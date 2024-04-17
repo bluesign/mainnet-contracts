@@ -1,14 +1,14 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import LostAndFound from ../0x473d6a2c37eab5be/LostAndFound.cdc
-import ScopedFTProviders from ./ScopedFTProviders.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import LostAndFound from "../0x473d6a2c37eab5be/LostAndFound.cdc"
+import ScopedFTProviders from "./ScopedFTProviders.cdc"
 
-import NFTStorefrontV2 from ../0x3cdbb3d569211ff3/NFTStorefrontV2.cdc
-import Filter from ./Filter.cdc
-import FlowtyUtils from ../0x3cdbb3d569211ff3/FlowtyUtils.cdc
-import FlowtyListingCallback from ../0x3cdbb3d569211ff3/FlowtyListingCallback.cdc
-import DNAHandler from ../0x3cdbb3d569211ff3/DNAHandler.cdc
+import NFTStorefrontV2 from "../0x3cdbb3d569211ff3/NFTStorefrontV2.cdc"
+import Filter from "./Filter.cdc"
+import FlowtyUtils from "../0x3cdbb3d569211ff3/FlowtyUtils.cdc"
+import FlowtyListingCallback from "../0x3cdbb3d569211ff3/FlowtyListingCallback.cdc"
+import DNAHandler from "../0x3cdbb3d569211ff3/DNAHandler.cdc"
 
 pub contract Offers {
 	pub let OffersStoragePath: StoragePath

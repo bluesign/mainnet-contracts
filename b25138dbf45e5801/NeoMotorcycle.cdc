@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NeoViews from ./NeoViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NeoViews from "./NeoViews.cdc"
 
 //This NFT contract is a grouping of a Founder (that can admin it) and its members. It lives in the Neo account always and could in essence even be just a resource and not an NFT
 pub contract NeoMotorcycle: NonFungibleToken {

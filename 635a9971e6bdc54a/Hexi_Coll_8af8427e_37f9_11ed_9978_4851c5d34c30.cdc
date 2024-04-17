@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract Hexi_Coll_8af8427e_37f9_11ed_9978_4851c5d34c30 : NonFungibleToken {
 

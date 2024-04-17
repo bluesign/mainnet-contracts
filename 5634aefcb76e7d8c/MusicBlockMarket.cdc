@@ -1,7 +1,7 @@
-import Melos from ../0xff5393e7c38b1512/Melos.cdc
-import MusicBlock from ../0xff5393e7c38b1512/MusicBlock.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import Melos from "../0xff5393e7c38b1512/Melos.cdc"
+import MusicBlock from "../0xff5393e7c38b1512/MusicBlock.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 /*
     This is a simple MusicBlock initial sale contract for the DApp to use

@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NFTLX from ./NFTLX.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NFTLX from "./NFTLX.cdc"
 
 /**
     # Index of Contents

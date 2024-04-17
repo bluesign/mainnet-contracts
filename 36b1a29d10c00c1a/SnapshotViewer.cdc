@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Snapshot from ./Snapshot.cdc
-import Base64Util from ./Base64Util.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Snapshot from "./Snapshot.cdc"
+import Base64Util from "./Base64Util.cdc"
 
 // The `SnapshotViewer` contract is a sample implementation of the `IViewer` struct interface.
 //

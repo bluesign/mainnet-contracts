@@ -1,8 +1,8 @@
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import MotoGPPack from ./MotoGPPack.cdc
-import MotoGPCard from ./MotoGPCard.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import ContractVersion from ./ContractVersion.cdc
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import MotoGPPack from "./MotoGPPack.cdc"
+import MotoGPCard from "./MotoGPCard.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import ContractVersion from "./ContractVersion.cdc"
 
 // Contract for managing pack opening.
 //

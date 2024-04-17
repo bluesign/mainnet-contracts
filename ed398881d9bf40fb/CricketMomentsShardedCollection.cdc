@@ -17,8 +17,8 @@
     then this contract can be retired.
 
 */
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import CricketMoments from ./CricketMoments.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import CricketMoments from "./CricketMoments.cdc"
 
 pub contract CricketMomentsShardedCollection {
 

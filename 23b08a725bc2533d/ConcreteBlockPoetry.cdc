@@ -1,4 +1,4 @@
-import ConcreteAlphabets from ./ConcreteAlphabets.cdc
+import ConcreteAlphabets from "./ConcreteAlphabets.cdc"
 
 pub contract ConcreteBlockPoetry {
 

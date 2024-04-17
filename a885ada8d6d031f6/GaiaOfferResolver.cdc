@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Resolver from ../0xb8ea91944fd51c43/Resolver.cdc
-import Wearables from ../0xe81193c424cfd3fb/Wearables.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Resolver from "../0xb8ea91944fd51c43/Resolver.cdc"
+import Wearables from "../0xe81193c424cfd3fb/Wearables.cdc"
 
 pub contract GaiaOfferResolver {
     pub enum ResolverType: UInt8 {

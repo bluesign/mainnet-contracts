@@ -6,11 +6,11 @@
 // Version         : 0.0.1
 // Blockchain      : Flow www.onFlow.org
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import DisruptArt from ./DisruptArt.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import DisruptArtMarketplaceFlow from ./DisruptArtMarketplaceFlow.cdc
-import DisruptArtAuction from ./DisruptArtAuction.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import DisruptArt from "./DisruptArt.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import DisruptArtMarketplaceFlow from "./DisruptArtMarketplaceFlow.cdc"
+import DisruptArtAuction from "./DisruptArtAuction.cdc"
 
 pub contract DisruptArtAuctionFlow {
 

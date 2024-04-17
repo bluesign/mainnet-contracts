@@ -1,11 +1,11 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import StarlyIDParser from ./StarlyIDParser.cdc
-import StakedStarlyCard from ../0x29fcd0b5e444242a/StakedStarlyCard.cdc
-import StarlyCard from ./StarlyCard.cdc
-import StarlyCardMarket from ./StarlyCardMarket.cdc
-import StarlyCardStaking from ../0x29fcd0b5e444242a/StarlyCardStaking.cdc
-import StarlyRoyalties from ./StarlyRoyalties.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import StarlyIDParser from "./StarlyIDParser.cdc"
+import StakedStarlyCard from "../0x29fcd0b5e444242a/StakedStarlyCard.cdc"
+import StarlyCard from "./StarlyCard.cdc"
+import StarlyCardMarket from "./StarlyCardMarket.cdc"
+import StarlyCardStaking from "../0x29fcd0b5e444242a/StarlyCardStaking.cdc"
+import StarlyRoyalties from "./StarlyRoyalties.cdc"
 
 pub contract StarlyCardBidV3 {
 

@@ -10,7 +10,7 @@
 
  */
 
-import TKNZ from ./TKNZ.cdc
+import TKNZ from "./TKNZ.cdc"
 
 pub contract TKNZAdminReceiver {
 

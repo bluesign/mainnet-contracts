@@ -1,11 +1,11 @@
-import TheFabricantMetadataViews from ./TheFabricantMetadataViews.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import TheFabricantNFTStandard from ./TheFabricantNFTStandard.cdc
-import Revealable from ./Revealable.cdc
-import CoCreatable from ./CoCreatable.cdc
-import TheFabricantAccessList from ./TheFabricantAccessList.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import TheFabricantMetadataViews from "./TheFabricantMetadataViews.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import TheFabricantNFTStandard from "./TheFabricantNFTStandard.cdc"
+import Revealable from "./Revealable.cdc"
+import CoCreatable from "./CoCreatable.cdc"
+import TheFabricantAccessList from "./TheFabricantAccessList.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 // XXories
 

@@ -79,44 +79,7 @@ pub contract interface NonFungibleToken {
         pub let id: UInt64
     }
 
-    // Interface to mediate withdraws from ../the Collection/and implement this interface
-//
-pub contract interface NonFungibleToken {
-
-    // The total number of tokens of this type in existence
-    pub var totalSupply: UInt64
-
-    // Event that emitted when the NFT contract is initialized
-    //
-    pub event ContractInitialized()
-
-    // Event that is emitted when a token is withdrawn,
-    // indicating the owner of the collection that it was withdrawn from.
-    //
-    // If the collection is not in an account's storage, `from` will be `nil`.
-    //
-    pub event Withdraw(id: UInt64, from: Address?)
-
-    // Event that emitted when a token is deposited to a collection.
-    //
-    // It indicates the owner of the collection that it was deposited to.
-    //
-    pub event Deposit(id: UInt64, to: Address?)
-
-    // Interface that the NFTs have to conform to
-    //
-    pub resource interface INFT {
-        // The unique ID that each NFT has
-        pub let id: UInt64
-    }
-
-    // Requirement that all conforming NFT smart contracts have
-    // to define a resource called NFT that conforms to INFT
-    pub resource NFT: INFT {
-        pub let id: UInt64
-    }
-
-    // Interface to mediate withdraws.cdc
+    // Interface to mediate withdraws from the Collection
     //
     pub resource interface Provider {
         // withdraw removes an NFT from the collection and moves it to the caller

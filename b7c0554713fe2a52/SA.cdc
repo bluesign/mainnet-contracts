@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
-import PierRouter from ../0xa0ebe96eb1366be6/PierRouter.cdc
-import IPierPair from ../0x609e10301860b683/IPierPair.cdc
-import PierPair from ../0x609e10301860b683/PierPair.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
+import PierRouter from "../0xa0ebe96eb1366be6/PierRouter.cdc"
+import IPierPair from "../0x609e10301860b683/IPierPair.cdc"
+import PierPair from "../0x609e10301860b683/PierPair.cdc"
 
 pub contract SA {
     pub fun getAmountOut(amountIn: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64 {

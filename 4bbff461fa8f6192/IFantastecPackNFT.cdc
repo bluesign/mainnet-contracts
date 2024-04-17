@@ -1,7 +1,6 @@
 import Crypto
-import NonFungibleToken from ../0x1d7e57aa55817448/Crypto
-import NonFungibleToken.cdc
-import FantastecNFT from ./FantastecNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FantastecNFT from "./FantastecNFT.cdc"
 
 pub contract interface IFantastecPackNFT {
     /// StoragePath for Collection Resource

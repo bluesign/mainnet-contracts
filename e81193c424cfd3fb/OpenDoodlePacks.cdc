@@ -1,9 +1,9 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Random from ./Random.cdc
-import DoodlePackTypes from ./DoodlePackTypes.cdc
-import Wearables from ./Wearables.cdc
-import Redeemables from ./Redeemables.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Random from "./Random.cdc"
+import DoodlePackTypes from "./DoodlePackTypes.cdc"
+import Wearables from "./Wearables.cdc"
+import Redeemables from "./Redeemables.cdc"
 
 pub contract OpenDoodlePacks: NonFungibleToken {
     pub event ContractInitialized()

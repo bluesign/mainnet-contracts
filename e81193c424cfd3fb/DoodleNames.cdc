@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FIND from ../0x097bafa4e0b48eef/FIND.cdc
-import Templates from ./Templates.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FIND from "../0x097bafa4e0b48eef/FIND.cdc"
+import Templates from "./Templates.cdc"
 
 pub contract DoodleNames: NonFungibleToken {
 

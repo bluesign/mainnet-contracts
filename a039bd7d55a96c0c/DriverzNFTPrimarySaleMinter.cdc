@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import GaiaPrimarySale from ../0x01ddf82c652e36ef/GaiaPrimarySale.cdc
-import DriverzNFT from ./DriverzNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import GaiaPrimarySale from "../0x01ddf82c652e36ef/GaiaPrimarySale.cdc"
+import DriverzNFT from "./DriverzNFT.cdc"
 
 pub contract DriverzNFTPrimarySaleMinter {
     pub resource Minter: GaiaPrimarySale.IMinter {

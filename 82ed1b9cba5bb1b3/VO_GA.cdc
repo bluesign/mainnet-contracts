@@ -10,7 +10,7 @@
  * https://opensource.org/licenses/MIT.
  */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract VO_GA: FungibleToken {
     // TokensInitialized

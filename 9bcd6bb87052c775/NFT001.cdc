@@ -1,4 +1,4 @@
-import IStats from ./IStats.cdc
+import IStats from "./IStats.cdc"
 
 access(all) contract NFT001 {
     pub var statsContract: Address

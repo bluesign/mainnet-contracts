@@ -1,10 +1,10 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NFTStorefront from ../0x4eb8a10cb9f87357/NFTStorefront.cdc
-import SoulMadeComponent from ./SoulMadeComponent.cdc
-import SoulMadeMain from ./SoulMadeMain.cdc
-import SoulMadePack from ./SoulMadePack.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NFTStorefront from "../0x4eb8a10cb9f87357/NFTStorefront.cdc"
+import SoulMadeComponent from "./SoulMadeComponent.cdc"
+import SoulMadeMain from "./SoulMadeMain.cdc"
+import SoulMadePack from "./SoulMadePack.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 
 pub contract SoulMade {
 

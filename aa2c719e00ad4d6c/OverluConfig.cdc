@@ -1,4 +1,4 @@
-import OverluError from ./OverluError.cdc
+import OverluError from "./OverluError.cdc"
 
 pub contract OverluConfig {
 

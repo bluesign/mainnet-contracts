@@ -4,7 +4,7 @@
     author: Bilal Shahid bilal@zay.codes
 */
 
-import SevenOneZeroPhantomNFT from ./SevenOneZeroPhantomNFT.cdc
+import SevenOneZeroPhantomNFT from "./SevenOneZeroPhantomNFT.cdc"
 
 pub contract SevenOneZeroPhantomNFTDrop {
     

@@ -1,9 +1,9 @@
-import FindViews from ./FindViews.cdc
-import FindMarket from ./FindMarket.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FINDNFTCatalog from ./FINDNFTCatalog.cdc
-import FIND from ./FIND.cdc
-import Clock from ./Clock.cdc
+import FindViews from "./FindViews.cdc"
+import FindMarket from "./FindMarket.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FINDNFTCatalog from "./FINDNFTCatalog.cdc"
+import FIND from "./FIND.cdc"
+import Clock from "./Clock.cdc"
 
 pub contract FindThoughts {
 

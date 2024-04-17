@@ -5,11 +5,11 @@
 # Author: Increment Labs
 
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import SwapInterfaces from ./SwapInterfaces.cdc
-import SwapConfig from ./SwapConfig.cdc
-import SwapError from ./SwapError.cdc
-import SwapFactory from ./SwapFactory.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import SwapInterfaces from "./SwapInterfaces.cdc"
+import SwapConfig from "./SwapConfig.cdc"
+import SwapError from "./SwapError.cdc"
+import SwapFactory from "./SwapFactory.cdc"
 
 pub contract SwapPair: FungibleToken {
     /// Total supply of pair lpTokens in existence

@@ -1,10 +1,10 @@
 // This contract allows users to put their NFTs up for sale. Other users
 // can purchase these NFTs with fungible tokens.
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import Momentables from ./Momentables.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import Momentables from "./Momentables.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 //This contract was made during OWB so the code here is some of the first cadence code we (0xAlchemist and 0xBjartek wrote)
 pub contract MomentablesAuction {

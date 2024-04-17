@@ -8,8 +8,8 @@
     Author: Brian Min brian@flowverse.co
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 import Crypto
 
 pub contract FlowversePrimarySaleV2 {
@@ -28,25 +28,7 @@ pub contract FlowversePrimarySaleV2 {
         pub fun mint(entityID: UInt64, minterAddress: Address): @NonFungibleToken.NFT
     }
 
-    // Data struct signed by admin account - allows accounts to purchase from ../a primary sale for a period of time./Crypto
-
-pub contract FlowversePrimarySaleV2 {
-    pub let AdminStoragePath: StoragePath
-
-    // Incremented ID used to create entities
-    pub var nextPrimarySaleID: UInt64
-
-    access(contract) var primarySales: @{UInt64: PrimarySale}
-    access(contract) var primarySaleIDs: {String: UInt64}
-
-    pub event PurchaseComplete(primarySaleID: UInt64, orders: [Order], nftIDs: [UInt64], purchaserAddress: Address, pool: String, price: UFix64, salePaymentVaultType: String)
-    pub event ContractInitialized()
-
-    pub resource interface IMinter {
-        pub fun mint(entityID: UInt64, minterAddress: Address): @NonFungibleToken.NFT
-    }
-
-    // Data struct signed by admin account - allows accounts to purchase.cdc
+    // Data struct signed by admin account - allows accounts to purchase from a primary sale for a period of time.
     pub struct AdminSignedPayload {
         pub let primarySaleID: UInt64
         pub let purchaserAddress: Address

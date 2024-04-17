@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MatrixWorldVoucher from ../0x0d77ec47bbad8ef6/MatrixWorldVoucher.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MatrixWorldVoucher from "../0x0d77ec47bbad8ef6/MatrixWorldVoucher.cdc"
 pub contract tt{
 pub resource tr : MatrixWorldVoucher.MatrixWorldVoucherCollectionPublic{
 

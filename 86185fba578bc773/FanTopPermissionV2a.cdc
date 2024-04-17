@@ -1,7 +1,7 @@
-import FanTopToken from ./FanTopToken.cdc
-import FanTopMarket from ./FanTopMarket.cdc
-import FanTopSerial from ./FanTopSerial.cdc
-import Signature from ./Signature.cdc
+import FanTopToken from "./FanTopToken.cdc"
+import FanTopMarket from "./FanTopMarket.cdc"
+import FanTopSerial from "./FanTopSerial.cdc"
+import Signature from "./Signature.cdc"
 
 pub contract FanTopPermissionV2a {
     pub event PermissionAdded(target: Address, role: String)

@@ -32,10 +32,10 @@
     deposited to.
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
 
 pub contract Market {
 

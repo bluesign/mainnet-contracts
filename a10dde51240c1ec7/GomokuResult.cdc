@@ -1,4 +1,4 @@
-import GomokuType from ./GomokuType.cdc
+import GomokuType from "./GomokuType.cdc"
 
 pub contract GomokuResult {
 

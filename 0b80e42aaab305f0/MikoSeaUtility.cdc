@@ -1,7 +1,7 @@
-import MIKOSEANFTV2 from ./MIKOSEANFTV2.cdc
-import MIKOSEANFT from ./MIKOSEANFT.cdc
-import MikoSeaMarket from ./MikoSeaMarket.cdc
-import MikoSeaNFTMetadata from ./MikoSeaNFTMetadata.cdc
+import MIKOSEANFTV2 from "./MIKOSEANFTV2.cdc"
+import MIKOSEANFT from "./MIKOSEANFT.cdc"
+import MikoSeaMarket from "./MikoSeaMarket.cdc"
+import MikoSeaNFTMetadata from "./MikoSeaNFTMetadata.cdc"
 
 pub contract MikoSeaUtility {
     // rate transform from yen to usd, ex: {"USD_TO_JPY": 171.2}

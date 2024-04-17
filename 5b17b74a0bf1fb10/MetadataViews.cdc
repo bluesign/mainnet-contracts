@@ -1,4 +1,4 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 /// This contract implements the metadata standard proposed
 /// in FLIP-0636.

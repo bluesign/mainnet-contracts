@@ -1,7 +1,7 @@
-// import FungibleToken from ../"./FungibleToken.cdc"/FungibleToken.cdc
-// import Pausable from ../"./Pausable.cdc"/Pausable.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import Pausable from ./Pausable.cdc
+// import FungibleToken from "../"./FungibleToken.cdc"/FungibleToken.cdc"
+// import Pausable from "../"./Pausable.cdc"/Pausable.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import Pausable from "./Pausable.cdc"
 
 pub contract ContributionPoint: FungibleToken, Pausable {
     /// Total supply of ExampleTokens in existence

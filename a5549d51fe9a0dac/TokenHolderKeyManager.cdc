@@ -1,4 +1,4 @@
-import KeyManager from ../0x840b99b76051d886/KeyManager.cdc
+import KeyManager from "../0x840b99b76051d886/KeyManager.cdc"
 
 // The TokenHolderKeyManager contract is an implementation of
 // the KeyManager interface intended for use by FLOW token holders.

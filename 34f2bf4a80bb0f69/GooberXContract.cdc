@@ -1,12 +1,12 @@
 /**
 *  SPDX-License-Identifier: GPL-3.0-only
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import FindUtils from ../0x097bafa4e0b48eef/FindUtils.cdc
-import Profile from ../0x097bafa4e0b48eef/Profile.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import FindUtils from "../0x097bafa4e0b48eef/FindUtils.cdc"
+import Profile from "../0x097bafa4e0b48eef/Profile.cdc"
 
 // GooberXContract - The contract Erik needs to party !
 pub contract GooberXContract : NonFungibleToken {

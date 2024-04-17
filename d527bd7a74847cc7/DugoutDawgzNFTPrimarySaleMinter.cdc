@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import GaiaPrimarySale from ../0x01ddf82c652e36ef/GaiaPrimarySale.cdc
-import DugoutDawgzNFT from ./DugoutDawgzNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import GaiaPrimarySale from "../0x01ddf82c652e36ef/GaiaPrimarySale.cdc"
+import DugoutDawgzNFT from "./DugoutDawgzNFT.cdc"
 
 pub contract DugoutDawgzNFTPrimarySaleMinter {
     pub resource Minter: GaiaPrimarySale.IMinter {

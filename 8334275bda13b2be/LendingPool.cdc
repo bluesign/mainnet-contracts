@@ -8,10 +8,10 @@ Core functionalities of the lending pool smart contract supporting cross-market 
 Multiple LendingPool contracts will be deployed for each of the different pooled underlying FungibleTokens.
 
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import LendingInterfaces from ../0x2df970b6cdee5735/LendingInterfaces.cdc
-import LendingConfig from ../0x2df970b6cdee5735/LendingConfig.cdc
-import LendingError from ../0x2df970b6cdee5735/LendingError.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import LendingInterfaces from "../0x2df970b6cdee5735/LendingInterfaces.cdc"
+import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
+import LendingError from "../0x2df970b6cdee5735/LendingError.cdc"
 
 pub contract LendingPool {
     /// Account address the pool is deployed to, i.e. the pool 'contract address'

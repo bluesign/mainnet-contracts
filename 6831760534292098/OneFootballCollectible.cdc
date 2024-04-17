@@ -26,7 +26,7 @@ References:
     - NFT Metadata FLIP https://github.com/onflow/flow/blob/master/flips/20210916-nft-metadata.md
 
 **/
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract OneFootballCollectible: NonFungibleToken {
 

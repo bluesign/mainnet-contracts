@@ -1,13 +1,13 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NFTCatalog from ../0x49a7cda3a1eecc29/NFTCatalog.cdc
-import StringUtils from ./StringUtils.cdc
-import ArrayUtils from ./ArrayUtils.cdc
-import NFTStorefrontV2 from ../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import FlowUtilityToken from ../0xead892083b3e2c6c/FlowUtilityToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NFTCatalog from "../0x49a7cda3a1eecc29/NFTCatalog.cdc"
+import StringUtils from "./StringUtils.cdc"
+import ArrayUtils from "./ArrayUtils.cdc"
+import NFTStorefrontV2 from "../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import FlowUtilityToken from "../0xead892083b3e2c6c/FlowUtilityToken.cdc"
 
 // TransactionGenerationUtils
 //
@@ -220,10 +220,7 @@ pub contract TransactionGenerationUtils {
             var line = "import "
             let typeSplit = StringUtils.split(type, ".")
             line = line.concat(typeSplit[2])
-            line = line.concat(" from ../0x")/"
-            let typeSplit = StringUtils.split(type, ".")
-            line = line.concat(typeSplit[2])
-            line = line.concat(".cdc
+            line = line.concat(" from 0x")
             line = line.concat(typeSplit[1])
 
             // If we've already seen this import statement, skip it

@@ -1,9 +1,9 @@
 // VictoryNFTCollectionItem - MAINNET
-import VictoryNFTCollectionItem from ./VictoryNFTCollectionItem.cdc
+import VictoryNFTCollectionItem from "./VictoryNFTCollectionItem.cdc"
 // FungibleToken - MAINNET
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 // NonFungibleToken - MAINNET
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 /*
     This is a VictoryNFTCollectionItem sale contract for the DApp to use

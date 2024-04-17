@@ -1,4 +1,4 @@
-import ContractVersion from ./ContractVersion.cdc
+import ContractVersion from 0xa49cc0ee46c54bfb 
 
 pub contract MotoGPRegistry: ContractVersion {
     

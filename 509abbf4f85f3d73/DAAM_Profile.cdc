@@ -3,7 +3,7 @@
 // Ami Rajpal: ami@daam.agency
 // DAAM Agency (web: daam.agency)
 
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract DAAM_Profile {
     // Storage:

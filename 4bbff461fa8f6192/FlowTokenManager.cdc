@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowStorageFees from ../0xe467b9dd11fa00df/FlowStorageFees.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowStorageFees from "../0xe467b9dd11fa00df/FlowStorageFees.cdc"
 
 pub contract FlowTokenManager {
   pub fun TopUpFlowTokens(account: PublicAccount, flowTokenProvider: &{FungibleToken.Provider}) {

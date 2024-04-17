@@ -1,5 +1,5 @@
 
-import NonFungibleToken, MetadataViews from ../0x1d7e57aa55817448/NonFungibleToken, MetadataViews.cdc
+import NonFungibleToken, MetadataViews from 0x1d7e57aa55817448
 
 pub contract interface Interfaces {
 

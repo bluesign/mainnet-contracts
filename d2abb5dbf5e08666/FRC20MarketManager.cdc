@@ -6,13 +6,13 @@
 TODO: Add description
 
 */
-import Fixes from ./Fixes.cdc
-import FixesHeartbeat from ./FixesHeartbeat.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
-import FRC20Marketplace from ./FRC20Marketplace.cdc
-import FRC20TradingRecord from ./FRC20TradingRecord.cdc
+import Fixes from "./Fixes.cdc"
+import FixesHeartbeat from "./FixesHeartbeat.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
+import FRC20Marketplace from "./FRC20Marketplace.cdc"
+import FRC20TradingRecord from "./FRC20TradingRecord.cdc"
 
 access(all) contract FRC20MarketManager {
     /* --- Events --- */

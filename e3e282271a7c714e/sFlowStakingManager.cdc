@@ -1,8 +1,8 @@
-import sFlowToken from ./sFlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowStakingCollection from ../0x8d0e87b65159ae63/FlowStakingCollection.cdc
-import FlowIDTableStaking from ../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc
+import sFlowToken from "./sFlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowStakingCollection from "../0x8d0e87b65159ae63/FlowStakingCollection.cdc"
+import FlowIDTableStaking from "../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc"
 
 pub contract sFlowStakingManager {
 

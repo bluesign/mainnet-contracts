@@ -1,13 +1,13 @@
 /// PegBridge support mint via co-signed message, and burn, will call corresponding PegToken contract
 /// Account of this contract must has Minter/Burner resource for corresponding PegToken
 /// interfaces/resources in FTMinterBurner are needed to avoid token specific types
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import cBridge from ./cBridge.cdc
-import PbPegged from ./PbPegged.cdc
-import DelayedTransfer from ./DelayedTransfer.cdc
-import VolumeControl from ./VolumeControl.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import cBridge from "./cBridge.cdc"
+import PbPegged from "./PbPegged.cdc"
+import DelayedTransfer from "./DelayedTransfer.cdc"
+import VolumeControl from "./VolumeControl.cdc"
 // FTMinterBurner is needed for mint/burn
-import FTMinterBurner from ./FTMinterBurner.cdc
+import FTMinterBurner from "./FTMinterBurner.cdc"
 
 pub contract PegBridge {
   // path for admin resource

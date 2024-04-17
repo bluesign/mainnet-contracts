@@ -30,9 +30,9 @@
 	provided or one of its pre-conditions or post conditions aren't met.
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import EverbloomMetadata from ./EverbloomMetadata.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import EverbloomMetadata from "./EverbloomMetadata.cdc"
 
 pub contract Everbloom2: NonFungibleToken {
 	// -----------------------------------------------------------------------

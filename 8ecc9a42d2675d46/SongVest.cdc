@@ -1,7 +1,7 @@
 // Author: Morgan Wilde
 // Author's website: flowdeveloper.com
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract SongVest: NonFungibleToken {
 

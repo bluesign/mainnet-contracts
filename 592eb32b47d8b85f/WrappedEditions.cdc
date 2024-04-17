@@ -1,6 +1,6 @@
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FlowtyWrapped from ./FlowtyWrapped.cdc
-import StringUtils from ../0xa340dc0a4ec828ab/StringUtils.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FlowtyWrapped from "./FlowtyWrapped.cdc"
+import StringUtils from "../0xa340dc0a4ec828ab/StringUtils.cdc"
 
 pub contract WrappedEditions {
     pub struct Wrapped2023Data {

@@ -2,8 +2,8 @@
     Help manage a primary sale for SomePlace collectibles utilizing preminted NFTs that are in storage.
     This is meant to be curated for specific drops where there are leftover NFTs to be sold publically from a private sale.
 */
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import SomePlaceCollectible from ./SomePlaceCollectible.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import SomePlaceCollectible from "./SomePlaceCollectible.cdc"
 
 pub contract SomePlacePrimarySaleHelper {
     access(self) let premintedNFTCap: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>

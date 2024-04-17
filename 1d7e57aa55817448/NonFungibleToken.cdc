@@ -102,67 +102,7 @@ pub contract interface NonFungibleToken {
         pub let id: UInt64
     }
 
-    /// Interface to mediate withdraws from ../the Collection/and implement this interface
-///
-pub contract interface NonFungibleToken {
-
-    /// The total number of tokens of this type in existence
-    pub var totalSupply: UInt64
-
-    /// Event that emitted when the NFT contract is initialized
-    ///
-    pub event ContractInitialized()
-
-    /// Event that is emitted when a token is withdrawn,
-    /// indicating the owner of the collection that it was withdrawn from.
-    ///
-    /// If the collection is not in an account's storage, `from` will be `nil`.
-    ///
-    pub event Withdraw(id: UInt64, from: Address?)
-
-    /// Event that emitted when a token is deposited to a collection.
-    ///
-    /// It indicates the owner of the collection that it was deposited to.
-    ///
-    pub event Deposit(id: UInt64, to: Address?)
-
-    /// Interface that the NFTs have to conform to
-    /// The metadata views methods are included here temporarily
-    /// because enforcing the metadata interfaces in the standard
-    /// would break many contracts in an upgrade. Those breaking changes
-    /// are being saved for the stable cadence milestone
-    ///
-    pub resource interface INFT {
-        /// The unique ID that each NFT has
-        pub let id: UInt64
-
-        /// Function that returns all the Metadata Views implemented by a Non Fungible Token
-        ///
-        /// @return An array of Types defining the implemented views. This value will be used by
-        ///         developers to know which parameter to pass to the resolveView() method.
-        ///
-        pub fun getViews(): [Type] {
-            return []
-        }
-
-        /// Function that resolves a metadata view for this token.
-        ///
-        /// @param view: The Type of the desired view.
-        /// @return A structure representing the requested view.
-        ///
-        pub fun resolveView(_ view: Type): AnyStruct? {
-            return nil
-        }
-    }
-
-    /// Requirement that all conforming NFT smart contracts have
-    /// to define a resource called NFT that conforms to INFT
-    ///
-    pub resource NFT: INFT {
-        pub let id: UInt64
-    }
-
-    /// Interface to mediate withdraws.cdc
+    /// Interface to mediate withdraws from the Collection
     ///
     pub resource interface Provider {
         /// Removes an NFT from the resource implementing it and moves it to the caller

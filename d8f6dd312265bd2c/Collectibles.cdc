@@ -1,4 +1,4 @@
-import CapsuleNFT from ./CapsuleNFT.cdc
+import CapsuleNFT from "./CapsuleNFT.cdc"
 
 pub contract Collectibles: CapsuleNFT {
     pub var totalMinted: UInt64

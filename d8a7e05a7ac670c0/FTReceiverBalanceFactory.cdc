@@ -1,5 +1,5 @@
-import CapabilityFactory from ./CapabilityFactory.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import CapabilityFactory from "./CapabilityFactory.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract FTReceiverBalanceFactory {
     pub struct Factory: CapabilityFactory.Factory {

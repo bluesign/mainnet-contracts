@@ -1,13 +1,13 @@
-import PlayToken from ./PlayToken.cdc
-import ScoreToken from ./ScoreToken.cdc
-import MoxyToken from ./MoxyToken.cdc
-import MoxyVaultToken from ./MoxyVaultToken.cdc
-import LockedMoxyToken from ./LockedMoxyToken.cdc
-import LockedMoxyVaultToken from ./LockedMoxyVaultToken.cdc
-import MoxyReleaseRounds from ./MoxyReleaseRounds.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MoxyProcessQueue from ./MoxyProcessQueue.cdc
-import MoxyData from ./MoxyData.cdc
+import PlayToken from "./PlayToken.cdc"
+import ScoreToken from "./ScoreToken.cdc"
+import MoxyToken from "./MoxyToken.cdc"
+import MoxyVaultToken from "./MoxyVaultToken.cdc"
+import LockedMoxyToken from "./LockedMoxyToken.cdc"
+import LockedMoxyVaultToken from "./LockedMoxyVaultToken.cdc"
+import MoxyReleaseRounds from "./MoxyReleaseRounds.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MoxyProcessQueue from "./MoxyProcessQueue.cdc"
+import MoxyData from "./MoxyData.cdc"
  
 
 pub contract MoxyClub {

@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import GaiaPrimarySale from ../0x01ddf82c652e36ef/GaiaPrimarySale.cdc
-import DimensionXComics from ../0xe3ad6030cbaff1c2/DimensionXComics.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import GaiaPrimarySale from "../0x01ddf82c652e36ef/GaiaPrimarySale.cdc"
+import DimensionXComics from "../0xe3ad6030cbaff1c2/DimensionXComics.cdc"
 
 pub contract DimensionXComicsPrimarySaleMinter {
 

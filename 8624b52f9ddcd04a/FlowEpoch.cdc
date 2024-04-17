@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowIDTableStaking from ./FlowIDTableStaking.cdc
-import FlowClusterQC from ./FlowClusterQC.cdc
-import FlowDKG from ./FlowDKG.cdc
-import FlowFees from ../0xf919ee77447b7497/FlowFees.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowIDTableStaking from "./FlowIDTableStaking.cdc"
+import FlowClusterQC from "./FlowClusterQC.cdc"
+import FlowDKG from "./FlowDKG.cdc"
+import FlowFees from "../0xf919ee77447b7497/FlowFees.cdc"
 
 // The top-level smart contract managing the lifecycle of epochs. In Flow,
 // epochs are the smallest unit of time where the identity table (the set of 

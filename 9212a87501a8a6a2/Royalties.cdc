@@ -6,10 +6,10 @@
     Author: Brian Min brian@flowverse.co
 */
 
-import NFTStorefrontV2 from ../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NFTStorefrontV2 from "../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 access(all) contract Royalties {
     pub let AdminStoragePath: StoragePath

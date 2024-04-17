@@ -1,4 +1,4 @@
-import BIP39WordList from ./BIP39WordList.cdc
+import BIP39WordList from "./BIP39WordList.cdc"
 
 pub contract MnemonicPoetry {
 

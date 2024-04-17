@@ -1,4 +1,4 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract JoyrideMultiToken {
     // Always 0. This is not really a Token

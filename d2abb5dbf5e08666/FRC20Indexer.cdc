@@ -7,14 +7,14 @@ This the main contract of FRC20, it is used to deploy and manage the FRC20 token
 
 */
 // Third-party imports
-import StringUtils from ../0xa340dc0a4ec828ab/StringUtils.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FungibleTokenMetadataViews from ../0xf233dcee88fe0abe/FungibleTokenMetadataViews.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import StringUtils from "../0xa340dc0a4ec828ab/StringUtils.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FungibleTokenMetadataViews from "../0xf233dcee88fe0abe/FungibleTokenMetadataViews.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 // Fixes imports
-import Fixes from ./Fixes.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
+import Fixes from "./Fixes.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
 
 access(all) contract FRC20Indexer {
     /* --- Events --- */

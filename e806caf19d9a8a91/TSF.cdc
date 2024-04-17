@@ -1,8 +1,8 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import HybridCustody from ../0xd8a7e05a7ac670c0/HybridCustody.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import HybridCustody from "../0xd8a7e05a7ac670c0/HybridCustody.cdc"
 
 pub contract TSF {
     pub event ContractInitialized()

@@ -8,9 +8,9 @@
 // 3. Once the registration end, you can draw the winners. For each draw, a winner will be selected randomly from registrants, and an NFT will be picked out randomly from NFTs in the Raffle as the reward for winner;
 // 4. Registrants go to the Raffle page to check whether they are winners or not, and claim the reward if they are.
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import EligibilityVerifiers from ./EligibilityVerifiers.cdc
-import DrizzleRecorder from ./DrizzleRecorder.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import EligibilityVerifiers from "./EligibilityVerifiers.cdc"
+import DrizzleRecorder from "./DrizzleRecorder.cdc"
 
 pub contract Mist {
 

@@ -1,6 +1,6 @@
-import Flowns from ../0x233eb012d34b0070/Flowns.cdc
-import Domains from ../0x233eb012d34b0070/Domains.cdc
-import FIND from ../0x097bafa4e0b48eef/FIND.cdc
+import Flowns from "../0x233eb012d34b0070/Flowns.cdc"
+import Domains from "../0x233eb012d34b0070/Domains.cdc"
+import FIND from "../0x097bafa4e0b48eef/FIND.cdc"
 
 pub contract DomainUtils {
 

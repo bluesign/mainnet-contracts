@@ -1,6 +1,6 @@
 // TiblesProducer.cdc
 
-import TiblesNFT from ./TiblesNFT.cdc
+import TiblesNFT from "./TiblesNFT.cdc"
 
 pub contract interface TiblesProducer {
   pub let ProducerStoragePath: StoragePath

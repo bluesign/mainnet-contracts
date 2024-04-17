@@ -4,7 +4,7 @@ NFTRegistry
 Niftory NFTs should ideally be functionally the same. This would allow
 other applications to refer to any Niftory NFT without having to know about
 the properties of any individual NFT project. For example, a developer should
-not be required to import code from ../a specific NFT project just to get the/code.cdc
+not be required to import code from a specific NFT project just to get the
 path of where a collection should be found in a users account.
 
 To make this possible, this NFTRegistry associates a single String identifier
@@ -18,13 +18,13 @@ This includes
 
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
-import MutableMetadataSetManager from ./MutableMetadataSetManager.cdc
-import MetadataViewsManager from ./MetadataViewsManager.cdc
+import MutableMetadataSetManager from "./MutableMetadataSetManager.cdc"
+import MetadataViewsManager from "./MetadataViewsManager.cdc"
 
-import NiftoryNonFungibleToken from ./NiftoryNonFungibleToken.cdc
+import NiftoryNonFungibleToken from "./NiftoryNonFungibleToken.cdc"
 
 pub contract NiftoryNFTRegistry {
 

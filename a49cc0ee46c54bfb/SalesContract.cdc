@@ -1,9 +1,9 @@
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import MotoGPPack from ./MotoGPPack.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MotoGPTransfer from ./MotoGPTransfer.cdc
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import MotoGPPack from "./MotoGPPack.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MotoGPTransfer from "./MotoGPTransfer.cdc"
 
 // The SalesContract's role is to enable on-chain sales of MotoGP packs.
 // Users buy directly from the buyPack method and get the pack deposited into their collection, if all conditions are met.

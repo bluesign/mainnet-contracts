@@ -6,7 +6,7 @@
 
 */
 
-import FlowIDTableStaking from ../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc
+import FlowIDTableStaking from "../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc"
 
 pub contract LiquidStakingConfig {
 

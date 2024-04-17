@@ -5,10 +5,10 @@
     a fixed edition count.
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import SomePlaceCounter from ./SomePlaceCounter.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import SomePlaceCounter from "./SomePlaceCounter.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract SomePlaceCollectible : NonFungibleToken {
 

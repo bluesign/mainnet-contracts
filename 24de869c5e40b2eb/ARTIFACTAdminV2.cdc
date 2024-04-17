@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Unlicense
 
-import ARTIFACTPackV3 from ./ARTIFACTPackV3.cdc
-import ARTIFACTV2 from ./ARTIFACTV2.cdc
-import Interfaces from ./Interfaces.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import ARTIFACTPackV3 from "./ARTIFACTPackV3.cdc"
+import ARTIFACTV2 from "./ARTIFACTV2.cdc"
+import Interfaces from "./Interfaces.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract ARTIFACTAdminV2: Interfaces {
 

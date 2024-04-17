@@ -6,17 +6,17 @@ This is the contract for NiftoryIsAwesome NFTs!
 This was implemented using Niftory interfaces. For full details on how this
 contract functions, please see the Niftory and NFTRegistry contracts.
 */
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
-import MutableMetadata from ../0x7ec1f607f0872a9e/MutableMetadata.cdc
-import MutableMetadataTemplate from ../0x7ec1f607f0872a9e/MutableMetadataTemplate.cdc
-import MutableMetadataSet from ../0x7ec1f607f0872a9e/MutableMetadataSet.cdc
-import MutableMetadataSetManager from ../0x7ec1f607f0872a9e/MutableMetadataSetManager.cdc
-import MetadataViewsManager from ../0x7ec1f607f0872a9e/MetadataViewsManager.cdc
+import MutableMetadata from "../0x7ec1f607f0872a9e/MutableMetadata.cdc"
+import MutableMetadataTemplate from "../0x7ec1f607f0872a9e/MutableMetadataTemplate.cdc"
+import MutableMetadataSet from "../0x7ec1f607f0872a9e/MutableMetadataSet.cdc"
+import MutableMetadataSetManager from "../0x7ec1f607f0872a9e/MutableMetadataSetManager.cdc"
+import MetadataViewsManager from "../0x7ec1f607f0872a9e/MetadataViewsManager.cdc"
 
-import NiftoryNonFungibleToken from ../0x7ec1f607f0872a9e/NiftoryNonFungibleToken.cdc
-import NiftoryNFTRegistry from ../0x7ec1f607f0872a9e/NiftoryNFTRegistry.cdc
+import NiftoryNonFungibleToken from "../0x7ec1f607f0872a9e/NiftoryNonFungibleToken.cdc"
+import NiftoryNFTRegistry from "../0x7ec1f607f0872a9e/NiftoryNFTRegistry.cdc"
 
 pub contract NiftoryIsAwesome: NonFungibleToken {
 

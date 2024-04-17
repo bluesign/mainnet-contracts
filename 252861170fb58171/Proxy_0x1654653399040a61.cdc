@@ -1,5 +1,5 @@
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import DynamicImport from ./DynamicImport.cdc
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import DynamicImport from "./DynamicImport.cdc"
 
 pub contract Proxy_0x1654653399040a61 {
     

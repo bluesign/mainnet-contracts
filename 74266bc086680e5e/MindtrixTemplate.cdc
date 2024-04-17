@@ -11,17 +11,17 @@ For example, we can create a POAP or custom NFT template for events.
 
 **/
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import FlowUtilityToken from ../0xead892083b3e2c6c/FlowUtilityToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FiatToken from ../0xb19436aae4d94622/FiatToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import TokenForwarding from ../0xe544175ee0461c4b/TokenForwarding.cdc
-import Mindtrix from ./Mindtrix.cdc
-import MindtrixViews from ./MindtrixViews.cdc
-import MindtrixEssence from ./MindtrixEssence.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import FlowUtilityToken from "../0xead892083b3e2c6c/FlowUtilityToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FiatToken from "../0xb19436aae4d94622/FiatToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import TokenForwarding from "../0xe544175ee0461c4b/TokenForwarding.cdc"
+import Mindtrix from "./Mindtrix.cdc"
+import MindtrixViews from "./MindtrixViews.cdc"
+import MindtrixEssence from "./MindtrixEssence.cdc"
 
 pub contract MindtrixTemplate {
 

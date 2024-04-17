@@ -1,4 +1,4 @@
-import MoxyData from ./MoxyData.cdc
+import MoxyData from "./MoxyData.cdc"
  
 
 pub contract LinearRelease {

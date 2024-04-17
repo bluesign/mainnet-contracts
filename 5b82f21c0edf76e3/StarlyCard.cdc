@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import StarlyMetadata from ./StarlyMetadata.cdc
-import StarlyMetadataViews from ./StarlyMetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import StarlyMetadata from "./StarlyMetadata.cdc"
+import StarlyMetadataViews from "./StarlyMetadataViews.cdc"
 
 pub contract StarlyCard: NonFungibleToken {
 

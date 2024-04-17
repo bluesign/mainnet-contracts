@@ -1,4 +1,4 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract SendTokenMessage {
     pub event Delivered(tokenType: Type, amount: UFix64, to: Address, message: String?)

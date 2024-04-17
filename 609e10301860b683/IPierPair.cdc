@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import PierLPToken from ./PierLPToken.cdc
-import PierMath from ../0xa378eeb799df8387/PierMath.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import PierLPToken from 0x609e10301860b683 
+import PierMath from 0xa378eeb799df8387 
 
 /**
 

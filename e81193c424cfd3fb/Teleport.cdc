@@ -1,14 +1,14 @@
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Clock from ./Clock.cdc
-import Wearables from ./Wearables.cdc
-import FindUtils from ../0x097bafa4e0b48eef/FindUtils.cdc
-import FindRelatedAccounts from ../0x097bafa4e0b48eef/FindRelatedAccounts.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TokenForwarding from ../0xe544175ee0461c4b/TokenForwarding.cdc
-import DapperStorageRent from ../0xa08e88e23f332538/DapperStorageRent.cdc
-import GenesisBoxRegistry from ./GenesisBoxRegistry.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Clock from "./Clock.cdc"
+import Wearables from "./Wearables.cdc"
+import FindUtils from "../0x097bafa4e0b48eef/FindUtils.cdc"
+import FindRelatedAccounts from "../0x097bafa4e0b48eef/FindRelatedAccounts.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TokenForwarding from "../0xe544175ee0461c4b/TokenForwarding.cdc"
+import DapperStorageRent from "../0xa08e88e23f332538/DapperStorageRent.cdc"
+import GenesisBoxRegistry from "./GenesisBoxRegistry.cdc"
 
 
 pub contract Teleport {

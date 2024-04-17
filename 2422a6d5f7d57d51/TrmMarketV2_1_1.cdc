@@ -39,9 +39,9 @@
     deposited to.
 **/
 
-import TrmAssetV2_1 from ./TrmAssetV2_1.cdc
-import TrmRentV2_1 from ./TrmRentV2_1.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import TrmAssetV2_1 from "./TrmAssetV2_1.cdc"
+import TrmRentV2_1 from "./TrmRentV2_1.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract TrmMarketV2_1_1 {
     /// -----------------------------------------------------------------------

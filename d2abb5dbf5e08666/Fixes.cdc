@@ -7,8 +7,8 @@ This is the basic contract of the FIXeS protocol. It contains the logic to creat
 
 */
 
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 
 /// FIXES contract to store inscriptions
 ///

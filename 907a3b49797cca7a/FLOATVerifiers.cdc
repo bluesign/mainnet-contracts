@@ -3,10 +3,10 @@
 
 > Author: Bohao Tang<tech@btang.cn>
 */
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
-import Interfaces from ./Interfaces.cdc
-import UserProfile from ./UserProfile.cdc
-import CompetitionService from ./CompetitionService.cdc
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+import Interfaces from "./Interfaces.cdc"
+import UserProfile from "./UserProfile.cdc"
+import CompetitionService from "./CompetitionService.cdc"
 
 pub contract FLOATVerifiers {
 

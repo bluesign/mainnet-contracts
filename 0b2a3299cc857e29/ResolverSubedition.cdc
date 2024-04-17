@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import TopShot from ./TopShot.cdc
-import Resolver from ../0xb8ea91944fd51c43/Resolver.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import TopShot from "./TopShot.cdc"
+import Resolver from "../0xb8ea91944fd51c43/Resolver.cdc"
 
 pub contract ResolverSubedition {
     pub enum ResolverType: UInt8 {

@@ -7,15 +7,15 @@ TODO: Add description
 
 */
 // Third Party Imports
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 // Fixes Imports
-import Fixes from ./Fixes.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20SemiNFT from ./FRC20SemiNFT.cdc
+import Fixes from "./Fixes.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20SemiNFT from "./FRC20SemiNFT.cdc"
 
 access(all) contract FRC20Staking {
     /* --- Events --- */

@@ -1,10 +1,10 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Profile from ../0xd796ff17107bbff6/Profile.cdc
-import FIND from ./FIND.cdc
-import Debug from ./Debug.cdc
-import Clock from ./Clock.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Profile from "../0xd796ff17107bbff6/Profile.cdc"
+import FIND from 0xd136d89c8958d52a 
+import Debug from "./Debug.cdc"
+import Clock from "./Clock.cdc"
 
 
 pub contract Admin {

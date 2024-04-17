@@ -39,23 +39,23 @@ https://www.mindtrix.xyz
 */
 
 // dev
-// import FungibleToken from ../0xee82856bf20e2aa6/FungibleToken.cdc
-// import NonFungibleToken from ../0xf8d6e0586b0a20c7/NonFungibleToken.cdc
-// import MetadataViews from ../0xf8d6e0586b0a20c7/MetadataViews.cdc
+// import FungibleToken from "../0xee82856bf20e2aa6/FungibleToken.cdc"
+// import NonFungibleToken from "../0xf8d6e0586b0a20c7/NonFungibleToken.cdc"
+// import MetadataViews from "../0xf8d6e0586b0a20c7/MetadataViews.cdc"
 
 // testnet
-// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
-// import NonFungibleToken from ../0x631e88ae7f1d7c20/NonFungibleToken.cdc
-// import MetadataViews from ../0x631e88ae7f1d7c20/MetadataViews.cdc
+// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
+// import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
+// import MetadataViews from "../0x631e88ae7f1d7c20/MetadataViews.cdc"
 
 // pro
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
-// import FungibleToken from ../"./FungibleToken.cdc"/FungibleToken.cdc
-// import NonFungibleToken from ../"./NonFungibleToken.cdc"/NonFungibleToken.cdc
-// import MetadataViews from ../"./MetadataViews.cdc"/MetadataViews.cdc
+// import FungibleToken from "../"./FungibleToken.cdc"/FungibleToken.cdc"
+// import NonFungibleToken from "../"./NonFungibleToken.cdc"/NonFungibleToken.cdc"
+// import MetadataViews from "../"./MetadataViews.cdc"/MetadataViews.cdc"
 
 pub contract Mindtrix: NonFungibleToken {
 

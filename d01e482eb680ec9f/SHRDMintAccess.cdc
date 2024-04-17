@@ -1,4 +1,4 @@
-import SHRD from ./SHRD.cdc
+import SHRD from "./SHRD.cdc"
 
 pub contract SHRDMintAccess {
 

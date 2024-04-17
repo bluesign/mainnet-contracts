@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import PrivateReceiverForwarder from ../0x18eb4ee6b3c026d2/PrivateReceiverForwarder.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import PrivateReceiverForwarder from "../0x18eb4ee6b3c026d2/PrivateReceiverForwarder.cdc"
 
 /// DapperStorageRent
 /// Provide a means for accounts storage TopUps. To be used during transaction execution.

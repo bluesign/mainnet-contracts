@@ -1,4 +1,4 @@
-import DigitalNativeArt from ../0xa19cf4dba5941530/DigitalNativeArt.cdc
+import DigitalNativeArt from "../0xa19cf4dba5941530/DigitalNativeArt.cdc"
 
 pub contract Atelier {
 

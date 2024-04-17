@@ -36,11 +36,11 @@
     NFT Contract defined at these addresses:
     https://docs.onflow.org/core-contracts/non-fungible-token
 
-    EMULATOR import NonFungibleToken from ../0xf8d6e0586b0a20c7/NonFungibleToken.cdc
-    TESTNET import NonFungibleToken from ../0x631e88ae7f1d7c20/NonFungibleToken.cdc
-    MAININET import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+    EMULATOR import NonFungibleToken from "../0xf8d6e0586b0a20c7/NonFungibleToken.cdc"
+    TESTNET import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
+    MAININET import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 */
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract LegaciCollectible: NonFungibleToken {
 

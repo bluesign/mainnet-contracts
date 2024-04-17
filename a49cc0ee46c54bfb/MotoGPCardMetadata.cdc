@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import ContractVersion from ../0xb223b2bfe4b8ffb5/ContractVersion.cdc
-import MotoGPRegistry from ./MotoGPRegistry.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448 
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import ContractVersion from "../0xb223b2bfe4b8ffb5/ContractVersion.cdc"
+import MotoGPRegistry from "./MotoGPRegistry.cdc"
 
 
 // Contract to hold Metadata for MotoGPCards. Metadata is accessed using the Card's cardID (not the Card's id)

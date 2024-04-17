@@ -1,9 +1,9 @@
-import AFLNFT from ./AFLNFT.cdc
-import AFLPack from ./AFLPack.cdc
-import AFLBurnExchange from ./AFLBurnExchange.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import PackRestrictions from ./PackRestrictions.cdc
+import AFLNFT from "./AFLNFT.cdc"
+import AFLPack from "./AFLPack.cdc"
+import AFLBurnExchange from "./AFLBurnExchange.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import PackRestrictions from "./PackRestrictions.cdc"
 
 pub contract AFLAdmin {
 

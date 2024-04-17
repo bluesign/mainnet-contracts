@@ -8,9 +8,9 @@
 // Y8a.    .a8P  88       88  88  "8b,   ,aa  88,    ,88  aa    ]8I  88       88  
 //  `"Y8888Y"'   88       88  88   `"Ybbd8"'  `"8bbdP"Y8  `"YbbdP"'  88       88  
 //
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Base64Util from ./Base64Util.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Base64Util from "./Base64Util.cdc"
 
 pub contract Unleash: NonFungibleToken {
     pub event ContractInitialized()

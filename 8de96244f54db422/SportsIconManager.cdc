@@ -5,17 +5,17 @@
     make creations and modifications pertaining to SportsIcon Collectibles
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import IconsToken from ../0x24efe89a9efa3c6f/IconsToken.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import SportsIconBeneficiaries from ./SportsIconBeneficiaries.cdc
-import SportsIconCollectible from ./SportsIconCollectible.cdc
-import SportsIconPrimarySalePrices from ./SportsIconPrimarySalePrices.cdc
-import TokenForwarding from ../0xe544175ee0461c4b/TokenForwarding.cdc
-import SportsIconNFTStorefront from ../0x03c8261a06cb1b42/SportsIconNFTStorefront.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import IconsToken from "../0x24efe89a9efa3c6f/IconsToken.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import SportsIconBeneficiaries from "./SportsIconBeneficiaries.cdc"
+import SportsIconCollectible from "./SportsIconCollectible.cdc"
+import SportsIconPrimarySalePrices from "./SportsIconPrimarySalePrices.cdc"
+import TokenForwarding from "../0xe544175ee0461c4b/TokenForwarding.cdc"
+import SportsIconNFTStorefront from "../0x03c8261a06cb1b42/SportsIconNFTStorefront.cdc"
 
 pub contract SportsIconManager {
     pub let ManagerStoragePath: StoragePath

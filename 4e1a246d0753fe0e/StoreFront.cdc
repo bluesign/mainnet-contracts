@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Unlicense
 
-// import NonFungibleToken from ../"./NonFungibleToken.cdc"/NonFungibleToken.cdc
-// import MetadataViews from ../"./MetadataViews.cdc"/MetadataViews.cdc
-// import StoreFrontViews from ../"./StoreFrontViews.cdc"/StoreFrontViews.cdc
+// import NonFungibleToken from "../"./NonFungibleToken.cdc"/NonFungibleToken.cdc"
+// import MetadataViews from "../"./MetadataViews.cdc"/MetadataViews.cdc"
+// import StoreFrontViews from "../"./StoreFrontViews.cdc"/StoreFrontViews.cdc"
 
-import NonFungibleToken, MetadataViews from ../0x1d7e57aa55817448/NonFungibleToken, MetadataViews.cdc
-import StoreFrontViews from ./StoreFrontViews.cdc
+import NonFungibleToken, MetadataViews from 0x1d7e57aa55817448
+import StoreFrontViews from "./StoreFrontViews.cdc"
 
 
 // TOKEN RUNNERS: Contract responsable for NFT and Collection

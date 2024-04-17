@@ -65,7 +65,7 @@ This will lead to predictability in how applications can look up the data.
 ### Cadence
 -----------
 
-    import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+    import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
 
     transaction {
       let address: address
@@ -85,11 +85,11 @@ This will lead to predictability in how applications can look up the data.
 ### FCL
 -------
 
-    import {query} from ../"@onflow/fcl"/{query}.cdc
+    import {query} from "../"@onflow/fcl"/{query}.cdc"
 
     await mutate({
       cadence: `
-        import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+        import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
     
         transaction {
           prepare(currentUser: AuthAccount) {
@@ -121,7 +121,7 @@ As the owner of a resource you can update the following:
 ### Cadence
 -----------
 
-    import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+    import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
 
     transaction(name: String) {
       prepare(currentUser: AuthAccount) {
@@ -135,11 +135,11 @@ As the owner of a resource you can update the following:
 ### FCL
 -------
 
-    import {mutate} from ../"@onflow/fcl"/{mutate}.cdc
+    import {mutate} from "../"@onflow/fcl"/{mutate}.cdc"
 
     await mutate({
       cadence: `
-        import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+        import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
     
         transaction(name: String) {
           prepare(currentUser: AuthAccount) {
@@ -163,7 +163,7 @@ As the owner of a resource you can update the following:
 ### Cadence
 -----------
 
-    import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+    import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
 
     pub fun main(address: Address): Profile.ReadOnly? {
       return Profile.read(address)
@@ -173,11 +173,11 @@ As the owner of a resource you can update the following:
 ### FCL
 -------
 
-    import {query} from ../"@onflow/fcl"/{query}.cdc
+    import {query} from "../"@onflow/fcl"/{query}.cdc"
 
     await query({
       cadence: `
-        import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+        import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
     
         pub fun main(address: Address): Profile.ReadOnly? {
           return Profile.read(address)
@@ -196,7 +196,7 @@ As the owner of a resource you can update the following:
 ### Cadence
 -----------
 
-    import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+    import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
 
     pub fun main(addresses: [Address]): {Address: Profile.ReadOnly} {
       return Profile.readMultiple(addresses)
@@ -206,11 +206,11 @@ As the owner of a resource you can update the following:
 ### FCL
 -------
 
-    import {query} from ../"@onflow/fcl"/{query}.cdc
+    import {query} from "../"@onflow/fcl"/{query}.cdc"
 
     await query({
       cadence: `
-        import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+        import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
     
         pub fun main(addresses: [Address]): {Address: Profile.ReadOnly} {
           return Profile.readMultiple(addresses)
@@ -229,7 +229,7 @@ As the owner of a resource you can update the following:
 ### Cadence
 -----------
 
-    import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+    import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
 
     pub fun main(address: Address): Bool {
       return Profile.check(address)
@@ -239,11 +239,11 @@ As the owner of a resource you can update the following:
 ### FCL
 -------
 
-    import {query} from ../"@onflow/fcl"/{query}.cdc
+    import {query} from "../"@onflow/fcl"/{query}.cdc"
 
     await query({
       cadence: `
-        import Profile from ../0xba1132bc08f82fe2/Profile.cdc
+        import Profile from "../0xba1132bc08f82fe2/Profile.cdc"
     
         pub fun main(address: Address): Bool {
           return Profile.check(address)

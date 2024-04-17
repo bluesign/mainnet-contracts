@@ -1,8 +1,8 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FindForge from ../0x097bafa4e0b48eef/FindForge.cdc
-import FindPack from ../0x097bafa4e0b48eef/FindPack.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FindForge from "../0x097bafa4e0b48eef/FindForge.cdc"
+import FindPack from "../0x097bafa4e0b48eef/FindPack.cdc"
 
 
 pub contract Flomies: NonFungibleToken {

@@ -6,10 +6,10 @@
 TODO: Add description
 
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20Staking from ./FRC20Staking.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20Staking from "./FRC20Staking.cdc"
 
 access(all) contract FRC20StakingForwarder {
     /* --- Events --- */

@@ -1,7 +1,7 @@
 // Modern Musician Relic Contract v.0.1.0
 
-import NonFungibleToken from ./NonFungibleToken.cdc
-import MetadataViews from ./MetadataViews.cdc
+import NonFungibleToken from "./NonFungibleToken.cdc"
+import MetadataViews from "./MetadataViews.cdc"
 
 pub contract RelicContract: NonFungibleToken {
 

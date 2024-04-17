@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import ExpToken from ./ExpToken.cdc
-import DailyTask from ./DailyTask.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import ExpToken from "./ExpToken.cdc"
+import DailyTask from "./DailyTask.cdc"
 
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
 
 pub contract GamingIntegration_IncrementSwap {
 

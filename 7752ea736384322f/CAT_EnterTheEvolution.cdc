@@ -1,12 +1,12 @@
-import TheFabricantMetadataViewsV2 from ./TheFabricantMetadataViewsV2.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import TheFabricantNFTStandardV2 from ./TheFabricantNFTStandardV2.cdc
-import RevealableV2 from ./RevealableV2.cdc
-import CoCreatableV2 from ./CoCreatableV2.cdc
-import TheFabricantAccessList from ./TheFabricantAccessList.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import TheFabricantMetadataViewsV2 from "./TheFabricantMetadataViewsV2.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import TheFabricantNFTStandardV2 from "./TheFabricantNFTStandardV2.cdc"
+import RevealableV2 from "./RevealableV2.cdc"
+import CoCreatableV2 from "./CoCreatableV2.cdc"
+import TheFabricantAccessList from "./TheFabricantAccessList.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 
 // CAT
 // 4 shapes

@@ -1,7 +1,7 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowFees from ../0xf919ee77447b7497/FlowFees.cdc
-import FlowStorageFees from ./FlowStorageFees.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowFees from "../0xf919ee77447b7497/FlowFees.cdc"
+import FlowStorageFees from "./FlowStorageFees.cdc"
 
 pub contract FlowServiceAccount {
 

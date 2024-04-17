@@ -1,10 +1,10 @@
-import MatchContract from ./MatchContract.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import MatchContract from "./MatchContract.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 
-import GomokuIdentity from ./GomokuIdentity.cdc
-import GomokuResult from ./GomokuResult.cdc
-import GomokuType from ./GomokuType.cdc
+import GomokuIdentity from "./GomokuIdentity.cdc"
+import GomokuResult from "./GomokuResult.cdc"
+import GomokuType from "./GomokuType.cdc"
 
 pub contract Gomoku {
 

@@ -5,10 +5,10 @@
     Admin resource is required to create Auctions
  */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import ListenNFT from ./ListenNFT.cdc
-import ListenUSD from ./ListenUSD.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import ListenNFT from "./ListenNFT.cdc"
+import ListenUSD from "./ListenUSD.cdc"
 
 
 // ListenAuction

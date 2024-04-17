@@ -1,4 +1,4 @@
-import DateUtil from ./DateUtil.cdc
+import DateUtil from "./DateUtil.cdc"
 
 //  ┌─────────────────────────────────────────────┐
 // ─┤ Every year during July 7, wishes come true. │

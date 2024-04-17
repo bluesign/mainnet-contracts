@@ -14,8 +14,8 @@
 // This is done for performance reasons, as it allows for a much smaller storage footprint and effective use of capacity
 // which is recommended by FLOW team.
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 
 pub contract NFTKred : NonFungibleToken{

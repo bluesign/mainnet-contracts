@@ -9,16 +9,16 @@ Marketplaces can be branded, in other words, will only allow MintStoreItems from
 Each market will also set its own fee structure through royalties. A flow account can host a single market at a time.
 
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MintStoreItem from ../0x20187093790b9aef/MintStoreItem.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MintStoreItem from "../0x20187093790b9aef/MintStoreItem.cdc"
 
 // emulator
-// import FungibleToken from ../FungibleToken/FungibleToken.cdc
-// import FUSD from ../FUSD/FUSD.cdc
-// import NonFungibleToken from ../NonFungibleToken/NonFungibleToken.cdc
-// import MintStoreItem from ../MintStoreItem/MintStoreItem.cdc
+// import FungibleToken from "../FungibleToken/FungibleToken.cdc"
+// import FUSD from "../FUSD/FUSD.cdc"
+// import NonFungibleToken from "../NonFungibleToken/NonFungibleToken.cdc"
+// import MintStoreItem from "../MintStoreItem/MintStoreItem.cdc"
 
 
 pub contract MintStoreMarketFactory {

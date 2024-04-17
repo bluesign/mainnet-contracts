@@ -1,9 +1,9 @@
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import SwapFactory from ./SwapFactory.cdc
-import SwapConfig from ./SwapConfig.cdc
-import SwapError from ./SwapError.cdc
-import SwapInterfaces from ./SwapInterfaces.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import SwapFactory from "./SwapFactory.cdc"
+import SwapConfig from "./SwapConfig.cdc"
+import SwapError from "./SwapError.cdc"
+import SwapInterfaces from "./SwapInterfaces.cdc"
 
 pub contract SwapRouter {
     /// Perform a chained swap calculation starting with exact amountIn

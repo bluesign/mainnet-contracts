@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import AACommon from ./AACommon.cdc
-import AAReferralManager from ./AAReferralManager.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import AACommon from "./AACommon.cdc"
+import AAReferralManager from "./AAReferralManager.cdc"
 
-import AAPhysical from ./AAPhysical.cdc
-import AACurrencyManager from ./AACurrencyManager.cdc
+import AAPhysical from "./AAPhysical.cdc"
+import AACurrencyManager from "./AACurrencyManager.cdc"
 
 pub contract AAFeeManager {
     access(contract) let itemPhysicalCuts: { UInt64: [AACommon.PaymentCut]}

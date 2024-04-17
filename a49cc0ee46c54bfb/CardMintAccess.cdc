@@ -1,6 +1,6 @@
-import MotoGPCard from ./MotoGPCard.cdc
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import ContractVersion from ./ContractVersion.cdc
+import MotoGPCard from "./MotoGPCard.cdc"
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import ContractVersion from "./ContractVersion.cdc"
 
 pub contract CardMintAccess: ContractVersion {
 

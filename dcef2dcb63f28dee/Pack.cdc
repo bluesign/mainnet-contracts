@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache License 2.0
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
-import Elvn from ../0x6292b23b3eb3f999/Elvn.cdc
-import Moments from ../0x6292b23b3eb3f999/Moments.cdc
+import Elvn from "../0x6292b23b3eb3f999/Elvn.cdc"
+import Moments from "../0x6292b23b3eb3f999/Moments.cdc"
 
 pub contract Pack {
     // payment

@@ -1,8 +1,8 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FungibleTokenMetadataViews from ../0xea86b9b77d95aeea/FungibleTokenMetadataViews.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import ViewResolver from ../0xea86b9b77d95aeea/ViewResolver.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FungibleTokenMetadataViews from "../0xea86b9b77d95aeea/FungibleTokenMetadataViews.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import ViewResolver from "../0xea86b9b77d95aeea/ViewResolver.cdc"
+import FlowToken from 0x1654653399040a61 
 
 pub contract Lama: ViewResolver {
     pub let LamaStoragePath: StoragePath

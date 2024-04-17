@@ -39,11 +39,11 @@
     deposited to.
 **/
 
-import TrmAssetV1 from ./TrmAssetV1.cdc
-import TrmRentV1 from ./TrmRentV1.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
+import TrmAssetV1 from "./TrmAssetV1.cdc"
+import TrmRentV1 from "./TrmRentV1.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
 
 pub contract TrmMarketV1 {
     // -----------------------------------------------------------------------

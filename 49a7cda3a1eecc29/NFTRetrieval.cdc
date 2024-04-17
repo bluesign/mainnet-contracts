@@ -1,5 +1,5 @@
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NFTCatalog from ./NFTCatalog.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NFTCatalog from "./NFTCatalog.cdc"
 
 // NFTRetrieval
 //

@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe;/FungibleToken.cdc
-import BNU from ../0xae508a21ec3017f9;/BNU.cdc
+import FungibleToken from "../0xf233dcee88fe0abe;/FungibleToken.cdc"
+import BNU from "../0xae508a21ec3017f9;/BNU.cdc"
 
 pub contract ByteNextStaking {
   pub var rewardPerBlock: UFix64;

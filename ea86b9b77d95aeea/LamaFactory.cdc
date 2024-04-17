@@ -1,5 +1,5 @@
-import CapabilityFactory from ./CapabilityFactory.cdc
-import Lama from ./Lama.cdc
+import CapabilityFactory from "./CapabilityFactory.cdc"
+import Lama from "./Lama.cdc"
 
 pub contract LamaFactory {
     pub struct Factory: CapabilityFactory.Factory {

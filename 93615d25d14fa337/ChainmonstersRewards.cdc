@@ -2,9 +2,9 @@
 // Based on the "current" NonFungibleToken standard on Flow.
 // Does not include that much functionality as the only purpose it to mint and store the Presale NFTs.
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract ChainmonstersRewards: NonFungibleToken {
 

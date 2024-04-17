@@ -1,5 +1,5 @@
-import NonFungibleToken from ./NonFungibleToken.cdc
-import MetadataViews from ./MetadataViews.cdc
+import NonFungibleToken from 0x151899ab03cd1dcc 
+import MetadataViews from "./MetadataViews.cdc"
 
 pub contract RujianNFT: NonFungibleToken {
 

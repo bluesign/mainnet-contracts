@@ -21,8 +21,8 @@
 
 */
 
-import OracleInterface from ../0xcec15c814971c1dc/OracleInterface.cdc
-import OracleConfig from ../0xcec15c814971c1dc/OracleConfig.cdc
+import OracleInterface from "../0xcec15c814971c1dc/OracleInterface.cdc"
+import OracleConfig from "../0xcec15c814971c1dc/OracleConfig.cdc"
 
 pub contract PriceOracle: OracleInterface {
 

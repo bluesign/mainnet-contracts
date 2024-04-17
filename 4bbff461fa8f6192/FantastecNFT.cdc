@@ -1,10 +1,10 @@
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FantastecSwapDataV2 from ./FantastecSwapDataV2.cdc
-import FantastecSwapDataProperties from ./FantastecSwapDataProperties.cdc
-import ViewResolver from ../0x1d7e57aa55817448/ViewResolver.cdc
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FantastecSwapDataV2 from "./FantastecSwapDataV2.cdc"
+import FantastecSwapDataProperties from "./FantastecSwapDataProperties.cdc"
+import ViewResolver from "../0x1d7e57aa55817448/ViewResolver.cdc"
 
 pub contract FantastecNFT: NonFungibleToken, ViewResolver {
 

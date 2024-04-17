@@ -22,11 +22,11 @@ A seller can present an NFT with a corresponding offer and has two solutions to 
 - accept the offer as a first bid of an auction
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import Record from ./Record.cdc
-import ArtistRegistery from ./ArtistRegistery.cdc
-import BaguetteAuction from ./BaguetteAuction.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import Record from "./Record.cdc"
+import ArtistRegistery from "./ArtistRegistery.cdc"
+import BaguetteAuction from "./BaguetteAuction.cdc"
 
 pub contract BaguetteOffer {
 

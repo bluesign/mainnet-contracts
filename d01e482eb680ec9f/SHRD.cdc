@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MotoGPAdmin from ../0xa49cc0ee46c54bfb/MotoGPAdmin.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MotoGPAdmin from "../0xa49cc0ee46c54bfb/MotoGPAdmin.cdc"
 
 // The SRHD Fungible Token is designed to be uncapped, mintable and burnable,
 // corresponding to the SHRD ERC-20 on Ethereum.

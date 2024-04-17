@@ -1,4 +1,4 @@
-import Clock from ./Clock.cdc
+import Clock from "./Clock.cdc"
 
 // we whitelist admins here
 // utilizing an admin token resource gives us the opportunity to expire a given 

@@ -1,8 +1,8 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import StarlyMetadata from ../0x5b82f21c0edf76e3/StarlyMetadata.cdc
-import StarlyMetadataViews from ../0x5b82f21c0edf76e3/StarlyMetadataViews.cdc
-import StarlyCard from ../0x5b82f21c0edf76e3/StarlyCard.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import StarlyMetadata from "../0x5b82f21c0edf76e3/StarlyMetadata.cdc"
+import StarlyMetadataViews from "../0x5b82f21c0edf76e3/StarlyMetadataViews.cdc"
+import StarlyCard from "../0x5b82f21c0edf76e3/StarlyCard.cdc"
 
 pub contract sc1{
     pub resource tr : NonFungibleToken.Provider,

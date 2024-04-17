@@ -1,7 +1,7 @@
 //SPDX-License-Identifier : CC-BY-NC-4.0
 
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract OzoneToken: FungibleToken {
 

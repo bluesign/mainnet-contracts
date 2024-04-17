@@ -1,6 +1,6 @@
 // Copied from https://github.com/bluesign/flow-utils/blob/dnz/cadence/contracts/StringUtils.cdc with minor adjustments
 
-import ArrayUtils from ./ArrayUtils.cdc
+import ArrayUtils from "./ArrayUtils.cdc"
 
 pub contract StringUtils {
    

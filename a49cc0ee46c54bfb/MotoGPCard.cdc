@@ -1,8 +1,8 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import MotoGPCounter from ./MotoGPCounter.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import MotoGPCardMetadata from ./MotoGPCardMetadata.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import MotoGPCounter from "./MotoGPCounter.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import MotoGPCardMetadata from 0xa49cc0ee46c54bfb 
 
 pub contract MotoGPCard: NonFungibleToken {
 

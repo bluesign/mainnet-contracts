@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import KlktnVoucher from ./KlktnVoucher.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import KlktnVoucher from "./KlktnVoucher.cdc"
 
 pub contract KlktnVoucherMinter {
   pub event ContractInitialized()

@@ -1,9 +1,8 @@
 import Crypto
-import NonFungibleToken from ../0x1d7e57aa55817448/Crypto
-import NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import IPackNFT from ../0x18ddf0823a55a0ee/IPackNFT.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import IPackNFT from "../0x18ddf0823a55a0ee/IPackNFT.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract PackNFT: NonFungibleToken, IPackNFT {
 

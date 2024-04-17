@@ -1,4 +1,4 @@
-import StringUtils from ./StringUtils.cdc
+import StringUtils from "./StringUtils.cdc"
 
 pub contract GameBoardUtils {
   pub fun convertRelativePositionsToString(_ positions: [[Int]]): String {

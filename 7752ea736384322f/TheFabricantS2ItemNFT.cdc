@@ -5,10 +5,10 @@
     TheFabricantS2GarmentNFT NFT and 1 TheFabricantS2MaterialNFT NFT.
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TheFabricantS2GarmentNFT from ./TheFabricantS2GarmentNFT.cdc
-import TheFabricantS2MaterialNFT from ./TheFabricantS2MaterialNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TheFabricantS2GarmentNFT from "./TheFabricantS2GarmentNFT.cdc"
+import TheFabricantS2MaterialNFT from "./TheFabricantS2MaterialNFT.cdc"
 
 pub contract TheFabricantS2ItemNFT: NonFungibleToken {
 

@@ -17,8 +17,8 @@
   This contract was based on KittyItems.cdc and ExampleNFT.cdc: https://github.com/onflow/kitty-items and https://github.com/onflow/flow-nft/blob/master/contracts/ExampleNFT.cdc, respectively.
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract Electables: NonFungibleToken {
     pub var totalSupply: UInt64

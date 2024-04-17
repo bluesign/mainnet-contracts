@@ -1,9 +1,9 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import GarmentNFT from ./GarmentNFT.cdc
-import MaterialNFT from ./MaterialNFT.cdc
-import ItemNFT from ./ItemNFT.cdc
-import FBRC from ./FBRC.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import GarmentNFT from "./GarmentNFT.cdc"
+import MaterialNFT from "./MaterialNFT.cdc"
+import ItemNFT from "./ItemNFT.cdc"
+import FBRC from "./FBRC.cdc"
 
 //helper contract that combines the garment and material nft to mint item nft AND gives you an amount of fbrc as reward
 //only admin can deposit to fbrc vault

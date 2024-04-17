@@ -1,4 +1,4 @@
-import MusicPeaksAttendanceToken from ./MusicPeaksAttendanceToken.cdc
+import MusicPeaksAttendanceToken from "./MusicPeaksAttendanceToken.cdc"
 
 pub contract FLOATIncinerator {
 

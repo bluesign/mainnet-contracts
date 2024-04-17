@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetapierLaunchpadPass from ./MetapierLaunchpadPass.cdc
-import MetapierLaunchpadOwnerPass from ./MetapierLaunchpadOwnerPass.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MetapierLaunchpadPass from "./MetapierLaunchpadPass.cdc"
+import MetapierLaunchpadOwnerPass from "./MetapierLaunchpadOwnerPass.cdc"
 
 /**
 

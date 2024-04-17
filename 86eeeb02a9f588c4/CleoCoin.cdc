@@ -2,7 +2,7 @@
     CLΣΘ CΘΙΝ 6/9/2023
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 access(all) contract CleoCoin: FungibleToken {
 

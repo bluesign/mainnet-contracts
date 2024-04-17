@@ -6,10 +6,10 @@
 // 1. You create a new DROP by setting the basic information, depositing funds, setting the criteria for eligible accounts and token distribution mode, then share the DROP link to your community;
 // 2. Community members access the DROP page via the link, check their eligibility and claim the token if they are eligible.
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import Distributors from ./Distributors.cdc
-import EligibilityVerifiers from ./EligibilityVerifiers.cdc
-import DrizzleRecorder from ./DrizzleRecorder.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import Distributors from "./Distributors.cdc"
+import EligibilityVerifiers from "./EligibilityVerifiers.cdc"
+import DrizzleRecorder from "./DrizzleRecorder.cdc"
 
 pub contract Cloud {
 

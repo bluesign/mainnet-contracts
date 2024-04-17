@@ -5,11 +5,11 @@
     more than a selected amount of times
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TheFabricantS1GarmentNFT from ../0x9e03b1f871b3513/TheFabricantS1GarmentNFT.cdc
-import TheFabricantS1MaterialNFT from ../0x9e03b1f871b3513/TheFabricantS1MaterialNFT.cdc
-import TheFabricantS1ItemNFT from ../0x9e03b1f871b3513/TheFabricantS1ItemNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TheFabricantS1GarmentNFT from "../0x9e03b1f871b3513/TheFabricantS1GarmentNFT.cdc"
+import TheFabricantS1MaterialNFT from "../0x9e03b1f871b3513/TheFabricantS1MaterialNFT.cdc"
+import TheFabricantS1ItemNFT from "../0x9e03b1f871b3513/TheFabricantS1ItemNFT.cdc"
 
 pub contract TheFabricantS1MintTransferClaim{
 

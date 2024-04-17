@@ -7,7 +7,7 @@
 // \____/  \__,_||_|\_\ \__,_| \__| \__,_||_|    \___/
 //
 //
-import Base64Util from ./Base64Util.cdc
+import Base64Util from "./Base64Util.cdc"
 
 pub contract SakutaroPoemContent {
     pub let name: String

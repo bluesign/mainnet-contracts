@@ -1,7 +1,7 @@
 //SPDX-License-Identifier : CC-BY-NC-4.0
 
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 // Metaverse
 // NFT for Metaverse

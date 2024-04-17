@@ -1,10 +1,10 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NeoMotorcycle from ./NeoMotorcycle.cdc
-import NeoViews from ./NeoViews.cdc
-import NeoSticker from ./NeoSticker.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NeoMotorcycle from "./NeoMotorcycle.cdc"
+import NeoViews from "./NeoViews.cdc"
+import NeoSticker from "./NeoSticker.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 /// A NFT contract to store founder motorcycle collectibles
 pub contract NeoFounder: NonFungibleToken {

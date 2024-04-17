@@ -21,7 +21,7 @@ use the tick method to tick the time.
 You can then call this from a transaction like this:
 
 ```
-import YourThing from ../"../contracts/YouThing.cdc"/YourThing.cdc
+import YourThing from "../"../contracts/YouThing.cdc"/YourThing.cdc"
 
 transaction(clock: UFix64) {
 	prepare(account: AuthAccount) {

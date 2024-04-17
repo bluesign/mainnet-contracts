@@ -5,8 +5,8 @@
 # Author: Increment Labs
 
 */
-import LendingInterfaces from ../0x2df970b6cdee5735/LendingInterfaces.cdc
-import LendingConfig from ../0x2df970b6cdee5735/LendingConfig.cdc
+import LendingInterfaces from "../0x2df970b6cdee5735/LendingInterfaces.cdc"
+import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
 
 pub contract TwoSegmentsInterestRateModel {
     /// The storage path for the Admin resource

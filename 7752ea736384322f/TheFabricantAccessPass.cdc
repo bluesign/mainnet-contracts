@@ -27,9 +27,9 @@
 // You can have different minters for different variants with different extra metadata
 // This is done by setting accessPassMetadatas in the promotion.
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import TheFabricantMetadataViews from ./TheFabricantMetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import TheFabricantMetadataViews from "./TheFabricantMetadataViews.cdc"
 
 pub contract TheFabricantAccessPass: NonFungibleToken {
     // -----------------------------------------------------------------------

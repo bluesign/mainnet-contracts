@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TeleportedSportiumToken from ../0x475755d2c9dccc3a/TeleportedSportiumToken.cdc
-import TeleportedTetherToken from ../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TeleportedSportiumToken from "../0x475755d2c9dccc3a/TeleportedSportiumToken.cdc"
+import TeleportedTetherToken from "../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc"
 
 // Exchange pair between TeleportedSportiumToken and TeleportedTetherToken
 // Token1: TeleportedSportiumToken

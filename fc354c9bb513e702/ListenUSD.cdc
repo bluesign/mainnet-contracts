@@ -2,7 +2,7 @@
     ListenUSD
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract ListenUSD: FungibleToken {
     // TokensInitialized

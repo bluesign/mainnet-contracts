@@ -1,4 +1,4 @@
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
 
 pub contract Ashes {
     pub var nextAshSerial: UInt64

@@ -5,13 +5,13 @@
 // Owner           : Popsycl.com
 // Developer       : RubiconFinTech.com
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
-import PopsyclMarketplace from ./PopsyclMarketplace.cdc
+import PopsyclMarketplace from "./PopsyclMarketplace.cdc"
 
-import PopsyclPack from ./PopsyclPack.cdc
+import PopsyclPack from "./PopsyclPack.cdc"
 
-import Popsycl from ./Popsycl.cdc
+import Popsycl from "./Popsycl.cdc"
 
 pub contract PopsyclPackMarketplace {
 

@@ -1,4 +1,4 @@
-import GameEngine from ./GameEngine.cdc
+import GameEngine from "./GameEngine.cdc"
 
 pub contract GamePieces {
   /*

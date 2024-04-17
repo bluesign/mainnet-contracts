@@ -1,11 +1,11 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import StarlyCard from ../0x5b82f21c0edf76e3/StarlyCard.cdc
-import StarlyCardStaking from ./StarlyCardStaking.cdc
-import StarlyIDParser from ../0x5b82f21c0edf76e3/StarlyIDParser.cdc
-import StarlyMetadata from ../0x5b82f21c0edf76e3/StarlyMetadata.cdc
-import StarlyToken from ../0x142fa6570b62fd97/StarlyToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import StarlyCard from "../0x5b82f21c0edf76e3/StarlyCard.cdc"
+import StarlyCardStaking from "./StarlyCardStaking.cdc"
+import StarlyIDParser from "../0x5b82f21c0edf76e3/StarlyIDParser.cdc"
+import StarlyMetadata from "../0x5b82f21c0edf76e3/StarlyMetadata.cdc"
+import StarlyToken from "../0x142fa6570b62fd97/StarlyToken.cdc"
 
 pub contract StakedStarlyCard: NonFungibleToken {
 

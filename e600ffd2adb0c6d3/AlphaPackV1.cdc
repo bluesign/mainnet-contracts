@@ -1,7 +1,7 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FiatToken from ../0xb19436aae4d94622/FiatToken.cdc
-import AlphaNFTV1 from ./AlphaNFTV1.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FiatToken from "../0xb19436aae4d94622/FiatToken.cdc"
+import AlphaNFTV1 from "./AlphaNFTV1.cdc"
 
 pub contract AlphaPackV1 {
     // event when a pack is bought

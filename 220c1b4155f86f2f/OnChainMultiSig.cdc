@@ -1,6 +1,5 @@
 import Crypto
-import FungibleToken from ../0xf233dcee88fe0abe/Crypto
-import FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract OnChainMultiSig {
     

@@ -2,7 +2,7 @@
 // influencer to the vaults in which they'd like to receive tokens,
 // as well as the cut they'd like to take from marketplace transactions.
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract InfluencerRegistry {
 

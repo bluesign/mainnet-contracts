@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import REVV from ../0x50b286b60012753/REVV.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import REVV from "../0x50b286b60012753/REVV.cdc"
 
 // The REVVVaultAccess contract's role is to allow the REVV contract account owner ('REVV owner')
 // to grant other accounts ('other account') access to withdraw REVV from the REVV owner's REVV vault

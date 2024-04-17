@@ -6,9 +6,9 @@
 TODO: Add description
 
 */
-import Fixes from ./Fixes.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
+import Fixes from "./Fixes.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
 
 access(all) contract FRC20TradingRecord {
     /* --- Events --- */

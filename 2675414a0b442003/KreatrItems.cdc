@@ -1,9 +1,9 @@
-// import NonFungibleToken from ../"./NonFungibleToken.cdc"/NonFungibleToken.cdc
-// import NonFungibleToken from ../0x631e88ae7f1d7c20 // Testnet/NonFungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448 // Mainnet/NonFungibleToken.cdc
-// import MetadataViews from ../"./MetadataViews.cdc"/MetadataViews.cdc
-// import MetadataViews from ../0x631e88ae7f1d7c20 // Testnet/MetadataViews.cdc
-import MetadataViews from ../0x1d7e57aa55817448 // Mainnet/MetadataViews.cdc
+// import NonFungibleToken from "./NonFungibleToken.cdc"   
+// import NonFungibleToken from 0x631e88ae7f1d7c20 // Testnet
+import NonFungibleToken from 0x1d7e57aa55817448 // Mainnet
+// import MetadataViews from "../"./MetadataViews.cdc"/MetadataViews.cdc"
+// import MetadataViews from 0x631e88ae7f1d7c20 // Testnet
+import MetadataViews from 0x1d7e57aa55817448 // Mainnet
 
 // KreatrItems
 // NFT items for ArtWork!

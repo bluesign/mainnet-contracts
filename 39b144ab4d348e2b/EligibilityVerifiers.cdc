@@ -5,8 +5,8 @@
 // 2. FLOAT Group. You can also limit the eligibility to people who own FLOATs in a FLOAT Group. You can set a threshold to the number of FLOATs the users should have.
 // 3. Whitelist. You can upload a whitelist. Only accounts on the whitelist are eligible for rewards.
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 pub contract EligibilityVerifiers {
 

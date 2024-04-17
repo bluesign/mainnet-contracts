@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MultiFungibleToken from ../0xa378eeb799df8387/MultiFungibleToken.cdc
-import PierLPToken from ./PierLPToken.cdc
-import IPierPair from ./IPierPair.cdc
-import PierMath from ../0xa378eeb799df8387/PierMath.cdc
-import PierSwapSettings from ../0x066a74dfb4da0306/PierSwapSettings.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MultiFungibleToken from "../0xa378eeb799df8387/MultiFungibleToken.cdc"
+import PierLPToken from "./PierLPToken.cdc"
+import IPierPair from "./IPierPair.cdc"
+import PierMath from "../0xa378eeb799df8387/PierMath.cdc"
+import PierSwapSettings from "../0x066a74dfb4da0306/PierSwapSettings.cdc"
 
 /**
 

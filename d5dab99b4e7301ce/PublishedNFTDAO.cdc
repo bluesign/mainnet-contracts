@@ -1,8 +1,8 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FungibleTokenMetadataViews from ../0xf233dcee88fe0abe/FungibleTokenMetadataViews.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Toucans from ../0x577a3c409c5dcb5e/Toucans.cdc
-import ToucansTokens from ../0x577a3c409c5dcb5e/ToucansTokens.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FungibleTokenMetadataViews from "../0xf233dcee88fe0abe/FungibleTokenMetadataViews.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Toucans from "../0x577a3c409c5dcb5e/Toucans.cdc"
+import ToucansTokens from "../0x577a3c409c5dcb5e/ToucansTokens.cdc"
  
 pub contract PublishedNFTDAO: FungibleToken {
 

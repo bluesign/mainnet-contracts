@@ -1,4 +1,4 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 // Token contract of Violet Verse Token (VV)
 pub contract VioletVerse: FungibleToken {

@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Art from ./Art.cdc
-import Content from ./Content.cdc
-import Auction from ./Auction.cdc
-import Profile from ./Profile.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Art from "./Art.cdc"
+import Content from "./Content.cdc"
+import Auction from "./Auction.cdc"
+import Profile from "./Profile.cdc"
 
 /*
 The main contract in the Versus auction system.

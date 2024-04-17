@@ -4,11 +4,11 @@
     Author: Brian Min brian@flowverse.co
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowversePass from ./FlowversePass.cdc
-import FlowverseSocks from ../0xce4c02539d1fabe8/FlowverseSocks.cdc
-import FlowverseShirt from ./FlowverseShirt.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowversePass from "./FlowversePass.cdc"
+import FlowverseSocks from "../0xce4c02539d1fabe8/FlowverseSocks.cdc"
+import FlowverseShirt from "./FlowverseShirt.cdc"
 import Crypto
 
 access(all) contract OrdinalVendor {

@@ -1,8 +1,8 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import ExpToken from ./ExpToken.cdc
-import DailyTask from ./DailyTask.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import ExpToken from "./ExpToken.cdc"
+import DailyTask from "./DailyTask.cdc"
 
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 pub contract GamingIntegration_FLOAT {
 

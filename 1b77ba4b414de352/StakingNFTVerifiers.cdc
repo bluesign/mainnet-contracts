@@ -7,9 +7,9 @@
     Author: Increment Labs
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
-import StakingNFT from ./StakingNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+import StakingNFT from "./StakingNFT.cdc"
 
 pub contract StakingNFTVerifiers {
 

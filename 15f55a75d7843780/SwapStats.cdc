@@ -1,4 +1,4 @@
-import SwapStatsRegistry from ./SwapStatsRegistry.cdc
+import SwapStatsRegistry from "./SwapStatsRegistry.cdc"
 
 access(all) contract SwapStats {
 

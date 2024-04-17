@@ -10,16 +10,16 @@
  */
 
 // mainnet
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 // testnet
-// import NonFungibleToken from ../0x631e88ae7f1d7c20/NonFungibleToken.cdc
-// import MetadataViews from ../0x631e88ae7f1d7c20/MetadataViews.cdc
+// import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
+// import MetadataViews from "../0x631e88ae7f1d7c20/MetadataViews.cdc"
 
 // local
-//  import NonFungibleToken from ../"./NonFungibleToken.cdc"/NonFungibleToken.cdc
-//  import MetadataViews from ../"./MetadataViews.cdc"/MetadataViews.cdc
+//  import NonFungibleToken from "../"./NonFungibleToken.cdc"/NonFungibleToken.cdc"
+//  import MetadataViews from "../"./MetadataViews.cdc"/MetadataViews.cdc"
 
 
  pub contract ArleeScene : NonFungibleToken{

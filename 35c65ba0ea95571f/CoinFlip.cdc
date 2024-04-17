@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe  //mainnet/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61 //mainnet/FlowToken.cdc
+import FungibleToken from 0xf233dcee88fe0abe  //mainnet
+import FlowToken from 0x1654653399040a61 //mainnet
 
 pub contract CoinFlip{
 

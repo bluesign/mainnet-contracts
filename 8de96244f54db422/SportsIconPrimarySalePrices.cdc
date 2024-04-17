@@ -2,7 +2,7 @@
     Description: Contract for SportsIcon management of primary sale listings
 */
 
-import SportsIconNFTStorefront from ../0x03c8261a06cb1b42/SportsIconNFTStorefront.cdc
+import SportsIconNFTStorefront from "../0x03c8261a06cb1b42/SportsIconNFTStorefront.cdc"
 
 pub contract SportsIconPrimarySalePrices {
 

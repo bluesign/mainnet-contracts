@@ -1,9 +1,7 @@
 import Crypto
 
-import FungibleToken from ../0xf233dcee88fe0abe/Crypto
-
-import FungibleToken.cdc
-import MoxyToken from ./MoxyToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MoxyToken from "./MoxyToken.cdc"
 
 pub contract ColdStorage {
 

@@ -1,10 +1,10 @@
-import FlovatarMarketplace from ../0x921ea449dffec68a/FlovatarMarketplace.cdc
-import FlovatarComponent from ../0x921ea449dffec68a/FlovatarComponent.cdc
-import Flovatar from ../0x921ea449dffec68a/Flovatar.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FlovatarComponentTemplate from ../0x921ea449dffec68a/FlovatarComponentTemplate.cdc
+import FlovatarMarketplace from "../0x921ea449dffec68a/FlovatarMarketplace.cdc"
+import FlovatarComponent from "../0x921ea449dffec68a/FlovatarComponent.cdc"
+import Flovatar from "../0x921ea449dffec68a/Flovatar.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FlovatarComponentTemplate from "../0x921ea449dffec68a/FlovatarComponentTemplate.cdc"
 
 pub contract Marketplace {
 

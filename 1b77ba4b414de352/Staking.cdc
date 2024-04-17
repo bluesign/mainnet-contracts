@@ -7,9 +7,9 @@
 # Author: Increment Labs & Caos
 
 **/
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import StakingError from ./StakingError.cdc
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import StakingError from "./StakingError.cdc"
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
 
 pub contract Staking {
   // Paths

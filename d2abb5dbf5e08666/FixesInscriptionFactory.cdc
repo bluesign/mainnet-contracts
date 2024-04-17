@@ -7,9 +7,9 @@ This contract is a helper factory contract to create Fixes Inscriptions.
 
 */
 
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 // Fixes Imports
-import Fixes from ./Fixes.cdc
+import Fixes from "./Fixes.cdc"
 
 access(all) contract FixesInscriptionFactory {
 

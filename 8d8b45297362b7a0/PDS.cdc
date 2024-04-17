@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import IPackNFT from ./IPackNFT.cdc
+import NonFungibleToken from 0x1d7e57aa55817448 
+import IPackNFT from 0x8d8b45297362b7a0 
 
 pub contract PDS{
     /// The collection to hold all escrowed NFT

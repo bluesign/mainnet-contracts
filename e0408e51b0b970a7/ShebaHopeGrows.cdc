@@ -11,19 +11,19 @@
     Enjoy!
 */
 
-// import NonFungibleToken from ../"./NonFungibleToken.cdc"/NonFungibleToken.cdc
-// import MetadataViews from ../"./MetadataViews.cdc"/MetadataViews.cdc
+// import NonFungibleToken from "../"./NonFungibleToken.cdc"/NonFungibleToken.cdc"
+// import MetadataViews from "../"./MetadataViews.cdc"/MetadataViews.cdc"
 // for tests
-// import NonFungibleToken from ../"0xNonFungibleToken"/NonFungibleToken.cdc
-// import MetadataViews from ../"0xMetadataViews"/MetadataViews.cdc
-// import FungibleToken from ../"0xFungibleToken"/FungibleToken.cdc
+// import NonFungibleToken from "../"0xNonFungibleToken"/NonFungibleToken.cdc"
+// import MetadataViews from "../"0xMetadataViews"/MetadataViews.cdc"
+// import FungibleToken from "../"0xFungibleToken"/FungibleToken.cdc"
 // for testnet
-// import NonFungibleToken from ../0x631e88ae7f1d7c20/NonFungibleToken.cdc
-// import MetadataViews from ../0x631e88ae7f1d7c20/MetadataViews.cdc
+// import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
+// import MetadataViews from "../0x631e88ae7f1d7c20/MetadataViews.cdc"
 
 // for mainnet
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract ShebaHopeGrows: NonFungibleToken {
 

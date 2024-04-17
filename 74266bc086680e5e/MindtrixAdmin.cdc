@@ -1,10 +1,10 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import MindtrixViews from ./MindtrixViews.cdc
-import Mindtrix from ./Mindtrix.cdc
-import MindtrixEssence from ./MindtrixEssence.cdc
-import MindtrixDonation from ./MindtrixDonation.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import MindtrixViews from "./MindtrixViews.cdc"
+import Mindtrix from "./Mindtrix.cdc"
+import MindtrixEssence from "./MindtrixEssence.cdc"
+import MindtrixDonation from "./MindtrixDonation.cdc"
 
 pub contract MindtrixAdmin {
 

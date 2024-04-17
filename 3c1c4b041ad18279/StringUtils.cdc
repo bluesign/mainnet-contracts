@@ -1,4 +1,4 @@
-import ArrayUtils from ../0xa340dc0a4ec828ab/ArrayUtils.cdc
+import ArrayUtils from "../0xa340dc0a4ec828ab/ArrayUtils.cdc"
 
 pub contract StringUtils {
    

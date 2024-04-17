@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import StarlyToken from ../0x142fa6570b62fd97/StarlyToken.cdc
-import TeleportedTetherToken from ../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import StarlyToken from "../0x142fa6570b62fd97/StarlyToken.cdc"
+import TeleportedTetherToken from "../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc"
 
 // Exchange pair between StarlyToken and TeleportedTetherToken
 // Token1: StarlyToken

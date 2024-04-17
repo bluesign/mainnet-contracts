@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Pack from ./Pack.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Pack from "./Pack.cdc"
 
 // Purpose: This Inbox contract allows the admin to send pack NFTs to a centralized inbox held by the admin.
 // This allows the recipients to claim their packs at any time.

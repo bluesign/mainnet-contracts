@@ -1,13 +1,13 @@
-//import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-//import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-//import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-//import Flovatar from ./Flovatar.cdc
-//import FlovatarComponent from ./FlovatarComponent.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import Flovatar from ./Flovatar.cdc
-import FlovatarComponent from ./FlovatarComponent.cdc
+//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+//import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+//import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+//import Flovatar from "./Flovatar.cdc"
+//import FlovatarComponent from "./FlovatarComponent.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import Flovatar from "./Flovatar.cdc"
+import FlovatarComponent from "./FlovatarComponent.cdc"
 
 /*
  A standard marketplace contract with Royalties management and hardcoded against Flovatar and Components.

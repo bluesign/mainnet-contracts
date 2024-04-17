@@ -9,8 +9,8 @@
   Do not deploy this contract to initial Admin.
  */
 
-import OlympicPin from ../0x1d007eed492fdbbe/OlympicPin.cdc
-import OlympicPinShardedCollection from ../0xf087790fe77461e4/OlympicPinShardedCollection.cdc
+import OlympicPin from  0x1d007eed492fdbbe
+import OlympicPinShardedCollection from "../0xf087790fe77461e4/OlympicPinShardedCollection.cdc"
 
 pub contract OlympicPinAdminReceiver {
 

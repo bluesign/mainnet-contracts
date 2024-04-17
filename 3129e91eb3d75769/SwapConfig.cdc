@@ -6,7 +6,7 @@
 
 */
 
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
 
 pub contract SwapConfig {
     pub var PairPublicPath: PublicPath

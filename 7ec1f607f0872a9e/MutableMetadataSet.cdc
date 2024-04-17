@@ -15,8 +15,8 @@ to a particular logical Set of NFTs by locking the Set.
 
 */
 
-import MutableMetadata from ./MutableMetadata.cdc
-import MutableMetadataTemplate from ./MutableMetadataTemplate.cdc
+import MutableMetadata from "./MutableMetadata.cdc"
+import MutableMetadataTemplate from "./MutableMetadataTemplate.cdc"
 
 pub contract MutableMetadataSet {
 

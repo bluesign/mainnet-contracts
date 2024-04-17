@@ -4,7 +4,7 @@
 
 */
 
-import LendingInterfaces from ../0x2df970b6cdee5735/LendingInterfaces.cdc
+import LendingInterfaces from "../0x2df970b6cdee5735/LendingInterfaces.cdc"
 
 pub contract RV2 {
 

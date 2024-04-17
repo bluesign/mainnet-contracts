@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import SpaceTradeAssetCatalog from ./SpaceTradeAssetCatalog.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import SpaceTradeAssetCatalog from "./SpaceTradeAssetCatalog.cdc"
 
 pub contract SpaceTradeFeeManager {
 

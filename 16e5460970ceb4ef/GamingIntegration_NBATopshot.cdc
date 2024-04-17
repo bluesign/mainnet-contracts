@@ -1,10 +1,10 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import ExpToken from ./ExpToken.cdc
-import DailyTask from ./DailyTask.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import ExpToken from "./ExpToken.cdc"
+import DailyTask from "./DailyTask.cdc"
 
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
-import Market from ../0xc1e4f4f4c4257510/Market.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
+import Market from "../0xc1e4f4f4c4257510/Market.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
 
 pub contract GamingIntegration_NBATopshot {
 

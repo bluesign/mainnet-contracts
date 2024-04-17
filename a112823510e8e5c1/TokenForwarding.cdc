@@ -14,8 +14,8 @@ their tokens to.
 
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NWayUtilityCoin from ../0x011b6f1425389550/NWayUtilityCoin.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NWayUtilityCoin from "../0x011b6f1425389550/NWayUtilityCoin.cdc"
 
 pub contract TokenForwarding {
 

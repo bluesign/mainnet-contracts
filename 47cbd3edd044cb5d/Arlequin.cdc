@@ -1,32 +1,32 @@
 // mainnet
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import ArleePartner from ./ArleePartner.cdc
-import ArleeScene from ./ArleeScene.cdc
-import ArleeSceneVoucher from ./ArleeSceneVoucher.cdc
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import ArleePartner from "./ArleePartner.cdc"
+import ArleeScene from "./ArleeScene.cdc"
+import ArleeSceneVoucher from "./ArleeSceneVoucher.cdc"
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 // testnet
-// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
-// import NonFungibleToken from ../0x631e88ae7f1d7c20/NonFungibleToken.cdc
-// import MetadataViews from ../0x631e88ae7f1d7c20/MetadataViews.cdc
-// import FlowToken from ../0x7e60df042a9c0868/FlowToken.cdc
-// import ArleePartner from ../0xe7fd8b1148e021b2/ArleePartner.cdc
-// import ArleeScene from ../0xe7fd8b1148e021b2/ArleeScene.cdc
-// import ArleeSceneVoucher from ../0xe7fd8b1148e021b2/ArleeSceneVoucher.cdc
-// import FLOAT from ../0x0afe396ebc8eee65/FLOAT.cdc
+// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
+// import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
+// import MetadataViews from "../0x631e88ae7f1d7c20/MetadataViews.cdc"
+// import FlowToken from "../0x7e60df042a9c0868/FlowToken.cdc"
+// import ArleePartner from "../0xe7fd8b1148e021b2/ArleePartner.cdc"
+// import ArleeScene from "../0xe7fd8b1148e021b2/ArleeScene.cdc"
+// import ArleeSceneVoucher from "../0xe7fd8b1148e021b2/ArleeSceneVoucher.cdc"
+// import FLOAT from "../0x0afe396ebc8eee65/FLOAT.cdc"
 
 // local
-// import FungibleToken from ../"./FungibleToken"/FungibleToken.cdc
-// import NonFungibleToken from ../"./NonFungibleToken"/NonFungibleToken.cdc
-// import MetadataViews from ../"./MetadataViews"/MetadataViews.cdc
-// import FlowToken from ../"./FlowToken"/FlowToken.cdc
-// import ArleePartner from ../"./ArleePartner"/ArleePartner.cdc
-// import ArleeScene from ../"./ArleeScene"/ArleeScene.cdc
-// import ArleeSceneVoucher from ../"./ArleeSceneVoucher"/ArleeSceneVoucher.cdc
-// import FLOAT from ../"./lib/FLOAT.cdc"/FLOAT.cdc
+// import FungibleToken from "../"./FungibleToken"/FungibleToken.cdc"
+// import NonFungibleToken from "../"./NonFungibleToken"/NonFungibleToken.cdc"
+// import MetadataViews from "../"./MetadataViews"/MetadataViews.cdc"
+// import FlowToken from "../"./FlowToken"/FlowToken.cdc"
+// import ArleePartner from "../"./ArleePartner"/ArleePartner.cdc"
+// import ArleeScene from "../"./ArleeScene"/ArleeScene.cdc"
+// import ArleeSceneVoucher from "../"./ArleeSceneVoucher"/ArleeSceneVoucher.cdc"
+// import FLOAT from "../"./lib/FLOAT.cdc"/FLOAT.cdc"
 
 pub contract Arlequin {
     

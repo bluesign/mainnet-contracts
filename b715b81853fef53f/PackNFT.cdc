@@ -1,7 +1,6 @@
 import Crypto
-import NonFungibleToken from ../0x1d7e57aa55817448/Crypto
-import NonFungibleToken.cdc
-import IPackNFT from ../0xb357442e10e629e2/IPackNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import IPackNFT from "../0xb357442e10e629e2/IPackNFT.cdc"
 
 pub contract PackNFT: NonFungibleToken, IPackNFT {
 

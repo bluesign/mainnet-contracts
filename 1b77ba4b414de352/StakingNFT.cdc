@@ -7,10 +7,10 @@
 # Author: Increment Labs
 
 **/
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import StakingError from ./StakingError.cdc
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import StakingError from "./StakingError.cdc"
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
 
 pub contract StakingNFT {
   pub let address: Address

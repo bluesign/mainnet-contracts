@@ -1,4 +1,4 @@
-import FlowtyRaffles from ./FlowtyRaffles.cdc
+import FlowtyRaffles from "./FlowtyRaffles.cdc"
 
 /*
 FlowtyRaffleSource - Contains a basic implementation of RaffleSource which can be used for all `AnyStruct`

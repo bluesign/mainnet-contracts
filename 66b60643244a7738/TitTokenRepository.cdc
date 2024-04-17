@@ -1,11 +1,11 @@
 // Testnet
-// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
-// import TitToken from ../0x6e9ac121d7106a09/TitToken.cdc
+// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
+// import TitToken from "../0x6e9ac121d7106a09/TitToken.cdc"
 
 
 // Mainnet
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TitToken from ../0x66b60643244a7738 // Replace with actual address/TitToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TitToken from 0x66b60643244a7738 // Replace with actual address
 
 pub contract TitTokenRepository {
 

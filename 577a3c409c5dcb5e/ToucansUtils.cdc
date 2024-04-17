@@ -1,14 +1,13 @@
 import Crypto
-import FungibleToken from ../0xf233dcee88fe0abe/Crypto
-import FungibleToken.cdc
-import NFTCatalog from ../0x49a7cda3a1eecc29/NFTCatalog.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FIND from ../0x097bafa4e0b48eef/FIND.cdc
-import EmeraldIdentity from ../0x39e42c67cc851cfb/EmeraldIdentity.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
-import LiquidStaking from ../0xd6f80565193ad727/LiquidStaking.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import stFlowToken from ../0xd6f80565193ad727/stFlowToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NFTCatalog from "../0x49a7cda3a1eecc29/NFTCatalog.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FIND from "../0x097bafa4e0b48eef/FIND.cdc"
+import EmeraldIdentity from "../0x39e42c67cc851cfb/EmeraldIdentity.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
+import LiquidStaking from "../0xd6f80565193ad727/LiquidStaking.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import stFlowToken from "../0xd6f80565193ad727/stFlowToken.cdc"
 
 pub contract ToucansUtils {
   pub fun ownsNFTFromCatalogCollectionIdentifier(collectionIdentifier: String, user: Address): Bool {

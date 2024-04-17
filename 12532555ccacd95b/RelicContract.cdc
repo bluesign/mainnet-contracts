@@ -6,8 +6,8 @@ well as a custom MetadataViews implementation.
 developed by info@spaceleaf.io
 *******************************************/
 
-import NonFungibleToken from ./NonFungibleToken.cdc
-import MetadataViews from ./MetadataViews.cdc
+import NonFungibleToken from "./NonFungibleToken.cdc"
+import MetadataViews from "./MetadataViews.cdc"
 
 pub contract RelicContract: NonFungibleToken {
 

@@ -12,7 +12,7 @@ additional Sets and access those Sets for mutation, if allowed by the Set.
 
 */
 
-import MutableMetadataSet from ./MutableMetadataSet.cdc
+import MutableMetadataSet from "./MutableMetadataSet.cdc"
 
 pub contract MutableMetadataSetManager {
 

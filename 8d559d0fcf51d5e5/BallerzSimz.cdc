@@ -1,6 +1,6 @@
-import Gaia from ../0x8b148183c28ff88f/Gaia.cdc
-import BounceToken from ./BounceToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import Gaia from "../0x8b148183c28ff88f/Gaia.cdc"
+import BounceToken from "./BounceToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract BallerzSimz {
 

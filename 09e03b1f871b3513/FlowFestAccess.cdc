@@ -4,9 +4,9 @@
     This contract allows users to redeem their FlowFest NFTs to gain access to thefabricant.studio
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TheFabricantMysteryBox_FF1 from ../0xa0cbe021821c0965/TheFabricantMysteryBox_FF1.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TheFabricantMysteryBox_FF1 from "../0xa0cbe021821c0965/TheFabricantMysteryBox_FF1.cdc"
 pub contract FlowFestAccess {
 
     // -----------------------------------------------------------------------

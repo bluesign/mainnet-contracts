@@ -1,4 +1,4 @@
-import GameLevels from ./GameLevels.cdc
+import GameLevels from "./GameLevels.cdc"
 
 pub contract GameEngine {
 

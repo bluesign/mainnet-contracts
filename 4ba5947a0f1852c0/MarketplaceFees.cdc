@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MemeToken from ./MemeToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MemeToken from "./MemeToken.cdc"
 
 /// The MarketplaceFees contract is responsible for managing the fees for the marketplace.
 /// This contract derived from the FlowTokenFees contract in the FlowToken contract.

@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleTokenMinter from ../0x3b16cb9f5c036412/NonFungibleTokenMinter.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleTokenMinter from "../0x3b16cb9f5c036412/NonFungibleTokenMinter.cdc"
 
 pub contract ARPC: NonFungibleToken, NonFungibleTokenMinter {
     pub var totalSupply: UInt64

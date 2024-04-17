@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import DooverseItems from ../0x66ad29c7d7465437/DooverseItems.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import DooverseItems from "../0x66ad29c7d7465437/DooverseItems.cdc"
 
 // DooverseAdminNFTStorefront
 //

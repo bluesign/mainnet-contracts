@@ -4,7 +4,7 @@
   - Author: VIV3 Inc.
   - Copyright: 2020 VIV3 Inc.
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract USDToken: FungibleToken {
 

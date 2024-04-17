@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import ToucansTokens from ./ToucansTokens.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import ToucansTokens from "./ToucansTokens.cdc"
 
 pub contract ToucansLockTokens {
 

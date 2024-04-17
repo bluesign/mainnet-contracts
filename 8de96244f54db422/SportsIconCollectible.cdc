@@ -7,10 +7,10 @@
     author: zay.codes
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import SportsIconCounter from ./SportsIconCounter.cdc
-import SportsIconBeneficiaries from ./SportsIconBeneficiaries.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import SportsIconCounter from "./SportsIconCounter.cdc"
+import SportsIconBeneficiaries from "./SportsIconBeneficiaries.cdc"
 
 pub contract SportsIconCollectible: NonFungibleToken {
 

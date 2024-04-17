@@ -1,5 +1,5 @@
-import FlowServiceAccount from ../0xe467b9dd11fa00df/FlowServiceAccount.cdc
-import DynamicImport from ./DynamicImport.cdc
+import FlowServiceAccount from "../0xe467b9dd11fa00df/FlowServiceAccount.cdc"
+import DynamicImport from "./DynamicImport.cdc"
 
 pub contract Proxy_0xe467b9dd11fa00df {
     

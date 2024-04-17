@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import SoulMadeComponent from ./SoulMadeComponent.cdc
-import SoulMadeMain from ./SoulMadeMain.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import SoulMadeComponent from "./SoulMadeComponent.cdc"
+import SoulMadeMain from "./SoulMadeMain.cdc"
 
 pub contract SoulMadePack: NonFungibleToken {
 

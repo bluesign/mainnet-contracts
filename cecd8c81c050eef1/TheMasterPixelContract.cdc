@@ -1,6 +1,6 @@
 
 
-import TheMasterPieceContract from ./TheMasterPieceContract.cdc
+import TheMasterPieceContract from "./TheMasterPieceContract.cdc"
 
 pub contract TheMasterPixelContract {
 

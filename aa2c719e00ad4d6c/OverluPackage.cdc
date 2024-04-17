@@ -1,11 +1,11 @@
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import OverluConfig from ./OverluConfig.cdc
-import OverluModel from ./OverluModel.cdc
-import OverluDNA from ./OverluDNA.cdc
-import OverluError from ./OverluError.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import OverluConfig from "./OverluConfig.cdc"
+import OverluModel from "./OverluModel.cdc"
+import OverluDNA from "./OverluDNA.cdc"
+import OverluError from "./OverluError.cdc"
 
 pub contract OverluPackage: NonFungibleToken {
 

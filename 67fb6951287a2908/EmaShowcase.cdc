@@ -1,4 +1,4 @@
-import MessageCard from ../0xf38fadaba79009cc/MessageCard.cdc
+import MessageCard from "../0xf38fadaba79009cc/MessageCard.cdc"
 
 pub contract EmaShowcase {
     pub struct Ema {

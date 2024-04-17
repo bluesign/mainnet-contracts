@@ -1,7 +1,7 @@
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
-import Ashes from ./Ashes.cdc
-import UFC_NFT from ../0x329feb3ab062d289/UFC_NFT.cdc
-import AllDay from ../0xe4cf4bdc1751c65d/AllDay.cdc
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
+import Ashes from "./Ashes.cdc"
+import UFC_NFT from "../0x329feb3ab062d289/UFC_NFT.cdc"
+import AllDay from "../0xe4cf4bdc1751c65d/AllDay.cdc"
 
 pub contract AshesV2 {
     access(contract) var recentBurn: [AshData?]

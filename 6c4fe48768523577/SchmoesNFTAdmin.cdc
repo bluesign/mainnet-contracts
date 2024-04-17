@@ -1,4 +1,4 @@
-import SchmoesNFT from ./SchmoesNFT.cdc
+import SchmoesNFT from "./SchmoesNFT.cdc"
 
 pub contract SchmoesNFTAdmin {
     pub let AdminStoragePath: StoragePath

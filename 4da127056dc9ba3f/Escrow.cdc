@@ -7,7 +7,7 @@
         Deewai Abdullahi: innocent.abdullahi@dapperlabs.com
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract Escrow {
     // Event emitted when a new leaderboard is created.

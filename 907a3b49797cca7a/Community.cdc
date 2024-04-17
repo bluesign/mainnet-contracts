@@ -4,9 +4,9 @@
 > Author: Bohao Tang<tech@btang.cn>
 
 */
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Interfaces from ./Interfaces.cdc
-import Helper from ./Helper.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Interfaces from "./Interfaces.cdc"
+import Helper from "./Helper.cdc"
 
 pub contract Community {
 

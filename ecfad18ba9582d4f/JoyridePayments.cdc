@@ -1,7 +1,7 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import JoyrideMultiToken from ./JoyrideMultiToken.cdc
-import JoyrideAccounts from ./JoyrideAccounts.cdc
-import GameEscrowMarker from ./GameEscrowMarker.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import JoyrideMultiToken from "./JoyrideMultiToken.cdc"
+import JoyrideAccounts from "./JoyrideAccounts.cdc"
+import GameEscrowMarker from "./GameEscrowMarker.cdc"
 
 pub contract JoyridePayments {
 

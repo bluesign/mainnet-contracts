@@ -1,9 +1,9 @@
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import OverluError from ./OverluError.cdc
-import OverluConfig from ./OverluConfig.cdc
-import OverluDNA from ./OverluDNA.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import OverluError from "./OverluError.cdc"
+import OverluConfig from "./OverluConfig.cdc"
+import OverluDNA from "./OverluDNA.cdc"
 
 pub contract OverluModel: NonFungibleToken {
 

@@ -1,11 +1,11 @@
 // Testnet
-// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
-// import VroomToken from ../0x6e9ac121d7106a09/VroomToken.cdc
+// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
+// import VroomToken from "../0x6e9ac121d7106a09/VroomToken.cdc"
 
 
 // Mainnet
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import VroomToken from ../0xf887ece39166906e // Replace with actual address/VroomToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import VroomToken from 0xf887ece39166906e // Replace with actual address
 
 pub contract VroomTokenRepository {
 

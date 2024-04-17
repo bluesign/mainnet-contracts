@@ -8,16 +8,14 @@ TODO: Add description
 */
 
 // Third-party imports
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import HybridCustody from ../0xd8a7e05a7ac670c0/HybridCustody.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import HybridCustody from "../0xd8a7e05a7ac670c0/HybridCustody.cdc"
 // Fixes imports
 // import "Fixes"
 // import "FRC20FTShared"
-import FRC20Indexer from ./"Fixes"
-// import "FRC20FTShared"
-import FRC20Indexer.cdc
+import FRC20Indexer from "./FRC20Indexer.cdc"
 
 access(all) contract FRC20AccountsPool {
 

@@ -18,7 +18,7 @@ is the same as nftmetadata['name'].
 
 */
 
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract MetadataViewsManager {
 

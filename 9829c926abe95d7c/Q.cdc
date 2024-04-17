@@ -1,8 +1,8 @@
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
-import FlowSwapPair from ../0xc6c77b9f5c7a378f/FlowSwapPair.cdc
-import IPierPair from ../0x609e10301860b683/IPierPair.cdc
-import PierPair from ../0x609e10301860b683/PierPair.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
+import FlowSwapPair from "../0xc6c77b9f5c7a378f/FlowSwapPair.cdc"
+import IPierPair from "../0x609e10301860b683/IPierPair.cdc"
+import PierPair from "../0x609e10301860b683/PierPair.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract Q {
     pub fun q(): [AnyStruct] {

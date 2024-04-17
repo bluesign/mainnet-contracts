@@ -1,5 +1,5 @@
-import MonoCat from ../0x8529aaf64c168952/MonoCat.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import MonoCat from "../0x8529aaf64c168952/MonoCat.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract Migrate {
     // save monocats owners address

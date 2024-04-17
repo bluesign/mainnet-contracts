@@ -1,14 +1,14 @@
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import SwapRouter from ../0x5f4da03554851654/SwapRouter.cdc
-import SwapInterfaces from ../0x5f4da03554851654/SwapInterfaces.cdc
-import SwapConfig from ../0x5f4da03554851654/SwapConfig.cdc
-import SwapFactory from ../0x5f4da03554851654/SwapFactory.cdc
-import StarVaultConfig from ./StarVaultConfig.cdc
-import StarVaultInterfaces from ./StarVaultInterfaces.cdc
-import LPStaking from ./LPStaking.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import SwapRouter from "../0x5f4da03554851654/SwapRouter.cdc"
+import SwapInterfaces from "../0x5f4da03554851654/SwapInterfaces.cdc"
+import SwapConfig from "../0x5f4da03554851654/SwapConfig.cdc"
+import SwapFactory from "../0x5f4da03554851654/SwapFactory.cdc"
+import StarVaultConfig from "./StarVaultConfig.cdc"
+import StarVaultInterfaces from "./StarVaultInterfaces.cdc"
+import LPStaking from "./LPStaking.cdc"
 
 pub contract StarVault: FungibleToken {
 

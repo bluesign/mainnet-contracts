@@ -8,9 +8,9 @@
 
 // FLOW FUNGIBLE TOKEN mainnet
 // 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 // Testnet wallet address
-import DisruptArt from ./DisruptArt.cdc
+import DisruptArt from "./DisruptArt.cdc"
 
 // This contract allows users to list their DisruptArt NFT for sale. 
 // Other users can purchase these NFTs with FLOW token.

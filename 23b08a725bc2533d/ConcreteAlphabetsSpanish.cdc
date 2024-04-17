@@ -1,6 +1,6 @@
 // You can create concrete poems with these alphabet resources.
 
-import ConcreteAlphabets from ./ConcreteAlphabets.cdc
+import ConcreteAlphabets from "./ConcreteAlphabets.cdc"
 
 pub contract ConcreteAlphabetsSpanish {
     pub resource U00C1{} // Á

@@ -1,4 +1,4 @@
-import FanTopToken from ./FanTopToken.cdc
+import FanTopToken from "./FanTopToken.cdc"
 
 pub contract FanTopPermission {
     pub enum Role: UInt8 {

@@ -6,15 +6,15 @@
 
 */
 
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
-import FlowIDTableStaking from ../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc
-import FlowEpoch from ../0x8624b52f9ddcd04a/FlowEpoch.cdc
+import FlowIDTableStaking from "../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc"
+import FlowEpoch from "../0x8624b52f9ddcd04a/FlowEpoch.cdc"
 
-import stFlowToken from ./stFlowToken.cdc
-import LiquidStakingConfig from ./LiquidStakingConfig.cdc
-import LiquidStakingError from ./LiquidStakingError.cdc
+import stFlowToken from "./stFlowToken.cdc"
+import LiquidStakingConfig from "./LiquidStakingConfig.cdc"
+import LiquidStakingError from "./LiquidStakingError.cdc"
 
 pub contract DelegatorManager {
     /// All delegators managed by liquid staking protocol

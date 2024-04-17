@@ -1,7 +1,7 @@
 
-    import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
-    import MetadataWrapper from ./MetadataWrapper.cdc
-    import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+    import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+    import MetadataWrapper from "./MetadataWrapper.cdc"
+    import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
     pub contract FLOATWrapper {
 

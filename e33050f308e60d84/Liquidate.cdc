@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import LendingConfig from ../0x2df970b6cdee5735/LendingConfig.cdc
-import LendingInterfaces from ../0x2df970b6cdee5735/LendingInterfaces.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
+import LendingInterfaces from "../0x2df970b6cdee5735/LendingInterfaces.cdc"
 
 pub contract Liquidate {
     access(self) let poolNames: [String]

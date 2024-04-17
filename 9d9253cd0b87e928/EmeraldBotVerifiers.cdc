@@ -1,4 +1,4 @@
-import EmeraldPass from ../0x6a07dbeb03167a13/EmeraldPass.cdc
+import EmeraldPass from "../0x6a07dbeb03167a13/EmeraldPass.cdc"
 
 pub contract EmeraldBotVerifiers {
 

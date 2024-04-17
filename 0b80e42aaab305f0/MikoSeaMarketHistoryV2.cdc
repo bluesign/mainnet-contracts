@@ -1,4 +1,4 @@
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract MikoSeaMarketHistoryV2 {
     //------------------------------------------------------------

@@ -1,6 +1,6 @@
 //-------------- Mainnet -----------------------------
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import RedevNFT from ./RedevNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import RedevNFT from "./RedevNFT.cdc"
 // -------------------------------------------------
 
 // GrandmallworldNFT token contract

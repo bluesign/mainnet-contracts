@@ -1,10 +1,10 @@
 // DAAM.cdc
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import DAAM_Profile from ../0x509abbf4f85f3d73/DAAM_Profile.cdc
-import Categories from ./Categories.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken    from 0xf233dcee88fe0abe 
+import MetadataViews    from 0x1d7e57aa55817448
+import DAAM_Profile     from 0x509abbf4f85f3d73
+import Categories       from 0x7db4d10c78bad30a
 
 /************************************************************************/
 pub contract DAAM: NonFungibleToken {

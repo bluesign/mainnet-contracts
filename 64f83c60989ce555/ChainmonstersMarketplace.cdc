@@ -1,7 +1,7 @@
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import ChainmonstersRewards from ../0x93615d25d14fa337/ChainmonstersRewards.cdc
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import ChainmonstersRewards from "../0x93615d25d14fa337/ChainmonstersRewards.cdc"
 
 /*
     This is a simple ChainmonstersRewards initial sale contract for the DApp to use

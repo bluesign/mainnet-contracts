@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-import Flunks from ./Flunks.cdc
+import Flunks from "./Flunks.cdc"
 
 pub contract FlunksGraduation {
   pub event ContractInitialized()

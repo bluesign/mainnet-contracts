@@ -8,12 +8,12 @@
 // which can be used by admins to mint new NFTs.
 //
 // Learn more about non-fungible tokens in this tutorial: https://docs.onflow.org/docs/non-fungible-tokens
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-// import FungibleToken from ../"./FungibleToken.cdc"/FungibleToken.cdc
-// import NonFungibleToken from ../"./NonFungibleToken.cdc"/NonFungibleToken.cdc
-// import MetadataViews from ../"./MetadataViews.cdc"/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+// import FungibleToken from "../"./FungibleToken.cdc"/FungibleToken.cdc"
+// import NonFungibleToken from "../"./NonFungibleToken.cdc"/NonFungibleToken.cdc"
+// import MetadataViews from "../"./MetadataViews.cdc"/MetadataViews.cdc"
 
 pub contract EverSinceNFT : NonFungibleToken{
 

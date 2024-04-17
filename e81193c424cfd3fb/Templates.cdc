@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 // This contracts stores all the defined interfaces and structs.
 // Interfaces can span on both Doodles and Wearables therefore it is better to have them in a central contract

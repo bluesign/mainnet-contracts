@@ -1,24 +1,24 @@
 // AUTO-GENERATED CONTRACT
-import AADigital from ../0x39eeb4ee6f30fc3f/AADigital.cdc
-import DooverseItems from ../0x66ad29c7d7465437/DooverseItems.cdc
-import Evolution from ../0xf4264ac8f3256818/Evolution.cdc
-import Flunks from ../0x807c3d470888cc48/Flunks.cdc
-import MaxarNFT from ../0xa4e9020ad21eb30b/MaxarNFT.cdc
-import MetaPanda from ../0xf2af175e411dfff8/MetaPanda.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Moments from ../0xd4ad4740ee426334/Moments.cdc
-import MotoGPCard from ../0xa49cc0ee46c54bfb/MotoGPCard.cdc
-import NFTContract from ../0x1e075b24abe6eca6/NFTContract.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import PartyMansionDrinksContract from ../0x34f2bf4a80bb0f69/PartyMansionDrinksContract.cdc
-import QRLNFT from ../0xa4e9020ad21eb30b/QRLNFT.cdc
-import RCRDSHPNFT from ../0x6c3ff40b90b928ab/RCRDSHPNFT.cdc
-import Seussibles from ../0x321d8fcde05f6e8c/Seussibles.cdc
-import TheFabricantS2ItemNFT from ../0x7752ea736384322f/TheFabricantS2ItemNFT.cdc
-import TicalUniverse from ../0xfef48806337aabf1/TicalUniverse.cdc
-import TrartContractNFT from ../0x6f01a4b0046c1f87/TrartContractNFT.cdc
-import UFC_NFT from ../0x329feb3ab062d289/UFC_NFT.cdc
-import VnMiss from ../0x7c11edb826692404/VnMiss.cdc
+import AADigital from "../0x39eeb4ee6f30fc3f/AADigital.cdc"
+import DooverseItems from "../0x66ad29c7d7465437/DooverseItems.cdc"
+import Evolution from "../0xf4264ac8f3256818/Evolution.cdc"
+import Flunks from "../0x807c3d470888cc48/Flunks.cdc"
+import MaxarNFT from "../0xa4e9020ad21eb30b/MaxarNFT.cdc"
+import MetaPanda from "../0xf2af175e411dfff8/MetaPanda.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Moments from "../0xd4ad4740ee426334/Moments.cdc"
+import MotoGPCard from "../0xa49cc0ee46c54bfb/MotoGPCard.cdc"
+import NFTContract from "../0x1e075b24abe6eca6/NFTContract.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import PartyMansionDrinksContract from "../0x34f2bf4a80bb0f69/PartyMansionDrinksContract.cdc"
+import QRLNFT from "../0xa4e9020ad21eb30b/QRLNFT.cdc"
+import RCRDSHPNFT from "../0x6c3ff40b90b928ab/RCRDSHPNFT.cdc"
+import Seussibles from "../0x321d8fcde05f6e8c/Seussibles.cdc"
+import TheFabricantS2ItemNFT from "../0x7752ea736384322f/TheFabricantS2ItemNFT.cdc"
+import TicalUniverse from "../0xfef48806337aabf1/TicalUniverse.cdc"
+import TrartContractNFT from "../0x6f01a4b0046c1f87/TrartContractNFT.cdc"
+import UFC_NFT from "../0x329feb3ab062d289/UFC_NFT.cdc"
+import VnMiss from "../0x7c11edb826692404/VnMiss.cdc"
 
 /*
     A wrapper contract around the script provided by the Alchemy GitHub respository.

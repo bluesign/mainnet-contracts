@@ -1,4 +1,4 @@
-import TestImport from ../0xea57707519a77b05/TestImport.cdc
+import TestImport from "../0xea57707519a77b05/TestImport.cdc"
 
 access(all) contract Test {
 

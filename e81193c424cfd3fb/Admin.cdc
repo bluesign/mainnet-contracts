@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Debug from ./Debug.cdc
-import Clock from ./Clock.cdc
-import Templates from ./Templates.cdc
-import Wearables from ./Wearables.cdc
-import Doodles from ./Doodles.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Redeemables from ./Redeemables.cdc
-import TransactionsRegistry from ./TransactionsRegistry.cdc
-import DoodlePacks from ./DoodlePacks.cdc
-import DoodlePackTypes from ./DoodlePackTypes.cdc
-import OpenDoodlePacks from ./OpenDoodlePacks.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Debug from "./Debug.cdc"
+import Clock from "./Clock.cdc"
+import Templates from "./Templates.cdc"
+import Wearables from "./Wearables.cdc"
+import Doodles from "./Doodles.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Redeemables from "./Redeemables.cdc"
+import TransactionsRegistry from "./TransactionsRegistry.cdc"
+import DoodlePacks from "./DoodlePacks.cdc"
+import DoodlePackTypes from "./DoodlePackTypes.cdc"
+import OpenDoodlePacks from "./OpenDoodlePacks.cdc"
 
 pub contract Admin {
 

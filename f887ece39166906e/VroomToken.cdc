@@ -5,10 +5,10 @@
 /// Gladiator (2000), directed by Ridley Scott
 
 /// Testnet
-/// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
+/// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
 
 /// Mainnet
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 
 pub contract VroomToken: FungibleToken {

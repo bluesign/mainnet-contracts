@@ -1,8 +1,8 @@
 // Description
 
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import TheFabricantMetadataViewsV2 from ./TheFabricantMetadataViewsV2.cdc
-import CoCreatableV2 from ./CoCreatableV2.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import TheFabricantMetadataViewsV2 from "./TheFabricantMetadataViewsV2.cdc"
+import CoCreatableV2 from "./CoCreatableV2.cdc"
 
 pub contract interface RevealableV2 {
 

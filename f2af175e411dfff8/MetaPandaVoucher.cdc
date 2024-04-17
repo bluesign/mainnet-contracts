@@ -12,9 +12,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **/
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import AnchainUtils from ../0x7ba45bdcac17806a/AnchainUtils.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import AnchainUtils from "../0x7ba45bdcac17806a/AnchainUtils.cdc"
 
 // MetaPandaVoucher
 // NFT items for MetaPandaVoucher!

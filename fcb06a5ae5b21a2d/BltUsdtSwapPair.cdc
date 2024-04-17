@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import BloctoToken from ../0x0f9df91c9121c460/BloctoToken.cdc
-import TeleportedTetherToken from ../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import BloctoToken from "../0x0f9df91c9121c460/BloctoToken.cdc"
+import TeleportedTetherToken from "../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc"
 
 // Exchange pair between BloctoToken and TeleportedTetherToken
 // Token1: BloctoToken

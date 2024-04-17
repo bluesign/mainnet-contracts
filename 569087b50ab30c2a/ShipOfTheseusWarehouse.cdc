@@ -1,4 +1,4 @@
-import ShipOfTheseus from ./ShipOfTheseus.cdc
+import ShipOfTheseus from "./ShipOfTheseus.cdc"
 
 pub contract ShipOfTheseusWarehouse {
     pub event Withdraw(id: UInt64, uuid: UInt64, from: Address?)

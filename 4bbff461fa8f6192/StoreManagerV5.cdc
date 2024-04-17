@@ -1,5 +1,5 @@
-import FantastecSwapDataProperties from ./FantastecSwapDataProperties.cdc
-import StoreManagerV3 from ./StoreManagerV3.cdc
+import FantastecSwapDataProperties from "./FantastecSwapDataProperties.cdc"
+import StoreManagerV3 from "./StoreManagerV3.cdc"
 
 pub contract StoreManagerV5 {
     pub event SectionAdded(id: UInt64)

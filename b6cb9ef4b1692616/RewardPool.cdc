@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import StarVaultInterfaces from ./StarVaultInterfaces.cdc
-import StarVaultConfig from ./StarVaultConfig.cdc
-import StarVaultFactory from ./StarVaultFactory.cdc
-import LPStaking from ./LPStaking.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import StarVaultInterfaces from "./StarVaultInterfaces.cdc"
+import StarVaultConfig from "./StarVaultConfig.cdc"
+import StarVaultFactory from "./StarVaultFactory.cdc"
+import LPStaking from "./LPStaking.cdc"
 
 pub contract RewardPool {
 

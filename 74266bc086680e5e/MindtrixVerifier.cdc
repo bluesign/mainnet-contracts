@@ -9,7 +9,7 @@ Therefore, this contract is scalable with other forms of
 conditions.
 */
 
-import MindtrixViews from ./MindtrixViews.cdc
+import MindtrixViews from "./MindtrixViews.cdc"
 
 pub contract MindtrixVerifier {
 

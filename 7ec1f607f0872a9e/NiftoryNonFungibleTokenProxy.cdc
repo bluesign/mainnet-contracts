@@ -1,4 +1,4 @@
-import NiftoryNonFungibleToken from ./NiftoryNonFungibleToken.cdc
+import NiftoryNonFungibleToken from "./NiftoryNonFungibleToken.cdc"
 
 pub contract NiftoryNonFungibleTokenProxy {
 

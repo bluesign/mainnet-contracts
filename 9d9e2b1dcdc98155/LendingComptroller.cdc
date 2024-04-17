@@ -7,9 +7,9 @@
 The Comptroller contract manages market parameters and provides safety auditing before actions being applied to LendingPools.
 
 */
-import LendingInterfaces from ../0x2df970b6cdee5735/LendingInterfaces.cdc
-import LendingConfig from ../0x2df970b6cdee5735/LendingConfig.cdc
-import LendingError from ../0x2df970b6cdee5735/LendingError.cdc
+import LendingInterfaces from "../0x2df970b6cdee5735/LendingInterfaces.cdc"
+import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
+import LendingError from "../0x2df970b6cdee5735/LendingError.cdc"
 
 pub contract LendingComptroller {
     /// Account address LendingComptroller contract is deployed to, i.e. 'the contract address'

@@ -1,4 +1,4 @@
-import FLOAT from ./FLOAT.cdc
+import FLOAT from "./FLOAT.cdc"
 
 pub contract FLOATIncinerator {
 

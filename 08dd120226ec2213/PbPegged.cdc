@@ -1,4 +1,4 @@
-import Pb from ./Pb.cdc
+import Pb from "./Pb.cdc"
 pub contract PbPegged {
   pub struct Withdraw {
     pub var token: [UInt8]

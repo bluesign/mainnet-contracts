@@ -1,13 +1,13 @@
-import Debug from ./Debug.cdc
-import Clock from ./Clock.cdc
-import NeoMotorcycle from ./NeoMotorcycle.cdc
-import NeoFounder from ./NeoFounder.cdc
-import NeoMember from ./NeoMember.cdc
-import NeoVoucher from ./NeoVoucher.cdc
-import NeoAvatar from ./NeoAvatar.cdc
-import NeoSticker from ./NeoSticker.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import Debug from "./Debug.cdc"
+import Clock from "./Clock.cdc"
+import NeoMotorcycle from "./NeoMotorcycle.cdc"
+import NeoFounder from "./NeoFounder.cdc"
+import NeoMember from "./NeoMember.cdc"
+import NeoVoucher from "./NeoVoucher.cdc"
+import NeoAvatar from "./NeoAvatar.cdc"
+import NeoSticker from "./NeoSticker.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract Admin {
 

@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import AFLNFT from ./AFLNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import AFLNFT from "./AFLNFT.cdc"
 
 pub contract AFLBurnExchange {
     access(self) let tokens: @{UInt64: NonFungibleToken.NFT} // nftId of token to be swapped -> new token 

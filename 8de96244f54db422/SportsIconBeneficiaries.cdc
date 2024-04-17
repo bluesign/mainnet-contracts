@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 
 pub contract SportsIconBeneficiaries {
     pub event BeneficiaryPaid(ids:[UInt64], amount: UFix64, to:Address)

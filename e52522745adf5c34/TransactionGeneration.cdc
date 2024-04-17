@@ -1,13 +1,13 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NFTCatalog from ../0x49a7cda3a1eecc29/NFTCatalog.cdc
-import StringUtils from ./StringUtils.cdc
-import ArrayUtils from ./ArrayUtils.cdc
-import NFTStorefrontV2 from ../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc
-import TransactionGenerationUtils from ./TransactionGenerationUtils.cdc
-import TransactionTemplates from ./TransactionTemplates.cdc
-import TokenForwarding from ../0xe544175ee0461c4b/TokenForwarding.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NFTCatalog from "../0x49a7cda3a1eecc29/NFTCatalog.cdc"
+import StringUtils from "./StringUtils.cdc"
+import ArrayUtils from "./ArrayUtils.cdc"
+import NFTStorefrontV2 from "../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc"
+import TransactionGenerationUtils from "./TransactionGenerationUtils.cdc"
+import TransactionTemplates from "./TransactionTemplates.cdc"
+import TokenForwarding from "../0xe544175ee0461c4b/TokenForwarding.cdc"
 
 // TransactionGeneration
 //

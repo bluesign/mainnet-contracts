@@ -1,8 +1,8 @@
 //  SPDX-License-Identifier: UNLICENSED
 //
 //
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Anique from ../0xe2e1689b53e92a82/Anique.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Anique from "../0xe2e1689b53e92a82/Anique.cdc"
 
 pub contract SGKCLDR_ec_dos_gh24: NonFungibleToken, Anique {
     // -----------------------------------------------------------------------

@@ -1,6 +1,6 @@
-import ChainzPack from ./ChainzPack.cdc
-import ChainzNFT from ./ChainzNFT.cdc
-import ChainzKey from ./ChainzKey.cdc
+import ChainzPack from "./ChainzPack.cdc"
+import ChainzNFT from "./ChainzNFT.cdc"
+import ChainzKey from "./ChainzKey.cdc"
 
 pub contract ChainzAdmin {
 

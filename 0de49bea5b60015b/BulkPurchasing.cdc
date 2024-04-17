@@ -1,14 +1,14 @@
-import IBulkSales from ./IBulkSales.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import Market from ../0xc1e4f4f4c4257510/Market.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NFTCatalog from ../0x49a7cda3a1eecc29/NFTCatalog.cdc
-import NFTStorefront from ../0x4eb8a10cb9f87357/NFTStorefront.cdc
-import NFTStorefrontV2 from ../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
-import TopShotMarketV3 from ../0xc1e4f4f4c4257510/TopShotMarketV3.cdc
+import IBulkSales from "./IBulkSales.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import Market from "../0xc1e4f4f4c4257510/Market.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NFTCatalog from "../0x49a7cda3a1eecc29/NFTCatalog.cdc"
+import NFTStorefront from "../0x4eb8a10cb9f87357/NFTStorefront.cdc"
+import NFTStorefrontV2 from "../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc"
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
+import TopShotMarketV3 from "../0xc1e4f4f4c4257510/TopShotMarketV3.cdc"
 
 access(all) contract BulkPurchasing: IBulkSales {
 

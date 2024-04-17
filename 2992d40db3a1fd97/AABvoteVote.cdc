@@ -1,4 +1,4 @@
-import AABvoteNFT from ./AABvoteNFT.cdc
+import AABvoteNFT from "./AABvoteNFT.cdc"
 
 pub contract AABvoteVote {
     pub let votes: {Address: [Vote]}

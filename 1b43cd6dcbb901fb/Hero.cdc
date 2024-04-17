@@ -1,4 +1,4 @@
- import HeroSurname from ./HeroSurname.cdc
+ import HeroSurname from "./HeroSurname.cdc"
  pub contract Hero {
     pub var name: String
 

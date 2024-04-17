@@ -1,5 +1,5 @@
-import CapabilityFactory from ../0xea86b9b77d95aeea/CapabilityFactory.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import CapabilityFactory from "../0xea86b9b77d95aeea/CapabilityFactory.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract FTProviderFactory {
     pub struct Factory: CapabilityFactory.Factory {

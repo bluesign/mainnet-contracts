@@ -11,9 +11,9 @@
 // multiple addresses to your DiscordID, and you cannot configure
 // multiple DiscordIDs to your address. 1-1.
 
-import EmeraldIdentityDapper from ./EmeraldIdentityDapper.cdc
-import EmeraldIdentityLilico from ./EmeraldIdentityLilico.cdc
-import EmeraldIdentityShadow from ./EmeraldIdentityShadow.cdc
+import EmeraldIdentityDapper from "./EmeraldIdentityDapper.cdc"
+import EmeraldIdentityLilico from "./EmeraldIdentityLilico.cdc"
+import EmeraldIdentityShadow from "./EmeraldIdentityShadow.cdc"
 
 pub contract EmeraldIdentity {
 

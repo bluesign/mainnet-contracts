@@ -27,9 +27,9 @@
 
  */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowFees from ../0xf919ee77447b7497/FlowFees.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowFees from "../0xf919ee77447b7497/FlowFees.cdc"
 import Crypto
 
 pub contract FlowIDTableStaking {
@@ -139,116 +139,7 @@ pub contract FlowIDTableStaking {
         /// Moves to the tokensStaked bucket at the end of an epoch
         pub var tokensCommitted: @FlowToken.Vault
 
-        /// The tokens that this node has unstaked from ../the previous epoch/Crypto
-
-pub contract FlowIDTableStaking {
-
-    /****** ID Table and Staking Events ******/
-
-    pub event NewEpoch(totalStaked: UFix64, totalRewardPayout: UFix64, newEpochCounter: UInt64)
-    pub event EpochTotalRewardsPaid(total: UFix64, fromFees: UFix64, minted: UFix64, feesBurned: UFix64, epochCounterForRewards: UInt64)
-
-    /// Node Events
-    pub event NewNodeCreated(nodeID: String, role: UInt8, amountCommitted: UFix64)
-    pub event TokensCommitted(nodeID: String, amount: UFix64)
-    pub event TokensStaked(nodeID: String, amount: UFix64)
-    pub event NodeTokensRequestedToUnstake(nodeID: String, amount: UFix64)
-    pub event TokensUnstaking(nodeID: String, amount: UFix64)
-    pub event TokensUnstaked(nodeID: String, amount: UFix64)
-    pub event NodeRemovedAndRefunded(nodeID: String, amount: UFix64)
-    pub event RewardsPaid(nodeID: String, amount: UFix64, epochCounter:  UInt64)
-    pub event UnstakedTokensWithdrawn(nodeID: String, amount: UFix64)
-    pub event RewardTokensWithdrawn(nodeID: String, amount: UFix64)
-    pub event NetworkingAddressUpdated(nodeID: String, newAddress: String)
-    pub event NodeWeightChanged(nodeID: String, newWeight: UInt64)
-
-    /// Delegator Events
-    pub event NewDelegatorCreated(nodeID: String, delegatorID: UInt32)
-    pub event DelegatorTokensCommitted(nodeID: String, delegatorID: UInt32, amount: UFix64)
-    pub event DelegatorTokensStaked(nodeID: String, delegatorID: UInt32, amount: UFix64)
-    pub event DelegatorTokensRequestedToUnstake(nodeID: String, delegatorID: UInt32, amount: UFix64)
-    pub event DelegatorTokensUnstaking(nodeID: String, delegatorID: UInt32, amount: UFix64)
-    pub event DelegatorTokensUnstaked(nodeID: String, delegatorID: UInt32, amount: UFix64)
-    pub event DelegatorRewardsPaid(nodeID: String, delegatorID: UInt32, amount: UFix64, epochCounter:  UInt64)
-    pub event DelegatorUnstakedTokensWithdrawn(nodeID: String, delegatorID: UInt32, amount: UFix64)
-    pub event DelegatorRewardTokensWithdrawn(nodeID: String, delegatorID: UInt32, amount: UFix64)
-
-    /// Contract Field Change Events
-    pub event NewDelegatorCutPercentage(newCutPercentage: UFix64)
-    pub event NewWeeklyPayout(newPayout: UFix64)
-    pub event NewStakingMinimums(newMinimums: {UInt8: UFix64})
-    pub event NewDelegatorStakingMinimum(newMinimum: UFix64)
-
-    /// Holds the identity table for all the nodes in the network.
-    /// Includes nodes that aren't actively participating
-    /// key = node ID
-    /// value = the record of that node's info, tokens, and delegators
-    access(contract) var nodes: @{String: NodeRecord}
-
-    /// The minimum amount of tokens that each staker type has to stake
-    /// in order to be considered valid
-    /// Keys:
-    /// 1 - Collector Nodes
-    /// 2 - Consensus Nodes
-    /// 3 - Execution Nodes
-    /// 4 - Verification Nodes
-    /// 5 - Access Nodes
-    access(account) var minimumStakeRequired: {UInt8: UFix64}
-
-    /// The total amount of tokens that are staked for all the nodes
-    /// of each node type during the current epoch
-    access(account) var totalTokensStakedByNodeType: {UInt8: UFix64}
-
-    /// The total amount of tokens that are paid as rewards every epoch
-    /// could be manually changed by the admin resource
-    access(account) var epochTokenPayout: UFix64
-
-    /// The ratio of the weekly awards that each node type gets
-    /// NOTE: Currently is not used
-    access(contract) var rewardRatios: {UInt8: UFix64}
-
-    /// The percentage of rewards that every node operator takes from
-    /// the users that are delegating to it
-    access(account) var nodeDelegatingRewardCut: UFix64
-
-    /// Paths for storing staking resources
-    pub let NodeStakerStoragePath: StoragePath
-    pub let NodeStakerPublicPath: PublicPath
-    pub let StakingAdminStoragePath: StoragePath
-    pub let DelegatorStoragePath: StoragePath
-
-    /*********** ID Table and Staking Composite Type Definitions *************/
-
-    /// Contains information that is specific to a node in Flow
-    pub resource NodeRecord {
-
-        /// The unique ID of the node
-        /// Set when the node is created
-        pub let id: String
-
-        /// The type of node:
-        /// 1 = collection
-        /// 2 = consensus
-        /// 3 = execution
-        /// 4 = verification
-        /// 5 = access
-        pub var role: UInt8
-
-        pub(set) var networkingAddress: String
-        pub(set) var networkingKey: String
-        pub(set) var stakingKey: String
-
-        /// TODO: Proof of Possession (PoP) of the staking private key
-
-        /// The total tokens that only this node currently has staked, not including delegators
-        /// This value must always be above the minimum requirement to stay staked or accept delegators
-        pub var tokensStaked: @FlowToken.Vault
-
-        /// The tokens that this node has committed to stake for the next epoch.
-        /// Moves to the tokensStaked bucket at the end of an epoch
-        pub var tokensCommitted: @FlowToken.Vault
-
-        /// The tokens that this node has unstaked.cdc
+        /// The tokens that this node has unstaked from the previous epoch
         /// Moves to the tokensUnstaked bucket at the end of an epoch.
         pub var tokensUnstaking: @FlowToken.Vault
 

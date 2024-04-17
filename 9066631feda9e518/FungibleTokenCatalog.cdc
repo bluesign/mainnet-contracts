@@ -1,8 +1,8 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import FlowUtilityToken from ../0xead892083b3e2c6c/FlowUtilityToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import FlowUtilityToken from "../0xead892083b3e2c6c/FlowUtilityToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
 
 access(all) contract FungibleTokenCatalog {
 

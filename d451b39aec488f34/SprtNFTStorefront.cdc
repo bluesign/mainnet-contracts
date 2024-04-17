@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache License 2.0
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448;/NonFungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448;/NonFungibleToken.cdc"
 
-import ElvnFeeTreasury from ../0x2292306bbb61edb6/ElvnFeeTreasury.cdc
+import ElvnFeeTreasury from "../0x2292306bbb61edb6/ElvnFeeTreasury.cdc"
 
 // NFTStorefront
 //

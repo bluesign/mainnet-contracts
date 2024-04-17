@@ -1,6 +1,6 @@
-import Minter from ./Minter.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FiatToken from ../0xb19436aae4d94622/FiatToken.cdc
+import Minter from "./Minter.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FiatToken from "../0xb19436aae4d94622/FiatToken.cdc"
 
 pub contract FiatTokenMinter {
     pub resource FungibleTokenMinter: Minter.FungibleTokenMinter {

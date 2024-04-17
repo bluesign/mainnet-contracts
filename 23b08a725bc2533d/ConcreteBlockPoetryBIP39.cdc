@@ -1,11 +1,11 @@
-import BIP39WordList from ./BIP39WordList.cdc
-import ConcreteAlphabets from ./ConcreteAlphabets.cdc
-import ConcreteAlphabetsHiragana from ./ConcreteAlphabetsHiragana.cdc
-import ConcreteAlphabetsHangle from ./ConcreteAlphabetsHangle.cdc
-import ConcreteAlphabetsSpanish from ./ConcreteAlphabetsSpanish.cdc
-import ConcreteAlphabetsSimplifiedChinese from ./ConcreteAlphabetsSimplifiedChinese.cdc
-import ConcreteAlphabetsTraditionalChinese from ./ConcreteAlphabetsTraditionalChinese.cdc
-import ConcreteAlphabetsFrench from ./ConcreteAlphabetsFrench.cdc
+import BIP39WordList from "./BIP39WordList.cdc"
+import ConcreteAlphabets from "./ConcreteAlphabets.cdc"
+import ConcreteAlphabetsHiragana from "./ConcreteAlphabetsHiragana.cdc"
+import ConcreteAlphabetsHangle from "./ConcreteAlphabetsHangle.cdc"
+import ConcreteAlphabetsSpanish from "./ConcreteAlphabetsSpanish.cdc"
+import ConcreteAlphabetsSimplifiedChinese from "./ConcreteAlphabetsSimplifiedChinese.cdc"
+import ConcreteAlphabetsTraditionalChinese from "./ConcreteAlphabetsTraditionalChinese.cdc"
+import ConcreteAlphabetsFrench from "./ConcreteAlphabetsFrench.cdc"
 
 pub contract ConcreteBlockPoetryBIP39 {
 

@@ -9,9 +9,9 @@
 *   
 */
 
-import NonFungibleToken from ./NonFungibleToken.cdc
-import MetadataViews from ./MetadataViews.cdc
-import FungibleToken from ./FungibleToken.cdc
+import NonFungibleToken from "./NonFungibleToken.cdc"
+import MetadataViews from "./MetadataViews.cdc"
+import FungibleToken from "./FungibleToken.cdc"
 
 
 

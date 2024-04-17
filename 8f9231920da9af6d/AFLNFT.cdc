@@ -1,8 +1,8 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import AFLBadges from ./AFLBadges.cdc
-import AFLMetadataHelper from ./AFLMetadataHelper.cdc
-import AFLBurnRegistry from ./AFLBurnRegistry.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import AFLBadges from "./AFLBadges.cdc"
+import AFLMetadataHelper from "./AFLMetadataHelper.cdc"
+import AFLBurnRegistry from "./AFLBurnRegistry.cdc"
 
 pub contract AFLNFT : NonFungibleToken {
     // Events

@@ -1,8 +1,8 @@
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Domains from ./Domains.cdc
-import FNSConfig from ./FNSConfig.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Domains from "./Domains.cdc"
+import FNSConfig from "./FNSConfig.cdc"
 
 // Flowns is the core contract of FNS, Flowns define Root domain and admin resource
 pub contract Flowns {

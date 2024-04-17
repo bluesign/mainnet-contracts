@@ -7,9 +7,9 @@
 // \____/  \__,_||_|\_\ \__,_| \__| \__,_||_|    \___/
 //
 //
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import SakutaroPoemContent from ./SakutaroPoemContent.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import SakutaroPoemContent from "./SakutaroPoemContent.cdc"
 
 pub contract SakutaroPoemReplica: NonFungibleToken {
     pub let CollectionPublicPath: PublicPath

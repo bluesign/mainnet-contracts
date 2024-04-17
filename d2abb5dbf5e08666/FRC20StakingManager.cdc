@@ -7,20 +7,20 @@ TODO: Add description
 
 */
 // Third Party Imports
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 // Fixes Imports
-import Fixes from ./Fixes.cdc
-import FixesHeartbeat from ./FixesHeartbeat.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20SemiNFT from ./FRC20SemiNFT.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
-import FRC20Staking from ./FRC20Staking.cdc
-import FRC20StakingVesting from ./FRC20StakingVesting.cdc
-import FRC20StakingForwarder from ./FRC20StakingForwarder.cdc
+import Fixes from "./Fixes.cdc"
+import FixesHeartbeat from "./FixesHeartbeat.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20SemiNFT from "./FRC20SemiNFT.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
+import FRC20Staking from "./FRC20Staking.cdc"
+import FRC20StakingVesting from "./FRC20StakingVesting.cdc"
+import FRC20StakingForwarder from "./FRC20StakingForwarder.cdc"
 
 access(all) contract FRC20StakingManager {
     /* --- Events --- */

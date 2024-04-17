@@ -1,5 +1,5 @@
-import VeraEvent from ./VeraEvent.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import VeraEvent from "./VeraEvent.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 // VeraTicket
 // Ticket NFT items Contract!

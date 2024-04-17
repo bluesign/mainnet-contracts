@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TitToken from ../0x66b60643244a7738 // Replace with actual address/TitToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TitToken from 0x66b60643244a7738 // Replace with actual address
 
 pub contract TitTokenMarket {
     pub resource Listing {

@@ -10,14 +10,14 @@
 
  */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowIDTableStaking from ../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc
-import FlowClusterQC from ../0x8624b52f9ddcd04a/FlowClusterQC.cdc
-import FlowDKG from ../0x8624b52f9ddcd04a/FlowDKG.cdc
-import FlowEpoch from ../0x8624b52f9ddcd04a/FlowEpoch.cdc
-import FlowStorageFees from ../0xe467b9dd11fa00df/FlowStorageFees.cdc
-import LockedTokens from ./LockedTokens.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowIDTableStaking from "../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc"
+import FlowClusterQC from "../0x8624b52f9ddcd04a/FlowClusterQC.cdc"
+import FlowDKG from "../0x8624b52f9ddcd04a/FlowDKG.cdc"
+import FlowEpoch from "../0x8624b52f9ddcd04a/FlowEpoch.cdc"
+import FlowStorageFees from "../0xe467b9dd11fa00df/FlowStorageFees.cdc"
+import LockedTokens from "./LockedTokens.cdc"
 
 pub contract FlowStakingCollection {
 

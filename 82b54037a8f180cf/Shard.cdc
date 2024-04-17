@@ -1,5 +1,5 @@
-// import NonFungibleToken from ../0x631e88ae7f1d7c20 // testnet/NonFungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448 // mainnet/NonFungibleToken.cdc
+// import NonFungibleToken from 0x631e88ae7f1d7c20 // testnet
+import NonFungibleToken from 0x1d7e57aa55817448 // mainnet
 
 // eternal.gg
 pub contract Shard: NonFungibleToken {

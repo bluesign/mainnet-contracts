@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 
-import Flunks from ./Flunks.cdc
-import Backpack from ./Backpack.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
+import Flunks from "./Flunks.cdc"
+import Backpack from "./Backpack.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
 
 pub contract BackpackMinter {
 

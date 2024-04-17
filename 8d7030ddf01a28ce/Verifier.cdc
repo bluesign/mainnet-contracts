@@ -8,16 +8,16 @@ It abstracts the verification logic out of the main conteact.
 Therefore, this contract is scalable with other forms of
 conditions.
 */
-// import Mindtrix from ../"./Mindtrix.cdc"/Mindtrix.cdc
+// import Mindtrix from "../"./Mindtrix.cdc"/Mindtrix.cdc"
 
 //dev
-// import Mindtrix from ../0xf8d6e0586b0a20c7/Mindtrix.cdc
+// import Mindtrix from "../0xf8d6e0586b0a20c7/Mindtrix.cdc"
 
 // staging
-// import Mindtrix from ../0x1ed02a22a3821c65/Mindtrix.cdc
+// import Mindtrix from "../0x1ed02a22a3821c65/Mindtrix.cdc"
 
 // pro
-import Mindtrix from ./Mindtrix.cdc
+import Mindtrix from "./Mindtrix.cdc"
 
 pub contract Verifier {
 

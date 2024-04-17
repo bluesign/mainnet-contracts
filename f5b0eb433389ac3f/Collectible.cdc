@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Edition from ./Edition.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Edition from "./Edition.cdc"
 
 pub contract Collectible: NonFungibleToken {
     // Named Paths   

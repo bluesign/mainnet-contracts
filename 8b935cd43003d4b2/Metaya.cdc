@@ -6,8 +6,8 @@
     SPDX-License-Identifier: Apache-2.0
 **/
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import SoundlinksDID from ../0x602e888f32abc278/SoundlinksDID.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import SoundlinksDID from 0x602e888f32abc278 
 
 pub contract Metaya: NonFungibleToken {
 

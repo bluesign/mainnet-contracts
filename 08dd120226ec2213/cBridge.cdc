@@ -1,4 +1,4 @@
-import Pb from ./Pb.cdc
+import Pb from "./Pb.cdc"
 // only need to support signer verify for now
 pub contract cBridge {
 

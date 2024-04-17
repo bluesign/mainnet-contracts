@@ -6,7 +6,7 @@
 
 */
 
-import LendingInterfaces from ../0x2df970b6cdee5735/LendingInterfaces.cdc
+import LendingInterfaces from "../0x2df970b6cdee5735/LendingInterfaces.cdc"
 
 pub contract RV3 {
     // Struct to hold referee information, including the referee's address and the timestamp when they were bound.

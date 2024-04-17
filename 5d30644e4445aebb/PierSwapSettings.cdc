@@ -1,5 +1,5 @@
-import MultiFungibleToken from ../0x3620aa78dc6c5b54/MultiFungibleToken.cdc
-import PierLPToken from ../0xe31c5fc93a43c6bb/PierLPToken.cdc
+import MultiFungibleToken from "../0x3620aa78dc6c5b54/MultiFungibleToken.cdc"
+import PierLPToken from "../0xe31c5fc93a43c6bb/PierLPToken.cdc"
 
 /**
 

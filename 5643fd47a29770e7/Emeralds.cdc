@@ -1,13 +1,13 @@
 // CREATED BY: Touchstone (https://touchstone.city/), a platform crafted by your best friends at Emerald City DAO (https://ecdao.org/).
 // STATEMENT: This contract promises to keep the 5% royalty off of primary sales and 2.5% off of secondary sales to Emerald City DAO or risk permanent suspension from participation in the DAO and its tools.
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import MintVerifiers from ../0x7a696d6136e1dce2/MintVerifiers.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import EmeraldPass from ../0x6a07dbeb03167a13/EmeraldPass.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from 0x1d7e57aa55817448 
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import MintVerifiers from 0x7a696d6136e1dce2 
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import EmeraldPass from "../0x6a07dbeb03167a13/EmeraldPass.cdc"
 
 pub contract Emeralds: NonFungibleToken {
 

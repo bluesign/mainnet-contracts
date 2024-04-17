@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FBRC from ../0xfc91de5e6566cc7c/FBRC.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FBRC from "../0xfc91de5e6566cc7c/FBRC.cdc"
 
 // This contract allows an admin to allocate airdrop amounts to addresses
 // allowing these addresses to receive FBRC by calling claimFBRC

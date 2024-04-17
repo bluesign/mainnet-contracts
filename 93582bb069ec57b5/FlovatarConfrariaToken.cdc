@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import Toucans from ../0x577a3c409c5dcb5e/Toucans.cdc
-import ToucansTokens from ../0x577a3c409c5dcb5e/ToucansTokens.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import Toucans from "../0x577a3c409c5dcb5e/Toucans.cdc"
+import ToucansTokens from "../0x577a3c409c5dcb5e/ToucansTokens.cdc"
 
 pub contract FlovatarConfrariaToken: FungibleToken {
     pub var totalSupply: UFix64

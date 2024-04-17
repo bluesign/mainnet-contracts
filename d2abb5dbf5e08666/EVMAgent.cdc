@@ -7,15 +7,15 @@ This contract is used to fetch the child account by verifying the signature of t
 
 */
 // Third-party Imports
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import StringUtils from ../0xa340dc0a4ec828ab/StringUtils.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import StringUtils from "../0xa340dc0a4ec828ab/StringUtils.cdc"
 // Fixes Imports
-import ETHUtils from ./ETHUtils.cdc
-import Fixes from ./Fixes.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20Staking from ./FRC20Staking.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
+import ETHUtils from "./ETHUtils.cdc"
+import Fixes from "./Fixes.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20Staking from "./FRC20Staking.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
 
 access(all) contract EVMAgent {
     /* --- Events --- */

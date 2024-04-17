@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FiatToken from ../0xb19436aae4d94622/FiatToken.cdc
-import TeleportedTetherToken from ../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FiatToken from "../0xb19436aae4d94622/FiatToken.cdc"
+import TeleportedTetherToken from "../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc"
 
 // Exchange pair between FiatToken and TeleportedTetherToken
 // Token1: FiatToken (USDC)

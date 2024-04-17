@@ -1,5 +1,5 @@
-import NonFungibleToken from ./NonFungibleToken.cdc
-import MetadataViews from ./MetadataViews.cdc
+import NonFungibleToken from 0x5cb714790301ed17 
+import MetadataViews from "./MetadataViews.cdc"
 pub contract Ezy3dItems: NonFungibleToken {
 
     // Events

@@ -1,6 +1,6 @@
-import Vevent from ./Vevent.cdc
-import Wearables from ../0xe81193c424cfd3fb/Wearables.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import Vevent from "./Vevent.cdc"
+import Wearables from "../0xe81193c424cfd3fb/Wearables.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract VeventVerifiers {
 

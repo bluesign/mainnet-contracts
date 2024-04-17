@@ -1,4 +1,4 @@
-import AFLPack from ../0x8f9231920da9af6d/AFLPack.cdc
+import AFLPack from "../0x8f9231920da9af6d/AFLPack.cdc"
 
 pub contract MyAdmin {
 

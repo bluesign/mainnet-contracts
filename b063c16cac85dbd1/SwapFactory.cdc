@@ -5,11 +5,11 @@
 # Author: Increment Labs
 
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import SwapError from ../0xb78ef7afa52ff906/SwapError.cdc
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
-import StableSwapFactory from ./StableSwapFactory.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import SwapError from "../0xb78ef7afa52ff906/SwapError.cdc"
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
+import StableSwapFactory from "./StableSwapFactory.cdc"
 
 pub contract SwapFactory {
     /// Account which has deployed pair template contract

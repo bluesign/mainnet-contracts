@@ -6,14 +6,14 @@
 This contract contains the factory for creating new Lottery Pool.
 
 */
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 // Fixes Imports
-import Fixes from ./Fixes.cdc
-import FixesInscriptionFactory from ./FixesInscriptionFactory.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FGameLottery from ./FGameLottery.cdc
-import FGameLotteryRegistry from ./FGameLotteryRegistry.cdc
+import Fixes from "./Fixes.cdc"
+import FixesInscriptionFactory from "./FixesInscriptionFactory.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FGameLottery from "./FGameLottery.cdc"
+import FGameLotteryRegistry from "./FGameLotteryRegistry.cdc"
 
 access(all) contract FGameLotteryFactory {
 

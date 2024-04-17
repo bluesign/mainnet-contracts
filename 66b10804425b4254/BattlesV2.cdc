@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import REVV from ../0xd01e482eb680ec9f/REVV.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import REVV from "../0xd01e482eb680ec9f/REVV.cdc"
 
 /// BattlesV2
 ///

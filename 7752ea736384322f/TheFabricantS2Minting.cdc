@@ -9,16 +9,16 @@
 // MN 486
 // for testing: 1
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import TheFabricantS2GarmentNFT from ./TheFabricantS2GarmentNFT.cdc
-import TheFabricantS2MaterialNFT from ./TheFabricantS2MaterialNFT.cdc
-import TheFabricantS2ItemNFT from ./TheFabricantS2ItemNFT.cdc
-import ItemNFT from ../0xfc91de5e6566cc7c/ItemNFT.cdc
-import TheFabricantS1ItemNFT from ../0x09e03b1f871b3513/TheFabricantS1ItemNFT.cdc
-import TheFabricantMysteryBox_FF1 from ../0xa0cbe021821c0965/TheFabricantMysteryBox_FF1.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import TheFabricantAccessPass from ./TheFabricantAccessPass.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import TheFabricantS2GarmentNFT from "./TheFabricantS2GarmentNFT.cdc"
+import TheFabricantS2MaterialNFT from "./TheFabricantS2MaterialNFT.cdc"
+import TheFabricantS2ItemNFT from "./TheFabricantS2ItemNFT.cdc"
+import ItemNFT from "../0xfc91de5e6566cc7c/ItemNFT.cdc"
+import TheFabricantS1ItemNFT from "../0x09e03b1f871b3513/TheFabricantS1ItemNFT.cdc"
+import TheFabricantMysteryBox_FF1 from "../0xa0cbe021821c0965/TheFabricantMysteryBox_FF1.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import TheFabricantAccessPass from "./TheFabricantAccessPass.cdc"
 pub contract TheFabricantS2Minting{
 
     pub event ItemMintedAndTransferred(

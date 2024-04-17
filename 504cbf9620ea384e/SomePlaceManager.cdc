@@ -7,11 +7,11 @@
     author: zay.codes
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import SomePlaceCollectible from ./SomePlaceCollectible.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import SomePlaceCollectible from "./SomePlaceCollectible.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
 
 pub contract SomePlaceManager {
     pub let ManagerStoragePath: StoragePath

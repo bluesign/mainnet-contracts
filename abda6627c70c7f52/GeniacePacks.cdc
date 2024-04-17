@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448;/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe;/FungibleToken.cdc
-import GeniaceAuction from ../0xabda6627c70c7f52;/GeniaceAuction.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448;/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe;/FungibleToken.cdc"
+import GeniaceAuction from "../0xabda6627c70c7f52;/GeniaceAuction.cdc"
 
 
 // This contract is to support the mystery packs functionality in Geniace platform

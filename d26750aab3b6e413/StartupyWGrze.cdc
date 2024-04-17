@@ -1,9 +1,9 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import CollecticoRoyalties from ../0xffe32280cd5b72a3/CollecticoRoyalties.cdc
-import CollecticoStandardNFT from ../0x11cbef9729b236f3/CollecticoStandardNFT.cdc
-import CollecticoStandardViews from ../0x11cbef9729b236f3/CollecticoStandardViews.cdc
-import CollectionResolver from ../0x11cbef9729b236f3/CollectionResolver.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import CollecticoRoyalties from "../0xffe32280cd5b72a3/CollecticoRoyalties.cdc"
+import CollecticoStandardNFT from "../0x11cbef9729b236f3/CollecticoStandardNFT.cdc"
+import CollecticoStandardViews from "../0x11cbef9729b236f3/CollecticoStandardViews.cdc"
+import CollectionResolver from "../0x11cbef9729b236f3/CollectionResolver.cdc"
 
 /*
     Startupy w Grze

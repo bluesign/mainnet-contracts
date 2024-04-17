@@ -1,6 +1,6 @@
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import StringUtils from ../0xe52522745adf5c34/StringUtils.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import StringUtils from "../0xe52522745adf5c34/StringUtils.cdc"
 
 access(all) contract Utils {
 

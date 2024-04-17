@@ -42,8 +42,8 @@
 */
 
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import DarkCountryStaking from ./DarkCountryStaking.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import DarkCountryStaking from "./DarkCountryStaking.cdc"
 
 
 pub contract DarkCountry: NonFungibleToken {

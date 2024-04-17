@@ -1,4 +1,4 @@
-import MultiFungibleToken from ../0xa378eeb799df8387/MultiFungibleToken.cdc
+import MultiFungibleToken from "../0xa378eeb799df8387/MultiFungibleToken.cdc"
 
 /**
 

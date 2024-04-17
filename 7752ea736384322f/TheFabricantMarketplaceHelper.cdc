@@ -7,26 +7,26 @@
     uses FlowToken as payment method
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import GarmentNFT from ../0xfc91de5e6566cc7c/GarmentNFT.cdc
-import MaterialNFT from ../0xfc91de5e6566cc7c/MaterialNFT.cdc
-import ItemNFT from ../0xfc91de5e6566cc7c/ItemNFT.cdc
-import TheFabricantS1GarmentNFT from ../0x09e03b1f871b3513/TheFabricantS1GarmentNFT.cdc
-import TheFabricantS1MaterialNFT from ../0x09e03b1f871b3513/TheFabricantS1MaterialNFT.cdc
-import TheFabricantS1ItemNFT from ../0x09e03b1f871b3513/TheFabricantS1ItemNFT.cdc
-import TheFabricantS2GarmentNFT from ./TheFabricantS2GarmentNFT.cdc
-import TheFabricantS2MaterialNFT from ./TheFabricantS2MaterialNFT.cdc
-import TheFabricantS2ItemNFT from ./TheFabricantS2ItemNFT.cdc
-import TheFabricantMarketplace from ../0x09e03b1f871b3513/TheFabricantMarketplace.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import TheFabricantAccessPass from ./TheFabricantAccessPass.cdc
-import TheFabricantXXories from ./TheFabricantXXories.cdc
-import TheFabricantNFTStandard from ./TheFabricantNFTStandard.cdc
-import TheFabricantNFTStandardV2 from ./TheFabricantNFTStandardV2.cdc
-import CAT_EnterTheEvolution from ./CAT_EnterTheEvolution.cdc
-import TheFabricantKapers from ./TheFabricantKapers.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import GarmentNFT from "../0xfc91de5e6566cc7c/GarmentNFT.cdc"
+import MaterialNFT from "../0xfc91de5e6566cc7c/MaterialNFT.cdc"
+import ItemNFT from "../0xfc91de5e6566cc7c/ItemNFT.cdc"
+import TheFabricantS1GarmentNFT from "../0x09e03b1f871b3513/TheFabricantS1GarmentNFT.cdc"
+import TheFabricantS1MaterialNFT from "../0x09e03b1f871b3513/TheFabricantS1MaterialNFT.cdc"
+import TheFabricantS1ItemNFT from "../0x09e03b1f871b3513/TheFabricantS1ItemNFT.cdc"
+import TheFabricantS2GarmentNFT from "./TheFabricantS2GarmentNFT.cdc"
+import TheFabricantS2MaterialNFT from "./TheFabricantS2MaterialNFT.cdc"
+import TheFabricantS2ItemNFT from "./TheFabricantS2ItemNFT.cdc"
+import TheFabricantMarketplace from "../0x09e03b1f871b3513/TheFabricantMarketplace.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import TheFabricantAccessPass from "./TheFabricantAccessPass.cdc"
+import TheFabricantXXories from "./TheFabricantXXories.cdc"
+import TheFabricantNFTStandard from "./TheFabricantNFTStandard.cdc"
+import TheFabricantNFTStandardV2 from "./TheFabricantNFTStandardV2.cdc"
+import CAT_EnterTheEvolution from "./CAT_EnterTheEvolution.cdc"
+import TheFabricantKapers from "./TheFabricantKapers.cdc"
 
 
 pub contract TheFabricantMarketplaceHelper {

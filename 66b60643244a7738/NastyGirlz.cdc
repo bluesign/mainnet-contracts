@@ -1,12 +1,12 @@
 // Testnet
-// import NonFungibleToken from ../0x631e88ae7f1d7c20/NonFungibleToken.cdc
-// import MetadataViews from ../0x631e88ae7f1d7c20/MetadataViews.cdc
-// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
+// import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
+// import MetadataViews from "../0x631e88ae7f1d7c20/MetadataViews.cdc"
+// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
 
 // Mainnet
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 // import Crypto
 
 pub contract NastyGirlz: NonFungibleToken {
@@ -27,27 +27,7 @@ pub contract NastyGirlz: NonFungibleToken {
     creator: Address,
   )
 
-  // NFT is withdrawn from ../a collection/Crypto
-
-pub contract NastyGirlz: NonFungibleToken {
-
-  // Events
-  //
-  // This contract is initialized
-  pub event ContractInitialized()
-
-  // NFT is minted
-  pub event NFTMinted(
-    nftID: UInt64,
-    setID: UInt64,
-    templateID: UInt64,
-    displayName: String,
-    displayDescription: String,
-    displayURI: String,
-    creator: Address,
-  )
-
-  // NFT is withdrawn.cdc
+  // NFT is withdrawn from a collection
   pub event Withdraw(id: UInt64, from: Address?)
 
   // NFT is deposited from a collection

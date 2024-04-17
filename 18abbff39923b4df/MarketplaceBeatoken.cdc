@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-import FungibleBeatoken from ./FungibleBeatoken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NonFungibleBeatoken from ./NonFungibleBeatoken.cdc
+import FungibleBeatoken from "./FungibleBeatoken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NonFungibleBeatoken from "./NonFungibleBeatoken.cdc"
 
 pub contract MarketplaceBeatoken {
 

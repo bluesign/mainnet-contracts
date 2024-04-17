@@ -12,7 +12,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 **/
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract AnchainUtils {
   // ResolverCollection

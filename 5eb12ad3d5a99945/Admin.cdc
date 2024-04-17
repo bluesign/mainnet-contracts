@@ -1,4 +1,4 @@
-import NFTStorefront from ./NFTStorefront.cdc
+import NFTStorefront from "./NFTStorefront.cdc"
 
 pub contract Admin {
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 
-import NonFungibleToken, MetadataViews from ../0x1d7e57aa55817448/NonFungibleToken, MetadataViews.cdc
-import ARTIFACTViews, Interfaces from ./ARTIFACTViews, Interfaces.cdc
+import NonFungibleToken, MetadataViews from 0x1d7e57aa55817448
+import ARTIFACTViews, Interfaces from 0x24de869c5e40b2eb
 
 pub contract ARTIFACTV2: NonFungibleToken {
 

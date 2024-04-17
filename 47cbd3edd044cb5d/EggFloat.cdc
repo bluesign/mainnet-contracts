@@ -1,17 +1,17 @@
 // mainnet
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import ArleeScene from ./ArleeScene.cdc
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import ArleeScene from "../"./ArleeScene.cdc"/ArleeScene.cdc"
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 // testnet
-// import NonFungibleToken from ../0x631e88ae7f1d7c20/NonFungibleToken.cdc
-// import ArleeScene from ../0xe7fd8b1148e021b2/ArleeScene.cdc
-// import FLOAT from ../0x0afe396ebc8eee65/FLOAT.cdc
+// import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
+// import ArleeScene from "../0xe7fd8b1148e021b2/ArleeScene.cdc"
+// import FLOAT from "../0x0afe396ebc8eee65/FLOAT.cdc"
 
 // local
-// import FLOAT from ../"./lib/FLOAT.cdc"/FLOAT.cdc
-// import NonFungibleToken from ../"./lib/NonFungibleToken.cdc"/NonFungibleToken.cdc
-// import ArleeScene from ../"./ArleeScene.cdc"/ArleeScene.cdc
+// import FLOAT from "../"./lib/FLOAT.cdc"/FLOAT.cdc"
+// import NonFungibleToken from "../"./lib/NonFungibleToken.cdc"/NonFungibleToken.cdc"
+// import ArleeScene from "../"./ArleeScene.cdc"/ArleeScene.cdc"
 
 pub contract EggFloat {
 

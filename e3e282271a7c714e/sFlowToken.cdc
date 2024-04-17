@@ -1,16 +1,16 @@
-// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
-// import FlowToken from ../0x7e60df042a9c0868/FlowToken.cdc
-// import FlowStakingCollection from ../0x95e019a17d0e23d7/FlowStakingCollection.cdc
+// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
+// import FlowToken from "../0x7e60df042a9c0868/FlowToken.cdc"
+// import FlowStakingCollection from "../0x95e019a17d0e23d7/FlowStakingCollection.cdc"
 
 // Emulator
-// import FungibleToken from ../0xee82856bf20e2aa6/FungibleToken.cdc
-// import FlowToken from ../0x0ae53cb6e3f42a79/FlowToken.cdc
-// import FlowStakingCollection from ../0xf8d6e0586b0a20c7/FlowStakingCollection.cdc
+// import FungibleToken from "../0xee82856bf20e2aa6/FungibleToken.cdc"
+// import FlowToken from "../0x0ae53cb6e3f42a79/FlowToken.cdc"
+// import FlowStakingCollection from "../0xf8d6e0586b0a20c7/FlowStakingCollection.cdc"
 
 // Mainnet
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowStakingCollection from ../0x8d0e87b65159ae63/FlowStakingCollection.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowStakingCollection from "../0x8d0e87b65159ae63/FlowStakingCollection.cdc"
 
 pub contract sFlowToken: FungibleToken {
 

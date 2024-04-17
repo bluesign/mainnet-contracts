@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MoxyData from ./MoxyData.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MoxyData from "./MoxyData.cdc"
  
 
 pub contract MoxyVaultToken: FungibleToken {

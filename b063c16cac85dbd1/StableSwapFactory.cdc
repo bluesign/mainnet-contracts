@@ -1,6 +1,6 @@
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
-import SwapError from ../0xb78ef7afa52ff906/SwapError.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
+import SwapError from "../0xb78ef7afa52ff906/SwapError.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
 
 /**
     Data container of stableswap pair addresses.

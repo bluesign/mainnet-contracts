@@ -11,7 +11,7 @@ Heavily based off the Dapper Labs NBA Top Shot contract, with the following modi
 Much thanks to all the Dapper resouces and Discord help used in the adaptation of this contract!
  */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract KOTD: NonFungibleToken {
 

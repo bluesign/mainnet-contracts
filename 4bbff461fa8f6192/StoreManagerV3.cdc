@@ -1,4 +1,4 @@
-import FantastecSwapDataProperties from ./FantastecSwapDataProperties.cdc
+import FantastecSwapDataProperties from "./FantastecSwapDataProperties.cdc"
 
 pub contract StoreManagerV3 {
     pub event SectionAdded(id: UInt64)

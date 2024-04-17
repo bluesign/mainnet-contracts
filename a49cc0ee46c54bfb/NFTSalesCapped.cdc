@@ -1,14 +1,14 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import REVV from ../0xd01e482eb680ec9f/REVV.cdc
-import SHRD from ../0xd01e482eb680ec9f/SHRD.cdc
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import MotoGPCard from ./MotoGPCard.cdc
-import CardMintAccess from ./CardMintAccess.cdc
-import ContractVersion from ./ContractVersion.cdc
-import SHRDMintAccess from ../0xd01e482eb680ec9f/SHRDMintAccess.cdc
-import MotoGPCardMetadata from ./MotoGPCardMetadata.cdc
-import MotoGPCardSerialPoolV2 from ./MotoGPCardSerialPoolV2.cdc
-import Pausable from ../0xb223b2bfe4b8ffb5/Pausable.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import REVV from "../0xd01e482eb680ec9f/REVV.cdc"
+import SHRD from "../0xd01e482eb680ec9f/SHRD.cdc"
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import MotoGPCard from "./MotoGPCard.cdc"
+import CardMintAccess from "./CardMintAccess.cdc"
+import ContractVersion from "./ContractVersion.cdc"
+import SHRDMintAccess from "../0xd01e482eb680ec9f/SHRDMintAccess.cdc"
+import MotoGPCardMetadata from "./MotoGPCardMetadata.cdc"
+import MotoGPCardSerialPoolV2 from "./MotoGPCardSerialPoolV2.cdc"
+import Pausable from "../0xb223b2bfe4b8ffb5/Pausable.cdc"
 
 pub contract NFTSalesCapped : ContractVersion {
 

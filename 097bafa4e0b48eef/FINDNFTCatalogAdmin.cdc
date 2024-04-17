@@ -1,5 +1,5 @@
-import FINDNFTCatalog from ./FINDNFTCatalog.cdc
-import NFTCatalog from ../0x49a7cda3a1eecc29/NFTCatalog.cdc
+import FINDNFTCatalog from "./FINDNFTCatalog.cdc"
+import NFTCatalog from "../0x49a7cda3a1eecc29/NFTCatalog.cdc"
 
 // NFTCatalogAdmin
 //

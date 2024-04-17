@@ -1,10 +1,10 @@
 // MAINNET
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowUtilityToken from ../0xead892083b3e2c6c/FlowUtilityToken.cdc
-import FlowversePass from ./FlowversePass.cdc
-import FlowverseSocks from ../0xce4c02539d1fabe8/FlowverseSocks.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowUtilityToken from "../0xead892083b3e2c6c/FlowUtilityToken.cdc"
+import FlowversePass from "./FlowversePass.cdc"
+import FlowverseSocks from "../0xce4c02539d1fabe8/FlowverseSocks.cdc"
 import Crypto
 
 pub contract FlowversePrimarySale {
@@ -41,43 +41,7 @@ pub contract FlowversePrimarySale {
         pub fun mint(entityID: UInt64, minterAddress: Address): @NonFungibleToken.NFT
     }
     
-    // Data struct signed by admin account - allows accounts to purchase from ../a primary sale for a period of time./Crypto
-
-pub contract FlowversePrimarySale {
-    pub let AdminStoragePath: StoragePath
-
-    // Incremented ID used to create entities
-    pub var nextPrimarySaleID: UInt64
-
-    access(contract) var primarySales: @{UInt64: PrimarySale}
-    access(contract) var primarySaleIDs: {String: UInt64}
-
-    pub event PrimarySaleCreated(
-        primarySaleID: UInt64,
-        contractName: String,
-        contractAddress: Address,
-        setID: UInt64,
-        prices: {String: PriceData},
-        launchDate: String,
-        endDate: String,
-        pooled: Bool,
-    )
-    pub event PrimarySaleStatusChanged(primarySaleID: UInt64, status: String)
-    pub event PrimarySaleDateUpdated(primarySaleID: UInt64, date: String, isLaunch: Bool)
-    pub event PriceSet(primarySaleID: UInt64, type: String, price: UFix64, eligibleAddresses: [Address]?, maxMintsPerUser: UInt64)
-    pub event EntityAdded(primarySaleID: UInt64, entityID: UInt64, pool: String?, quantity: UInt64)
-    pub event EntityRemoved(primarySaleID: UInt64, entityID: UInt64, pool: String?)
-    // NFTPurchased is deprecated - please refer to PurchasedOrder event instead
-    pub event NFTPurchased(primarySaleID: UInt64, entityID: UInt64, nftID: UInt64, purchaserAddress: Address, priceType: String, price: UFix64)
-    pub event PurchasedOrder(primarySaleID: UInt64, entityID: UInt64, quantity: UInt64, nftIDs: [UInt64], purchaserAddress: Address, priceType: String, price: UFix64)
-    pub event ClaimedTreasures(primarySaleID: UInt64, nftIDs: [UInt64], passIDs: [UInt64], sockIDs: [UInt64], claimerAddress: Address, pool: String)
-    pub event ContractInitialized()
-
-    pub resource interface IMinter {
-        pub fun mint(entityID: UInt64, minterAddress: Address): @NonFungibleToken.NFT
-    }
-    
-    // Data struct signed by admin account - allows accounts to purchase.cdc
+    // Data struct signed by admin account - allows accounts to purchase from a primary sale for a period of time.
     pub struct AdminSignedPayload {
         pub let primarySaleID: UInt64
         pub let purchaserAddress: Address

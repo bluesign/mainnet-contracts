@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
 
 pub contract Resolver {
     // Current list of supported resolution rules.

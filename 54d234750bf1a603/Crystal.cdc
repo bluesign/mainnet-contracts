@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Shard from ../0x82b54037a8f180cf/Shard.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Shard from "../0x82b54037a8f180cf/Shard.cdc"
 
 // eternal.gg
 pub contract Crystal: NonFungibleToken {

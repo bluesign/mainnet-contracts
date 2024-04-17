@@ -17,8 +17,8 @@ If the owner wants to cancel the publication of the key before it has been done,
 A record points to an artist, defined by an ID. An artist registery is held so that the artist share can be sent correctly after sales and auctions.
 **/
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import ArtistRegistery from ./ArtistRegistery.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import ArtistRegistery from "./ArtistRegistery.cdc"
 
 pub contract Record: NonFungibleToken {
 

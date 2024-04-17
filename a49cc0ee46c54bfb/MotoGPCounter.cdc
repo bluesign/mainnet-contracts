@@ -1,5 +1,5 @@
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import ContractVersion from ./ContractVersion.cdc
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import ContractVersion from "./ContractVersion.cdc"
 
 pub contract MotoGPCounter: ContractVersion {
 

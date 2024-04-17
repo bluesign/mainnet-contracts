@@ -1,12 +1,12 @@
 // Third-party imports
-import StringUtils from ../0xa340dc0a4ec828ab/StringUtils.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FungibleTokenMetadataViews from ../0xf233dcee88fe0abe/FungibleTokenMetadataViews.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import StringUtils from "../0xa340dc0a4ec828ab/StringUtils.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FungibleTokenMetadataViews from "../0xf233dcee88fe0abe/FungibleTokenMetadataViews.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 // FlowUp imports
-import FlowUp from ./FlowUp.cdc
-import FURC20FTShared from ./FURC20FTShared.cdc
+import FlowUp from "./FlowUp.cdc"
+import FURC20FTShared from "./FURC20FTShared.cdc"
 
 access(all) contract FURC20Indexer {
     /* --- Events --- */

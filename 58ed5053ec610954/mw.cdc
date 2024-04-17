@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MatrixWorldVoucher from ../0x0d77ec47bbad8ef6/MatrixWorldVoucher.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import LicensedNFT from ../0x01ab36aaf654a13e/LicensedNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MatrixWorldVoucher from "../0x0d77ec47bbad8ef6/MatrixWorldVoucher.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import LicensedNFT from "../0x01ab36aaf654a13e/LicensedNFT.cdc"
 
 pub contract mw{
     pub resource tr : MatrixWorldVoucher.MatrixWorldVoucherCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic{

@@ -1,6 +1,6 @@
-import ChainmonstersRewards from ./ChainmonstersRewards.cdc
-import PRNG from ./PRNG.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import ChainmonstersRewards from "./ChainmonstersRewards.cdc"
+import PRNG from "./PRNG.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract ChainmonstersFoundation {
 

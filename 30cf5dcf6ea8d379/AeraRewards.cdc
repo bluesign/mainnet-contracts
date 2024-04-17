@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FindViews from ../0x097bafa4e0b48eef/FindViews.cdc
-import AeraNFT from ./AeraNFT.cdc
-import Clock from ./Clock.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FindViews from "../0x097bafa4e0b48eef/FindViews.cdc"
+import AeraNFT from "./AeraNFT.cdc"
+import Clock from "./Clock.cdc"
 
 /*
 Aera Reward is the NFT for fulfilling all the required panels for a chapter

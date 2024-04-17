@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import BloctoToken from ../0x0f9df91c9121c460/BloctoToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import BloctoToken from "../0x0f9df91c9121c460/BloctoToken.cdc"
 
 pub contract TeleportCustodyBSC {
 

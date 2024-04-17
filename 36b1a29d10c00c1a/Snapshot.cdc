@@ -10,8 +10,8 @@
 //  - Proves that an address owned a particular NFT for a specified time range (if it did, it returns its snapshot information).
 //  - Displays a specific snapshot in a format of your choice.
 //
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract Snapshot {
 

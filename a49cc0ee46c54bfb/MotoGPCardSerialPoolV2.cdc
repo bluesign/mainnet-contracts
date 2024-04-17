@@ -1,5 +1,5 @@
-import ContractVersion from ./ContractVersion.cdc
-import MotoGPAdmin from ./MotoGPAdmin.cdc
+import ContractVersion from "./ContractVersion.cdc"
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
 
 pub contract MotoGPCardSerialPoolV2: ContractVersion {
 

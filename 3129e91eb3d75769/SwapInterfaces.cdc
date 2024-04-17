@@ -5,7 +5,7 @@
 # Author: Increment Labs
 
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract interface SwapInterfaces {
     pub resource interface PairPublic {

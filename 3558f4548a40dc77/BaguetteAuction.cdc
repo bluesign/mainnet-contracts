@@ -29,10 +29,10 @@ Users can only create an auction by accepting an offer made on their NFT as the 
 An auction is extended by `timeExtension` minutes if a new bid is placed less than `timeExtension` minutes before the end.
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import Record from ./Record.cdc
-import ArtistRegistery from ./ArtistRegistery.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import Record from "./Record.cdc"
+import ArtistRegistery from "./ArtistRegistery.cdc"
 
 
 pub contract BaguetteAuction {

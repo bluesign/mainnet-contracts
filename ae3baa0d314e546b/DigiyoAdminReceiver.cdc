@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
-import Digiyo from ./Digiyo.cdc
-import DigiyoSplitCollection from ./DigiyoSplitCollection.cdc
+import Digiyo from "./Digiyo.cdc"
+import DigiyoSplitCollection from "./DigiyoSplitCollection.cdc"
 
 pub contract DigiyoAdminReceiver {
 

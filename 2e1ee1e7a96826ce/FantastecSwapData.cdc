@@ -16,7 +16,7 @@ Cards represent an individual item or moment of interest - a digital card of a p
 An NFT will be minted against individual Card.
 
 */
-// import NonFungibleToken from ../"../../standards/contracts/NonFungibleToken.cdc"/NonFungibleToken.cdc
+// import NonFungibleToken from "../"../../standards/contracts/NonFungibleToken.cdc"/NonFungibleToken.cdc"
 
 
 pub contract FantastecSwapData {

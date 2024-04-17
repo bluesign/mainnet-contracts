@@ -20,11 +20,11 @@ A SaleCollection is created through a contract level function which the default 
 */
 
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import Record from ./Record.cdc
-import ArtistRegistery from ./ArtistRegistery.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import Record from "./Record.cdc"
+import ArtistRegistery from "./ArtistRegistery.cdc"
 
 
 pub contract BaguetteSale {

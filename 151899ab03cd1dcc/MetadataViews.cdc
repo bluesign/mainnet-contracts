@@ -1,5 +1,5 @@
-import FungibleToken from ./FungibleToken.cdc
-import NonFungibleToken from ./NonFungibleToken.cdc
+import FungibleToken from 0x151899ab03cd1dcc 
+import NonFungibleToken from "./NonFungibleToken.cdc"
 pub contract MetadataViews {
 
   // 提供对一组访问元数据的视图。结构或资源（例如NFT）可以实现此接口，以提供对其支持的视图的访问。

@@ -2,8 +2,8 @@
 //
 //  Secondary marketplace for Anique NFTs.
 //
-import Anique from ./Anique.cdc
-import AniqueCredit from ./AniqueCredit.cdc
+import Anique from "./Anique.cdc"
+import AniqueCredit from "./AniqueCredit.cdc"
 
 pub contract AniqueMarket {
 

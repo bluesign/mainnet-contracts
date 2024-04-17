@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Unlicense
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import ARTIFACT, ARTIFACTPack, ARTIFACTAdmin, Interfaces from ./ARTIFACT, ARTIFACTPack, ARTIFACTAdmin, Interfaces.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import ARTIFACT, ARTIFACTPack, ARTIFACTAdmin, Interfaces from 0x24de869c5e40b2eb
 
 pub contract ARTIFACTMarket {
 

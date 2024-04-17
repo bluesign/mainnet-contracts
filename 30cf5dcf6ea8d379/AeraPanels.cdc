@@ -1,11 +1,11 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import AeraPack from ./AeraPack.cdc
-import AeraRewards from ./AeraRewards.cdc
-import AeraNFT from ./AeraNFT.cdc
-import FindViews from ../0x097bafa4e0b48eef/FindViews.cdc
-import FindFurnace from ../0x097bafa4e0b48eef/FindFurnace.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import AeraPack from "./AeraPack.cdc"
+import AeraRewards from "./AeraRewards.cdc"
+import AeraNFT from "./AeraNFT.cdc"
+import FindViews from "../0x097bafa4e0b48eef/FindViews.cdc"
+import FindFurnace from "../0x097bafa4e0b48eef/FindFurnace.cdc"
 
 pub contract AeraPanels: NonFungibleToken {
 

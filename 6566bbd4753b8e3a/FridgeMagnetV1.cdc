@@ -18,8 +18,8 @@
 
 // These both imports' accounts are for test, 
 // Emulator -> 0xf8d6e0586b0a20c7, Testnet -> 0x631e88ae7f1d7c20, for mainnet -> 0x1d7e57aa55817448
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract FridgeMagnetV1: NonFungibleToken {
 

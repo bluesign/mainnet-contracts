@@ -45,19 +45,19 @@ It allows the owner to create and mutate their Set and Entity
 It's the Admin of MindtrixPack contract that defines who can create SetCollection.
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
-import FlowUtilityToken from ../0xead892083b3e2c6c/FlowUtilityToken.cdc
-import FiatToken from ../0xb19436aae4d94622/FiatToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import MindtrixUtility from ./MindtrixUtility.cdc
-import MindtrixViews from ./MindtrixViews.cdc
-import MindtrixVerifier from ./MindtrixVerifier.cdc
-import MindtrixOtter from ./MindtrixOtter.cdc
-import PRNG from ../0x5d60e2a0dfe7a922/PRNG.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
+import FlowUtilityToken from "../0xead892083b3e2c6c/FlowUtilityToken.cdc"
+import FiatToken from "../0xb19436aae4d94622/FiatToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import MindtrixUtility from "./MindtrixUtility.cdc"
+import MindtrixViews from "./MindtrixViews.cdc"
+import MindtrixVerifier from "./MindtrixVerifier.cdc"
+import MindtrixOtter from "./MindtrixOtter.cdc"
+import PRNG from "../0x5d60e2a0dfe7a922/PRNG.cdc"
 
 pub contract MindtrixPack: NonFungibleToken {
 

@@ -1,4 +1,4 @@
-import KeeprNFTStorefront from ./KeeprNFTStorefront.cdc
+import KeeprNFTStorefront from "./KeeprNFTStorefront.cdc"
 
 pub contract KeeprAdmin {
 

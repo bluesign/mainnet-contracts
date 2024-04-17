@@ -1,4 +1,4 @@
-import Gun from ./Gun.cdc
+import Gun from "./Gun.cdc"
 pub contract James {
     pub var name: String
 

@@ -1,4 +1,4 @@
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 pub contract Helper {
 

@@ -18,11 +18,11 @@
 //   * no unstaking fees after certain staking period
 //   * timestamp until unstaking is disabled
 
-import CompoundInterest from ./CompoundInterest.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import StarlyToken from ../0x142fa6570b62fd97/StarlyToken.cdc
+import CompoundInterest from "./CompoundInterest.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import StarlyToken from "../0x142fa6570b62fd97/StarlyToken.cdc"
 
 pub contract StarlyTokenStaking: NonFungibleToken {
 

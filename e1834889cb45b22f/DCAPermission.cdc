@@ -1,4 +1,4 @@
-import DigitalContentAsset from ./DigitalContentAsset.cdc
+import DigitalContentAsset from "./DigitalContentAsset.cdc"
 
 pub contract DCAPermission {
     pub enum Role: UInt8 {

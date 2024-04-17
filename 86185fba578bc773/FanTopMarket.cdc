@@ -1,7 +1,6 @@
 import Crypto
-import NonFungibleToken from ../0x1d7e57aa55817448/Crypto
-import NonFungibleToken.cdc
-import FanTopToken from ./FanTopToken.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FanTopToken from "./FanTopToken.cdc"
 
 pub contract FanTopMarket {
     pub event CapacityExtended(

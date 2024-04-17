@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NFTStorefront from ../0x4eb8a10cb9f87357/NFTStorefront.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NFTStorefront from "../0x4eb8a10cb9f87357/NFTStorefront.cdc"
 
 pub contract Marketplace {
 

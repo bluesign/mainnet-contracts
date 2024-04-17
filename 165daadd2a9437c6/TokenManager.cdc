@@ -1,4 +1,4 @@
-import Rumble from ./Rumble.cdc
+import Rumble from "./Rumble.cdc"
 
 pub contract TokenManager {
 

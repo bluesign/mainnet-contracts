@@ -1,4 +1,4 @@
-import IStats from ./IStats.cdc
+import IStats from "./IStats.cdc"
 
 access(all) contract Stats2: IStats  {
   pub let stats: {UInt64: String}

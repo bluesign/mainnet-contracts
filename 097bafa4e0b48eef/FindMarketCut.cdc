@@ -1,6 +1,6 @@
-import FindMarketCutStruct from ./FindMarketCutStruct.cdc
-import FindMarketCutInterface from ./FindMarketCutInterface.cdc
-import FindUtils from ./FindUtils.cdc
+import FindMarketCutStruct from "./FindMarketCutStruct.cdc"
+import FindMarketCutInterface from "./FindMarketCutInterface.cdc"
+import FindUtils from "./FindUtils.cdc"
 
 pub contract FindMarketCut {
 

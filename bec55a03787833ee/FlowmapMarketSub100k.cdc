@@ -1,7 +1,7 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import Flowmap from ../0x483f0fe77f0d59fb/Flowmap.cdc
-import FlowBlocksTradingScore from ./FlowBlocksTradingScore.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import Flowmap from "../0x483f0fe77f0d59fb/Flowmap.cdc"
+import FlowBlocksTradingScore from "./FlowBlocksTradingScore.cdc"
 
 access(all) contract FlowmapMarketSub100k {
 

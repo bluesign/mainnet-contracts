@@ -25,11 +25,11 @@
 
  */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowIDTableStaking from ../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc
-import FlowStorageFees from ../0xe467b9dd11fa00df/FlowStorageFees.cdc
-import StakingProxy from ../0x62430cf28c26d095/StakingProxy.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowIDTableStaking from "../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc"
+import FlowStorageFees from "../0xe467b9dd11fa00df/FlowStorageFees.cdc"
+import StakingProxy from "../0x62430cf28c26d095/StakingProxy.cdc"
 
 pub contract LockedTokens {
 

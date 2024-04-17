@@ -5,10 +5,10 @@
 
 Join a flow development competition.
 */
-import Interfaces from ./Interfaces.cdc
-import Helper from ./Helper.cdc
-import UserProfile from ./UserProfile.cdc
-import Community from ./Community.cdc
+import Interfaces from "./Interfaces.cdc"
+import Helper from "./Helper.cdc"
+import UserProfile from "./UserProfile.cdc"
+import Community from "./Community.cdc"
 
 pub contract CompetitionService {
 

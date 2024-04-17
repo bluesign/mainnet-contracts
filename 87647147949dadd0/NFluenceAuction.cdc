@@ -3,10 +3,10 @@ This is a multifaceted contract that sets up an auction resource, the parameters
 running an auctions and setting up an account storefront to store all active auctions
  */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NFluence from ./NFluence.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NFluence from "./NFluence.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
 
 
 pub contract NFluenceAuction {

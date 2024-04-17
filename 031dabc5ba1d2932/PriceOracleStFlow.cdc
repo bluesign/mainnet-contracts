@@ -1,7 +1,7 @@
-import OracleInterface from ../0xcec15c814971c1dc/OracleInterface.cdc
-import OracleConfig from ../0xcec15c814971c1dc/OracleConfig.cdc
-import DelegatorManager from ../0xd6f80565193ad727/DelegatorManager.cdc
-import LiquidStakingConfig from ../0xd6f80565193ad727/LiquidStakingConfig.cdc
+import OracleInterface from "../0xcec15c814971c1dc/OracleInterface.cdc"
+import OracleConfig from "../0xcec15c814971c1dc/OracleConfig.cdc"
+import DelegatorManager from "../0xd6f80565193ad727/DelegatorManager.cdc"
+import LiquidStakingConfig from "../0xd6f80565193ad727/LiquidStakingConfig.cdc"
 
 /// On-chain PriceOracle for stFlowToken/USD, which leverages on-chain PriceOracle for FlowToken/USD.
 /// It needs to be a whitelisted reader of Flow/USD PriceOracle.

@@ -1,7 +1,7 @@
-import KissoNFT from ./KissoNFT.cdc
-import AdminToken from ./AdminToken.cdc
-import Clock from ./Clock.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import KissoNFT from "./KissoNFT.cdc"
+import AdminToken from "./AdminToken.cdc"
+import Clock from "./Clock.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract DAO {
 

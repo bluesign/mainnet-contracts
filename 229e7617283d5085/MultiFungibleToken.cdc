@@ -1,8 +1,8 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-//import MetadataViews from ../0x8ea44ab931cac762 // Only used for initializing MultiFungibleTokenReceiverPath/MetadataViews.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+//import MetadataViews from 0x8ea44ab931cac762 // Only used for initializing MultiFungibleTokenReceiverPath
 
 // Supported FungibleTokens
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
 
 pub contract MultiFungibleToken
 {

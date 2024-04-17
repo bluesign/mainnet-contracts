@@ -1,6 +1,6 @@
-import AlphaNFTV1 from ./AlphaNFTV1.cdc
-import AlphaPackV1 from ./AlphaPackV1.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import AlphaNFTV1 from "./AlphaNFTV1.cdc"
+import AlphaPackV1 from "./AlphaPackV1.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract AlphaAdminV1 {
 

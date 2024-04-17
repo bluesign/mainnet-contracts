@@ -7,13 +7,13 @@ TODO: Add description
 
 */
 // Third-party imports
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 // Fixes imports
-import Fixes from ./Fixes.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
+import Fixes from "./Fixes.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
 
 access(all) contract FRC20Storefront {
 

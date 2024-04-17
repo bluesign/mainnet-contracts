@@ -1,17 +1,17 @@
-// import sFlowToken from ../"./sFlowToken.cdc"/sFlowToken.cdc
+// import sFlowToken from "../"./sFlowToken.cdc"/sFlowToken.cdc"
 
 // Testnet
-// import FungibleToken from ../0x9a0766d93b6608b7/FungibleToken.cdc
-// import FlowToken from ../0x7e60df042a9c0868/FlowToken.cdc
-// import FlowStakingCollection from ../0x95e019a17d0e23d7/FlowStakingCollection.cdc
-// import FlowIDTableStaking from ../0x9eca2b38b18b5dfe/FlowIDTableStaking.cdc
+// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
+// import FlowToken from "../0x7e60df042a9c0868/FlowToken.cdc"
+// import FlowStakingCollection from "../0x95e019a17d0e23d7/FlowStakingCollection.cdc"
+// import FlowIDTableStaking from "../0x9eca2b38b18b5dfe/FlowIDTableStaking.cdc"
 
 // Mainnet
-import sFlowToken from ./sFlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FlowStakingCollection from ../0x8d0e87b65159ae63/FlowStakingCollection.cdc
-import FlowIDTableStaking from ../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc
+import sFlowToken from "./sFlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FlowStakingCollection from "../0x8d0e87b65159ae63/FlowStakingCollection.cdc"
+import FlowIDTableStaking from "../0x8624b52f9ddcd04a/FlowIDTableStaking.cdc"
 
 pub contract sFlowStakingManagerV2 {
 	access(contract) var unstakeRequests: [{String: AnyStruct}]

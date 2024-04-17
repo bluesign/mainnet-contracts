@@ -1,10 +1,10 @@
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NFTCatalog from ../0x49a7cda3a1eecc29/NFTCatalog.cdc
-import NFTStorefront from ../0x4eb8a10cb9f87357/NFTStorefront.cdc
-import NFTStorefrontV2 from ../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc
-import FlowtyStorefront from ../0x5425d4a12d3b88de/FlowtyStorefront.cdc
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NFTCatalog from "../0x49a7cda3a1eecc29/NFTCatalog.cdc"
+import NFTStorefront from "../0x4eb8a10cb9f87357/NFTStorefront.cdc"
+import NFTStorefrontV2 from "../0x4eb8a10cb9f87357/NFTStorefrontV2.cdc"
+import FlowtyStorefront from "../0x5425d4a12d3b88de/FlowtyStorefront.cdc"
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
 
 access(all) contract NFTMetadataUtility {
     access(all) struct CollectionItem {

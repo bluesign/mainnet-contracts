@@ -1,5 +1,5 @@
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
-import EmeraldPass from ../0x6a07dbeb03167a13/EmeraldPass.cdc
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+import EmeraldPass from "../0x6a07dbeb03167a13/EmeraldPass.cdc"
 
 // Created by Emerald City DAO for Touchstone (https://touchstone.city/)
 

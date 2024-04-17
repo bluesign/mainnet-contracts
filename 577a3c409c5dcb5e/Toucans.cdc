@@ -1,16 +1,15 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 import Crypto
-import ToucansTokens from ./Crypto
-import ToucansTokens.cdc
-import ToucansUtils from ./ToucansUtils.cdc
-import ToucansActions from ./ToucansActions.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import ToucansLockTokens from ./ToucansLockTokens.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NFTCatalog from ../0x49a7cda3a1eecc29/NFTCatalog.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
-import stFlowToken from ../0xd6f80565193ad727/stFlowToken.cdc
-import SwapError from ../0xb78ef7afa52ff906/SwapError.cdc
+import ToucansTokens from "./ToucansTokens.cdc"
+import ToucansUtils from "./ToucansUtils.cdc"
+import ToucansActions from "./ToucansActions.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import ToucansLockTokens from "./ToucansLockTokens.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NFTCatalog from "../0x49a7cda3a1eecc29/NFTCatalog.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
+import stFlowToken from "../0xd6f80565193ad727/stFlowToken.cdc"
+import SwapError from "../0xb78ef7afa52ff906/SwapError.cdc"
 
 pub contract Toucans {
 

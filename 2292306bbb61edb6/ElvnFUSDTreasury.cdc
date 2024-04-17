@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache License 2.0
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
 
-import Elvn from ../0x3084a96e617d3b0a/Elvn.cdc
+import Elvn from "../0x3084a96e617d3b0a/Elvn.cdc"
 
 // ElvnFUSDTreasury
 // 

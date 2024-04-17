@@ -1,9 +1,9 @@
 /* SPDX-License-Identifier: UNLICENSED */
 
-import DimeCollectibleV3 from ../0xf5cdaace879e5a79/DimeCollectibleV3.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
+import DimeCollectibleV3 from "../0xf5cdaace879e5a79/DimeCollectibleV3.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 
 pub contract DimeRoyalties {
     // Events

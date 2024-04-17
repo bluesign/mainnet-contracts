@@ -1,4 +1,4 @@
-import JoyridePayments from ../0xecfad18ba9582d4f/JoyridePayments.cdc
+import JoyridePayments from "../0xecfad18ba9582d4f/JoyridePayments.cdc"
 
 pub contract JoyrideGameShim {
     pub event PlayerTransaction(gameID: String)

@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FlowversePass from ./FlowversePass.cdc
-import FlowversePrimarySale from ./FlowversePrimarySale.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FlowversePass from "./FlowversePass.cdc"
+import FlowversePrimarySale from "./FlowversePrimarySale.cdc"
 
 pub contract FlowversePassPrimarySaleMinter {
     pub resource Minter: FlowversePrimarySale.IMinter {

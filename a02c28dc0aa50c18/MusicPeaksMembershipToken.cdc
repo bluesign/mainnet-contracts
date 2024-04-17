@@ -27,10 +27,10 @@
 
 // For more info on GrantedAccountAccess, see GrantedAccountAccess.cdc
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import FindViews from ../0x097bafa4e0b48eef/FindViews.cdc
-import GrantedAccountAccess from ./GrantedAccountAccess.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import FindViews from "../0x097bafa4e0b48eef/FindViews.cdc"
+import GrantedAccountAccess from "./GrantedAccountAccess.cdc"
 
 pub contract MusicPeaksMembershipToken: NonFungibleToken {
 

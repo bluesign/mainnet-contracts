@@ -1,5 +1,5 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import StarlyToken from ../0x142fa6570b62fd97/StarlyToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import StarlyToken from "../0x142fa6570b62fd97/StarlyToken.cdc"
 
 pub contract TeleportCustodyBSC {
 

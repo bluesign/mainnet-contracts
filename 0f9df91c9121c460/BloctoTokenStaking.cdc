@@ -7,8 +7,8 @@
 
  */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import BloctoToken from ./BloctoToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import BloctoToken from "./BloctoToken.cdc"
 
 pub contract BloctoTokenStaking {
 

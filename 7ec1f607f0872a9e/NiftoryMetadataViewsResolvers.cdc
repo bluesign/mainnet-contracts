@@ -12,11 +12,11 @@ provided the AnyStruct as.
 
 */
 
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
-import MetadataViewsManager from ./MetadataViewsManager.cdc
+import MetadataViewsManager from "./MetadataViewsManager.cdc"
 
-import NiftoryNonFungibleToken from ./NiftoryNonFungibleToken.cdc
+import NiftoryNonFungibleToken from "./NiftoryNonFungibleToken.cdc"
 
 pub contract NiftoryMetadataViewsResolvers {
 

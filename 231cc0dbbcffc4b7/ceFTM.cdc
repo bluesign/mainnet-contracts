@@ -1,6 +1,6 @@
 /// Canonical ceFTM on Flow
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FTMinterBurner from ../0x08dd120226ec2213/FTMinterBurner.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FTMinterBurner from "../0x08dd120226ec2213/FTMinterBurner.cdc"
 
 pub contract ceFTM: FungibleToken, FTMinterBurner {
     // path for admin resource

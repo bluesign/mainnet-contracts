@@ -5,25 +5,25 @@
 
 */
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 // Lending
-import LendingInterfaces from ../0x2df970b6cdee5735/LendingInterfaces.cdc
-import LendingConfig from ../0x2df970b6cdee5735/LendingConfig.cdc
+import LendingInterfaces from "../0x2df970b6cdee5735/LendingInterfaces.cdc"
+import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
 // Swap
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
 // Liquid Staking
-import LiquidStaking from ../0xd6f80565193ad727/LiquidStaking.cdc
+import LiquidStaking from "../0xd6f80565193ad727/LiquidStaking.cdc"
 // Farm
-import Staking from ../0x1b77ba4b414de352/Staking.cdc
-import StakingNFT from ../0x1b77ba4b414de352/StakingNFT.cdc
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
+import Staking from "../0x1b77ba4b414de352/Staking.cdc"
+import StakingNFT from "../0x1b77ba4b414de352/StakingNFT.cdc"
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 // Oracle
-import PublicPriceOracle from ../0xec67451f8a58216a/PublicPriceOracle.cdc
+import PublicPriceOracle from "../0xec67451f8a58216a/PublicPriceOracle.cdc"
 
 // Referral System
-import RV3 from ./RV3.cdc
+import RV3 from "./RV3.cdc"
 
 pub contract PPPV6 {
 

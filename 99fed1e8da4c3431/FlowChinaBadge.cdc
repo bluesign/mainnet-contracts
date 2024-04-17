@@ -1,5 +1,5 @@
-import NonFungibleToken from ../0x1d7e57aa55817448 //"./NonFungibleToken.cdc"/NonFungibleToken.cdc
-// import FungibleToken from ../"./FungibleToken.cdc"/FungibleToken.cdc
+import NonFungibleToken from 0x1d7e57aa55817448 //"./NonFungibleToken.cdc"
+// import FungibleToken from "../"./FungibleToken.cdc"/FungibleToken.cdc"
 
 pub contract FlowChinaBadge: NonFungibleToken {
 

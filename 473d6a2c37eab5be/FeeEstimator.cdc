@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowStorageFees from ../0xe467b9dd11fa00df/FlowStorageFees.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowStorageFees from "../0xe467b9dd11fa00df/FlowStorageFees.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 
 /*
     FeeEstimator

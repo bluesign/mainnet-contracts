@@ -1,7 +1,7 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import SwapConfig from ../0xb78ef7afa52ff906/SwapConfig.cdc
-import SwapFactory from ../0xb063c16cac85dbd1/SwapFactory.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
+import SwapFactory from "../0xb063c16cac85dbd1/SwapFactory.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
 
 pub contract SwapTools {
     pub resource Executor: SwapInterfaces.FlashLoanExecutor {

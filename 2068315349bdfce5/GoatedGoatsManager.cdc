@@ -5,14 +5,14 @@
     sale and have ability to mint editions themself.
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import GoatedGoatsTrait from ./GoatedGoatsTrait.cdc
-import GoatedGoatsVouchers from ../0xdfc74d9d561374c0/GoatedGoatsVouchers.cdc
-import TraitPacksVouchers from ../0xdfc74d9d561374c0/TraitPacksVouchers.cdc
-import GoatedGoatsTraitPack from ./GoatedGoatsTraitPack.cdc
-import GoatedGoats from ./GoatedGoats.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import GoatedGoatsTrait from "./GoatedGoatsTrait.cdc"
+import GoatedGoatsVouchers from "../0xdfc74d9d561374c0/GoatedGoatsVouchers.cdc"
+import TraitPacksVouchers from "../0xdfc74d9d561374c0/TraitPacksVouchers.cdc"
+import GoatedGoatsTraitPack from "./GoatedGoatsTraitPack.cdc"
+import GoatedGoats from "./GoatedGoats.cdc"
 
 pub contract GoatedGoatsManager {
     // -----------------------------------------------------------------------

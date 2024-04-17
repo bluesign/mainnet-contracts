@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Digiyo from ./Digiyo.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Digiyo from "./Digiyo.cdc"
 
 pub contract DigiyoSplitCollection {
 

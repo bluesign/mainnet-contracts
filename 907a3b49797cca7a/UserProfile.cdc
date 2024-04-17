@@ -4,7 +4,7 @@
 > Author: Bohao Tang<tech@btang.cn>
 
 */
-import Interfaces from ./Interfaces.cdc
+import Interfaces from "./Interfaces.cdc"
 
 pub contract UserProfile {
 

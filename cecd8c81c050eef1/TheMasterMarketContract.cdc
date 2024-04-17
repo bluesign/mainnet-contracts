@@ -1,8 +1,8 @@
 
 
-import TheMasterPieceContract from ./TheMasterPieceContract.cdc
-import TheMasterPixelContract from ./TheMasterPixelContract.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import TheMasterPieceContract from "./TheMasterPieceContract.cdc"
+import TheMasterPixelContract from "./TheMasterPixelContract.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract TheMasterMarketContract {
 

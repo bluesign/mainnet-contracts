@@ -5,8 +5,8 @@
 //
 //  authors: Atsushi Otani atsushi.ootani@anique.jp
 //
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Anique from ./Anique.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Anique from "./Anique.cdc"
 
 pub contract AttackOnTitanLegacy: NonFungibleToken, Anique {
     // -----------------------------------------------------------------------

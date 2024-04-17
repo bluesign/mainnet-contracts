@@ -1,6 +1,6 @@
-import BloctoStorageRent from ../0x1dfd1e5b87b847dc/BloctoStorageRent.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import BloctoStorageRent from "../0x1dfd1e5b87b847dc/BloctoStorageRent.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
 pub contract new {
          

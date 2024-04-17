@@ -26,7 +26,7 @@ must be called alongside and will fail if minting should not be allowed.
 
 */
 
-import MutableMetadata from ./MutableMetadata.cdc
+import MutableMetadata from "./MutableMetadata.cdc"
 
 pub contract MutableMetadataTemplate {
 

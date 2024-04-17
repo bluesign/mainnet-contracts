@@ -18,7 +18,7 @@ TODO
 
 */
 
-import FantastecSwapDataProperties from ./FantastecSwapDataProperties.cdc
+import FantastecSwapDataProperties from "./FantastecSwapDataProperties.cdc"
 
 pub contract SocialProfileV3 {
 

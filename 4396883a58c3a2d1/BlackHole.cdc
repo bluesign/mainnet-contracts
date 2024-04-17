@@ -10,8 +10,8 @@
 - Users can get the balance of vanished fungible tokens by the type of the Fungible Token in the BlackHole Resource.
 
 */
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import StringUtils from ../0xa340dc0a4ec828ab/StringUtils.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import StringUtils from "../0xa340dc0a4ec828ab/StringUtils.cdc"
 
 /// BlackHole contract
 ///

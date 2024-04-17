@@ -4,10 +4,10 @@
 // Version: 0.0.1
 //
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import DisruptArt from ./DisruptArt.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import DisruptArtMarketplace from ./DisruptArtMarketplace.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import DisruptArt from "./DisruptArt.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import DisruptArtMarketplace from "./DisruptArtMarketplace.cdc"
 
 pub contract DisruptArtAuction {
 

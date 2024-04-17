@@ -1,4 +1,4 @@
-import ContractVersion from ./ContractVersion.cdc
+import ContractVersion from "./ContractVersion.cdc"
 
 pub contract Pausable: ContractVersion {
 

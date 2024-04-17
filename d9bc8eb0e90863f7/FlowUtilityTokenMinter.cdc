@@ -1,6 +1,6 @@
-import Minter from ./Minter.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowUtilityToken from ../0xead892083b3e2c6c/FlowUtilityToken.cdc
+import Minter from "./Minter.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowUtilityToken from "../0xead892083b3e2c6c/FlowUtilityToken.cdc"
 
 pub contract FlowUtilityTokenMinter {
     pub resource FungibleTokenMinter: Minter.FungibleTokenMinter {

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-import InceptionAvatar from ./InceptionAvatar.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import InceptionCrystal from ./InceptionCrystal.cdc
-import InceptionBlackBox from ./InceptionBlackBox.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
+import InceptionAvatar from "./InceptionAvatar.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import InceptionCrystal from "./InceptionCrystal.cdc"
+import InceptionBlackBox from "./InceptionBlackBox.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 
 pub contract InceptionExchange {
 

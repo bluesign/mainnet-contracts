@@ -36,23 +36,7 @@ pub contract FlowClusterQC {
     access(account) var clusters: [Cluster]
 
     /// Indicates if a voter resource has already been claimed by a node ID
-    /// from ../the identity table contract/Crypto
-
-pub contract FlowClusterQC {
-
-    // ================================================================================
-    // CONTRACT VARIABLES
-    // ================================================================================
-
-    /// Indicates whether votes are currently being collected.
-    /// If false, no node operator will be able to submit votes
-    pub var inProgress: Bool
-
-    /// The collection node clusters for the current epoch
-    access(account) var clusters: [Cluster]
-
-    /// Indicates if a voter resource has already been claimed by a node ID
-    ///.cdc
+    /// from the identity table contract
     /// Node IDs have to claim a voter once
     /// one node will use the same specific ID and Voter resource for all time
     /// `nil` means that there is no voting capability for the node ID

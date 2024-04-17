@@ -8,11 +8,11 @@ TODO: Add description
 */
 
 // Third party imports
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import ViewResolver from ../0x1d7e57aa55817448/ViewResolver.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import ViewResolver from "../0x1d7e57aa55817448/ViewResolver.cdc"
 // Fixes Import
-import Fixes from ./Fixes.cdc
+import Fixes from "./Fixes.cdc"
 
 access(all) contract FixesWrappedNFT: NonFungibleToken, ViewResolver {
 

@@ -1,4 +1,4 @@
-import NFTStorefrontV2 from ../0x3cdbb3d569211ff3/NFTStorefrontV2.cdc
+import NFTStorefrontV2 from "../0x3cdbb3d569211ff3/NFTStorefrontV2.cdc"
 
 access(all) contract FlowtyStorefront {
     access(all) fun getStorefrontRef(owner: Address): &NFTStorefrontV2.Storefront{NFTStorefrontV2.StorefrontPublic} {

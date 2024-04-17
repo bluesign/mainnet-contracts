@@ -1,7 +1,7 @@
-import GameLevels from ../0x9d041d36947924c0/GameLevels.cdc
-import GameEngine from ../0x9d041d36947924c0/GameEngine.cdc
-import TraditionalTetrisPieces from ./TraditionalTetrisPieces.cdc
-import TetrisObjects from ./TetrisObjects.cdc
+import GameLevels from "../0x9d041d36947924c0/GameLevels.cdc"
+import GameEngine from "../0x9d041d36947924c0/GameEngine.cdc"
+import TraditionalTetrisPieces from "./TraditionalTetrisPieces.cdc"
+import TetrisObjects from "./TetrisObjects.cdc"
 
 pub contract Tetris: GameLevels {
 

@@ -28,23 +28,15 @@ the following features
 
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/an NFT contract directly, you just need
-  to know what path and which address the minting/info/etc. capabilities are
-  located)
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
-- Common interface for collections, which allows bulk withdrawal/deposits
+import MutableMetadata from "./MutableMetadata.cdc"
+import MutableMetadataTemplate from "./MutableMetadataTemplate.cdc"
+import MutableMetadataSet from "./MutableMetadataSet.cdc"
+import MutableMetadataSetManager from "./MutableMetadataSetManager.cdc"
 
-*/
-
-import NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-
-import MutableMetadata from ./MutableMetadata.cdc
-import MutableMetadataTemplate from ./MutableMetadataTemplate.cdc
-import MutableMetadataSet from ./MutableMetadataSet.cdc
-import MutableMetadataSetManager from ./MutableMetadataSetManager.cdc
-
-import MetadataViewsManager from ./MetadataViewsManager.cdc
+import MetadataViewsManager from "./MetadataViewsManager.cdc"
 
 pub contract NiftoryNonFungibleToken {
 
@@ -175,36 +167,7 @@ pub contract NiftoryNonFungibleToken {
       _ resolver: AnyStruct{MetadataViewsManager.Resolver}
     )
 
-    // Remove the given resolver from ../the MetadataViewsResolver if not locked/the actual NFT contract explicitly)
-    pub fun getNFTCollectionData(): MetadataViews.NFTCollectionData
-  }
-
-  pub resource interface ManagerPrivate {
-
-    // ========================================================================
-    // Contract metadata
-    // ========================================================================
-
-    // Set arbitrary metadata for this NFT contract, if implemented
-    pub fun modifyContractMetadata(): auth &AnyStruct
-
-    // Set arbitrary metadata for this NFT contract, if implemented
-    pub fun replaceContractMetadata(_ metadata: AnyStruct?)
-
-    // ========================================================================
-    // Metadata Views Manager
-    // ========================================================================
-
-    // Lock MetadataViewsResolver so that resolvers can be neither added nor
-    // removed
-    pub fun lockMetadataViewsManager()
-
-    // Add the given resolver to the MetadataViewsResolver if not locked
-    pub fun setMetadataViewsResolver(
-      _ resolver: AnyStruct{MetadataViewsManager.Resolver}
-    )
-
-    // Remove the given resolver.cdc
+    // Remove the given resolver from the MetadataViewsResolver if not locked
     pub fun removeMetadataViewsResolver(_ type: Type)
 
     // ========================================================================

@@ -1,8 +1,8 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import cBridge from ./cBridge.cdc
-import PbPegged from ./PbPegged.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import cBridge from "./cBridge.cdc"
+import PbPegged from "./PbPegged.cdc"
 // DelayedTransfer must from same account as addXfer is limited to access(account) to avoid spam
-import DelayedTransfer from ./DelayedTransfer.cdc
+import DelayedTransfer from "./DelayedTransfer.cdc"
 
 // user deposit into SafeBox, cBridge will mint corresponding ERC20 tokens on specified dest chain.
 // when user burn ERC20 tokens, cBridge will withdraw FungibleTokens to user specified receiver address

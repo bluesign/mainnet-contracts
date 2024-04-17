@@ -2,9 +2,9 @@
 //testnet: 0x631e88ae7f1d7c20
 //mainnet: 0x1d7e57aa55817448
 
-import NonFungibleToken from ../0x1d7e57aa55817448;/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448;/MetadataViews.cdc
-import ViewResolver from ../0x1d7e57aa55817448;/ViewResolver.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448;/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448;/MetadataViews.cdc"
+import ViewResolver from "../0x1d7e57aa55817448;/ViewResolver.cdc"
 
 pub contract aiSportsMinter: NonFungibleToken, ViewResolver {
   // Total supply of aiSportsMinters in existence

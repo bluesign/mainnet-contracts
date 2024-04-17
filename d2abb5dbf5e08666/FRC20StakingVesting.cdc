@@ -6,10 +6,10 @@
 TODO: Add description
 
 */
-import FixesHeartbeat from ./FixesHeartbeat.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
-import FRC20Staking from ./FRC20Staking.cdc
+import FixesHeartbeat from "./FixesHeartbeat.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
+import FRC20Staking from "./FRC20Staking.cdc"
 
 /// The `FRC20StakingVesting` contract
 ///

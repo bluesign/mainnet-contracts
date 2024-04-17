@@ -8,8 +8,8 @@
 
  */
 
-import TopShot from ../0x0b2a3299cc857e29/TopShot.cdc
-import TopShotShardedCollection from ../0xef4d8b44dd7f7ef6/TopShotShardedCollection.cdc
+import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
+import TopShotShardedCollection from "../0xef4d8b44dd7f7ef6/TopShotShardedCollection.cdc"
 
 pub contract TopshotAdminReceiver {
 

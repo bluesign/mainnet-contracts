@@ -1,4 +1,4 @@
-import BasicBeasts from ./BasicBeasts.cdc
+import BasicBeasts from "./BasicBeasts.cdc"
 
 pub contract HunterScore {
 

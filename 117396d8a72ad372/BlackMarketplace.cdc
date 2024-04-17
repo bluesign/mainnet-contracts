@@ -2,10 +2,10 @@
 // Yosh! -swt
 //
 //
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FUSD from ../0x3c5959b568896393/FUSD.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NFTDayTreasureChest from ./NFTDayTreasureChest.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FUSD from "../0x3c5959b568896393/FUSD.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448 
+import NFTDayTreasureChest from "./NFTDayTreasureChest.cdc"
 
 pub contract BlackMarketplace {
 

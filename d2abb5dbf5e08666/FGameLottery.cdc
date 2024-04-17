@@ -8,12 +8,12 @@ The lottery is drawn every epoch. The lottery result is generated randomly and v
 
 */
 // Fixes Imports
-import Fixes from ./Fixes.cdc
-import FixesHeartbeat from ./FixesHeartbeat.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
-import FRC20Staking from ./FRC20Staking.cdc
+import Fixes from "./Fixes.cdc"
+import FixesHeartbeat from "./FixesHeartbeat.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
+import FRC20Staking from "./FRC20Staking.cdc"
 
 access(all) contract FGameLottery {
     /* --- Events --- */

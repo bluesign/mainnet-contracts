@@ -1,6 +1,6 @@
-import GameEngine from ../0x9d041d36947924c0/GameEngine.cdc
-import TraditionalTetrisPieces from ./TraditionalTetrisPieces.cdc
-import GameBoardUtils from ../0x9d041d36947924c0/GameBoardUtils.cdc
+import GameEngine from "../0x9d041d36947924c0/GameEngine.cdc"
+import TraditionalTetrisPieces from "./TraditionalTetrisPieces.cdc"
+import GameBoardUtils from "../0x9d041d36947924c0/GameBoardUtils.cdc"
 
 pub contract TetrisObjects {
   // GameObject for a TetrisPiece

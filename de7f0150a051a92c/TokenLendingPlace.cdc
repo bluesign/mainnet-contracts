@@ -1,6 +1,6 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FiatToken from ../0xb19436aae4d94622/FiatToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FiatToken from "../0xb19436aae4d94622/FiatToken.cdc"
 
 pub contract TokenLendingPlace {
 

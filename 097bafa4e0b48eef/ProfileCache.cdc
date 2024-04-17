@@ -1,4 +1,4 @@
-import Clock from ./Clock.cdc
+import Clock from "./Clock.cdc"
 
 pub contract ProfileCache {
 

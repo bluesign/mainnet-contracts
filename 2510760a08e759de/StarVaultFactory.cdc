@@ -1,7 +1,7 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import StarVaultConfig from ./StarVaultConfig.cdc
-import StarVaultInterfaces from ./StarVaultInterfaces.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import StarVaultConfig from "./StarVaultConfig.cdc"
+import StarVaultInterfaces from "./StarVaultInterfaces.cdc"
 
 pub contract StarVaultFactory {
 

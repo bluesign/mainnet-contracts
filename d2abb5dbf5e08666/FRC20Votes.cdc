@@ -6,17 +6,17 @@
 This contract is used to manage the FRC20 votes.
 
 */
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Fixes from ./Fixes.cdc
-import FixesHeartbeat from ./FixesHeartbeat.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
-import FRC20SemiNFT from ./FRC20SemiNFT.cdc
-import FRC20Staking from ./FRC20Staking.cdc
-import FRC20StakingManager from ./FRC20StakingManager.cdc
-import FRC20VoteCommands from ./FRC20VoteCommands.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Fixes from "./Fixes.cdc"
+import FixesHeartbeat from "./FixesHeartbeat.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
+import FRC20SemiNFT from "./FRC20SemiNFT.cdc"
+import FRC20Staking from "./FRC20Staking.cdc"
+import FRC20StakingManager from "./FRC20StakingManager.cdc"
+import FRC20VoteCommands from "./FRC20VoteCommands.cdc"
 
 access(all) contract FRC20Votes {
     /* --- Events --- */

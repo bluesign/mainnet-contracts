@@ -1,4 +1,4 @@
-import SchmoesPreLaunchToken from ./SchmoesPreLaunchToken.cdc
+import SchmoesPreLaunchToken from "./SchmoesPreLaunchToken.cdc"
 
 pub contract SchmoesPreLaunchTokenAdmin {
     pub let AdminStoragePath: StoragePath

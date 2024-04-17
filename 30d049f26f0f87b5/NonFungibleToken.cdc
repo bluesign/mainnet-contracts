@@ -70,49 +70,7 @@ pub contract interface NonFungibleToken {
         pub let id: UInt64
     }
 
-    // Interface to mediate withdraws from ../the Collection/and implement this interface
-//
-pub contract interface NonFungibleToken {
-
-    // The total number of tokens of this type in existence
-    pub var totalSupply: UInt64
-
-    // Event that emitted when the Relic contract is initialized
-    //
-    pub event ContractInitialized()
-
-    // Event that is emitted when a token is withdrawn,
-    // indicating the owner of the collection that it was withdrawn from.
-    //
-    // If the collection is not in an account's storage, `from` will be `nil`.
-    //
-    pub event Withdraw(id: UInt64, from: Address?)
-
-    // Event that emitted when a token is deposited to a collection.
-    //
-    // It indicates the owner of the collection that it was deposited to.
-    //
-    pub event Deposit(id: UInt64, to: Address?)
-
-
-    // emits an event when a transfer is conducted
-    pub event Transfer(id: UInt64, from: Address?, to: Address?)
-
-
-    // Interface that the Relics have to conform to
-    //
-    pub resource interface INFT {
-        // The unique ID that each Relic has
-        pub let id: UInt64
-    }
-
-    // Requirement that all conforming Relic smart contracts have
-    // to define a resource called Relic that conforms to IRelic
-    pub resource Relic: INFT {
-        pub let id: UInt64
-    }
-
-    // Interface to mediate withdraws.cdc
+    // Interface to mediate withdraws from the Collection
     //
     pub resource interface Provider {
         // withdraw removes an Relic from the collection and moves it to the caller

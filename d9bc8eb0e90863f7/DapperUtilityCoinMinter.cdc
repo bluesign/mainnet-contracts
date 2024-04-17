@@ -1,6 +1,6 @@
-import Minter from ./Minter.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import DapperUtilityCoin from ../0xead892083b3e2c6c/DapperUtilityCoin.cdc
+import Minter from "./Minter.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import DapperUtilityCoin from "../0xead892083b3e2c6c/DapperUtilityCoin.cdc"
 
 pub contract DapperUtilityCoinMinter {
     pub resource FungibleTokenMinter: Minter.FungibleTokenMinter {

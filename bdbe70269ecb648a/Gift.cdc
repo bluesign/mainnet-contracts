@@ -4,8 +4,8 @@
 // Unless the owner recognizes it himself, external viewers will probably not be able to see it.
 // Once recognized by the owner, it is no longer a gift.
 //
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 pub contract Gift: NonFungibleToken {
     pub let CollectionPublicPath: PublicPath

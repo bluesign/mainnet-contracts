@@ -8,13 +8,13 @@ It is responsible for managing the lottery pools and the whitelist of the contro
 
 */
 // Fixes Imports
-import Fixes from ./Fixes.cdc
-import FixesHeartbeat from ./FixesHeartbeat.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FGameLottery from ./FGameLottery.cdc
-import FRC20Staking from ./FRC20Staking.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
+import Fixes from "./Fixes.cdc"
+import FixesHeartbeat from "./FixesHeartbeat.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FGameLottery from "./FGameLottery.cdc"
+import FRC20Staking from "./FRC20Staking.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
 
 access(all) contract FGameLotteryRegistry {
     /* --- Events --- */

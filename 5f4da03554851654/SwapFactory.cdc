@@ -1,8 +1,8 @@
 
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import SwapError from ./SwapError.cdc
-import SwapConfig from ./SwapConfig.cdc
-import SwapInterfaces from ./SwapInterfaces.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import SwapError from "./SwapError.cdc"
+import SwapConfig from "./SwapConfig.cdc"
+import SwapInterfaces from "./SwapInterfaces.cdc"
 
 pub contract SwapFactory {
     /// Account which has deployed pair template contract

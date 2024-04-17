@@ -1,7 +1,7 @@
 // MADE BY: Bohao Tang
 
-import FLOAT from ../0x2d4c3caffbeab845/FLOAT.cdc
-import FLOATEventSeries from ./FLOATEventSeries.cdc
+import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+import FLOATEventSeries from "./FLOATEventSeries.cdc"
 
 pub contract FLOATChallengeVerifiers {
     //

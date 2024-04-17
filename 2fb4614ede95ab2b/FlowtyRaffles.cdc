@@ -1,5 +1,5 @@
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import RandomBeaconHistory from ../0xe467b9dd11fa00df/RandomBeaconHistory.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import RandomBeaconHistory from "../0xe467b9dd11fa00df/RandomBeaconHistory.cdc"
 // import "Xorshift128plus"
 
 pub contract FlowtyRaffles {
@@ -32,39 +32,7 @@ pub contract FlowtyRaffles {
 
     NOTE: While the comments on each of these methods is the INTENDED behavior that an an implementation should use,
     there is not way for the raffle itself to know if a source is acting in good faith. Make sure you choose a raffle
-    source implementation with care, as choosing one from ../an unknown party could result in unfair outcomes./"Xorshift128plus"
-
-pub contract FlowtyRaffles {
-    pub let ManagerStoragePath: StoragePath
-    pub let ManagerPublicPath: PublicPath
-
-    pub event ManagerCreated(uuid: UInt64)
-    pub event RaffleCreated(address: Address?, raffleID: UInt64)
-    pub event RaffleReceiptCommitted(address: Address?, raffleID: UInt64, receiptID: UInt64, commitBlock: UInt64)
-    pub event RaffleReceiptRevealed(address: Address?, raffleID: UInt64, receiptID: UInt64, commitBlock: UInt64, revealHeight: UInt64, sourceType: Type, index: Int, value: String?, valueType: Type)
-
-    pub struct DrawingResult {
-        pub let index: Int
-        pub let value: AnyStruct
-
-        init(_ index: Int, _ value: AnyStruct) {
-            self.index = index
-            self.value = value
-        }
-    }
-
-    /*
-    RaffleSourcePublic - Some helper methods on a raffle source that anyone should be able to call.
-    For the most part, these methods assist in others being able to verify the entries in a raffle
-    indepdenently, and are also used when a raffle performs a dtawing by:
-        1. Asking for how many entries a raffle has
-        2. Generating a random number
-        3. Selecting a random index in the entries list based on the length of entries
-        4. Obtaining the entry at the selected index
-
-    NOTE: While the comments on each of these methods is the INTENDED behavior that an an implementation should use,
-    there is not way for the raffle itself to know if a source is acting in good faith. Make sure you choose a raffle
-    source implementation with care, as choosing one.cdc
+    source implementation with care, as choosing one from an unknown party could result in unfair outcomes.
     */
     pub resource interface RaffleSourcePublic {
         /*

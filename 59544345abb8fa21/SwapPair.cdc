@@ -1,13 +1,13 @@
-import FiatToken from ../0xb19436aae4d94622/FiatToken.cdc
-import FlowSwapPair from ../0xc6c77b9f5c7a378f/FlowSwapPair.cdc
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import IPierPair from ../0x609e10301860b683/IPierPair.cdc
-import PierPair from ../0x609e10301860b683/PierPair.cdc
-import SwapConfig from ../0xb98a8c088deffb6c/SwapConfig.cdc
-import SwapFactory from ../0xb063c16cac85dbd1/SwapFactory.cdc
-import SwapInterfaces from ../0xb78ef7afa52ff906/SwapInterfaces.cdc
-import UsdcUsdtSwapPair from ../0x9c6f94adf47904b5/UsdcUsdtSwapPair.cdc
+import FiatToken from "../0xb19436aae4d94622/FiatToken.cdc"
+import FlowSwapPair from "../0xc6c77b9f5c7a378f/FlowSwapPair.cdc"
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import IPierPair from "../0x609e10301860b683/IPierPair.cdc"
+import PierPair from "../0x609e10301860b683/PierPair.cdc"
+import SwapConfig from "../0xb98a8c088deffb6c/SwapConfig.cdc"
+import SwapFactory from "../0xb063c16cac85dbd1/SwapFactory.cdc"
+import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
+import UsdcUsdtSwapPair from "../0x9c6f94adf47904b5/UsdcUsdtSwapPair.cdc"
 
 pub contract SwapPair {
     access(self) fun bloctoScaledReserves(): [UInt256] {

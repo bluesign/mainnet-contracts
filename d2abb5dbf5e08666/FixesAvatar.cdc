@@ -8,12 +8,12 @@ TODO: Add description
 */
 
 // Thirdparty Imports
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 // Fixes Imports
-import FixesTraits from ./FixesTraits.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
+import FixesTraits from "./FixesTraits.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
 
 /// The `FixesAvatar` contract
 ///

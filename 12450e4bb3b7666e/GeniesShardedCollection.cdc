@@ -11,8 +11,8 @@
     then this contract can be retired.
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import Genies from ./Genies.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import Genies from "./Genies.cdc"
 
 pub contract GeniesShardedCollection {
     // Named Paths

@@ -6,17 +6,17 @@
 This contract is used to manage the frc20 vote commands.
 
 */
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import Fixes from ./Fixes.cdc
-import FixesInscriptionFactory from ./FixesInscriptionFactory.cdc
-import FRC20Indexer from ./FRC20Indexer.cdc
-import FRC20FTShared from ./FRC20FTShared.cdc
-import FRC20AccountsPool from ./FRC20AccountsPool.cdc
-import FRC20StakingManager from ./FRC20StakingManager.cdc
-import FRC20StakingVesting from ./FRC20StakingVesting.cdc
-import FGameLottery from ./FGameLottery.cdc
-import FGameLotteryRegistry from ./FGameLotteryRegistry.cdc
-import FGameLotteryFactory from ./FGameLotteryFactory.cdc
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import Fixes from "./Fixes.cdc"
+import FixesInscriptionFactory from "./FixesInscriptionFactory.cdc"
+import FRC20Indexer from "./FRC20Indexer.cdc"
+import FRC20FTShared from "./FRC20FTShared.cdc"
+import FRC20AccountsPool from "./FRC20AccountsPool.cdc"
+import FRC20StakingManager from "./FRC20StakingManager.cdc"
+import FRC20StakingVesting from "./FRC20StakingVesting.cdc"
+import FGameLottery from "./FGameLottery.cdc"
+import FGameLotteryRegistry from "./FGameLotteryRegistry.cdc"
+import FGameLotteryFactory from "./FGameLotteryFactory.cdc"
 
 access(all) contract FRC20VoteCommands {
 

@@ -7,8 +7,8 @@
     author: zay.codes
 */
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import SomePlaceCounter from ./SomePlaceCounter.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import SomePlaceCounter from "./SomePlaceCounter.cdc"
 
 pub contract SomePlaceCollectible : NonFungibleToken {
 

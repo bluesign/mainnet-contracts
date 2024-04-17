@@ -1,4 +1,4 @@
-import FindMarketCutStruct from ./FindMarketCutStruct.cdc
+import FindMarketCutStruct from "./FindMarketCutStruct.cdc"
 
 pub contract interface FindMarketCutInterface {
 

@@ -1,4 +1,4 @@
-import RewardAlgorithm from ../0x35f9e7ac86111b22;/RewardAlgorithm.cdc
+import RewardAlgorithm from "../0x35f9e7ac86111b22;/RewardAlgorithm.cdc"
 
 access(all) contract WonderPartnerRewardAlgorithm: RewardAlgorithm {
 

@@ -1,6 +1,6 @@
-import AFLNFT from ./AFLNFT.cdc
-import AFLPack from ./AFLPack.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import AFLNFT from "./AFLNFT.cdc"
+import AFLPack from "./AFLPack.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 pub contract AFLAdmin {
 
     // Admin

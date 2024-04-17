@@ -1,6 +1,6 @@
-import MoxyVaultToken from ./MoxyVaultToken.cdc
-import LinearRelease from ./LinearRelease.cdc
-import MoxyData from ./MoxyData.cdc
+import MoxyVaultToken from "./MoxyVaultToken.cdc"
+import LinearRelease from "./LinearRelease.cdc"
+import MoxyData from "./MoxyData.cdc"
  
 
 pub contract LockedMoxyVaultToken {

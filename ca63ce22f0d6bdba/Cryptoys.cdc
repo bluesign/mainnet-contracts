@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import CryptoysMetadataView from ./CryptoysMetadataView.cdc
-import ICryptoys from ./ICryptoys.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import CryptoysMetadataView from "./CryptoysMetadataView.cdc"
+import ICryptoys from "./ICryptoys.cdc"
 
 // Cryptoys
 // The jam.

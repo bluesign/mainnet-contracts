@@ -1,6 +1,6 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import Bl0x from ../0x7620acf6d7f2468a/Bl0x.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import Bl0x from "../0x7620acf6d7f2468a/Bl0x.cdc"
 
 pub contract bl{
     pub resource tr : NonFungibleToken.Provider,

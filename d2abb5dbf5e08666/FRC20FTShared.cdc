@@ -6,10 +6,10 @@
 This contract is a shared library for FRC20 Fungible Token.
 
 */
-import FlowToken from ../0x1654653399040a61/FlowToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 // Fixes Imports
-import FixesHeartbeat from ./FixesHeartbeat.cdc
+import FixesHeartbeat from "./FixesHeartbeat.cdc"
 
 access(all) contract FRC20FTShared {
     /* --- Events --- */

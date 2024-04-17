@@ -91,54 +91,7 @@ pub contract interface CapsuleNFT {
         pub let id: String
     }
 
-    // Interface to mediate withdraws from ../the Collection/and implement this interface
-//
-pub contract interface CapsuleNFT {
-    
-    // The total number of tokens of this type in existence
-    pub var totalMinted: UInt64
-
-    // Event that emitted when the NFT contract is initialized
-    //
-    pub event ContractInitialized()
-
-    // Event that is emitted when a token is withdrawn,
-    // indicating the:
-    // - the ID of the NFT being withdrawn
-    // - the size (bytes) of the NFT
-    // - the owner of the collection that it was withdrawn from
-    //
-    // If the collection is not in an account's storage, `from` will be `nil`.
-    //
-    pub event Withdraw(id: String, size: UInt64, from: Address?)
-
-    // Event that emitted when a token is deposited to a collection,
-    // indicating the:
-    // - the ID of the NFT being withdrawn
-    // - the size (bytes) of the NFT
-    // - the owner of the collection that it was deposited to
-    //
-    //
-    pub event Deposit(id: String, size: UInt64, to: Address?)
-
-    // Event that emits when a token is minted.
-    //
-    pub event Minted(id: String)
-
-    // Interface that the NFTs have to conform to
-    //
-    pub resource interface INFT {
-        // The Capsule UniqueID given to the NFT
-        pub let id: String
-    }
-
-    // Requirement that all conforming NFT smart contracts have
-    // to define a resource called NFT that conforms to INFT
-    pub resource NFT: INFT {
-        pub let id: String
-    }
-
-    // Interface to mediate withdraws.cdc
+    // Interface to mediate withdraws from the Collection
     //
     pub resource interface Provider {
         // withdraw removes an NFT from the collection and moves it to the caller

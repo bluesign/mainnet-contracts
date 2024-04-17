@@ -1,7 +1,7 @@
-import FungibleToken from ../0xf233dcee88fe0abe;/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448;/NonFungibleToken.cdc
-import ByteNextMedalNFT from ../0x3b16cb9f5c036412;/ByteNextMedalNFT.cdc
-import NonFungibleTokenMinter from ../0x3b16cb9f5c036412;/NonFungibleTokenMinter.cdc
+import FungibleToken from "../0xf233dcee88fe0abe;/FungibleToken.cdc"
+import NonFungibleToken from "../0x1d7e57aa55817448;/NonFungibleToken.cdc"
+import ByteNextMedalNFT from "../0x3b16cb9f5c036412;/ByteNextMedalNFT.cdc"
+import NonFungibleTokenMinter from "../0x3b16cb9f5c036412;/NonFungibleTokenMinter.cdc"
 
 pub contract ByteNextLaunchpad {
 

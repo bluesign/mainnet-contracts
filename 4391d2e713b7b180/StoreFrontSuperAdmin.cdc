@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NFTStorefront, StoreFront from ./NFTStorefront, StoreFront.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NFTStorefront, StoreFront from 0x4391d2e713b7b180
 
 // TOKEN RUNNERS: Contract responsable for Admin and Super admin permissions
 pub contract StoreFrontSuperAdmin {

@@ -6,9 +6,9 @@
 // Developer       : RubiconFinTech.com
 
 // FlowToken FUNGIBLE TOKEN mainnet
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 
-import Popsycl from ./Popsycl.cdc
+import Popsycl from "./Popsycl.cdc"
 
 // This contract allows users to list their Popsycl NFT for sale. 
 // Other users can purchase these NFTs with FLOW token.

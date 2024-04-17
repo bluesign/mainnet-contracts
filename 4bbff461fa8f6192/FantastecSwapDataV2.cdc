@@ -10,7 +10,7 @@ Cards represent an individual item or moment of interest - a digital card of a p
 An NFT will be minted against individual Card.
 */
 
-import FantastecSwapDataProperties from ./FantastecSwapDataProperties.cdc
+import FantastecSwapDataProperties from "./FantastecSwapDataProperties.cdc"
 
 pub contract FantastecSwapDataV2 {
 

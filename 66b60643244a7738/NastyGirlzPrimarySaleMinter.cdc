@@ -1,7 +1,7 @@
 // Mainnet
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import NGPrimarySale from ./NGPrimarySale.cdc
-import NastyGirlz from ./NastyGirlz.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import NGPrimarySale from "./NGPrimarySale.cdc"
+import NastyGirlz from "./NastyGirlz.cdc"
 
 pub contract NastyGirlzPrimarySaleMinter {
     pub resource Minter: NGPrimarySale.IMinter {

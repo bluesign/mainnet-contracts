@@ -20,7 +20,7 @@
 // of the secret code through. For Limited, we need to know the totalSupply of the event,
 // so we pass it through as well.
 
-import MusicPeaksMembershipToken from ./MusicPeaksMembershipToken.cdc
+import MusicPeaksMembershipToken from "./MusicPeaksMembershipToken.cdc"
 
 pub contract FLOATVerifiers {
 

@@ -1,4 +1,4 @@
-import ExpToken from ./ExpToken.cdc
+import ExpToken from "./ExpToken.cdc"
 
 pub contract GamingIntegration {
     //

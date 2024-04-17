@@ -1,7 +1,7 @@
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import FlowverseSocks from ./FlowverseSocks.cdc
-import RaribleNFT from ../0x01ab36aaf654a13e/RaribleNFT.cdc
+import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import FlowverseSocks from "./FlowverseSocks.cdc"
+import RaribleNFT from "../0x01ab36aaf654a13e/RaribleNFT.cdc"
 
 pub contract FlowverseSocksMintContract {
     pub let AdminStoragePath: StoragePath

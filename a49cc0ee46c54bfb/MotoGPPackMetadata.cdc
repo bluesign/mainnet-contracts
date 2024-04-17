@@ -1,9 +1,9 @@
-import FungibleToken from ../0xf233dcee88fe0abe/FungibleToken.cdc
-import NonFungibleToken from ../0x1d7e57aa55817448/NonFungibleToken.cdc
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
-import MotoGPAdmin from ./MotoGPAdmin.cdc
-import ContractVersion from ../0xb223b2bfe4b8ffb5/ContractVersion.cdc
-import MotoGPRegistry from ./MotoGPRegistry.cdc
+import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+import NonFungibleToken from 0x1d7e57aa55817448 
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
+import MotoGPAdmin from "./MotoGPAdmin.cdc"
+import ContractVersion from "../0xb223b2bfe4b8ffb5/ContractVersion.cdc"
+import MotoGPRegistry from 0xa49cc0ee46c54bfb 
 
 // Contract to hold Metadata for MotoGPPacks. Metadata is accessed using the Pack's packID (not the Pack's id)
 //

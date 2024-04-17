@@ -1,10 +1,10 @@
 // Third-party imports
-import MetadataViews from ../0x1d7e57aa55817448/MetadataViews.cdc
+import MetadataViews from "../0x1d7e57aa55817448/MetadataViews.cdc"
 
 // HC-owned imports
-import CapabilityFactory from ./CapabilityFactory.cdc
-import CapabilityDelegator from ./CapabilityDelegator.cdc
-import CapabilityFilter from ./CapabilityFilter.cdc
+import CapabilityFactory from "./CapabilityFactory.cdc"
+import CapabilityDelegator from "./CapabilityDelegator.cdc"
+import CapabilityFilter from "./CapabilityFilter.cdc"
 
 /// HybridCustody defines a framework for sharing accounts via account linking.
 /// In the contract, there are three main resources:

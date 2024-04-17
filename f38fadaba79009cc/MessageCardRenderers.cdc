@@ -1,4 +1,4 @@
-import MessageCard from ./MessageCard.cdc
+import MessageCard from "./MessageCard.cdc"
 
 pub contract MessageCardRenderers {
     pub struct SvgPartsRenderer: MessageCard.IRenderer {
