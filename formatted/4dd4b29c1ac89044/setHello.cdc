@@ -1,0 +1,3 @@
+pub contract setHello{ 
+    init(){} 
+}

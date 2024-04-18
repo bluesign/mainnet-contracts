@@ -1,0 +1,1 @@
+pub contract t2{}
