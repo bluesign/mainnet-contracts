@@ -350,11 +350,9 @@ contract FlovatarInbox{
 	access(all)
 	fun getFlovatarDustBalance(id: UInt64): UFix64{ 
 		if let inboxCollection =
-			(
-				self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarInbox.CollectionPublic}>(){ 
 			return inboxCollection.getFlovatarDustBalance(id: id)
 		}
 		return 0.0
@@ -364,11 +362,9 @@ contract FlovatarInbox{
 	access(all)
 	fun getWalletDustBalance(address: Address): UFix64{ 
 		if let inboxCollection =
-			(
-				self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarInbox.CollectionPublic}>(){ 
 			return inboxCollection.getWalletDustBalance(address: address)
 		}
 		return 0.0
@@ -378,11 +374,9 @@ contract FlovatarInbox{
 	access(all)
 	fun getFlovatarComponentIDs(id: UInt64): [UInt64]{ 
 		if let inboxCollection =
-			(
-				self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarInbox.CollectionPublic}>(){ 
 			return inboxCollection.getFlovatarComponentIDs(id: id)
 		}
 		return []
@@ -392,11 +386,9 @@ contract FlovatarInbox{
 	access(all)
 	fun getWalletComponentIDs(address: Address): [UInt64]{ 
 		if let inboxCollection =
-			(
-				self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarInbox.CollectionPublic}>(){ 
 			return inboxCollection.getWalletComponentIDs(address: address)
 		}
 		return []
@@ -415,7 +407,7 @@ contract FlovatarInbox{
 			){ 
 			if let flovatar = Flovatar.getFlovatar(address: address, flovatarId: id){ 
 				let receiverAccount = getAccount(address)
-				let flovatarComponentReceiverCollection = receiverAccount.capabilities.get<&{FlovatarComponent.CollectionPublic}>(FlovatarComponent.CollectionPublicPath)!
+				let flovatarComponentReceiverCollection = receiverAccount.capabilities.get<&{FlovatarComponent.CollectionPublic}>(FlovatarComponent.CollectionPublicPath)
 				var i: UInt32 = 0
 				let componentIds = self.getFlovatarComponentIDs(id: id)
 				
@@ -448,7 +440,7 @@ contract FlovatarInbox{
 			let flovatarComponentReceiverCollection =
 				receiverAccount.capabilities.get<&{FlovatarComponent.CollectionPublic}>(
 					FlovatarComponent.CollectionPublicPath
-				)!
+				)
 			var i: UInt32 = 0
 			let componentIds = self.getWalletComponentIDs(address: address)
 			
@@ -478,7 +470,7 @@ contract FlovatarInbox{
 			){ 
 			if let flovatar = Flovatar.getFlovatar(address: address, flovatarId: id){ 
 				let receiverAccount = getAccount(address)
-				let receiverRef = (receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(FlovatarDustToken.VaultReceiverPath)!!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+				let receiverRef = (receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(FlovatarDustToken.VaultReceiverPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 				let vault <- inboxCollection.withdrawFlovatarDust(id: id)
 				emit FlovatarWithdrawDust(id: id, amount: vault.balance, to: address)
 				receiverRef.deposit(from: <-vault)
@@ -502,7 +494,7 @@ contract FlovatarInbox{
 				(
 					receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(
 						FlovatarDustToken.VaultReceiverPath
-					)!!
+					)!
 				).borrow()
 				?? panic("Could not borrow receiver reference to the recipient's Vault")
 			let vault <- inboxCollection.withdrawWalletDust(address: address)
@@ -524,11 +516,9 @@ contract FlovatarInbox{
 		if let flovatarScore: UFix64 =
 			Flovatar.getFlovatarRarityScore(address: address, flovatarId: id){ 
 			if let inboxCollection =
-				(
-					self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
-						self.CollectionPublicPath
-					)!
-				).borrow(){ 
+				self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
+					self.CollectionPublicPath
+				).borrow<&{FlovatarInbox.CollectionPublic}>(){ 
 				let lastClaimed: UFix64 = inboxCollection.getLastClaimedDust(id: id)
 				let currentTime: UFix64 = getCurrentBlock().timestamp
 				let timeDiff: UFix64 = currentTime - lastClaimed
@@ -568,7 +558,7 @@ contract FlovatarInbox{
 			}
 			if claimableDust.amount > UFix64(0.0){ 
 				let receiverAccount = getAccount(address)
-				let receiverRef = (receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(FlovatarDustToken.VaultReceiverPath)!!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+				let receiverRef = (receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(FlovatarDustToken.VaultReceiverPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 				let vault <- self.communityVault.withdraw(amount: claimableDust.amount)
 				self.setLastClaimedDust(id: id, days: claimableDust.days)
 				emit FlovatarClaimedCommunityDust(id: id, amount: vault.balance, to: address)
@@ -588,10 +578,8 @@ contract FlovatarInbox{
 			return
 		}
 		let manager =
-			(
-				getAccount(parent).capabilities.get<&HybridCustody.Manager>(
-					HybridCustody.ManagerPublicPath
-				)!
+			getAccount(parent).capabilities.get<&HybridCustody.Manager>(
+				HybridCustody.ManagerPublicPath
 			).borrow()
 			?? panic("parent account does not have a hybrid custody manager")
 		assert(
@@ -605,7 +593,7 @@ contract FlovatarInbox{
 			}
 			if claimableDust.amount > 0.0{ 
 				let receiverAccount = getAccount(parent)
-				let receiverRef = (receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(FlovatarDustToken.VaultReceiverPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+				let receiverRef = receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(FlovatarDustToken.VaultReceiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 				let vault <- self.communityVault.withdraw(amount: claimableDust.amount)
 				self.setLastClaimedDust(id: id, days: claimableDust.days)
 				

@@ -163,7 +163,7 @@ contract BlockpartyNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -260,7 +260,7 @@ contract BlockpartyNFT: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("no token found with provided withdrawID")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -285,7 +285,7 @@ contract BlockpartyNFT: NonFungibleToken{
 			}
 			let token <- self.withdraw(withdrawID: id)
 			(self.tokenDDepositerCap.borrow()!).deposit(token: <-token)
-			let addrToIssueProvider = ((self.owner!).capabilities.get<&TokenDAddressProvider>(BlockpartyNFT.TokenDAccountAddressProviderPublicPath)!).borrow()!
+			let addrToIssueProvider = (self.owner!).capabilities.get<&TokenDAddressProvider>(BlockpartyNFT.TokenDAccountAddressProviderPublicPath).borrow()!
 			emit TransferredToServiceAccount(id: id, from: (self.owner!).address, extSystemAddrToMint: addrToIssueProvider.tokenDAddress)
 		}
 		
@@ -324,6 +324,16 @@ contract BlockpartyNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -341,7 +351,7 @@ contract BlockpartyNFT: NonFungibleToken{
 		access(all)
 		fun mintNFTByIssuance(requests: [IssuanceMintMsg], metadatas: [{String: String}]){ 
 			let minterOwner = self.owner ?? panic("could not get minter owner")
-			let minterOwnerCollection = (minterOwner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.BNFTCollectionPublicPath)!).borrow() ?? panic("Could not get reference to the service account's NFT Collection")
+			let minterOwnerCollection = minterOwner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.BNFTCollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get reference to the service account's NFT Collection")
 			var creationID = BlockpartyNFT.totalSupply + 1 as UInt64
 			BlockpartyNFT.totalSupply = BlockpartyNFT.totalSupply + UInt64(requests.length)
 			for i, req in requests{ 
@@ -362,7 +372,7 @@ contract BlockpartyNFT: NonFungibleToken{
 		fun mintNFT(withdrawRequestID: UInt64, detailsURL: String, metadataMap:{ String: String}, receiver: Address){ 
 			// Borrow the recipient's public NFT collection reference
 			let recipientAccount = getAccount(receiver)
-			let recipientCollection = (recipientAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.BNFTCollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let recipientCollection = recipientAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.BNFTCollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			
 			// create token with provided name and data
 			let token <- create NFT(id: BlockpartyNFT.totalSupply + 1 as UInt64, detailsURL: detailsURL)
@@ -474,7 +484,7 @@ contract BlockpartyNFT: NonFungibleToken{
 			// in case when contract is being deployed after removal minter does already exist and no need to save it once more
 			self.account.storage.save(<-create NFTMinter(collectionPublicPath: self.BNFTCollectionPublicPath), to: self.MinterStoragePath)
 		}
-		let adminCollectionExists = (self.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.BNFTCollectionPublicPath)!).check()
+		let adminCollectionExists = self.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.BNFTCollectionPublicPath).check()
 		if !adminCollectionExists{ 
 			self.account.storage.save(<-self.createEmptyCollection(nftType: Type<@Collection>()), to: self.BNFTCollectionStoragePath)
 		// adminCollection <-! self.createEmptyCollection() as @BlockpartyNFT.Collection?

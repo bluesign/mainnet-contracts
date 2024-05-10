@@ -52,7 +52,7 @@ contract Electables: NonFungibleToken{
 	let MinterStoragePath: StoragePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -148,7 +148,7 @@ contract Electables: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// Provider Interface
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -195,10 +195,20 @@ contract Electables: NonFungibleToken{
 		}
 		
 		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?{ 
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}{ 
 			let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			let electable = nft as! &Electables.NFT
 			return electable as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

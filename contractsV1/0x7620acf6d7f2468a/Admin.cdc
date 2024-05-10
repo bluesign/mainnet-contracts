@@ -122,7 +122,7 @@ contract Admin{
 				self.capability != nil:
 					"Cannot create Admin, capability is not set"
 			}
-			let recipient = (Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(Bl0xPack.CollectionPublicPath)!).borrow()!
+			let recipient = Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(Bl0xPack.CollectionPublicPath).borrow()!
 			for hash in hashes{ 
 				Bl0xPack.mintNFT(recipient: recipient, typeId: typeId, hash: hash)
 			}

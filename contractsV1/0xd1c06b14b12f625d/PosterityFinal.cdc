@@ -85,7 +85,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -128,8 +128,8 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 				case Type<MetadataViews.NFTCollectionDisplay>():
 					return PosterityFinal.resolveView(view)
 				case Type<MetadataViews.Royalties>():
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(self.originalMinter).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.10, // 10% royalty on secondary sales																																															   
-																																															   description: "The creator of the original content gets 10% of every secondary sale.")])
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(self.originalMinter).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.10, // 10% royalty on secondary sales																																															  
+																																															  description: "The creator of the original content gets 10% of every secondary sale.")])
 				case Type<MetadataViews.Serial>():
 					return MetadataViews.Serial(0)
 			}
@@ -185,7 +185,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// Withdraw removes an NFT from the collection and moves it to the caller(for Trading)
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -249,6 +249,16 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -280,7 +290,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 			// Fetch StoragePath for this randomID and recipient	
 			let identifier = "PosteritySVGStorage_".concat(randomNumber.toString())
 			let nft <- create NFT(_randomID: randomNumber, _recipient: recipient, _signature: signature, _extra:{ "randomID": randomNumber, "traits": traits}, _SVGPointer: StoragePath(identifier: identifier)!)
-			if let recipientCollection = (getAccount(recipient).capabilities.get<&PosterityFinal.Collection>(PosterityFinal.CollectionPublicPath)!).borrow(){ 
+			if let recipientCollection = getAccount(recipient).capabilities.get<&PosterityFinal.Collection>(PosterityFinal.CollectionPublicPath).borrow<&PosterityFinal.Collection>(){ 
 				recipientCollection.deposit(token: <-nft)
 			} else if let storage = &PosterityFinal.nftStorage[recipient] as auth(Mutate) &{UInt64: NFT}?{ 
 				storage[nft.id] <-! nft

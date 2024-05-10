@@ -115,7 +115,7 @@ contract SturdyMinter{
 		let merchantDUCReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -126,11 +126,9 @@ contract SturdyMinter{
 		// Get buyer collection public to receive SturdyTokens
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					SturdyTokens.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				SturdyTokens.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint SturdyTokens NFTs per purchaseAmount
@@ -185,7 +183,7 @@ contract SturdyMinter{
 		let merchantDUCReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -196,11 +194,9 @@ contract SturdyMinter{
 		// Get buyer collection public to receive SturdyTokens
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					SturdyTokens.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				SturdyTokens.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint SturdyTokens NFTs per purchaseAmount

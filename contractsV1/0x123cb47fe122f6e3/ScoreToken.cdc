@@ -223,7 +223,7 @@ contract ScoreToken: FungibleToken{
 		///
 		access(all)
 		fun mintTokensTo(amount: UFix64, address: Address){ 
-			let tokenReceiver = (getAccount(address).capabilities.get<&{ScoreToken.ReceiverInterface}>(ScoreToken.scoreTokenReceiverTimestampPath)!).borrow() ?? panic("Unable to borrow receiver reference")
+			let tokenReceiver = getAccount(address).capabilities.get<&{ScoreToken.ReceiverInterface}>(ScoreToken.scoreTokenReceiverTimestampPath).borrow<&{ScoreToken.ReceiverInterface}>() ?? panic("Unable to borrow receiver reference")
 			let mintedVault <- self.mintTokensFor(amount: amount, timestamp: getCurrentBlock().timestamp)
 			tokenReceiver.earnScore(from: <-mintedVault)
 		}

@@ -175,8 +175,8 @@ contract DigiBuddiesStorefront{
 			//Check if the account has a DigiBuddies collection. 
 			//If so, check if there are Driverz in it. 
 			//If account do not have driverz, the discount will not be applied.
-			if (getAccount(buyerAddress).capabilities.get<&{NonFungibleToken.CollectionPublic}>(DigiBuddies.CollectionPublicPath)!).borrow() != nil{ 
-				let driverzCollection: &{NonFungibleToken.CollectionPublic} = (getAccount(buyerAddress).capabilities.get<&{NonFungibleToken.CollectionPublic}>(DigiBuddies.CollectionPublicPath)!).borrow()!
+			if getAccount(buyerAddress).capabilities.get<&{NonFungibleToken.CollectionPublic}>(DigiBuddies.CollectionPublicPath).borrow() != nil{ 
+				let driverzCollection: &{NonFungibleToken.CollectionPublic} = getAccount(buyerAddress).capabilities.get<&{NonFungibleToken.CollectionPublic}>(DigiBuddies.CollectionPublicPath).borrow()!
 				if driverzCollection.getIDs().length > 0{ 
 					let discountAmount: UFix64 = self.details.discount != nil ? self.details.discount! : 0.0
 					finalSalePrice = self.details.salePrice - discountAmount

@@ -76,7 +76,7 @@ contract UFCStrikeInfinity: NonFungibleToken, ViewResolver{
 	let minted:{ UInt256: Bool}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		/// The unique ID of each NFT
 		access(all)
 		let id: UInt64
@@ -192,7 +192,7 @@ contract UFCStrikeInfinity: NonFungibleToken, ViewResolver{
 		/// @param withdrawID: The ID of the NFT that wants to be withdrawn
 		/// @return The NFT resource that has been taken out of the collection
 		///
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -291,6 +291,16 @@ contract UFCStrikeInfinity: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -344,7 +354,7 @@ contract UFCStrikeInfinity: NonFungibleToken, ViewResolver{
 		emit Minted(id: id, address: recipient)
 		
 		// Get the collection of the current account using a borrowed reference
-		let receiver = (getAccount(recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(UFCStrikeInfinity.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+		let receiver = getAccount(recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(UFCStrikeInfinity.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Update the owners mapping
 		UFCStrikeInfinity.owners.append(recipient)

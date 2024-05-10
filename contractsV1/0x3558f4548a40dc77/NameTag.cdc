@@ -56,14 +56,12 @@ contract NameTag{
 	
 	access(all)
 	fun hasTag(_ address: Address): Bool{ 
-		return (getAccount(address).capabilities.get<&{NameTag.Public}>(NameTag.publicPath)!)
-			.check()
+		return getAccount(address).capabilities.get<&{NameTag.Public}>(NameTag.publicPath).check()
 	}
 	
 	access(all)
 	fun fetch(_ address: Address): &{NameTag.Public}{ 
-		return (getAccount(address).capabilities.get<&{NameTag.Public}>(NameTag.publicPath)!)
-			.borrow()!
+		return getAccount(address).capabilities.get<&{NameTag.Public}>(NameTag.publicPath).borrow()!
 	}
 	
 	init(){ 

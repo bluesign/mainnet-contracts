@@ -322,7 +322,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Werewolf, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Werewolf, ViewResolver.Resolver{ 
 		/// Werewolf
 		access(all)
 		let id: UInt64
@@ -469,7 +469,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://www.barteryard.club")
 				case Type<MetadataViews.Royalties>():
-					let recipient = getAccount(Address(0xb07b788eb60b6528)).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+					let recipient = getAccount(Address(0xb07b788eb60b6528)).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: recipient, cut: 0.025, description: "Werewolves Royalty")])
 				case Type<MetadataViews.NFTCollectionDisplay>():
 					let mediaSquare = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://images.barteryard.club/logo.svg"), mediaType: "image/svg+xml")
@@ -509,7 +509,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -562,6 +562,16 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let BarterYardClubWerewolf = nft as! &BarterYardClubWerewolf.NFT
 			return BarterYardClubWerewolf as! &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

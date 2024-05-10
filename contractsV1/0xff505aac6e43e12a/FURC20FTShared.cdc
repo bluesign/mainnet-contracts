@@ -656,7 +656,7 @@ contract FURC20FTShared{
 	///
 	access(all)
 	fun borrowStoreRef(_ address: Address): &SharedStore?{ 
-		return (getAccount(address).capabilities.get<&SharedStore>(self.SharedStorePublicPath)!)
+		return getAccount(address).capabilities.get<&SharedStore>(self.SharedStorePublicPath)
 			.borrow()
 	}
 	
@@ -787,10 +787,8 @@ contract FURC20FTShared{
 	///
 	access(account)
 	fun borrowTransactionHook(_ address: Address): &{TransactionHook}?{ 
-		return (
-			getAccount(address).capabilities.get<&{TransactionHook}>(
-				self.TransactionHookPublicPath
-			)!
+		return getAccount(address).capabilities.get<&{TransactionHook}>(
+			self.TransactionHookPublicPath
 		).borrow()
 	}
 	

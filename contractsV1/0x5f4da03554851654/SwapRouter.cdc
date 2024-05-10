@@ -30,7 +30,7 @@ contract SwapRouter{
 		var i: Int = 0
 		while i < tokenKeyPath.length - 1{ 
 			let pairAddr = SwapFactory.getPairAddress(token0Key: tokenKeyPath[i], token1Key: tokenKeyPath[i + 1]) ?? panic(SwapError.ErrorEncode(msg: "SwapRouter: nonexistent pair ".concat(tokenKeyPath[i]).concat(" <-> ").concat(tokenKeyPath[i + 1]), err: SwapError.ErrorCode.NONEXISTING_SWAP_PAIR))
-			let pairPublicRef = (getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow() ?? panic(SwapError.ErrorEncode(msg: "SwapRouter: Lost SwapPair public capability", err: SwapError.ErrorCode.LOST_PUBLIC_CAPABILITY))
+			let pairPublicRef = getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow() ?? panic(SwapError.ErrorEncode(msg: "SwapRouter: Lost SwapPair public capability", err: SwapError.ErrorCode.LOST_PUBLIC_CAPABILITY))
 			/// Previous swap result will be the input of the next swap
 			amounts[i + 1] = pairPublicRef.getAmountOut(amountIn: amounts[i], tokenInKey: tokenKeyPath[i])
 			i = i + 1
@@ -54,7 +54,7 @@ contract SwapRouter{
 		var i: Int = tokenKeyPath.length - 1
 		while i > 0{ 
 			let pairAddr = SwapFactory.getPairAddress(token0Key: tokenKeyPath[i], token1Key: tokenKeyPath[i - 1]) ?? panic(SwapError.ErrorEncode(msg: "SwapRouter: nonexistent pair ".concat(tokenKeyPath[i]).concat(" <-> ").concat(tokenKeyPath[i + 1]), err: SwapError.ErrorCode.NONEXISTING_SWAP_PAIR))
-			let pairPublicRef = (getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow() ?? panic(SwapError.ErrorEncode(msg: "SwapRouter: Lost SwapPair public capability", err: SwapError.ErrorCode.LOST_PUBLIC_CAPABILITY))
+			let pairPublicRef = getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow() ?? panic(SwapError.ErrorEncode(msg: "SwapRouter: Lost SwapPair public capability", err: SwapError.ErrorCode.LOST_PUBLIC_CAPABILITY))
 			/// Calculate from back to front
 			amounts[i - 1] = pairPublicRef.getAmountIn(amountOut: amounts[i], tokenOutKey: tokenKeyPath[i])
 			i = i - 1
@@ -253,10 +253,8 @@ contract SwapRouter{
 	): @{FungibleToken.Vault}{ 
 		let pairAddr = SwapFactory.getPairAddress(token0Key: token0Key, token1Key: token1Key)!
 		let pairPublicRef =
-			(
-				getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					SwapConfig.PairPublicPath
-				)!
+			getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				SwapConfig.PairPublicPath
 			).borrow()!
 		return <-pairPublicRef.swap(vaultIn: <-vaultIn, exactAmountOut: exactAmountOut)
 	}

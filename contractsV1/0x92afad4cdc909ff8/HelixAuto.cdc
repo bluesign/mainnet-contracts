@@ -106,7 +106,7 @@ contract HelixAuto: NonFungibleToken{
 	
 	// NFT Resource
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// Variables
 		access(all)
 		let id: UInt64
@@ -232,7 +232,7 @@ contract HelixAuto: NonFungibleToken{
 		}
 		
 		// Deposit
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This collection doesn't contain an NFT with that id")
 			emit Withdraw(id: withdrawID, from: self.owner?.address)
@@ -274,6 +274,16 @@ contract HelixAuto: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -306,7 +316,7 @@ contract HelixAuto: NonFungibleToken{
 	// If it has a collection and it contains the itemID, return a reference to that
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &HelixAuto.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&HelixAuto.Collection>(HelixAuto.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&HelixAuto.Collection>(HelixAuto.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust that HelixAuto.collection.borrowEntireNFT to get the correct itemID
 		// (it checks it before returning it)
 		return collection.borrowEntireNFT(id: itemID)

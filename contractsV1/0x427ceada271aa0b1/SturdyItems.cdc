@@ -55,7 +55,7 @@ contract SturdyItems: NonFungibleToken{
 	// A Sturdy Item as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -186,7 +186,7 @@ contract SturdyItems: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -245,6 +245,16 @@ contract SturdyItems: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let exampleNFT = nft as! &SturdyItems.NFT
 			return exampleNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -310,7 +320,7 @@ contract SturdyItems: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &SturdyItems.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&SturdyItems.Collection>(SturdyItems.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&SturdyItems.Collection>(SturdyItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust SturdyItems.Collection.borowSturdyItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowSturdyItem(id: itemID)

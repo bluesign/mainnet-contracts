@@ -72,7 +72,7 @@ contract KrikeyAINFT: NonFungibleToken{
 		 */
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, TokenDataAware, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, TokenDataAware, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -111,8 +111,8 @@ contract KrikeyAINFT: NonFungibleToken{
 				case Type<MetadataViews.Royalties>():
 					let RECEIVER_PATH = /public/flowTokenReceiver
 					// Address Hardcoded for testing
-					var royaltyReceiver = getAccount(0xff338e9d95c0bb8c).capabilities.get<&{FungibleToken.Receiver}>(RECEIVER_PATH)!
-					let royalty = MetadataViews.Royalty(receiver: royaltyReceiver, cut: (asset!).royalty, description: "Solarpups Krikey Creator Royalty")
+					var royaltyReceiver = getAccount(0xff338e9d95c0bb8c).capabilities.get<&{FungibleToken.Receiver}>(RECEIVER_PATH)
+					let royalty = MetadataViews.Royalty(receiver: royaltyReceiver!, cut: (asset!).royalty, description: "Solarpups Krikey Creator Royalty")
 					return MetadataViews.Royalties([royalty])
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL(url)
@@ -287,7 +287,7 @@ contract KrikeyAINFT: NonFungibleToken{
 			self.ownedAssets ={} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- (self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")) as! @KrikeyAINFT.NFT
 			self.ownedAssets[token.data.assetId]?.remove(key: token.data.edition)
@@ -383,6 +383,16 @@ contract KrikeyAINFT: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let solarpupsNFT = nft as! &KrikeyAINFT.NFT
 			return solarpupsNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

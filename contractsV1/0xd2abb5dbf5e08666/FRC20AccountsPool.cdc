@@ -480,7 +480,7 @@ contract FRC20AccountsPool{
 	///
 	access(all)
 	fun borrowAccountsPool(): &Pool{ 
-		return (self.account.capabilities.get<&Pool>(self.AccountsPoolPublicPath)!).borrow()
+		return self.account.capabilities.get<&Pool>(self.AccountsPoolPublicPath).borrow()
 		?? panic("Could not borrow accounts pool reference")
 	}
 	

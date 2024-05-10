@@ -67,7 +67,7 @@ contract DimeCollectibleV2: NonFungibleToken{
 	
 	// DimeCollectibleV2 as a NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -195,7 +195,7 @@ contract DimeCollectibleV2: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -236,6 +236,16 @@ contract DimeCollectibleV2: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -288,7 +298,7 @@ contract DimeCollectibleV2: NonFungibleToken{
 	// return a reference to it
 	access(all)
 	fun fetch(_ from: Address, itemId: UInt64): &DimeCollectibleV2.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&DimeCollectibleV2.Collection>(DimeCollectibleV2.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&DimeCollectibleV2.Collection>(DimeCollectibleV2.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.borrowCollectible(id: itemId)
 	}
 	

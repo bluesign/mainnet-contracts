@@ -185,7 +185,7 @@ contract LampionsPack: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -342,7 +342,7 @@ contract LampionsPack: NonFungibleToken{
 		fun requeue(packId: UInt64){ 
 			let token <- self.withdraw(withdrawID: packId) as! @NFT
 			let address = token.resetOpendBy()
-			let cap = getAccount(address).capabilities.get<&Collection>(LampionsPack.CollectionPublicPath)!
+			let cap = getAccount(address).capabilities.get<&Collection>(LampionsPack.CollectionPublicPath)
 			let receiver = cap.borrow()!
 			receiver.deposit(token: <-token)
 			emit Requeued(packId: packId, address: cap.address)
@@ -363,7 +363,7 @@ contract LampionsPack: NonFungibleToken{
 			token.setOpenedBy(receiverCap)
 			
 			// establish the receiver for Redeeming LampionsPack
-			let receiver = (LampionsPack.account.capabilities.get<&{NonFungibleToken.Receiver}>(LampionsPack.OpenedCollectionPublicPath)!).borrow()!
+			let receiver = LampionsPack.account.capabilities.get<&{NonFungibleToken.Receiver}>(LampionsPack.OpenedCollectionPublicPath).borrow()!
 			let typeId = token.getTypeID()
 			// deposit for consumption
 			receiver.deposit(token: <-token)
@@ -460,7 +460,7 @@ contract LampionsPack: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Could not withdraw nft")
 			let nft <- token as! @NFT
@@ -530,6 +530,16 @@ contract LampionsPack: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let exampleNFT = nft as! &NFT
 			return exampleNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -627,7 +637,7 @@ contract LampionsPack: NonFungibleToken{
 	
 	access(all)
 	fun getPacksCollection(): &LampionsPack.Collection{ 
-		return (LampionsPack.account.capabilities.get<&LampionsPack.Collection>(LampionsPack.CollectionPublicPath)!).borrow() ?? panic("Could not borow LampionsPack collection")
+		return LampionsPack.account.capabilities.get<&LampionsPack.Collection>(LampionsPack.CollectionPublicPath).borrow() ?? panic("Could not borow LampionsPack collection")
 	}
 	
 	access(all)
@@ -665,7 +675,7 @@ contract LampionsPack: NonFungibleToken{
 	
 	access(all)
 	fun hasFloat(floatEventId: UInt64, user: Address): Bool{ 
-		let float = (getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow()
+		let float = getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 		if float == nil{ 
 			return false
 		}

@@ -98,7 +98,7 @@ contract Gomoku{
 				let participants = Gomoku.getParticipants(by: index)
 				assert(participants.length == 2, message: "Composition not matched.")
 				for participant in participants{ 
-					if let identityCollectionRef = (getAccount(participant).capabilities.get<&GomokuIdentity.IdentityCollection>(GomokuIdentity.CollectionPublicPath)!).borrow(){ 
+					if let identityCollectionRef = getAccount(participant).capabilities.get<&GomokuIdentity.IdentityCollection>(GomokuIdentity.CollectionPublicPath).borrow(){ 
 						let identityToken <- identityCollectionRef.withdraw(by: index) ?? panic("identity not found in address ".concat(participant.toString()).concat(" at index ").concat(index.toString()))
 						if let identityTokenBack <- compositionRef.finalizeByTimeout(identityToken: <-identityToken){ 
 							identityCollectionRef.deposit(token: <-identityTokenBack)
@@ -116,7 +116,7 @@ contract Gomoku{
 		access(all)
 		fun recycleBets(){ 
 			let capability =
-				Gomoku.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+				Gomoku.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 			let flowReceiverReference =
 				capability.borrow()
 				?? panic("Could not borrow a reference to the Flow token receiver capability")
@@ -169,13 +169,13 @@ contract Gomoku{
 			let flowVault <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
 			self.account.storage.save(<-flowVault, to: /storage/flowTokenVault)
 		}
-		if self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)! == nil{ 
+		if self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver) == nil{ 
 			// Create a public capability to the stored Vault that only exposes
 			// the `deposit` method through the `Receiver` interface
 			var capability_1 = self.account.capabilities.storage.issue<&FlowToken.Vault>(/storage/flowTokenVault)
 			self.account.capabilities.publish(capability_1, at: /public/flowTokenReceiver)
 		}
-		if self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)! == nil{ 
+		if self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance) == nil{ 
 			// Create a public capability to the stored Vault that only exposes
 			// the `balance` field through the `Balance` interface
 			var capability_2 = self.account.capabilities.storage.issue<&FlowToken.Vault>(/storage/flowTokenVault)
@@ -187,7 +187,7 @@ contract Gomoku{
 	access(all)
 	fun getCompositionRef(by index: UInt32): &Gomoku.Composition?{ 
 		if let host = MatchContract.getHostAddress(by: index){ 
-			if let collectionRef = (getAccount(host).capabilities.get<&Gomoku.CompositionCollection>(self.CollectionPublicPath)!).borrow(){ 
+			if let collectionRef = getAccount(host).capabilities.get<&Gomoku.CompositionCollection>(self.CollectionPublicPath).borrow(){ 
 				return collectionRef.borrow(id: index)
 			} else{ 
 				return nil
@@ -342,7 +342,7 @@ contract Gomoku{
 	): Bool{ 
 		if let matchedHost = MatchContract.match(index: index, challengerAddress: challenger){ 
 			assert(matchedHost != challenger, message: "You can't play with yourself.")
-			if let compositionCollectionRef = (getAccount(matchedHost).capabilities.get<&Gomoku.CompositionCollection>(self.CollectionPublicPath)!).borrow(){ 
+			if let compositionCollectionRef = getAccount(matchedHost).capabilities.get<&Gomoku.CompositionCollection>(self.CollectionPublicPath).borrow(){ 
 				let hostBet = self.hostOpeningBetMap[index]?.balance ?? UFix64(0)
 				assert(hostBet == bet.balance, message: "Opening bets not equal.")
 				self.hostRaisedBetMap[index] <-! FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>()) as! @FlowToken.Vault
@@ -752,21 +752,16 @@ contract Gomoku{
 			
 			// Flow Receiver
 			let devFlowTokenReceiver =
-				(Gomoku.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!)
+				Gomoku.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 					.borrow()
 				?? panic("Could not borrow a reference to the dev flowTokenReceiver capability.")
 			let hostFlowTokenReceiver =
-				(
-					getAccount(self.host).capabilities.get<&FlowToken.Vault>(
-						/public/flowTokenReceiver
-					)!
-				).borrow()
+				getAccount(self.host).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+					.borrow()
 				?? panic("Could not borrow a reference to the dev flowTokenReceiver capability.")
 			let challengerFlowTokenReceiver =
-				(
-					getAccount(self.challenger!).capabilities.get<&FlowToken.Vault>(
-						/public/flowTokenReceiver
-					)!
+				getAccount(self.challenger!).capabilities.get<&FlowToken.Vault>(
+					/public/flowTokenReceiver
 				).borrow()
 				?? panic("Could not borrow a reference to the dev flowTokenReceiver capability.")
 			
@@ -904,7 +899,7 @@ contract Gomoku{
 			// Identity collection check
 			let identityTokenId = identityToken.id
 			if identityToken.address == self.host{ 
-				if let identityCollectionRef = (getAccount(self.challenger!).capabilities.get<&GomokuIdentity.IdentityCollection>(GomokuIdentity.CollectionPublicPath)!).borrow(){ 
+				if let identityCollectionRef = getAccount(self.challenger!).capabilities.get<&GomokuIdentity.IdentityCollection>(GomokuIdentity.CollectionPublicPath).borrow(){ 
 					if let challengerIdentityToken <- identityCollectionRef.withdraw(by: identityTokenId){ 
 						challengerIdentityToken.setDestroyable(true)
 						destroy challengerIdentityToken
@@ -915,7 +910,7 @@ contract Gomoku{
 					emit CollectionNotFound(type: Type<@GomokuIdentity.IdentityCollection>(), path: GomokuIdentity.CollectionPublicPath, address: self.challenger!)
 				}
 			} else if identityToken.address == self.challenger{ 
-				if let identityCollectionRef = (getAccount(self.host).capabilities.get<&GomokuIdentity.IdentityCollection>(GomokuIdentity.CollectionPublicPath)!).borrow(){ 
+				if let identityCollectionRef = getAccount(self.host).capabilities.get<&GomokuIdentity.IdentityCollection>(GomokuIdentity.CollectionPublicPath).borrow(){ 
 					if let hostIdentityToken <- identityCollectionRef.withdraw(by: identityTokenId){ 
 						hostIdentityToken.setDestroyable(true)
 						destroy hostIdentityToken
@@ -1054,10 +1049,8 @@ contract Gomoku{
 			let winnerResultToken <- winnerResultCollection.withdraw(by: id)!
 			let losserResultToken <- losserResultCollection.withdraw(by: id)!
 			if let winnerResultCollectionCapability =
-				(
-					getAccount(winnerAddress).capabilities.get<&GomokuResult.ResultCollection>(
-						GomokuResult.CollectionPublicPath
-					)!
+				getAccount(winnerAddress).capabilities.get<&GomokuResult.ResultCollection>(
+					GomokuResult.CollectionPublicPath
 				).borrow(){ 
 				winnerResultCollectionCapability.deposit(token: <-winnerResultToken)
 			} else{ 
@@ -1065,10 +1058,8 @@ contract Gomoku{
 				destroy winnerResultToken
 			}
 			if let losserResultCollectionCapability =
-				(
-					getAccount(losserAddress).capabilities.get<&GomokuResult.ResultCollection>(
-						GomokuResult.CollectionPublicPath
-					)!
+				getAccount(losserAddress).capabilities.get<&GomokuResult.ResultCollection>(
+					GomokuResult.CollectionPublicPath
 				).borrow(){ 
 				losserResultCollectionCapability.deposit(token: <-losserResultToken)
 			} else{ 
@@ -1120,10 +1111,8 @@ contract Gomoku{
 			let previous = self.currentRound
 			self.currentRound = self.currentRound + 1
 			let hostIdentityCollectionCapability =
-				(
-					getAccount(self.host).capabilities.get<&GomokuIdentity.IdentityCollection>(
-						GomokuIdentity.CollectionPublicPath
-					)!
+				getAccount(self.host).capabilities.get<&GomokuIdentity.IdentityCollection>(
+					GomokuIdentity.CollectionPublicPath
 				).borrow()
 				?? panic("Could not borrow a reference to the host capability.")
 			if let identityToken = hostIdentityCollectionCapability.borrow(id: self.id){ 
@@ -1133,10 +1122,8 @@ contract Gomoku{
 			}
 			assert(self.challenger != nil, message: "Challenger not found.")
 			let challengerIdentityCollectionCapability =
-				(
-					getAccount(self.challenger!).capabilities.get<
-						&GomokuIdentity.IdentityCollection
-					>(GomokuIdentity.CollectionPublicPath)!
+				getAccount(self.challenger!).capabilities.get<&GomokuIdentity.IdentityCollection>(
+					GomokuIdentity.CollectionPublicPath
 				).borrow()
 				?? panic("Could not borrow a reference to the challenger capability.")
 			if let identityToken = challengerIdentityCollectionCapability.borrow(id: self.id){ 

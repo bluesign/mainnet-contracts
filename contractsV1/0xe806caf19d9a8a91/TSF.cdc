@@ -240,11 +240,8 @@ contract TSF{
 		// Check current account for TopShot Moments
 		let account: &Account = getAccount(recipientAcc.address)
 		let collectionRef =
-			(
-				account.capabilities.get<&{TopShot.MomentCollectionPublic}>(
-					/public/MomentCollection
-				)!!
-			).borrow()
+			(account.capabilities.get<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection)!)
+				.borrow()
 		let info:{ UInt64: OwnedPlayerInfo} ={} 
 		if collectionRef != nil{ 
 			let collRef = collectionRef!
@@ -275,7 +272,7 @@ contract TSF{
 		}
 		for address in (manager!).getChildAddresses(){ 
 			let account: &Account = getAccount(address)
-			let collectionRef = (account.capabilities.get<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection)!!).borrow()
+			let collectionRef = (account.capabilities.get<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection)!).borrow()
 			if collectionRef != nil{ 
 				let collRef = collectionRef!
 				for mId in momentIdsToMint{ 
@@ -301,7 +298,7 @@ contract TSF{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -324,7 +321,7 @@ contract TSF{
 		}
 		
 		access(all)
-		view fun getViews(): [Type]{ 
+		fun getViews(): [Type]{ 
 			return []
 		}
 		

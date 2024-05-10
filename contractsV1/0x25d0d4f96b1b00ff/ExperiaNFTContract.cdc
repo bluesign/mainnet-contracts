@@ -56,7 +56,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 	
 	//In this section you will find our variables and fields for our NFTs and Collections
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The unique ID that each NFT has
 		access(all)
 		let id: UInt64
@@ -156,7 +156,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 		}
 		
 		/* Function to remove the NFt from the Collection */
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let exist = self.idExists(id: withdrawID)
@@ -214,6 +214,16 @@ contract ExperiaNFTContract: NonFungibleToken{
 		access(all)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -64,7 +64,7 @@ contract FlunksWhitelistMinter{
 		let merchantDUCReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -75,11 +75,9 @@ contract FlunksWhitelistMinter{
 		// Get buyer collection public to receive Flunks
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Flunks.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Flunks.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint Flunks NFTs per purchaseAmount
@@ -133,7 +131,7 @@ contract FlunksWhitelistMinter{
 		let merchantDUCReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -144,11 +142,9 @@ contract FlunksWhitelistMinter{
 		// Get buyer collection public to receive Flunks
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Flunks.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Flunks.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint Flunks NFTs per purchaseAmount

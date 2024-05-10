@@ -1529,7 +1529,7 @@ contract TenantService: NonFungibleToken{
 	// The immutable data for an NFT, this is the actual NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -1683,7 +1683,7 @@ contract TenantService: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: NFT does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -1773,6 +1773,16 @@ contract TenantService: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -1804,7 +1814,7 @@ contract TenantService: NonFungibleToken{
 			}
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			post{ 
 				result.id == withdrawID:
@@ -1883,8 +1893,13 @@ contract TenantService: NonFungibleToken{
 		}
 		
 		access(all)
-		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
-			return <-create ShardedCollection()
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 	}
 	

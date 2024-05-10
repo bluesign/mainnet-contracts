@@ -19,7 +19,7 @@ contract MyNFT1: NonFungibleToken{
 	event MintItem(id: UInt64, address: Address?, data:{ String: String})
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -61,7 +61,7 @@ contract MyNFT1: NonFungibleToken{
 			self.ownedNFTs[myToken.id] <-! myToken
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This NFT does not exist")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -82,6 +82,16 @@ contract MyNFT1: NonFungibleToken{
 		fun borrowEntireNFT(id: UInt64): &MyNFT1.NFT{ 
 			let reference = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return reference as! &MyNFT1.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

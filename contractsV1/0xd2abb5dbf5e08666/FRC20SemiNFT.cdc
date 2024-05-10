@@ -169,7 +169,7 @@ contract FRC20SemiNFT: NonFungibleToken, ViewResolver{
 	/// and stored in the Collection resource
 	///
 	access(all)
-	resource NFT: IFRC20SemiNFT, NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: IFRC20SemiNFT, NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		/// The unique ID that each NFT has
 		access(all)
 		let id: UInt64
@@ -271,8 +271,8 @@ contract FRC20SemiNFT: NonFungibleToken, ViewResolver{
 					case Type<MetadataViews.Royalties>():
 						// Royalties for FRC20SemiNFT is 5% to Deployer account
 						let deployerAddr = FRC20SemiNFT.account.address
-						let flowCap = getAccount(deployerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: flowCap, cut: 0.05, description: "5% of the sale price of this NFT goes to the FIXeS platform account")])
+						let flowCap = getAccount(deployerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: flowCap!, cut: 0.05, description: "5% of the sale price of this NFT goes to the FIXeS platform account")])
 				}
 				return nil
 			}
@@ -570,7 +570,7 @@ contract FRC20SemiNFT: NonFungibleToken, ViewResolver{
 		/// @param withdrawID: The ID of the NFT that wants to be withdrawn
 		/// @return The NFT resource that has been taken out of the collection
 		///
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- (self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")) as! @FRC20SemiNFT.NFT
 			
@@ -720,6 +720,16 @@ contract FRC20SemiNFT: NonFungibleToken, ViewResolver{
 				self.tickIDsMapping[tick] = []
 			}
 			return self._borrowTickIDs(tick) ?? panic("Tick IDs must exist")
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

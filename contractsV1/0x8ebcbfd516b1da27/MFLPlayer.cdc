@@ -81,7 +81,7 @@ contract MFLPlayer: NonFungibleToken{
 	
 	// The resource that represents the Player NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// The unique ID for the Player
 		access(all)
@@ -117,8 +117,8 @@ contract MFLPlayer: NonFungibleToken{
 					return MetadataViews.Display(name: playerData.metadata["name"] as! String? ?? "", description: "MFL Player #".concat(playerData.id.toString()), thumbnail: playerData.image)
 				case Type<MetadataViews.Royalties>():
 					let royalties: [MetadataViews.Royalty] = []
-					let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)!
-					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap, cut: 0.05, description: "Creator Royalty"))
+					let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
+					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.NFTCollectionDisplay>():
 					let socials ={ "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"), "discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"), "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"), "medium": MetadataViews.ExternalURL("https://medium.com/playmfl")}
@@ -188,7 +188,7 @@ contract MFLPlayer: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -236,6 +236,16 @@ contract MFLPlayer: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let playerNFT = nft as! &MFLPlayer.NFT
 			return playerNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -298,13 +298,11 @@ contract BYC{
 		fun doesAddressOwnNFT(_ address: Address): Bool{ 
 			let account = getAccount(address)
 			let collectionRef =
-				(
-					account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-						self.collectionPublicPath!
-					)!
-				).borrow()
+				account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+					self.collectionPublicPath!
+				).borrow<&{NonFungibleToken.CollectionPublic}>()
 			// return collectionRef!.getIDs().contains(self.id!)
-			return (collectionRef!).borrowNFT(self.id!) != nil
+			return (collectionRef!).borrowNFT(id: self.id!) != nil
 		}
 		
 		access(all)
@@ -796,13 +794,13 @@ contract BYC{
 				let barterRef = &self.barters[uuid] as &Barter?
 				if (barterRef!).previousID == barter.uuid{ 
 					let oldBarter <- self.barters.remove(key: uuid)!
-					let linkedCollection = (getAccount(oldBarter.getOfferAddress()).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath)!).borrow()!
+					let linkedCollection = getAccount(oldBarter.getOfferAddress()).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath).borrow<&{BYC.BarterCollectionPublic}>()!
 					linkedCollection.clean(barterRef: &oldBarter as &Barter, id: oldBarter.linkedID!)
 					destroy oldBarter
 				}
 			}
 			// cleanup boths accounts
-			let linkedCollection = (getAccount(barter.getOfferAddress()).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath)!).borrow()!
+			let linkedCollection = getAccount(barter.getOfferAddress()).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath).borrow<&{BYC.BarterCollectionPublic}>()!
 			linkedCollection.clean(barterRef: &barter as &Barter, id: barter.linkedID!)
 			destroy barter
 		}
@@ -813,11 +811,11 @@ contract BYC{
 		//
 		access(all)
 		fun counterBarter(barterAddress: Address, barterID: UInt64, ftAssetsOffered: [FTAsset], nftAssetsOffered: [NFTAsset], ftAssetsRequested: [FTAsset], nftAssetsRequested: [NFTAsset], expiresAt: UFix64, feeCapability: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>): @Barter{ 
-			let barterCollectionCap = getAccount(barterAddress).capabilities.get_<YOUR_TYPE>(BYC.BarterCollectionPublicPath)!
+			let barterCollectionCap = getAccount(barterAddress).capabilities.get_<YOUR_TYPE>(BYC.BarterCollectionPublicPath)
 			let barterCollectionRef = barterCollectionCap.borrow<&{BarterCollectionPublic}>()!
 			let barterRef = barterCollectionRef.borrowBarter(id: barterID)!
 			var counterpartyAddress = barterRef.getOfferAddress()
-			let counterpartyCollection = (getAccount(counterpartyAddress!).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath)!).borrow()!
+			let counterpartyCollection = getAccount(counterpartyAddress!).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath).borrow<&{BYC.BarterCollectionPublic}>()!
 			
 			// If the caller is the counterparty reject the previous offer (they are responding to an offer)
 			// if the caller is another address we just create a new barter with previousBarterID set to id of the barter being countered
@@ -846,7 +844,7 @@ contract BYC{
 				let callerIsCounterparty = self.owner?.address == barterRef.counterpartyAddress
 				// check if caller is canceling offer they made or rejecting an offer received
 				let linkedAddress = callerIsCounterparty ? barterRef.getOfferAddress() : barterRef.counterpartyAddress!
-				let linkedCollection = (getAccount(linkedAddress).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath)!).borrow()!
+				let linkedCollection = getAccount(linkedAddress).capabilities.get<&{BYC.BarterCollectionPublic}>(BYC.BarterCollectionPublicPath).borrow<&{BYC.BarterCollectionPublic}>()!
 				linkedCollection.clean(barterRef: barterRef, id: barterRef.linkedID!)
 			}
 			destroy <-self.barters.remove(key: id)
@@ -952,11 +950,9 @@ contract BYC{
 			return <-a
 		}
 		let remoteCollectionRef =
-			(
-				getAccount(counterpartyAddress!).capabilities.get<&{BarterCollectionPublic}>(
-					BYC.BarterCollectionPublicPath
-				)!
-			).borrow()
+			getAccount(counterpartyAddress!).capabilities.get<&{BarterCollectionPublic}>(
+				BYC.BarterCollectionPublicPath
+			).borrow<&{BarterCollectionPublic}>()
 		if remoteCollectionRef != nil{ // we send a linked copy of the Barter to the counterparty 
 			
 			let a <- create Barter(ftAssetsOffered: ftAssetsOffered, nftAssetsOffered: nftAssetsOffered, ftAssetsRequested: ftAssetsRequested, nftAssetsRequested: nftAssetsRequested, counterpartyAddress: counterpartyAddress, expiresAt: expiresAt, previousBarterID: previousBarterID, proposerFeeCapability: feeCapability)
@@ -1011,16 +1007,14 @@ contract BYC{
 		nftIdentifier: String
 	): Bool{ 
 		let collectionRef =
-			(
-				getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					collectionPath
-				)!
+			getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				collectionPath
 			).borrow()
 		if collectionRef == nil{ 
 			return false
 		}
 		for id in (collectionRef!).getIDs(){ 
-			let nft = (collectionRef!).borrowNFT(id)
+			let nft = (collectionRef!).borrowNFT(id: id)
 			if nft.getType().identifier == nftIdentifier{ 
 				return true
 			}

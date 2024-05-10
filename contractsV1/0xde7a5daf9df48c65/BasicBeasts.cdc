@@ -258,7 +258,7 @@ contract BasicBeasts: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -379,8 +379,8 @@ contract BasicBeasts: NonFungibleToken{
 				case Type<MetadataViews.Royalties>():
 					let royalties: [MetadataViews.Royalty] = BasicBeasts.royalties
 					if self.firstOwner != nil{ 
-						royalties.append(MetadataViews.Royalty(receiver: getAccount(self.firstOwner!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.05, // 5% royalty on secondary sales																																												 
-																																												 description: "First owner 5% royalty from secondary sales."))
+						royalties.append(MetadataViews.Royalty(receiver: getAccount(self.firstOwner!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.05, // 5% royalty on secondary sales																																												
+																																												description: "First owner 5% royalty from secondary sales."))
 					}
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.Editions>():
@@ -557,7 +557,7 @@ contract BasicBeasts: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: The Beast does not exist in the Collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -602,6 +602,16 @@ contract BasicBeasts: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let basicBeastsNFT = nft as! &BasicBeasts.NFT
 			return basicBeastsNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -726,8 +736,8 @@ contract BasicBeasts: NonFungibleToken{
 		self.beastTemplates ={} 
 		self.retired ={} 
 		self.numberMintedPerBeastTemplate ={} 
-		self.royalties = [MetadataViews.Royalty(receiver: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.05, // 5% royalty on secondary sales																																				  
-																																				  description: "Basic Beasts 5% royalty from secondary sales.")]
+		self.royalties = [MetadataViews.Royalty(receiver: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.05, // 5% royalty on secondary sales																																				 
+																																				 description: "Basic Beasts 5% royalty from secondary sales.")]
 		
 		// Put Admin in storage
 		self.account.storage.save(<-create Admin(), to: self.AdminStoragePath)

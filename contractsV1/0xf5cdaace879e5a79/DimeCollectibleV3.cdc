@@ -99,7 +99,7 @@ contract DimeCollectibleV3: NonFungibleToken{
 	
 	// DimeCollectible NFT, representing three distinct NFTTypes
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -226,7 +226,7 @@ contract DimeCollectibleV3: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -266,6 +266,16 @@ contract DimeCollectibleV3: NonFungibleToken{
 			}
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &DimeCollectibleV3.NFT?
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

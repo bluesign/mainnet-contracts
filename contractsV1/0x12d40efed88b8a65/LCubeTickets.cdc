@@ -581,7 +581,7 @@ contract LCubeTickets: NonFungibleToken{
 	// The resource that represents the Ticket NFTs
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// Global unique ticket ID
 		access(all)
 		let id: UInt64
@@ -771,7 +771,7 @@ contract LCubeTickets: NonFungibleToken{
 		// that is to be removed from the Collection
 		//
 		// returns: @NonFungibleToken.NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Borrow nft and check if locked
 			let nft = self.borrowNFT(withdrawID)
@@ -884,6 +884,16 @@ contract LCubeTickets: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let lCubeTicketNFT = nft as! &LCubeTickets.NFT
 			return lCubeTicketNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

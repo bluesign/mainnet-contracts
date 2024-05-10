@@ -331,7 +331,7 @@ contract MysteryBox{
 			var remainderVault <- self.sendCommission(buyerAddr: buyerAddr, buyerTokenVault: <-buyerTokenVault, tokenName: tokenName, totalPrice: totalPrice)
 			var saledTokenIds = self.checkStockAndSendNFTToBuyer(buyerAddr: buyerAddr, mysteryBoxTypeId: mysteryBoxTypeId, mysteryBoxAmount: mysteryBoxAmount)
 			//deposit buyerTokenValut to admin fusd receiver
-			var mainFusdReceiverCap = (getAccount(self.mainFusdReceiverAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Unable to borrow receiver reference")
+			var mainFusdReceiverCap = getAccount(self.mainFusdReceiverAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Unable to borrow receiver reference")
 			mainFusdReceiverCap.deposit(from: <-remainderVault)
 			emit OpenMysteryBox(orderId: MysteryBox.totalSupply, buyer: buyerAddr, type: mysteryBoxTypeId, unitPrice: (MysteryBox.mysteryBoxTypeList[mysteryBoxTypeId]!).unitPrice, tokenIds: saledTokenIds, poolTokenName: tokenName, amountAddToPool: totalPrice * 50000000.0 / 1000000000.0)
 		// emit UpdatePrizePool(tokenName: tokenName, amount: totalPrice * 50000000.0 / 1000000000.0)
@@ -352,7 +352,7 @@ contract MysteryBox{
 			//if referrer != self.ZERO_ADDRESS, it means that the user has a referrer
 			if referrerAddr != MysteryBox.ZERO_ADDRESS{ 
 				//send the commission to the referrer
-				var referrerCap = (getAccount(referrerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Unable to borrow receiver fusd reference")
+				var referrerCap = getAccount(referrerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Unable to borrow receiver fusd reference")
 				
 				// referrer get commission of 20% of total price
 				var refTempVault <- buyerTokenVault.withdraw(amount: totalPrice * 20000000.0 / 100000000.0)
@@ -384,7 +384,7 @@ contract MysteryBox{
 					let lreferrerAddr = (MysteryBox.accountList[referrerAddr]!).referrerAddr
 					//send the commission to the referrer`s referrer if it exist
 					if lreferrerAddr != MysteryBox.ZERO_ADDRESS{ 
-						var lreferrerCap = (getAccount(lreferrerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Unable to borrow receiver reference")
+						var lreferrerCap = getAccount(lreferrerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Unable to borrow receiver reference")
 						
 						// referrer`s referrer get commission of 5% of total price
 						var lrefTempVault <- buyerTokenVault.withdraw(amount: totalPrice * 50000000.0 / 1000000000.0)
@@ -463,7 +463,7 @@ contract MysteryBox{
 			}
 			var mysteryBoxTypeItem = MysteryBox.mysteryBoxTypeList[mysteryBoxTypeId]
 			var stock = (MysteryBox.mysteryBoxTypeList[mysteryBoxTypeId]!).stock
-			var receiverCap = (getAccount(buyerAddr).capabilities.get<&{NonFungibleToken.CollectionPublic}>(NyatheesOVO.CollectionPublicPath)!).borrow() ?? panic("Unable to borrow NyatheesOVO Receiver!")
+			var receiverCap = getAccount(buyerAddr).capabilities.get<&{NonFungibleToken.CollectionPublic}>(NyatheesOVO.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Unable to borrow NyatheesOVO Receiver!")
 			
 			//send NFTs to the buyer
 			var saledTokenIds: [UInt64] = []
@@ -494,7 +494,7 @@ contract MysteryBox{
 			if paymentVault.balance >= total{ 
 				var index = 0
 				while count > index{ 
-					var receiverCap = (getAccount(addresses[index]).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Unable to borrow receiver reference")
+					var receiverCap = getAccount(addresses[index]).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Unable to borrow receiver reference")
 					receiverCap.deposit(from: <-paymentVault.withdraw(amount: amounts[index]))
 					index = index + 1
 				}
@@ -502,7 +502,7 @@ contract MysteryBox{
 				var tempPoolBalance = MysteryBox.prizePool[tokenName]!
 				MysteryBox.prizePool[tokenName] = tempPoolBalance - total
 			}
-			var payerCap = (getAccount(payer).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Unable to borrow receiver reference")
+			var payerCap = getAccount(payer).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Unable to borrow receiver reference")
 			payerCap.deposit(from: <-paymentVault)
 		}
 		

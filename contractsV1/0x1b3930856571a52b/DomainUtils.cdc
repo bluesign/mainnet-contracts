@@ -78,7 +78,7 @@ contract DomainUtils{
 	fun getFlownsDefaultDomain(address: Address): String?{ 
 		let account = getAccount(address)
 		let collectionCap =
-			account.capabilities.get<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)!
+			account.capabilities.get<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)
 		if !collectionCap.check(){ 
 			return nil
 		}

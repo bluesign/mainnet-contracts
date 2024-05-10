@@ -544,8 +544,8 @@ contract BandOracle{
 		self.account.capabilities.publish(capability_2, at: dataUpdaterPrivatePath)
 		?? panic("Data Updater capability for admin creation failed")
 		let updaterCapability =
-			self.account.capabilities.get<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)!
-		let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability)
+			self.account.capabilities.get<&{BandOracle.DataUpdater}>(dataUpdaterPrivatePath)
+		let relayer <- BandOracle.createRelay(updaterCapability: updaterCapability!)
 		self.account.storage.save(<-relayer, to: BandOracle.RelayStoragePath)
 		var capability_3 =
 			self.account.capabilities.storage.issue<&BandOracle.Relay>(BandOracle.RelayStoragePath)

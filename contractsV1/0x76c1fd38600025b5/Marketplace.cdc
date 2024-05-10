@@ -251,9 +251,9 @@ contract Marketplace{
 			let itemRef = (self.itemProviderCapability.borrow()!).borrowItem(id: itemID)! as &ItemNFT.NFT
 			
 			// get all FlowToken royalty capabilities
-			let itemCap = getAccount(itemRef.royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
-			let garmentCap = getAccount((itemRef.borrowGarment()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
-			let materialCap = getAccount((itemRef.borrowMaterial()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			let itemCap = getAccount(itemRef.royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+			let garmentCap = getAccount((itemRef.borrowGarment()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+			let materialCap = getAccount((itemRef.borrowMaterial()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 			
 			// initialize sale cuts for item, garment, material and contract
 			let saleCutArray = [SaleCut(receiver: itemCap, initialAmount: 0.30, amount: 0.1 / 3.0), SaleCut(receiver: garmentCap, initialAmount: 0.30, amount: 0.1 / 3.0), SaleCut(receiver: materialCap, initialAmount: 0.30, amount: 0.1 / 3.0), SaleCut(receiver: Marketplace.contractCap, initialAmount: 0.10, amount: 0.05)]
@@ -531,13 +531,13 @@ contract Marketplace{
 			}
 			
 			// from the itemAddress borrow the details of the item
-			let collectionRef = (getAccount(itemAddress).capabilities.get<&{ItemNFT.ItemCollectionPublic}>(ItemNFT.CollectionPublicPath)!).borrow()!
+			let collectionRef = getAccount(itemAddress).capabilities.get<&{ItemNFT.ItemCollectionPublic}>(ItemNFT.CollectionPublicPath).borrow<&{ItemNFT.ItemCollectionPublic}>()!
 			let tokenRef = collectionRef.borrowItem(id: itemID)! as &ItemNFT.NFT
 			
 			// get the FlowToken capabilities
-			let itemCap = getAccount(tokenRef.royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
-			let garmentCap = getAccount((tokenRef.borrowGarment()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
-			let materialCap = getAccount((tokenRef.borrowMaterial()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			let itemCap = getAccount(tokenRef.royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+			let garmentCap = getAccount((tokenRef.borrowGarment()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+			let materialCap = getAccount((tokenRef.borrowMaterial()!).royaltyVault.address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 			
 			// initialize sale cuts for item, garment, material and contract
 			let saleCutArray = [SaleCut(receiver: itemCap, initialAmount: 0.30, amount: 0.1 / 3.0), SaleCut(receiver: garmentCap, initialAmount: 0.30, amount: 0.1 / 3.0), SaleCut(receiver: materialCap, initialAmount: 0.30, amount: 0.1 / 3.0), SaleCut(receiver: Marketplace.contractCap, initialAmount: 0.10, amount: 0.05)]
@@ -756,7 +756,7 @@ contract Marketplace{
 		}
 		// check that deployer's FlowToken capability is valid
 		let flowTokenCapCheck =
-			(self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!
+			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow()!
 		self.contractCap = self.account.capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
 			)!

@@ -387,21 +387,18 @@ contract Profile{
 	
 	access(all)
 	fun check(_ address: Address): Bool{ 
-		return (getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!)
-			.check()
+		return getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath).check()
 	}
 	
 	access(all)
 	fun fetch(_ address: Address): &{Profile.Public}{ 
-		return (getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!)
-			.borrow()!
+		return getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath).borrow()!
 	}
 	
 	access(all)
 	fun read(_ address: Address): Profile.ReadOnly?{ 
 		if let profile =
-			(getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!)
-				.borrow(){ 
+			getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath).borrow(){ 
 			return profile.asReadOnly()
 		} else{ 
 			return nil

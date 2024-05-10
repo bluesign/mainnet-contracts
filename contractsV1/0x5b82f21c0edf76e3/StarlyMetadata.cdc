@@ -126,7 +126,7 @@ contract StarlyMetadata{
 		if let cardEdition = self.getCardEdition(starlyID: starlyID){ 
 			let creator = cardEdition.collection.creator
 			// TODO link and use getRoyaltyReceiverPublicPath
-			let royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: getAccount(0x12c122ca9266c278).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!!, cut: 0.05, description: "Starly royalty (5%)"), MetadataViews.Royalty(receiver: getAccount(creator.address!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!!, cut: 0.05, description: "Creator royalty (%5) for ".concat(creator.username))]
+			let royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: getAccount(0x12c122ca9266c278).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!, cut: 0.05, description: "Starly royalty (5%)"), MetadataViews.Royalty(receiver: getAccount(creator.address!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!, cut: 0.05, description: "Creator royalty (%5) for ".concat(creator.username))]
 			return MetadataViews.Royalties(royalties)
 		}
 		return nil

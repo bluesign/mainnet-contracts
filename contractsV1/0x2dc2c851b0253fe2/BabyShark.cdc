@@ -324,7 +324,7 @@ contract BabyShark: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -449,7 +449,7 @@ contract BabyShark: NonFungibleToken{
 		
 		access(all)
 		fun unboxNft(address: Address, nftId: UInt64, newSetId: UInt32){ 
-			let collectionRef = (getAccount(address).capabilities.get<&{BabyShark.FlickplaySeriesCollectionPublic}>(BabyShark.CollectionPublicPath)!).borrow()
+			let collectionRef = getAccount(address).capabilities.get<&{BabyShark.FlickplaySeriesCollectionPublic}>(BabyShark.CollectionPublicPath).borrow()
 			let nftRef = (collectionRef!).borrowFlickplaySeries(id: nftId)
 			nftRef?.unbox(newSetId: newSetId)
 		}
@@ -521,7 +521,7 @@ contract BabyShark: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let ref = (&self.ownedNFTs[withdrawID] as &{NonFungibleToken.NFT}?)!
 			let flickplayNFT = ref as! &BabyShark.NFT
@@ -599,6 +599,16 @@ contract BabyShark: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -615,7 +625,7 @@ contract BabyShark: NonFungibleToken{
 	
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &BabyShark.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&BabyShark.Collection>(BabyShark.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&BabyShark.Collection>(BabyShark.CollectionPublicPath).borrow<&BabyShark.Collection>() ?? panic("Couldn't get collection")
 		return collection.borrowFlickplaySeries(id: id)
 	}
 	

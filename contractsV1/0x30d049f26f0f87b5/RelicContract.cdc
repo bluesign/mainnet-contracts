@@ -83,7 +83,7 @@ contract RelicContract: NonFungibleToken{
 	}
 	
 	access(all)
-	resource Relic: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource Relic: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -253,7 +253,7 @@ contract RelicContract: NonFungibleToken{
 		access(all)
 		var ownedRelics: @{UInt64: NonFungibleToken.Relic}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedRelics.remove(key: withdrawID) ?? panic("missing Relic")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -298,13 +298,18 @@ contract RelicContract: NonFungibleToken{
 		}
 		
 		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?{ 
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
 			panic("implement me")
 		}
 		
 		access(all)
-		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
-			return <-create Collection()
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?{ 
+			panic("implement me")
 		}
 		
 		init(){ 

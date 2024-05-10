@@ -67,7 +67,7 @@ contract MoxyNFT: NonFungibleToken{
 	let MinterStoragePath: StoragePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -328,7 +328,7 @@ contract MoxyNFT: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			let to <- token as! @MoxyNFT.NFT
@@ -440,6 +440,16 @@ contract MoxyNFT: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let MoxyNFT = nft as! &MoxyNFT.NFT
 			return MoxyNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -559,7 +569,7 @@ contract MoxyNFT: NonFungibleToken{
 			}
 			var counter: UInt64 = 1
 			emit ProcessMintRequestStarted(catalogId: (MoxyNFT.mintRequest!).catalogId, editionId: (MoxyNFT.mintRequest!).editionId)
-			let recipientRef = (getAccount((MoxyNFT.mintRequest!).recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(MoxyNFT.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let recipientRef = getAccount((MoxyNFT.mintRequest!).recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(MoxyNFT.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			while (MoxyNFT.mintRequest!).hasPendings() && counter <= quantity{ 
 				// create a new NFT
 				self.mintNFT(recipient: recipientRef, catalogId: (MoxyNFT.mintRequest!).catalogId, editionId: (MoxyNFT.mintRequest!).editionId, royalties: (MoxyNFT.mintRequest!).royalties, edition: (MoxyNFT.mintRequest!).currentEdition)

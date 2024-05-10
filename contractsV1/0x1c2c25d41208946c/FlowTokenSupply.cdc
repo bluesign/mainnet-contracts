@@ -87,7 +87,7 @@ contract FlowTokenSupply{
 		var bonusAmount: UFix64 = 0.0
 		for accountAddress in bonusAccounts{ 
 			let account = getAccount(accountAddress)
-			let vaultRef = (account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow() ?? panic("Could not borrow Balance reference to the Vault")
+			let vaultRef = account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<&FlowToken.Vault>() ?? panic("Could not borrow Balance reference to the Vault")
 			bonusAmount = bonusAmount + vaultRef.balance
 		}
 		

@@ -40,10 +40,8 @@ contract SwapPair{
 	fun incrementScaledReserves(): [UInt256]{ 
 		let pairInfo =
 			(
-				(
-					getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
-						SwapConfig.PairPublicPath
-					)!
+				getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
+					SwapConfig.PairPublicPath
 				).borrow()!
 			).getPairInfo()
 		return [
@@ -55,10 +53,8 @@ contract SwapPair{
 	access(self)
 	fun metaScaledReserves(): [UInt256]{ 
 		let mpool =
-			(
-				getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
-					/public/metapierSwapPoolPublic
-				)!
+			getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
+				/public/metapierSwapPoolPublic
 			).borrow()!
 		let mpoolInfo = mpool.getReserves()
 		return [
@@ -148,10 +144,8 @@ contract SwapPair{
 		switch p{ 
 			case 0:
 				let pair =
-					(
-						getAccount(0xfa82796435e15832).capabilities.get<
-							&{SwapInterfaces.PairPublic}
-						>(SwapConfig.PairPublicPath)!
+					getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
+						SwapConfig.PairPublicPath
 					).borrow()!
 				if vaultIn.isInstance(self.token0VaultType){ 
 					return <-pair.swap(vaultIn: <-vaultIn, exactAmountOut: nil)
@@ -160,10 +154,8 @@ contract SwapPair{
 				}
 			case 1:
 				let mpool =
-					(
-						getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
-							/public/metapierSwapPoolPublic
-						)!
+					getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
+						/public/metapierSwapPoolPublic
 					).borrow()!
 				let minfo = mpool.getReserves()
 				if vaultIn.isInstance(self.token0VaultType){ 

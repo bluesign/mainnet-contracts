@@ -173,10 +173,10 @@ contract Royalties{
 					continue
 				}
 				if receiverAddressOverrides.length > i{ 
-					receiver = getAccount(receiverAddressOverrides[i]).capabilities.get<&{FungibleToken.Receiver}>(ftReceiverPath)!
+					receiver = getAccount(receiverAddressOverrides[i]).capabilities.get<&{FungibleToken.Receiver}>(ftReceiverPath)
 				}
 				if receiver == nil{ 
-					receiver = getAccount(royalty.receiver.address).capabilities.get<&{FungibleToken.Receiver}>(ftReceiverPath)!
+					receiver = getAccount(royalty.receiver.address).capabilities.get<&{FungibleToken.Receiver}>(ftReceiverPath)
 				}
 				if (receiver!).check(){ 
 					royalties.append(MetadataViews.Royalty(receiver: receiver!, cut: rate, description: description))

@@ -152,7 +152,7 @@ contract Record: NonFungibleToken{
 	
 	// Resource representing a unique song. Can only be created by a minter
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public{ 
+	resource NFT: NonFungibleToken.NFT, Public{ 
 		
 		// Unique ID for the record
 		access(all)
@@ -294,7 +294,7 @@ contract Record: NonFungibleToken{
 		}
 		
 		// Withdraw a given record from the collection
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			
 			// Remove the nft from the Collection
@@ -369,6 +369,16 @@ contract Record: NonFungibleToken{
 				let refRecord = refNFT as! &Record.NFT
 				refRecord.unlock()
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -251,7 +251,7 @@ contract PopsyclAuction{
 			// borrow a reference to the owner's NFT receiver
 			if let vaultRef = capability.borrow(){ 
 				let bidVaultRef = &self.bidVault as &{FungibleToken.Vault}
-				let influencerVaultRef = (getAccount(self.influencer!!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to owner vault")
+				let influencerVaultRef = getAccount(self.influencer!!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to owner vault")
 				var balance = 0.0
 				if sale{ 
 					let marketShare = bidVaultRef.balance / 100.0 * PopsyclMarketplace.marketFee
@@ -259,10 +259,10 @@ contract PopsyclAuction{
 					balance = bidVaultRef.balance - (marketShare + royalityShare)
 					let marketCut <- bidVaultRef.withdraw(amount: marketShare)
 					let royalityCut <- bidVaultRef.withdraw(amount: royalityShare)
-					let PopsyclvaultRef = (getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to Marketplace vault")
+					let PopsyclvaultRef = getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to Marketplace vault")
 					
 					// let itemRef = &self.auctionItems[id] as? &AuctionItem
-					let influencerVaultRef = (getAccount(self.influencer!!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to owner vault")
+					let influencerVaultRef = getAccount(self.influencer!!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to owner vault")
 					PopsyclvaultRef.deposit(from: <-marketCut)
 					influencerVaultRef.deposit(from: <-royalityCut)
 				} else{ 

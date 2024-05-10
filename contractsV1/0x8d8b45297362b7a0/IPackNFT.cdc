@@ -136,7 +136,7 @@ contract interface IPackNFT{
 	}
 	
 	access(all)
-	resource interface NFT: NonFungibleToken.INFT, IPackNFTToken, IPackNFTOwnerOperator{ 
+	resource interface NFT: NonFungibleToken.NFT, IPackNFTToken, IPackNFTOwnerOperator{ 
 		access(all)
 		let id: UInt64
 		

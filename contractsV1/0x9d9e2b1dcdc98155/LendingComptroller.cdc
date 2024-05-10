@@ -563,9 +563,9 @@ contract LendingComptroller{
 					LendingError.ErrorEncode(msg: "Price feed for market is not available yet", err: LendingError.ErrorCode.ADD_MARKET_NO_ORACLE_PRICE)
 			}
 			// Add a new market with collateralFactor of 0.0 and borrowCap of 0.0
-			let poolPublicCap = getAccount(poolAddress).capabilities.get<&{LendingInterfaces.PoolPublic}>(LendingConfig.PoolPublicPublicPath)!
+			let poolPublicCap = getAccount(poolAddress).capabilities.get<&{LendingInterfaces.PoolPublic}>(LendingConfig.PoolPublicPublicPath)
 			assert(poolPublicCap.check() == true, message: LendingError.ErrorEncode(msg: "Cannot borrow reference to PoolPublic resource", err: LendingError.ErrorCode.CANNOT_ACCESS_POOL_PUBLIC_CAPABILITY))
-			self.markets[poolAddress] = Market(poolPublicCap: poolPublicCap, isOpen: false, isMining: false, liquidationPenalty: liquidationPenalty, collateralFactor: collateralFactor, borrowCap: 0.0, supplyCap: 0.0)
+			self.markets[poolAddress] = Market(poolPublicCap: poolPublicCap!, isOpen: false, isMining: false, liquidationPenalty: liquidationPenalty, collateralFactor: collateralFactor, borrowCap: 0.0, supplyCap: 0.0)
 			emit MarketAdded(market: poolAddress, marketType: (poolPublicCap.borrow()!).getUnderlyingTypeString(), liquidationPenalty: liquidationPenalty, collateralFactor: collateralFactor)
 		}
 		
@@ -606,7 +606,7 @@ contract LendingComptroller{
 		access(contract)
 		fun configOracle(oracleAddress: Address){ 
 			let oldOracleAddress = self.oracleCap != nil ? ((self.oracleCap!).borrow()!).owner?.address : nil
-			self.oracleCap = getAccount(oracleAddress).capabilities.get<&{LendingInterfaces.OraclePublic}>(LendingConfig.OraclePublicPath)!
+			self.oracleCap = getAccount(oracleAddress).capabilities.get<&{LendingInterfaces.OraclePublic}>(LendingConfig.OraclePublicPath)
 			emit NewOracle(oldOracleAddress, (((self.oracleCap!).borrow()!).owner!).address)
 		}
 		

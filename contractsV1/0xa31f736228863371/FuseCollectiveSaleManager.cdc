@@ -226,7 +226,7 @@ contract FuseCollectiveSaleManager{
 		// Default payment receiver will be the contract deploying account
 		self.paymentReceiver = self.account.capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		emit ContractInitialized()
 	}
 }

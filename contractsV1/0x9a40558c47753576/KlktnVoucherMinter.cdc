@@ -29,18 +29,16 @@ contract KlktnVoucherMinter{
 			?? panic("Could not borrow a reference to the KlktnVoucher Admin")
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					KlktnVoucher.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				KlktnVoucher.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Validate buyer's DUC receiver
 		let buyerDUCReceiverRef =
 			getAccount(buyer).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			buyerDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed buyer DUC receiver"

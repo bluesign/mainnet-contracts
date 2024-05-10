@@ -55,7 +55,7 @@ contract MFLPack: NonFungibleToken{
 	var totalSupply: UInt64
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// Unique ID across all packs
 		access(all)
@@ -87,8 +87,8 @@ contract MFLPack: NonFungibleToken{
 					return MetadataViews.Display(name: packTemplateData.name, description: "MFL Pack #".concat(self.id.toString()), thumbnail: MetadataViews.HTTPFile(url: packTemplateData.imageUrl))
 				case Type<MetadataViews.Royalties>():
 					let royalties: [MetadataViews.Royalty] = []
-					let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)!
-					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap, cut: 0.05, description: "Creator Royalty"))
+					let royaltyReceiverCap = getAccount(MFLAdmin.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
+					royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator Royalty"))
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.NFTCollectionDisplay>():
 					let socials ={ "twitter": MetadataViews.ExternalURL("https://twitter.com/playMFL"), "discord": MetadataViews.ExternalURL("https://discord.gg/pEDTR4wSPr"), "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/playmfl"), "medium": MetadataViews.ExternalURL("https://medium.com/playmfl")}
@@ -124,7 +124,7 @@ contract MFLPack: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -189,6 +189,16 @@ contract MFLPack: NonFungibleToken{
 			// Emit an event which will be processed by the backend to distribute the content of the pack
 			emit Opened(id: pack.id, from: (self.owner!).address)
 			destroy pack
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -149,7 +149,7 @@ contract Offers{
 			}
 			
 			// clean up any listings that belong to this NFT on the NFTStorefront as well
-			let cap = getAccount(receiver.address).capabilities.get<&NFTStorefrontV2.Storefront>(NFTStorefrontV2.StorefrontPublicPath)!
+			let cap = getAccount(receiver.address).capabilities.get<&NFTStorefrontV2.Storefront>(NFTStorefrontV2.StorefrontPublicPath)
 			if cap.check(){ 
 				let s = cap.borrow()!
 				var existingListingIDs = s.getExistingListingIDs(nftType: nftType, nftID: nftID)
@@ -431,7 +431,7 @@ contract Offers{
 		access(all)
 		fun removeOffer(storefrontAddress: Address, offerResourceID: UInt64){ 
 			let acct = getAccount(storefrontAddress)
-			let storefront = acct.capabilities.get<&Storefront>(Offers.OffersPublicPath)!
+			let storefront = acct.capabilities.get<&Storefront>(Offers.OffersPublicPath)
 			(storefront.borrow()!).adminRemoveListing(offerResourceID: offerResourceID)
 		}
 	}

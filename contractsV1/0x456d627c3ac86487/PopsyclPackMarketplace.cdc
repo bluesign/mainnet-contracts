@@ -226,9 +226,9 @@ contract PopsyclPackMarketplace{
 			let owner = self.packInfluencer[packId]!!
 			
 			// Popvalut reference
-			let PopsyclvaultRef = (getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to PopsyclPackMarketplace vault")
+			let PopsyclvaultRef = getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to PopsyclPackMarketplace vault")
 			// influencer vault reference
-			let influencerVaultRef = (getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to owner vault")
+			let influencerVaultRef = getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to owner vault")
 			let marketShare = self.flowshare(price: self.packPrices[packId]!, commission: PopsyclMarketplace.marketFee)
 			let royalityShare = self.flowshare(price: self.packPrices[packId]!, commission: self.packRoylty[packId]!)
 			let marketCut <- payment.withdraw(amount: marketShare)
@@ -299,7 +299,7 @@ contract PopsyclPackMarketplace{
 		access(all)
 		fun saleWithdrawn(packId: UInt64){ 
 			let owner = self.packSeller[packId]!!
-			let receiver = (getAccount(owner).capabilities.get<&{PopsyclPack.PopsyclPackCollectionPublic}>(PopsyclPack.PopsyclPackPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let receiver = getAccount(owner).capabilities.get<&{PopsyclPack.PopsyclPackCollectionPublic}>(PopsyclPack.PopsyclPackPublicPath).borrow<&{PopsyclPack.PopsyclPackCollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			receiver.deposit(token: <-self.withdraw(id: packId))
 			emit SaleWithdrawn(packTokenId: packId)
 		}

@@ -102,7 +102,7 @@ contract MessageCard: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -248,7 +248,7 @@ contract MessageCard: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -297,6 +297,16 @@ contract MessageCard: NonFungibleToken{
 		fun updateTemplate(id: UInt64, templatesCapability: Capability<&Templates>, templateId: UInt64){ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &MessageCard.NFT
 			nft.updateTemplate(templatesCapability: templatesCapability, templateId: templateId)
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

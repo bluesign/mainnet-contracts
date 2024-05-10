@@ -312,7 +312,7 @@ contract Swap{
 			
 			// Pay fees to the fee receiver defined in the contract
 			let feeAddress = Swap.FeeAddress()
-			let feeReceiver = getAccount(feeAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+			let feeReceiver = getAccount(feeAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 			for f in self.details.fees{ 
 				if let receiver = feeReceiver.borrow(){ 
 					let vault <- payment.withdraw(amount: f.amount)

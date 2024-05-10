@@ -488,7 +488,7 @@ contract TheFabricantPrimalRave: NonFungibleToken, TheFabricantNFTStandardV2, Re
 	}
 	
 	access(all)
-	resource NFT: TheFabricantNFTStandardV2.TFNFT, NonFungibleToken.INFT, ViewResolver.Resolver, PublicNFT{ 
+	resource NFT: TheFabricantNFTStandardV2.TFNFT, NonFungibleToken.NFT, ViewResolver.Resolver, PublicNFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -748,7 +748,7 @@ contract TheFabricantPrimalRave: NonFungibleToken, TheFabricantNFTStandardV2, Re
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Remove the nft from the Collection
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: NFT does not exist in the collection")
@@ -806,6 +806,16 @@ contract TheFabricantPrimalRave: NonFungibleToken, TheFabricantNFTStandardV2, Re
 				return ref as! &TheFabricantPrimalRave.NFT
 			}
 			return nil
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -933,7 +943,7 @@ contract TheFabricantPrimalRave: NonFungibleToken, TheFabricantNFTStandardV2, Re
 			// Get the publicMinter details so we can apply all the correct props to the NFT
 			//NOTE: Therefore relies on a pM having been created
 			let publicPath = PublicPath(identifier: publicMinterPathString) ?? panic("Failed to construct public path from path string: ".concat(publicMinterPathString))
-			let publicMinterCap = (getAccount((self.owner!).address).capabilities.get<&TheFabricantPrimalRave.PublicMinter>(publicPath)!).borrow() ?? panic("Couldn't get publicMinter ref or pathString is wrong: ".concat(publicMinterPathString))
+			let publicMinterCap = getAccount((self.owner!).address).capabilities.get<&TheFabricantPrimalRave.PublicMinter>(publicPath).borrow<&TheFabricantPrimalRave.PublicMinter>() ?? panic("Couldn't get publicMinter ref or pathString is wrong: ".concat(publicMinterPathString))
 			let publicMinterDetails = publicMinterCap.getPublicMinterDetails()
 			
 			//Confirm that minting is open on the publicMinter

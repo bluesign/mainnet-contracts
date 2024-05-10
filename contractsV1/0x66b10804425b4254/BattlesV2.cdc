@@ -192,7 +192,7 @@ contract BattlesV2{
 	access(self)
 	fun getRevvReceiver(addr: Address): &{FungibleToken.Receiver}?{ 
 		let recipient = getAccount(addr)
-		let receiverCap = recipient.capabilities.get_<YOUR_TYPE>(REVV.RevvReceiverPublicPath)!
+		let receiverCap = recipient.capabilities.get_<YOUR_TYPE>(REVV.RevvReceiverPublicPath)
 		return receiverCap.borrow<&{FungibleToken.Receiver}>()
 	}
 	

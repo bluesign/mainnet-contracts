@@ -118,7 +118,7 @@ contract NftReality: NonFungibleToken{
 	
 	// NftReality nft resource
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -219,7 +219,7 @@ contract NftReality: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -253,6 +253,16 @@ contract NftReality: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

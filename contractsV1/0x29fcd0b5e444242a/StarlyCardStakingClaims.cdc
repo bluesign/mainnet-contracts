@@ -115,7 +115,7 @@ contract StarlyCardStakingClaims{
 			(
 				account.capabilities.get<
 					&{StakedStarlyCard.CollectionPublic, NonFungibleToken.CollectionPublic}
-				>(StakedStarlyCard.CollectionPublicPath)!!
+				>(StakedStarlyCard.CollectionPublicPath)!
 			).borrow()
 			?? panic("Could not borrow capability from public StarlyTokenStaking collection!")
 		let userRecentClaims = (&self.recentClaims[address] as &RecentClaims?)!
@@ -145,7 +145,7 @@ contract StarlyCardStakingClaims{
 		}
 		if payoutAmount > 0.0{ 
 			let claimVaultRef = StarlyCardStakingClaims.account.storage.borrow<&StarlyToken.Vault>(from: StarlyToken.TokenStoragePath)!
-			let receiverRef = (account.capabilities.get<&{FungibleToken.Receiver}>(StarlyToken.TokenPublicReceiverPath)!).borrow() ?? panic("Could not borrow StarlyToken receiver reference to the beneficiary's vault!")
+			let receiverRef = account.capabilities.get<&{FungibleToken.Receiver}>(StarlyToken.TokenPublicReceiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow StarlyToken receiver reference to the beneficiary's vault!")
 			receiverRef.deposit(from: <-claimVaultRef.withdraw(amount: payoutAmount))
 			emit ClaimPaid(amount: payoutAmount, to: address, paidStakeIDs: paidStakeIDs)
 		}
@@ -174,7 +174,7 @@ contract StarlyCardStakingClaims{
 			(
 				getAccount(address).capabilities.get<
 					&{StarlyTokenStaking.CollectionPublic, NonFungibleToken.CollectionPublic}
-				>(StarlyTokenStaking.CollectionPublicPath)!!
+				>(StarlyTokenStaking.CollectionPublicPath)!
 			).borrow()
 			?? panic("Could not borrow capability from public StarlyTokenStaking collection!")
 		let stakedAmount = stakeCollectionRef.getStakedAmount()

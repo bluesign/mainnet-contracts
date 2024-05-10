@@ -149,7 +149,7 @@ contract REVVVaultAccess{
 				"VaultGuard StoragePath already registered"
 		}
 		self.totalAuthorizedAmount = self.totalAuthorizedAmount + maxAmount
-		let vaultCapability = self.account.capabilities.get<&REVV.Vault>(REVV.RevvVaultPrivatePath)!
+		let vaultCapability = self.account.capabilities.get<&REVV.Vault>(REVV.RevvVaultPrivatePath)
 		let _guard <- create VaultGuard(vaultCapability: vaultCapability, max: maxAmount)
 		self.account.storage.save(<-_guard, to: guardStoragePath)
 		var capability_1 = self.account.capabilities.storage.issue<&VaultGuard>(guardStoragePath)
@@ -196,7 +196,7 @@ contract REVVVaultAccess{
 	fun getMaxAmountForAccount(vaultProxyAddress: Address): UFix64{ 
 		let paths = self.proxyToGuardMap[vaultProxyAddress]!
 		let capability =
-			self.account.capabilities.get<&REVVVaultAccess.VaultGuard>(paths.privatePath)!
+			self.account.capabilities.get<&REVVVaultAccess.VaultGuard>(paths.privatePath)
 		let vaultRef = capability.borrow()!
 		return vaultRef.max
 	}
@@ -207,7 +207,7 @@ contract REVVVaultAccess{
 	fun getTotalAmountForAccount(vaultProxyAddress: Address): UFix64{ 
 		let paths = self.proxyToGuardMap[vaultProxyAddress]!
 		let capability =
-			self.account.capabilities.get<&REVVVaultAccess.VaultGuard>(paths.privatePath)!
+			self.account.capabilities.get<&REVVVaultAccess.VaultGuard>(paths.privatePath)
 		let vaultRef = capability.borrow()!
 		return vaultRef.total
 	}

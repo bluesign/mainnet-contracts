@@ -538,7 +538,7 @@ contract CAT_EnterTheEvolution: NonFungibleToken, TheFabricantNFTStandardV2, Rev
 	}
 	
 	access(all)
-	resource NFT: TheFabricantNFTStandardV2.TFNFT, NonFungibleToken.INFT, ViewResolver.Resolver, PublicNFT{ 
+	resource NFT: TheFabricantNFTStandardV2.TFNFT, NonFungibleToken.NFT, ViewResolver.Resolver, PublicNFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -807,7 +807,7 @@ contract CAT_EnterTheEvolution: NonFungibleToken, TheFabricantNFTStandardV2, Rev
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Remove the nft from the Collection
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: NFT does not exist in the collection")
@@ -865,6 +865,16 @@ contract CAT_EnterTheEvolution: NonFungibleToken, TheFabricantNFTStandardV2, Rev
 				return ref as! &CAT_EnterTheEvolution.NFT
 			}
 			return nil
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -1224,7 +1234,7 @@ contract CAT_EnterTheEvolution: NonFungibleToken, TheFabricantNFTStandardV2, Rev
 			let shoeShapeDescription = (shoeShape!).characteristicDescription
 			
 			// Add CoCreator to external royalties
-			let coCreatorReceiver = getAccount((receiver.owner!).address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			let coCreatorReceiver = getAccount((receiver.owner!).address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 			let coCreatorExternalRoyalty = MetadataViews.Royalty(receiver: coCreatorReceiver, cut: 0.01, description: "CoCreator Royalty")
 			let externalPublicMinterRoyalties = self.royalties.getRoyalties()
 			externalPublicMinterRoyalties.append(coCreatorExternalRoyalty)

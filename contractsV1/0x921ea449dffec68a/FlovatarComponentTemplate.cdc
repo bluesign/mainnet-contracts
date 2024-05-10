@@ -252,11 +252,9 @@ contract FlovatarComponentTemplate{
 	fun getComponentTemplates(): [ComponentTemplateData]{ 
 		var componentTemplateData: [ComponentTemplateData] = []
 		if let componentTemplateCollection =
-			(
-				self.account.capabilities.get<&{FlovatarComponentTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarComponentTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarComponentTemplate.CollectionPublic}>(){ 
 			for id in componentTemplateCollection.getIDs(){ 
 				var componentTemplate = componentTemplateCollection.borrowComponentTemplate(id: id)
 				componentTemplateData.append(ComponentTemplateData(id: id, name: (componentTemplate!).name, category: (componentTemplate!).category, color: (componentTemplate!).color, description: (componentTemplate!).description, svg: nil, series: (componentTemplate!).series, maxMintableComponents: (componentTemplate!).maxMintableComponents, rarity: (componentTemplate!).rarity))
@@ -269,11 +267,9 @@ contract FlovatarComponentTemplate{
 	access(all)
 	fun getComponentTemplate(id: UInt64): ComponentTemplateData?{ 
 		if let componentTemplateCollection =
-			(
-				self.account.capabilities.get<&{FlovatarComponentTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarComponentTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarComponentTemplate.CollectionPublic}>(){ 
 			if let componentTemplate = componentTemplateCollection.borrowComponentTemplate(id: id){ 
 				return ComponentTemplateData(id: id, name: (componentTemplate!).name, category: (componentTemplate!).category, color: (componentTemplate!).color, description: (componentTemplate!).description, svg: (componentTemplate!).svg, series: (componentTemplate!).series, maxMintableComponents: (componentTemplate!).maxMintableComponents, rarity: (componentTemplate!).rarity)
 			}

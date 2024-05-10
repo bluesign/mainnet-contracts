@@ -72,7 +72,7 @@ contract HWGarageCardV2: NonFungibleToken{
 	var currentCardEditionIdByPackSeriesId:{ UInt64: UInt64}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -120,8 +120,8 @@ contract HWGarageCardV2: NonFungibleToken{
 					let traitsView = MetadataViews.dictToTraits(dict: self.metadata, excludedNames: exludedTraits)
 					return traitsView
 				case Type<MetadataViews.Royalties>():
-					let flowReciever = getAccount(0xf86e2f015cd692be).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: flowReciever, cut: 0.05, description: "Mattel 5% Royalty")])
+					let flowReciever = getAccount(0xf86e2f015cd692be).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: flowReciever!, cut: 0.05, description: "Mattel 5% Royalty")])
 				case Type<MetadataViews.Rarity>():
 					let rarityDescription = self.metadata["rarity"]
 					return MetadataViews.Rarity(score: nil, max: nil, description: rarityDescription)
@@ -174,7 +174,7 @@ contract HWGarageCardV2: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -218,6 +218,16 @@ contract HWGarageCardV2: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let token = nft as! &HWGarageCardV2.NFT
 			return token as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -141,7 +141,7 @@ contract GeneratedExperiences: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -224,7 +224,7 @@ contract GeneratedExperiences: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -265,6 +265,16 @@ contract GeneratedExperiences: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -297,12 +307,12 @@ contract GeneratedExperiences: NonFungibleToken{
 			let arr: [MetadataViews.Royalty] = []
 			for r in collectionInfo.royaltiesInput{ 
 				// Try to get Token Switchboard
-				var receiverCap = getAccount(r.recipient).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)!
+				var receiverCap = getAccount(r.recipient).capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)
 				// If it fails, try to get Find Profile
 				if !receiverCap.check(){ 
-					receiverCap = getAccount(r.recipient).capabilities.get<&{FungibleToken.Receiver}>(/public/findProfileReceiver)!
+					receiverCap = getAccount(r.recipient).capabilities.get<&{FungibleToken.Receiver}>(/public/findProfileReceiver)
 				}
-				arr.append(MetadataViews.Royalty(receiver: receiverCap, cut: r.cut, description: r.description))
+				arr.append(MetadataViews.Royalty(receiver: receiverCap!, cut: r.cut, description: r.description))
 			}
 			collectionInfo.setRoyalty(r: arr)
 			GeneratedExperiences.collectionInfo[collectionInfo.season] = collectionInfo

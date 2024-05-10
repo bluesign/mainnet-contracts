@@ -56,7 +56,7 @@ contract WonderlandRewardAlgorithm: RewardAlgorithm{
 	
 	access(all)
 	fun borrowAlgorithm(): &Algorithm{ 
-		return (self.account.capabilities.get<&WonderlandRewardAlgorithm.Algorithm>(self.AlgorithmPublicPath)!).borrow()!
+		return self.account.capabilities.get<&WonderlandRewardAlgorithm.Algorithm>(self.AlgorithmPublicPath).borrow()!
 	}
 	
 	init(){ 

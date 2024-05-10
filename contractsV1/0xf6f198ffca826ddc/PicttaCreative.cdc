@@ -388,7 +388,7 @@ contract PicttaCreative: NonFungibleToken{
 	
 	// The resource that represents the Collectible NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		
 		// Global unique Collectible Id
 		access(all)
@@ -500,7 +500,7 @@ contract PicttaCreative: NonFungibleToken{
 		}
 		
 		// Remove a Collectible from the Collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: Collectible does not exist in the collection.")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -576,6 +576,16 @@ contract PicttaCreative: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -602,7 +612,7 @@ contract PicttaCreative: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &PicttaCreative.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&PicttaCreative.Collection>(PicttaCreative.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&PicttaCreative.Collection>(PicttaCreative.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust KittyItems.Collection.borowKittyItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowCollectible(id: itemID)

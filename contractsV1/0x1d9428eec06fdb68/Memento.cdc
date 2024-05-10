@@ -229,7 +229,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -279,8 +279,8 @@ contract Memento: NonFungibleToken, ViewResolver{
 						return MetadataViews.Medias([MetadataViews.Media(file: MetadataViews.HTTPFile(url: metadata.embededHTML), mediaType: "html")])
 					}
 				case Type<MetadataViews.Royalties>():
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(metadata.creatorAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.10, // 10% royalty on secondary sales																																																   
-																																																   description: "The creator of the original content gets 10% of every secondary sale.")])
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(metadata.creatorAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.10, // 10% royalty on secondary sales																																																  
+																																																  description: "The creator of the original content gets 10% of every secondary sale.")])
 				case Type<MetadataViews.Serial>():
 					return MetadataViews.Serial(self.serial)
 			}
@@ -342,7 +342,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// Withdraw removes an NFT from the collection and moves it to the caller(for Trading)
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -406,6 +406,16 @@ contract Memento: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -442,7 +452,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 					"Minting for this NFT has ended or reached max supply."
 			}
 			let nft <- create NFT(_creatorID: creatorId, _description: description, _recipient: recipient)
-			if let recipientCollection = (getAccount(recipient).capabilities.get<&Memento.Collection>(Memento.CollectionPublicPath)!).borrow(){ 
+			if let recipientCollection = getAccount(recipient).capabilities.get<&Memento.Collection>(Memento.CollectionPublicPath).borrow<&Memento.Collection>(){ 
 				recipientCollection.deposit(token: <-nft)
 			} else if let storage = &Memento.nftStorage[recipient] as auth(Mutate) &{UInt64: NFT}?{ 
 				storage[nft.id] <-! nft

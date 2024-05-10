@@ -60,7 +60,7 @@ contract TFCItems: NonFungibleToken{
 	// NFT
 	// A TFC Item as an NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -171,7 +171,7 @@ contract TFCItems: NonFungibleToken{
 		
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -276,6 +276,16 @@ contract TFCItems: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -338,7 +348,7 @@ contract TFCItems: NonFungibleToken{
 	// If it has a collection and that collection contains the itemId, return a reference to that.
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &TFCItems.NFT?{ 
-		let capability = getAccount(from).capabilities.get<&TFCItems.Collection>(TFCItems.CollectionPublicPath)!
+		let capability = getAccount(from).capabilities.get<&TFCItems.Collection>(TFCItems.CollectionPublicPath)
 		if capability.check(){ 
 			let collection = capability.borrow()
 			return (collection!).borrowTFCItem(id: itemID)

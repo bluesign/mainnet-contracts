@@ -63,7 +63,7 @@ contract DynamicNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -150,7 +150,7 @@ contract DynamicNFT: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -191,6 +191,16 @@ contract DynamicNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -219,7 +229,7 @@ contract DynamicNFT: NonFungibleToken{
 		
 		access(all)
 		fun pushTrade(id: UInt64, currentOwner: Address, trade: TraderflowScores.Trade){ 
-			let ownerCollection = (getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath)!).borrow() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
+			let ownerCollection = getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath).borrow<&Collection>() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
 			let nftRef = ownerCollection.borrowAuthNFT(id: id) ?? panic("This account does not own an NFT with this id.")
 			let tradeRef = nftRef.borrowTradesRef()
 			let update = tradeRef.pushTrade(_trade: trade)
@@ -228,7 +238,7 @@ contract DynamicNFT: NonFungibleToken{
 		
 		access(all)
 		fun pushEquity(id: UInt64, currentOwner: Address, equity: UFix64){ 
-			let ownerCollection = (getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath)!).borrow() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
+			let ownerCollection = getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath).borrow<&Collection>() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
 			let nftRef = ownerCollection.borrowAuthNFT(id: id) ?? panic("This account does not own an NFT with this id.")
 			let tradeRef = nftRef.borrowTradesRef()
 			let update = tradeRef.pushEquity(_equity: equity)
@@ -237,7 +247,7 @@ contract DynamicNFT: NonFungibleToken{
 		
 		access(all)
 		fun updateArtwork(id: UInt64, currentOwner: Address, ipfs: String){ 
-			let ownerCollection = (getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath)!).borrow() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
+			let ownerCollection = getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath).borrow<&Collection>() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
 			let nftRef = ownerCollection.borrowAuthNFT(id: id) ?? panic("This account does not own an NFT with this id.")
 			nftRef.metadata.thumbnail = ipfs
 		}

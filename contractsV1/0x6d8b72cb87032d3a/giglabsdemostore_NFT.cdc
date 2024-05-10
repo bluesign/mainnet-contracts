@@ -311,7 +311,7 @@ contract giglabsdemostore_NFT: NonFungibleToken{
 	// A resource that represents the giglabsdemostore_NFT NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -421,7 +421,7 @@ contract giglabsdemostore_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -509,6 +509,16 @@ contract giglabsdemostore_NFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -537,7 +547,7 @@ contract giglabsdemostore_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &giglabsdemostore_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&giglabsdemostore_NFT.Collection>(giglabsdemostore_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&giglabsdemostore_NFT.Collection>(giglabsdemostore_NFT.CollectionPublicPath).borrow<&giglabsdemostore_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust giglabsdemostore_NFT.Collection.borrowgiglabsdemostore_NFT to get the correct id
 		// (it checks it before returning it).
 		return collection.borrowgiglabsdemostore_NFT(id: id)

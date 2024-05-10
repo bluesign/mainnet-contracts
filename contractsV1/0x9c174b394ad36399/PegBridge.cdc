@@ -280,12 +280,12 @@ contract PegBridge{
 		let receiverCap =
 			getAccount(mintInfo.receiver).capabilities.get<&{FungibleToken.Receiver}>(
 				tokCfg.vaultPub
-			)!
+			)
 		let minterMap = self.account.storage.borrow<&MinterBurnerMap>(from: self.FTMBMapPath)!
 		let mintedVault: @{FungibleToken.Vault} <- minterMap.mint(id: token, amt: mintInfo.amount)
 		if mintInfo.amount > tokCfg.delayThreshold{ 
 			// add to delayed xfer
-			DelayedTransfer.addDelayXfer(id: mintId, receiverCap: receiverCap, from: <-mintedVault)
+			DelayedTransfer.addDelayXfer(id: mintId, receiverCap: receiverCap!, from: <-mintedVault)
 		} else{ 
 			let receiverRef = receiverCap.borrow() ?? panic("Could not borrow a reference to the receiver")
 			receiverRef.deposit(from: <-mintedVault)

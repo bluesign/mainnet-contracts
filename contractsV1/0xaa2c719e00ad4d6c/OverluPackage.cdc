@@ -111,7 +111,7 @@ contract OverluPackage: NonFungibleToken{
 			 ***********************************************************/
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -246,7 +246,7 @@ contract OverluPackage: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				OverluPackage.pause == false:
@@ -298,6 +298,16 @@ contract OverluPackage: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let OverluPackage = nft as! &OverluPackage.NFT
 			return OverluPackage as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -494,7 +504,7 @@ contract OverluPackage: NonFungibleToken{
 		 vaultReceiver!).deposit(from: <-feeToken)
 		var idx: UInt8 = 0
 		while idx < amount{ 
-			minter.mintNFT(typeId: UInt64(1), recipient: (getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(OverluPackage.CollectionPublicPath)!).borrow()!, name: "", description: "", thumbnail: "", royalties: [])
+			minter.mintNFT(typeId: UInt64(1), recipient: getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(OverluPackage.CollectionPublicPath).borrow()!, name: "", description: "", thumbnail: "", royalties: [])
 			idx = idx + 1
 			records.append(OverluPackage.totalSupply - 1 as UInt64)
 		}

@@ -336,14 +336,11 @@ contract SoulMadeMarketplace{
 	fun getSoulMadeMainSale(address: Address, id: UInt64): SoulMadeMainSaleData{ 
 		let account = getAccount(address)
 		let saleCollection =
-			(
-				account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow()!
+			account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(self.CollectionPublicPath)
+				.borrow<&{SoulMadeMarketplace.SalePublic}>()!
 		let soulMadeMain = saleCollection.getSoulMadeMain(tokenId: id)
 		let price = saleCollection.getSoulMadeMainPrice(tokenId: id)
-		return SoulMadeMainSaleData(id: id, price: price!, mainDetail: *soulMadeMain.mainDetail)
+		return SoulMadeMainSaleData(id: id, price: price!, mainDetail: soulMadeMain.mainDetail)
 	}
 	
 	// Get all the SoulMadeMain Sale offers for a specific account
@@ -352,15 +349,12 @@ contract SoulMadeMarketplace{
 		var saleData: [SoulMadeMainSaleData] = []
 		let account = getAccount(address)
 		let saleCollection =
-			(
-				account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow()!
+			account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(self.CollectionPublicPath)
+				.borrow<&{SoulMadeMarketplace.SalePublic}>()!
 		for id in saleCollection.getSoulMadeMainIDs(){ 
 			let price = saleCollection.getSoulMadeMainPrice(tokenId: id)
 			let soulMadeMain = saleCollection.getSoulMadeMain(tokenId: id)
-			saleData.append(SoulMadeMainSaleData(id: id, price: price!, mainDetail: *soulMadeMain.mainDetail))
+			saleData.append(SoulMadeMainSaleData(id: id, price: price!, mainDetail: soulMadeMain.mainDetail))
 		}
 		return saleData
 	}
@@ -389,17 +383,14 @@ contract SoulMadeMarketplace{
 	fun getSoulMadeComponentSale(address: Address, id: UInt64): SoulMadeComponentSaleData{ 
 		let account = getAccount(address)
 		let saleCollection =
-			(
-				account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow()!
+			account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(self.CollectionPublicPath)
+				.borrow<&{SoulMadeMarketplace.SalePublic}>()!
 		let soulMadeComponent = saleCollection.getSoulMadeComponent(tokenId: id)
 		let price = saleCollection.getSoulMadeComponentPrice(tokenId: id)
 		return SoulMadeComponentSaleData(
 			id: id,
 			price: price!,
-			componentDetail: *soulMadeComponent.componentDetail
+			componentDetail: soulMadeComponent.componentDetail
 		)
 	}
 	
@@ -409,15 +400,12 @@ contract SoulMadeMarketplace{
 		var saleData: [SoulMadeComponentSaleData] = []
 		let account = getAccount(address)
 		let saleCollection =
-			(
-				account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow()!
+			account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(self.CollectionPublicPath)
+				.borrow<&{SoulMadeMarketplace.SalePublic}>()!
 		for id in saleCollection.getSoulMadeComponentIDs(){ 
 			let price = saleCollection.getSoulMadeComponentPrice(tokenId: id)
 			let soulMadeComponent = saleCollection.getSoulMadeComponent(tokenId: id)
-			saleData.append(SoulMadeComponentSaleData(id: id, price: price!, componentDetail: *soulMadeComponent.componentDetail))
+			saleData.append(SoulMadeComponentSaleData(id: id, price: price!, componentDetail: soulMadeComponent.componentDetail))
 		}
 		return saleData
 	}
@@ -459,11 +447,8 @@ contract SoulMadeMarketplace{
 		var saleData: [SoulMadeSaleData] = []
 		let account = getAccount(address)
 		let saleCollection =
-			(
-				account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow()!
+			account.capabilities.get<&{SoulMadeMarketplace.SalePublic}>(self.CollectionPublicPath)
+				.borrow<&{SoulMadeMarketplace.SalePublic}>()!
 		for id in saleCollection.getSoulMadeMainIDs(){ 
 			let price = saleCollection.getSoulMadeMainPrice(tokenId: id)
 			let soulMadeMain = saleCollection.getSoulMadeMain(tokenId: id)

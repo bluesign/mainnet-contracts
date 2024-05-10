@@ -90,7 +90,7 @@ contract PierSwapFactory{
 	access(all)
 	fun getPoolById(poolId: UInt64): &PierPair.Pool{ 
 		let address = Address(poolId)
-		return (getAccount(address).capabilities.get<&PierPair.Pool>(self.SwapPoolPublicPath)!)
+		return getAccount(address).capabilities.get<&PierPair.Pool>(self.SwapPoolPublicPath)
 			.borrow()
 		?? panic("Metapier PierSwapFactory: Couldn't borrow swap pool from the account")
 	}
@@ -195,7 +195,9 @@ contract PierSwapFactory{
 		
 		// deposits fees for account creation
 		let receiverRef =
-			(self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()
+			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<
+				&FlowToken.Vault
+			>()
 			?? panic(
 				"Metapier PierSwapFactory: Could not borrow receiver reference to the Flow Token Vault"
 			)

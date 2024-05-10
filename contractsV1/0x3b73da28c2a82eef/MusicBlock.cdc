@@ -87,7 +87,7 @@ contract MusicBlock: NonFungibleToken{
 		*/
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -154,7 +154,7 @@ contract MusicBlock: NonFungibleToken{
 		
 		// self.metadata = {}
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -214,6 +214,16 @@ contract MusicBlock: NonFungibleToken{
 		fun borrowMusicBlock(id: UInt64): &MusicBlock.NFT{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &MusicBlock.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

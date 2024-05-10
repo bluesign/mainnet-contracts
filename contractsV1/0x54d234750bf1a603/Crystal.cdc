@@ -66,7 +66,7 @@ contract Crystal: NonFungibleToken{
 	
 	// NFT Representng a Crystal
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// Identifier of NFT
 		access(all)
 		let id: UInt64
@@ -108,7 +108,7 @@ contract Crystal: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("The Crystal NFT does not exist")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -151,6 +151,16 @@ contract Crystal: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -175,7 +185,7 @@ contract Crystal: NonFungibleToken{
 		}
 		
 		// Access the collection of the owner
-		let collection = (getAccount(owner).capabilities.get<&{Shard.ShardCollectionPublic}>(/public/EternalShardCollection)!).borrow() ?? panic("Could not get receiver reference to the Shard Collection")
+		let collection = getAccount(owner).capabilities.get<&{Shard.ShardCollectionPublic}>(/public/EternalShardCollection).borrow<&{Shard.ShardCollectionPublic}>() ?? panic("Could not get receiver reference to the Shard Collection")
 		
 		// Create a list of Shards for every ID supplied
 		let shards: [&Shard.NFT] = []

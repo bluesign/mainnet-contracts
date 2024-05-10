@@ -72,7 +72,7 @@ contract CaaArts: NonFungibleToken{
 	// An CAA art piece NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -159,7 +159,7 @@ contract CaaArts: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -220,6 +220,16 @@ contract CaaArts: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -285,7 +295,7 @@ contract CaaArts: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &CaaArts.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&CaaArts.Collection>(CaaArts.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&CaaArts.Collection>(CaaArts.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust CaaArts.Collection.borowCaaArt to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowCaaArt(id: itemID)

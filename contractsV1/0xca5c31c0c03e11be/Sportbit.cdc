@@ -95,7 +95,7 @@ contract Sportbit: NonFungibleToken{
 	
 	// The NFT resource that implements the Public interface as well
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -203,7 +203,7 @@ contract Sportbit: NonFungibleToken{
 			}
 			if type == Type<MetadataViews.Royalties>(){ 
 				let royalties: [MetadataViews.Royalty] = []
-				royalties.append(MetadataViews.Royalty(receiver: Sportbit.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.05, description: "Sportvatar Royalty"))
+				royalties.append(MetadataViews.Royalty(receiver: Sportbit.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.05, description: "Sportvatar Royalty"))
 				return MetadataViews.Royalties(royalties)
 			}
 			if type == Type<MetadataViews.Serial>(){ 
@@ -298,7 +298,7 @@ contract Sportbit: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -357,6 +357,16 @@ contract Sportbit: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let componentNFT = nft as! &Sportbit.NFT
 			return componentNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -424,7 +434,7 @@ contract Sportbit: NonFungibleToken{
 	access(all)
 	fun getSvgForSportbit(address: Address, id: UInt64): String?{ 
 		let account = getAccount(address)
-		if let componentCollection = (account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath)!).borrow(){ 
+		if let componentCollection = account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath).borrow<&Sportbit.Collection>(){ 
 			return (componentCollection.borrowAccessory(id: id)!).getSvg()
 		}
 		return nil
@@ -434,7 +444,7 @@ contract Sportbit: NonFungibleToken{
 	access(all)
 	fun getSportbit(address: Address, componentId: UInt64): AccessoryData?{ 
 		let account = getAccount(address)
-		if let componentCollection = (account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath)!).borrow(){ 
+		if let componentCollection = account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath).borrow<&Sportbit.Collection>(){ 
 			if let component = componentCollection.borrowAccessory(id: componentId){ 
 				return AccessoryData(id: componentId, templateId: (component!).templateId, mint: (component!).mint)
 			}
@@ -447,7 +457,7 @@ contract Sportbit: NonFungibleToken{
 	fun getSportbits(address: Address): [AccessoryData]{ 
 		var componentData: [AccessoryData] = []
 		let account = getAccount(address)
-		if let componentCollection = (account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath)!).borrow(){ 
+		if let componentCollection = account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath).borrow<&Sportbit.Collection>(){ 
 			for id in componentCollection.getIDs(){ 
 				var component = componentCollection.borrowAccessory(id: id)
 				componentData.append(AccessoryData(id: id, templateId: (component!).templateId, mint: (component!).mint))

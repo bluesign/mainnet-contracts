@@ -93,7 +93,7 @@ contract ArleePartner: NonFungibleToken{
 	
 	// ArleePartnerNFT (Will only be given name and royalty)
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -179,7 +179,7 @@ contract ArleePartner: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot find ArleePartner NFT in your Collection, id: ".concat(withdrawID.toString()))
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -251,6 +251,16 @@ contract ArleePartner: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -265,7 +275,7 @@ contract ArleePartner: NonFungibleToken{
 	// return true if the address holds the ArleePartner NFT
 	access(all)
 	fun checkArleePartnerNFT(addr: Address): Bool{ 
-		let holderCap = getAccount(addr).capabilities.get<&ArleePartner.Collection>(ArleePartner.CollectionPublicPath)!
+		let holderCap = getAccount(addr).capabilities.get<&ArleePartner.Collection>(ArleePartner.CollectionPublicPath)
 		if holderCap.borrow == nil{ 
 			return false
 		}
@@ -279,7 +289,7 @@ contract ArleePartner: NonFungibleToken{
 	
 	access(all)
 	fun getArleePartnerNFTIDs(addr: Address): [UInt64]?{ 
-		let holderCap = getAccount(addr).capabilities.get<&ArleePartner.Collection>(ArleePartner.CollectionPublicPath)!
+		let holderCap = getAccount(addr).capabilities.get<&ArleePartner.Collection>(ArleePartner.CollectionPublicPath)
 		if holderCap.borrow == nil{ 
 			return nil
 		}

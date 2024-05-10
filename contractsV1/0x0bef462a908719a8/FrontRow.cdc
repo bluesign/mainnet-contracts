@@ -169,7 +169,7 @@ contract FrontRow: NonFungibleToken{
 	
 	// The resource that represents FrontRow NFT (based on a blueprint)
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64 // Global unique NFT ID
 		
@@ -398,7 +398,7 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Returns: @NonFungibleToken.NFT the token that was withdrawn
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			
 			// Remove the NFT from the Collection
@@ -507,6 +507,16 @@ contract FrontRow: NonFungibleToken{
 				}
 			}
 			return nil
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

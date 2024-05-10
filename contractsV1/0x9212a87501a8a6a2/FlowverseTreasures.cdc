@@ -470,7 +470,7 @@ contract FlowverseTreasures: NonFungibleToken{
 	
 	// NFT Resource that represents an instance of an entity in a set
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// Global unique NFT ID
 		access(all)
 		let id: UInt64
@@ -528,7 +528,7 @@ contract FlowverseTreasures: NonFungibleToken{
 					return MetadataViews.Display(name: self.name(), description: FlowverseTreasures.getEntityMetaDataByField(entityID: self.entityID, field: "description") ?? "", thumbnail: MetadataViews.HTTPFile(url: FlowverseTreasures.getEntityMetaDataByField(entityID: self.entityID, field: "thumbnailURL") ?? ""))
 				case Type<MetadataViews.Royalties>():
 					let feeCut: UFix64 = 0.05
-					let royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: getAccount(querySetData.royaltyReceiverAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!!, cut: feeCut, description: "Creator Royalty Fee")]
+					let royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: getAccount(querySetData.royaltyReceiverAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!, cut: feeCut, description: "Creator Royalty Fee")]
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.Serial>():
 					return MetadataViews.Serial(self.mintNumber)
@@ -724,7 +724,7 @@ contract FlowverseTreasures: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -783,6 +783,16 @@ contract FlowverseTreasures: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let flowverseNFT = nft as! &FlowverseTreasures.NFT
 			return flowverseNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

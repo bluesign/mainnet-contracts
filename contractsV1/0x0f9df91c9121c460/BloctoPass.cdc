@@ -112,7 +112,7 @@ contract BloctoPass: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, FungibleToken.Vault, FungibleToken.Provider, FungibleToken.Receiver, BloctoPassPrivate, BloctoPassPublic{ 
+	resource NFT: NonFungibleToken.NFT, FungibleToken.Vault, FungibleToken.Provider, FungibleToken.Receiver, BloctoPassPrivate, BloctoPassPublic{ 
 		// BLT holder vault
 		access(self)
 		let vault: @BloctoToken.Vault
@@ -345,7 +345,7 @@ contract BloctoPass: NonFungibleToken{
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
 		// withdrawal is disabled during lockup period
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -393,6 +393,16 @@ contract BloctoPass: NonFungibleToken{
 		fun borrowBloctoPassPrivate(id: UInt64): &BloctoPass.NFT{ 
 			let bloctoPassRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return bloctoPassRef as! &BloctoPass.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

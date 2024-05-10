@@ -230,10 +230,8 @@ contract NFTMetadataUtility{
 	access(all)
 	fun getStorefrontV2NFTRef(owner: Address, listingResourceID: UInt64): &{NonFungibleToken.NFT}?{ 
 		let storefrontRef =
-			(
-				getAccount(owner).capabilities.get<&NFTStorefrontV2.Storefront>(
-					NFTStorefrontV2.StorefrontPublicPath
-				)!
+			getAccount(owner).capabilities.get<&NFTStorefrontV2.Storefront>(
+				NFTStorefrontV2.StorefrontPublicPath
 			).borrow()
 			?? panic("Could not borrow public storefront from address")
 		let listing =
@@ -245,10 +243,8 @@ contract NFTMetadataUtility{
 	access(all)
 	fun getStorefrontV2ListingMetadata(owner: Address, listingResourceID: UInt64): StorefrontItem{ 
 		let storefrontRef =
-			(
-				getAccount(owner).capabilities.get<&NFTStorefrontV2.Storefront>(
-					NFTStorefrontV2.StorefrontPublicPath
-				)!
+			getAccount(owner).capabilities.get<&NFTStorefrontV2.Storefront>(
+				NFTStorefrontV2.StorefrontPublicPath
 			).borrow()
 			?? panic("Could not borrow public storefront from address")
 		let listing =
@@ -305,10 +301,8 @@ contract NFTMetadataUtility{
 	access(all)
 	fun getStorefrontV1NFTRef(owner: Address, listingResourceID: UInt64): &{NonFungibleToken.NFT}?{ 
 		let storefrontRef =
-			(
-				getAccount(owner).capabilities.get<&NFTStorefront.Storefront>(
-					NFTStorefront.StorefrontPublicPath
-				)!
+			getAccount(owner).capabilities.get<&NFTStorefront.Storefront>(
+				NFTStorefront.StorefrontPublicPath
 			).borrow()
 			?? panic("Could not borrow public storefront from address")
 		let listing =
@@ -320,10 +314,8 @@ contract NFTMetadataUtility{
 	access(all)
 	fun getStorefrontV1ListingMetadata(owner: Address, listingResourceID: UInt64): StorefrontItem{ 
 		let storefrontRef =
-			(
-				getAccount(owner).capabilities.get<&NFTStorefront.Storefront>(
-					NFTStorefront.StorefrontPublicPath
-				)!
+			getAccount(owner).capabilities.get<&NFTStorefront.Storefront>(
+				NFTStorefront.StorefrontPublicPath
 			).borrow()
 			?? panic("Could not borrow public storefront from address")
 		let listing =
@@ -346,13 +338,11 @@ contract NFTMetadataUtility{
 	access(all)
 	fun getTopShotNFTRef(owner: Address, nftID: UInt64): &{NonFungibleToken.NFT}?{ 
 		let collectionRef =
-			(
-				getAccount(owner).capabilities.get<&{TopShot.MomentCollectionPublic}>(
-					/public/MomentCollection
-				)!
-			).borrow()
+			getAccount(owner).capabilities.get<&{TopShot.MomentCollectionPublic}>(
+				/public/MomentCollection
+			).borrow<&{TopShot.MomentCollectionPublic}>()
 			?? panic("Could not get reference to public TopShot collection")
-		return collectionRef.borrowNFT(nftID)
+		return collectionRef.borrowNFT(id: nftID)
 	}
 	
 	access(all)

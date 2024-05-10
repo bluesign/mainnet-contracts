@@ -85,7 +85,7 @@ contract SoulMadeComponent: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ComponentPublic, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ComponentPublic, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -141,7 +141,7 @@ contract SoulMadeComponent: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing Component NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -182,6 +182,16 @@ contract SoulMadeComponent: NonFungibleToken{
 			let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			let componentNFT = nft as! &SoulMadeComponent.NFT
 			return componentNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -46,7 +46,7 @@ contract ListenNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ListenNFTPublic{ 
+	resource NFT: NonFungibleToken.NFT, ListenNFTPublic{ 
 		access(all)
 		let id: UInt64
 		
@@ -102,7 +102,7 @@ contract ListenNFT: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -157,6 +157,16 @@ contract ListenNFT: NonFungibleToken{
 			let nftMetadata:{ String: String} = (listenNFT!).getMetadata()
 			nftMetadata.insert(key: "id", id.toString())
 			return nftMetadata
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -44,7 +44,7 @@ contract Flex: NonFungibleToken{
 	// A Flex as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -170,7 +170,7 @@ contract Flex: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -223,6 +223,16 @@ contract Flex: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -272,7 +282,7 @@ contract Flex: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &Flex.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Flex.Collection>(Flex.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&Flex.Collection>(Flex.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Flex.Collection.borowFlex to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowFlex(id: itemID)

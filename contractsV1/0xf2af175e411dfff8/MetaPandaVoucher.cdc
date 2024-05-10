@@ -127,7 +127,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 	// A MetaPandaVoucher as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -218,7 +218,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -259,6 +259,16 @@ contract MetaPandaVoucher: NonFungibleToken{
 				return nft
 			}
 			panic("NFT not found in collection.")
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -328,7 +338,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 		let token <- collection.withdraw(withdrawID: voucherID)
 		
 		// Get a reference to our redeemer collection
-		let receiver = (MetaPandaVoucher.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(MetaPandaVoucher.RedeemedCollectionPublicPath)!).borrow()!
+		let receiver = MetaPandaVoucher.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(MetaPandaVoucher.RedeemedCollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
 		
 		// Deposit the voucher for consumption
 		receiver.deposit(token: <-token)

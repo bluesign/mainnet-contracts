@@ -697,7 +697,7 @@ contract FRC20Marketplace{
 	///
 	access(all)
 	fun borrowMarket(_ addr: Address): &Market?{ 
-		return (getAccount(addr).capabilities.get<&Market>(self.FRC20MarketPublicPath)!).borrow()
+		return getAccount(addr).capabilities.get<&Market>(self.FRC20MarketPublicPath).borrow()
 	}
 	
 	init(){ 

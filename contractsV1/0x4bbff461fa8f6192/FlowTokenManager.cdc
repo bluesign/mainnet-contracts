@@ -11,7 +11,7 @@ contract FlowTokenManager{
 			var extraStorageRequiredMb = FlowStorageFees.convertUInt64StorageBytesToUFix64Megabytes(extraStorageRequiredBytes)
 			var flowRequired = FlowStorageFees.storageCapacityToFlow(extraStorageRequiredMb)
 			let vault: @{FungibleToken.Vault} <- flowTokenProvider.withdraw(amount: flowRequired)
-			((account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!!).borrow()!).deposit(from: <-vault)
+			((account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow()!).deposit(from: <-vault)
 		}
 	}
 }

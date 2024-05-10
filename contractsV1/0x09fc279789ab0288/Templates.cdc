@@ -184,8 +184,8 @@ contract Templates{
 			let cap =
 				getAccount(self.address).capabilities.get<&{FungibleToken.Receiver}>(
 					self.getPublicPath()
-				)!
-			return MetadataViews.Royalty(receiver: cap, cut: self.cut, description: self.name)
+				)
+			return MetadataViews.Royalty(receiver: cap!, cut: self.cut, description: self.name)
 		}
 	}
 	

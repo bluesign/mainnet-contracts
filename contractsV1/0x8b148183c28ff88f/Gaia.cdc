@@ -462,7 +462,7 @@ contract Gaia: NonFungibleToken{
 	// A Flow Asset as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -554,9 +554,9 @@ contract Gaia: NonFungibleToken{
 					return self.parseTraits(metadata: metadata!, setData: setData)
 				case Type<MetadataViews.Royalties>():
 					let royalties: [MetadataViews.Royalty] = []
-					let royaltyReceiverCap = getAccount(Gaia.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!
+					let royaltyReceiverCap = getAccount(Gaia.royaltyAddress()).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
 					if royaltyReceiverCap.check(){ 
-						royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap, cut: 0.05, description: "Creator royalty fee."))
+						royalties.append(MetadataViews.Royalty(receiver: royaltyReceiverCap!, cut: 0.05, description: "Creator royalty fee."))
 					}
 					return MetadataViews.Royalties(royalties)
 				case Type<MetadataViews.Serial>():
@@ -707,7 +707,7 @@ contract Gaia: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -809,6 +809,16 @@ contract Gaia: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let gaiaNFT = nft as! &Gaia.NFT
 			return gaiaNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -1015,7 +1025,7 @@ contract Gaia: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &Gaia.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Gaia.Collection>(Gaia.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&Gaia.Collection>(Gaia.CollectionPublicPath).borrow<&Gaia.Collection>() ?? panic("Couldn't get collection")
 		// We trust Gaia.Collection.borowGaiaAsset to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowGaiaNFT(id: itemID)
@@ -1028,7 +1038,7 @@ contract Gaia: NonFungibleToken{
 	//
 	access(all)
 	fun checkSetup(_ address: Address): Bool{ 
-		return (getAccount(address).capabilities.get<&{Gaia.CollectionPublic}>(Gaia.CollectionPublicPath)!).check()
+		return getAccount(address).capabilities.get<&{Gaia.CollectionPublic}>(Gaia.CollectionPublicPath).check()
 	}
 	
 	// initializer

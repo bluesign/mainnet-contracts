@@ -47,7 +47,7 @@ contract BountyUnlockConditions{
 		access(all)
 		fun isUnlocked(_ params:{ String: AnyStruct}): Bool{ 
 			let profileAddr: Address = params["profile"]! as! Address
-			if let profile = (getAccount(profileAddr).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath)!).borrow(){ 
+			if let profile = getAccount(profileAddr).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath).borrow<&UserProfile.Profile>(){ 
 				let points = profile.getSeasonPoints(seasonId: self.seasonId)
 				return points >= self.amount
 			} else{ 
@@ -76,7 +76,7 @@ contract BountyUnlockConditions{
 		access(all)
 		fun isUnlocked(_ params:{ String: AnyStruct}): Bool{ 
 			let profileAddr: Address = params["profile"]! as! Address
-			if let collection = (getAccount(profileAddr).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow(){ 
+			if let collection = getAccount(profileAddr).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>(){ 
 				let len = collection.ownedIdsFromEvent(eventId: self.eventId).length
 				return len > 0
 			} else{ 
@@ -101,7 +101,7 @@ contract BountyUnlockConditions{
 		access(all)
 		fun isUnlocked(_ params:{ String: AnyStruct}): Bool{ 
 			let profileAddr: Address = params["profile"]! as! Address
-			if let profile = (getAccount(profileAddr).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath)!).borrow(){ 
+			if let profile = getAccount(profileAddr).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath).borrow<&UserProfile.Profile>(){ 
 				let completed = profile.getBountiesCompleted()
 				return UInt64(completed.keys.length) >= self.amount
 			} else{ 
@@ -126,7 +126,7 @@ contract BountyUnlockConditions{
 		access(all)
 		fun isUnlocked(_ params:{ String: AnyStruct}): Bool{ 
 			let profileAddr: Address = params["profile"]! as! Address
-			if let profile = (getAccount(profileAddr).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath)!).borrow(){ 
+			if let profile = getAccount(profileAddr).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath).borrow<&UserProfile.Profile>(){ 
 				return profile.isBountyCompleted(bountyId: self.bountyId)
 			} else{ 
 				return false

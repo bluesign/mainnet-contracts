@@ -393,7 +393,7 @@ contract MetapierLaunchpad{
 		// gets the public launchpad pass collection stored in the given address
 		access(self)
 		fun getPublicPassCollection(address: Address): &MetapierLaunchpadPass.Collection{ 
-			return (getAccount(address).capabilities.get<&MetapierLaunchpadPass.Collection>(MetapierLaunchpadPass.CollectionPublicPath)!).borrow()!
+			return getAccount(address).capabilities.get<&MetapierLaunchpadPass.Collection>(MetapierLaunchpadPass.CollectionPublicPath).borrow()!
 		}
 		
 		access(all)

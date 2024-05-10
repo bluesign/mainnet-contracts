@@ -100,11 +100,11 @@ contract FindThoughts{
 			let cap =
 				getAccount(creator).capabilities.get<&FindThoughts.Collection>(
 					FindThoughts.CollectionPublicPath
-				)!
+				)
 			if !cap.check(){ 
 				panic("creator's find thought capability is not valid. Creator : ".concat(creator.toString()))
 			}
-			self.cap = cap
+			self.cap = cap!
 			self.id = id
 		}
 		

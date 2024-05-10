@@ -129,7 +129,7 @@ contract DimeRoyaltiesV2{
 		// only the actual owner can change the listing
 		access(all)
 		fun updateOwner(id: UInt64, newOwner: Address){ 
-			let collection = (getAccount(newOwner).capabilities.get<&DimeCollectibleV4.Collection>(DimeCollectibleV4.CollectionPublicPath)!).borrow() ?? panic("Couldn't borrow a capability to the new owner's collection")
+			let collection = getAccount(newOwner).capabilities.get<&DimeCollectibleV4.Collection>(DimeCollectibleV4.CollectionPublicPath).borrow() ?? panic("Couldn't borrow a capability to the new owner's collection")
 			let nft = collection.borrowCollectible(id: id)
 			assert(nft != nil, message: "That user doesn't own that NFT")
 			
@@ -243,7 +243,7 @@ contract DimeRoyaltiesV2{
 		fun createRelease(collection: &DimeCollectibleV4.Collection, totalRoyalties: UFix64, numRoyaltyNFTs: UInt64, tradeable: Bool, managerFees: UFix64, artistShares: SaleShares, managerShares: SaleShares, secondarySaleRoyalties: MetadataViews.Royalties){ 
 			let minterAddress: Address = 0x056a9cc93a020fad // 0x056a9cc93a020fad for testnet. 0xf5cdaace879e5a79 for mainnet
 			
-			let minterRef = (getAccount(minterAddress).capabilities.get<&DimeCollectibleV4.NFTMinter>(DimeCollectibleV4.MinterPublicPath)!).borrow()!
+			let minterRef = getAccount(minterAddress).capabilities.get<&DimeCollectibleV4.NFTMinter>(DimeCollectibleV4.MinterPublicPath).borrow()!
 			let release <- create Release(id: DimeRoyaltiesV2.nextReleaseId, royaltiesPerShare: totalRoyalties / UFix64(numRoyaltyNFTs), numRoyaltyNFTs: numRoyaltyNFTs, managerFees: managerFees, artistShares: artistShares, managerShares: managerShares, secondarySaleRoyalties: secondarySaleRoyalties)
 			let existing <- self.releases[DimeRoyaltiesV2.nextReleaseId] <- release
 			// This should always be null, but we need to handle this explicitly

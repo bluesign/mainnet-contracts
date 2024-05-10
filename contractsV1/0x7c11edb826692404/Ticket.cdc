@@ -42,7 +42,7 @@ contract Ticket: NonFungibleToken{
 	let MinterStoragePath: StoragePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -103,7 +103,7 @@ contract Ticket: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let level = self.borrowTicket(id: withdrawID)?.level ?? panic("Level missing")
 			self.counts[level] = self.counts[level]! - 1
@@ -152,6 +152,16 @@ contract Ticket: NonFungibleToken{
 		access(all)
 		fun getCounts():{ UInt8: UInt64}{ 
 			return self.counts
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

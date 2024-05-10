@@ -97,7 +97,7 @@ contract SwirlMoment: NonFungibleToken{
 		// validate swirl participants' messages
 		for proof in proofs{ 
 			// 0. resolve profile from the participant's SwirlNametag.
-			let collectionRef = (proof.account.capabilities.get<&{SwirlNametag.SwirlNametagCollectionPublic}>(SwirlNametag.CollectionPublicPath)!).borrow() ?? panic("no SwirlNametag.Collection found: ".concat(proof.account.address.toString()))
+			let collectionRef = proof.account.capabilities.get<&{SwirlNametag.SwirlNametagCollectionPublic}>(SwirlNametag.CollectionPublicPath).borrow<&{SwirlNametag.SwirlNametagCollectionPublic}>() ?? panic("no SwirlNametag.Collection found: ".concat(proof.account.address.toString()))
 			let nametags = collectionRef.getIDs()
 			if nametags.length == 0{ 
 				panic("no nametag found: ".concat(proof.account.address.toString()))
@@ -131,7 +131,7 @@ contract SwirlMoment: NonFungibleToken{
 				if p.account.address == proof.account.address{ 
 					continue
 				}
-				let recipient = (p.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(SwirlMoment.CollectionPublicPath)!).borrow() ?? panic("no SwirlMoment.Collection found: ".concat(proof.account.address.toString()))
+				let recipient = p.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(SwirlMoment.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("no SwirlMoment.Collection found: ".concat(proof.account.address.toString()))
 				self.mintNFT(recipient: recipient, nametagID: nametag.id, location: proof.location)
 			}
 		}
@@ -155,7 +155,7 @@ contract SwirlMoment: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		/// the token ID
 		access(all)
 		let id: UInt64
@@ -274,7 +274,7 @@ contract SwirlMoment: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			panic("soulbound; SBT is not transferable")
 		}
@@ -327,6 +327,16 @@ contract SwirlMoment: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let SwirlMomentNFT = nft as! &SwirlMoment.NFT
 			return SwirlMomentNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

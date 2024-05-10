@@ -24,10 +24,8 @@ contract MarketplaceZap{
 	): @{FungibleToken.Vault}{ 
 		let vaultAddress = StarVaultFactory.vault(vaultId: vaultId)
 		let vaultRef =
-			(
-				getAccount(vaultAddress).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(
-					StarVaultConfig.VaultPublicPath
-				)!
+			getAccount(vaultAddress).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(
+				StarVaultConfig.VaultPublicPath
 			).borrow()!
 		let ret <- vaultRef.mint(nfts: <-nfts, feeVault: <-feeVault)
 		let lpVault <- ret.removeFirst() as! @{FungibleToken.Vault}
@@ -73,10 +71,8 @@ contract MarketplaceZap{
 	]{ 
 		let vaultAddress = StarVaultFactory.vault(vaultId: vaultId)
 		let vaultRef =
-			(
-				getAccount(vaultAddress).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(
-					StarVaultConfig.VaultPublicPath
-				)!
+			getAccount(vaultAddress).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(
+				StarVaultConfig.VaultPublicPath
 			).borrow()!
 		let vfee = StarVaultConfig.getVaultFees(vaultId: vaultId)
 		let totalFees =

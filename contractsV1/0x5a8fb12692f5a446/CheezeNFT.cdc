@@ -18,7 +18,7 @@ contract CheezeNFT: NonFungibleToken{
 	event Deposit(id: UInt64, to: Address?)
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -59,7 +59,7 @@ contract CheezeNFT: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -89,6 +89,16 @@ contract CheezeNFT: NonFungibleToken{
 		fun getNftMetadata(id: UInt64):{ String: String}{ 
 			let r = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (r as! &CheezeNFT.NFT).getMetadata()
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

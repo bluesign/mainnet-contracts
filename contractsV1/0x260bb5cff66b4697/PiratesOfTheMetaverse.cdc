@@ -40,7 +40,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 	var totalSupply: UInt64
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -95,7 +95,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 					let square = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://potm-collection-images.s3.amazonaws.com/square.png"), mediaType: "image/png")
 					return MetadataViews.NFTCollectionDisplay(name: "Pirates Of The Metaverse", description: self.description(), externalURL: MetadataViews.ExternalURL("https://www.piratesnft.io/"), squareImage: square, bannerImage: banner, socials:{ "twitter": MetadataViews.ExternalURL("https://twitter.com/PiratesMeta")})
 				case Type<MetadataViews.Royalties>():
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(0xc97017ed85e496bf).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.05, description: "POTM royalties")])
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(0xc97017ed85e496bf).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.05, description: "POTM royalties")])
 			}
 			return nil
 		}
@@ -144,7 +144,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -203,6 +203,16 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let pirate = nft as! &PiratesOfTheMetaverse.NFT
 			return pirate as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -274,7 +284,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &PiratesOfTheMetaverse.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&PiratesOfTheMetaverse.Collection>(PiratesOfTheMetaverse.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&PiratesOfTheMetaverse.Collection>(PiratesOfTheMetaverse.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust pirate.Collection.borowPirate to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowPirate(id: itemID)
@@ -282,7 +292,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 	
 	access(all)
 	fun hasBeenClaimed(id: UInt64): Bool{ 
-		let claimedPirates = self.account.capabilities.get<&{HasClaims}>(self.ClaimedPiratesPath)!
+		let claimedPirates = self.account.capabilities.get<&{HasClaims}>(self.ClaimedPiratesPath)
 		let claimedPiratesRef = claimedPirates.borrow()!
 		return claimedPiratesRef.hasBeenClaimed(id: id)
 	}

@@ -35,10 +35,8 @@ contract FlunksGraduation{
 		
 		// Check if owner is the true owner of the NFT
 		let collection =
-			(
-				getAccount(owner.address).capabilities.get<&Flunks.Collection>(
-					Flunks.CollectionPublicPath
-				)!
+			getAccount(owner.address).capabilities.get<&Flunks.Collection>(
+				Flunks.CollectionPublicPath
 			).borrow()!
 		let ownerCollectionTokenIds = collection.getIDs()
 		if !ownerCollectionTokenIds.contains(tokenID){ 

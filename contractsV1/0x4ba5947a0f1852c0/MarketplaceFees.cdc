@@ -140,12 +140,12 @@ contract MarketplaceFees{
 		let capability =
 			getAccount(self.account.address).capabilities.get<&{FungibleToken.Receiver}>(
 				MemeToken.ReceiverPublicPath
-			)!
+			)
 		
 		// Initialize the fee parameters if they are not already initialized
 		if self.account.storage.borrow<&FeeParameters>(from: /storage/MarketplaceFeeParameters)
 		== nil{ 
-			let feeParameters = FeeParameters(rate: 0.05, receiverCapability: capability)
+			let feeParameters = FeeParameters(rate: 0.05, receiverCapability: capability!)
 			self.account.storage.save(feeParameters, to: /storage/MarketplaceFeeParameters)
 		}
 	}

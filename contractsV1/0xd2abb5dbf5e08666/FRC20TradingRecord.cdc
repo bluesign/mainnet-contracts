@@ -680,7 +680,7 @@ contract FRC20TradingRecord{
 	///
 	access(all)
 	fun borrowTradingRecords(_ addr: Address): &TradingRecords?{ 
-		return (getAccount(addr).capabilities.get<&TradingRecords>(self.TradingRecordsPublicPath)!)
+		return getAccount(addr).capabilities.get<&TradingRecords>(self.TradingRecordsPublicPath)
 			.borrow()
 	}
 	

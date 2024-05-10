@@ -19,11 +19,9 @@ contract StarlyTokenReward{
 					from: StarlyToken.TokenStoragePath
 				)!
 			let receiverRef =
-				(
-					getAccount(to).capabilities.get<&{FungibleToken.Receiver}>(
-						StarlyToken.TokenPublicReceiverPath
-					)!
-				).borrow()
+				getAccount(to).capabilities.get<&{FungibleToken.Receiver}>(
+					StarlyToken.TokenPublicReceiverPath
+				).borrow<&{FungibleToken.Receiver}>()
 				?? panic(
 					"Could not borrow StarlyToken receiver reference to the recipient's vault!"
 				)

@@ -62,7 +62,7 @@ contract LendingOracle{
 		access(all)
 		fun latestResult(pool: Address): [UFix64; 2]{ 
 			var oracleAddr = self.oracleAddrDict[pool]!
-			let oraclePublicInterface_ReaderRef = (getAccount(oracleAddr).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath)!).borrow() ?? panic("Lost oracle public capability at ".concat(oracleAddr.toString()))
+			let oraclePublicInterface_ReaderRef = getAccount(oracleAddr).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow() ?? panic("Lost oracle public capability at ".concat(oracleAddr.toString()))
 			let priceReaderSuggestedPath = oraclePublicInterface_ReaderRef.getPriceReaderStoragePath()
 			let priceReaderRef = LendingOracle.account.storage.borrow<&OracleInterface.PriceReader>(from: priceReaderSuggestedPath) ?? panic("Lost local price reader resource.")
 			let price = priceReaderRef.getMedianPrice()
@@ -82,7 +82,7 @@ contract LendingOracle{
 				/// 2. Record oracle address for this feed
 				self.oracleAddrDict[pool] = oracleAddr
 				/// 3. Mint oracle reader
-				let oraclePublicInterface_ReaderRef = (getAccount(oracleAddr).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath)!).borrow() ?? panic("Lost oracle public capability at ".concat(oracleAddr.toString()))
+				let oraclePublicInterface_ReaderRef = getAccount(oracleAddr).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow() ?? panic("Lost oracle public capability at ".concat(oracleAddr.toString()))
 				let priceReaderSuggestedPath = oraclePublicInterface_ReaderRef.getPriceReaderStoragePath()
 				if LendingOracle.account.storage.borrow<&OracleInterface.PriceReader>(from: priceReaderSuggestedPath) == nil{ 
 					let priceReader <- oraclePublicInterface_ReaderRef.mintPriceReader()
@@ -112,7 +112,7 @@ contract LendingOracle{
 				var oracleAddr = self.oracleAddrDict[pool]!
 				self.oracleAddrDict.remove(key: pool)
 				/// 3. Remove local oracle reader resource
-				let oraclePublicInterface_ReaderRef = (getAccount(oracleAddr).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath)!).borrow() ?? panic("Lost oracle public capability at ".concat(oracleAddr.toString()))
+				let oraclePublicInterface_ReaderRef = getAccount(oracleAddr).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow() ?? panic("Lost oracle public capability at ".concat(oracleAddr.toString()))
 				let priceReaderSuggestedPath = oraclePublicInterface_ReaderRef.getPriceReaderStoragePath()
 				destroy <-LendingOracle.account.storage.load<@AnyResource>(from: priceReaderSuggestedPath)
 				emit PriceFeedRemoved(from: pool)

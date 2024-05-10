@@ -85,7 +85,7 @@ contract NowggNFT: NonFungibleToken{
 	
 	// NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -169,7 +169,7 @@ contract NowggNFT: NonFungibleToken{
 		
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -217,6 +217,16 @@ contract NowggNFT: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -323,7 +333,7 @@ contract NowggNFT: NonFungibleToken{
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	access(all)
 	fun borrowNFT(from: Address, itemID: UInt64): &NowggNFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&NowggNFT.Collection>(NowggNFT.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&NowggNFT.Collection>(NowggNFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust NowggNFT.Collection.borrowNowggNFT to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowNowggNFT(id: itemID)

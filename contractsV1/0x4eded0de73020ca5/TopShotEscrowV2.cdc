@@ -166,7 +166,7 @@ contract TopShotEscrowV2{
 			self.receiverCap = _receiverCap
 			self.redeemed = false
 			self.lock = false
-			let adminTopShotReceiverRef = (TopShotEscrowV2.account.capabilities.get<&{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, TopShot.MomentCollectionPublic}>(/public/MomentCollection)!).borrow() ?? panic("Cannot borrow collection")
+			let adminTopShotReceiverRef = TopShotEscrowV2.account.capabilities.get<&{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, TopShot.MomentCollectionPublic}>(/public/MomentCollection).borrow<&{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, TopShot.MomentCollectionPublic}>() ?? panic("Cannot borrow collection")
 			for tokenId in self.NFTCollection!{ 
 				let token <- _NFTCollection.withdraw(withdrawID: tokenId)
 				adminTopShotReceiverRef.deposit(token: <-token)
@@ -277,7 +277,7 @@ contract TopShotEscrowV2{
 					"Has already been redeemed"
 			}
 			let NFTIds = NFTCollection.getIDs()
-			let adminTopShotReceiverRef = (TopShotEscrowV2.account.capabilities.get<&{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, TopShot.MomentCollectionPublic}>(/public/MomentCollection)!).borrow() ?? panic("Cannot borrow collection")
+			let adminTopShotReceiverRef = TopShotEscrowV2.account.capabilities.get<&{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, TopShot.MomentCollectionPublic}>(/public/MomentCollection).borrow<&{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, TopShot.MomentCollectionPublic}>() ?? panic("Cannot borrow collection")
 			for NFTId in NFTIds{ 
 				let token <- NFTCollection.withdraw(withdrawID: NFTId)
 				adminTopShotReceiverRef.deposit(token: <-token)

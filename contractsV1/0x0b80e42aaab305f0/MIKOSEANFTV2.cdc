@@ -371,7 +371,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 	// NFT Resource
 	//------------------------------------------------------------
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -623,7 +623,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return self.borrowMIKOSEANFTV2(id: nftID)?.commentData?.values ?? []
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: (self.owner!).address)
@@ -728,6 +728,16 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			if let nft = self.borrowMIKOSEANFTV2(id: nftID){ 
 				nft.updateMetadata(metadata)
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

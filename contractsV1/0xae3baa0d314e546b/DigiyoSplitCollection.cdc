@@ -33,7 +33,7 @@ contract DigiyoSplitCollection{
 		}
 		
 		// withdraw removes an instance from a collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			post{ 
 				result.id == withdrawID:
@@ -104,8 +104,13 @@ contract DigiyoSplitCollection{
 		}
 		
 		access(all)
-		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
-			return <-create SplitCollection()
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 	}
 	

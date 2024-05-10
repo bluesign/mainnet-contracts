@@ -598,7 +598,7 @@ contract KOTD: NonFungibleToken{
 	
 	// The resource that represents the Collectible NFTs
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// Global unique collectibleItem ID
 		access(all)
@@ -621,8 +621,8 @@ contract KOTD: NonFungibleToken{
 					let metadata = KOTD.getCollectibleItemMetaData(collectibleItemID: collectibleItemID)!
 					return MetadataViews.Display(name: metadata["title"] ?? "KOTD NFT", description: metadata["description"] ?? "Official KOTD NFT", thumbnail: MetadataViews.HTTPFile(url: metadata["posterUrl"] ?? "ipfs://bafybeidy62mofvdpzr5gujq57kcpm27pciqx33pahxbfuwgzea646k2nay/s1_poster.jpg"))
 				case Type<MetadataViews.Royalties>():
-					let receiver = KOTD.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					let royalty = MetadataViews.Royalty(receiver: receiver, cut: 0.05, description: "KOTD / Niftory Fees")
+					let receiver = KOTD.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					let royalty = MetadataViews.Royalty(receiver: receiver!, cut: 0.05, description: "KOTD / Niftory Fees")
 					return MetadataViews.Royalties([royalty])
 				case Type<MetadataViews.NFTCollectionData>():
 					return MetadataViews.NFTCollectionData(storagePath: KOTD.CollectionStoragePath, publicPath: KOTD.CollectionPublicPath, publicCollection: Type<&KOTD.Collection>(), publicLinkedType: Type<&KOTD.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
@@ -701,7 +701,7 @@ contract KOTD: NonFungibleToken{
 		// that is to be removed from the Collection
 		//
 		// returns: @NonFungibleToken.NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			
 			// Remove the nft from the Collection
@@ -821,6 +821,16 @@ contract KOTD: NonFungibleToken{
 			let nftRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let fullNft = nftRef as! &NFT
 			return fullNft as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

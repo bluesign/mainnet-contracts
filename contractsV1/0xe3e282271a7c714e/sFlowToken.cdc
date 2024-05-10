@@ -228,7 +228,7 @@ contract sFlowToken: FungibleToken{
 	}
 	
 	init(){ 
-		let vaultRef = (self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow() ?? panic("Could not borrow Balance reference to the Vault")
+		let vaultRef = self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<&FlowToken.Vault>() ?? panic("Could not borrow Balance reference to the Vault")
 		var amountInStaking: UFix64 = 0.0
 		let delegatingInfo = FlowStakingCollection.getAllDelegatorInfo(address: self.account.address)
 		for info in delegatingInfo{ 

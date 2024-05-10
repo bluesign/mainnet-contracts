@@ -189,7 +189,7 @@ contract RaptaIcon: NonFungibleToken{
 	
 	//RESOURCES
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, Private, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, Private, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -358,7 +358,7 @@ contract RaptaIcon: NonFungibleToken{
 			destroy removedToken
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This NFT does not exist in this collection.")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -407,6 +407,16 @@ contract RaptaIcon: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -421,7 +431,7 @@ contract RaptaIcon: NonFungibleToken{
 					"This collection is sold out"
 			}
 			let acct = getAccount(user)
-			let collection = (acct.capabilities.get<&RaptaIcon.Collection>(RaptaIcon.CollectionPublicPath)!).borrow()!
+			let collection = acct.capabilities.get<&RaptaIcon.Collection>(RaptaIcon.CollectionPublicPath).borrow()!
 			let icons = collection.getIDs().length
 			return <-create NFT(royalties: Royalties(royalty: RaptaIcon.royalties))
 		}
@@ -544,7 +554,7 @@ contract RaptaIcon: NonFungibleToken{
 				"This collection is sold out"
 		}
 		let acct = getAccount(user)
-		let collection = (acct.capabilities.get<&RaptaIcon.Collection>(RaptaIcon.CollectionPublicPath)!).borrow()!
+		let collection = acct.capabilities.get<&RaptaIcon.Collection>(RaptaIcon.CollectionPublicPath).borrow()!
 		let icons = collection.getIDs().length
 		if icons >= 1{ 
 			panic("This collection only allows one mint per wallet")

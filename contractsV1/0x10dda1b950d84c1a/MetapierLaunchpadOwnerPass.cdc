@@ -36,7 +36,7 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 	let CollectionPublicPath: PublicPath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -72,7 +72,7 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token <- self.ownedNFTs.remove(key: withdrawID)!
@@ -123,6 +123,16 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 				}
 			}
 			return ids
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

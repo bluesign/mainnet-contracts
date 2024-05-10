@@ -1085,10 +1085,8 @@ contract StakingNFT{
 	access(all)
 	fun updatePool(pid: UInt64){ 
 		let collectionCap =
-			(
-				StakingNFT.account.capabilities.get<&{StakingNFT.PoolCollectionPublic}>(
-					StakingNFT.CollectionPublicPath
-				)!
+			StakingNFT.account.capabilities.get<&{StakingNFT.PoolCollectionPublic}>(
+				StakingNFT.CollectionPublicPath
 			).borrow()
 		let pool = (collectionCap!).getPool(pid: pid)
 		pool.updatePool()

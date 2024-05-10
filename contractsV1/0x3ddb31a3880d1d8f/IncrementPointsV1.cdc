@@ -162,17 +162,13 @@ contract IncrementPointsV1{
 		
 		// Lending State
 		let lendingComptrollerRef =
-			(
-				getAccount(0xf80cb737bfe7c792).capabilities.get<
-					&{LendingInterfaces.ComptrollerPublic}
-				>(LendingConfig.ComptrollerPublicPath)!
+			getAccount(0xf80cb737bfe7c792).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(
+				LendingConfig.ComptrollerPublicPath
 			).borrow()!
 		let marketAddrs: [Address] = lendingComptrollerRef.getAllMarkets()
 		let lendingOracleRef =
-			(
-				getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
-					LendingConfig.OraclePublicPath
-				)!
+			getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
+				LendingConfig.OraclePublicPath
 			).borrow()!
 		var totalSupplyAmountInUsd = 0.0
 		var totalBorrowAmountInUsd = 0.0
@@ -219,10 +215,8 @@ contract IncrementPointsV1{
 		}
 		let poolInfo: [AnyStruct] =
 			(
-				(
-					getAccount(swapPoolAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
-						SwapConfig.PairPublicPath
-					)!
+				getAccount(swapPoolAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
+					SwapConfig.PairPublicPath
 				).borrow()!
 			).getPairInfo()
 		self._swapPoolReserve0 = poolInfo[2] as! UFix64
@@ -239,10 +233,8 @@ contract IncrementPointsV1{
 		self._swapVolumeTrackingTimestamp = 0.0
 		let poolInfo: [AnyStruct] =
 			(
-				(
-					getAccount(self._swapPoolAddress).capabilities.get<
-						&{SwapInterfaces.PairPublic}
-					>(SwapConfig.PairPublicPath)!
+				getAccount(self._swapPoolAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(
+					SwapConfig.PairPublicPath
 				).borrow()!
 			).getPairInfo()
 		let reserve0Token = poolInfo[0] as! String

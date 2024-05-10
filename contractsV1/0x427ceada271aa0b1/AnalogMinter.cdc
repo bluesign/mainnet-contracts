@@ -119,7 +119,7 @@ contract AnalogMinter{
 		let merchantFUTReceiverRef =
 			getAccount(set.analogRoyaltyAddress).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/flowUtilityTokenReceiver
-			)!
+			)
 		assert(
 			merchantFUTReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant FUT receiver"
@@ -130,11 +130,9 @@ contract AnalogMinter{
 		// Get buyer collection public to receive Analogs
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Analogs.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Analogs.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint Analogs NFTs per purchaseAmount
@@ -189,7 +187,7 @@ contract AnalogMinter{
 		let merchantFUTReceiverRef =
 			getAccount(set.analogRoyaltyAddress).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/flowUtilityTokenReceiver
-			)!
+			)
 		assert(
 			merchantFUTReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant FUT receiver"
@@ -200,11 +198,9 @@ contract AnalogMinter{
 		// Get buyer collection public to receive Analogs
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Analogs.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Analogs.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint Analogs NFTs per purchaseAmount
@@ -243,18 +239,16 @@ contract AnalogMinter{
 		let buyerFUTReceiverRef =
 			getAccount(buyer).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/flowUtilityTokenReceiver
-			)!
+			)
 		assert(
 			buyerFUTReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed buyer FUT receiver"
 		)
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Analogs.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Analogs.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		var mintCounter = numberOfTokens
 		while mintCounter > 0{ 

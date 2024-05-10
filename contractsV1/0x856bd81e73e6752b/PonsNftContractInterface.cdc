@@ -94,7 +94,7 @@ contract interface PonsNftContractInterface{
 	
 	/* All implementing contracts must implement the NFT resource, fulfilling requirements of PonsNft and the requirements from the NonFungibleToken contract */
 	access(all)
-	resource interface NFT: PonsNft, NonFungibleToken.INFT{} 
+	resource interface NFT: PonsNft, NonFungibleToken.NFT{} 
 	
 	/* All implementing contracts must implement the Collection resource, fulfilling requirements of PonsCollection and the requirements from the NonFungibleToken contract */
 	access(all)

@@ -235,13 +235,13 @@ contract RaptaAccessory: NonFungibleToken{
 		fun getIDs(): [UInt64]
 		
 		access(all)
-		view fun borrowAccessoryTemplate(id: UInt64): &RaptaAccessory.Template?
+		fun borrowAccessoryTemplate(id: UInt64): &RaptaAccessory.Template?
 	}
 	
 	//RESOURCES
 	//Accessory Resources
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -350,7 +350,7 @@ contract RaptaAccessory: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -395,6 +395,16 @@ contract RaptaAccessory: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let accessory = nft as! &RaptaAccessory.NFT
 			return accessory as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -491,7 +501,7 @@ contract RaptaAccessory: NonFungibleToken{
 		}
 		
 		access(all)
-		view fun borrowAccessoryTemplate(id: UInt64): &RaptaAccessory.Template?{ 
+		fun borrowAccessoryTemplate(id: UInt64): &RaptaAccessory.Template?{ 
 			if self.ownedTemplates[id] != nil{ 
 				let ref = (&self.ownedTemplates[id] as &RaptaAccessory.Template?)!
 				return ref as! &RaptaAccessory.Template
@@ -511,7 +521,7 @@ contract RaptaAccessory: NonFungibleToken{
 	access(all)
 	fun getpngForAccessory(address: Address, accessoryId: UInt64): String?{ 
 		let account = getAccount(address)
-		if let collection = (account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let collection = account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath).borrow<&{RaptaAccessory.CollectionPublic}>(){ 
 			return (collection.borrowAccessory(id: accessoryId)!).getPNG()
 		}
 		return nil
@@ -520,7 +530,7 @@ contract RaptaAccessory: NonFungibleToken{
 	access(all)
 	fun getAccessory(address: Address, accessoryId: UInt64): AccessoryData?{ 
 		let account = getAccount(address)
-		if let collection = (account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let collection = account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath).borrow<&{RaptaAccessory.CollectionPublic}>(){ 
 			if let accessory = collection.borrowAccessory(id: accessoryId){ 
 				return AccessoryData(id: accessoryId, templateId: (accessory!).templateId)
 			}
@@ -532,7 +542,7 @@ contract RaptaAccessory: NonFungibleToken{
 	fun getAccessories(address: Address): [AccessoryData]{ 
 		var accessoryData: [AccessoryData] = []
 		let account = getAccount(address)
-		if let collection = (account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let collection = account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath).borrow<&{RaptaAccessory.CollectionPublic}>(){ 
 			for id in collection.getIDs(){ 
 				var accessory = collection.borrowAccessory(id: id)
 				accessoryData.append(AccessoryData(id: id, templateId: (accessory!).templateId))
@@ -565,7 +575,7 @@ contract RaptaAccessory: NonFungibleToken{
 	access(all)
 	fun getAccessoryTemplates(): [TemplateData]{ 
 		var accessoryTemplateData: [TemplateData] = []
-		if let templateCollection = (self.account.capabilities.get<&{RaptaAccessory.TemplateCollectionPublic}>(self.TemplatePublicPath)!).borrow(){ 
+		if let templateCollection = self.account.capabilities.get<&{RaptaAccessory.TemplateCollectionPublic}>(self.TemplatePublicPath).borrow<&{RaptaAccessory.TemplateCollectionPublic}>(){ 
 			for id in templateCollection.getIDs(){ 
 				var template = templateCollection.borrowAccessoryTemplate(id: id)
 				accessoryTemplateData.append(TemplateData(id: id, name: (template!).name, description: (template!).description, category: (template!).category, png: (template!).png, layer: (template!).layer, mintLimit: (template!).mintLimit))
@@ -576,7 +586,7 @@ contract RaptaAccessory: NonFungibleToken{
 	
 	access(all)
 	view fun getAccessoryTemplate(id: UInt64): TemplateData?{ 
-		if let templateCollection = (self.account.capabilities.get<&{RaptaAccessory.TemplateCollectionPublic}>(self.TemplatePublicPath)!).borrow(){ 
+		if let templateCollection = self.account.capabilities.get<&{RaptaAccessory.TemplateCollectionPublic}>(self.TemplatePublicPath).borrow<&{RaptaAccessory.TemplateCollectionPublic}>(){ 
 			if let template = templateCollection.borrowAccessoryTemplate(id: id){ 
 				return TemplateData(id: id, name: (template!).name, description: (template!).description, category: (template!).category, png: (template!).png, layer: (template!).layer, mintLimit: (template!).mintLimit)
 			}

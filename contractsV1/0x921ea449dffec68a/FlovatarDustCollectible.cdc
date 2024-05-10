@@ -209,7 +209,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	
 	//The NFT resource that implements both Private and Public interfaces
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, Private, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, Private, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -579,7 +579,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -649,6 +649,16 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -712,7 +722,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	access(all)
 	fun getCollectible(address: Address, collectibleId: UInt64): FlovatarDustCollectibleData?{ 
 		let account = getAccount(address)
-		if let collectibleCollection = (account.capabilities.get<&FlovatarDustCollectible.Collection>(self.CollectionPublicPath)!).borrow(){ 
+		if let collectibleCollection = account.capabilities.get<&FlovatarDustCollectible.Collection>(self.CollectionPublicPath).borrow<&FlovatarDustCollectible.Collection>(){ 
 			if let collectible = collectibleCollection.borrowDustCollectible(id: collectibleId){ 
 				return FlovatarDustCollectibleData(id: collectibleId, mint: (collectible!).mint, series: (collectible!).series, name: (collectible!).getName(), svg: (collectible!).getSvg(), combination: (collectible!).combination, creatorAddress: (collectible!).creatorAddress, layers: (collectible!).getLayers(), bio: (collectible!).getBio(), metadata: (collectible!).getMetadata())
 			}
@@ -725,7 +735,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	fun getCollectibles(address: Address): [FlovatarDustCollectibleData]{ 
 		var dustCollectibleData: [FlovatarDustCollectibleData] = []
 		let account = getAccount(address)
-		if let collectibleCollection = (account.capabilities.get<&FlovatarDustCollectible.Collection>(self.CollectionPublicPath)!).borrow(){ 
+		if let collectibleCollection = account.capabilities.get<&FlovatarDustCollectible.Collection>(self.CollectionPublicPath).borrow<&FlovatarDustCollectible.Collection>(){ 
 			for id in collectibleCollection.getIDs(){ 
 				if let collectible = collectibleCollection.borrowDustCollectible(id: id){ 
 					dustCollectibleData.append(FlovatarDustCollectibleData(id: id, mint: (collectible!).mint, series: (collectible!).series, name: (collectible!).getName(), svg: nil, combination: (collectible!).combination, creatorAddress: (collectible!).creatorAddress, layers: (collectible!).getLayers(), bio: (collectible!).getBio(), metadata: (collectible!).getMetadata()))
@@ -897,8 +907,8 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		}
 		let royalties: [Royalty] = []
 		let creatorAccount = getAccount(address)
-		royalties.append(Royalty(wallet: creatorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: FlovatarDustCollectible.getRoyaltyCut(), type: RoyaltyType.percentage))
-		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: FlovatarDustCollectible.getMarketplaceCut(), type: RoyaltyType.percentage))
+		royalties.append(Royalty(wallet: creatorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: FlovatarDustCollectible.getRoyaltyCut(), type: RoyaltyType.percentage))
+		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: FlovatarDustCollectible.getMarketplaceCut(), type: RoyaltyType.percentage))
 		
 		// Mint the new Flovatar NFT by passing the metadata to it
 		var newNFT <- create NFT(series: series, layers: fullLayers, creatorAddress: address, royalties: Royalties(royalty: royalties))

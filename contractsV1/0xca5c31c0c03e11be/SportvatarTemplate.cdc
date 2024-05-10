@@ -494,14 +494,12 @@ contract SportvatarTemplate{
 	fun getTemplates(): [TemplateData]{ 
 		var templateData: [TemplateData] = []
 		if let templateCollection =
-			(
-				self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{SportvatarTemplate.CollectionPublic}>(){ 
 			for id in templateCollection.getIDs(){ 
 				var template = templateCollection.borrowTemplate(id: id)
-				templateData.append(TemplateData(id: id, name: (template!).name, description: (template!).description, series: (template!).series, layer: (template!).layer, metadata: *(template!).metadata, rarity: (template!).rarity, sport: (template!).sport, svg: nil, maxMintableComponents: (template!).maxMintableComponents))
+				templateData.append(TemplateData(id: id, name: (template!).name, description: (template!).description, series: (template!).series, layer: (template!).layer, metadata: (template!).metadata, rarity: (template!).rarity, sport: (template!).sport, svg: nil, maxMintableComponents: (template!).maxMintableComponents))
 			}
 		}
 		return templateData
@@ -513,14 +511,12 @@ contract SportvatarTemplate{
 	fun getSeriesAll(): [SeriesData]{ 
 		var seriesData: [SeriesData] = []
 		if let templateCollection =
-			(
-				self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{SportvatarTemplate.CollectionPublic}>(){ 
 			for id in templateCollection.getSeriesIDs(){ 
 				var series = templateCollection.borrowSeries(id: id)
-				seriesData.append(SeriesData(id: id, name: (series!).name, description: (series!).description, svgPrefix: (series!).svgPrefix, svgSuffix: (series!).svgSuffix, layers: *(series!).layers, colors: *(series!).colors, metadata: *(series!).metadata, maxMintable: (series!).maxMintable))
+				seriesData.append(SeriesData(id: id, name: (series!).name, description: (series!).description, svgPrefix: (series!).svgPrefix, svgSuffix: (series!).svgSuffix, layers: (series!).layers, colors: (series!).colors, metadata: (series!).metadata, maxMintable: (series!).maxMintable))
 			}
 		}
 		return seriesData
@@ -530,13 +526,11 @@ contract SportvatarTemplate{
 	access(all)
 	fun getTemplate(id: UInt64): TemplateData?{ 
 		if let templateCollection =
-			(
-				self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{SportvatarTemplate.CollectionPublic}>(){ 
 			if let template = templateCollection.borrowTemplate(id: id){ 
-				return TemplateData(id: id, name: (template!).name, description: (template!).description, series: (template!).series, layer: (template!).layer, metadata: *(template!).metadata, rarity: (template!).rarity, sport: (template!).sport, svg: (template!).svg, maxMintableComponents: (template!).maxMintableComponents)
+				return TemplateData(id: id, name: (template!).name, description: (template!).description, series: (template!).series, layer: (template!).layer, metadata: (template!).metadata, rarity: (template!).rarity, sport: (template!).sport, svg: (template!).svg, maxMintableComponents: (template!).maxMintableComponents)
 			}
 		}
 		return nil
@@ -546,11 +540,9 @@ contract SportvatarTemplate{
 	access(all)
 	fun getTemplateSvg(id: UInt64): String?{ 
 		if let templateCollection =
-			(
-				self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{SportvatarTemplate.CollectionPublic}>(){ 
 			if let template = templateCollection.borrowTemplate(id: id){ 
 				return (template!).svg
 			}
@@ -562,13 +554,11 @@ contract SportvatarTemplate{
 	access(all)
 	fun getSeries(id: UInt64): SeriesData?{ 
 		if let templateCollection =
-			(
-				self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{SportvatarTemplate.CollectionPublic}>(){ 
 			if let series = templateCollection.borrowSeries(id: id){ 
-				return SeriesData(id: id, name: (series!).name, description: (series!).description, svgPrefix: (series!).svgPrefix, svgSuffix: (series!).svgSuffix, layers: *(series!).layers, colors: *(series!).colors, metadata: *(series!).metadata, maxMintable: (series!).maxMintable)
+				return SeriesData(id: id, name: (series!).name, description: (series!).description, svgPrefix: (series!).svgPrefix, svgSuffix: (series!).svgSuffix, layers: (series!).layers, colors: (series!).colors, metadata: (series!).metadata, maxMintable: (series!).maxMintable)
 			}
 		}
 		return nil

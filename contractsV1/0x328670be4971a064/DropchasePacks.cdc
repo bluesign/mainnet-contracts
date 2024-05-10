@@ -139,7 +139,7 @@ contract DropchasePacks: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		
 		// Global unique moment ID
 		access(all)
@@ -189,7 +189,7 @@ contract DropchasePacks: NonFungibleToken{
 					"All packs are bought"
 				self.owner != nil:
 					"Owner cant be nil"
-				((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/DropchaseCoinReceiver)!).borrow() != nil:
+				(self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/DropchaseCoinReceiver).borrow<&{FungibleToken.Receiver}>() != nil:
 					"DropchaseCoin receiver cant be nil"
 			}
 			let creatorName = DropchasePacks.getPackCreator(packID: packID)
@@ -202,7 +202,7 @@ contract DropchasePacks: NonFungibleToken{
 			let creatorReceiverRef = creatorCap.borrow<&{FungibleToken.Receiver}>() ?? panic("Cannot find a token receiver for the creator")
 			creatorReceiverRef.deposit(from: <-creatorCut)
 			emit creatorPackCutReceived(name: creatorName, cut: creatorCutAmount)
-			let ownerReceiverVault = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/DropchaseCoinReceiver)!).borrow()!
+			let ownerReceiverVault = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/DropchaseCoinReceiver).borrow<&{FungibleToken.Receiver}>()!
 			ownerReceiverVault.deposit(from: <-buyerPayment)
 			(DropchasePacks.packs[packID]!).packBuyers.append(buyerAddress)
 			emit PackBought(packID: packID, address: buyerAddress)
@@ -303,7 +303,7 @@ contract DropchasePacks: NonFungibleToken{
 		// that is to be removed from the Collection
 		//
 		// returns: @NonFungibleToken.NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			
 			// Remove the nft from the Collection
@@ -430,6 +430,16 @@ contract DropchasePacks: NonFungibleToken{
 			
 			//destroy old token
 			destroy token
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

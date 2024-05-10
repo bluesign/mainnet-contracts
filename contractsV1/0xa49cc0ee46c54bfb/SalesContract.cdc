@@ -369,8 +369,9 @@ contract SalesContract{
 		// Get recipient vault and deposit payment
 		let payoutRecipient = getAccount(sku.payoutAddress)
 		let payoutReceiver =
-			(payoutRecipient.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!)
-				.borrow()
+			payoutRecipient.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<
+				&FlowToken.Vault
+			>()
 			?? panic("Could not borrow a reference to the payout receiver")
 		payoutReceiver.deposit(from: <-vault)
 		

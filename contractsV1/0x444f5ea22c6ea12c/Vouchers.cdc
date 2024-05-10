@@ -119,7 +119,7 @@ contract Vouchers: NonFungibleToken{
 		let token <- collection.withdraw(withdrawID: voucherID)
 		
 		// establish the receiver for Redeeming Vouchers
-		let receiver = (Vouchers.account.capabilities.get<&{Vouchers.CollectionPublic}>(Vouchers.RedeemedCollectionPublicPath)!).borrow()!
+		let receiver = Vouchers.account.capabilities.get<&{Vouchers.CollectionPublic}>(Vouchers.RedeemedCollectionPublicPath).borrow()!
 		
 		// deposit for consumption
 		receiver.deposit(token: <-token)
@@ -133,7 +133,7 @@ contract Vouchers: NonFungibleToken{
 	// Voucher
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -198,7 +198,7 @@ contract Vouchers: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -250,6 +250,16 @@ contract Vouchers: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -397,7 +407,7 @@ contract Vouchers: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &Vouchers.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Vouchers.Collection>(Vouchers.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&Vouchers.Collection>(Vouchers.CollectionPublicPath).borrow<&Vouchers.Collection>() ?? panic("Couldn't get collection")
 		// We trust Vouchers.Collection.borrowVoucher to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowVoucher(id: itemID)

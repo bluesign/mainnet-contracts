@@ -287,7 +287,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 	
 	// Resource that represents NFTs
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The global unique ID for each NFT
 		access(all)
 		let id: UInt64
@@ -436,7 +436,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		// withdraw removes an NFT from the Collection and moves it to the caller
 		// Param: withdrawID -> ID of the NFT
 		// Return: token (: @NonFungibleToken.NFT)
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: This collection does not contain an NFT with this ID")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -496,6 +496,16 @@ contract FridgeMagnetV1: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let FridgeMagnetV1NFT = nft as! &FridgeMagnetV1.NFT
 			return FridgeMagnetV1NFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

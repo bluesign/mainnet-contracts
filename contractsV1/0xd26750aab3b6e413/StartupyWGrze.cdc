@@ -232,7 +232,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -350,7 +350,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Borrow nft and check if locked
 			let nft = self.borrowCollecticoNFT(id: withdrawID) ?? panic("Requested NFT does not exist in the collection")
@@ -434,6 +434,16 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let collecticoNFT = nft as! &StartupyWGrze.NFT
 			return collecticoNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

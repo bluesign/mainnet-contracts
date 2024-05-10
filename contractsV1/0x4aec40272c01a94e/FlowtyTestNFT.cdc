@@ -50,7 +50,7 @@ contract FlowtyTestNFT: NonFungibleToken, ViewResolver{
 	let MinterPublicPath: PublicPath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -150,7 +150,7 @@ contract FlowtyTestNFT: NonFungibleToken, ViewResolver{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -201,6 +201,16 @@ contract FlowtyTestNFT: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -222,8 +232,8 @@ contract FlowtyTestNFT: NonFungibleToken, ViewResolver{
 		// and deposit it in the recipients collection using their collection reference
 		access(all)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}){ 
-			let royaltyRecipient = getAccount(FlowtyTestNFT.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/placeholder)!
-			let cutInfo = MetadataViews.Royalty(receiver: royaltyRecipient, cut: 0.0, description: "")
+			let royaltyRecipient = getAccount(FlowtyTestNFT.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/placeholder)
+			let cutInfo = MetadataViews.Royalty(receiver: royaltyRecipient!, cut: 0.0, description: "")
 			FlowtyTestNFT.totalSupply = FlowtyTestNFT.totalSupply + 1
 			let thumbnail = "https://storage.googleapis.com/flowty-images/flowty-logo.jpeg"
 			let name = "Flowty Test NFT #".concat(FlowtyTestNFT.totalSupply.toString())

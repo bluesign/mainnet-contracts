@@ -58,7 +58,7 @@ contract VeraTicket: NonFungibleToken{
 	// A Ticket as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -168,7 +168,7 @@ contract VeraTicket: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -232,6 +232,16 @@ contract VeraTicket: NonFungibleToken{
 				//eventCollection.decrementTicketMinted(eventId: eventID, tier: tier, subtier: subtier)
 				emit Destroy(id: id)
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -359,7 +369,7 @@ contract VeraTicket: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &VeraTicket.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&VeraTicket.Collection>(VeraTicket.VeraTicketPubStorage)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&VeraTicket.Collection>(VeraTicket.VeraTicketPubStorage).borrow<&VeraTicket.Collection>() ?? panic("Couldn't get collection")
 		// We trust Tickets.Collection.borowTicket to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowTicket(id: itemID)

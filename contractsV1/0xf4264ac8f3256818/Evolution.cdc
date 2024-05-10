@@ -376,7 +376,7 @@ contract Evolution: NonFungibleToken{
 	
 	// The resource that represents the Collectible NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// Global unique Collectible Id
 		access(all)
@@ -636,7 +636,7 @@ contract Evolution: NonFungibleToken{
 		}
 		
 		// Remove a Collectible from the Collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: Collectible does not exist in the collection.")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -717,6 +717,16 @@ contract Evolution: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let collectible = nft as! &NFT
 			return collectible
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -307,7 +307,7 @@ contract NftEggsStore{
 			 //剩下的令牌为零，从功能上讲，这将是一个消耗空保险库的无操作
 			 residualReceiver!).deposit(from: <-payment)
 			// 对收件人的NFT集合的引用
-			let depositRef = (getAccount(buyerAddress).capabilities.get<&{NftEggsNFT.CollectionPublic}>(NftEggsNFT.CollectionPublicPath)!).borrow() ?? panic("Could not borrow a reference to the receiver's collection")
+			let depositRef = getAccount(buyerAddress).capabilities.get<&{NftEggsNFT.CollectionPublic}>(NftEggsNFT.CollectionPublicPath).borrow<&{NftEggsNFT.CollectionPublic}>() ?? panic("Could not borrow a reference to the receiver's collection")
 			// 存入收件人NFT集合
 			depositRef.deposit(token: <-nft)
 			
@@ -336,7 +336,7 @@ contract NftEggsStore{
 			
 			//将前一个投标人的代币退回
 			if self.bidVault.balance > 0.0{ 
-				let returnVault = getAccount(self.details.bidAddress!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+				let returnVault = getAccount(self.details.bidAddress!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 				(returnVault.borrow()!).deposit(from: <-self.bidVault.withdraw(amount: self.bidVault.balance))
 			}
 			let oldVault <- self.bidVault <- bidTokens
@@ -411,7 +411,7 @@ contract NftEggsStore{
 				assert(nft.isInstance(self.details.nftType), message: "withdrawn NFT is not of specified type")
 				assert(nft.id == self.details.nftID, message: "withdrawn NFT does not have specified ID")
 				// 对收件人的NFT集合的引用
-				let depositRef = (getAccount(self.details.bidAddress!).capabilities.get<&{NftEggsNFT.CollectionPublic}>(NftEggsNFT.CollectionPublicPath)!).borrow() ?? panic("Could not borrow a reference to the receiver's collection")
+				let depositRef = getAccount(self.details.bidAddress!).capabilities.get<&{NftEggsNFT.CollectionPublic}>(NftEggsNFT.CollectionPublicPath).borrow<&{NftEggsNFT.CollectionPublic}>() ?? panic("Could not borrow a reference to the receiver's collection")
 				// 存入收件人NFT集合
 				depositRef.deposit(token: <-nft)
 				emit ListingCompleted(storefrontAddress: self.owner?.address, listingResourceID: self.uuid, storefrontResourceID: self.details.storefrontID, purchased: self.details.purchased, buyerAddress: self.details.bidAddress!, dealPrice: self.details.bidPrice, nftID: self.details.nftID)
@@ -505,10 +505,10 @@ contract NftEggsStore{
 			if endTime < now{ 
 				panic("endTime must be  greater than now")
 			}
-			let collectionRef = (getAccount(nftProviderCapability.address).capabilities.get<&{NftEggsNFT.CollectionPublic}>(NftEggsNFT.CollectionPublicPath)!).borrow() ?? panic("Could not borrow capability from public collection")
+			let collectionRef = getAccount(nftProviderCapability.address).capabilities.get<&{NftEggsNFT.CollectionPublic}>(NftEggsNFT.CollectionPublicPath).borrow<&{NftEggsNFT.CollectionPublic}>() ?? panic("Could not borrow capability from public collection")
 			let nft = collectionRef.borrowNftEggsNFT(id: nftID)
-			let ownerWallet = getAccount(nftProviderCapability.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-			let royalty ={ "owner": NftEggsNFT.Royalty(wallet: ownerWallet, cut: 1.0 - ((nft!).royalty["creator"]!).cut - ((nft!).royalty["platform"]!).cut), "platform": (nft!).royalty["platform"]!, "creator": (nft!).royalty["creator"]!}
+			let ownerWallet = getAccount(nftProviderCapability.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+			let royalty ={ "owner": NftEggsNFT.Royalty(wallet: ownerWallet!, cut: 1.0 - ((nft!).royalty["creator"]!).cut - ((nft!).royalty["platform"]!).cut), "platform": (nft!).royalty["platform"]!, "creator": (nft!).royalty["creator"]!}
 			let listing <- create Listing(nftProviderCapability: nftProviderCapability, nftType: nftType, nftID: nftID, salePaymentVaultType: salePaymentVaultType, saleItemPrice: saleItemPrice, saleCuts: royalty, saleType: saleType, startTime: startTime, endTime: endTime, minimumBidIncrement: minimumBidIncrement, storefrontID: self.uuid)
 			let listingResourceID = listing.uuid
 			let listingPrice = listing.getDetails().salePrice

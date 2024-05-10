@@ -257,7 +257,7 @@ contract FlovatarPack{
 			
 			// Gets the Component Collection Public capability to be able to
 			// send there the Components contained in the Pack
-			let recipientCap = (self.owner!).capabilities.get<&{FlovatarComponent.CollectionPublic}>(FlovatarComponent.CollectionPublicPath)!
+			let recipientCap = (self.owner!).capabilities.get<&{FlovatarComponent.CollectionPublic}>(FlovatarComponent.CollectionPublicPath)
 			let recipient = recipientCap.borrow()!
 			
 			// Removed the pack from the collection
@@ -396,7 +396,7 @@ contract FlovatarPack{
 			let pack <- self.withdraw(withdrawID: tokenId)
 			
 			// Borrows the owner's capability for the Vault and deposits the FLOW tokens
-			let dapperMarketVault = getAccount(0x8a86f18e0e05bd9f).capabilities.get<&{FungibleToken.Receiver}>(/public/flowUtilityTokenReceiver)!
+			let dapperMarketVault = getAccount(0x8a86f18e0e05bd9f).capabilities.get<&{FungibleToken.Receiver}>(/public/flowUtilityTokenReceiver)
 			let vaultRef = dapperMarketVault.borrow() ?? panic("Could not borrow reference to owner pack vault")
 			vaultRef.deposit(from: <-buyTokens)
 			
@@ -479,8 +479,8 @@ contract FlovatarPack{
 	fun getPacks(address: Address): [UInt64]?{ 
 		let account = getAccount(address)
 		if let packCollection =
-			(account.capabilities.get<&{FlovatarPack.CollectionPublic}>(self.CollectionPublicPath)!)
-				.borrow(){ 
+			account.capabilities.get<&{FlovatarPack.CollectionPublic}>(self.CollectionPublicPath)
+				.borrow<&{FlovatarPack.CollectionPublic}>(){ 
 			return packCollection.getIDs()
 		}
 		return nil
@@ -518,7 +518,7 @@ contract FlovatarPack{
 	}
 	
 	init(){ 
-		let wallet = self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+		let wallet = self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		self.CollectionPublicPath = /public/FlovatarPackCollection
 		self.CollectionStoragePath = /storage/FlovatarPackCollection
 		

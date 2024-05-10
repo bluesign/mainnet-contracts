@@ -278,7 +278,7 @@ contract Flovatar: NonFungibleToken{
 	
 	//The NFT resource that implements both Private and Public interfaces
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, Private, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, Private, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -770,7 +770,7 @@ contract Flovatar: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -840,6 +840,16 @@ contract Flovatar: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -895,7 +905,7 @@ contract Flovatar: NonFungibleToken{
 	access(all)
 	fun getFlovatar(address: Address, flovatarId: UInt64): FlovatarData?{ 
 		let account = getAccount(address)
-		if let flovatarCollection = (account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let flovatarCollection = account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flovatar.CollectionPublic}>(){ 
 			if !flovatarCollection.isInstance(Type<@Flovatar.Collection>()){ 
 				panic("The Collection is not from the correct Type")
 			}
@@ -910,7 +920,7 @@ contract Flovatar: NonFungibleToken{
 	access(all)
 	fun getFlovatarRarityScore(address: Address, flovatarId: UInt64): UFix64?{ 
 		let account = getAccount(address)
-		if let flovatarCollection = (account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let flovatarCollection = account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flovatar.CollectionPublic}>(){ 
 			if !flovatarCollection.isInstance(Type<@Flovatar.Collection>()){ 
 				panic("The Collection is not from the correct Type")
 			}
@@ -926,7 +936,7 @@ contract Flovatar: NonFungibleToken{
 	fun getFlovatars(address: Address): [FlovatarData]{ 
 		var flovatarData: [FlovatarData] = []
 		let account = getAccount(address)
-		if let flovatarCollection = (account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let flovatarCollection = account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flovatar.CollectionPublic}>(){ 
 			if !flovatarCollection.isInstance(Type<@Flovatar.Collection>()){ 
 				panic("The Collection is not from the correct Type")
 			}
@@ -1212,8 +1222,8 @@ contract Flovatar: NonFungibleToken{
 		let metadata = Metadata(mint: Flovatar.totalSupply + UInt64(1), series: spark.getSeries(), svg: svg, combination: combinationString, creatorAddress: address, components:{ "body": body, "hair": hair, "facialHair": facialHairId, "eyes": eyes, "nose": nose, "mouth": mouth, "clothing": clothing}, rareCount: rareCount, epicCount: epicCount, legendaryCount: legendaryCount)
 		let royalties: [Royalty] = []
 		let creatorAccount = getAccount(address)
-		royalties.append(Royalty(wallet: creatorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: Flovatar.getRoyaltyCut(), type: RoyaltyType.percentage))
-		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: Flovatar.getMarketplaceCut(), type: RoyaltyType.percentage))
+		royalties.append(Royalty(wallet: creatorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: Flovatar.getRoyaltyCut(), type: RoyaltyType.percentage))
+		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: Flovatar.getMarketplaceCut(), type: RoyaltyType.percentage))
 		
 		// Mint the new Flovatar NFT by passing the metadata to it
 		var newNFT <- create NFT(metadata: metadata, royalties: Royalties(royalty: royalties))

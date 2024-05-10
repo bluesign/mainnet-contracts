@@ -140,7 +140,7 @@ contract Pack: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -391,7 +391,7 @@ contract Pack: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: The Pack does not exist in the Collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -436,6 +436,16 @@ contract Pack: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let packNFT = nft as! &Pack.NFT
 			return packNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

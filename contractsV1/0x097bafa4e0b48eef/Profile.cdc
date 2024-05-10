@@ -754,15 +754,15 @@ contract Profile{
 			// Check the vault type
 			var ref: &{FungibleToken.Receiver}? = nil
 			if FindUtils.contains(identifier, element: "FlowToken.Vault"){ 
-				ref = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow()
+				ref = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()
 			} else if FindUtils.contains(identifier, element: "FiatToken.Vault"){ 
-				ref = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/USDCVaultReceiver)!).borrow()
+				ref = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/USDCVaultReceiver).borrow()
 			} else if FindUtils.contains(identifier, element: "FUSD.Vault"){ 
-				ref = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow()
+				ref = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow()
 			} else if FindUtils.contains(identifier, element: "FlowUtilityToken.Vault"){ 
-				ref = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowUtilityTokenReceiver)!).borrow()
+				ref = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowUtilityTokenReceiver).borrow()
 			} else if FindUtils.contains(identifier, element: "DapperUtilityCoin.Vault"){ 
-				ref = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!).borrow()
+				ref = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver).borrow()
 			}
 			if ref != nil{ 
 				(ref!).deposit(from: <-from)
@@ -965,13 +965,13 @@ contract Profile{
 	>?{ 
 		let profileCap = self.findWalletCapability(address)
 		if profileCap.check(){ 
-			if let profile = (getAccount(address).capabilities.get<&Profile.User>(Profile.publicPath)!).borrow(){ 
+			if let profile = getAccount(address).capabilities.get<&Profile.User>(Profile.publicPath).borrow(){ 
 				if profile.hasWallet(type.identifier){ 
 					return profileCap
 				}
 			}
 		}
-		let cap = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(path)!
+		let cap = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(path)
 		if cap.check(){ 
 			return cap
 		}
@@ -987,8 +987,7 @@ contract Profile{
 	
 	access(all)
 	fun find(_ address: Address): &{Profile.Public}{ 
-		return (getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!)
-			.borrow()!
+		return getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath).borrow()!
 	}
 	
 	access(all)

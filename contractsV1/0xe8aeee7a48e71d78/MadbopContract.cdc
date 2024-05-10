@@ -203,8 +203,8 @@ contract MadbopContract{
 		var adminPrivateCap =
 			self.account.capabilities.get<&{MadbopNFTs.NFTMethodsCapability}>(
 				MadbopNFTs.NFTMethodsCapabilityPrivatePath
-			)!
-		self.adminRef = adminPrivateCap
+			)
+		self.adminRef = adminPrivateCap!
 		self.JukeboxStoragePath = /storage/MadbopJukebox
 		self.JukeboxPublicPath = /public/MadbopJukebox
 		self.account.storage.save(<-create Jukebox(), to: self.JukeboxStoragePath)

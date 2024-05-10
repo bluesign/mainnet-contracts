@@ -30,11 +30,9 @@ contract StorageHelper{
 			?? panic("Could not borrow reference to the owner's Vault!")
 		let topUpFunds <- vaultRef.withdraw(amount: topUpAmount)
 		let receiverRef =
-			(
-				getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
-					/public/flowTokenReceiver
-				)!
-			).borrow()
+			getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
+				/public/flowTokenReceiver
+			).borrow<&{FungibleToken.Receiver}>()
 			?? panic("Could not borrow receiver reference to the recipient's Vault")
 		receiverRef.deposit(from: <-topUpFunds)
 		emit AccountToppedUp(address: address, amount: topUpAmount)

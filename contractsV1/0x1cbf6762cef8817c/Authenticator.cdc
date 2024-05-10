@@ -771,7 +771,7 @@ contract Authenticator: NonFungibleToken{
 				objectLabel == nil || categoryLabel == nil:
 					"Invalid License"
 			}
-			let adminFusdReceiver = (getAccount(Authenticator.adminAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!!).borrow() ?? panic("Could not borrow receiver reference to the Admin's FUSD Vault")
+			let adminFusdReceiver = (getAccount(Authenticator.adminAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the Admin's FUSD Vault")
 			adminFusdReceiver.deposit(from: <-vault)
 			return <-self.createLicenseNFT(transferable: Authenticator.boughtNftIsTransferable, expiration: Authenticator.boughtNftExpiration, objectLabel: objectLabel, categoryLabel: categoryLabel, image: Authenticator.boughtNftImage, name: Authenticator.boughtNftName, url: nil)
 		}
@@ -788,7 +788,7 @@ contract Authenticator: NonFungibleToken{
 				objectLabel == nil || categoryLabel == nil:
 					"Invalid License"
 			}
-			let adminDucReceiver = (getAccount(Authenticator.adminDapperWalletAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!!).borrow() ?? panic("Could not borrow receiver reference to the Admin's DUC Vault")
+			let adminDucReceiver = (getAccount(Authenticator.adminDapperWalletAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the Admin's DUC Vault")
 			adminDucReceiver.deposit(from: <-vault)
 			return <-self.createLicenseNFT(transferable: Authenticator.boughtNftIsTransferable, expiration: Authenticator.boughtNftExpiration, objectLabel: objectLabel, categoryLabel: categoryLabel, image: Authenticator.boughtNftImage, name: Authenticator.boughtNftName, url: nil)
 		}
@@ -869,7 +869,7 @@ contract Authenticator: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver, PublicNFT{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver, PublicNFT{ 
 		// NonFungibleToken.INFT
 		access(all)
 		let id: UInt64
@@ -1015,7 +1015,7 @@ contract Authenticator: NonFungibleToken{
 			self.ownedNFTs[license.id] <-! license
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This collection doesnt contain the required license")
 			let license <- token as! @NFT
@@ -1115,6 +1115,16 @@ contract Authenticator: NonFungibleToken{
 				}
 			}
 			return accessExpiration
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -109,7 +109,7 @@ contract PlayTodayItems: NonFungibleToken{
 	// public function that anyone can call to create a new empty collection
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -200,7 +200,7 @@ contract PlayTodayItems: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -261,6 +261,16 @@ contract PlayTodayItems: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -313,7 +323,7 @@ contract PlayTodayItems: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &PlayTodayItems.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&PlayTodayItems.Collection>(PlayTodayItems.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&PlayTodayItems.Collection>(PlayTodayItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust PlayTodayItems.Collection.borowPlayTodayItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowPlayTodayItem(id: itemID)

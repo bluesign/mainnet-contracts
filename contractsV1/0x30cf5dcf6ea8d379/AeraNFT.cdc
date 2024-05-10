@@ -46,7 +46,7 @@ contract AeraNFT: NonFungibleToken{
 	let CollectionPrivatePath: PrivatePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -164,8 +164,8 @@ contract AeraNFT: NonFungibleToken{
 						//mainnet merchant address
 						address = 0xa9277dcbec7769df
 					}
-					let ducReceiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: ducReceiver, cut: 0.06, description: "onefootball largest of 6% or 0.65")])
+					let ducReceiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: ducReceiver!, cut: 0.06, description: "onefootball largest of 6% or 0.65")])
 			/*
 						case Type<FindViews.MinimumRoyalty>():
 							return FindViews.MinimiumRoyalty({"onefootball largest of 6% or 0.65": 0.65)})
@@ -235,7 +235,7 @@ contract AeraNFT: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -289,6 +289,16 @@ contract AeraNFT: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let aera = nft as! &NFT
 			aera.addBadge(badge)
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

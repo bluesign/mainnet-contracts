@@ -21,7 +21,7 @@ contract FLOATChallengeVerifiers{
 		access(all)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let claimee: Address = params["claimee"]! as! Address
-			if let achievementBoard = (getAccount(claimee).capabilities.get<&FLOATEventSeries.AchievementBoard>(FLOATEventSeries.FLOATAchievementBoardPublicPath)!).borrow(){ 
+			if let achievementBoard = getAccount(claimee).capabilities.get<&FLOATEventSeries.AchievementBoard>(FLOATEventSeries.FLOATAchievementBoardPublicPath).borrow<&FLOATEventSeries.AchievementBoard>(){ 
 				// build goal status by different ways
 				if let record = achievementBoard.borrowAchievementRecordRef(host: self.challengeIdentifier.host, seriesId: self.challengeIdentifier.id){ 
 					assert(record.score >= self.challengeThresholdPoints, message: "You do not meet the minimum required Achievement Point for Challenge#".concat(self.challengeIdentifier.id.toString()))

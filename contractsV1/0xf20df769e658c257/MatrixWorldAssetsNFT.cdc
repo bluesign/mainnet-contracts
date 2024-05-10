@@ -54,7 +54,7 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -99,7 +99,7 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -135,6 +135,16 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 		fun getRoyalties(id: UInt64): [LicensedNFT.Royalty]{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (ref as! &LicensedNFT.NFT).getRoyalties()
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

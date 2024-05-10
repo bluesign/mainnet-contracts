@@ -96,17 +96,15 @@ contract CheezeVouchers{
 		access(all)
 		fun fulfillVoucher(address: Address, voucherId: UInt64, random: UInt64){ 
 			pre{ 
-				((getAccount(address).capabilities.get<&CheezeVouchers.VoucherCollection>(/public/VoucherCollection)!).borrow()!).getIDs().contains(voucherId)
+				(getAccount(address).capabilities.get<&CheezeVouchers.VoucherCollection>(/public/VoucherCollection).borrow()!).getIDs().contains(voucherId)
 				!CheezeVouchers.voucherUsed[voucherId]!
 			}
 			post{ 
 				CheezeVouchers.voucherUsed[voucherId]!
 			}
 			let voucherCollection =
-				(
-					getAccount(address).capabilities.get<&CheezeVouchers.VoucherCollection>(
-						/public/VoucherCollection
-					)!
+				getAccount(address).capabilities.get<&CheezeVouchers.VoucherCollection>(
+					/public/VoucherCollection
 				).borrow()!
 			let listingId = voucherCollection.listingIdForVoucherWithId(voucherId: voucherId)
 			let stored <- CheezeVouchers.storedNFTs.remove(key: listingId)!
@@ -114,10 +112,8 @@ contract CheezeVouchers{
 			let token <- stored.remove(at: randomNftIndex)
 			let nftId = token.id
 			let receiver =
-				(
-					getAccount(address).capabilities.get<&CheezeNFT.Collection>(
-						/public/CheezeNFTReceiver
-					)!
+				getAccount(address).capabilities.get<&CheezeNFT.Collection>(
+					/public/CheezeNFTReceiver
 				).borrow()!
 			receiver.deposit(token: <-token)
 			CheezeVouchers.voucherUsed[voucherId] = true
@@ -230,7 +226,7 @@ contract CheezeVouchers{
 		self.voucherUsed ={} 
 		let admin <- create Administrator()
 		self.account.storage.save(<-admin, to: /storage/cheezeVouchersAdmin)
-		self.cutReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!!
+		self.cutReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
 		self.cutPercent = 0.25
 	}
 }

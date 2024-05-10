@@ -132,7 +132,7 @@ contract ARTIFACTV2: NonFungibleToken{
 	// The resource that represents the NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -229,7 +229,7 @@ contract ARTIFACTV2: NonFungibleToken{
 		// that is to be removed from the Collection
 		//
 		// returns: @NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Remove the nft from the Collection
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: ARTIFACTV2 does not exist in the collection")
@@ -297,6 +297,16 @@ contract ARTIFACTV2: NonFungibleToken{
 			} else{ 
 				panic("can't find nft id")
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

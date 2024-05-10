@@ -516,14 +516,12 @@ contract FlovatarDustCollectibleTemplate{
 	fun getCollectibleTemplates(): [CollectibleTemplateData]{ 
 		var collectibleTemplateData: [CollectibleTemplateData] = []
 		if let collectibleTemplateCollection =
-			(
-				self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(){ 
 			for id in collectibleTemplateCollection.getIDs(){ 
 				var collectibleTemplate = collectibleTemplateCollection.borrowCollectibleTemplate(id: id)
-				collectibleTemplateData.append(CollectibleTemplateData(id: id, name: (collectibleTemplate!).name, description: (collectibleTemplate!).description, series: (collectibleTemplate!).series, layer: (collectibleTemplate!).layer, metadata: *(collectibleTemplate!).metadata, rarity: (collectibleTemplate!).rarity, basePrice: (collectibleTemplate!).basePrice, svg: nil, maxMintableComponents: (collectibleTemplate!).maxMintableComponents))
+				collectibleTemplateData.append(CollectibleTemplateData(id: id, name: (collectibleTemplate!).name, description: (collectibleTemplate!).description, series: (collectibleTemplate!).series, layer: (collectibleTemplate!).layer, metadata: (collectibleTemplate!).metadata, rarity: (collectibleTemplate!).rarity, basePrice: (collectibleTemplate!).basePrice, svg: nil, maxMintableComponents: (collectibleTemplate!).maxMintableComponents))
 			}
 		}
 		return collectibleTemplateData
@@ -535,14 +533,12 @@ contract FlovatarDustCollectibleTemplate{
 	fun getCollectibleSeriesAll(): [CollectibleSeriesData]{ 
 		var collectibleSeriesData: [CollectibleSeriesData] = []
 		if let collectibleTemplateCollection =
-			(
-				self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(){ 
 			for id in collectibleTemplateCollection.getSeriesIDs(){ 
 				var collectibleSeries = collectibleTemplateCollection.borrowCollectibleSeries(id: id)
-				collectibleSeriesData.append(CollectibleSeriesData(id: id, name: (collectibleSeries!).name, description: (collectibleSeries!).description, svgPrefix: (collectibleSeries!).svgPrefix, svgSuffix: (collectibleSeries!).svgSuffix, priceIncrease: (collectibleSeries!).priceIncrease, layers: *(collectibleSeries!).layers, colors: *(collectibleSeries!).colors, metadata: *(collectibleSeries!).metadata, maxMintable: (collectibleSeries!).maxMintable))
+				collectibleSeriesData.append(CollectibleSeriesData(id: id, name: (collectibleSeries!).name, description: (collectibleSeries!).description, svgPrefix: (collectibleSeries!).svgPrefix, svgSuffix: (collectibleSeries!).svgSuffix, priceIncrease: (collectibleSeries!).priceIncrease, layers: (collectibleSeries!).layers, colors: (collectibleSeries!).colors, metadata: (collectibleSeries!).metadata, maxMintable: (collectibleSeries!).maxMintable))
 			}
 		}
 		return collectibleSeriesData
@@ -552,11 +548,9 @@ contract FlovatarDustCollectibleTemplate{
 	access(all)
 	fun getCollectibleTemplate(id: UInt64): CollectibleTemplateData?{ 
 		if let collectibleTemplateCollection =
-			(
-				self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(){ 
 			if let collectibleTemplate =
 				collectibleTemplateCollection.borrowCollectibleTemplate(id: id){ 
 				return CollectibleTemplateData(
@@ -565,7 +559,7 @@ contract FlovatarDustCollectibleTemplate{
 					description: (collectibleTemplate!).description,
 					series: (collectibleTemplate!).series,
 					layer: (collectibleTemplate!).layer,
-					metadata: *(collectibleTemplate!).metadata,
+					metadata: (collectibleTemplate!).metadata,
 					rarity: (collectibleTemplate!).rarity,
 					basePrice: (collectibleTemplate!).basePrice,
 					svg: (collectibleTemplate!).svg,
@@ -580,11 +574,9 @@ contract FlovatarDustCollectibleTemplate{
 	access(all)
 	fun getCollectibleTemplateSvg(id: UInt64): String?{ 
 		if let collectibleTemplateCollection =
-			(
-				self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(){ 
 			if let collectibleTemplate =
 				collectibleTemplateCollection.borrowCollectibleTemplate(id: id){ 
 				return (collectibleTemplate!).svg
@@ -597,11 +589,9 @@ contract FlovatarDustCollectibleTemplate{
 	access(all)
 	fun getCollectibleSeries(id: UInt64): CollectibleSeriesData?{ 
 		if let collectibleTemplateCollection =
-			(
-				self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(){ 
 			if let collectibleSeries =
 				collectibleTemplateCollection.borrowCollectibleSeries(id: id){ 
 				return CollectibleSeriesData(
@@ -611,9 +601,9 @@ contract FlovatarDustCollectibleTemplate{
 					svgPrefix: (collectibleSeries!).svgPrefix,
 					svgSuffix: (collectibleSeries!).svgSuffix,
 					priceIncrease: (collectibleSeries!).priceIncrease,
-					layers: *(collectibleSeries!).layers,
-					colors: *(collectibleSeries!).colors,
-					metadata: *(collectibleSeries!).metadata,
+					layers: (collectibleSeries!).layers,
+					colors: (collectibleSeries!).colors,
+					metadata: (collectibleSeries!).metadata,
 					maxMintable: (collectibleSeries!).maxMintable
 				)
 			}

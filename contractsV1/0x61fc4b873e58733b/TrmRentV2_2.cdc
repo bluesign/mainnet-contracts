@@ -139,7 +139,7 @@ contract TrmRentV2_2: NonFungibleToken{
 	//
 	// The main Rent NFT resource that signifies that an asset is rented by a user
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -256,7 +256,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				false:
@@ -506,6 +506,16 @@ contract TrmRentV2_2: NonFungibleToken{
 				destroy oldToken
 				emit Deposit(id: newRentTokenId, to: (self.owner!).address)
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

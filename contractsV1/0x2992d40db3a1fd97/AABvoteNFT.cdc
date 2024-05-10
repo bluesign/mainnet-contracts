@@ -63,7 +63,7 @@ contract AABvoteNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -149,7 +149,7 @@ contract AABvoteNFT: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -192,6 +192,16 @@ contract AABvoteNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -216,7 +226,7 @@ contract AABvoteNFT: NonFungibleToken{
 	
 	access(all)
 	fun getCollection(_ from: Address): &Collection{ 
-		let collection = (getAccount(from).capabilities.get<&AABvoteNFT.Collection>(AABvoteNFT.CollectionPublicPath)!!).borrow() ?? panic("Could not borrow capability from public collection")
+		let collection = (getAccount(from).capabilities.get<&AABvoteNFT.Collection>(AABvoteNFT.CollectionPublicPath)!).borrow() ?? panic("Could not borrow capability from public collection")
 		return collection
 	}
 	

@@ -39,7 +39,7 @@ contract ToucansUtils{
 				message: "Should always be true. Just making sure so the user doesn't get punished accidentally ;)"
 			)
 			for address in addresses{ 
-				if let collection: &{NonFungibleToken.CollectionPublic} = (getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(publicPath)!).borrow(){ 
+				if let collection: &{NonFungibleToken.CollectionPublic} = getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(publicPath).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 					let identifier: String = collection.getType().identifier
 					if identifier == constructedIdentifier && collection.getIDs().length > 0{ 
 						return true
@@ -53,7 +53,9 @@ contract ToucansUtils{
 	access(all)
 	fun depositTokensToAccount(funds: @{FungibleToken.Vault}, to: Address, publicPath: PublicPath){ 
 		let vault =
-			(getAccount(to).capabilities.get<&{FungibleToken.Receiver}>(publicPath)!).borrow()
+			getAccount(to).capabilities.get<&{FungibleToken.Receiver}>(publicPath).borrow<
+				&{FungibleToken.Receiver}
+			>()
 			?? panic("Account does not have a proper Vault set up.")
 		vault.deposit(from: <-funds)
 	}
@@ -126,17 +128,13 @@ contract ToucansUtils{
 	fun getEstimatedOut(amountIn: UFix64, tokenInKey: String): UFix64{ 
 		// normal xyk pool
 		let poolCapV1 =
-			(
-				getAccount(0x396c0cda3302d8c5).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					/public/increment_swap_pair
-				)!
+			getAccount(0x396c0cda3302d8c5).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				/public/increment_swap_pair
 			).borrow()!
 		// stableswap pool with most liquidity
 		let poolCapStable =
-			(
-				getAccount(0xc353b9d685ec427d).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					/public/increment_swap_pair
-				)!
+			getAccount(0xc353b9d685ec427d).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				/public/increment_swap_pair
 			).borrow()!
 		let estimatedSwapOutV1 = poolCapV1.getAmountOut(amountIn: amountIn, tokenInKey: tokenInKey)
 		let estimatedSwapOutStable =
@@ -159,18 +157,14 @@ contract ToucansUtils{
 		let amountIn = inVault.balance
 		// normal xyk pool
 		let poolCapV1 =
-			(
-				getAccount(0x396c0cda3302d8c5).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					/public/increment_swap_pair
-				)!
+			getAccount(0x396c0cda3302d8c5).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				/public/increment_swap_pair
 			).borrow()!
 		let estimatedSwapOutV1 = poolCapV1.getAmountOut(amountIn: amountIn, tokenInKey: tokenInKey)
 		// stableswap pool with most liquidity
 		let poolCapStable =
-			(
-				getAccount(0xc353b9d685ec427d).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					/public/increment_swap_pair
-				)!
+			getAccount(0xc353b9d685ec427d).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				/public/increment_swap_pair
 			).borrow()!
 		let estimatedSwapOutStable =
 			poolCapStable.getAmountOut(amountIn: amountIn, tokenInKey: tokenInKey)

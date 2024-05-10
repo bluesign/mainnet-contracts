@@ -85,7 +85,7 @@ contract InceptionMinter{
 		let merchantDUCReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -96,11 +96,9 @@ contract InceptionMinter{
 		// Get buyer collection public to receive InceptionAvatar
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					InceptionAvatar.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				InceptionAvatar.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint InceptionAvatar NFTs per purchaseAmount
@@ -123,7 +121,7 @@ contract InceptionMinter{
 		// Hidden gem from the brotherhood of tinkers for your generosity
 		if InceptionBlackBox.mintLimit >= InceptionBlackBox.totalSupply{ 
 			let InceptionBlackBoxAdmin = self.account.storage.borrow<&InceptionBlackBox.Admin>(from: InceptionBlackBox.AdminStoragePath) ?? panic("Could not borrow a reference to the InceptionBlackBox Admin")
-			let InceptionBlackBoxReceiver = (recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(InceptionBlackBox.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the InceptionBlackBox Collection")
+			let InceptionBlackBoxReceiver = recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(InceptionBlackBox.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the InceptionBlackBox Collection")
 			var blackBoxMintCounter = numberOfTokens
 			while blackBoxMintCounter > 0{ 
 				InceptionBlackBoxAdmin.mintInceptionBlackBox(recipient: InceptionBlackBoxReceiver)
@@ -172,7 +170,7 @@ contract InceptionMinter{
 		let merchantFUTReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/flowUtilityTokenReceiver
-			)!
+			)
 		assert(
 			merchantFUTReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant FUT receiver"
@@ -183,11 +181,9 @@ contract InceptionMinter{
 		// Get buyer collection public to receive InceptionAvatar
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					InceptionAvatar.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				InceptionAvatar.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint InceptionAvatar NFTs per purchaseAmount
@@ -212,7 +208,7 @@ contract InceptionMinter{
 		// Hidden gem from the brotherhood of tinkers for your generosity
 		if InceptionBlackBox.mintLimit >= InceptionBlackBox.totalSupply{ 
 			let InceptionBlackBoxAdmin = self.account.storage.borrow<&InceptionBlackBox.Admin>(from: InceptionBlackBox.AdminStoragePath) ?? panic("Could not borrow a reference to the InceptionBlackBox Admin")
-			let InceptionBlackBoxReceiver = (recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(InceptionBlackBox.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the InceptionBlackBox Collection")
+			let InceptionBlackBoxReceiver = recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(InceptionBlackBox.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the InceptionBlackBox Collection")
 			var blackBoxMintCounter = numberOfTokens
 			while blackBoxMintCounter > 0{ 
 				InceptionBlackBoxAdmin.mintInceptionBlackBox(recipient: InceptionBlackBoxReceiver)
@@ -237,11 +233,9 @@ contract InceptionMinter{
 			?? panic("Could not borrow a reference to the InceptionBlackBox Admin")
 		let recipient = getAccount(buyer)
 		let InceptionBlackBoxReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					InceptionBlackBox.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				InceptionBlackBox.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the InceptionBlackBox Collection")
 		InceptionBlackBoxAdmin.mintInceptionBlackBox(recipient: InceptionBlackBoxReceiver)
 		destroy <-paymentVault
@@ -275,18 +269,16 @@ contract InceptionMinter{
 		// Get buyer collection public to receive InceptionAvatar
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					InceptionAvatar.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				InceptionAvatar.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Validate buyer's DUC receiver
 		let buyerDUCReceiverRef =
 			getAccount(buyer).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			buyerDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed buyer DUC receiver"
@@ -334,18 +326,16 @@ contract InceptionMinter{
 		// Get buyer collection public to receive InceptionAvatar
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					InceptionAvatar.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				InceptionAvatar.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Validate buyer's DUC receiver
 		let buyerDUCReceiverRef =
 			getAccount(buyer).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			buyerDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed buyer DUC receiver"

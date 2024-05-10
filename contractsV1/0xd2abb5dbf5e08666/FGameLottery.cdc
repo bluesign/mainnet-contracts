@@ -1845,9 +1845,8 @@ contract FGameLottery{
 	///
 	access(all)
 	view fun borrowLotteryPool(_ addr: Address): &LotteryPool?{ 
-		return (
-			getAccount(addr).capabilities.get<&LotteryPool>(FGameLottery.lotteryPoolPublicPath)!
-		).borrow()
+		return getAccount(addr).capabilities.get<&LotteryPool>(FGameLottery.lotteryPoolPublicPath)
+			.borrow()
 	}
 	
 	init(){ 

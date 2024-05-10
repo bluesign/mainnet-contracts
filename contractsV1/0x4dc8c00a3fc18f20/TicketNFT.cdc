@@ -15,7 +15,7 @@ contract TicketNFT: NonFungibleToken{
 	event Deposit(id: UInt64, to: Address?)
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -56,7 +56,7 @@ contract TicketNFT: NonFungibleToken{
 			self.ownedNFTs[myToken.id] <-! myToken
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This NFT does not exist")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -82,6 +82,16 @@ contract TicketNFT: NonFungibleToken{
 		access(all)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

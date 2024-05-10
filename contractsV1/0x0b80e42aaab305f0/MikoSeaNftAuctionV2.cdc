@@ -596,8 +596,8 @@ contract MikoSeaNftAuctionV2{
 			let winerCap =
 				getAccount((winer!).bidItem.address).capabilities.get<
 					&{MIKOSEANFT.MikoSeaCollectionPublic}
-				>(MIKOSEANFT.CollectionPublicPath)!
-			self.sendNFT(winerCap)
+				>(MIKOSEANFT.CollectionPublicPath)
+			self.sendNFT(winerCap!)
 			self.sendNftTime = getCurrentBlock().timestamp
 		}
 		

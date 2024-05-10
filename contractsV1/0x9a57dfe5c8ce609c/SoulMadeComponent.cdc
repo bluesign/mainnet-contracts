@@ -89,7 +89,7 @@ contract SoulMadeComponent: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ComponentPublic, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ComponentPublic, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -107,7 +107,7 @@ contract SoulMadeComponent: NonFungibleToken{
 				case Type<MetadataViews.Display>():
 					return MetadataViews.Display(name: self.componentDetail.name, description: self.componentDetail.description, thumbnail: MetadataViews.IPFSFile(cid: self.componentDetail.ipfsHash, path: nil))
 				case Type<MetadataViews.Royalties>():
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(0x9a57dfe5c8ce609c).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.00, description: "SoulMade Component Royalties")])
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(0x9a57dfe5c8ce609c).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.00, description: "SoulMade Component Royalties")])
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://soulmade.art")
 				case Type<MetadataViews.NFTCollectionData>():
@@ -160,7 +160,7 @@ contract SoulMadeComponent: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing Component NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -201,6 +201,16 @@ contract SoulMadeComponent: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let componentNFT = nft as! &SoulMadeComponent.NFT
 			return componentNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -57,10 +57,8 @@ contract RewardPool{
 	access(all)
 	fun getBalance(account: Address): UFix64{ 
 		let collectionRef =
-			(
-				getAccount(account).capabilities.get<&LPStaking.LPStakingCollection>(
-					StarVaultConfig.LPStakingCollectionPublicPath
-				)!
+			getAccount(account).capabilities.get<&LPStaking.LPStakingCollection>(
+				StarVaultConfig.LPStakingCollectionPublicPath
 			).borrow()
 		if collectionRef != nil{ 
 			return (collectionRef!).getTokenBalance(tokenAddress: self.stakeToken)
@@ -135,7 +133,7 @@ contract RewardPool{
 			self.rewards[account] = 0.0
 			let provider = self.account.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)!
 			let vault <- provider.withdraw(amount: reward)
-			let receiver = (getAccount(account).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow()!
+			let receiver = getAccount(account).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()!
 			receiver.deposit(from: <-vault)
 		}
 	}
@@ -148,7 +146,7 @@ contract RewardPool{
 		}
 		let balance = vault.balance
 		let receiver =
-			(self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
+			self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 				.borrow()!
 		receiver.deposit(from: <-vault)
 		self.notifyRewardAmount(rewards: balance)

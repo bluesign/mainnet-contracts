@@ -571,7 +571,7 @@ contract SocialProfileV3{
 			if (self.owner!).address == theirAddress{ 
 				panic("You cannot follow your own profile")
 			}
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirAccount = socialProfileRef.incrementFollower()
 			self.following[theirAddress] = true
 			emit ProfileFollowed(owner: (self.owner!).address, follower: theirAddress)
@@ -582,7 +582,7 @@ contract SocialProfileV3{
 			if self.following[theirAddress] == nil{ 
 				panic("You can not unfollow as you do not follow profile")
 			}
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirAccount = socialProfileRef.decrementFollower()
 			self.following.remove(key: theirAddress)
 			emit ProfileUnfollowed(owner: (self.owner!).address, follower: theirAddress)
@@ -624,7 +624,7 @@ contract SocialProfileV3{
 			if self.likedPosts[id] == true{ 
 				panic("You already liked this post")
 			}
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost = socialProfileRef.borrowPost(id) ?? panic("Post does not exist with that id")
 			theirPost.incrementLike()
 			self.likedPosts[id] = true
@@ -636,7 +636,7 @@ contract SocialProfileV3{
 			if self.likedPosts[id] == false || self.likedPosts[id] == nil{ 
 				panic("Post cannot be unliked as it was not previously liked")
 			}
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost = socialProfileRef.borrowPost(id) ?? panic("Post does not exist with that id")
 			theirPost.decrementLike()
 			self.likedPosts.remove(key: id)
@@ -656,7 +656,7 @@ contract SocialProfileV3{
 		/* Comments */
 		access(all)
 		fun createComment(theirAddress: Address, postId: UInt64, content: String){ 
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost = socialProfileRef.borrowPost(postId) ?? panic("Post does not exist with that id")
 			let commentId = SocialProfileV3.nextCommentId
 			SocialProfileV3.nextCommentId = SocialProfileV3.nextCommentId + 1
@@ -667,7 +667,7 @@ contract SocialProfileV3{
 		
 		access(all)
 		fun deleteComment(theirAddress: Address, postId: UInt64, commentId: UInt64){ 
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost = socialProfileRef.borrowPost(postId) ?? panic("Post does not exist with that id")
 			let _comment: Comment? = theirPost.getComment(commentId)
 			// check comment exists
@@ -688,7 +688,7 @@ contract SocialProfileV3{
 			if self.likedComments[commentId] == true{ 
 				panic("You already liked this comment")
 			}
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost: &Post = socialProfileRef.borrowPost(postId) ?? panic("Post does not exist with that id")
 			// Call the method to like the comment within the post
 			theirPost.likeComment(commentId)
@@ -701,7 +701,7 @@ contract SocialProfileV3{
 			if self.likedComments[commentId] == nil{ 
 				panic("You havent liked this comment so you can not unlike")
 			}
-			let socialProfileRef = (getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath)!).borrow()!
+			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost = socialProfileRef.borrowPost(postId) ?? panic("Post does not exist with that id")
 			theirPost.unlikeComment(commentId)
 			self.likedComments.remove(key: commentId)

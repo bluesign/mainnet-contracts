@@ -311,7 +311,7 @@ contract breakingt_NFT: NonFungibleToken{
 	// A resource that represents the breakingt_NFT NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -421,7 +421,7 @@ contract breakingt_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -509,6 +509,16 @@ contract breakingt_NFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -537,7 +547,7 @@ contract breakingt_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &breakingt_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&breakingt_NFT.Collection>(breakingt_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&breakingt_NFT.Collection>(breakingt_NFT.CollectionPublicPath).borrow<&breakingt_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust breakingt_NFT.Collection.borrowbreakingt_NFT to get the correct id
 		// (it checks it before returning it).
 		return collection.borrowbreakingt_NFT(id: id)

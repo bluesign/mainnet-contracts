@@ -22,25 +22,25 @@ contract SnapshotLogic{
 			var nfts:{ String:{ UInt64: Snapshot.NFTInfo}} ={} 
 			let account = getAccount(address)
 			account.forEachPublic(fun (path: PublicPath, type: Type): Bool{ 
-					let collection = (account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)!).borrow()
+					let collection = account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path).borrow<&{NonFungibleToken.CollectionPublic}>()
 					if collection != nil{ 
 						for index, id in (collection!).getIDs(){ 
 							if index == 0{ 
 								nfts[path.toString()] ={} 
 							}
-							let nft = (collection!).borrowNFT(id)
-							(nfts[path.toString()]!).insert(key: nft.id, self.makeNFTInfo(nft: nft!, path: path))
+							let nft = (collection!).borrowNFT(id: id)
+							(nfts[path.toString()]!).insert(key: nft.id, self.makeNFTInfo(nft: nft, path: path))
 						}
 						return true
 					}
-					let topshotCollection = (account.capabilities.get<&{TopShot.MomentCollectionPublic}>(path)!).borrow()
+					let topshotCollection = account.capabilities.get<&{TopShot.MomentCollectionPublic}>(path).borrow<&{TopShot.MomentCollectionPublic}>()
 					if topshotCollection != nil{ 
 						for index, id in (topshotCollection!).getIDs(){ 
 							if index == 0{ 
 								nfts[path.toString()] ={} 
 							}
-							let nft = (topshotCollection!).borrowNFT(id)
-							(nfts[path.toString()]!).insert(key: nft.id, self.makeNFTInfo(nft: nft!, path: path))
+							let nft = (topshotCollection!).borrowNFT(id: id)
+							(nfts[path.toString()]!).insert(key: nft.id, self.makeNFTInfo(nft: nft, path: path))
 						}
 						return true
 					}

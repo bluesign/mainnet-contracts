@@ -44,7 +44,7 @@ contract DalleOnFlow: NonFungibleToken{
 	let AdminStoragePath: StoragePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -99,8 +99,8 @@ contract DalleOnFlow: NonFungibleToken{
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://www.dalleonflow.art/")
 				case Type<MetadataViews.Royalties>():
-					let royaltyReceiver = getAccount(0x18deb5b8e5393198).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: royaltyReceiver, cut: 0.05, description: "This is the royalty receiver for DalleOnFlow")])
+					let royaltyReceiver = getAccount(0x18deb5b8e5393198).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: royaltyReceiver!, cut: 0.05, description: "This is the royalty receiver for DalleOnFlow")])
 			}
 			return nil
 		}
@@ -141,7 +141,7 @@ contract DalleOnFlow: NonFungibleToken{
 			self.ownedNFTs[myToken.id] <-! myToken
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This NFT does not exist")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -172,6 +172,16 @@ contract DalleOnFlow: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -198,7 +208,7 @@ contract DalleOnFlow: NonFungibleToken{
 				payment.balance == 10.24:
 					"Payment does not match the price."
 			}
-			let dofWallet = (getAccount(0x18deb5b8e5393198).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!
+			let dofWallet = getAccount(0x18deb5b8e5393198).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!
 			dofWallet.deposit(from: <-payment)
 			let nft <- create NFT(_description: description, _thumbnailCID: thumbnailCID, _metadata: metadata)
 			let recepientCollection = recepient.borrow()!

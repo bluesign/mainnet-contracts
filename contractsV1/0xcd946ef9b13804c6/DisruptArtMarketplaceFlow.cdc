@@ -237,7 +237,7 @@ contract DisruptArtMarketplaceFlow{
 				self.purchase(id: tokens[count], recipient: recipient, payment: <-tokenCut)
 				count = count + 1
 			}
-			let disruptartvaultRef = (getAccount(DisruptArtMarketplaceFlow.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to DisruptArtMarketplace vault")
+			let disruptartvaultRef = getAccount(DisruptArtMarketplaceFlow.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to DisruptArtMarketplace vault")
 			disruptartvaultRef.deposit(from: <-payment)
 		}
 		
@@ -254,9 +254,9 @@ contract DisruptArtMarketplaceFlow{
 			let owner = self.creators[id]!!
 			
 			// Disruptvalut reference
-			let disruptartvaultRef = (getAccount(DisruptArtMarketplaceFlow.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to DisruptArtMarketplace vault")
+			let disruptartvaultRef = getAccount(DisruptArtMarketplaceFlow.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to DisruptArtMarketplace vault")
 			// Creator vault reference
-			let creatorvaultRef = (getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to owner vault")
+			let creatorvaultRef = getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to owner vault")
 			
 			// Seller vault reference
 			let vaultRef = self.ownerVault.borrow() ?? panic("Could not borrow reference to owner token vault")
@@ -328,7 +328,7 @@ contract DisruptArtMarketplaceFlow{
 			}
 			var count = 0
 			let owner = self.seller[tokens[0]]!!
-			let receiver = (getAccount(owner).capabilities.get<&{DisruptArt.DisruptArtCollectionPublic}>(DisruptArt.disruptArtPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let receiver = getAccount(owner).capabilities.get<&{DisruptArt.DisruptArtCollectionPublic}>(DisruptArt.disruptArtPublicPath).borrow<&{DisruptArt.DisruptArtCollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			while count < tokens.length{ 
 				// Deposit the NFT back into the seller collection
 				receiver.deposit(token: <-self.withdraw(id: tokens[count]))

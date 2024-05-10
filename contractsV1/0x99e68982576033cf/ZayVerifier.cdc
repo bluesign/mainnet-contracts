@@ -95,10 +95,8 @@ contract ZayVerifier{
 	access(all)
 	fun checkOwnership(address: Address, collectionPath: PublicPath, nftType: Type): Bool{ 
 		let collectionRef =
-			(
-				getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					collectionPath
-				)!
+			getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				collectionPath
 			).borrow()
 		if collectionRef == nil{ 
 			return false
@@ -108,7 +106,7 @@ contract ZayVerifier{
 		while index < ids.length{ 
 			// Borrow the NFT, and ensure it is the proper type
 			let id = ids[index]
-			let nft = (collectionRef!).borrowNFT(id)
+			let nft = (collectionRef!).borrowNFT(id: id)
 			if nft.isInstance(nftType){ 
 				return true
 			}

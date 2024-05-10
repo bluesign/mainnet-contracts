@@ -34,7 +34,7 @@ contract SeekEarlySupporters: NonFungibleToken{
 	let CollectionPublicPath: PublicPath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -100,7 +100,7 @@ contract SeekEarlySupporters: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -131,6 +131,16 @@ contract SeekEarlySupporters: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -143,7 +153,7 @@ contract SeekEarlySupporters: NonFungibleToken{
 	
 	access(all)
 	fun mintNFT(address: Address): @NFT{ 
-		let recipient = (getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(SeekEarlySupporters.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+		let recipient = getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(SeekEarlySupporters.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 		// check if user has already minted an NFT
 		if self.mintedAdresses.contains(self.account.address){ 
 			panic("User has already minted an NFT")

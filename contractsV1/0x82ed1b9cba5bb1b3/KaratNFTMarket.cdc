@@ -134,10 +134,10 @@ contract KaratNFTMarket{
 			let fee = buyerPayment.balance * KaratNFTMarket.feeRate
 			let roy = buyerPayment.balance * nft.metadata.royalty
 			let feeValut <- buyerPayment.withdraw(amount: fee)
-			let feeReceiver = (getAccount(KaratNFTMarket.feeReceiverAddress).capabilities.get<&{FungibleToken.Receiver}>(self.receiverPublicPath)!).borrow() ?? panic("Cannot borrow fee receiver")
+			let feeReceiver = getAccount(KaratNFTMarket.feeReceiverAddress).capabilities.get<&{FungibleToken.Receiver}>(self.receiverPublicPath).borrow() ?? panic("Cannot borrow fee receiver")
 			feeReceiver.deposit(from: <-feeValut)
 			let royaltyValut <- buyerPayment.withdraw(amount: roy)
-			let royaltyReceiver = (getAccount(nft.metadata.artistAddress).capabilities.get<&{FungibleToken.Receiver}>(self.receiverPublicPath)!).borrow() ?? panic("Cannot borrow fee receiver")
+			let royaltyReceiver = getAccount(nft.metadata.artistAddress).capabilities.get<&{FungibleToken.Receiver}>(self.receiverPublicPath).borrow() ?? panic("Cannot borrow fee receiver")
 			royaltyReceiver.deposit(from: <-royaltyValut)
 			(self.sellerPaymentReceiver.borrow()!).deposit(from: <-buyerPayment)
 			buyerCollection.deposit(token: <-nft)

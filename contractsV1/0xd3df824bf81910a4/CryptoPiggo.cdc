@@ -55,7 +55,7 @@ contract CryptoPiggo: NonFungibleToken{
 	let idToAddress: [Address]
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -148,7 +148,7 @@ contract CryptoPiggo: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: (self.owner!).address)
@@ -231,6 +231,16 @@ contract CryptoPiggo: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -278,7 +288,7 @@ contract CryptoPiggo: NonFungibleToken{
 		fun mintNFT(recipient: Address, initMetadata:{ String: String}){ 
 			let nftID = CryptoPiggo.totalSupply
 			if nftID < CryptoPiggo.maxSupply{ 
-				let receiver = (getAccount(recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(CryptoPiggo.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+				let receiver = getAccount(recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(CryptoPiggo.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 				emit Minted(id: nftID, initMeta: initMetadata)
 				CryptoPiggo.idToAddress.append(recipient)
 				CryptoPiggo.totalSupply = nftID + 1

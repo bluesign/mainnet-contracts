@@ -460,7 +460,7 @@ contract MoxyReleaseRounds{
 			let moxyVault <- lockedMOXYVault.withdrawUnlocked()
 			let address = (lockedMOXYVault.owner!).address
 			let recipient = getAccount(address)
-			let moxyVaultRef = (recipient.capabilities.get<&{FungibleToken.Receiver}>(MoxyToken.moxyTokenReceiverPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+			let moxyVaultRef = recipient.capabilities.get<&{FungibleToken.Receiver}>(MoxyToken.moxyTokenReceiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 			let moxyAmount = moxyVault.balance
 			var feeToDeduct = feeRemaining
 			if feeToDeduct > moxyAmount{ 
@@ -472,7 +472,7 @@ contract MoxyReleaseRounds{
 			// Unlock MV tokens
 			let lockedMVVault = self.lockedMVVault.borrow()!
 			let mvVault <- lockedMVVault.withdrawUnlocked()
-			let mvVaultRef = (recipient.capabilities.get<&{MoxyVaultToken.ReceiverInterface}>(MoxyVaultToken.moxyVaultTokenReceiverTimestampPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+			let mvVaultRef = recipient.capabilities.get<&{MoxyVaultToken.ReceiverInterface}>(MoxyVaultToken.moxyVaultTokenReceiverTimestampPath).borrow<&{MoxyVaultToken.ReceiverInterface}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 			let mvAmount = mvVault.balance
 			mvVaultRef.depositAmount(from: <-mvVault)
 			emit UnlockedMOXYTokenForLinearReleases(address: address, amount: mvAmount)
@@ -813,11 +813,9 @@ contract MoxyReleaseRounds{
 			// Get the locked recipient Vault
 			let recipient = getAccount(address)
 			let receiverRef =
-				(
-					recipient.capabilities.get<&{LockedMoxyToken.Receiver}>(
-						MoxyToken.moxyTokenLockedReceiverPath
-					)!
-				).borrow()
+				recipient.capabilities.get<&{LockedMoxyToken.Receiver}>(
+					MoxyToken.moxyTokenLockedReceiverPath
+				).borrow<&{LockedMoxyToken.Receiver}>()
 				?? panic(
 					"Could not borrow receiver reference to the recipient's Vault (moxyTokenLockedReceiverPath)"
 				)
@@ -852,11 +850,9 @@ contract MoxyReleaseRounds{
 			// Get recipient reference to assign release schedule
 			let recipient = getAccount(address)
 			let receiverRef =
-				(
-					recipient.capabilities.get<&{LockedMoxyToken.Receiver}>(
-						MoxyToken.moxyTokenLockedReceiverPath
-					)!
-				).borrow()
+				recipient.capabilities.get<&{LockedMoxyToken.Receiver}>(
+					MoxyToken.moxyTokenLockedReceiverPath
+				).borrow<&{LockedMoxyToken.Receiver}>()
 				?? panic(
 					"Could not borrow receiver reference to the recipient's Vault (moxyTokenLockedReceiverPath)"
 				)
@@ -1399,8 +1395,8 @@ contract MoxyReleaseRounds{
 	
 	access(self)
 	fun getRoundsCapability(): &Rounds{ 
-		return (self.account.capabilities.get<&MoxyReleaseRounds.Rounds>(self.moxyRoundsPrivate)!)
-			.borrow()!
+		return self.account.capabilities.get<&MoxyReleaseRounds.Rounds>(self.moxyRoundsPrivate)
+			.borrow<&MoxyReleaseRounds.Rounds>()!
 	}
 	
 	access(all)

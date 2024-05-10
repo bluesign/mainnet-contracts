@@ -80,7 +80,7 @@ contract FlowStorageFees{
 			(
 				getAccount(accountAddress).capabilities.get<&FlowToken.Vault>(
 					/public/flowTokenBalance
-				)!!
+				)!
 			).borrow(){ 
 			balance = balanceRef.balance
 		}
@@ -115,7 +115,7 @@ contract FlowStorageFees{
 		let capacities: [UFix64] = []
 		for accountAddress in accountAddresses{ 
 			var balance = 0.0
-			if let balanceRef = (getAccount(accountAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!!).borrow(){ 
+			if let balanceRef = (getAccount(accountAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow(){ 
 				if accountAddress == payer{ 
 					// if the account is the payer, deduct the maximum possible transaction fees from the balance
 					balance = balanceRef.balance.saturatingSubtract(maxTxFees)
@@ -183,7 +183,9 @@ contract FlowStorageFees{
 		let acct = getAccount(accountAddress)
 		var balance = 0.0
 		if let balanceRef =
-			(acct.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow(){ 
+			acct.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<
+				&FlowToken.Vault
+			>(){ 
 			balance = balanceRef.balance
 		}
 		

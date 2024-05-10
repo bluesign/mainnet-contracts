@@ -287,7 +287,7 @@ contract ListenAuction{
 			let finalSalePrice = bidRef.vault.balance
 			let funds <- bidRef.vault.withdraw(amount: finalSalePrice)
 			let ftReceiverCap =
-				ListenAuction.account.capabilities.get_<YOUR_TYPE>(ListenUSD.ReceiverPublicPath)!
+				ListenAuction.account.capabilities.get_<YOUR_TYPE>(ListenUSD.ReceiverPublicPath)
 			let vaultRef = ftReceiverCap.borrow<&{FungibleToken.Receiver}>()!
 			vaultRef.deposit(from: <-funds)
 			let auction <- ListenAuction.auctions.remove(key: auctionID)

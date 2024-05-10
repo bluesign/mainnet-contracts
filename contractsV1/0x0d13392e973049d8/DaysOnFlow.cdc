@@ -71,7 +71,7 @@ contract DaysOnFlow: NonFungibleToken{
 	
 	// Represents a DOF item
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -192,7 +192,7 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			let nft <- token as! @NFT
@@ -249,6 +249,16 @@ contract DaysOnFlow: NonFungibleToken{
 			let tokenRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let nftRef = tokenRef as! &NFT
 			return nftRef as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -342,7 +352,7 @@ contract DaysOnFlow: NonFungibleToken{
 		access(all)
 		fun nbDayNFTwlToMint(address: Address): Int{ 
 			// DayNFT collection
-			let holder = (getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath)!).borrow()
+			let holder = getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath).borrow<&DayNFT.Collection>()
 			if holder == nil || !self.wlClaimable{ 
 				return 0
 			}
@@ -370,7 +380,7 @@ contract DaysOnFlow: NonFungibleToken{
 				panic("Unclaimable series")
 			}
 			// DayNFT collection
-			let holder = (getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the DayNFT Collection")
+			let holder = getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath).borrow<&DayNFT.Collection>() ?? panic("Could not get receiver reference to the DayNFT Collection")
 			for id in holder.getIDs(){ 
 				if self.dayNFTwlClaimed[id] != nil && !self.dayNFTwlClaimed[id]!{ 
 					self.mint(address: address, saleType: "DayNFT WL")
@@ -394,7 +404,7 @@ contract DaysOnFlow: NonFungibleToken{
 			if self.wlClaimed[address]!{ 
 				panic("Already claimed")
 			}
-			let rec = (DaysOnFlow.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow a reference to the Flow receiver")
+			let rec = DaysOnFlow.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow a reference to the Flow receiver")
 			rec.deposit(from: <-vault)
 			self.mint(address: address, saleType: "WL")
 			self.wlClaimed[address] = true
@@ -421,7 +431,7 @@ contract DaysOnFlow: NonFungibleToken{
 			if self.publicMinted >= self.publicSupply{ 
 				panic("Nothing left on public sale")
 			}
-			let rec = (DaysOnFlow.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow a reference to the Flow receiver")
+			let rec = DaysOnFlow.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow a reference to the Flow receiver")
 			rec.deposit(from: <-vault)
 			self.mint(address: address, saleType: "Public")
 			self.publicMinted = self.publicMinted + 1
@@ -452,7 +462,7 @@ contract DaysOnFlow: NonFungibleToken{
 		access(contract)
 		fun mint(address: Address, saleType: String): UInt64{ 
 			// DOF collection
-			let receiver = (getAccount(address).capabilities.get<&{DaysOnFlow.CollectionPublic}>(DaysOnFlow.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let receiver = getAccount(address).capabilities.get<&{DaysOnFlow.CollectionPublic}>(DaysOnFlow.CollectionPublicPath).borrow<&{DaysOnFlow.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			let serial = self.totalSupply
 			let token <- create NFT(_seriesDescription: self.description, _seriesId: self.seriesId, _seriesImage: self.image, _seriesName: self.name, _serial: serial, _saleType: saleType)
 			let id = token.id

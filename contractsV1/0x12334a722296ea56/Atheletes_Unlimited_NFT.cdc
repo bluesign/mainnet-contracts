@@ -303,7 +303,7 @@ contract Atheletes_Unlimited_NFT: NonFungibleToken{
 	// NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -412,7 +412,7 @@ contract Atheletes_Unlimited_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -504,6 +504,16 @@ contract Atheletes_Unlimited_NFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -532,7 +542,7 @@ contract Atheletes_Unlimited_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &Atheletes_Unlimited_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Atheletes_Unlimited_NFT.Collection>(Atheletes_Unlimited_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&Atheletes_Unlimited_NFT.Collection>(Atheletes_Unlimited_NFT.CollectionPublicPath).borrow<&Atheletes_Unlimited_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust Atheletes_Unlimited_NFT.Collection.borrowAtheletes_Unlimited_NFT to get the correct id
 		// (it checks it before returning it).
 		return collection.borrowAtheletes_Unlimited_NFT(id: id)

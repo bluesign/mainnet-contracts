@@ -44,8 +44,9 @@ contract BloctoStorageRent{
 		self.cleanExpiredRefilledAccounts(10)
 		let recipient = getAccount(address)
 		let receiverRef =
-			(recipient.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
-				.borrow()
+			recipient.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<
+				&{FungibleToken.Receiver}
+			>()
 		if receiverRef == nil || (receiverRef!).owner == nil{ 
 			return
 		}

@@ -484,7 +484,7 @@ contract Wearables: NonFungibleToken{
 	// the NFT resource that is a Wearable.
 	// A resource on flow https://developers.flow.com/cadence/language/resources is kind of like a struct just with way stronger semantics and rules around security
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		//the unique id of a NFT, Wearables uses UUID so this id is unique across _all_ resources on flow
 		access(all)
@@ -656,14 +656,14 @@ contract Wearables: NonFungibleToken{
 						
 						//this is an account that have setup a forwarder for DUC/FUT to the merchant account of Doodles.
 						let royaltyAccountWithDapperForwarder = getAccount(0x12be92985b852cb8)
-						let cap = royaltyAccountWithDapperForwarder.capabilities.get<&{FungibleToken.Receiver}>(/public/fungibleTokenSwitchboardPublic)!
-						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap, cut: royalty.cut, description: royalty.description)])
+						let cap = royaltyAccountWithDapperForwarder.capabilities.get<&{FungibleToken.Receiver}>(/public/fungibleTokenSwitchboardPublic)
+						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap!, cut: royalty.cut, description: royalty.description)])
 					}
 					let doodlesMerchanAccountTestnet = "0xd5b1a1553d0ed52e"
 					if royalty.receiver.address.toString() == doodlesMerchanAccountTestnet{ 
 						//on testnet we just send this to the main vault, it is not important
-						let cap = Wearables.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap, cut: royalty.cut, description: royalty.description)])
+						let cap = Wearables.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap!, cut: royalty.cut, description: royalty.description)])
 					}
 					return royalties
 				case Type<MetadataViews.NFTCollectionDisplay>():
@@ -806,7 +806,7 @@ contract Wearables: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -851,6 +851,16 @@ contract Wearables: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let wearable = nft as! &NFT
 			return wearable
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -181,7 +181,7 @@ contract MetabiliaNFT: NonFungibleToken{
 	// "Standard" NFTs that implement MetadataViews and point
 	// to a Template struct that give information about the NFTs metadata
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// id is unique among all MetabiliaNFT NFTs on Flow, ordered sequentially from 0
 		access(all)
@@ -286,7 +286,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		
 		// Withdraw an NFT from the collection.
 		// Panics if NFT does not exist in the collection
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.ownedNFTs.containsKey(withdrawID):
@@ -337,6 +337,16 @@ contract MetabiliaNFT: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let typedNFT = nft as! &NFT
 			return typedNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

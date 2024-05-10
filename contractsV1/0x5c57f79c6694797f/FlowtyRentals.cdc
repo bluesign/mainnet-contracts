@@ -510,7 +510,7 @@ contract FlowtyRentals{
 			// get the path and corresponding capability to send fees to the Flowty account
 			let tokenPaths = Flowty.getTokenPaths()
 			let feeTokenPath = tokenPaths[self.details.paymentVaultType.identifier]!
-			let flowtyFeeReceiver = (FlowtyRentals.account.capabilities.get<&{FungibleToken.Receiver}>(feeTokenPath)!).borrow()!
+			let flowtyFeeReceiver = FlowtyRentals.account.capabilities.get<&{FungibleToken.Receiver}>(feeTokenPath).borrow()!
 			flowtyFeeReceiver.deposit(from: <-flowtyFeeCut)
 			
 			// check if automatic return has been enabled by renter.
@@ -1208,10 +1208,8 @@ contract FlowtyRentals{
 	
 	access(all)
 	fun borrowStorefrontPublic(addr: Address): &FlowtyRentalsStorefront?{ 
-		return (
-			getAccount(addr).capabilities.get<&FlowtyRentalsStorefront>(
-				FlowtyRentals.FlowtyRentalsStorefrontPublicPath
-			)!
+		return getAccount(addr).capabilities.get<&FlowtyRentalsStorefront>(
+			FlowtyRentals.FlowtyRentalsStorefrontPublicPath
 		).borrow()
 	}
 	

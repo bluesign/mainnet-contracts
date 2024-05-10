@@ -45,7 +45,7 @@ contract NFTDayTreasureChest: NonFungibleToken{
 	var royalties: [MetadataViews.Royalty]
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -137,7 +137,7 @@ contract NFTDayTreasureChest: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -178,6 +178,16 @@ contract NFTDayTreasureChest: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let NFTDayTreasureChest = nft as! &NFTDayTreasureChest.NFT
 			return NFTDayTreasureChest as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -254,8 +264,8 @@ contract NFTDayTreasureChest: NonFungibleToken{
 		self.retired = false
 		self.whitelist = []
 		self.minted = []
-		self.royalties = [MetadataViews.Royalty(receiver: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.05, // 5% royalty on secondary sales																																				  
-																																				  description: "Basic Beasts 5% royalty from secondary sales.")]
+		self.royalties = [MetadataViews.Royalty(receiver: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.05, // 5% royalty on secondary sales																																				 
+																																				 description: "Basic Beasts 5% royalty from secondary sales.")]
 		
 		// Set the named paths
 		self.CollectionStoragePath = /storage/bbNFTDayTreasureChestCollection

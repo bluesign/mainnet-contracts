@@ -495,13 +495,13 @@ contract FURC20Indexer{
 			let flowToInviterAmount = flowToInviter.balance
 			assert(flowToInviterAmount >= 25.0, message: "The flowToInviterAmount should be greater than 25.0")
 			let creatorRecipient: Address = 0x45cf22342e0a72c7
-			let creatorRecipientVaultRef = (getAccount(creatorRecipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not get creator receiver reference")
+			let creatorRecipientVaultRef = getAccount(creatorRecipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not get creator receiver reference")
 			creatorRecipientVaultRef.deposit(from: <-flowToCreator)
 			let inviterFlowUpBalance: UFix64 = self.getBalance(tick: "flowup", addr: inviterAddress)
 			if inviterFlowUpBalance < 1.0{ 
 				creatorRecipientVaultRef.deposit(from: <-flowToInviter)
 			} else{ 
-				let inviterRecipientVaultRef = (getAccount(inviterAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not get inviter receiver reference")
+				let inviterRecipientVaultRef = getAccount(inviterAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not get inviter receiver reference")
 				inviterRecipientVaultRef.deposit(from: <-flowToInviter)
 			}
 			let meta = self.parseMetadata(&ins.getData() as &FlowUp.InscriptionData)
@@ -1031,7 +1031,7 @@ contract FURC20Indexer{
 			// add the seller or buyer cut
 			if sellerAddress != nil{ 
 				// borrow the receiver reference
-				let flowTokenReceiver = getAccount(sellerAddress!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+				let flowTokenReceiver = getAccount(sellerAddress!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 				assert(flowTokenReceiver.check(), message: "Could not borrow receiver reference to the seller's Vault")
 				ret.append(FURC20FTShared.SaleCut(type: FURC20FTShared.SaleCutType.SellMaker, ratio: 1.0 - salesFee,																													 // recevier is the FlowToken Vault of the seller
 																													 receiver: flowTokenReceiver))
@@ -1210,8 +1210,7 @@ contract FURC20Indexer{
 	fun getIndexer(): &InscriptionIndexer{ 
 		let addr = self.account.address
 		let cap =
-			(getAccount(addr).capabilities.get<&InscriptionIndexer>(self.IndexerPublicPath)!)
-				.borrow()
+			getAccount(addr).capabilities.get<&InscriptionIndexer>(self.IndexerPublicPath).borrow()
 		return cap ?? panic("Could not borrow InscriptionIndexer")
 	}
 	
@@ -1219,7 +1218,7 @@ contract FURC20Indexer{
 	///
 	access(all)
 	fun borrowFlowTokenReceiver(_ addr: Address): &FlowToken.Vault?{ 
-		let cap = getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+		let cap = getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		return cap.borrow()
 	}
 	

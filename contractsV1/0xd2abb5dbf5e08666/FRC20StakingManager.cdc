@@ -482,7 +482,7 @@ contract FRC20StakingManager{
 			return true
 		}
 		let admin =
-			(self.account.capabilities.get<&StakingAdmin>(self.StakingAdminPublicPath)!).borrow()
+			self.account.capabilities.get<&StakingAdmin>(self.StakingAdminPublicPath).borrow()
 			?? panic("Could not borrow the admin reference")
 		return admin.isWhitelisted(address: address)
 	}

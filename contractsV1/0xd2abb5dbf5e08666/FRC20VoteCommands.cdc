@@ -390,7 +390,7 @@ contract FRC20VoteCommands{
 	access(all)
 	view fun borrowSystemInscriptionsStore(): &Fixes.InscriptionsStore{ 
 		let storePubPath = Fixes.getFixesStorePublicPath()
-		return (self.account.capabilities.get<&Fixes.InscriptionsStore>(storePubPath)!).borrow()
+		return self.account.capabilities.get<&Fixes.InscriptionsStore>(storePubPath).borrow()
 		?? panic("Fixes.InscriptionsStore is not found")
 	}
 	

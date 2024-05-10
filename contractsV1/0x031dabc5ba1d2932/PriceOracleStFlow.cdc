@@ -210,7 +210,7 @@ contract PriceOracleStFlow: OracleInterface{
 		self._reservedFields ={} 
 		
 		// Initialize & save flowPriceReader
-		let flowPriceOraclePublicInterfaceReaderRef = (getAccount(flowPriceOracle).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath)!).borrow() ?? panic("cannot borrow reference to Flow/USD PriceOracle Reader")
+		let flowPriceOraclePublicInterfaceReaderRef = getAccount(flowPriceOracle).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow() ?? panic("cannot borrow reference to Flow/USD PriceOracle Reader")
 		let flowPriceReaderPath = flowPriceOraclePublicInterfaceReaderRef.getPriceReaderStoragePath()
 		destroy <-self.account.storage.load<@AnyResource>(from: flowPriceReaderPath)
 		let flowPriceReader <- flowPriceOraclePublicInterfaceReaderRef.mintPriceReader()

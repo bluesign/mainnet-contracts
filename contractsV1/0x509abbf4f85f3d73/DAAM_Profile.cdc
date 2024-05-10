@@ -333,7 +333,7 @@ contract DAAM_Profile{
 	
 	access(all)
 	fun check(_ address: Address): Bool{ 
-		let ref = (getAccount(address).capabilities.get<&User>(self.publicPath)!).borrow() as &User?
+		let ref = getAccount(address).capabilities.get<&User>(self.publicPath).borrow() as &User?
 		return ref != nil
 	}
 	

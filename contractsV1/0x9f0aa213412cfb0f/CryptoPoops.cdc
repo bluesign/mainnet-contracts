@@ -15,7 +15,7 @@ contract CryptoPoops: NonFungibleToken{
 	event Deposit(id: UInt64, to: Address?)
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -62,7 +62,7 @@ contract CryptoPoops: NonFungibleToken{
 			self.ownedNFTs[cryptoPoop.id] <-! cryptoPoop
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This collection doesn't cotain nft with that id")
 			emit Withdraw(id: withdrawID, from: self.owner?.address)
@@ -83,6 +83,16 @@ contract CryptoPoops: NonFungibleToken{
 		fun borrowEntireNFT(id: UInt64): &NFT{ 
 			let refNFT = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? ?? panic("something")
 			return refNFT as! &NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

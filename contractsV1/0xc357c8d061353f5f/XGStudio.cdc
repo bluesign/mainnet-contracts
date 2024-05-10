@@ -325,7 +325,7 @@ contract XGStudio: NonFungibleToken{
 	// The resource that represents the XGStudio NFTs
 	// 
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -592,25 +592,25 @@ contract XGStudio: NonFungibleToken{
 			let token = XGStudio.getNFTDataById(nftId: self.id)
 			let template = XGStudio.getTemplateById(templateId: token.templateID)
 			let templateData = template.getImmutableData()
-			let genericReceiver = getAccount(0x2ce293d39a72a72b).capabilities.get<&{FungibleToken.Receiver}>(Profile.publicReceiverPath)!
+			let genericReceiver = getAccount(0x2ce293d39a72a72b).capabilities.get<&{FungibleToken.Receiver}>(Profile.publicReceiverPath)
 			
 			// Only add receiver if the Profile capability exists
-			let royalties: [MetadataViews.Royalty] = genericReceiver.check() ? [MetadataViews.Royalty(receiver: genericReceiver, cut: 0.025, description: "Artist")] : []
+			let royalties: [MetadataViews.Royalty] = genericReceiver.check() ? [MetadataViews.Royalty(receiver: genericReceiver!, cut: 0.025, description: "Artist")] : []
 			if template.brandId == 1{ 
 				// xGMove
-				let receiver = getAccount(0xc2307c44b0903e33).capabilities.get<&{FungibleToken.Receiver}>(Profile.publicReceiverPath)!
+				let receiver = getAccount(0xc2307c44b0903e33).capabilities.get<&{FungibleToken.Receiver}>(Profile.publicReceiverPath)
 				
 				// Only add receiver if the Profile capability exists
 				if receiver.check(){ 
-					royalties.append(MetadataViews.Royalty(receiver: receiver, cut: 0.05, description: "xGMove treasury"))
+					royalties.append(MetadataViews.Royalty(receiver: receiver!, cut: 0.05, description: "xGMove treasury"))
 				}
 			} else if template.brandId == 2{ 
 				// xGFootball
-				let receiver = getAccount(0xa6fa47e9ad815dcf).capabilities.get<&{FungibleToken.Receiver}>(Profile.publicReceiverPath)!
+				let receiver = getAccount(0xa6fa47e9ad815dcf).capabilities.get<&{FungibleToken.Receiver}>(Profile.publicReceiverPath)
 				
 				// Only add receiver if the Profile capability exists
 				if receiver.check(){ 
-					royalties.append(MetadataViews.Royalty(receiver: receiver, cut: 0.05, description: "xGFootball treasury"))
+					royalties.append(MetadataViews.Royalty(receiver: receiver!, cut: 0.05, description: "xGFootball treasury"))
 				}
 			}
 			return MetadataViews.Royalties(royalties)
@@ -652,7 +652,7 @@ contract XGStudio: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: template does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -701,6 +701,16 @@ contract XGStudio: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let xgNFT = nft as! &XGStudio.NFT
 			return xgNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -873,7 +883,7 @@ contract XGStudio: NonFungibleToken{
 					"Template Id must be valid"
 			}
 			let receiptAccount = getAccount(account)
-			let recipientCollection = (receiptAccount.capabilities.get<&{XGStudio.XGStudioCollectionPublic}>(XGStudio.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let recipientCollection = receiptAccount.capabilities.get<&{XGStudio.XGStudioCollectionPublic}>(XGStudio.CollectionPublicPath).borrow<&{XGStudio.XGStudioCollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			var newNFT: @NFT <- create NFT(templateID: templateId, mintNumber: (XGStudio.allTemplates[templateId]!).incrementIssuedSupply(), immutableData: immutableData)
 			recipientCollection.deposit(token: <-newNFT)
 		}

@@ -94,7 +94,7 @@ contract YahooCollectible: NonFungibleToken{
 	// A Yahoo Collectible NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -129,7 +129,7 @@ contract YahooCollectible: NonFungibleToken{
 		access(all)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			var royalties: [MetadataViews.Royalty] = []
-			let receiver = getAccount(0xfcf3a236f4cd7dbc).capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)!
+			let receiver = getAccount(0xfcf3a236f4cd7dbc).capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)
 			royalties.append(MetadataViews.Royalty(receiver: receiver, cut: 0.1, description: "Royalty receiver for Yahoo"))
 			return MetadataViews.Royalties(royalties)
 		}
@@ -249,7 +249,7 @@ contract YahooCollectible: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -312,6 +312,16 @@ contract YahooCollectible: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let exampleNFT = nft as! &YahooCollectible.NFT
 			return exampleNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -415,7 +425,7 @@ contract YahooCollectible: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &YahooCollectible.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&YahooCollectible.Collection>(YahooCollectible.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&YahooCollectible.Collection>(YahooCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust YahooCollectible.Collection.borowYahooCollectible to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowYahooCollectible(id: itemID)

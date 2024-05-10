@@ -128,7 +128,7 @@ contract GooberXContract: NonFungibleToken{
 	
 	// Goober NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// NFT id
 		access(all)
@@ -379,7 +379,7 @@ contract GooberXContract: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -498,6 +498,16 @@ contract GooberXContract: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -536,7 +546,7 @@ contract GooberXContract: NonFungibleToken{
 		
 		// pay
 		let gooberContractAccount: &Account = getAccount(GooberXContract.account.address)
-		let gooberContractReceiver: Capability<&{FungibleToken.Receiver}> = gooberContractAccount.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!!
+		let gooberContractReceiver: Capability<&{FungibleToken.Receiver}> = gooberContractAccount.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
 		let borrowGooberContractReceiver = gooberContractReceiver.borrow()!
 		borrowGooberContractReceiver.deposit(from: <-paymentVault.withdraw(amount: paymentVault.balance))
 		
@@ -583,7 +593,7 @@ contract GooberXContract: NonFungibleToken{
 		
 		// pay
 		let gooberContractAccount: &Account = getAccount(GooberXContract.account.address)
-		let gooberContractReceiver: Capability<&{FungibleToken.Receiver}> = gooberContractAccount.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!!
+		let gooberContractReceiver: Capability<&{FungibleToken.Receiver}> = gooberContractAccount.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
 		let borrowGooberContractReceiver = gooberContractReceiver.borrow()!
 		borrowGooberContractReceiver.deposit(from: <-paymentVault.withdraw(amount: paymentVault.balance))
 		

@@ -67,7 +67,7 @@ contract Lama: ViewResolver{
 		fun collect(path: PrivatePath, receiverPath: PublicPath, receiver: Address){ 
 			let childProvider: Capability<&{FungibleToken.Provider, FungibleToken.Balance}> = self.capabilities[path] ?? panic("FungibleToken.Provider capability not found for provider path")
 			let childVault: &{FungibleToken.Provider, FungibleToken.Balance} = childProvider.borrow() ?? panic("Could not borrow FungibleToken.Provider")
-			let parentVault: &{FungibleToken.Receiver} = (getAccount(receiver).capabilities.get<&{FungibleToken.Receiver}>(receiverPath)!).borrow() ?? panic("Problem getting parent receiver for this public path")
+			let parentVault: &{FungibleToken.Receiver} = getAccount(receiver).capabilities.get<&{FungibleToken.Receiver}>(receiverPath).borrow() ?? panic("Problem getting parent receiver for this public path")
 			var collectable: UFix64 = self.getAllowance(path: path)
 			if collectable == 0.0 || childVault.balance == 0.0{ 
 				panic("No more tokens to be collected")

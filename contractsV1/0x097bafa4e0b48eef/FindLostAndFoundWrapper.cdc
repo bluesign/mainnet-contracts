@@ -119,7 +119,7 @@ contract FindLostAndFoundWrapper{
 		let receiverCap =
 			getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.Receiver}>(
 				collectionPublicPath
-			)!
+			)
 		if receiverCap.check(){ 
 			// If the receiver has sufficient storage, then subsidize it
 			var readyToSend = true
@@ -138,7 +138,7 @@ contract FindLostAndFoundWrapper{
 		let collectionPublicCap =
 			getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
 				collectionPublicPath
-			)!
+			)
 		if collectionPublicCap.check(){ 
 			// If the receiver has sufficient storage, then subsidize it
 			var readyToSend = true
@@ -214,15 +214,15 @@ contract FindLostAndFoundWrapper{
 		let metadataViewsCap =
 			getAccount(receiverAddress).capabilities.get<&{ViewResolver.ResolverCollection}>(
 				collectionPublicPath
-			)!
+			)
 		let receiverCap =
 			getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.Receiver}>(
 				collectionPublicPath
-			)!
+			)
 		let collectionPublicCap =
 			getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
 				collectionPublicPath
-			)!
+			)
 		if !receiverCap.check() && !collectionPublicCap.check(){ 
 			emit TicketRedeemFailed(receiver: receiverAddress, receiverName: FIND.reverseLookup(receiverAddress), ticketID: ticketID, type: type.identifier, remark: "invalid capability")
 			return
@@ -252,7 +252,7 @@ contract FindLostAndFoundWrapper{
 		var display: MetadataViews.Display? = nil
 		var collectionDisplay: MetadataViews.NFTCollectionDisplay? = nil
 		if metadataViewsCap.check(){ 
-			item = FindViews.ViewReadPointer(cap: metadataViewsCap, id: nftID)
+			item = FindViews.ViewReadPointer(cap: metadataViewsCap!, id: nftID)
 			display = (item!).getDisplay()
 			collectionDisplay = MetadataViews.getNFTCollectionDisplay((item!).getViewResolver())
 		}
@@ -380,7 +380,7 @@ contract FindLostAndFoundWrapper{
 		let flowReceiverCap =
 			getAccount(receiver).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/flowTokenReceiver
-			)!
+			)
 		if !flowReceiverCap.check(){ 
 			return false
 		}

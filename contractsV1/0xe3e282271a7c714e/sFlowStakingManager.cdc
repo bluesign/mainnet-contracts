@@ -49,7 +49,9 @@ contract sFlowStakingManager{
 	access(all)
 	fun getCurrentPoolAmount(): UFix64{ 
 		let vaultRef =
-			(self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow()
+			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<
+				&FlowToken.Vault
+			>()
 			?? panic("Could not borrow Balance reference to the Vault")
 		return vaultRef.balance
 	}
@@ -282,7 +284,7 @@ contract sFlowStakingManager{
 				
 				// Deposit the withdrawn tokens in the provider's receiver
 				let sentVault: @{FungibleToken.Vault} <- providerRef.withdraw(amount: requiredFlow)
-				let receiverRef = (accountStaker.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+				let receiverRef = accountStaker.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 				receiverRef.deposit(from: <-sentVault)
 				let managersFlowTokenVault = sFlowStakingManager.account.storage.borrow<&sFlowToken.Vault>(from: /storage/sFlowTokenVault) ?? panic("Could not borrow provider reference to the provider's Vault")
 				

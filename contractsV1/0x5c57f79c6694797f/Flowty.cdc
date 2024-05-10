@@ -566,7 +566,7 @@ contract Flowty{
 			let fundingFeeAmount = self.details.amount * self.details.interestRate * Flowty.FundingFee
 			let fundingFee <- payment.withdraw(amount: fundingFeeAmount)
 			let feeTokenPath = Flowty.TokenPaths[self.details.paymentVaultType.identifier]!
-			let flowtyFeeReceiver = (Flowty.account.capabilities.get<&{FungibleToken.Receiver}>(feeTokenPath)!).borrow()!
+			let flowtyFeeReceiver = Flowty.account.capabilities.get<&{FungibleToken.Receiver}>(feeTokenPath).borrow()!
 			flowtyFeeReceiver.deposit(from: <-fundingFee)
 			
 			// Royalty
@@ -1359,10 +1359,8 @@ contract Flowty{
 	access(all)
 	fun borrowMarketplacePublic(): &Flowty.FlowtyMarketplace{ 
 		let mp =
-			(
-				self.account.capabilities.get<&Flowty.FlowtyMarketplace>(
-					Flowty.FlowtyMarketplacePublicPath
-				)!
+			self.account.capabilities.get<&Flowty.FlowtyMarketplace>(
+				Flowty.FlowtyMarketplacePublicPath
 			).borrow()
 			?? panic("marketplac does not exist")
 		return mp

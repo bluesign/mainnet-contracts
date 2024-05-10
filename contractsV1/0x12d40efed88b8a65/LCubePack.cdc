@@ -83,7 +83,7 @@ contract LCubePack: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -199,7 +199,7 @@ contract LCubePack: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let nft = (&self.ownedNFTs[withdrawID] as &{NonFungibleToken.NFT}?)!
 			let packNFT = nft as! &LCubePack.NFT
@@ -223,17 +223,17 @@ contract LCubePack: NonFungibleToken{
 		access(all)
 		fun openPack(id: UInt64, receiverAccount: AuthAccount){ 
 			let recipient = getAccount(receiverAccount.address)
-			let recipientCap = recipient.capabilities.get<&{LCubeComponent.LCubeComponentCollectionPublic}>(LCubeComponent.CollectionPublicPath)!
+			let recipientCap = recipient.capabilities.get<&{LCubeComponent.LCubeComponentCollectionPublic}>(LCubeComponent.CollectionPublicPath)
 			let _auth = recipientCap.borrow()!
 			let pack <- self.withdraw(withdrawID: id) as! @LCubePack.NFT
 			let minter = LCubePack.getComponentMinter().borrow() ?? panic("Could not borrow receiver capability (maybe receiver not configured?)")
 			let collectionRef = receiverAccount.borrow<&LCubeComponent.Collection>(from: LCubeComponent.CollectionStoragePath) ?? panic("Could not borrow a reference to the owner's collection")
-			let depositRef = (recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(LCubeComponent.CollectionPublicPath)!).borrow()!
-			let beneficiaryCapability = recipient.capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
+			let depositRef = recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(LCubeComponent.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
+			let beneficiaryCapability = recipient.capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
 			if !beneficiaryCapability.check(){ 
 				panic("Beneficiary capability is not valid!")
 			}
-			var royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: beneficiaryCapability, cut: 0.05, description: "LimitlessCubePack Royalty")]
+			var royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: beneficiaryCapability!, cut: 0.05, description: "LimitlessCubePack Royalty")]
 			let componentMetadata = pack.getMetadata()
 			componentMetadata.insert(key: "gameID", pack.gameID.toString())
 			componentMetadata.insert(key: "creatorAddress", receiverAccount.address.toString())
@@ -287,6 +287,16 @@ contract LCubePack: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -300,7 +310,7 @@ contract LCubePack: NonFungibleToken{
 	access(all)
 	fun getPacks(address: Address): [UInt64]?{ 
 		let account = getAccount(address)
-		if let packCollection = (account.capabilities.get<&{LCubePack.LCubePackCollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let packCollection = account.capabilities.get<&{LCubePack.LCubePackCollectionPublic}>(self.CollectionPublicPath).borrow<&{LCubePack.LCubePackCollectionPublic}>(){ 
 			return packCollection.getIDs()
 		}
 		return nil

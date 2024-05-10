@@ -242,7 +242,7 @@ contract PopsyclMarketplace{
 				self.purchase(id: tokens[count], recipient: recipient, payment: <-tokenCut)
 				count = count + 1
 			}
-			let PopsyclvaultRef = (getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to PopsyclMarketplace vault")
+			let PopsyclvaultRef = getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to PopsyclMarketplace vault")
 			PopsyclvaultRef.deposit(from: <-payment)
 		}
 		
@@ -259,9 +259,9 @@ contract PopsyclMarketplace{
 			let owner = self.influencer[id]!!
 			
 			// Popvalut reference
-			let PopsyclvaultRef = (getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to PopsyclMarketplace vault")
+			let PopsyclvaultRef = getAccount(PopsyclMarketplace.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to PopsyclMarketplace vault")
 			// influencer vault reference
-			let influencerVaultRef = (getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to owner vault")
+			let influencerVaultRef = getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to owner vault")
 			let marketShare = self.flowshare(price: self.prices[id]!, commission: PopsyclMarketplace.marketFee)
 			let royalityShare = self.flowshare(price: self.prices[id]!, commission: self.roylty[id]!)
 			let marketCut <- payment.withdraw(amount: marketShare)
@@ -336,7 +336,7 @@ contract PopsyclMarketplace{
 			}
 			var count = 0
 			let owner = self.seller[tokens[0]]!!
-			let receiver = (getAccount(owner).capabilities.get<&{Popsycl.PopsyclCollectionPublic}>(Popsycl.PopsyclPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let receiver = getAccount(owner).capabilities.get<&{Popsycl.PopsyclCollectionPublic}>(Popsycl.PopsyclPublicPath).borrow<&{Popsycl.PopsyclCollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			while count < tokens.length{ 
 				// Deposit the NFT back into the seller collection
 				receiver.deposit(token: <-self.withdraw(id: tokens[count]))

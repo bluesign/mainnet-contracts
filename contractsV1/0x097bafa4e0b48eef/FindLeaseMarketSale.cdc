@@ -415,7 +415,7 @@ contract FindLeaseMarketSale{
 				"Invalid tenant"
 		}
 		if let tenant = (FindMarket.getTenantCapability(marketplace)!).borrow(){ 
-			return getAccount(user).capabilities.get<&FindLeaseMarketSale.SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))!
+			return getAccount(user).capabilities.get<&FindLeaseMarketSale.SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))
 		}
 		return nil
 	}

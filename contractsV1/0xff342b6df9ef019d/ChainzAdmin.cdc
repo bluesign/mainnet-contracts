@@ -61,11 +61,9 @@ contract ChainzAdmin{
 			// Mint the user a Chainz Ket
 			let recipient = (packCollectionRef.owner!).address
 			let chainzKeyCollection =
-				(
-					getAccount(recipient).capabilities.get<&ChainzKey.Collection>(
-						ChainzKey.CollectionPublicPath
-					)!
-				).borrow()
+				getAccount(recipient).capabilities.get<&ChainzKey.Collection>(
+					ChainzKey.CollectionPublicPath
+				).borrow<&ChainzKey.Collection>()
 				?? panic("This user does not have a ChainzKey Collection set up.")
 			var i: Int = 0
 			while i < keyTiers.length{ 
@@ -94,11 +92,9 @@ contract ChainzAdmin{
 		){ 
 			let recipient = (cardCollectionRef.owner!).address
 			let chainzNFTCollection =
-				(
-					getAccount(recipient).capabilities.get<&ChainzNFT.Collection>(
-						ChainzNFT.CollectionPublicPath
-					)!
-				).borrow()
+				getAccount(recipient).capabilities.get<&ChainzNFT.Collection>(
+					ChainzNFT.CollectionPublicPath
+				).borrow<&ChainzNFT.Collection>()
 				?? panic("This user does not have a ChainzNFT Collection set up.")
 			var i: Int = 0
 			while i < names.length{ 

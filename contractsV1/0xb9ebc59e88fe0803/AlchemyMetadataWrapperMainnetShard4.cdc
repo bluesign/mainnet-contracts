@@ -418,11 +418,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "tunegonft.com"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{TicalUniverse.TicalUniverseCollectionPublic}>(
-					TicalUniverse.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{TicalUniverse.TicalUniverseCollectionPublic}>(
+				TicalUniverse.CollectionPublicPath
+			).borrow<&{TicalUniverse.TicalUniverseCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -472,15 +470,13 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://nowwhere.io/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					NFTContract.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				NFTContract.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
-		let nftData = (col!).borrowNFT(id)
+		let nftData = (col!).borrowNFT(id: id)
 		var nftMetaData:{ String: String} ={} 
 		let nft = NFTContract.getNFTDataById(nftId: id)!
 		if nft == nil{ 
@@ -533,8 +529,8 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://swaychain.com/"
 			)
 		let col =
-			(owner.capabilities.get<&{QRLNFT.QRLNFTCollectionPublic}>(QRLNFT.CollectionPublicPath)!)
-				.borrow()
+			owner.capabilities.get<&{QRLNFT.QRLNFTCollectionPublic}>(QRLNFT.CollectionPublicPath)
+				.borrow<&{QRLNFT.QRLNFTCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -573,11 +569,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://nft.maxar.com/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{MaxarNFT.MaxarNFTCollectionPublic}>(
-					MaxarNFT.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{MaxarNFT.MaxarNFTCollectionPublic}>(
+				MaxarNFT.CollectionPublicPath
+			).borrow<&{MaxarNFT.MaxarNFTCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -616,11 +610,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: ""
 			)
 		let col =
-			(
-				owner.capabilities.get<&{TheFabricantS2ItemNFT.ItemCollectionPublic}>(
-					TheFabricantS2ItemNFT.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{TheFabricantS2ItemNFT.ItemCollectionPublic}>(
+				TheFabricantS2ItemNFT.CollectionPublicPath
+			).borrow<&{TheFabricantS2ItemNFT.ItemCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -666,8 +658,8 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://hoahauhoanvuvietnam.avatarart.io"
 			)
 		let col =
-			(owner.capabilities.get<&{VnMiss.VnMissCollectionPublic}>(VnMiss.CollectionPublicPath)!)
-				.borrow()
+			owner.capabilities.get<&{VnMiss.VnMissCollectionPublic}>(VnMiss.CollectionPublicPath)
+				.borrow<&{VnMiss.VnMissCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -722,11 +714,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://avatarart.io"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{AADigital.AADigitalCollectionPublic}>(
-					AADigital.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{AADigital.AADigitalCollectionPublic}>(
+				AADigital.CollectionPublicPath
+			).borrow<&{AADigital.AADigitalCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -773,11 +763,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://dooverse.io/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{DooverseItems.DooverseItemsCollectionPublic}>(
-					DooverseItems.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{DooverseItems.DooverseItemsCollectionPublic}>(
+				DooverseItems.CollectionPublicPath
+			).borrow<&{DooverseItems.DooverseItemsCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -828,11 +816,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: ""
 			)
 		let col =
-			(
-				owner.capabilities.get<&{TrartContractNFT.ICardCollectionPublic}>(
-					TrartContractNFT.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{TrartContractNFT.ICardCollectionPublic}>(
+				TrartContractNFT.CollectionPublicPath
+			).borrow<&{TrartContractNFT.ICardCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -896,11 +882,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://partymansion.io"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{PartyMansionDrinksContract.DrinkCollectionPublic}>(
-					PartyMansionDrinksContract.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{PartyMansionDrinksContract.DrinkCollectionPublic}>(
+				PartyMansionDrinksContract.CollectionPublicPath
+			).borrow<&{PartyMansionDrinksContract.DrinkCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -950,11 +934,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://www.evolution-collect.com/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{Evolution.EvolutionCollectionPublic}>(
-					/public/f4264ac8f3256818_Evolution_Collection
-				)!
-			).borrow()
+			owner.capabilities.get<&{Evolution.EvolutionCollectionPublic}>(
+				/public/f4264ac8f3256818_Evolution_Collection
+			).borrow<&{Evolution.EvolutionCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -1004,7 +986,7 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://www.jambb.com/"
 			)
 		let col =
-			(owner.capabilities.get<&{Moments.CollectionPublic}>(Moments.CollectionPublicPath)!)
+			owner.capabilities.get<&{Moments.CollectionPublic}>(Moments.CollectionPublicPath)
 				.borrow<&{Moments.CollectionPublic}>()
 		if col == nil{ 
 			return nil
@@ -1072,11 +1054,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://motogp-ignition.com/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{MotoGPCard.ICardCollectionPublic}>(
-					/public/motogpCardCollection
-				)!
-			).borrow()
+			owner.capabilities.get<&{MotoGPCard.ICardCollectionPublic}>(
+				/public/motogpCardCollection
+			).borrow<&{MotoGPCard.ICardCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -1121,11 +1101,8 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://www.ufcstrike.com"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{UFC_NFT.UFC_NFTCollectionPublic}>(
-					UFC_NFT.CollectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{UFC_NFT.UFC_NFTCollectionPublic}>(UFC_NFT.CollectionPublicPath)
+				.borrow<&{UFC_NFT.UFC_NFTCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -1164,11 +1141,9 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://app.rcrdshp.com/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{RCRDSHPNFT.RCRDSHPNFTCollectionPublic}>(
-					RCRDSHPNFT.collectionPublicPath
-				)!
-			).borrow()
+			owner.capabilities.get<&{RCRDSHPNFT.RCRDSHPNFTCollectionPublic}>(
+				RCRDSHPNFT.collectionPublicPath
+			).borrow<&{RCRDSHPNFT.RCRDSHPNFTCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -1205,10 +1180,8 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://seussibles.com/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{ViewResolver.ResolverCollection}>(
-					Seussibles.PublicCollectionPath
-				)!
+			owner.capabilities.get<&{ViewResolver.ResolverCollection}>(
+				Seussibles.PublicCollectionPath
 			).borrow()
 		if col == nil{ 
 			return nil
@@ -1246,10 +1219,8 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://metapandaclub.com/"
 			)
 		let col =
-			(
-				owner.capabilities.get<&{ViewResolver.ResolverCollection}>(
-					MetaPanda.CollectionPublicPath
-				)!
+			owner.capabilities.get<&{ViewResolver.ResolverCollection}>(
+				MetaPanda.CollectionPublicPath
 			).borrow()
 		if col == nil{ 
 			return nil
@@ -1287,8 +1258,8 @@ contract AlchemyMetadataWrapperMainnetShard4{
 				external_domain: "https://flunks.io/"
 			)
 		let col =
-			(owner.capabilities.get<&{Flunks.FlunksCollectionPublic}>(Flunks.CollectionPublicPath)!)
-				.borrow()
+			owner.capabilities.get<&{Flunks.FlunksCollectionPublic}>(Flunks.CollectionPublicPath)
+				.borrow<&{Flunks.FlunksCollectionPublic}>()
 		if col == nil{ 
 			return nil
 		}
@@ -1318,141 +1289,109 @@ contract AlchemyMetadataWrapperMainnetShard4{
 		let owner = getAccount(ownerAddress)
 		let ids:{ String: [UInt64]} ={} 
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					NFTContract.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				NFTContract.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["NFTContract"] = col.getIDs()
 		}
 		if let col =
-			(owner.capabilities.get<&{QRLNFT.QRLNFTCollectionPublic}>(QRLNFT.CollectionPublicPath)!)
-				.borrow(){ 
+			owner.capabilities.get<&{QRLNFT.QRLNFTCollectionPublic}>(QRLNFT.CollectionPublicPath)
+				.borrow<&{QRLNFT.QRLNFTCollectionPublic}>(){ 
 			ids["QRL"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{MaxarNFT.MaxarNFTCollectionPublic}>(
-					MaxarNFT.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{MaxarNFT.MaxarNFTCollectionPublic}>(
+				MaxarNFT.CollectionPublicPath
+			).borrow<&{MaxarNFT.MaxarNFTCollectionPublic}>(){ 
 			ids["Maxar"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{TheFabricantS2ItemNFT.ItemCollectionPublic}>(
-					TheFabricantS2ItemNFT.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{TheFabricantS2ItemNFT.ItemCollectionPublic}>(
+				TheFabricantS2ItemNFT.CollectionPublicPath
+			).borrow<&{TheFabricantS2ItemNFT.ItemCollectionPublic}>(){ 
 			ids["TheFabricantS2ItemNFT"] = col.getIDs()
 		}
 		if let col =
-			(owner.capabilities.get<&{VnMiss.VnMissCollectionPublic}>(VnMiss.CollectionPublicPath)!)
-				.borrow(){ 
+			owner.capabilities.get<&{VnMiss.VnMissCollectionPublic}>(VnMiss.CollectionPublicPath)
+				.borrow<&{VnMiss.VnMissCollectionPublic}>(){ 
 			ids["VnMiss"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{AADigital.AADigitalCollectionPublic}>(
-					AADigital.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{AADigital.AADigitalCollectionPublic}>(
+				AADigital.CollectionPublicPath
+			).borrow<&{AADigital.AADigitalCollectionPublic}>(){ 
 			ids["AvatarArt"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					DooverseItems.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				DooverseItems.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["Dooverse"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{MotoGPCard.ICardCollectionPublic}>(
-					/public/motogpCardCollection
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{MotoGPCard.ICardCollectionPublic}>(
+				/public/motogpCardCollection
+			).borrow<&{MotoGPCard.ICardCollectionPublic}>(){ 
 			ids["MotoGPCard"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					PartyMansionDrinksContract.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				PartyMansionDrinksContract.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["PartyMansionDrinksContract"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{TrartContractNFT.ICardCollectionPublic}>(
-					TrartContractNFT.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{TrartContractNFT.ICardCollectionPublic}>(
+				TrartContractNFT.CollectionPublicPath
+			).borrow<&{TrartContractNFT.ICardCollectionPublic}>(){ 
 			ids["TrartContractNFT"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{TicalUniverse.TicalUniverseCollectionPublic}>(
-					TicalUniverse.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{TicalUniverse.TicalUniverseCollectionPublic}>(
+				TicalUniverse.CollectionPublicPath
+			).borrow<&{TicalUniverse.TicalUniverseCollectionPublic}>(){ 
 			ids["TicalUniverse"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					/public/f4264ac8f3256818_Evolution_Collection
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				/public/f4264ac8f3256818_Evolution_Collection
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["Evolution"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Moments.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Moments.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["Moments"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					UFC_NFT.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				UFC_NFT.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["UFC_NFT"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					RCRDSHPNFT.collectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				RCRDSHPNFT.collectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["RCRDSHPNFT"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Seussibles.PublicCollectionPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Seussibles.PublicCollectionPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["Seussibles"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					MetaPanda.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				MetaPanda.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["MetaPanda"] = col.getIDs()
 		}
 		if let col =
-			(
-				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Flunks.CollectionPublicPath
-				)!
-			).borrow(){ 
+			owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Flunks.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>(){ 
 			ids["Flunks"] = col.getIDs()
 		}
 		return ids

@@ -61,7 +61,7 @@ contract SoundlinksDID: NonFungibleToken{
 	/// A Soundlinks DID as an NFT
 	///
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		
 		/// The unique ID for the Soundlinks DID
 		access(all)
@@ -136,7 +136,7 @@ contract SoundlinksDID: NonFungibleToken{
 		/// that is to be removed from the Collection
 		///
 		/// Returns: @NonFungibleToken.NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			
 			// Remove the Soundlinks DID from the Collection
@@ -274,6 +274,16 @@ contract SoundlinksDID: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

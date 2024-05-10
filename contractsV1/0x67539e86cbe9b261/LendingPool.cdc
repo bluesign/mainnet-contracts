@@ -743,7 +743,7 @@ contract LendingPool{
 			self.seizeInternal(liquidator: liquidator, borrower: borrower, scaledBorrowerLpTokenToSeize: scaledCollateralLpTokenSeizedAmount)
 		} else{ 
 			// Seize external
-			let externalPoolPublicRef = (getAccount(poolCollateralizedToSeize).capabilities.get<&{LendingInterfaces.PoolPublic}>(LendingConfig.PoolPublicPublicPath)!).borrow() ?? panic(LendingError.ErrorEncode(msg: "Cannot borrow reference to external PoolPublic resource", err: LendingError.ErrorCode.CANNOT_ACCESS_POOL_PUBLIC_CAPABILITY))
+			let externalPoolPublicRef = getAccount(poolCollateralizedToSeize).capabilities.get<&{LendingInterfaces.PoolPublic}>(LendingConfig.PoolPublicPublicPath).borrow() ?? panic(LendingError.ErrorEncode(msg: "Cannot borrow reference to external PoolPublic resource", err: LendingError.ErrorCode.CANNOT_ACCESS_POOL_PUBLIC_CAPABILITY))
 			externalPoolPublicRef.seize(seizerPoolCertificate: <-create PoolCertificate(), seizerPool: self.poolAddress, liquidator: liquidator, borrower: borrower, scaledBorrowerCollateralLpTokenToSeize: scaledCollateralLpTokenSeizedAmount)
 		}
 		emit Liquidate(
@@ -1201,7 +1201,7 @@ contract LendingPool{
 			if newInterestRateModelAddress != LendingPool.interestRateModelAddress{ 
 				let oldInterestRateModelAddress = LendingPool.interestRateModelAddress
 				LendingPool.interestRateModelAddress = newInterestRateModelAddress
-				LendingPool.interestRateModelCap = getAccount(newInterestRateModelAddress).capabilities.get<&{LendingInterfaces.InterestRateModelPublic}>(LendingConfig.InterestRateModelPublicPath)!
+				LendingPool.interestRateModelCap = getAccount(newInterestRateModelAddress).capabilities.get<&{LendingInterfaces.InterestRateModelPublic}>(LendingConfig.InterestRateModelPublicPath)
 				emit NewInterestRateModel(oldInterestRateModelAddress, newInterestRateModelAddress)
 			}
 			return
@@ -1244,7 +1244,7 @@ contract LendingPool{
 			if newComptrollerAddress != LendingPool.comptrollerAddress{ 
 				let oldComptrollerAddress = LendingPool.comptrollerAddress
 				LendingPool.comptrollerAddress = newComptrollerAddress
-				LendingPool.comptrollerCap = getAccount(newComptrollerAddress).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(LendingConfig.ComptrollerPublicPath)!
+				LendingPool.comptrollerCap = getAccount(newComptrollerAddress).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(LendingConfig.ComptrollerPublicPath)
 				emit NewComptroller(oldComptrollerAddress, newComptrollerAddress)
 			}
 		}
@@ -1268,7 +1268,7 @@ contract LendingPool{
 			LendingPool.scaledReserveFactor = LendingConfig.UFix64ToScaledUInt256(reserveFactor)
 			LendingPool.scaledPoolSeizeShare = LendingConfig.UFix64ToScaledUInt256(poolSeizeShare)
 			LendingPool.interestRateModelAddress = interestRateModelAddress
-			LendingPool.interestRateModelCap = getAccount(interestRateModelAddress).capabilities.get<&{LendingInterfaces.InterestRateModelPublic}>(LendingConfig.InterestRateModelPublicPath)!
+			LendingPool.interestRateModelCap = getAccount(interestRateModelAddress).capabilities.get<&{LendingInterfaces.InterestRateModelPublic}>(LendingConfig.InterestRateModelPublicPath)
 		}
 		
 		/// Admin function to withdraw pool reserve

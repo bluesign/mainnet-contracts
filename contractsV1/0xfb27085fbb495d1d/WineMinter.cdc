@@ -105,7 +105,7 @@ contract WineMinter{
 		let merchantDUCReceiverRef =
 			getAccount(self.merchantAccounts["DUC"]!).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -117,11 +117,9 @@ contract WineMinter{
 		// Get buyer collection public to receive Wine NFT
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Wine.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Wine.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint Collector NFT
@@ -176,7 +174,7 @@ contract WineMinter{
 		let merchantFUTReceiverRef =
 			getAccount(self.merchantAccounts["FUT"]!).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/flowUtilityTokenReceiver
-			)!
+			)
 		assert(
 			merchantFUTReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant FUT receiver"
@@ -188,11 +186,9 @@ contract WineMinter{
 		// Get buyer collection public to receive Wine NFT
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Wine.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Wine.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint Collector NFT

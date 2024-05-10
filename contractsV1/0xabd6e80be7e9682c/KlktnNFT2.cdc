@@ -261,7 +261,7 @@ contract KlktnNFT2: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	// NFT: The resource that represents the NFTs
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -322,7 +322,7 @@ contract KlktnNFT2: NonFungibleToken{
 		
 		// withdraw: removes an NFT from the collection and moves it to the caller
 		// - parameter: withdrawID: the ID of the owned NFT that is to be removed from the Collection
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -394,6 +394,16 @@ contract KlktnNFT2: NonFungibleToken{
 			let pack <- self.ownedNFTs.remove(key: packID)
 			emit PackOpened(id: packID, typeID: packTemplateInfo.typeID, name: packTemplateInfo.name, address: self.owner?.address)
 			destroy pack
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

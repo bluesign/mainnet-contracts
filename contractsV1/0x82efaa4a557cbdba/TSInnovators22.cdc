@@ -34,7 +34,7 @@ contract TSInnovators22: NonFungibleToken{
 	
 	// ** THIS REPRESENTS A TSINNOVATORS TOKEN **
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		//NFT Standard attribuet the 'uuid' of our token
 		access(all)
 		let id: UInt64
@@ -148,7 +148,7 @@ contract TSInnovators22: NonFungibleToken{
 		
 		//Ideally the POAP token is not transferrable so withdraw and delete will not be 
 		//included in public collection
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This NFT does not exist in your collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -160,6 +160,16 @@ contract TSInnovators22: NonFungibleToken{
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("You do not own this FLOAT in your collection")
 			let nft <- token as! @NFT
 			destroy nft
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

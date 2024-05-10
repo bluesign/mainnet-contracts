@@ -283,7 +283,7 @@ contract PriceOracle: OracleInterface{
 		let certificateRef = self.account.storage.borrow<&OracleCertificate>(from: self._CertificateStoragePath) ?? panic("Lost PriceOracle certificate resource.")
 		var priceList: [UFix64] = []
 		for oracleAddr in self._FeederWhiteList.keys{ 
-			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)!
+			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)
 			// Get valid feeding-price
 			if pricePanelCap.check(){ 
 				let price = (pricePanelCap.borrow()!).fetchPrice(certificate: certificateRef)
@@ -317,7 +317,7 @@ contract PriceOracle: OracleInterface{
 		let certificateRef = self.account.storage.borrow<&OracleCertificate>(from: self._CertificateStoragePath) ?? panic("Lost PriceOracle certificate resource.")
 		var priceList: [UFix64] = []
 		for oracleAddr in PriceOracle._FeederWhiteList.keys{ 
-			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)!
+			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)
 			if pricePanelCap.check(){ 
 				let price = (pricePanelCap.borrow()!).fetchPrice(certificate: certificateRef)
 				if price > 0.0{ 
@@ -339,7 +339,7 @@ contract PriceOracle: OracleInterface{
 		let certificateRef = self.account.storage.borrow<&OracleCertificate>(from: self._CertificateStoragePath) ?? panic("Lost PriceOracle certificate resource.")
 		var priceList: [UFix64] = []
 		for oracleAddr in PriceOracle._FeederWhiteList.keys{ 
-			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)!
+			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)
 			if pricePanelCap.check(){ 
 				let price = (pricePanelCap.borrow()!).getRawPrice(certificate: certificateRef)
 				priceList.append(price)
@@ -370,7 +370,7 @@ contract PriceOracle: OracleInterface{
 		let certificateRef = self.account.storage.borrow<&OracleCertificate>(from: self._CertificateStoragePath) ?? panic("Lost PriceOracle certificate resource.")
 		var latestBlockHeightList: [UInt64] = []
 		for oracleAddr in PriceOracle._FeederWhiteList.keys{ 
-			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)!
+			let pricePanelCap = getAccount(oracleAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)
 			if pricePanelCap.check(){ 
 				let latestPublishBlockHeight = (pricePanelCap.borrow()!).getLatestPublishBlockHeight()
 				latestBlockHeightList.append(latestPublishBlockHeight)
@@ -440,7 +440,7 @@ contract PriceOracle: OracleInterface{
 		access(all)
 		fun addFeederWhiteList(feederAddr: Address){ 
 			// Check if feeder prepared price panel first
-			let PriceFeederCap = getAccount(feederAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)!
+			let PriceFeederCap = getAccount(feederAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)
 			assert(PriceFeederCap.check(), message: "Need to prepare data feeder resource capability first.")
 			PriceOracle._FeederWhiteList[feederAddr] = true
 			emit AddFeederWhiteList(addr: feederAddr)

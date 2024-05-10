@@ -73,7 +73,7 @@ contract LilaiBounty{
 		let fulfillerVaultCap =
 			getAccount(fulfillment.fulfiller).capabilities.get<&{FungibleToken.Vault}>(
 				/public/FungibleTokenReceiver
-			)!
+			)
 		// Deposit the bounty into the fulfiller's vault
 		let fulfillerVaultRef =
 			fulfillerVaultCap.borrow()

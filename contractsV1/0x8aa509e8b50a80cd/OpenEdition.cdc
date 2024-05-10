@@ -221,10 +221,8 @@ contract OpenEdition{
 		fun sendCommissionPayments(buyerTokens: @FUSD.Vault, tokenID: UInt64){ 
 			// Capability to resource with commission information
 			let editionRef =
-				(
-					OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(
-						Edition.CollectionPublicPath
-					)!
+				OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(
+					Edition.CollectionPublicPath
 				).borrow()!
 			
 			// Commission informaton for all copies of on item
@@ -237,7 +235,7 @@ contract OpenEdition{
 				if (editionStatus.royalty[key]!).firstSalePercent > 0.0 && key != (platformVault.owner!).address{ 
 					let commission = self.price * (editionStatus.royalty[key]!).firstSalePercent * 0.01
 					let account = getAccount(key)
-					let vaultCap = account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
+					let vaultCap = account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)
 					
 					// vaultCap was checked during creation of commission info on Edition contract, therefore this is extra check
 					// if vault capability is not avaliable, the rest tokens will sent to platform vault					 
@@ -413,7 +411,7 @@ contract OpenEdition{
 				platformVaultCap.check():
 					"Platform vault should be reachable"
 			}
-			let editionRef = (OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath)!).borrow()!
+			let editionRef = OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath).borrow()!
 			
 			// Check edition info in contract Edition in order to manage commission and all amount of copies of the same item
 			// This error throws inside Edition contract. But I put this check for redundant
@@ -519,7 +517,7 @@ contract OpenEdition{
 		self.CollectionPublicPath = /public/NFTxtinglesOpenEdition
 		self.CollectionStoragePath = /storage/NFTxtinglesOpenEdition
 		let minterCap =
-			self.account.capabilities.get<&Collectible.NFTMinter>(Collectible.MinterPrivatePath)!!
+			self.account.capabilities.get<&Collectible.NFTMinter>(Collectible.MinterPrivatePath)!
 		let openEdition <- OpenEdition.createOpenEditionCollection(minterCap: minterCap)
 		self.account.storage.save(<-openEdition, to: OpenEdition.CollectionStoragePath)
 		var capability_1 =

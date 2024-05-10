@@ -187,12 +187,12 @@ contract MarketPlace{
 			
 			// this is validated during process of the cration NFT
 			let editionNumber = self.getEditionNumber(id: tokenID)!
-			let royaltyRef = (MarketPlace.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath)!).borrow()!
+			let royaltyRef = MarketPlace.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath).borrow()!
 			let royaltyStatus = royaltyRef.getEdition(editionNumber)!
 			for key in royaltyStatus.royalty.keys{ 
 				let commission = price * (royaltyStatus.royalty[key]!).secondSalePercent * 0.01
 				let account = getAccount(key)
-				let vaultCap = account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
+				let vaultCap = account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)
 				if vaultCap.check(){ 
 					let vaultCommissionRecepientRef = vaultCap.borrow()!
 					vaultCommissionRecepientRef.deposit(from: <-buyTokens.withdraw(amount: commission))
@@ -263,16 +263,14 @@ contract MarketPlace{
 		var saleData: [SaleData] = []
 		let account = getAccount(address)
 		let CollectibleCollection =
-			(
-				account.capabilities.get<&{MarketPlace.SaleCollectionPublic}>(
-					MarketPlace.CollectionPublicPath
-				)!
+			account.capabilities.get<&{MarketPlace.SaleCollectionPublic}>(
+				MarketPlace.CollectionPublicPath
 			).borrow()
 			?? panic("Could not borrow sale reference")
 		for id in CollectibleCollection.getIDs(){ 
 			var Collectible = CollectibleCollection.borrowCollectible(id: id)
 			var price = CollectibleCollection.idPrice(tokenID: id)
-			saleData.append(SaleData(metadata: *(Collectible!).metadata, id: id, price: price, editionNumber: (Collectible!).editionNumber))
+			saleData.append(SaleData(metadata: (Collectible!).metadata, id: id, price: price, editionNumber: (Collectible!).editionNumber))
 		}
 		return saleData
 	}

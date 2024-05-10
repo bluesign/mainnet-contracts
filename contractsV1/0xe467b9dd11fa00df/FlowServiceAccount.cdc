@@ -60,7 +60,9 @@ contract FlowServiceAccount{
 	fun defaultTokenBalance(_ acct: &Account): UFix64{ 
 		var balance = 0.0
 		if let balanceRef =
-			(acct.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow(){ 
+			acct.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<
+				&FlowToken.Vault
+			>(){ 
 			balance = balanceRef.balance
 		}
 		return balance

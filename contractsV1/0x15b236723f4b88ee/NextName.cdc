@@ -598,7 +598,7 @@ contract NextName: NonFungibleToken{
 	
 	// The resource that represents the Collectible NFTs
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// Global unique collectibleItem ID
 		access(all)
@@ -629,8 +629,8 @@ contract NextName: NonFungibleToken{
 					}
 					return MetadataViews.Display(name: metadata["title"] ?? "NextName NFT", description: metadata["description"] ?? "Official NextName NFT", thumbnail: MetadataViews.HTTPFile(url: url))
 				case Type<MetadataViews.Royalties>():
-					let receiver = NextName.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					let royalty = MetadataViews.Royalty(receiver: receiver, cut: 0.05, description: "NextName / Niftory Fees")
+					let receiver = NextName.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					let royalty = MetadataViews.Royalty(receiver: receiver!, cut: 0.05, description: "NextName / Niftory Fees")
 					return MetadataViews.Royalties([royalty])
 				case Type<MetadataViews.NFTCollectionData>():
 					return MetadataViews.NFTCollectionData(storagePath: NextName.CollectionStoragePath, publicPath: NextName.CollectionPublicPath, publicCollection: Type<&NextName.Collection>(), publicLinkedType: Type<&NextName.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
@@ -713,7 +713,7 @@ contract NextName: NonFungibleToken{
 		// that is to be removed from the Collection
 		//
 		// returns: @NonFungibleToken.NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			
 			// Remove the nft from the Collection
@@ -833,6 +833,16 @@ contract NextName: NonFungibleToken{
 			let nftRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let fullNft = nftRef as! &NFT
 			return fullNft as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

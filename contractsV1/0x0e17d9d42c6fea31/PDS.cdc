@@ -369,12 +369,12 @@ contract PDS{
 		let pdsCollection =
 			self.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
 				escrowCollectionPublic
-			)!
+			)
 		assert(
 			pdsCollection.check(),
 			message: "Please ensure PDS has created and linked a Collection for recieving escrows"
 		)
-		return pdsCollection
+		return pdsCollection!
 	}
 	
 	access(contract)
@@ -386,8 +386,8 @@ contract PDS{
 		collectionProviderPath: PrivatePath
 	){ 
 		let pdsCollection =
-			(self.account.capabilities.get<&{NonFungibleToken.Provider}>(collectionProviderPath)!)
-				.borrow()
+			self.account.capabilities.get<&{NonFungibleToken.Provider}>(collectionProviderPath)
+				.borrow<&{NonFungibleToken.Provider}>()
 			?? panic("Unable to borrow PDS collection provider capability from private path")
 		var i = 0
 		while i < nftIds.length{ 

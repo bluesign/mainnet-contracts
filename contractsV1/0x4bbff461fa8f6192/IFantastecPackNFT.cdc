@@ -68,7 +68,7 @@ contract interface IFantastecPackNFT{
 	}
 	
 	access(all)
-	resource interface NFT: NonFungibleToken.INFT{ 
+	resource interface NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 	}

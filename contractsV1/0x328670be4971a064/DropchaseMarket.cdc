@@ -336,11 +336,11 @@ contract DropchaseMarket{
 		let beneficiaryCapability =
 			getAccount(self.account.address).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/DropchaseCoinReceiver
-			)!
+			)
 		return <-create SaleCollection(
 			ownerCollection: ownerCollection,
 			ownerCapability: ownerCapability,
-			beneficiaryCapability: beneficiaryCapability,
+			beneficiaryCapability: beneficiaryCapability!,
 			cutPercentage: 0.05
 		)
 	}

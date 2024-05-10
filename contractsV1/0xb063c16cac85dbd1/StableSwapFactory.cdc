@@ -46,10 +46,8 @@ contract StableSwapFactory{
 			return nil
 		}
 		return (
-			(
-				getAccount(pairAddr!).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					SwapConfig.PairPublicPath
-				)!
+			getAccount(pairAddr!).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				SwapConfig.PairPublicPath
 			).borrow()!
 		).getPairInfo()
 	}
@@ -85,7 +83,7 @@ contract StableSwapFactory{
 		var i = 0
 		var res: [AnyStruct] = []
 		while i < pairSlice.length{ 
-			res.append(((getAccount(pairSlice[i]).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow()!).getPairInfo())
+			res.append((getAccount(pairSlice[i]).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!).getPairInfo())
 			i = i + 1
 		}
 		return res

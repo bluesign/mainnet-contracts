@@ -228,7 +228,7 @@ contract DarkCountryMarket{
 					"Cannot borrow sellerPaymentReceiver"
 			}
 			let saleOwner = (sellerItemProvider.borrow()!).owner!
-			let collectionBorrow = (saleOwner.capabilities.get<&{DarkCountry.DarkCountryCollectionPublic}>(DarkCountry.CollectionPublicPath)!!).borrow() ?? panic("Could not borrow DarkCountryCollectionPublic")
+			let collectionBorrow = (saleOwner.capabilities.get<&{DarkCountry.DarkCountryCollectionPublic}>(DarkCountry.CollectionPublicPath)!).borrow() ?? panic("Could not borrow DarkCountryCollectionPublic")
 			
 			// borrow a reference to a specific NFT in the collection
 			let nft = collectionBorrow.borrowDarkCountryNFT(id: itemID) ?? panic("No such itemID in that collection")
@@ -489,7 +489,7 @@ contract DarkCountryMarket{
 		// The default beneficiary capability value can be changed by Admin
 		self.beneficiaryCapability = self.account.capabilities.get_<YOUR_TYPE>(
 				/public/flowTokenReceiver
-			)!
+			)
 		self.preOrders ={} 
 	}
 }

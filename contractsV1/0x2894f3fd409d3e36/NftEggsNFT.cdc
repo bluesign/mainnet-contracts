@@ -128,7 +128,7 @@ contract NftEggsNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -190,7 +190,7 @@ contract NftEggsNFT: NonFungibleToken{
 		}
 		
 		// 提取NFT并转移给调用者
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -246,6 +246,16 @@ contract NftEggsNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -277,9 +287,9 @@ contract NftEggsNFT: NonFungibleToken{
 			var newItem = Item(metadata: metadata, quantity: quantity, royalty: rate, creator: creator)
 			let newId = newItem.itemId
 			NftEggsNFT.itemDatas[newId] = newItem
-			let creatorWallet = getAccount(creator).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-			let platformWallet = NftEggsNFT.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-			let royalty ={ "creator": NftEggsNFT.Royalty(wallet: creatorWallet, cut: rate), "platform": NftEggsNFT.Royalty(wallet: platformWallet, cut: 0.1)}
+			let creatorWallet = getAccount(creator).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+			let platformWallet = NftEggsNFT.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+			let royalty ={ "creator": NftEggsNFT.Royalty(wallet: creatorWallet!, cut: rate), "platform": NftEggsNFT.Royalty(wallet: platformWallet!, cut: 0.1)}
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
 			while i < quantity{ 

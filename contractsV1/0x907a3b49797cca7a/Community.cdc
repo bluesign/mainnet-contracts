@@ -677,7 +677,7 @@ contract Community{
 	access(all)
 	fun borrowCommunity(host: Address, id: UInt64): &CommunityIns?{ 
 		if let builder =
-			(getAccount(host).capabilities.get<&CommunityBuilder>(Community.CommunityPublicPath)!)
+			getAccount(host).capabilities.get<&CommunityBuilder>(Community.CommunityPublicPath)
 				.borrow(){ 
 			return builder.borrowCommunity(id: id)
 		}

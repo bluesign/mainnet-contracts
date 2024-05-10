@@ -45,10 +45,8 @@ contract ChainIDEShieldNFTMintContract{
 				"payment vault does not contain requested price"
 		}
 		let receiver =
-			(
-				getAccount(self.sale.receiver).capabilities.get<&{FungibleToken.Receiver}>(
-					/public/flowTokenReceiver
-				)!
+			getAccount(self.sale.receiver).capabilities.get<&{FungibleToken.Receiver}>(
+				/public/flowTokenReceiver
 			).borrow()
 			?? panic("Could not get receiver reference to Flow Token")
 		receiver.deposit(from: <-payment)

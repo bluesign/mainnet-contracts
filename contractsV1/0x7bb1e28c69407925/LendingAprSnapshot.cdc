@@ -217,7 +217,7 @@ contract LendingAprSnapshot{
 		let poolPublicCap =
 			getAccount(poolAddr).capabilities.get<&{LendingInterfaces.PoolPublic}>(
 				LendingConfig.PoolPublicPublicPath
-			)!
+			)
 		assert(
 			poolPublicCap.check() == true,
 			message: LendingError.ErrorEncode(
@@ -225,7 +225,7 @@ contract LendingAprSnapshot{
 				err: LendingError.ErrorCode.CANNOT_ACCESS_POOL_PUBLIC_CAPABILITY
 			)
 		)
-		self._markets[poolAddr] = AprSnapshot(poolPublicCap: poolPublicCap)
+		self._markets[poolAddr] = AprSnapshot(poolPublicCap: poolPublicCap!)
 		emit MarketDataTracked(
 			market: poolAddr,
 			marketType: (poolPublicCap.borrow()!).getUnderlyingTypeString(),

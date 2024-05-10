@@ -392,7 +392,7 @@ contract GaiaPackNFT: NonFungibleToken{
 	
 	// NFT "packs" can be revealed and then redeemed in exchange for associated nfts.
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver, PackNFTPublic, PackNFTOwner{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver, PackNFTPublic, PackNFTOwner{ 
 		access(all)
 		let id: UInt64
 		
@@ -565,7 +565,7 @@ contract GaiaPackNFT: NonFungibleToken{
 			return gaiaPackNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Missing NFT with ID ".concat(withdrawID.toString()))
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -611,6 +611,16 @@ contract GaiaPackNFT: NonFungibleToken{
 			}
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &GaiaPackNFT.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -203,7 +203,7 @@ contract SocialToken: FungibleToken{
 			let tempAmmount = amount * (feeStructure!).percentage
 			let tempraryVault <- fusdPayment.withdraw(amount: tempAmmount)
 			let account = getAccount(address)
-			let depositSigner = (account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!).borrow() ?? panic("could not borrow reference to the receiver")
+			let depositSigner = account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver).borrow() ?? panic("could not borrow reference to the receiver")
 			depositSigner.deposit(from: <-tempraryVault)
 		}
 		return <-fusdPayment
@@ -351,8 +351,8 @@ contract SocialToken: FungibleToken{
 	
 	init(){ 
 		self.totalSupply = 0.0
-		var adminPrivateCap = self.account.capabilities.get<&{Controller.SocialTokenResourcePublic}>(/private/SocialTokenResourcePrivatePath)!
-		self.adminRef = adminPrivateCap
+		var adminPrivateCap = self.account.capabilities.get<&{Controller.SocialTokenResourcePublic}>(/private/SocialTokenResourcePrivatePath)
+		self.adminRef = adminPrivateCap!
 		let vault <- FUSD.createEmptyVault(vaultType: Type<@FUSD.Vault>())
 		self.account.storage.save(<-vault, to: /storage/fusdVault)
 		var capability_1 = self.account.capabilities.storage.issue<&FUSD.Vault>(/storage/fusdVault)
@@ -361,7 +361,7 @@ contract SocialToken: FungibleToken{
 		self.account.capabilities.publish(capability_2, at: /public/fusdBalance)
 		var capability_3 = self.account.capabilities.storage.issue<&FUSD.Vault>(/storage/fusdVault)
 		self.account.capabilities.publish(capability_3, at: /private/fusdProvider)
-		self.collateralPool = FUSDPool(_receiver: self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!, _provider: self.account.capabilities.get<&FUSD.Vault>(/private/fusdProvider)!, _balance: self.account.capabilities.get<&FUSD.Vault>(/public/fusdBalance)!)
+		self.collateralPool = FUSDPool(_receiver: self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver), _provider: self.account.capabilities.get<&FUSD.Vault>(/private/fusdProvider), _balance: self.account.capabilities.get<&FUSD.Vault>(/public/fusdBalance))
 		emit TokensInitialized(initialSupply: self.totalSupply)
 	}
 }

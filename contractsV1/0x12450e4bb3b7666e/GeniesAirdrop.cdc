@@ -122,7 +122,7 @@ contract GeniesAirdrop{
 					"Invalid owner to claim"
 			}
 			let receiverAccount = getAccount(address)
-			let claimerCollection = (receiverAccount.capabilities.get<&Genies.Collection>(Genies.CollectionPublicPath)!).borrow()!
+			let claimerCollection = receiverAccount.capabilities.get<&Genies.Collection>(Genies.CollectionPublicPath).borrow<&Genies.Collection>()!
 			let nftProviderCap = self.giftNFTs.remove(key: nftId) ?? panic("missing NFT id")
 			let token <- (nftProviderCap.borrow()!).withdraw(withdrawID: nftId)
 			

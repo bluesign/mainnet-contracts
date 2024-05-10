@@ -33,7 +33,7 @@ contract interface NFTPlus{
 	}
 	
 	access(all)
-	resource interface NFT: NonFungibleToken.INFT, WithRoyalties{ 
+	resource interface NFT: NonFungibleToken.NFT, WithRoyalties{ 
 		access(all)
 		let id: UInt64
 		

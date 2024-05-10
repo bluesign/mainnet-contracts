@@ -194,7 +194,9 @@ contract SafeBox{
 		assert(!self.records.containsKey(depoId), message: "depoId already exists")
 		self.records[depoId] = true
 		let recev =
-			(self.account.capabilities.get<&{FungibleToken.Receiver}>(tokenCfg.vaultPub)!).borrow()
+			self.account.capabilities.get<&{FungibleToken.Receiver}>(tokenCfg.vaultPub).borrow<
+				&{FungibleToken.Receiver}
+			>()
 			?? panic("Could not borrow a reference to the receiver")
 		recev.deposit(from: <-from.withdraw(amount: info.amt))
 		emit Deposited(
@@ -232,9 +234,7 @@ contract SafeBox{
 		assert(!self.records.containsKey(wdId), message: "wdId already exists")
 		self.records[wdId] = true
 		let receiverCap =
-			getAccount(wdInfo.receiver).capabilities.get<&{FungibleToken.Receiver}>(
-				tokCfg.vaultPub
-			)!
+			getAccount(wdInfo.receiver).capabilities.get<&{FungibleToken.Receiver}>(tokCfg.vaultPub)
 		let vaultRef =
 			self.account.storage.borrow<&{FungibleToken.Provider}>(from: tokCfg.vaultSto)
 			?? panic("Could not borrow reference to the owner's Vault!")
@@ -242,7 +242,7 @@ contract SafeBox{
 		let vault <- vaultRef.withdraw(amount: wdInfo.amount)
 		if wdInfo.amount > tokCfg.delayThreshold{ 
 			// add to delayed xfer
-			DelayedTransfer.addDelayXfer(id: wdId, receiverCap: receiverCap, from: <-vault)
+			DelayedTransfer.addDelayXfer(id: wdId, receiverCap: receiverCap!, from: <-vault)
 		} else{ 
 			let receiverRef = receiverCap.borrow() ?? panic("Could not borrow a reference to the receiver")
 			// deposit into receiver

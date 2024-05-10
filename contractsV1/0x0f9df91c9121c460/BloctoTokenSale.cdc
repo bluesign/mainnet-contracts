@@ -126,11 +126,9 @@ contract BloctoTokenSale{
 				"Purchase amount exceeds personal cap"
 		}
 		let collectionRef =
-			(
-				getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					BloctoPass.CollectionPublicPath
-				)!
-			).borrow()
+			getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				BloctoPass.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not borrow blocto pass collection public reference")
 		
 		// Make sure user does not already have a BloctoPass
@@ -211,11 +209,9 @@ contract BloctoTokenSale{
 					"Already distributed or refunded"
 			}
 			let collectionRef =
-				(
-					getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-						BloctoPass.CollectionPublicPath
-					)!
-				).borrow()
+				getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+					BloctoPass.CollectionPublicPath
+				).borrow<&{NonFungibleToken.CollectionPublic}>()
 				?? panic("Could not borrow blocto pass collection public reference")
 			
 			// Make sure user does not already have a BloctoPass
@@ -281,11 +277,9 @@ contract BloctoTokenSale{
 					"Already distributed or refunded"
 			}
 			let receiverRef =
-				(
-					getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
-						TeleportedTetherToken.TokenPublicReceiverPath
-					)!
-				).borrow()
+				getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
+					TeleportedTetherToken.TokenPublicReceiverPath
+				).borrow<&{FungibleToken.Receiver}>()
 				?? panic("Could not borrow tUSDT vault receiver public reference")
 			let purchaseInfo =
 				BloctoTokenSale.purchases[address]

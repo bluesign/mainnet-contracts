@@ -103,10 +103,10 @@ contract AAExchange{
 				}
 				percentage = percentage - rate
 				ownerAmount = ownerAmount - cutAmount!
-				let recipientCap = getAccount(recipient).capabilities.get<&{FungibleToken.Receiver}>(salePaymentPath)!
+				let recipientCap = getAccount(recipient).capabilities.get<&{FungibleToken.Receiver}>(salePaymentPath)
 				assert(recipientCap.borrow() != nil, message: "Missing or mis-typed fungible token receiver")
 				let payment = AACommon.Payment(type: type, recipient: recipient, rate: rate, amount: cutAmount!)
-				let saleCut = NFTStorefront.SaleCut(receiver: recipientCap, amount: cutAmount!)
+				let saleCut = NFTStorefront.SaleCut(receiver: recipientCap!, amount: cutAmount!)
 				if amount != nil && payments.length > 0{ 
 					payments.insert(at: 0, payment)
 					saleCuts.insert(at: 0, saleCut)

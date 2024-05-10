@@ -823,7 +823,7 @@ contract FindMarketAuctionEscrow{
 			let vaultRef = &bid.vault as &{FungibleToken.Vault}
 			let nftCap = bid.nftCap
 			if !nftCap.check(){ 
-				let cpCap = getAccount(nftCap.address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)!
+				let cpCap = getAccount(nftCap.address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)
 				if !cpCap.check(){ 
 					panic("Bidder unlinked the nft receiver capability. bidder address : ".concat(bid.nftCap.address.toString()))
 				} else{ 
@@ -862,11 +862,11 @@ contract FindMarketAuctionEscrow{
 				panic("You already have an bid for this item, use increaseBid on that bid")
 			}
 			let tenant = self.getTenant()
-			let from = getAccount(item.owner()).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))!
+			let from = getAccount(item.owner()).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))
 			let vaultType = vault.getType()
-			let bid <- create Bid(from: from, itemUUID: uuid, vault: <-vault, nftCap: nftCap, bidExtraField: bidExtraField)
+			let bid <- create Bid(from: from!, itemUUID: uuid, vault: <-vault, nftCap: nftCap, bidExtraField: bidExtraField)
 			let saleItemCollection = from.borrow() ?? panic("Could not borrow sale item for id=".concat(uuid.toString()))
-			let callbackCapability = (self.owner!).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))!
+			let callbackCapability = (self.owner!).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))
 			let oldToken <- self.bids[uuid] <- bid
 			saleItemCollection.registerBid(item: item, callback: callbackCapability, vaultType: vaultType)
 			destroy oldToken
@@ -957,7 +957,7 @@ contract FindMarketAuctionEscrow{
 			panic("Invalid tenant")
 		}
 		if let tenant = (FindMarket.getTenantCapability(marketplace)!).borrow(){ 
-			return getAccount(user).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))!
+			return getAccount(user).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))
 		}
 		return nil
 	}
@@ -968,7 +968,7 @@ contract FindMarketAuctionEscrow{
 			panic("Invalid tenant")
 		}
 		if let tenant = (FindMarket.getTenantCapability(marketplace)!).borrow(){ 
-			return getAccount(user).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))!
+			return getAccount(user).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))
 		}
 		return nil
 	}

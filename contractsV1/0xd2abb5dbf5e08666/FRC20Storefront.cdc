@@ -1122,8 +1122,7 @@ contract FRC20Storefront{
 	///
 	access(all)
 	fun borrowStorefront(address: Address): &Storefront?{ 
-		return (getAccount(address).capabilities.get<&Storefront>(self.StorefrontPublicPath)!)
-			.borrow()
+		return getAccount(address).capabilities.get<&Storefront>(self.StorefrontPublicPath).borrow()
 	}
 	
 	init(){ 

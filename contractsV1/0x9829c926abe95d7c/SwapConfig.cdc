@@ -527,11 +527,8 @@ contract SwapConfig{
 	access(all)
 	fun getCurrentCumulativePrices(pairAddr: Address): [UInt256; 3]{ 
 		let pairPublicRef =
-			(
-				getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					self.PairPublicPath
-				)!
-			).borrow()
+			getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(self.PairPublicPath)
+				.borrow()
 			?? panic("cannot borrow reference to PairPublic")
 		let pairInfo = pairPublicRef.getPairInfo()
 		let reserve0 = pairInfo[2] as! UFix64

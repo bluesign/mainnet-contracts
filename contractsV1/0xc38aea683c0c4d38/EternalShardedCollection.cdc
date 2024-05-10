@@ -43,7 +43,7 @@ contract EternalShardedCollection{
 		
 		// withdraw removes a Moment from one of the Collections 
 		// and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			post{ 
 				result.id == withdrawID:
@@ -153,8 +153,13 @@ contract EternalShardedCollection{
 		}
 		
 		access(all)
-		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
-			return <-create ShardedCollection()
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 	
 	// If a transaction destroys the Collection object,

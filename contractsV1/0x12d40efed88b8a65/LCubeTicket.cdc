@@ -83,7 +83,7 @@ contract LCubeTicket: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -199,7 +199,7 @@ contract LCubeTicket: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let nft = (&self.ownedNFTs[withdrawID] as &{NonFungibleToken.NFT}?)!
 			let ticketNFT = nft as! &LCubeTicket.NFT
@@ -223,16 +223,16 @@ contract LCubeTicket: NonFungibleToken{
 		access(all)
 		fun useTicket(id: UInt64, address: Address){ 
 			let recipient = getAccount(address)
-			let recipientCap = recipient.capabilities.get<&{LCubeTicketComponent.LCubeTicketComponentCollectionPublic}>(LCubeTicketComponent.CollectionPublicPath)!
+			let recipientCap = recipient.capabilities.get<&{LCubeTicketComponent.LCubeTicketComponentCollectionPublic}>(LCubeTicketComponent.CollectionPublicPath)
 			let _auth = recipientCap.borrow()!
 			let ticket <- self.withdraw(withdrawID: id) as! @LCubeTicket.NFT
 			let minter = LCubeTicket.getComponentMinter().borrow() ?? panic("Could not borrow receiver capability (maybe receiver not configured?)")
-			let depositRef = (recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(LCubeTicketComponent.CollectionPublicPath)!).borrow()!
-			let beneficiaryCapability = recipient.capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
+			let depositRef = recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(LCubeTicketComponent.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
+			let beneficiaryCapability = recipient.capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
 			if !beneficiaryCapability.check(){ 
 				panic("Beneficiary capability is not valid!")
 			}
-			var royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: beneficiaryCapability, cut: 0.05, description: "LimitlessCubeTicket Royalty")]
+			var royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: beneficiaryCapability!, cut: 0.05, description: "LimitlessCubeTicket Royalty")]
 			let componentMetadata = ticket.getMetadata()
 			componentMetadata.insert(key: "eventID", ticket.eventID.toString())
 			componentMetadata.insert(key: "creatorAddress", address.toString())
@@ -286,6 +286,16 @@ contract LCubeTicket: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -299,7 +309,7 @@ contract LCubeTicket: NonFungibleToken{
 	access(all)
 	fun getTickets(address: Address): [UInt64]?{ 
 		let account = getAccount(address)
-		if let ticketCollection = (account.capabilities.get<&{LCubeTicket.LCubeTicketCollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let ticketCollection = account.capabilities.get<&{LCubeTicket.LCubeTicketCollectionPublic}>(self.CollectionPublicPath).borrow<&{LCubeTicket.LCubeTicketCollectionPublic}>(){ 
 			return ticketCollection.getIDs()
 		}
 		return nil

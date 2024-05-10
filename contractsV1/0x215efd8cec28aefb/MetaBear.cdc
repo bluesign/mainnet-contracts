@@ -56,7 +56,7 @@ contract MetaBear: NonFungibleToken{
 	// A MetaBear Item as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -122,7 +122,7 @@ contract MetaBear: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -174,6 +174,16 @@ contract MetaBear: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -254,9 +264,9 @@ contract MetaBear: NonFungibleToken{
 			
 			// Deposit Mint Price
 			// Get a reference to the owner's Receiver
-			let ownerRef = (getAccount(community).capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the owner's Vault")
-			let creatorRef = (getAccount(creator).capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the creator's Vault")
-			let platformRef = (getAccount(platform).capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the platform's Vault")
+			let ownerRef = getAccount(community).capabilities.get<&FUSD.Vault>(/public/fusdReceiver).borrow<&FUSD.Vault>() ?? panic("Could not borrow receiver reference to the owner's Vault")
+			let creatorRef = getAccount(creator).capabilities.get<&FUSD.Vault>(/public/fusdReceiver).borrow<&FUSD.Vault>() ?? panic("Could not borrow receiver reference to the creator's Vault")
+			let platformRef = getAccount(platform).capabilities.get<&FUSD.Vault>(/public/fusdReceiver).borrow<&FUSD.Vault>() ?? panic("Could not borrow receiver reference to the platform's Vault")
 			emit Minted(id: MetaBear.totalSupply, recipientAddress: (recipient.owner!).address, metadata: metadataString)
 			
 			// Deposit the withdrawn tokens in the recipient's receiver
@@ -285,7 +295,7 @@ contract MetaBear: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &MetaBear.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&MetaBear.Collection>(MetaBear.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&MetaBear.Collection>(MetaBear.CollectionPublicPath).borrow<&MetaBear.Collection>() ?? panic("Couldn't get collection")
 		// We trust MetaBear.Collection.borrowMetaBear to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowMetaBear(id: itemID)
@@ -367,7 +377,7 @@ contract MetaBear: NonFungibleToken{
 		var capability_1 = self.account.capabilities.storage.issue<&{MetaBear.CollectionDataPublic}>(self.CollectionDataPath)
 		self.account.capabilities.publish(capability_1, at: self.CollectionDataPublicPath)
 		self.account.storage.save(<-collectionData, to: self.CollectionDataPath)
-		let collectionDataCap = self.account.capabilities.get<&{MetaBear.CollectionDataPublic}>(self.CollectionDataPublicPath)! as Capability<&{MetaBear.CollectionDataPublic}>
+		let collectionDataCap = self.account.capabilities.get<&{MetaBear.CollectionDataPublic}>(self.CollectionDataPublicPath) as Capability<&{MetaBear.CollectionDataPublic}>
 		
 		// Minter
 		let oldMinter <- self.account.storage.load<@NFTMinter>(from: self.MinterStoragePath)

@@ -181,7 +181,7 @@ contract Bl0xPack: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -351,7 +351,7 @@ contract Bl0xPack: NonFungibleToken{
 		fun requeue(packId: UInt64){ 
 			let token <- self.withdraw(withdrawID: packId) as! @NFT
 			let address = token.resetOpendBy()
-			let cap = getAccount(address).capabilities.get<&Collection>(Bl0xPack.CollectionPublicPath)!
+			let cap = getAccount(address).capabilities.get<&Collection>(Bl0xPack.CollectionPublicPath)
 			let receiver = cap.borrow()!
 			receiver.deposit(token: <-token)
 			emit Requeued(packId: packId, address: cap.address)
@@ -372,7 +372,7 @@ contract Bl0xPack: NonFungibleToken{
 			token.setOpenedBy(receiverCap)
 			
 			// establish the receiver for Redeeming Bl0xPack
-			let receiver = (Bl0xPack.account.capabilities.get<&{NonFungibleToken.Receiver}>(Bl0xPack.OpenedCollectionPublicPath)!).borrow()!
+			let receiver = Bl0xPack.account.capabilities.get<&{NonFungibleToken.Receiver}>(Bl0xPack.OpenedCollectionPublicPath).borrow()!
 			
 			// deposit for consumption
 			receiver.deposit(token: <-token)
@@ -484,7 +484,7 @@ contract Bl0xPack: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Could not withdraw nft")
 			let nft <- token as! @NFT
@@ -553,6 +553,16 @@ contract Bl0xPack: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let exampleNFT = nft as! &NFT
 			return exampleNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -644,7 +654,7 @@ contract Bl0xPack: NonFungibleToken{
 	
 	access(all)
 	fun getPacksCollection(): &Bl0xPack.Collection{ 
-		return (Bl0xPack.account.capabilities.get<&Bl0xPack.Collection>(Bl0xPack.CollectionPublicPath)!).borrow() ?? panic("Could not borow Bl0xPack collection")
+		return Bl0xPack.account.capabilities.get<&Bl0xPack.Collection>(Bl0xPack.CollectionPublicPath).borrow() ?? panic("Could not borow Bl0xPack collection")
 	}
 	
 	access(all)
@@ -682,7 +692,7 @@ contract Bl0xPack: NonFungibleToken{
 	
 	access(all)
 	fun hasFloat(floatEventId: UInt64, user: Address): Bool{ 
-		let float = (getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow()
+		let float = getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 		if float == nil{ 
 			return false
 		}

@@ -469,7 +469,7 @@ contract FastBreakV1: NonFungibleToken{
 	/// The Fast Break Player plays the game & mints game tokens
 	///
 	access(all)
-	resource Player: FastBreakPlayer, NonFungibleToken.INFT{ 
+	resource Player: FastBreakPlayer, NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -510,7 +510,7 @@ contract FastBreakV1: NonFungibleToken{
 			
 			/// Validate Top Shots
 			let acct = getAccount(self.owner?.address!)
-			let collectionRef = (acct.capabilities.get<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection)!).borrow() ?? panic("Player does not have top shot collection")
+			let collectionRef = acct.capabilities.get<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection).borrow<&{TopShot.MomentCollectionPublic}>() ?? panic("Player does not have top shot collection")
 			
 			/// Must own Top Shots to play Fast Break
 			/// more efficient to borrow ref than to loop
@@ -553,7 +553,7 @@ contract FastBreakV1: NonFungibleToken{
 			
 			/// Validate Top Shots
 			let acct = getAccount(self.owner?.address!)
-			let collectionRef = (acct.capabilities.get<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection)!).borrow() ?? panic("Player does not have top shot collection")
+			let collectionRef = acct.capabilities.get<&{TopShot.MomentCollectionPublic}>(/public/MomentCollection).borrow<&{TopShot.MomentCollectionPublic}>() ?? panic("Player does not have top shot collection")
 			
 			/// Must own Top Shots to play Fast Break
 			/// more efficient to borrow ref than to loop
@@ -615,7 +615,7 @@ contract FastBreakV1: NonFungibleToken{
 	/// The Fast Break game token
 	///
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -721,7 +721,7 @@ contract FastBreakV1: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Could not find a fast break with the given ID in the Fast Break collection. Fast break Id: ".concat(withdrawID.toString()))
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -769,6 +769,16 @@ contract FastBreakV1: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

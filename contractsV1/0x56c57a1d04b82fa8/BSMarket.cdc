@@ -100,7 +100,7 @@ contract BSMarket{
 			// Deposit into the beneficiaries' accounts
 			for beneficiary in self.beneficiaries.keys{ 
 				let percentage = self.beneficiaries[beneficiary]!
-				let beneficiaryRef = (getAccount(beneficiary).capabilities.get<&{FungibleToken.Receiver}>(DevryCoin.ReceiverPublicPath)!).borrow()
+				let beneficiaryRef = getAccount(beneficiary).capabilities.get<&{FungibleToken.Receiver}>(DevryCoin.ReceiverPublicPath).borrow<&{FungibleToken.Receiver}>()
 				let beneficiaryCut <- buyerPayment.withdraw(amount: self.salePrice * percentage)
 				(beneficiaryRef!).deposit(from: <-beneficiaryCut)
 			}

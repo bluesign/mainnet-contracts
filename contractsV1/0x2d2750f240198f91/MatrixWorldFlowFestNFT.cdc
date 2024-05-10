@@ -62,7 +62,7 @@ contract MatrixWorldFlowFestNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, NFTPublic{ 
+	resource NFT: NonFungibleToken.NFT, NFTPublic{ 
 		access(all)
 		let id: UInt64
 		
@@ -105,7 +105,7 @@ contract MatrixWorldFlowFestNFT: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -142,6 +142,16 @@ contract MatrixWorldFlowFestNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -174,10 +184,10 @@ contract MatrixWorldFlowFestNFT: NonFungibleToken{
 	fun getNft(address: Address): [NftData]{ 
 		var nftData: [NftData] = []
 		let account = getAccount(address)
-		if let nftCollection = (account.capabilities.get<&{MatrixWorldFlowFestNFT.MatrixWorldFlowFestNFTCollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let nftCollection = account.capabilities.get<&{MatrixWorldFlowFestNFT.MatrixWorldFlowFestNFTCollectionPublic}>(self.CollectionPublicPath).borrow<&{MatrixWorldFlowFestNFT.MatrixWorldFlowFestNFTCollectionPublic}>(){ 
 			for id in nftCollection.getIDs(){ 
 				var nft = nftCollection.borrowVoucher(id: id)
-				nftData.append(NftData(metadata: *(nft!).metadata, id: id))
+				nftData.append(NftData(metadata: (nft!).metadata, id: id))
 			}
 		}
 		return nftData

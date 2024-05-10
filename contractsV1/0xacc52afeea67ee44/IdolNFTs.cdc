@@ -47,7 +47,7 @@ contract IdolNFTs: NonFungibleToken{
 	// Requirement that all conforming NFT smart contracts have
 	// to define a resource called NFT that conforms to INFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -131,7 +131,7 @@ contract IdolNFTs: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -186,6 +186,16 @@ contract IdolNFTs: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -233,7 +243,7 @@ contract IdolNFTs: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &IdolNFTs.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&IdolNFTs.Collection>(IdolNFTs.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&IdolNFTs.Collection>(IdolNFTs.CollectionPublicPath).borrow<&IdolNFTs.Collection>() ?? panic("Couldn't get collection")
 		// We trust IdolNFTs.Collection.borowIdol to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowIdol(id: itemID)

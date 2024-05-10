@@ -131,7 +131,7 @@ contract DayNFT: NonFungibleToken{
 				if bid.vault.balance > self.bestBid.vault.balance{ 
 					if self.bestBid.vault.balance > 0.0{ 
 						// Refund current best bid and replace it with the new one
-						let rec = (getAccount(self.bestBid.recipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow a reference to the receiver")
+						let rec = getAccount(self.bestBid.recipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow a reference to the receiver")
 						var tempVault <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>()) as! @FlowToken.Vault
 						tempVault <-> self.bestBid.vault
 						rec.deposit(from: <-tempVault)
@@ -139,7 +139,7 @@ contract DayNFT: NonFungibleToken{
 					bid <-> self.bestBid
 				} else{ 
 					// Refund the new bid
-					let rec = (getAccount(bid.recipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow a reference to the receiver")
+					let rec = getAccount(bid.recipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow a reference to the receiver")
 					var tempVault <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>()) as! @FlowToken.Vault
 					tempVault <-> bid.vault
 					rec.deposit(from: <-tempVault)
@@ -184,7 +184,7 @@ contract DayNFT: NonFungibleToken{
 		access(all)
 		fun claimNFTsWithToday(address: Address, today: DateUtils.Date): Int{ 
 			var res = 0
-			let receiver = (getAccount(address).capabilities.get<&{DayNFT.CollectionPublic}>(DayNFT.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let receiver = getAccount(address).capabilities.get<&{DayNFT.CollectionPublic}>(DayNFT.CollectionPublicPath).borrow<&{DayNFT.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			if self.NFTsDue[address] != nil{ 
 				var a = 0
 				let len = self.NFTsDue[address]?.length!
@@ -220,7 +220,7 @@ contract DayNFT: NonFungibleToken{
 		access(all)
 		fun tokensToClaim(address: Address): UFix64{ 
 			// Borrow the recipient's public NFT collection reference
-			let holder = (getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let holder = getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath).borrow<&DayNFT.Collection>() ?? panic("Could not get receiver reference to the NFT Collection")
 			
 			// Compute amount due based on number of NFTs detained
 			var amountDue = 0.0
@@ -234,10 +234,10 @@ contract DayNFT: NonFungibleToken{
 		access(all)
 		fun claimTokens(address: Address): UFix64{ 
 			// Borrow the recipient's public NFT collection reference
-			let holder = (getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let holder = getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath).borrow<&DayNFT.Collection>() ?? panic("Could not get receiver reference to the NFT Collection")
 			
 			// Borrow the recipient's flow token receiver
-			let receiver = (getAccount(address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow a reference to the receiver")
+			let receiver = getAccount(address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow a reference to the receiver")
 			
 			// Compute amount due based on number of NFTs detained
 			var amountDue = 0.0
@@ -272,7 +272,7 @@ contract DayNFT: NonFungibleToken{
 			let distrVault <- vault.withdraw(amount: distribute)
 			self.distributeVault.deposit(from: <-distrVault)
 			// Deposit to the account
-			let rec = (getAccount(self.contractAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow a reference to the Flow receiver")
+			let rec = getAccount(self.contractAddress).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow a reference to the Flow receiver")
 			rec.deposit(from: <-vault)
 			
 			// Assign part of the value to the current holders
@@ -288,7 +288,7 @@ contract DayNFT: NonFungibleToken{
 	
 	// Standard NFT resource
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -379,7 +379,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -429,6 +429,16 @@ contract DayNFT: NonFungibleToken{
 			let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			let dayNFT = nft as! &DayNFT.NFT
 			return dayNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

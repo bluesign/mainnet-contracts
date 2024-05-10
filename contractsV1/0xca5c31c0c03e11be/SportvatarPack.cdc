@@ -242,7 +242,7 @@ contract SportvatarPack{
 			
 			// Gets the Component Collection Public capability to be able to
 			// send there the Components contained in the Pack
-			let recipientCap = (self.owner!).capabilities.get<&{Sportbit.CollectionPublic}>(Sportbit.CollectionPublicPath)!
+			let recipientCap = (self.owner!).capabilities.get<&{Sportbit.CollectionPublic}>(Sportbit.CollectionPublicPath)
 			let recipient = recipientCap.borrow()!
 			
 			// Removed the pack from the collection
@@ -331,7 +331,7 @@ contract SportvatarPack{
 			// Borrows the owner's capability for the Vault and deposits the DUC tokens
 			// mainnet F Address: 0x8a86f18e0e05bd9f
 			// testnet S Address: 0x6f13cacd9e8bfdd1
-			let dapperMarketVault = getAccount(0x8a86f18e0e05bd9f).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!
+			let dapperMarketVault = getAccount(0x8a86f18e0e05bd9f).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
 			let vaultRef = dapperMarketVault.borrow() ?? panic("Could not borrow reference to owner pack vault")
 			vaultRef.deposit(from: <-buyTokens)
 			
@@ -406,7 +406,7 @@ contract SportvatarPack{
 	access(all)
 	fun createEmptyCollection(): @SportvatarPack.Collection{ 
 		let ownerVault: Capability<&{FungibleToken.Receiver}> =
-			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		return <-create Collection(ownerVault: ownerVault)
 	}
 	
@@ -415,11 +415,8 @@ contract SportvatarPack{
 	fun getPacks(address: Address): [UInt64]?{ 
 		let account = getAccount(address)
 		if let packCollection =
-			(
-				account.capabilities.get<&{SportvatarPack.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			account.capabilities.get<&{SportvatarPack.CollectionPublic}>(self.CollectionPublicPath)
+				.borrow<&{SportvatarPack.CollectionPublic}>(){ 
 			return packCollection.getIDs()
 		}
 		return nil
@@ -428,11 +425,9 @@ contract SportvatarPack{
 	access(all)
 	fun checkPackAvailable(id: UInt64): Bool{ 
 		if let packCollection =
-			(
-				self.account.capabilities.get<&{SportvatarPack.CollectionPublic}>(
-					self.CollectionPublicPath
-				)!
-			).borrow(){ 
+			self.account.capabilities.get<&{SportvatarPack.CollectionPublic}>(
+				self.CollectionPublicPath
+			).borrow<&{SportvatarPack.CollectionPublic}>(){ 
 			let packIds: [UInt64] = packCollection.getIDs()
 			return packIds.contains(id)
 		}
@@ -474,7 +469,7 @@ contract SportvatarPack{
 		let wallet =
 			getAccount(0x8a86f18e0e05bd9f).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		self.CollectionPublicPath = /public/SportvatarPackCollection
 		self.CollectionStoragePath = /storage/SportvatarPackCollection
 		

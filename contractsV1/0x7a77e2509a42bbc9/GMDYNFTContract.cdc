@@ -55,7 +55,7 @@ contract GMDYNFTContract: NonFungibleToken{
 	
 	//In this section you will find our variables and fields for our NFTs and Collections
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The unique ID that each NFT has
 		access(all)
 		let id: UInt64
@@ -135,7 +135,7 @@ contract GMDYNFTContract: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}
 		
 		access(all)
@@ -167,7 +167,7 @@ contract GMDYNFTContract: NonFungibleToken{
 		}
 		
 		/* Function to remove the NFt from the Collection */
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let exist = self.idExists(id: withdrawID)
@@ -232,6 +232,16 @@ contract GMDYNFTContract: NonFungibleToken{
 			let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			let gmdyNFT = nft as! &GMDYNFTContract.NFT
 			return gmdyNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

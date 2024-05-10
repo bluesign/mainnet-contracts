@@ -310,7 +310,7 @@ contract ShadowExchange{
 			if payment.isInstance(usdcTokenVaultType){ 
 				receiverPath = /public/USDCVaultReceiver
 			}
-			let feeReceiver = getAccount(feeAddress).capabilities.get<&{FungibleToken.Receiver}>(receiverPath)!
+			let feeReceiver = getAccount(feeAddress).capabilities.get<&{FungibleToken.Receiver}>(receiverPath)
 			for f in self.details.fees{ 
 				if let receiver = feeReceiver.borrow(){ 
 					let vault <- payment.withdraw(amount: f.amount)

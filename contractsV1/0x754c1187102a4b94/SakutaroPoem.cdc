@@ -85,7 +85,7 @@ contract SakutaroPoem: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -170,7 +170,7 @@ contract SakutaroPoem: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -212,6 +212,16 @@ contract SakutaroPoem: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -243,7 +253,7 @@ contract SakutaroPoem: NonFungibleToken{
 		self.CollectionPublicPath = /public/SakutaroPoemCollection
 		self.CollectionStoragePath = /storage/SakutaroPoemCollection
 		self.totalSupply = 0
-		let recepient = self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!!
+		let recepient = self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
 		self.royalties = [MetadataViews.Royalty(receiver: recepient, cut: 0.1, description: "39")]
 		self.account.storage.save(<-create Collection(), to: self.CollectionStoragePath)
 		var capability_1 = self.account.capabilities.storage.issue<&SakutaroPoem.Collection>(self.CollectionStoragePath)

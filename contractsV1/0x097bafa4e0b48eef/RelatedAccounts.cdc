@@ -150,7 +150,7 @@ contract RelatedAccounts{
 	
 	access(all)
 	fun findRelatedFlowAccounts(address: Address):{ String: Address}{ 
-		let cap = getAccount(address).capabilities.get<&Accounts>(self.publicPath)!
+		let cap = getAccount(address).capabilities.get<&Accounts>(self.publicPath)
 		if !cap.check(){ 
 			return{} 
 		}

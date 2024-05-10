@@ -27,10 +27,8 @@ contract Liquidate{
 	access(all)
 	fun repayAmount(borrowerAddr: Address, liquidatorAddr: Address): UFix64{ 
 		let comptrollerRef =
-			(
-				getAccount(0xf80cb737bfe7c792).capabilities.get<
-					&{LendingInterfaces.ComptrollerPublic}
-				>(LendingConfig.ComptrollerPublicPath)!
+			getAccount(0xf80cb737bfe7c792).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(
+				LendingConfig.ComptrollerPublicPath
 			).borrow()!
 		let liquidity = comptrollerRef.getUserCrossMarketLiquidity(userAddr: borrowerAddr)
 		if liquidity[0] >= liquidity[1]{ 
@@ -64,10 +62,8 @@ contract Liquidate{
 		let poolPrices: [UFix64] = []
 		let liquidatorBalances: [UFix64] = []
 		let oracleCap =
-			(
-				getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
-					LendingConfig.OraclePublicPath
-				)!
+			getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
+				LendingConfig.OraclePublicPath
 			).borrow()!
 		let borrowerSupplys: [UFix64] = []
 		let borrowerBorrows: [UFix64] = []
@@ -81,12 +77,12 @@ contract Liquidate{
 		for poolAddr in self.poolAddrs{ 
 			let poolPrice = oracleCap.getUnderlyingPrice(pool: poolAddr)
 			poolPrices.append(poolPrice)
-			var localBalance = ((getAccount(liquidatorAddr).capabilities.get<&{FungibleToken.Balance}>(PublicPath(identifier: self.poolBalancePaths[i])!)!).borrow()!).balance
+			var localBalance = (getAccount(liquidatorAddr).capabilities.get<&{FungibleToken.Balance}>(PublicPath(identifier: self.poolBalancePaths[i])!).borrow()!).balance
 			if localBalance > 1.0{ 
 				localBalance = localBalance - 1.0
 			}
 			liquidatorBalances.append(localBalance)
-			let lendingPoolCap = (getAccount(poolAddr).capabilities.get<&{LendingInterfaces.PoolPublic}>(LendingConfig.PoolPublicPublicPath)!).borrow()!
+			let lendingPoolCap = getAccount(poolAddr).capabilities.get<&{LendingInterfaces.PoolPublic}>(LendingConfig.PoolPublicPublicPath).borrow()!
 			let userInfo = lendingPoolCap.getAccountRealtimeScaled(account: borrowerAddr)
 			let userSupply = LendingConfig.ScaledUInt256ToUFix64(userInfo[1] * userInfo[0] / LendingConfig.scaleFactor)
 			let userSupplyUsd = userSupply * poolPrice
@@ -130,17 +126,13 @@ contract Liquidate{
 		let repayAmount =
 			self.repayAmount(borrowerAddr: borrowerAddr, liquidatorAddr: liquidatorAddr)
 		let repayPoolRef =
-			(
-				getAccount(self.poolAddrs[maxBorrowIndex]).capabilities.get<
-					&{LendingInterfaces.PoolPublic}
-				>(LendingConfig.PoolPublicPublicPath)!
-			).borrow()!
+			getAccount(self.poolAddrs[maxBorrowIndex]).capabilities.get<
+				&{LendingInterfaces.PoolPublic}
+			>(LendingConfig.PoolPublicPublicPath).borrow()!
 		let seizePoolRef =
-			(
-				getAccount(self.poolAddrs[maxSupplyIndex]).capabilities.get<
-					&{LendingInterfaces.PoolPublic}
-				>(LendingConfig.PoolPublicPublicPath)!
-			).borrow()!
+			getAccount(self.poolAddrs[maxSupplyIndex]).capabilities.get<
+				&{LendingInterfaces.PoolPublic}
+			>(LendingConfig.PoolPublicPublicPath).borrow()!
 		let preLpToken =
 			LendingConfig.ScaledUInt256ToUFix64(
 				seizePoolRef.getAccountLpTokenBalanceScaled(account: liquidatorAddr)

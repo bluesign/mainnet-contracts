@@ -144,7 +144,7 @@ contract MetaverseMarket: NonFungibleToken{
 	// MetaverseMarket as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		//NFT CONTRACT GLOBAL ID -> Current TotalSupply
 		access(all)
@@ -263,7 +263,7 @@ contract MetaverseMarket: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -320,6 +320,16 @@ contract MetaverseMarket: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -389,10 +399,10 @@ contract MetaverseMarket: NonFungibleToken{
 			(MetaverseMarket.nftsToSell[listedNftId]!).addMinted()
 			
 			// Get a reference to the recipient's Receiver
-			let receiverRef = (getAccount(list.creator).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+			let receiverRef = getAccount(list.creator).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 			
 			// Get a reference to the recipient's Receiver
-			let royaltyReceiver = (getAccount(MetaverseMarket.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+			let royaltyReceiver = getAccount(MetaverseMarket.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 			let royalty <- payment.withdraw(amount: payment.balance * 0.1)
 			royaltyReceiver.deposit(from: <-royalty)
 			receiverRef.deposit(from: <-payment)
@@ -428,7 +438,7 @@ contract MetaverseMarket: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &MetaverseMarket.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&MetaverseMarket.Collection>(MetaverseMarket.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&MetaverseMarket.Collection>(MetaverseMarket.CollectionPublicPath).borrow<&MetaverseMarket.Collection>() ?? panic("Couldn't get collection")
 		// We trust MetaverseMarket.Collection.borowMetaverseMarket to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowMetaverseMarket(id: itemID)
@@ -436,7 +446,7 @@ contract MetaverseMarket: NonFungibleToken{
 	
 	access(all)
 	fun getAllNftsFromAccount(_ from: Address): &{UInt64:{ NonFungibleToken.NFT}}?{ 
-		let collection = (getAccount(from).capabilities.get<&MetaverseMarket.Collection>(MetaverseMarket.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&MetaverseMarket.Collection>(MetaverseMarket.CollectionPublicPath).borrow<&MetaverseMarket.Collection>() ?? panic("Couldn't get collection")
 		return collection.getNFTs()
 	}
 	

@@ -232,11 +232,10 @@ contract Promise{
 	fun createTemplate(author: Address, content: String): @NFT{ 
 		let account = getAccount(author)
 		let vault =
-			(account.capabilities.get<&{PublicVault}>(self.vaultPublicPath)!).borrow()
+			account.capabilities.get<&{PublicVault}>(self.vaultPublicPath).borrow()
 			?? panic("Could not borrow Vault")
 		let userProfile =
-			(account.capabilities.get<&{Promise.PublicProfile}>(Promise.profilePublicPath)!)
-				.borrow()
+			account.capabilities.get<&{Promise.PublicProfile}>(Promise.profilePublicPath).borrow()
 			?? panic("Could not borrow user profile")
 		let reward <- create Vault(balance: self.reward)
 		vault.deposit(temporaryVault: <-reward)

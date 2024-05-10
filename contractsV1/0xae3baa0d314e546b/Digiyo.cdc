@@ -300,7 +300,7 @@ contract Digiyo: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ // Resource representing the Instance NFTs 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ // Resource representing the Instance NFTs 
 		
 		access(all)
 		let id: UInt64 // global unique instance ID
@@ -488,7 +488,7 @@ contract Digiyo: NonFungibleToken{
 		}
 		
 		// withdraw removes an Instance from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: Instance does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -564,6 +564,16 @@ contract Digiyo: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let digiyoNFT = nft as! &Digiyo.NFT
 			return digiyoNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

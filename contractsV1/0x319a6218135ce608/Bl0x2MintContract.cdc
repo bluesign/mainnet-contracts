@@ -130,18 +130,12 @@ contract Bl0x2MintContract{
 			?? panic("Cannot borrow vault from signer storage")
 		var tokenReceiverPath = /public/flowTokenReceiver
 		let receiver1 =
-			(
-				getAccount(receiverAddr1).capabilities.get<&{FungibleToken.Receiver}>(
-					tokenReceiverPath
-				)!
-			).borrow()
+			getAccount(receiverAddr1).capabilities.get<&{FungibleToken.Receiver}>(tokenReceiverPath)
+				.borrow()
 			?? panic("Cannot borrow FungibleToken receiver")
 		let receiver2 =
-			(
-				getAccount(receiverAddr2).capabilities.get<&{FungibleToken.Receiver}>(
-					tokenReceiverPath
-				)!
-			).borrow()
+			getAccount(receiverAddr2).capabilities.get<&{FungibleToken.Receiver}>(tokenReceiverPath)
+				.borrow()
 			?? panic("Cannot borrow FungibleToken receiver")
 		let payment1 <- vault.withdraw(amount: price * UFix64(realCount) * 0.95)
 		let payment2 <- vault.withdraw(amount: price * UFix64(realCount) * 0.05)

@@ -643,7 +643,7 @@ contract ZayTraderV2{
 				// a requested address was present as part of this trade offer
 				assert(signingAddress! == self.details.requestedAddress!, message: "Requested trade account does not match provided account or expected signature not provided")
 				assert(feeCap.address == self.details.requestedAddress!, message: "Requested trade account does not match provided account given for fee payment")
-				let requestedCollection = (getAccount(self.details.requestedAddress!).capabilities.get<&ZayTraderV2.TradeCollection>(ZayTraderV2.CollectionPublicPath)!).borrow()!
+				let requestedCollection = getAccount(self.details.requestedAddress!).capabilities.get<&ZayTraderV2.TradeCollection>(ZayTraderV2.CollectionPublicPath).borrow()!
 				assert(requestedCollection.getCurrentApprovingOfferID()! == self.uuid, message: "Expected approving trade offer ID does not match UUID of this trade offer")
 			}
 			// Check provided signature is valid for the 
@@ -980,7 +980,7 @@ contract ZayTraderV2{
 		// when it is mature/ready to
 		self.feeReceiver = self.account.capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		self.AdminStoragePath = /storage/ZayTraderAdminV2
 		self.account.storage.save(<-create Admin(), to: self.AdminStoragePath)
 		emit Initialized()

@@ -221,37 +221,29 @@ contract BulkPurchase{
 	// Helper functions
 	access(contract)
 	fun getStorefrontV1Ref(address: Address): &NFTStorefront.Storefront?{ 
-		return (
-			getAccount(address).capabilities.get<&NFTStorefront.Storefront>(
-				NFTStorefront.StorefrontPublicPath
-			)!
+		return getAccount(address).capabilities.get<&NFTStorefront.Storefront>(
+			NFTStorefront.StorefrontPublicPath
 		).borrow()
 	}
 	
 	access(contract)
 	fun getStorefrontV2Ref(address: Address): &NFTStorefrontV2.Storefront?{ 
-		return (
-			getAccount(address).capabilities.get<&NFTStorefrontV2.Storefront>(
-				NFTStorefrontV2.StorefrontPublicPath
-			)!
+		return getAccount(address).capabilities.get<&NFTStorefrontV2.Storefront>(
+			NFTStorefrontV2.StorefrontPublicPath
 		).borrow()
 	}
 	
 	access(contract)
 	fun getTopshotV1MarketRef(address: Address): &Market.SaleCollection?{ 
-		return (
-			getAccount(address).capabilities.get<&Market.SaleCollection>(
-				/public/topshotSaleCollection
-			)!
+		return getAccount(address).capabilities.get<&Market.SaleCollection>(
+			/public/topshotSaleCollection
 		).borrow()
 	}
 	
 	access(contract)
 	fun getTopshotV3MarketRef(address: Address): &TopShotMarketV3.SaleCollection?{ 
-		return (
-			getAccount(address).capabilities.get<&TopShotMarketV3.SaleCollection>(
-				TopShotMarketV3.marketPublicPath
-			)!
+		return getAccount(address).capabilities.get<&TopShotMarketV3.SaleCollection>(
+			TopShotMarketV3.marketPublicPath
 		).borrow()
 	}
 	
@@ -260,7 +252,7 @@ contract BulkPurchase{
 		return (
 			getAccount(address).capabilities.get<&FlovatarMarketplace.SaleCollection>(
 				FlovatarMarketplace.CollectionPublicPath
-			)!!
+			)!
 		).borrow()
 	}
 	

@@ -196,7 +196,7 @@ contract Marketplace{
 						*/
 			
 			let userAddress = getAccount(Marketplace.userAddress!)
-			let collection_ref = (userAddress.capabilities.get<&FlovatarComponent.Collection>(FlovatarComponent.CollectionPublicPath)!).borrow()!
+			let collection_ref = userAddress.capabilities.get<&FlovatarComponent.Collection>(FlovatarComponent.CollectionPublicPath).borrow()!
 			let nft_ref = collection_ref.borrowComponent(id: id)
 			nft_ref! // confirm user has the nft we want
 			

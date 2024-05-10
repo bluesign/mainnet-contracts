@@ -88,8 +88,7 @@ contract TitTokenMarket{
 		
 		// Ensure the paymentVault is a Flow token vault and deposit Flow tokens into the seller's vault
 		let receiver =
-			(seller.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
-				.borrow()
+			seller.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()
 			?? panic("Could not borrow receiver reference to the seller's Flow token vault")
 		receiver.deposit(from: <-paymentVault)
 		

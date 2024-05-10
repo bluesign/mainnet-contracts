@@ -57,7 +57,7 @@ contract JollyJokersMinter{
 		let merchantDUCReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -68,11 +68,9 @@ contract JollyJokersMinter{
 		// Get buyer collection public to receive JollyJokers
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					JollyJokers.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				JollyJokers.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint JollyJokers NFTs per purchaseAmount
@@ -116,7 +114,7 @@ contract JollyJokersMinter{
 		let merchantDUCReceiverRef =
 			getAccount(merchantAccount).capabilities.get<&{FungibleToken.Receiver}>(
 				/public/dapperUtilityCoinReceiver
-			)!
+			)
 		assert(
 			merchantDUCReceiverRef.borrow() != nil,
 			message: "Missing or mis-typed merchant DUC receiver"
@@ -127,11 +125,9 @@ contract JollyJokersMinter{
 		// Get buyer collection public to receive JollyJokers
 		let recipient = getAccount(buyer)
 		let NFTReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					JollyJokers.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				JollyJokers.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the NFT Collection")
 		
 		// Mint JollyJokers NFTs per purchaseAmount
@@ -204,7 +200,7 @@ contract JollyJokersMinter{
 		let cap =
 			getAccount(addr).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
 				JollyJokers.CollectionPublicPath
-			)!
+			)
 		if !cap.check(){ 
 			return JollyJokersMinter.publicSalePriceInDUC
 		}

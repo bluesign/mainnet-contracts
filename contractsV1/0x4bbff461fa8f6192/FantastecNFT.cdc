@@ -86,7 +86,7 @@ contract FantastecNFT: NonFungibleToken, ViewResolver{
 	// Raw NFT, doesn't currently restrict the caller instantiating an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -160,7 +160,7 @@ contract FantastecNFT: NonFungibleToken, ViewResolver{
 			if royaltiesMetadata != nil{ 
 				for royaltyElement in royaltiesMetadata!{ 
 					let royalty = royaltyElement as! FantastecSwapDataProperties.Royalty
-					let receiver = getAccount(royalty.address).capabilities.get<&FUSD.Vault>(/public/fusdBalance)!
+					let receiver = getAccount(royalty.address).capabilities.get<&FUSD.Vault>(/public/fusdBalance)
 					let cut = royalty.percentage / 100.0
 					let description = royalty.id.toString()
 					royalties.append(MetadataViews.Royalty(receiver: receiver, cut: cut, description: description))
@@ -609,7 +609,7 @@ contract FantastecNFT: NonFungibleToken, ViewResolver{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -621,6 +621,16 @@ contract FantastecNFT: NonFungibleToken, ViewResolver{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let fantastecNFT = nft as! &FantastecNFT.NFT
 			return fantastecNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

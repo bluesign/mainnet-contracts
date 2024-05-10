@@ -482,11 +482,8 @@ contract LostAndFound{
 					"storage payment must be in flow tokens"
 			}
 			let receiver =
-				(
-					LostAndFound.account.capabilities.get<&FlowToken.Vault>(
-						/public/flowTokenReceiver
-					)!
-				).borrow()!
+				LostAndFound.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+					.borrow()!
 			let storageBeforeShelf = LostAndFound.account.storage.used
 			let shelf = self.ensureShelf(redeemer, flowTokenRepayment: flowTokenRepayment)
 			if LostAndFound.account.storage.used != storageBeforeShelf
@@ -592,7 +589,7 @@ contract LostAndFound{
 		
 		access(all)
 		fun deposit(redeemer: Address, item: @AnyResource, memo: String?, display: MetadataViews.Display?): UInt64{ 
-			let receiver = (LostAndFound.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!
+			let receiver = LostAndFound.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow()!
 			let storageBeforeShelf = LostAndFound.account.storage.used
 			let shelfManager = LostAndFound.borrowShelfManager()
 			let shelf = shelfManager.ensureShelf(redeemer, flowTokenRepayment: self.flowTokenRepayment)
@@ -674,10 +671,8 @@ contract LostAndFound{
 	
 	access(all)
 	fun borrowShelfManager(): &LostAndFound.ShelfManager{ 
-		return (
-			self.account.capabilities.get<&LostAndFound.ShelfManager>(
-				LostAndFound.LostAndFoundPublicPath
-			)!
+		return self.account.capabilities.get<&LostAndFound.ShelfManager>(
+			LostAndFound.LostAndFoundPublicPath
 		).borrow()!
 	}
 	
@@ -745,7 +740,7 @@ contract LostAndFound{
 			}
 		}
 		let ftReceiver =
-			LostAndFound.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			LostAndFound.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		let ticket <-
 			create LostAndFound.Ticket(
 				item: <-item,

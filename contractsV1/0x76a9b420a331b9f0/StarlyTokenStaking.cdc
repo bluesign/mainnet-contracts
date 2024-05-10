@@ -185,7 +185,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 	
 	// Stake (named as NFT to comply with NonFungibleToken interface) contains the vault with staked tokens
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver, StakePublic{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver, StakePublic{ 
 		access(all)
 		let id: UInt64
 		
@@ -396,7 +396,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let stake <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: stake.id, from: self.owner?.address)
@@ -457,7 +457,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 		access(contract)
 		fun refund(id: UInt64, k: UFix64){ 
 			if let address = self.owner?.address{ 
-				let receiverRef = (getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(StarlyToken.TokenPublicReceiverPath)!).borrow() ?? panic("Could not borrow StarlyToken receiver reference to the recipient's vault!")
+				let receiverRef = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(StarlyToken.TokenPublicReceiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow StarlyToken receiver reference to the recipient's vault!")
 				let stake <- self.withdraw(withdrawID: id) as! @StarlyTokenStaking.NFT
 				let burner = StarlyTokenStaking.account.storage.borrow<&NFTBurner>(from: StarlyTokenStaking.BurnerStoragePath)!
 				let unstakeVault <- burner.burnStake(stake: <-stake, k: k, address: address, minStakingSeconds: StarlyTokenStaking.minStakingSeconds, unstakingFee: StarlyTokenStaking.unstakingFee, unstakingFlatFee: StarlyTokenStaking.unstakingFlatFee, unstakingFeesNotAppliedAfterSeconds: StarlyTokenStaking.unstakingFeesNotAppliedAfterSeconds, unstakingDisabledUntilTimestamp: StarlyTokenStaking.unstakingDisabledUntilTimestamp)
@@ -502,6 +502,16 @@ contract StarlyTokenStaking: NonFungibleToken{
 		fun borrowStakePrivate(id: UInt64): &StarlyTokenStaking.NFT{ 
 			let stakePassRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return stakePassRef as! &StarlyTokenStaking.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -80,7 +80,7 @@ contract GoatedGoatsTrait: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -117,8 +117,8 @@ contract GoatedGoatsTrait: NonFungibleToken{
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://GoatedGoats.com")
 				case Type<MetadataViews.Royalties>():
-					let royaltyReceiver = getAccount(0xd7081a5c66dc3e7f).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: royaltyReceiver, cut: 0.05, description: "This is the royalty receiver for traits")])
+					let royaltyReceiver = getAccount(0xd7081a5c66dc3e7f).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: royaltyReceiver!, cut: 0.05, description: "This is the royalty receiver for traits")])
 				case Type<MetadataViews.Display>():
 					var ipfsImage = MetadataViews.IPFSFile(cid: "No thumbnail cid set", path: "No thumbnail pat set")
 					if self.getMetadata().containsKey("thumbnailCID"){ 
@@ -179,7 +179,7 @@ contract GoatedGoatsTrait: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -220,6 +220,16 @@ contract GoatedGoatsTrait: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let trait = nft as! &GoatedGoatsTrait.NFT
 			return trait as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

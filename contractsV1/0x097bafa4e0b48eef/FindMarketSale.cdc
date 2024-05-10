@@ -298,7 +298,7 @@ contract FindMarketSale{
 					return FIND.reverseLookup(address)
 				}, resolvedAddress: resolved)
 			if !nftCap.check(){ 
-				let cpCap = getAccount(nftCap.address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(saleItem.getNFTCollectionData().publicPath)!
+				let cpCap = getAccount(nftCap.address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(saleItem.getNFTCollectionData().publicPath)
 				if !cpCap.check(){ 
 					panic("The nft receiver capability passed in is invalid.")
 				} else{ 
@@ -433,7 +433,7 @@ contract FindMarketSale{
 	>?{ 
 		if let tenantCap = FindMarket.getTenantCapability(marketplace){ 
 			let tenant = tenantCap.borrow() ?? panic("Invalid tenant")
-			return getAccount(user).capabilities.get<&FindMarketSale.SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))!
+			return getAccount(user).capabilities.get<&FindMarketSale.SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))
 		}
 		return nil
 	}

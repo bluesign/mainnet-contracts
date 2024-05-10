@@ -100,7 +100,7 @@ contract AlphaNFTV1: NonFungibleToken{
 	// The resource that represents the AlphaNFTV1 NFTs
 	// 
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -150,7 +150,7 @@ contract AlphaNFTV1: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -189,6 +189,16 @@ contract AlphaNFTV1: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -217,7 +227,7 @@ contract AlphaNFTV1: NonFungibleToken{
 				"Template Id must be valid"
 		}
 		let receiptAccount = getAccount(account)
-		let recipientCollection = (receiptAccount.capabilities.get<&{AlphaNFTV1.AlphaNFTV1CollectionPublic}>(AlphaNFTV1.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+		let recipientCollection = receiptAccount.capabilities.get<&{AlphaNFTV1.AlphaNFTV1CollectionPublic}>(AlphaNFTV1.CollectionPublicPath).borrow<&{AlphaNFTV1.AlphaNFTV1CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 		let mintNumberFromSupply = (AlphaNFTV1.templates[templateInfo["id"]!]!).incrementIssuedSupply()
 		let mintNumber = templateInfo["serial"] ?? mintNumberFromSupply
 		var newNFT: @NFT <- create NFT(templateId: templateInfo["id"]!, mintNumber: mintNumber)

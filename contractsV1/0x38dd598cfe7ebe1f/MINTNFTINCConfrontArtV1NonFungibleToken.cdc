@@ -21,7 +21,7 @@ contract MINTNFTINCConfrontArtV1NonFungibleToken: NonFungibleToken{
 	event NFTDestroyed(id: UInt64)
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -112,7 +112,7 @@ contract MINTNFTINCConfrontArtV1NonFungibleToken: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: NFT does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -166,6 +166,16 @@ contract MINTNFTINCConfrontArtV1NonFungibleToken: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

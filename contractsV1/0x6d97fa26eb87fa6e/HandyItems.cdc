@@ -236,7 +236,7 @@ contract HandyItems: NonFungibleToken{
 	// A Handy Item as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		//
 		access(all)
@@ -325,7 +325,7 @@ contract HandyItems: NonFungibleToken{
 			
 			// deposit it in the recipient's account using their reference
 			// recipient.deposit(token: <-create HandyItems.NFT(setID: self.id, serialID: 1))
-			let mainFUSDVault = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+			let mainFUSDVault = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 			mainFUSDVault.deposit(from: <-payment)
 			let numberLeft = self.quantity - self.numberMinted
 			let randID = UInt32(revertibleRandom<UInt64>() % UInt64(numberLeft) + 1)
@@ -377,7 +377,7 @@ contract HandyItems: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -429,6 +429,16 @@ contract HandyItems: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -541,7 +551,7 @@ contract HandyItems: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &HandyItems.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&HandyItems.Collection>(HandyItems.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&HandyItems.Collection>(HandyItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust HandyItems.Collection.borowHandyItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowHandyItem(id: itemID)

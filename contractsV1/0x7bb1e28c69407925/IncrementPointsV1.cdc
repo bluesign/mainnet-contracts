@@ -124,17 +124,13 @@ contract IncrementPointsV1{
 		// Update Lending State
 		// Lending
 		let lendingComptrollerRef =
-			(
-				getAccount(0xf80cb737bfe7c792).capabilities.get<
-					&{LendingInterfaces.ComptrollerPublic}
-				>(LendingConfig.ComptrollerPublicPath)!
+			getAccount(0xf80cb737bfe7c792).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(
+				LendingConfig.ComptrollerPublicPath
 			).borrow()!
 		let marketAddrs: [Address] = lendingComptrollerRef.getAllMarkets()
 		let lendingOracleRef =
-			(
-				getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
-					LendingConfig.OraclePublicPath
-				)!
+			getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
+				LendingConfig.OraclePublicPath
 			).borrow()!
 		var totalSupplyAmountInUsd = 0.0
 		var totalBorrowAmountInUsd = 0.0

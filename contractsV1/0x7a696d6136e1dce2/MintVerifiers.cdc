@@ -42,7 +42,7 @@ contract MintVerifiers{
 		access(all)
 		fun verify(_ params:{ String: AnyStruct}): String?{ 
 			let minter: Address = params["minter"]! as! Address
-			if let minterCollection = (getAccount(minter).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow(){ 
+			if let minterCollection = getAccount(minter).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>(){ 
 				if minterCollection.ownedIdsFromEvent(eventId: self.eventId).length <= 0{ 
 					return "The minter does not own a FLOAT from the required event."
 				}

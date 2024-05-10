@@ -202,7 +202,7 @@ contract Redeemables: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -268,14 +268,14 @@ contract Redeemables: NonFungibleToken{
 						
 						//this is an account that have setup a forwarder for DUC/FUT to the merchant account of Doodles.
 						let royaltyAccountWithDapperForwarder = getAccount(0x12be92985b852cb8)
-						let cap = royaltyAccountWithDapperForwarder.capabilities.get<&{FungibleToken.Receiver}>(/public/fungibleTokenSwitchboardPublic)!
-						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap, cut: royalty.cut, description: royalty.description)])
+						let cap = royaltyAccountWithDapperForwarder.capabilities.get<&{FungibleToken.Receiver}>(/public/fungibleTokenSwitchboardPublic)
+						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap!, cut: royalty.cut, description: royalty.description)])
 					}
 					let doodlesMerchanAccountTestnet = "0xd5b1a1553d0ed52e"
 					if royalty.receiver.address.toString() == doodlesMerchanAccountTestnet{ 
 						//on testnet we just send this to the main vault, it is not important
-						let cap = Redeemables.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap, cut: royalty.cut, description: royalty.description)])
+						let cap = Redeemables.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap!, cut: royalty.cut, description: royalty.description)])
 					}
 					return royalties
 			}
@@ -323,7 +323,7 @@ contract Redeemables: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- (self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")) as! @NFT
 			assert(!token.getSet().isRedeemLimitExceeded(), message: "Set redeem limit timestamp reached")
@@ -394,6 +394,16 @@ contract Redeemables: NonFungibleToken{
 					destroy <-self.ownedNFTs.remove(key: id)!
 				}
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -500,7 +510,7 @@ contract Redeemables: NonFungibleToken{
 		assert(set.isRedeemLimitExceeded(), message: "Set redeem limit timestamp not reached: ".concat(set.name))
 		let addresses = set.ownersRecord
 		for address in addresses{ 
-			let collection = (getAccount(address).capabilities.get<&{Redeemables.RedeemablesCollectionPublic}>(Redeemables.CollectionPublicPath)!).borrow()
+			let collection = getAccount(address).capabilities.get<&{Redeemables.RedeemablesCollectionPublic}>(Redeemables.CollectionPublicPath).borrow()
 			if collection != nil{ 
 				(collection!).burnUnredeemedSet(set: set)
 			}

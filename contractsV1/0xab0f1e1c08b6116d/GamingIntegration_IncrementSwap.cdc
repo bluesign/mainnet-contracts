@@ -49,10 +49,8 @@ contract GamingIntegration_IncrementSwap{
 		
 		// Inrement Swap
 		let poolRef: &{SwapInterfaces.PairPublic} =
-			(
-				getAccount(poolAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					SwapConfig.PairPublicPath
-				)!
+			getAccount(poolAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				SwapConfig.PairPublicPath
 			).borrow()!
 		return <-poolRef.swap(vaultIn: <-vaultIn, exactAmountOut: exactAmountOut)
 	}

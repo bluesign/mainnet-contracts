@@ -411,12 +411,12 @@ contract ListenMarketplace{
 		access(all)
 		fun createListing(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftIDs: [UInt64], salePaymentVaultType: Type, ftReceiverCap: Capability<&{FungibleToken.Receiver}>, salePrice: UFix64)																																																																   // saleCuts: [SaleCut]
 																																																																   : UInt64{ 
-			let royaltyReceiverCap = getAccount(ListenMarketplace.listenRoyaltyPaymentAddress).capabilities.get<&{FungibleToken.Receiver}>(ListenUSD.ReceiverPublicPath)!
+			let royaltyReceiverCap = getAccount(ListenMarketplace.listenRoyaltyPaymentAddress).capabilities.get<&{FungibleToken.Receiver}>(ListenUSD.ReceiverPublicPath)
 			assert(royaltyReceiverCap.borrow() != nil, message: "Missing or mis-typed ListenUSD receiver (royalty account)")
 			
 			// 5% royalty fee
-			let royalty = ListenMarketplace.SaleCut(receiver: royaltyReceiverCap, // as Capability<&{FungibleToken.Receiver}>,																				  
-																				  amount: salePrice * 0.05)
+			let royalty = ListenMarketplace.SaleCut(receiver: royaltyReceiverCap!, // as Capability<&{FungibleToken.Receiver}>,																				   
+																				   amount: salePrice * 0.05)
 			// With a 5% seller fee, the buyer would pay $100 for the NFT and $5 would go to Listen, meaning the seller would receive $95. 
 			// With a 5% buyer fee,  the buyer would pay $105 for the NFT, $5 would go to Listen, and $100 would go to the seller.
 			let saleCut = ListenMarketplace.SaleCut(receiver: ftReceiverCap, //  as Capability<&{FungibleToken.Receiver}>,																			 

@@ -21,7 +21,7 @@ contract sc1{
 		ViewResolver.ResolverCollection,
 		StarlyCard.StarlyCardCollectionPublic{
 	
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			panic("no")
 		}
@@ -40,28 +40,24 @@ contract sc1{
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?{ 
 			let owner = getAccount(0x58ed5053ec610954)
 			let col =
-				(
-					owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-						/public/starlyCardCollection
-					)!
-				).borrow()
+				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+					/public/starlyCardCollection
+				).borrow<&{NonFungibleToken.CollectionPublic}>()
 				?? panic("NFT Collection not found")
 			if col == nil{ 
 				panic("no")
 			}
-			let nft = (col!).borrowNFT(25176)
-			return nft!
+			let nft = (col!).borrowNFT(id: 25176)
+			return nft
 		}
 		
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?{ 
 			let owner = getAccount(0x58ed5053ec610954)
 			let col =
-				(
-					owner.capabilities.get<&{ViewResolver.ResolverCollection}>(
-						/public/starlyCardCollection
-					)!
-				).borrow()
+				owner.capabilities.get<&{ViewResolver.ResolverCollection}>(
+					/public/starlyCardCollection
+				).borrow<&{MetadataViews.ResolverCollection}>()
 				?? panic("NFT Collection not found")
 			if col == nil{ 
 				panic("no")
@@ -74,11 +70,9 @@ contract sc1{
 		fun borrowStarlyCard(id: UInt64): &StarlyCard.NFT?{ 
 			let owner = getAccount(0x58ed5053ec610954)
 			let col =
-				(
-					owner.capabilities.get<&{StarlyCard.StarlyCardCollectionPublic}>(
-						/public/starlyCardCollection
-					)!
-				).borrow()
+				owner.capabilities.get<&{StarlyCard.StarlyCardCollectionPublic}>(
+					/public/starlyCardCollection
+				).borrow<&{StarlyCard.StarlyCardCollectionPublic}>()
 				?? panic("NFT Collection not found")
 			if col == nil{ 
 				panic("no")
@@ -88,8 +82,13 @@ contract sc1{
 		}
 		
 		access(all)
-		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
-			return <-create tr()
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 	}
 	

@@ -319,7 +319,7 @@ contract FreshmintClaimSale{
 			// Remove the next NFT from the collection.
 			let nextID = ids[0]
 			let nft <- collection.withdraw(withdrawID: nextID)
-			let nftReceiver = (getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.receiverPath)!).borrow()!
+			let nftReceiver = getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.receiverPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
 			let remainingSupply = ids.length - 1
 			emit NFTClaimed(saleUUID: self.uuid, saleID: self.id, saleAddress: self.owner?.address, remainingSupply: remainingSupply, nftType: nft.getType(), nftID: nft.id)
 			nftReceiver.deposit(token: <-nft)

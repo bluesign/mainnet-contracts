@@ -552,7 +552,7 @@ contract FindPack: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -729,7 +729,7 @@ contract FindPack: NonFungibleToken{
 		fun requeue(packId: UInt64){ 
 			let token <- self.withdraw(withdrawID: packId) as! @NFT
 			let address = token.resetOpenedBy()
-			let cap = getAccount(address).capabilities.get<&Collection>(FindPack.CollectionPublicPath)!
+			let cap = getAccount(address).capabilities.get<&Collection>(FindPack.CollectionPublicPath)
 			let receiver = cap.borrow()!
 			receiver.deposit(token: <-token)
 			emit Requeued(packId: packId, address: cap.address)
@@ -750,7 +750,7 @@ contract FindPack: NonFungibleToken{
 			token.setOpenedBy(receiverCap)
 			
 			// establish the receiver for Redeeming FindPack
-			let receiver = (FindPack.account.capabilities.get<&{NonFungibleToken.Receiver}>(FindPack.OpenedCollectionPublicPath)!).borrow()!
+			let receiver = FindPack.account.capabilities.get<&{NonFungibleToken.Receiver}>(FindPack.OpenedCollectionPublicPath).borrow()!
 			let typeId = token.getTypeID()
 			let packTypeName = token.packTypeName
 			let metadata = token.getMetadata()
@@ -821,9 +821,9 @@ contract FindPack: NonFungibleToken{
 				}
 			//to-do :  emit events here ?
 			}
-			let wallet = getAccount(FindPack.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+			let wallet = getAccount(FindPack.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 			if wallet.check(){ 
-				let r = MetadataViews.Royalty(receiver: wallet, cut: 0.15, description: ".find")
+				let r = MetadataViews.Royalty(receiver: wallet!, cut: 0.15, description: ".find")
 				(r.receiver.borrow()!).deposit(from: <-vault.withdraw(amount: (saleInfo!).price * r.cut))
 			}
 			(metadata.wallet.borrow()!).deposit(from: <-vault)
@@ -885,9 +885,9 @@ contract FindPack: NonFungibleToken{
 			
 			//TODO: REMOVE THIS
 			if !royaltiesPaid{ 
-				let wallet = getAccount(FindPack.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+				let wallet = getAccount(FindPack.account.address).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 				if wallet.check(){ 
-					let r = MetadataViews.Royalty(receiver: wallet, cut: 0.10, description: ".find")
+					let r = MetadataViews.Royalty(receiver: wallet!, cut: 0.10, description: ".find")
 					(r.receiver.borrow()!).deposit(from: <-vault.withdraw(amount: (saleInfo!).price * r.cut))
 				}
 			}
@@ -905,7 +905,7 @@ contract FindPack: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Could not withdraw nft")
 			let nft <- token as! @NFT
@@ -977,6 +977,16 @@ contract FindPack: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let exampleNFT = nft as! &NFT
 			return exampleNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -1101,7 +1111,7 @@ contract FindPack: NonFungibleToken{
 	fun getPacksCollection(packTypeName: String, packTypeId: UInt64): &FindPack.Collection{ 
 		let pathIdentifier = self.getPacksCollectionPath(packTypeName: packTypeName, packTypeId: packTypeId)
 		let path = PublicPath(identifier: pathIdentifier) ?? panic("Cannot create path from identifier : ".concat(pathIdentifier))
-		return (FindPack.account.capabilities.get<&FindPack.Collection>(path)!).borrow() ?? panic("Could not borow FindPack collection for path : ".concat(pathIdentifier))
+		return FindPack.account.capabilities.get<&FindPack.Collection>(path).borrow() ?? panic("Could not borow FindPack collection for path : ".concat(pathIdentifier))
 	}
 	
 	// given a path, lookin to the NFT Collection and return a new empty collection

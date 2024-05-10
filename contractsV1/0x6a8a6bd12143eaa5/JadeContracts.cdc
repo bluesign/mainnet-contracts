@@ -153,22 +153,18 @@ contract JadeContracts{
 	access(all)
 	fun getUserJadeCollections(user: Address): [String]{ 
 		let collections: &JadeContracts.ContractsBook =
-			(
-				getAccount(user).capabilities.get<&JadeContracts.ContractsBook>(
-					JadeContracts.ContractsBookPublicPath
-				)!
-			).borrow()
+			getAccount(user).capabilities.get<&JadeContracts.ContractsBook>(
+				JadeContracts.ContractsBookPublicPath
+			).borrow<&JadeContracts.ContractsBook>()
 			?? panic("Could not borrow JadeContracts.ContractsBookPublic from user account")
 		return collections.getContracts()
 	}
 	
 	access(all)
 	fun getGlobalContractsBook(): &GlobalContractsBook{ 
-		return (
-			self.account.capabilities.get<&GlobalContractsBook>(
-				JadeContracts.GlobalContractsBookPublicPath
-			)!
-		).borrow()!
+		return self.account.capabilities.get<&GlobalContractsBook>(
+			JadeContracts.GlobalContractsBookPublicPath
+		).borrow<&GlobalContractsBook>()!
 	}
 	
 	init(){ 

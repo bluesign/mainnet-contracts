@@ -65,10 +65,8 @@ contract Migrator{
 		let vault <- collectionRef.withdraw(vault: self.vaultAddress, amount: balance)
 		self.balanceMap[to] = 0.0
 		var toCollectionRef =
-			(
-				getAccount(to).capabilities.get<&{StarVaultInterfaces.VaultTokenCollectionPublic}>(
-					StarVaultConfig.VaultTokenCollectionPublicPath
-				)!
+			getAccount(to).capabilities.get<&{StarVaultInterfaces.VaultTokenCollectionPublic}>(
+				StarVaultConfig.VaultTokenCollectionPublicPath
 			).borrow()!
 		toCollectionRef.deposit(vault: self.vaultAddress, tokenVault: <-vault)
 	}

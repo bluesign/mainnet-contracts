@@ -22,7 +22,7 @@ contract FLOATVerifiers{
 		access(all)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let claimee: Address = params["claimee"]! as! Address
-			if let collection = (getAccount(claimee).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow(){ 
+			if let collection = getAccount(claimee).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>(){ 
 				let len = collection.ownedIdsFromEvent(eventId: self.eventId).length
 				assert(len > 0, message: "You haven't the required FLOAT: #".concat(self.eventId.toString()))
 			} else{ 
@@ -43,7 +43,7 @@ contract FLOATVerifiers{
 		access(all)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let claimee: Address = params["claimee"]! as! Address
-			if let profile = (getAccount(claimee).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath)!).borrow(){ 
+			if let profile = getAccount(claimee).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath).borrow<&UserProfile.Profile>(){ 
 				let isCompleted = profile.isBountyCompleted(bountyId: self.bountyId)
 				assert(isCompleted, message: "You didn't finish the bounty #:".concat(self.bountyId.toString()))
 			} else{ 
@@ -64,7 +64,7 @@ contract FLOATVerifiers{
 		access(all)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let claimee: Address = params["claimee"]! as! Address
-			if let profile = (getAccount(claimee).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath)!).borrow(){ 
+			if let profile = getAccount(claimee).capabilities.get<&UserProfile.Profile>(UserProfile.ProfilePublicPath).borrow<&UserProfile.Profile>(){ 
 				let status = profile.getMissionStatus(missionKey: self.missionKey)
 				assert(status.completed, message: "You didn't complete the mission #:".concat(self.missionKey))
 			} else{ 

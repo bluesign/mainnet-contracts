@@ -273,7 +273,7 @@ contract Sportvatar: NonFungibleToken{
 	
 	//The NFT resource that implements both Private and Public interfaces
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, Private, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, Private, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -695,7 +695,7 @@ contract Sportvatar: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -762,6 +762,16 @@ contract Sportvatar: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let collectibleNFT = nft as! &Sportvatar.NFT
 			return collectibleNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -836,7 +846,7 @@ contract Sportvatar: NonFungibleToken{
 	access(all)
 	fun getSportvatar(address: Address, sportvatarId: UInt64): SportvatarData?{ 
 		let account = getAccount(address)
-		if let collectibleCollection = (account.capabilities.get<&Sportvatar.Collection>(self.CollectionPublicPath)!).borrow(){ 
+		if let collectibleCollection = account.capabilities.get<&Sportvatar.Collection>(self.CollectionPublicPath).borrow<&Sportvatar.Collection>(){ 
 			if let collectible = collectibleCollection.borrowSportvatar(id: sportvatarId){ 
 				return SportvatarData(id: sportvatarId, mint: (collectible!).mint, series: (collectible!).series, name: (collectible!).getName(), rarity: (collectible!).rarity, svg: (collectible!).getSvg(), combination: (collectible!).combination, creatorAddress: (collectible!).creatorAddress, layers: (collectible!).getLayers(), bio: (collectible!).getBio(), metadata: (collectible!).getMetadata(), stats: (collectible!).getStats())
 			}
@@ -849,7 +859,7 @@ contract Sportvatar: NonFungibleToken{
 	fun getSportvatars(address: Address): [SportvatarData]{ 
 		var sportvatarData: [SportvatarData] = []
 		let account = getAccount(address)
-		if let collectibleCollection = (account.capabilities.get<&Sportvatar.Collection>(self.CollectionPublicPath)!).borrow(){ 
+		if let collectibleCollection = account.capabilities.get<&Sportvatar.Collection>(self.CollectionPublicPath).borrow<&Sportvatar.Collection>(){ 
 			for id in collectibleCollection.getIDs(){ 
 				if let collectible = collectibleCollection.borrowSportvatar(id: id){ 
 					sportvatarData.append(SportvatarData(id: id, mint: (collectible!).mint, series: (collectible!).series, name: (collectible!).getName(), rarity: (collectible!).rarity, svg: nil, combination: (collectible!).combination, creatorAddress: (collectible!).creatorAddress, layers: (collectible!).getLayers(), bio: (collectible!).getBio(), metadata: (collectible!).getMetadata(), stats: (collectible!).getStats()))
@@ -1084,7 +1094,7 @@ contract Sportvatar: NonFungibleToken{
 			panic("Error distributing stat points to Sportvatar")
 		}
 		let royalties: [Royalty] = []
-		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: Sportvatar.getMarketplaceCut(), type: RoyaltyType.percentage))
+		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: Sportvatar.getMarketplaceCut(), type: RoyaltyType.percentage))
 		
 		// Mint the new Sportvatar NFT by passing the metadata to it
 		var newNFT <- create NFT(series: series, layers: fullLayers, metadata: metadata, stats: stats, creatorAddress: address, royalties: Royalties(royalty: royalties), rarity: flameRarity)

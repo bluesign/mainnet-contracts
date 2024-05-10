@@ -6,7 +6,7 @@ contract BnGNFT: NonFungibleToken{
 	
 	// Declare the NFT resource type
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let metadata:{ String: String}
 		
@@ -64,7 +64,7 @@ contract BnGNFT: NonFungibleToken{
 		//
 		// Function that removes an NFT from the collection 
 		// and moves it to the calling context
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token <- self.ownedNFTs.remove(key: withdrawID)!
@@ -105,6 +105,16 @@ contract BnGNFT: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

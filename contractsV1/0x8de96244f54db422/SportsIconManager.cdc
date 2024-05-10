@@ -451,9 +451,9 @@ contract SportsIconManager{
 		self.adminPaymentReceivers ={} 
 		self.adminPaymentReceivers["FUSD"] = self.account.capabilities.get<&FUSD.Vault>(
 				/public/fusdReceiver
-			)!
+			)
 		self.adminPaymentReceivers["FLOW"] = self.account.capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 	}
 }

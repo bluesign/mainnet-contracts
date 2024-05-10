@@ -609,10 +609,8 @@ contract Questing{
 	access(all)
 	fun getQuest(questManager: Address, id: UInt64): &Quest?{ 
 		if let questManagerRef =
-			(
-				getAccount(questManager).capabilities.get<&QuestManager>(
-					Questing.QuestManagerPublicPath
-				)!
+			getAccount(questManager).capabilities.get<&QuestManager>(
+				Questing.QuestManagerPublicPath
 			).borrow(){ 
 			return questManagerRef.borrowQuest(id: id)
 		} else{ 

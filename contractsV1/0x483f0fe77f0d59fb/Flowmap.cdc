@@ -36,7 +36,7 @@ contract Flowmap: NonFungibleToken{
 	let inscriptionFee: UFix64
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -89,7 +89,7 @@ contract Flowmap: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing Flowmap")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -120,6 +120,16 @@ contract Flowmap: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -138,7 +148,7 @@ contract Flowmap: NonFungibleToken{
 			inscriptionFee.balance >= Flowmap.inscriptionFee:
 				"Insufficient inscription fee"
 		}
-		((Flowmap.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!).deposit(from: <-inscriptionFee)
+		(Flowmap.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!).deposit(from: <-inscriptionFee)
 		return <-create Flowmap.NFT()
 	}
 	
@@ -150,8 +160,8 @@ contract Flowmap: NonFungibleToken{
 			inscriptionFee.balance >= Flowmap.inscriptionFee * quantity:
 				"Insufficient inscription fee"
 		}
-		((Flowmap.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!).deposit(from: <-inscriptionFee)
-		let receiverRef = (getAccount(receiver).capabilities.get<&{Flowmap.CollectionPublic}>(Flowmap.CollectionPublicPath)!).borrow() ?? panic("Could not borrow reference to the owner's Collection!")
+		(Flowmap.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!).deposit(from: <-inscriptionFee)
+		let receiverRef = getAccount(receiver).capabilities.get<&{Flowmap.CollectionPublic}>(Flowmap.CollectionPublicPath).borrow<&{Flowmap.CollectionPublic}>() ?? panic("Could not borrow reference to the owner's Collection!")
 		var i = 0
 		while i < Int(quantity){ 
 			receiverRef.deposit(token: <-create Flowmap.NFT())

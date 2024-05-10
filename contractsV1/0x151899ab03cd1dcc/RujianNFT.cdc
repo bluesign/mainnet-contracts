@@ -40,7 +40,7 @@ contract RujianNFT: NonFungibleToken{
 	// 如见 资源存证NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -186,7 +186,7 @@ contract RujianNFT: NonFungibleToken{
 		
 		//  提取
 		// 从 NFT 作品集 取出一个，并转移到调用者
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -248,6 +248,16 @@ contract RujianNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -301,7 +311,7 @@ contract RujianNFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &RujianNFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&RujianNFT.Collection>(RujianNFT.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&RujianNFT.Collection>(RujianNFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust RjResourceItems.Collection.borrowRujianNFT to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowRujianNFT(id: itemID)

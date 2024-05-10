@@ -182,7 +182,7 @@ contract Admin{
 				self.capability != nil:
 					"Cannot create Admin, capability is not set"
 			}
-			let recipient = (Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(AeraPack.CollectionPublicPath)!).borrow()!
+			let recipient = Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(AeraPack.CollectionPublicPath).borrow()!
 			for hash in hashes{ 
 				AeraPack.mintNFT(recipient: recipient, typeId: typeId, hash: hash)
 			}
@@ -215,7 +215,7 @@ contract Admin{
 			}
 			let sp = StoragePath(identifier: fromPath) ?? panic("Invalid path ".concat(fromPath))
 			let treasuryPath = PublicPath(identifier: toPath) ?? panic("Invalid toPath ".concat(toPath))
-			let collection = (Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(treasuryPath)!).borrow() ?? panic("Could not borrow nft.cp at toPath ".concat(toPath).concat(" address ").concat(Admin.account.address.toString()))
+			let collection = Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(treasuryPath).borrow() ?? panic("Could not borrow nft.cp at toPath ".concat(toPath).concat(" address ").concat(Admin.account.address.toString()))
 			self.sendNFT(storagePath: fromPath, recipient: collection, ids: ids)
 		}
 		
@@ -239,13 +239,13 @@ contract Admin{
 					"Cannot create Admin, capability is not set"
 			}
 			let privatePath = PrivatePath(identifier: pathIdentifier)!
-			var cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)!
+			var cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)
 			if !cap.check(){ 
 				let storagePath = StoragePath(identifier: pathIdentifier)!
 				Admin.account.link<&{MetadataViews.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath, target: storagePath)
-				cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)!
+				cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)
 			}
-			return FindViews.AuthNFTPointer(cap: cap, id: id)
+			return FindViews.AuthNFTPointer(cap: cap!, id: id)
 		}
 		
 		access(all)

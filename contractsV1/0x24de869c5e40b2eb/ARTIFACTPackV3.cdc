@@ -167,7 +167,7 @@ contract ARTIFACTPackV3: NonFungibleToken{
 	// The resource that represents the Pack
 	//
 	access(all)
-	resource NFT: Interfaces.IPack, NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: Interfaces.IPack, NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -330,7 +330,7 @@ contract ARTIFACTPackV3: NonFungibleToken{
 		// that is to be removed from the Collection
 		//
 		// returns: @NonFungibleToken.NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Remove the nft from the Collection
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: ARTIFACTPackV3 does not exist in the collection")
@@ -387,6 +387,16 @@ contract ARTIFACTPackV3: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let artifactsPack = nft as! &NFT
 			return artifactsPack as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

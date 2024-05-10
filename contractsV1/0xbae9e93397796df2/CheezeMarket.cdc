@@ -212,7 +212,7 @@ contract CheezeMarket{
 		
 		// XXX: cannot use Administrator.setX() cuz Cadence does not get
 		//	  that we do initialization and will show errors
-		self.cutReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!!
+		self.cutReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
 		self.firstSaleCutPercent = 0.25
 		self.royaltyCutPercent = 0.10
 		self.maxRoyaltyPercent = 0.3

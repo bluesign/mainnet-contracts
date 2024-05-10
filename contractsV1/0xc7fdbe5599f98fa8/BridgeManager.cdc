@@ -657,7 +657,7 @@ contract BridgeManager{
 	access(contract)
 	fun getAdmin(): &Admin{ 
 		let admin =
-			(self.account.capabilities.get<&Admin>(self.AdminPrivatePath)!).borrow()
+			self.account.capabilities.get<&Admin>(self.AdminPrivatePath).borrow<&Admin>()
 			?? panic("Could not borrow BridgeManager.Admin reference.")
 		return admin
 	}

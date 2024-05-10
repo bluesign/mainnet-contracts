@@ -328,7 +328,7 @@ contract Auction{
 				if (editionStatus.royalty[key]!).firstSalePercent > 0.0{ 
 					let commission = self.currentPrice * (editionStatus.royalty[key]!).firstSalePercent * 0.01
 					let account = getAccount(key)
-					let vaultCap = account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
+					let vaultCap = account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)
 					if vaultCap.check(){ 
 						let vault = vaultCap.borrow()!
 						vault.deposit(from: <-self.bidVault.withdraw(amount: commission))

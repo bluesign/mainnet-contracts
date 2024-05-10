@@ -114,7 +114,7 @@ contract Art: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, ViewResolver.Resolver{ 
 		//TODO: tighten up the permission here.
 		access(all)
 		let id: UInt64
@@ -263,7 +263,7 @@ contract Art: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -323,6 +323,16 @@ contract Art: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -355,7 +365,7 @@ contract Art: NonFungibleToken{
 	access(all)
 	fun getContentForArt(address: Address, artId: UInt64): String?{ 
 		let account = getAccount(address)
-		if let artCollection = (account.capabilities.get<&{Art.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let artCollection = account.capabilities.get<&{Art.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Art.CollectionPublic}>(){ 
 			return (artCollection.borrowArt(id: artId)!).content()
 		}
 		return nil
@@ -366,10 +376,10 @@ contract Art: NonFungibleToken{
 	fun getArt(address: Address): [ArtData]{ 
 		var artData: [ArtData] = []
 		let account = getAccount(address)
-		if let artCollection = (account.capabilities.get<&{Art.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let artCollection = account.capabilities.get<&{Art.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Art.CollectionPublic}>(){ 
 			for id in artCollection.getIDs(){ 
 				var art = artCollection.borrowArt(id: id)
-				artData.append(ArtData(metadata: *(art!).metadata, id: id, cacheKey: (art!).cacheKey()))
+				artData.append(ArtData(metadata: (art!).metadata, id: id, cacheKey: (art!).cacheKey()))
 			}
 		}
 		return artData

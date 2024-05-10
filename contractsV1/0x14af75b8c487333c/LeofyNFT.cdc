@@ -335,7 +335,7 @@ contract LeofyNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -412,7 +412,7 @@ contract LeofyNFT: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT: ".concat(withdrawID.toString()))
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -462,6 +462,16 @@ contract LeofyNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -478,12 +488,12 @@ contract LeofyNFT: NonFungibleToken{
 	
 	access(all)
 	fun getItemCollectionPublic(): &{LeofyNFT.ItemCollectionPublic}{ 
-		return (self.account.capabilities.get<&{LeofyNFT.ItemCollectionPublic}>(LeofyNFT.ItemPublicPath)!).borrow() ?? panic("Could not borrow capability from public Item Collection")
+		return self.account.capabilities.get<&{LeofyNFT.ItemCollectionPublic}>(LeofyNFT.ItemPublicPath).borrow<&{LeofyNFT.ItemCollectionPublic}>() ?? panic("Could not borrow capability from public Item Collection")
 	}
 	
 	access(all)
 	fun getLeofyCoinVault(): &{FungibleToken.Receiver}{ 
-		return (self.account.capabilities.get<&{FungibleToken.Receiver}>(LeofyCoin.ReceiverPublicPath)!!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+		return (self.account.capabilities.get<&{FungibleToken.Receiver}>(LeofyCoin.ReceiverPublicPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 	}
 	
 	// -----------------------------------------------------------------------

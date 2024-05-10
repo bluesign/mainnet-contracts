@@ -110,7 +110,7 @@ contract GeniaceNFT: NonFungibleToken{
 	
 	// Declare the NFT resource type
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The unique ID that differentiates each NFT
 		access(all)
 		let id: UInt64
@@ -173,7 +173,7 @@ contract GeniaceNFT: NonFungibleToken{
 		//
 		// Function that removes an NFT from the collection 
 		// and moves it to the calling context
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
@@ -227,6 +227,16 @@ contract GeniaceNFT: NonFungibleToken{
 		fun borrowGeniaceNFT(id: UInt64): &GeniaceNFT.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &GeniaceNFT.NFT?
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -203,11 +203,9 @@ contract BloctoTokenPublicSale{
 					"Already distributed or refunded"
 			}
 			let receiverRef =
-				(
-					getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
-						BloctoToken.TokenPublicReceiverPath
-					)!
-				).borrow()
+				getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
+					BloctoToken.TokenPublicReceiverPath
+				).borrow<&{FungibleToken.Receiver}>()
 				?? panic("Could not borrow BloctoToken receiver reference")
 			let purchaseInfo =
 				BloctoTokenPublicSale.purchases[address]
@@ -234,7 +232,7 @@ contract BloctoTokenPublicSale{
 			
 			// Refund the remaining amount
 			if refundAmount > 0.0{ 
-				let tUSDTReceiverRef = (getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(TeleportedTetherToken.TokenPublicReceiverPath)!).borrow() ?? panic("Could not borrow tUSDT vault receiver public reference")
+				let tUSDTReceiverRef = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(TeleportedTetherToken.TokenPublicReceiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow tUSDT vault receiver public reference")
 				let tusdtVault <- BloctoTokenPublicSale.tusdtVault.withdraw(amount: refundAmount)
 				tUSDTReceiverRef.deposit(from: <-tusdtVault)
 				emit Refunded(address: address, amount: refundAmount)
@@ -250,11 +248,9 @@ contract BloctoTokenPublicSale{
 					"Already distributed or refunded"
 			}
 			let receiverRef =
-				(
-					getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
-						TeleportedTetherToken.TokenPublicReceiverPath
-					)!
-				).borrow()
+				getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(
+					TeleportedTetherToken.TokenPublicReceiverPath
+				).borrow<&{FungibleToken.Receiver}>()
 				?? panic("Could not borrow tUSDT vault receiver public reference")
 			let purchaseInfo =
 				BloctoTokenPublicSale.purchases[address]

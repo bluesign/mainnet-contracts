@@ -107,7 +107,7 @@ contract ProShop_1: NonFungibleToken{
 	// A ProShop as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -721,7 +721,7 @@ contract ProShop_1: NonFungibleToken{
 		fun borrowProShop(id: UInt64): &ProShop_1.NFT{ 
 			let ownerAddress = ProShop_1.owners[id]!
 			let account = getAccount(ownerAddress)
-			let ref = (account.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!!).borrow() ?? panic("Could not borrow public reference")
+			let ref = (account.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!).borrow() ?? panic("Could not borrow public reference")
 			return ref.borrowProShop(id: id)!
 		}
 	}
@@ -793,7 +793,7 @@ contract ProShop_1: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// pre {
 			//	 //only can be called by admin or owner
@@ -826,7 +826,7 @@ contract ProShop_1: NonFungibleToken{
 			var token <- self.withdraw(withdrawID: tokenId) as! @ProShop_1.NFT
 			token.setProShopOwner(address: recipient, receiver: receiver)
 			let recipientAccount = getAccount(recipient)
-			let proshopPublicCollection = (recipientAccount.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!!).borrow() ?? panic("Could not borrow public reference of recipient")
+			let proshopPublicCollection = (recipientAccount.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!).borrow() ?? panic("Could not borrow public reference of recipient")
 			let tokenId: UInt64 = token.id
 			proshopPublicCollection.deposit(token: <-token)
 			emit transferredProshop(id: tokenId, from: (self.owner!).address, to: recipient)
@@ -889,7 +889,7 @@ contract ProShop_1: NonFungibleToken{
 		fun listForSale(id: UInt64, gearId: UInt64, price: UFix64){ 
 			let ownerAddress = ProShop_1.owners[id]!
 			let account = getAccount(ownerAddress)
-			let ref = (account.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!!).borrow() ?? panic("Could not borrow public reference")
+			let ref = (account.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!).borrow() ?? panic("Could not borrow public reference")
 			let proshoptoken = ref.borrowProShop(id: id)!
 			
 			//check access privilege
@@ -911,7 +911,7 @@ contract ProShop_1: NonFungibleToken{
 		fun purchaseGearForProShopWithPoints(id: UInt64, gear: @{NonFungibleToken.NFT}, points: UFix64){ 
 			let ownerAddress = ProShop_1.owners[id]!
 			let account = getAccount(ownerAddress)
-			let ref = (account.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!!).borrow() ?? panic("Could not borrow public reference")
+			let ref = (account.capabilities.get<&{ProShop_1.ProShopCollectionPublic}>(ProShop_1.CollectionPublicPath)!).borrow() ?? panic("Could not borrow public reference")
 			let proshoptoken = ref.borrowProShop(id: id)!
 			//check access privilege
 			let authAddress = self.owner?.address!
@@ -931,6 +931,16 @@ contract ProShop_1: NonFungibleToken{
 		access(all)
 		fun getAuthAccount(): Address{ 
 			return ProShop_1.account.address
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -1017,7 +1027,7 @@ contract ProShop_1: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, proshopId: UInt64): &ProShop_1.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&ProShop_1.Collection>(ProShop_1.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&ProShop_1.Collection>(ProShop_1.CollectionPublicPath).borrow<&ProShop_1.Collection>() ?? panic("Couldn't get collection")
 		// We trust ProShop.Collection.borowProShop to get the correct proshopId
 		// (it checks it before returning it).
 		return collection.borrowProShop(id: proshopId)

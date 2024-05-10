@@ -145,7 +145,7 @@ contract AFLNFT: NonFungibleToken{
 	// The resource that represents the AFLNFT NFTs
 	// 
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -192,7 +192,7 @@ contract AFLNFT: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			assert(withdrawID != 87707, message: "Transfer of this NFT is not allowed!") // 87707 is the id of 2021 AFL Genesis Ball
 			
@@ -235,6 +235,16 @@ contract AFLNFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -264,7 +274,7 @@ contract AFLNFT: NonFungibleToken{
 				"Template Id must be valid"
 		}
 		let receiptAccount = getAccount(account)
-		let recipientCollection = (receiptAccount.capabilities.get<&{AFLNFT.AFLNFTCollectionPublic}>(AFLNFT.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+		let recipientCollection = receiptAccount.capabilities.get<&{AFLNFT.AFLNFTCollectionPublic}>(AFLNFT.CollectionPublicPath).borrow<&{AFLNFT.AFLNFTCollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 		let mintNumberFromSupply = (AFLNFT.allTemplates[templateInfo["id"]!]!).incrementIssuedSupply()
 		let mintNumber = templateInfo["serial"] ?? mintNumberFromSupply
 		var newNFT: @NFT <- create NFT(templateId: templateInfo["id"]!, mintNumber: mintNumber)

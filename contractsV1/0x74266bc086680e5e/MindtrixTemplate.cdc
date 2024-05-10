@@ -571,13 +571,13 @@ contract MindtrixTemplate{
 		var merchantReceiverCap: Capability<&{FungibleToken.Receiver}> =
 			MindtrixTemplate.account.capabilities.get<&FiatToken.Vault>(
 				FiatToken.VaultReceiverPubPath
-			)!
+			)
 		if paymentType == Type<@FiatToken.Vault>(){ 
-			merchantReceiverCap = MindtrixTemplate.account.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath)!
+			merchantReceiverCap = MindtrixTemplate.account.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath)
 		} else if paymentType == Type<@FUSD.Vault>(){ 
-			merchantReceiverCap = MindtrixTemplate.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
+			merchantReceiverCap = MindtrixTemplate.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)
 		} else if paymentType == Type<@FlowToken.Vault>(){ 
-			merchantReceiverCap = MindtrixTemplate.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			merchantReceiverCap = MindtrixTemplate.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		}		  // The following below are Dapper Wallet Payments
 		  else if paymentType == Type<@FlowUtilityToken.Vault>(){ 
 			merchantReceiverCap = getAccount(merchantAccount!).capabilities.get<&{FungibleToken.Receiver}>(MindtrixTemplate.FutReceiverPublicPath)!
@@ -715,7 +715,7 @@ contract MindtrixTemplate{
 			MetadataViews.Royalty(
 				receiver: self.account.capabilities.get<&TokenForwarding.Forwarder>(
 					self.DucReceiverPublicPath
-				)!,
+				),
 				cut: 0.05,
 				description: "Mindtrix 5% $DUC royalty from secondary sales."
 			)
@@ -724,7 +724,7 @@ contract MindtrixTemplate{
 			MetadataViews.Royalty(
 				receiver: self.account.capabilities.get<&TokenForwarding.Forwarder>(
 					self.FutReceiverPublicPath
-				)!,
+				),
 				cut: 0.05,
 				description: "Mindtrix 5% $FUT royalty from secondary sales."
 			)

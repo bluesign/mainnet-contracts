@@ -918,7 +918,7 @@ contract Toucans{
 			let fundingCycleRef: &FundingCycle = self.borrowCurrentFundingCycleRef() ?? panic("There is no active cycle.")
 			
 			// tax for emerald city (5%)
-			let emeraldCityTreasury = (getAccount(0x5643fd47a29770e7).capabilities.get<&{FungibleToken.Receiver}>(self.paymentTokenInfo.receiverPath)!).borrow() ?? panic("Emerald City treasury cannot accept this payment. Please contact us in our Discord.")
+			let emeraldCityTreasury = getAccount(0x5643fd47a29770e7).capabilities.get<&{FungibleToken.Receiver}>(self.paymentTokenInfo.receiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Emerald City treasury cannot accept this payment. Please contact us in our Discord.")
 			emeraldCityTreasury.deposit(from: <-paymentTokens.withdraw(amount: paymentTokens.balance * 0.05))
 			let paymentAfterTax: UFix64 = paymentTokens.balance
 			let payer: Address = (projectTokenReceiver.owner!).address
@@ -1586,7 +1586,7 @@ contract Toucans{
 		// use this function to vote on other projects proposals
 		access(all)
 		fun voteOnProjectAction(projectOwner: Address, projectId: String, actionUUID: UInt64, vote: Bool){ 
-			let collection: &Collection = (getAccount(projectOwner).capabilities.get<&Toucans.Collection>(Toucans.CollectionPublicPath)!).borrow() ?? panic("A DAOTreasury doesn't exist here.")
+			let collection: &Collection = getAccount(projectOwner).capabilities.get<&Toucans.Collection>(Toucans.CollectionPublicPath).borrow<&Toucans.Collection>() ?? panic("A DAOTreasury doesn't exist here.")
 			let project: &Project = collection.borrowProjectPublic(projectId: projectId) ?? panic("Project does not exist.")
 			let manager: &Manager = project.borrowManagerPublic()
 			let action: &MultiSignAction = manager.borrowAction(actionUUID: actionUUID)

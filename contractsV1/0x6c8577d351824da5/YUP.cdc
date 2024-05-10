@@ -31,7 +31,7 @@ contract YUP: NonFungibleToken{
 	var totalSupply: UInt64
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -86,7 +86,7 @@ contract YUP: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -123,6 +123,16 @@ contract YUP: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -149,7 +159,7 @@ contract YUP: NonFungibleToken{
 	
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &YUP.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&YUP.Collection>(YUP.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&YUP.Collection>(YUP.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.borrowYUP(id: itemID)
 	}
 	

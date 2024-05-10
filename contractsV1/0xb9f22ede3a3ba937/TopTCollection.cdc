@@ -73,7 +73,7 @@ contract TopTCollection: NonFungibleToken{
 	// A Kitty Item as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -179,7 +179,7 @@ contract TopTCollection: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -248,6 +248,16 @@ contract TopTCollection: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -269,7 +279,7 @@ contract TopTCollection: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &TopTCollection.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&TopTCollection.Collection>(TopTCollection.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&TopTCollection.Collection>(TopTCollection.CollectionPublicPath).borrow<&TopTCollection.Collection>() ?? panic("Couldn't get collection")
 		// We trust KittyItems.Collection.borowKittyItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowToptItem(id: itemID)
@@ -286,10 +296,10 @@ contract TopTCollection: NonFungibleToken{
 	access(all)
 	fun getArt(address: Address): [ArtData]{ 
 		var artData: [ArtData] = []
-		if let artCollection = (getAccount(address).capabilities.get<&{TopTCollection.TopTCollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let artCollection = getAccount(address).capabilities.get<&{TopTCollection.TopTCollectionPublic}>(self.CollectionPublicPath).borrow<&{TopTCollection.TopTCollectionPublic}>(){ 
 			for id in artCollection.getIDs(){ 
 				var art = artCollection.borrowToptItem(id: id) ?? panic("ddd")
-				artData.append(ArtData(metadata: *art.metadata, id: id))
+				artData.append(ArtData(metadata: art.metadata, id: id))
 			}
 		}
 		return artData

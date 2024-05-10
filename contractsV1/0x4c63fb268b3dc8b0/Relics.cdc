@@ -72,7 +72,7 @@ contract Relics: NonFungibleToken{
 	
 	// Relic NFT resource definition
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -260,7 +260,7 @@ contract Relics: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Relic not found.")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -306,6 +306,16 @@ contract Relics: NonFungibleToken{
 			let relic = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let getRelic = relic as! &Relics.NFT
 			return getRelic
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -373,7 +383,7 @@ contract Relics: NonFungibleToken{
 		// update a single media URL on a single edition
 		access(all)
 		fun updateMediaURL(_from: Address, _id: UInt64, _whichURL: String, _newURL: String){ 
-			let collection = (getAccount(_from).capabilities.get<&Relics.Collection>(Relics.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+			let collection = getAccount(_from).capabilities.get<&Relics.Collection>(Relics.CollectionPublicPath).borrow<&Relics.Collection>() ?? panic("Couldn't get collection")
 			let edition = collection.borrowRelic(id: _id)
 			switch _whichURL{ 
 				case "assetVideoURL":
@@ -392,7 +402,7 @@ contract Relics: NonFungibleToken{
 		// update all media URLs on a single edition
 		access(all)
 		fun updateMediaURLs(from: Address, id: UInt64, _newAssetVideoURL: String, _newAssetImageURL: String, _newMusicURL: String, _newArtworkURL: String, _newMarketDisplay: String){ 
-			let collection = (getAccount(from).capabilities.get<&Relics.Collection>(Relics.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+			let collection = getAccount(from).capabilities.get<&Relics.Collection>(Relics.CollectionPublicPath).borrow<&Relics.Collection>() ?? panic("Couldn't get collection")
 			let edition = collection.borrowRelic(id: id)
 			edition?.updateMediaURLs(_newAssetVideoURL: _newAssetVideoURL, _newAssetImageURL: _newAssetImageURL, _newMusicURL: _newMusicURL, _newArtworkURL: _newArtworkURL, _newMarketDisplay: _newMarketDisplay)
 		}

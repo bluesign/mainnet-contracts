@@ -65,7 +65,7 @@ contract Admin{
 				self.capability != nil:
 					"Cannot create Neo Admin, capability is not set"
 			}
-			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)!
+			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)
 			((motorcycleCap.borrow()!).borrowNeoMotorcycle(id: id)!).addPhysicalLink(physicalLink)
 		}
 		
@@ -75,7 +75,7 @@ contract Admin{
 				self.capability != nil:
 					"Cannot create Neo Admin, capability is not set"
 			}
-			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)!
+			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)
 			((motorcycleCap.borrow()!).borrowNeoMotorcycle(id: id)!).setName(name)
 		}
 		
@@ -94,7 +94,7 @@ contract Admin{
 				self.capability != nil:
 					"Cannot create Neo Admin, capability is not set"
 			}
-			let recipient = (Admin.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(NeoVoucher.CollectionPublicPath)!).borrow()!
+			let recipient = Admin.account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(NeoVoucher.CollectionPublicPath).borrow()!
 			
 			//We only have one type right now
 			NeoVoucher.batchMintNFT(recipient: recipient, typeID: 1, count: count)
@@ -128,7 +128,7 @@ contract Admin{
 		access(all)
 		fun addAchievementToMember(user: Address, memberId: UInt64, name: String, description: String){ 
 			let userAccount = getAccount(user)
-			let memberCap = userAccount.capabilities.get<&{NeoMember.CollectionPublic}>(NeoMember.CollectionPublicPath)!
+			let memberCap = userAccount.capabilities.get<&{NeoMember.CollectionPublic}>(NeoMember.CollectionPublicPath)
 			let member = memberCap.borrow()!
 			member.addAchievement(id: memberId, achievement: NeoMotorcycle.Achievement(name: name, description: description))
 		}
@@ -136,14 +136,14 @@ contract Admin{
 		access(all)
 		fun addAchievementToFounder(user: Address, founderId: UInt64, name: String, description: String){ 
 			let userAccount = getAccount(user)
-			let founderCap = userAccount.capabilities.get<&{NeoFounder.CollectionPublic}>(NeoFounder.CollectionPublicPath)!
+			let founderCap = userAccount.capabilities.get<&{NeoFounder.CollectionPublic}>(NeoFounder.CollectionPublicPath)
 			let founder = founderCap.borrow()!
 			founder.addAchievement(id: founderId, achievement: NeoMotorcycle.Achievement(name: name, description: description))
 		}
 		
 		access(all)
 		fun addAchievementToTeam(teamId: UInt64, name: String, description: String){ 
-			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)!
+			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)
 			((motorcycleCap.borrow()!).borrowNeoMotorcycle(id: teamId)!).addAchievement(NeoMotorcycle.Achievement(name: name, description: description))
 		}
 		
@@ -194,7 +194,7 @@ contract Admin{
 			}
 			let motorscycle <- NeoMotorcycle.mint()
 			let id = motorscycle.id
-			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)!
+			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)
 			(motorcycleCap.borrow()!).deposit(token: <-motorscycle)
 			let motorcyclePointer = NeoMotorcycle.Pointer(collection: motorcycleCap, id: id)
 			if motorcyclePointer.resolve() == nil{ 
@@ -211,7 +211,7 @@ contract Admin{
 				self.capability != nil:
 					"Cannot create Neo Admin, capability is not set"
 			}
-			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)!
+			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)
 			let motorcyclePointer = NeoMotorcycle.Pointer(collection: motorcycleCap, id: motorcycleId)
 			if motorcyclePointer.resolve() == nil{ 
 				panic("Invalid motorcycle id")

@@ -51,7 +51,7 @@ contract DoodlePacks: NonFungibleToken{
 	let extra:{ String: AnyStruct}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -104,14 +104,14 @@ contract DoodlePacks: NonFungibleToken{
 					if dapperReceiverAddress.toString() == doodlesMerchantAccountMainnet{ 
 						//this is an account that have setup a forwarder for DUC/FUT to the merchant account of Doodles.
 						let royaltyAccountWithDapperForwarder = getAccount(0x12be92985b852cb8)
-						let cap = royaltyAccountWithDapperForwarder.capabilities.get<&{FungibleToken.Receiver}>(/public/fungibleTokenSwitchboardPublic)!
-						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap, cut: cut, description: description)])
+						let cap = royaltyAccountWithDapperForwarder.capabilities.get<&{FungibleToken.Receiver}>(/public/fungibleTokenSwitchboardPublic)
+						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap!, cut: cut, description: description)])
 					}
 					let doodlesMerchanAccountTestnet = "0xd5b1a1553d0ed52e"
 					if dapperReceiverAddress.toString() == doodlesMerchanAccountTestnet{ 
 						//on testnet we just send this to the main vault, it is not important
-						let cap = DoodlePacks.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap, cut: cut, description: description)])
+						let cap = DoodlePacks.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+						return MetadataViews.Royalties([MetadataViews.Royalty(receiver: cap!, cut: cut, description: description)])
 					}
 				case Type<MetadataViews.Editions>():
 					return MetadataViews.Editions([MetadataViews.Edition(name: packType.name, number: self.serialNumber, max: nil)])
@@ -153,7 +153,7 @@ contract DoodlePacks: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Could not withdraw nft")
 			let nft <- token as! @NFT
@@ -205,6 +205,16 @@ contract DoodlePacks: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let pack = nft as! &NFT
 			return pack
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

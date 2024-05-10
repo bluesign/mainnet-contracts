@@ -758,10 +758,10 @@ contract FindLeaseMarketDirectOfferSoft{
 			let from =
 				getAccount(FIND.status(name).owner!).capabilities.get<&SaleItemCollection>(
 					self.getTenant().getPublicPath(Type<@SaleItemCollection>())
-				)!
+				)
 			let bid <-
 				create Bid(
-					from: from,
+					from: from!,
 					leaseName: name,
 					vaultType: vaultType,
 					nonEscrowedBalance: amount,
@@ -772,7 +772,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			let callbackCapability =
 				(self.owner!).capabilities.get<&MarketBidCollection>(
 					self.getTenant().getPublicPath(Type<@MarketBidCollection>())
-				)!
+				)
 			let oldToken <- self.bids[name] <- bid
 			saleItemCollection.registerBid(
 				name: name,
@@ -877,7 +877,7 @@ contract FindLeaseMarketDirectOfferSoft{
 				"Invalid tenant"
 		}
 		if let tenant = (FindMarket.getTenantCapability(marketplace)!).borrow(){ 
-			return getAccount(user).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))!
+			return getAccount(user).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))
 		}
 		return nil
 	}
@@ -889,7 +889,7 @@ contract FindLeaseMarketDirectOfferSoft{
 				"Invalid tenant"
 		}
 		if let tenant = (FindMarket.getTenantCapability(marketplace)!).borrow(){ 
-			return getAccount(user).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))!
+			return getAccount(user).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))
 		}
 		return nil
 	}

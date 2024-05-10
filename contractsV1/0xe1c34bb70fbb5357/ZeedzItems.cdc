@@ -55,7 +55,7 @@ contract ZeedzItems: NonFungibleToken{
 	// A ZeedzItem as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -135,7 +135,7 @@ contract ZeedzItems: NonFungibleToken{
 		
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Not able to find specified NFT within the owner's collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -192,6 +192,16 @@ contract ZeedzItems: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -239,7 +249,7 @@ contract ZeedzItems: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &ZeedzItems.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&ZeedzItems.Collection>(ZeedzItems.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&ZeedzItems.Collection>(ZeedzItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust ZeedzItems.Collection.borowZeedzItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowZeedzItem(id: itemID)

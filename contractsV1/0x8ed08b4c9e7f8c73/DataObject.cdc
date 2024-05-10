@@ -87,7 +87,7 @@ contract DataObject{
 	// check if the collection exists or not 
 	access(all)
 	fun check(objectID: String, address: Address): Bool{ 
-		return (getAccount(address).capabilities.get<&Collection>(self.publicPath)!).check()
+		return getAccount(address).capabilities.get<&Collection>(self.publicPath).check()
 	}
 	
 	init(){ 

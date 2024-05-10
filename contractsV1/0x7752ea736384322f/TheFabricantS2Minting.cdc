@@ -159,17 +159,15 @@ contract TheFabricantS2Minting{
 	access(all)
 	view fun doesAddressHoldAccessPass(address: Address): Bool{ 
 		var hasTheFabricantAccessPass: Bool = false
-		if (
-			getAccount(address).capabilities.get<
-				&{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}
-			>(TheFabricantAccessPass.TheFabricantAccessPassCollectionPublicPath)!
-		).check(){ 
+		if getAccount(address).capabilities.get<
+			&{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}
+		>(TheFabricantAccessPass.TheFabricantAccessPassCollectionPublicPath).check(){ 
 			let collectionRef =
-				(
-					getAccount(address).capabilities.get<
-						&{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}
-					>(TheFabricantAccessPass.TheFabricantAccessPassCollectionPublicPath)!
-				).borrow()!
+				getAccount(address).capabilities.get<
+					&{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}
+				>(TheFabricantAccessPass.TheFabricantAccessPassCollectionPublicPath).borrow<
+					&{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}
+				>()!
 			hasTheFabricantAccessPass = collectionRef.getIDs().length > 0
 		}
 		return hasTheFabricantAccessPass
@@ -321,7 +319,7 @@ contract TheFabricantS2Minting{
 				TheFabricantS2ItemNFT.Royalty(
 					wallet: getAccount((self.owner!).address).capabilities.get<&FlowToken.Vault>(
 						/public/flowTokenReceiver
-					)!,
+					),
 					initialCut: 0.3,
 					cut: 0.1 / 3.0
 				)

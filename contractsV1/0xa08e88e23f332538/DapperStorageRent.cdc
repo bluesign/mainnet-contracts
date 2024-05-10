@@ -113,10 +113,8 @@ contract DapperStorageRent{
 		// Get the Flow Token reciever of the address
 		let recipient = getAccount(address)
 		let receiverRef =
-			(
-				recipient.capabilities.get<&PrivateReceiverForwarder.Forwarder>(
-					PrivateReceiverForwarder.PrivateReceiverPublicPath
-				)!
+			recipient.capabilities.get<&PrivateReceiverForwarder.Forwarder>(
+				PrivateReceiverForwarder.PrivateReceiverPublicPath
 			).borrow()
 		
 		// Silently fail if the `receiverRef` is `nill`
@@ -156,7 +154,9 @@ contract DapperStorageRent{
 		
 		// Check to make sure the payment vault has sufficient funds
 		if let vaultBalanceRef =
-			(self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow(){ 
+			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<
+				&FlowToken.Vault
+			>(){ 
 			if vaultBalanceRef.balance <= REFUEL_AMOUNT{ 
 				emit RefilledFailed(address: address, reason: "Insufficient balance to refuel")
 				return

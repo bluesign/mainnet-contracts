@@ -78,8 +78,8 @@ contract MotoGPCardMetadata: ContractVersion{
 	access(contract)
 	fun resolveRoyaltiesView(): MetadataViews.Royalties{ 
 		var royaltyList: [MetadataViews.Royalty] = []
-		let capability = getAccount(MotoGPRegistry.get(key: "motogp-royalty-receiver")! as! Address).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
-		let royalty: MetadataViews.Royalty = MetadataViews.Royalty(receiver: capability, cut: 0.075, description: "Creator royalty")
+		let capability = getAccount(MotoGPRegistry.get(key: "motogp-royalty-receiver")! as! Address).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
+		let royalty: MetadataViews.Royalty = MetadataViews.Royalty(receiver: capability!, cut: 0.075, description: "Creator royalty")
 		royaltyList.append(royalty)
 		return MetadataViews.Royalties(royaltyList)
 	}

@@ -365,7 +365,7 @@ contract FreshmintClaimSaleV2{
 			
 			// Get the next NFT from the queue
 			let nft <- queue.getNextNFT() ?? panic("sale is sold out")
-			let nftReceiver = (getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.receiverPath)!).borrow()!
+			let nftReceiver = getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.receiverPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
 			emit NFTClaimed(saleUUID: self.uuid, saleID: self.id, saleAddress: self.owner?.address, remainingSupply: queue.remaining(), nftType: nft.getType(), nftID: nft.id)
 			nftReceiver.deposit(token: <-nft)
 		}

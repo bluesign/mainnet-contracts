@@ -317,7 +317,7 @@ contract commercetown_NFT: NonFungibleToken{
 	// A resource that represents the commercetown_NFT NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -375,7 +375,7 @@ contract commercetown_NFT: NonFungibleToken{
 								let royaltyCut = commercetown_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
 								let cutValue: UFix64 = commercetown_NFT.royaltyCutStringToUFix64(royaltyCut)
 								if cutValue != 0.0{ 
-									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver)!, cut: cutValue, description: commercetown_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
+									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver), cut: cutValue, description: commercetown_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
 								}
 							}
 						}
@@ -495,7 +495,7 @@ contract commercetown_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -594,6 +594,16 @@ contract commercetown_NFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -622,7 +632,7 @@ contract commercetown_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &commercetown_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&commercetown_NFT.Collection>(commercetown_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&commercetown_NFT.Collection>(commercetown_NFT.CollectionPublicPath).borrow<&commercetown_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust commercetown_NFT.Collection.borrowcommercetown_NFT to get the correct id
 		// (it checks it before returning it).
 		return collection.borrowcommercetown_NFT(id: id)

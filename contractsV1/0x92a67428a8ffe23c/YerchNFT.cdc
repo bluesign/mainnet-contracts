@@ -33,7 +33,7 @@ contract YerchNFT: NonFungibleToken{
 	let AdminStoragePath: StoragePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -110,7 +110,7 @@ contract YerchNFT: NonFungibleToken{
 		access(all)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}
 		
 		access(all)
@@ -138,7 +138,7 @@ contract YerchNFT: NonFungibleToken{
 			self.ownedNFTs[myToken.id] <-! myToken
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This NFT does not exist")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -166,6 +166,16 @@ contract YerchNFT: NonFungibleToken{
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let nft = ref as! &YerchNFT.NFT
 			return nft as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

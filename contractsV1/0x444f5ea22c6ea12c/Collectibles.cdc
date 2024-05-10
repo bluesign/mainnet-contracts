@@ -69,7 +69,7 @@ contract Collectibles: NonFungibleToken{
 	// A Collectible
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -133,7 +133,7 @@ contract Collectibles: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -185,6 +185,16 @@ contract Collectibles: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -250,7 +260,7 @@ contract Collectibles: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &Collectibles.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Collectibles.Collection>(Collectibles.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&Collectibles.Collection>(Collectibles.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Collectibles.Collection.borowCollectible to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowCollectible(id: itemID)

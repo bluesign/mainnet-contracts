@@ -80,7 +80,7 @@ contract FindAirdropper{
 		}
 		let vr = pointer.getViewResolver()
 		let nftInfo = FindMarket.NFTInfo(vr, id: pointer.id, detail: true)
-		let receiverCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.Receiver}>(path)!
+		let receiverCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.Receiver}>(path)
 		// calculate the required storage and check sufficient balance
 		let senderStorageBeforeSend = getAccount(from).storage.used
 		let item <- pointer.withdraw()
@@ -98,7 +98,7 @@ contract FindAirdropper{
 			(receiverCap.borrow()!).deposit(token: <-item)
 			return
 		} else{ 
-			let collectionPublicCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)!
+			let collectionPublicCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)
 			if collectionPublicCap.check(){ 
 				let from = pointer.owner()
 				emit Airdropped(from: from, fromName: fromName, to: receiver, toName: toName, uuid: pointer.uuid, nftInfo: nftInfo, context: context, remark: "Receiver Not Linked")
@@ -141,7 +141,7 @@ contract FindAirdropper{
 		}
 		let vr = pointer.getViewResolver()
 		let nftInfo = FindMarket.NFTInfo(vr, id: pointer.id, detail: true)
-		let receiverCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.Receiver}>(path)!
+		let receiverCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.Receiver}>(path)
 		
 		// use LostAndFound for dropping
 		let ticketID =
@@ -192,7 +192,7 @@ contract FindAirdropper{
 		}
 		let vr = pointer.getViewResolver()
 		let nftInfo = FindMarket.NFTInfo(vr, id: pointer.id, detail: true)
-		let receiverCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.Receiver}>(path)!
+		let receiverCap = getAccount(receiver).capabilities.get<&{NonFungibleToken.Receiver}>(path)
 		
 		// use LostAndFound for dropping
 		let ticketID =

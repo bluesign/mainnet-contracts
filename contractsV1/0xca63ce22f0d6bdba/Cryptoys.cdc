@@ -60,7 +60,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 	// A Cryptoy as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver, ICryptoys.INFT{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver, ICryptoys.INFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -206,7 +206,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("withdraw() failed: missing NFT with id: ".concat(withdrawID.toString()))
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -286,6 +286,16 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			let nftRef = (&self.ownedNFTs[parentId] as &{NonFungibleToken.NFT}?)!
 			let cryptoyRef = nftRef as! &Cryptoys.NFT
 			return <-cryptoyRef.withdrawBucketItem(key, itemUuid)
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

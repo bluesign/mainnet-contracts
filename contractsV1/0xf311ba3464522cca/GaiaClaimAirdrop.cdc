@@ -187,10 +187,8 @@ contract GaiaClaimAirdrop{
 			&GaiaClaimAirdrop.claims[claimID] as &GaiaClaimAirdrop.Claim?
 			?? panic("Claim not found")
 		let collection =
-			(
-				getAccount(claim.address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					receiverCapabilityPath
-				)!
+			getAccount(claim.address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				receiverCapabilityPath
 			).borrow()
 			?? panic("Could not borrow NFT receiver collection")
 		let vault = claim.vault.borrow() ?? panic("Could not borrow NFT provider collection")

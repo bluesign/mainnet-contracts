@@ -120,7 +120,7 @@ contract AlphaPackV1{
 			AlphaNFTV1.createTemplate(maxSupply: 1, immutableData: originalPackTemplateImmutableData)
 			let nextTemplateId = AlphaNFTV1.getLatestTemplateId()
 			let receiptAccount = getAccount(AlphaPackV1.ownerAddress)
-			let recipientCollection = (receiptAccount.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath)!).borrow() ?? panic("Could not get receiver reference to the flow receiver")
+			let recipientCollection = receiptAccount.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath).borrow<&FiatToken.Vault>() ?? panic("Could not get receiver reference to the flow receiver")
 			recipientCollection.deposit(from: <-flowPayment)
 			AlphaNFTV1.mintNFT(templateInfo:{ "id": nextTemplateId}, account: receiptAddress)
 			(AlphaNFTV1.templates[packTemplateId]!).incrementIssuedSupply()

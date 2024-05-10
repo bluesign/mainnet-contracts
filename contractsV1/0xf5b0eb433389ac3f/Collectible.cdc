@@ -88,7 +88,7 @@ contract Collectible: NonFungibleToken{
 	// NFT
 	// Collectible as an NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public{ 
+	resource NFT: NonFungibleToken.NFT, Public{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -155,7 +155,7 @@ contract Collectible: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -221,6 +221,16 @@ contract Collectible: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -245,7 +255,7 @@ contract Collectible: NonFungibleToken{
 	resource NFTMinter{ 
 		access(all)
 		fun mintNFT(metadata: Metadata, editionNumber: UInt64): @NFT{ 
-			let editionRef = (Collectible.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath)!).borrow()!
+			let editionRef = Collectible.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath).borrow()!
 			
 			// Check edition info in contract Edition in order to manage commission and all amount of copies of the same item
 			assert(editionRef.getEdition(editionNumber) != nil, message: "Edition does not exist")
@@ -280,10 +290,10 @@ contract Collectible: NonFungibleToken{
 	fun getCollectibleDatas(address: Address): [CollectibleData]{ 
 		var collectibleData: [CollectibleData] = []
 		let account = getAccount(address)
-		if let CollectibleCollection = (account.capabilities.get<&{Collectible.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let CollectibleCollection = account.capabilities.get<&{Collectible.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Collectible.CollectionPublic}>(){ 
 			for id in CollectibleCollection.getIDs(){ 
 				var collectible = CollectibleCollection.borrowCollectible(id: id)
-				collectibleData.append(CollectibleData(metadata: *(collectible!).metadata, id: id, editionNumber: (collectible!).editionNumber))
+				collectibleData.append(CollectibleData(metadata: (collectible!).metadata, id: id, editionNumber: (collectible!).editionNumber))
 			}
 		}
 		return collectibleData

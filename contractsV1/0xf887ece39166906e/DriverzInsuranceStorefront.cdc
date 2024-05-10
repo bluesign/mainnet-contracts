@@ -177,8 +177,8 @@ contract DriverzInsuranceStorefront{
 			//Check if the account has a DriverzAirdrop collection. 
 			//If so, check if there are Driverz in it. 
 			//If account do not have driverz, the discount will not be applied.
-			if (getAccount(buyerAddress).capabilities.get<&{DriverzAirdrop.CollectionPublic}>(DriverzAirdrop.CollectionPublicPath)!).borrow() != nil{ 
-				let driverzCollection: &{DriverzAirdrop.CollectionPublic} = (getAccount(buyerAddress).capabilities.get<&{DriverzAirdrop.CollectionPublic}>(DriverzAirdrop.CollectionPublicPath)!).borrow()!
+			if getAccount(buyerAddress).capabilities.get<&{DriverzAirdrop.CollectionPublic}>(DriverzAirdrop.CollectionPublicPath).borrow() != nil{ 
+				let driverzCollection: &{DriverzAirdrop.CollectionPublic} = getAccount(buyerAddress).capabilities.get<&{DriverzAirdrop.CollectionPublic}>(DriverzAirdrop.CollectionPublicPath).borrow()!
 				if driverzCollection.getIDs().length > 0{ 
 					let discountAmount: UFix64 = self.details.discount != nil ? self.details.discount! : 0.0
 					finalSalePrice = self.details.salePrice - discountAmount

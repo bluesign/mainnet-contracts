@@ -130,8 +130,8 @@ contract SwapArchive{
 			Utils.getNFTCollectionData(ownerAddress: address, nftIdentifiers: nftIdentifiers)
 		for nft in nfts{ 
 			let collectionData = collectionMetadata[nft.type.identifier] ?? panic("collection data lookup failed")
-			let collectionPublic = (account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(collectionData.publicPath)!).borrow()
-			let nftRef = (collectionPublic!).borrowNFT(nft.id) as &{NonFungibleToken.INFT}
+			let collectionPublic = account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(collectionData.publicPath).borrow()
+			let nftRef = (collectionPublic!).borrowNFT(id: nft.id) as &{NonFungibleToken.INFT}
 			response.append(SwapNft(nft: nftRef, metadata: nil))
 		}
 		assert(nfts.length == response.length, message: "nft lookup mismatch")

@@ -170,7 +170,7 @@ contract Geeft: NonFungibleToken{
 	
 	// This represents a Geeft
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -283,7 +283,7 @@ contract Geeft: NonFungibleToken{
 			self.ownedNFTs[geeft.id] <-! geeft
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let geeft <- self.ownedNFTs.remove(key: withdrawID) ?? panic("This Geeft does not exist in this collection.")
 			emit Withdraw(id: geeft.id, from: self.owner?.address)
@@ -332,6 +332,16 @@ contract Geeft: NonFungibleToken{
 			return <-create Collection()
 		}
 		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
 		init(){ 
 			self.ownedNFTs <-{} 
 		}
@@ -340,7 +350,7 @@ contract Geeft: NonFungibleToken{
 	access(all)
 	fun sendGeeft(createdBy: Address?, message: String?, collections: @{String: CollectionContainer}, vaults: @{String: VaultContainer}, extra:{ String: AnyStruct}, recipient: Address){ 
 		let geeft <- create NFT(createdBy: createdBy, message: message, collections: <-collections, vaults: <-vaults, extra: extra)
-		let collection = (getAccount(recipient).capabilities.get<&Collection>(Geeft.CollectionPublicPath)!).borrow() ?? panic("The recipient does not have a Geeft Collection")
+		let collection = getAccount(recipient).capabilities.get<&Collection>(Geeft.CollectionPublicPath).borrow<&Collection>() ?? panic("The recipient does not have a Geeft Collection")
 		emit GeeftCreated(id: geeft.id, message: message, createdBy: createdBy, to: recipient)
 		collection.deposit(token: <-geeft)
 	}

@@ -372,11 +372,11 @@ contract BloctoDAO{
 	access(all)
 	fun getStakedBLT(address: Address): UFix64{ 
 		let collectionRef =
-			(
-				getAccount(address).capabilities.get<
-					&{NonFungibleToken.CollectionPublic, BloctoPass.CollectionPublic}
-				>(/public/bloctoPassCollection)!
-			).borrow()
+			getAccount(address).capabilities.get<
+				&{NonFungibleToken.CollectionPublic, BloctoPass.CollectionPublic}
+			>(/public/bloctoPassCollection).borrow<
+				&{NonFungibleToken.CollectionPublic, BloctoPass.CollectionPublic}
+			>()
 			?? panic("Could not borrow collection public reference")
 		let ids = collectionRef.getIDs()
 		var amount = 0.0

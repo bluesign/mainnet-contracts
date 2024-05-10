@@ -156,10 +156,10 @@ contract GaiaOrder{
 		let addPayment = fun (type: String, address: Address, rate: UFix64){ 
 				assert(rate >= 0.0 && rate < 1.0, message: "Rate must be in range [0..1)")
 				let amount = price * rate
-				let receiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(vaultPath)!
+				let receiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(vaultPath)
 				assert(receiver.borrow() != nil, message: "Missing or mis-typed fungible token receiver")
 				payments.append(Payment(type: type, address: address, rate: rate, amount: amount))
-				saleCuts.append(NFTStorefront.SaleCut(receiver: receiver, amount: amount))
+				saleCuts.append(NFTStorefront.SaleCut(receiver: receiver!, amount: amount))
 				percentage = percentage - rate
 			}
 		if GaiaFee.buyerFee > 0.0{ 

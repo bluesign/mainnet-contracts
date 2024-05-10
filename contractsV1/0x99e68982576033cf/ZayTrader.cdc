@@ -975,7 +975,7 @@ contract ZayTrader{
 		// when it is mature/ready to
 		self.feeReceiver = self.account.capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		self.AdminStoragePath = /storage/ZayTraderAdmin
 		self.account.storage.save(<-create Admin(), to: self.AdminStoragePath)
 		emit Initialized()

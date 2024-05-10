@@ -488,7 +488,7 @@ contract FURC20Indexer{
 			let flowToAmount = flowToCreator.balance
 			assert(flowToAmount >= 50.0, message: "The amount should be greater than 50.0")
 			let recipient: Address = 0x73bef00786567ae1
-			let recipientVaultRef = (getAccount(recipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not get receiver reference")
+			let recipientVaultRef = getAccount(recipient).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not get receiver reference")
 			recipientVaultRef.deposit(from: <-flowToCreator)
 			let meta = self.parseMetadata(&ins.getData() as &FlowUp.InscriptionData)
 			assert(meta["op"] == "mint" && meta["tick"] != nil && meta["amt"] != nil, message: "The inscription is not a valid FURC20 inscription for minting")
@@ -1017,7 +1017,7 @@ contract FURC20Indexer{
 			// add the seller or buyer cut
 			if sellerAddress != nil{ 
 				// borrow the receiver reference
-				let flowTokenReceiver = getAccount(sellerAddress!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+				let flowTokenReceiver = getAccount(sellerAddress!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 				assert(flowTokenReceiver.check(), message: "Could not borrow receiver reference to the seller's Vault")
 				ret.append(FURC20FTShared.SaleCut(type: FURC20FTShared.SaleCutType.SellMaker, ratio: 1.0 - salesFee,																													 // recevier is the FlowToken Vault of the seller
 																													 receiver: flowTokenReceiver))
@@ -1196,8 +1196,7 @@ contract FURC20Indexer{
 	fun getIndexer(): &InscriptionIndexer{ 
 		let addr = self.account.address
 		let cap =
-			(getAccount(addr).capabilities.get<&InscriptionIndexer>(self.IndexerPublicPath)!)
-				.borrow()
+			getAccount(addr).capabilities.get<&InscriptionIndexer>(self.IndexerPublicPath).borrow()
 		return cap ?? panic("Could not borrow InscriptionIndexer")
 	}
 	
@@ -1205,7 +1204,7 @@ contract FURC20Indexer{
 	///
 	access(all)
 	fun borrowFlowTokenReceiver(_ addr: Address): &FlowToken.Vault?{ 
-		let cap = getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+		let cap = getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		return cap.borrow()
 	}
 	

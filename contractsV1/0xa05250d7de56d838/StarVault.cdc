@@ -152,7 +152,7 @@ contract StarVault: FungibleToken{
 		}
 		LPStaking.distributeFees(vaultId: self.vaultId, vault: <-fee.withdraw(amount: amount * (1.0 - feeRatio)))
 		if feeRatio > 0.0 && feeTo != nil{ 
-			let flowVaultRef = (getAccount(StarVaultConfig.feeTo!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow()!
+			let flowVaultRef = getAccount(StarVaultConfig.feeTo!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()!
 			flowVaultRef.deposit(from: <-fee)
 		} else{ 
 			destroy fee

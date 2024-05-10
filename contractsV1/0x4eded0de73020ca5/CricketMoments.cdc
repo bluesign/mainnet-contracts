@@ -85,7 +85,7 @@ contract CricketMoments: NonFungibleToken{
 	// NFT
 	// A Moment as an NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// Token's ID
 		access(all)
 		let id: UInt64
@@ -168,7 +168,7 @@ contract CricketMoments: NonFungibleToken{
 		
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -219,6 +219,16 @@ contract CricketMoments: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -316,7 +326,7 @@ contract CricketMoments: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &CricketMoments.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&CricketMoments.Collection>(CricketMoments.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&CricketMoments.Collection>(CricketMoments.CollectionPublicPath).borrow<&CricketMoments.Collection>() ?? panic("Couldn't get collection")
 		// We trust CricketMoments.Collection.borrowMoment to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowCricketMoment(id: id)

@@ -118,7 +118,7 @@ contract FreshmintLockBox{
 			let message = self.makeClaimMessage(address: address, id: id)
 			let isValidClaim = publicKey.verify(signature: signature, signedData: message, domainSeparationTag: "FLOW-V0.0-user", hashAlgorithm: HashAlgorithm.SHA3_256)
 			assert(isValidClaim, message: "invalid claim signature")
-			let receiver = (getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.receiverPath)!).borrow()!
+			let receiver = getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.receiverPath).borrow<&{NonFungibleToken.CollectionPublic}>()!
 			receiver.deposit(token: <-nft)
 			emit Claimed(nftType: nftType, nftID: id, from: self.owner?.address, recipient: address)
 		}

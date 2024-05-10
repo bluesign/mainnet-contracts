@@ -806,10 +806,10 @@ contract FindLeaseMarketAuctionSoft{
 			let from =
 				getAccount(FIND.status(name).owner!).capabilities.get<&SaleItemCollection>(
 					self.getTenant().getPublicPath(Type<@SaleItemCollection>())
-				)!
+				)
 			let bid <-
 				create Bid(
-					from: from,
+					from: from!,
 					leaseName: name,
 					vaultType: vaultType,
 					balance: amount,
@@ -820,7 +820,7 @@ contract FindLeaseMarketAuctionSoft{
 			let callbackCapability =
 				(self.owner!).capabilities.get<&MarketBidCollection>(
 					self.getTenant().getPublicPath(Type<@MarketBidCollection>())
-				)!
+				)
 			let oldToken <- self.bids[name] <- bid
 			saleItemCollection.registerBid(
 				name: name,
@@ -920,7 +920,7 @@ contract FindLeaseMarketAuctionSoft{
 				"Invalid tenant"
 		}
 		if let tenant = (FindMarket.getTenantCapability(marketplace)!).borrow(){ 
-			return getAccount(user).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))!
+			return getAccount(user).capabilities.get<&SaleItemCollection>(tenant.getPublicPath(Type<@SaleItemCollection>()))
 		}
 		return nil
 	}
@@ -932,7 +932,7 @@ contract FindLeaseMarketAuctionSoft{
 				"Invalid tenant"
 		}
 		if let tenant = (FindMarket.getTenantCapability(marketplace)!).borrow(){ 
-			return getAccount(user).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))!
+			return getAccount(user).capabilities.get<&MarketBidCollection>(tenant.getPublicPath(Type<@MarketBidCollection>()))
 		}
 		return nil
 	}

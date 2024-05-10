@@ -181,9 +181,9 @@ contract FlowmapMarketSub100k{
 			
 			// Add seller to list of sellers
 			FlowmapMarketSub100k.addSeller(seller: (self.owner!).address)
-			((			  
-			  // Contract address receives listing fee
-			  FlowmapMarketSub100k.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!).deposit(from: <-listingFee)
+			(			 
+			 // Contract address receives listing fee
+			 FlowmapMarketSub100k.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!).deposit(from: <-listingFee)
 			emit FlowmapListed(id: tokenID, price: price, listingFee: FlowmapMarketSub100k.listingFee)
 		}
 		
@@ -211,12 +211,12 @@ contract FlowmapMarketSub100k{
 					"Can't purchase: Market is paused"
 			}
 			let price = self.prices[tokenID]!
-			((			  
-			  // Contract address receives purchase fee
-			  FlowmapMarketSub100k.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!).deposit(from: <-buyTokens.withdraw(amount: FlowmapMarketSub100k.purchaseFee))
-			((			  
-			  // Seller receives the rest
-			  getAccount((self.owner!).address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!).deposit(from: <-buyTokens)
+			(			 
+			 // Contract address receives purchase fee
+			 FlowmapMarketSub100k.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!).deposit(from: <-buyTokens.withdraw(amount: FlowmapMarketSub100k.purchaseFee))
+			(			 
+			 // Seller receives the rest
+			 getAccount((self.owner!).address).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!).deposit(from: <-buyTokens)
 			let boughtFlowmap <- (self.ownerCollection.borrow()!).withdraw(withdrawID: tokenID) as! @Flowmap.NFT
 			
 			// Save sales data onchain

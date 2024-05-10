@@ -194,9 +194,8 @@ contract BlackHole{
 	///
 	access(all)
 	view fun borrowBlackHoleReceiver(_ addr: Address): &Receiver?{ 
-		return (
-			getAccount(addr).capabilities.get<&Receiver>(self.getBlackHoleReceiverPublicPath())!
-		).borrow()
+		return getAccount(addr).capabilities.get<&Receiver>(self.getBlackHoleReceiverPublicPath())
+			.borrow()
 	}
 	
 	/// Check if is the address a valid BlackHole address

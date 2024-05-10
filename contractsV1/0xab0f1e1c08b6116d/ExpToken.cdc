@@ -199,7 +199,7 @@ contract ExpToken: FungibleToken{
 	access(account)
 	fun gainExp(expAmount: UFix64, playerAddr: Address){ 
 		// Mint Exp tokens
-		let expVaultCap = getAccount(playerAddr).capabilities.get<&ExpToken.Vault>(ExpToken.tokenReceiverPath)!
+		let expVaultCap = getAccount(playerAddr).capabilities.get<&ExpToken.Vault>(ExpToken.tokenReceiverPath)
 		if expVaultCap.check() == true{ 
 			let expVault <- ExpToken.mintTokens(amount: expAmount)
 			(expVaultCap.borrow()!).deposit(from: <-expVault)

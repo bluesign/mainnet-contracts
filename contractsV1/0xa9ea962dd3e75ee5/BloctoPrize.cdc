@@ -354,7 +354,7 @@ contract BloctoPrize{
 				let vaultRef = BloctoPrize.account.storage.borrow<&{FungibleToken.Vault}>(from: prize.token.vaultPath) ?? panic("Could not borrow reference to the owner's Vault!")
 				let sentVault <- vaultRef.withdraw(amount: prize.amount)
 				let recipient = getAccount(address)
-				let receiverRef = (recipient.capabilities.get<&{FungibleToken.Receiver}>(prize.token.receiverPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
+				let receiverRef = recipient.capabilities.get<&{FungibleToken.Receiver}>(prize.token.receiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 				receiverRef.deposit(from: <-sentVault)
 			}
 			self.claimed[address] = true

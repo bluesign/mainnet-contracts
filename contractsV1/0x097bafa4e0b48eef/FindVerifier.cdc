@@ -47,7 +47,7 @@ contract FindVerifier{
 				return true
 			}
 			let user: Address = param["address"]! as! Address
-			let float = (getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow()
+			let float = getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 			if float == nil{ 
 				return false
 			}
@@ -90,7 +90,7 @@ contract FindVerifier{
 				return true
 			}
 			let user: Address = param["address"]! as! Address
-			let float = (getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow()
+			let float = getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 			if float == nil{ 
 				return false
 			}
@@ -167,7 +167,7 @@ contract FindVerifier{
 				return true
 			}
 			let user: Address = param["address"]! as! Address
-			let cap = getAccount(user).capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath)!
+			let cap = getAccount(user).capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath)
 			if !cap.check(){ 
 				return false
 			}
@@ -217,9 +217,9 @@ contract FindVerifier{
 				return true
 			}
 			let user: Address = param["address"]! as! Address
-			let cap = getAccount(user).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.path)!
+			let cap = getAccount(user).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.path)
 			if !cap.check(){ 
-				let mvCap = getAccount(user).capabilities.get<&{ViewResolver.ResolverCollection}>(self.path)!
+				let mvCap = getAccount(user).capabilities.get<&{ViewResolver.ResolverCollection}>(self.path)
 				if !mvCap.check(){ 
 					return false
 				}
@@ -304,7 +304,7 @@ contract FindVerifier{
 				return true
 			}
 			let user: Address = param["address"]! as! Address
-			let mvCap = getAccount(user).capabilities.get<&{ViewResolver.ResolverCollection}>(self.path)!
+			let mvCap = getAccount(user).capabilities.get<&{ViewResolver.ResolverCollection}>(self.path)
 			if !mvCap.check(){ 
 				return false
 			}

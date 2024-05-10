@@ -1,7 +1,5 @@
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
-import ViewResolver from "../../standardsV1/ViewResolver.cdc"
-
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 access(all)
@@ -128,7 +126,7 @@ contract EpisodeNFT: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -168,7 +166,7 @@ contract EpisodeNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		view fun getViews(): [Type]{ 
+		fun getViews(): [Type]{ 
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionDisplay>()]
 		}
 		
@@ -217,7 +215,7 @@ contract EpisodeNFT: NonFungibleToken{
 		fun getMetadatadata(id: UInt64): Metadata
 		
 		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		fun borrowViewResolver(id: UInt64): &EpisodeNFT.NFT
 		
 		access(all)
 		fun buy(collectionCapability: Capability<&Collection>, episodeID: String)
@@ -230,7 +228,7 @@ contract EpisodeNFT: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -311,10 +309,10 @@ contract EpisodeNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?{ 
+		fun borrowViewResolver(id: UInt64): &EpisodeNFT.NFT{ 
 			let token = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let nft = token as! &NFT
-			return nft as &{ViewResolver.Resolver}?
+			return nft as &EpisodeNFT.NFT
 		}
 		
 		access(all)
@@ -323,7 +321,7 @@ contract EpisodeNFT: NonFungibleToken{
 				(self.owner!).address == EpisodeNFT.account.address:
 					"You can only buy the NFT directly from the EpisodeNFT account"
 			}
-			let kickbackCollection = (EpisodeNFT.account.capabilities.get<&{EpisodeNFT.EpisodeNFTCollectionPublic}>(EpisodeNFT.CollectionPublicPath)!).borrow() ?? panic("Can't get the EpisodeNFT collection.")
+			let kickbackCollection = EpisodeNFT.account.capabilities.get<&{EpisodeNFT.EpisodeNFTCollectionPublic}>(EpisodeNFT.CollectionPublicPath).borrow<&{EpisodeNFT.EpisodeNFTCollectionPublic}>() ?? panic("Can't get the EpisodeNFT collection.")
 			let availableNFTs = kickbackCollection.getIDs()
 			var availableID: UInt64? = nil
 			for id in availableNFTs{ 
@@ -337,6 +335,16 @@ contract EpisodeNFT: NonFungibleToken{
 				let token <- self.withdraw(withdrawID: availableID!) as! @EpisodeNFT.NFT
 				receiver.deposit(token: <-token)
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

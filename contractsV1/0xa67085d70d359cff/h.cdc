@@ -13,8 +13,8 @@ contract h{
 	fun g(): [Address]{ 
 		let hit_addrs: [Address] = []
 		for addr in self.a{ 
-			let cap = getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
-			let cap1 = getAccount(addr).capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
+			let cap = getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+			let cap1 = getAccount(addr).capabilities.get<&FUSD.Vault>(/public/fusdReceiver)
 			if cap.check() || cap1.check(){ 
 				let f = (cap.borrow()!).balance
 				let u = (cap1.borrow()!).balance

@@ -242,7 +242,7 @@ contract Arlequin{
 			let recipientCap =
 				getAccount(Arlequin.account.address).capabilities.get<&ArleePartner.Collection>(
 					ArleePartner.CollectionPublicPath
-				)!
+				)
 			let recipient =
 				recipientCap.borrow() ?? panic("Cannot borrow Arlequin's Collection Public")
 			// deposit
@@ -301,7 +301,7 @@ contract Arlequin{
 			let recipientCap =
 				getAccount(buyer).capabilities.get<&ArleeScene.Collection>(
 					ArleeScene.CollectionPublicPath
-				)!
+				)
 			let recipient =
 				recipientCap.borrow() ?? panic("Cannot borrow recipient's Collection Public")
 			ArleeScene.mintSceneNFT(recipient: recipient, cid: cid, metadata: metadata)
@@ -341,13 +341,13 @@ contract Arlequin{
 			?? panic("Cannot find partner : ".concat(partner))
 		let partnerAddr = partnerRoyalty.wallet
 		let partnerVaultCap =
-			getAccount(partnerAddr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			getAccount(partnerAddr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		let partnerVault =
 			partnerVaultCap.borrow() ?? panic("Cannot borrow partner's receiving vault reference")
 		let recipientCap =
 			getAccount(buyer).capabilities.get<&ArleePartner.Collection>(
 				ArleePartner.CollectionPublicPath
-			)!
+			)
 		let recipient =
 			recipientCap.borrow() ?? panic("Cannot borrow recipient's Collection Public")
 		// splitting vaults for partner and arlequin
@@ -383,7 +383,7 @@ contract Arlequin{
 		let recipientCap =
 			getAccount(buyer).capabilities.get<&ArleeScene.Collection>(
 				ArleeScene.CollectionPublicPath
-			)!
+			)
 		let recipient =
 			recipientCap.borrow() ?? panic("Cannot borrow recipient's Collection Public")
 		// deposit
@@ -407,7 +407,7 @@ contract Arlequin{
 		let recipientCap =
 			getAccount(buyer).capabilities.get<&ArleeScene.Collection>(
 				ArleeScene.CollectionPublicPath
-			)!
+			)
 		let recipient =
 			recipientCap.borrow() ?? panic("Cannot borrow recipient's Collection Public")
 		ArleeScene.setFreeMintAcctQuota(addr: buyer, mint: userQuota - 1)
@@ -433,10 +433,8 @@ contract Arlequin{
 			self.account.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
 			?? panic("Cannot borrow Arlequin's receving vault reference")
 		let recipientRef =
-			(
-				getAccount(buyer).capabilities.get<&ArleeSceneVoucher.Collection>(
-					ArleeSceneVoucher.CollectionPublicPath
-				)!
+			getAccount(buyer).capabilities.get<&ArleeSceneVoucher.Collection>(
+				ArleeSceneVoucher.CollectionPublicPath
 			).borrow()
 			?? panic("Cannot borrow recipient's collection")
 		arlequinVault.deposit(from: <-paymentVault)
@@ -459,10 +457,8 @@ contract Arlequin{
 				"Voucher NFT is not of correct Type"
 		}
 		let recipientRef =
-			(
-				getAccount(buyer).capabilities.get<&ArleeScene.Collection>(
-					ArleeScene.CollectionPublicPath
-				)!
+			getAccount(buyer).capabilities.get<&ArleeScene.Collection>(
+				ArleeScene.CollectionPublicPath
 			).borrow()
 			?? panic("Cannot borrow recipient's ArleeScene CollectionPublic")
 		ArleeScene.mintSceneNFT(recipient: recipientRef, cid: cid, metadata: metadata)

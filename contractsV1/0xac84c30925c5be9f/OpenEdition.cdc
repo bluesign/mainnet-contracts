@@ -211,10 +211,8 @@ contract OpenEdition{
 		fun sendCommissionPayments(buyerTokens: @{FungibleToken.Vault}, tokenID: UInt64){ 
 			// Capability to resource with commission information
 			let editionRef =
-				(
-					OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(
-						Edition.CollectionPublicPath
-					)!
+				OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(
+					Edition.CollectionPublicPath
 				).borrow()!
 			
 			// Commission informaton for all copies of on item
@@ -227,7 +225,7 @@ contract OpenEdition{
 				if (editionStatus.royalty[key]!).firstSalePercent > 0.0 && key != (platformVault.owner!).address{ 
 					let commission = self.price * (editionStatus.royalty[key]!).firstSalePercent * 0.01
 					let account = getAccount(key)
-					let vaultCap = account.capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!
+					let vaultCap = account.capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)
 					
 					// vaultCap was checked during creation of commission info on Edition contract, therefore this is extra check
 					// if vault capability is not avaliable, the rest tokens will sent to platform vault					 
@@ -410,7 +408,7 @@ contract OpenEdition{
 				platformVaultCap.check():
 					"Platform vault should be reachable"
 			}
-			let editionRef = (OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath)!).borrow()!
+			let editionRef = OpenEdition.account.capabilities.get<&{Edition.EditionCollectionPublic}>(Edition.CollectionPublicPath).borrow()!
 			
 			// Check edition info in contract Edition in order to manage commission and all amount of copies of the same item
 			// This error throws inside Edition contract. But I put this check for redundant

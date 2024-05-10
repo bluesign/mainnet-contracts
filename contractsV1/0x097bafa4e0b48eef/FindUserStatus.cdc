@@ -489,7 +489,7 @@ contract FindUserStatus{
 		var listingsV1: StorefrontListing? = nil
 		let account = getAccount(user)
 		let storefrontCap =
-			account.capabilities.get<&NFTStorefront.Storefront>(NFTStorefront.StorefrontPublicPath)!
+			account.capabilities.get<&NFTStorefront.Storefront>(NFTStorefront.StorefrontPublicPath)
 		if storefrontCap.check(){ 
 			let storefrontRef = storefrontCap.borrow()!
 			for listingId in storefrontRef.getListingIDs(){ 
@@ -519,7 +519,7 @@ contract FindUserStatus{
 		let storefrontV2Cap =
 			account.capabilities.get<&NFTStorefrontV2.Storefront>(
 				NFTStorefrontV2.StorefrontPublicPath
-			)!
+			)
 		if storefrontV2Cap.check(){ 
 			let storefrontRef = storefrontV2Cap.borrow()!
 			for listingId in storefrontRef.getListingIDs(){ 
@@ -547,7 +547,7 @@ contract FindUserStatus{
 		var flowty: FlowtyListing? = nil
 		let account = getAccount(user)
 		let flowtyCap =
-			account.capabilities.get<&Flowty.FlowtyStorefront>(Flowty.FlowtyStorefrontPublicPath)!
+			account.capabilities.get<&Flowty.FlowtyStorefront>(Flowty.FlowtyStorefrontPublicPath)
 		if flowtyCap.check(){ 
 			let storefrontRef = flowtyCap.borrow()!
 			for listingId in storefrontRef.getListingIDs(){ 
@@ -577,7 +577,7 @@ contract FindUserStatus{
 		let flowtyRentalCap =
 			account.capabilities.get<&FlowtyRentals.FlowtyRentalsStorefront>(
 				FlowtyRentals.FlowtyRentalsStorefrontPublicPath
-			)!
+			)
 		if flowtyRentalCap.check(){ 
 			let storefrontRef = flowtyRentalCap.borrow()!
 			for listingId in storefrontRef.getListingIDs(){ 

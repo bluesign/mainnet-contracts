@@ -536,7 +536,7 @@ contract Domains: NonFungibleToken{
 	
 	// Domain resource for NFT standard
 	access(all)
-	resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: DomainPublic, DomainPrivate, NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -611,8 +611,8 @@ contract Domains: NonFungibleToken{
 				case Type<MetadataViews.Serial>():
 					return MetadataViews.Serial(self.id)
 				case Type<MetadataViews.Royalties>():
-					let receieverCap = Domains.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					let royalty = MetadataViews.Royalty(receiver: receieverCap, cut: 0.1, description: "Flowns will take 10% as second trade royalty fee")
+					let receieverCap = Domains.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					let royalty = MetadataViews.Royalty(receiver: receieverCap!, cut: 0.1, description: "Flowns will take 10% as second trade royalty fee")
 					return MetadataViews.Royalties([royalty])
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://flowns.org/domain/".concat(domainName))
@@ -1047,7 +1047,7 @@ contract Domains: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let domain <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing domain")
 			emit Withdraw(id: domain.id, from: self.owner?.address)
@@ -1138,6 +1138,16 @@ contract Domains: NonFungibleToken{
 			Domains.totalSupply = Domains.totalSupply + 1 as UInt64
 			emit DomainMinted(id: nft.id, name: name, nameHash: nameHash, parentName: parentName, expiredAt: expiredAt, receiver: receiver.address)
 			(receiver.borrow()!).deposit(token: <-nft)
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

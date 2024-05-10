@@ -199,8 +199,8 @@ contract FlowtyUtils{
 			}
 			for cutInfo in royalties.getRoyalties(){ 
 				if royaltyCuts[cutInfo.receiver.address] == nil{ 
-					let cap = getAccount(cutInfo.receiver.address).capabilities.get<&{FungibleToken.Receiver}>(tokenInfo.receiverPath)!
-					royaltyCuts[cutInfo.receiver.address] = RoyaltyCut(cap: cap, percentage: 0.0)
+					let cap = getAccount(cutInfo.receiver.address).capabilities.get<&{FungibleToken.Receiver}>(tokenInfo.receiverPath)
+					royaltyCuts[cutInfo.receiver.address] = RoyaltyCut(cap: cap!, percentage: 0.0)
 				}
 				let denom = royaltiesTotal * cutPerRoyalties
 				if denom == 0.0{ 
@@ -356,7 +356,7 @@ contract FlowtyUtils{
 		)
 		
 		// get the FungibleToken.Balance capability located at the path
-		let vaultCap = user.capabilities.get<&{FungibleToken.Balance}>(balancePath)!
+		let vaultCap = user.capabilities.get<&{FungibleToken.Balance}>(balancePath)
 		
 		// check the capability exists
 		if !vaultCap.check(){ 
@@ -415,9 +415,9 @@ contract FlowtyUtils{
 		)
 		== nil{ 
 			let flowTokenReceiver =
-				self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+				self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 			let depositor <-
-				LostAndFound.createDepositor(flowTokenReceiver, lowBalanceThreshold: 10.0)
+				LostAndFound.createDepositor(flowTokenReceiver!, lowBalanceThreshold: 10.0)
 			self.account.storage.save(<-depositor, to: LostAndFound.DepositorStoragePath)
 		}
 	}

@@ -108,7 +108,7 @@ contract ethosAIFIIFounder: NonFungibleToken{
 	// The resource that represents the ethosAIFIIFounder NFTs
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -156,8 +156,8 @@ contract ethosAIFIIFounder: NonFungibleToken{
 					return MetadataViews.NFTCollectionDisplay(name: ethosAIFIIFounder.getCollectionAttribute(key: "name") as! String, description: ethosAIFIIFounder.getCollectionAttribute(key: "description") as! String, externalURL: MetadataViews.ExternalURL("https://jade.ethosnft.com/collections/".concat((self.owner!).address.toString()).concat("/ethosAIFIIFounder")), squareImage: squareMedia, bannerImage: bannerMedia ?? squareMedia, socials: ethosAIFIIFounder.getCollectionAttribute(key: "socials") as!{ String: MetadataViews.ExternalURL})
 				case Type<MetadataViews.Royalties>():
 					return MetadataViews.Royalties([													// For ethos Multiverse Inc. in favor of producing Jade, a tool for deploying NFT contracts and minting/managing collections.
-													MetadataViews.Royalty(receiver: getAccount(0xeaf1bb3f70a73336).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.025, // 2.5% on secondary sales																																															   
-																																															   description: "ethos Multiverse Inc. receives a 2.5% royalty from secondary sales because this collection was created using Jade (https://jade.ethosnft.com), a tool for deploying NFT contracts and minting/managing collections, created by ethos Multiverse Inc.")])
+													MetadataViews.Royalty(receiver: getAccount(0xeaf1bb3f70a73336).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.025, // 2.5% on secondary sales																																															  
+																																															  description: "ethos Multiverse Inc. receives a 2.5% royalty from secondary sales because this collection was created using Jade (https://jade.ethosnft.com), a tool for deploying NFT contracts and minting/managing collections, created by ethos Multiverse Inc.")])
 				case Type<MetadataViews.NFTView>():
 					return MetadataViews.NFTView(id: self.id, uuid: self.uuid, display: self.resolveView(Type<MetadataViews.Display>()) as! MetadataViews.Display?, externalURL: self.resolveView(Type<MetadataViews.ExternalURL>()) as! MetadataViews.ExternalURL?, collectionData: self.resolveView(Type<MetadataViews.NFTCollectionData>()) as! MetadataViews.NFTCollectionData?, collectionDisplay: self.resolveView(Type<MetadataViews.NFTCollectionDisplay>()) as! MetadataViews.NFTCollectionDisplay?, royalties: self.resolveView(Type<MetadataViews.Royalties>()) as! MetadataViews.Royalties?, traits: self.resolveView(Type<MetadataViews.Traits>()) as! MetadataViews.Traits?)
 			}
@@ -204,7 +204,7 @@ contract ethosAIFIIFounder: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Token not found")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -260,6 +260,16 @@ contract ethosAIFIIFounder: NonFungibleToken{
 			let token = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let nft = token as! &NFT
 			return nft as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

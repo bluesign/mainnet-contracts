@@ -1015,7 +1015,7 @@ contract AuctionHouse{
 				if self.auctionMetadata != nil{ // return Metadata to Creator 
 					
 					let metadata <- self.auctionMetadata <- nil
-					let ref = (getAccount(receiver!).capabilities.get<&DAAM.MetadataGenerator>(DAAM.metadataPublicPath)!).borrow()!
+					let ref = getAccount(receiver!).capabilities.get<&DAAM.MetadataGenerator>(DAAM.metadataPublicPath).borrow()!
 					ref.returnMetadata(metadata: <-metadata!)
 					self.returnFunds() // return funds to all bidders
 					
@@ -1036,7 +1036,7 @@ contract AuctionHouse{
 		access(self)
 		fun finalise(receiver: Address?, nft: @DAAM.NFT, pass: Bool){ 
 			log("receiver: ".concat((receiver!).toString()))
-			let collectionRef = (getAccount(receiver!).capabilities.get<&{NonFungibleToken.CollectionPublic}>(DAAM.collectionPublicPath)!).borrow()!
+			let collectionRef = getAccount(receiver!).capabilities.get<&{NonFungibleToken.CollectionPublic}>(DAAM.collectionPublicPath).borrow()!
 			var isLast = false
 			if (nft.metadata!).edition.max != nil{ 
 				isLast = (nft.metadata!).edition.number == (nft.metadata!).edition.max!
@@ -1162,7 +1162,7 @@ contract AuctionHouse{
 			
 			for bidder in self.auctionLog.keys{ 
 				// get Crypto Wallet capability
-				let bidderRef = (getAccount(bidder).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!).borrow()!
+				let bidderRef = getAccount(bidder).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath()).borrow()!
 				let amount <- self.auctionVault.withdraw(amount: self.auctionLog[bidder]!) // Withdraw amount
 				
 				self.auctionLog.remove(key: bidder)
@@ -1330,7 +1330,7 @@ contract AuctionHouse{
 				// Agent payment
 				let agentAmount = price * (self.auctionNFT?.metadata!).creatorInfo.firstSale!
 				let agentAddress = (self.auctionNFT?.metadata!).creatorInfo.agent!
-				let agent = (getAccount(agentAddress).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath()!)!).borrow()! // get Seller FUSD Wallet Capability
+				let agent = getAccount(agentAddress).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath()!).borrow()! // get Seller FUSD Wallet Capability
 				
 				let agentCut <-! self.auctionVault.withdraw(amount: agentAmount) // Calcuate actual amount
 				
@@ -1505,7 +1505,7 @@ contract AuctionHouse{
 		let currentAuctions = self.currentAuctions
 		let selectedAuction:{ Address: [UInt64]} ={} 
 		for seller in currentAuctions.keys{ 
-			let auctionHouse = (getAccount(seller).capabilities.get<&AuctionHouse.AuctionWallet>(AuctionHouse.auctionPublicPath)!).borrow()!
+			let auctionHouse = getAccount(seller).capabilities.get<&AuctionHouse.AuctionWallet>(AuctionHouse.auctionPublicPath).borrow()!
 			let aids = currentAuctions[seller]!
 			let list: [UInt64] = []
 			for aid in aids{ 

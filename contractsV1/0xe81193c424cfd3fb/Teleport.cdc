@@ -162,7 +162,7 @@ contract Teleport{
 				panic(trust.message)
 			}
 			let account = getAccount(data.receiver)
-			let wearable = (account.capabilities.get<&Wearables.Collection>(Wearables.CollectionPublicPath)!).borrow() ?? panic("cannot borrow werable cap")
+			let wearable = account.capabilities.get<&Wearables.Collection>(Wearables.CollectionPublicPath).borrow() ?? panic("cannot borrow werable cap")
 			let context = data.context
 			for id in data.wearableTemplateIds{ 
 				Wearables.mintNFT(recipient: wearable, template: id, context: context)
@@ -170,7 +170,7 @@ contract Teleport{
 			Teleport.registryRemote[data.remoteId] = data
 			Teleport.registryTeleporter[data.teleporterId] = data.remoteId
 			emit Teleported(data: data)
-			if let receiver = (account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow(){ 
+			if let receiver = account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow(){ 
 				let isDapper = receiver.isInstance(Type<@TokenForwarding.Forwarder>())
 				if !isDapper{ 
 					return
@@ -217,14 +217,14 @@ contract Teleport{
 				panic(trust.message)
 			}
 			let account = getAccount(data.receiver)
-			let wearable = (account.capabilities.get<&Wearables.Collection>(Wearables.CollectionPublicPath)!).borrow() ?? panic("cannot borrow werable cap")
+			let wearable = account.capabilities.get<&Wearables.Collection>(Wearables.CollectionPublicPath).borrow() ?? panic("cannot borrow werable cap")
 			let context = data.context
 			for id in data.wearableTemplateIds{ 
 				Wearables.mintNFT(recipient: wearable, template: id, context: context)
 			}
 			GenesisBoxRegistry.setData(data)
 			emit Opened(data: data)
-			if let receiver = (account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow(){ 
+			if let receiver = account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow(){ 
 				let isDapper = receiver.isInstance(Type<@TokenForwarding.Forwarder>())
 				if !isDapper{ 
 					return

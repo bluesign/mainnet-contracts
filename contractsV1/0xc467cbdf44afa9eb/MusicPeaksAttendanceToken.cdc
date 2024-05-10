@@ -132,7 +132,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 	
 	// Represents a FLOAT
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The `uuid` of this resource
 		access(all)
 		let id: UInt64
@@ -326,7 +326,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			self.ownedNFTs[id] <-! nft
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("You do not own this FLOAT in your collection")
 			let nft <- token as! @NFT
@@ -419,6 +419,16 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			let tokenRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let nftRef = tokenRef as! &NFT
 			return nftRef as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -670,7 +680,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 					"This serial has not been created yet."
 			}
 			let data = self.currentHolders[serial]!
-			let collection = (getAccount(data.address).capabilities.get<&Collection>(MusicPeaksAttendanceToken.FLOATCollectionPublicPath)!).borrow()
+			let collection = getAccount(data.address).capabilities.get<&Collection>(MusicPeaksAttendanceToken.FLOATCollectionPublicPath).borrow<&Collection>()
 			if collection?.borrowFLOAT(id: data.id) != nil{ 
 				return data
 			}
@@ -1055,9 +1065,9 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		// to their FLOATEvents here and do pretty much whatever you want.
 		access(all)
 		fun borrowSharedRef(fromHost: Address): &FLOATEvents{ 
-			let sharedInfo = (getAccount(fromHost).capabilities.get<&GrantedAccountAccess.Info>(GrantedAccountAccess.InfoPublicPath)!).borrow() ?? panic("Cannot borrow the InfoPublic from the host")
+			let sharedInfo = getAccount(fromHost).capabilities.get<&GrantedAccountAccess.Info>(GrantedAccountAccess.InfoPublicPath).borrow<&GrantedAccountAccess.Info>() ?? panic("Cannot borrow the InfoPublic from the host")
 			assert(sharedInfo.isAllowed(account: (self.owner!).address), message: "This account owner does not share their account with you.")
-			let otherFLOATEvents = (getAccount(fromHost).capabilities.get<&FLOATEvents>(MusicPeaksAttendanceToken.FLOATEventsPublicPath)!).borrow() ?? panic("Could not borrow the public FLOATEvents.")
+			let otherFLOATEvents = getAccount(fromHost).capabilities.get<&FLOATEvents>(MusicPeaksAttendanceToken.FLOATEventsPublicPath).borrow<&FLOATEvents>() ?? panic("Could not borrow the public FLOATEvents.")
 			return otherFLOATEvents.borrowEventsRef()
 		}
 		

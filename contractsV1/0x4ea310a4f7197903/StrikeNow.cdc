@@ -251,7 +251,7 @@ contract StrikeNow: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -495,7 +495,7 @@ contract StrikeNow: NonFungibleToken{
 			let path = StrikeNow.CollectionPublicPath
 			while remaining > 0 && StrikeNow.pendingMints.length > 0{ 
 				let recipientAccount = getAccount((StrikeNow.pendingMints[0]!).address)
-				let recipientCollection = (recipientAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)!).borrow()
+				let recipientCollection = recipientAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path).borrow()
 				
 				//If the recipient has a broken or missing collection, add them to the list of
 				//failed mints and move to the next mint set
@@ -570,7 +570,7 @@ contract StrikeNow: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -628,6 +628,16 @@ contract StrikeNow: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -644,7 +654,7 @@ contract StrikeNow: NonFungibleToken{
 	
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &StrikeNow.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&StrikeNow.Collection>(StrikeNow.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&StrikeNow.Collection>(StrikeNow.CollectionPublicPath).borrow<&StrikeNow.Collection>() ?? panic("Couldn't get collection")
 		return collection.borrowStrikeNow(id: id)
 	}
 	
@@ -825,7 +835,7 @@ contract StrikeNow: NonFungibleToken{
 		//Get a DUC receiver reference using our current merchant account
 		//This must be updated for different target chains
 		let merchantAccount = getAccount(0xcfa0d15914188d1d)
-		let ducReceiver = merchantAccount.capabilities.get_<YOUR_TYPE>(/public/dapperUtilityCoinReceiver)!!
+		let ducReceiver = merchantAccount.capabilities.get_<YOUR_TYPE>(/public/dapperUtilityCoinReceiver)!
 		
 		//Create a forwarder resource for DUC and store it
 		let ducForwarder <- TokenForwarding.createNewForwarder(recipient: ducReceiver)

@@ -103,7 +103,9 @@ contract sFlowStakingManagerV3{
 	access(all)
 	fun getAccountFlowBalance(): UFix64{ 
 		let vaultRef =
-			(self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow()
+			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<
+				&FlowToken.Vault
+			>()
 			?? panic("Could not borrow Balance reference to the Vault")
 		return vaultRef.balance
 	}
@@ -226,7 +228,7 @@ contract sFlowStakingManagerV3{
 			// withdraw token vault from protocol
 			// send to user
 			let unstakerAccount = getAccount(accountAddress)
-			let unstakerReceiverRef = (unstakerAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow receiver reference to recipient's Flow Vault")
+			let unstakerReceiverRef = unstakerAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to recipient's Flow Vault")
 			let managerProviderRef = self.borrowFlowVault()
 			let managerFlowVault: @{FungibleToken.Vault} <- managerProviderRef.withdraw(amount: fastUnstakeAmount)
 			unstakerReceiverRef.deposit(from: <-managerFlowVault)
@@ -289,7 +291,7 @@ contract sFlowStakingManagerV3{
 			let requestAmount = request.amount
 			let withdrawAmount = requestAmount * self.getsFlowPrice()
 			if self.getAccountFlowBalance() > withdrawAmount + minFlowBalance{ 
-				let unstakerReceiverRef = (stakingAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow receiver reference to recipient's Flow Vault")
+				let unstakerReceiverRef = stakingAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow receiver reference to recipient's Flow Vault")
 				let providerRef = self.borrowFlowVault()
 				let managersFlowTokenVault = self.borrowsFlowVault()
 				let managersFlowTokenBurnerVault = self.borrowsFlowBurner()

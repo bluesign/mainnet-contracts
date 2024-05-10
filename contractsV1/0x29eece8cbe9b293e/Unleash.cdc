@@ -76,7 +76,7 @@ contract Unleash: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NFTPublic, NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NFTPublic, NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -215,7 +215,7 @@ contract Unleash: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -260,6 +260,16 @@ contract Unleash: NonFungibleToken{
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &Unleash.NFT
 			return nft as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

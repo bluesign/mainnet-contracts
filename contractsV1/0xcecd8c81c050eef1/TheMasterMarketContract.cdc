@@ -61,10 +61,8 @@ contract TheMasterMarketContract{
 	access(contract)
 	view fun isOpened(ownerAddress: Address): Bool{ 
 		let refMarketState =
-			(
-				getAccount(self.account.address).capabilities.get<&{TheMasterMarketStateInterface}>(
-					/public/TheMasterMarketState
-				)!
+			getAccount(self.account.address).capabilities.get<&{TheMasterMarketStateInterface}>(
+				/public/TheMasterMarketState
 			).borrow()!
 		return refMarketState.isOpened() || self.account.address == ownerAddress
 	}

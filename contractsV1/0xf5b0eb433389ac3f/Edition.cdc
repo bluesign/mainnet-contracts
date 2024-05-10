@@ -142,7 +142,7 @@ contract Edition{
 				firstSummaryPercent = firstSummaryPercent + (royalty[key]!).firstSalePercent
 				secondSummaryPercent = secondSummaryPercent + (royalty[key]!).secondSalePercent
 				let account = getAccount(key)
-				let vaultCap = account.capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!
+				let vaultCap = account.capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)
 				if !vaultCap.check(){ 
 					let panicMessage = "Account ".concat(key.toString()).concat(" does not provide fusd vault capability")
 					panic(panicMessage)

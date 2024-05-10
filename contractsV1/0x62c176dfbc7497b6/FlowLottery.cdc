@@ -162,14 +162,14 @@ contract FlowLottery{
 			let rollover: @{FungibleToken.Vault} <- winnings.withdraw(amount: amount * 0.02)
 			let platformTax: @{FungibleToken.Vault} <- winnings.withdraw(amount: amount * 0.005)
 			let platformVault: &FlowToken.Vault =
-				(FlowLottery.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!)
-					.borrow()!
+				FlowLottery.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+					.borrow<&FlowToken.Vault>()!
 			platformVault.deposit(from: <-platformTax)
 			
 			// deposit winnings
 			let winnerFlowVault: &FlowToken.Vault =
-				(getAccount(winner).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!)
-					.borrow()
+				getAccount(winner).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
+					.borrow<&FlowToken.Vault>()
 				?? panic("User does not have a Flow Token vault set up.")
 			winnerFlowVault.deposit(from: <-winnings)
 			

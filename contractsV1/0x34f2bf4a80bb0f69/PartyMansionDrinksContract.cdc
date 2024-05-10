@@ -268,7 +268,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	// "Here’s to those who wish us well. And those that don’t can go to hell."
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// NFT id
 		access(all)
 		let id: UInt64
@@ -683,7 +683,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		//  Let's drink the liquid that brings all good cheer; 
 		//  Oh, where is the drink like old-fashioned beer?"
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -764,6 +764,16 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 				return ref as! &PartyMansionDrinksContract.NFT
 			}
 			panic("Missing NFT. ID : ".concat(id.toString()))
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -943,7 +953,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		
 		// pay the barkeeper
 		let partyMansionDrinkContractAccount: &Account = getAccount(PartyMansionDrinksContract.account.address)
-		let partyMansionDrinkContractReceiver: Capability<&{FungibleToken.Receiver}> = partyMansionDrinkContractAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!!
+		let partyMansionDrinkContractReceiver: Capability<&{FungibleToken.Receiver}> = partyMansionDrinkContractAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
 		let borrowPartyMansionDrinkContractReceiver = partyMansionDrinkContractReceiver.borrow()!
 		borrowPartyMansionDrinkContractReceiver.deposit(from: <-paymentVault.withdraw(amount: paymentVault.balance))
 		

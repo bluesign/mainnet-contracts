@@ -359,17 +359,13 @@ contract IncrementPoints{
 		
 		// Access the lending comptroller to fetch market addresses and calculate the user's supply and borrow in USD.
 		let lendingComptrollerRef =
-			(
-				getAccount(0xf80cb737bfe7c792).capabilities.get<
-					&{LendingInterfaces.ComptrollerPublic}
-				>(LendingConfig.ComptrollerPublicPath)!
+			getAccount(0xf80cb737bfe7c792).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(
+				LendingConfig.ComptrollerPublicPath
 			).borrow()!
 		let marketAddrs: [Address] = lendingComptrollerRef.getAllMarkets()
 		let lendingOracleRef =
-			(
-				getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
-					LendingConfig.OraclePublicPath
-				)!
+			getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
+				LendingConfig.OraclePublicPath
 			).borrow()!
 		var totalSupplyAmountInUsd = 0.0
 		var totalBorrowAmountInUsd = 0.0
@@ -389,7 +385,7 @@ contract IncrementPoints{
 		let stFlowVaultCap =
 			getAccount(userAddr).capabilities.get<&{FungibleToken.Balance}>(
 				/public/stFlowTokenBalance
-			)!
+			)
 		if stFlowVaultCap.check(){ 
 			// Prevent fake stFlow token vault
 			if (stFlowVaultCap.borrow()!).getType().identifier == "A.d6f80565193ad727.stFlowToken.Vault"{ 
@@ -430,10 +426,8 @@ contract IncrementPoints{
 		//	 }
 		// }
 		let farmCollectionRef =
-			(
-				getAccount(0x1b77ba4b414de352).capabilities.get<&{Staking.PoolCollectionPublic}>(
-					Staking.CollectionPublicPath
-				)!
+			getAccount(0x1b77ba4b414de352).capabilities.get<&{Staking.PoolCollectionPublic}>(
+				Staking.CollectionPublicPath
 			).borrow()!
 		let userFarmIds = Staking.getUserStakingIds(address: userAddr)
 		for farmPoolId in userFarmIds{ 
@@ -459,7 +453,7 @@ contract IncrementPoints{
 				}
 				let lpUsdRatio: UFix64 = self.getPointsRate_SpecificSwapLPUsdRatio(poolAddr: swapPoolAddress)
 				if acceptTokenName == "SwapPair"{ 
-					let swapPoolInfo = ((getAccount(swapPoolAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow()!).getPairInfo()
+					let swapPoolInfo = (getAccount(swapPoolAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!).getPairInfo()
 					var lpPrice = 0.0
 					if lpPrices.containsKey(swapPoolAddress){ 
 						lpPrice = lpPrices[swapPoolAddress]!
@@ -607,11 +601,9 @@ contract IncrementPoints{
 	view fun isCoreMember(_ userAddr: Address): Bool{ 
 		let coreMemberEventID: UInt64 = 326723707
 		let floatCollection =
-			(
-				getAccount(userAddr).capabilities.get<&FLOAT.Collection>(
-					FLOAT.FLOATCollectionPublicPath
-				)!
-			).borrow()
+			getAccount(userAddr).capabilities.get<&FLOAT.Collection>(
+				FLOAT.FLOATCollectionPublicPath
+			).borrow<&FLOAT.Collection>()
 		if floatCollection == nil{ 
 			return false
 		}
@@ -621,10 +613,8 @@ contract IncrementPoints{
 			return true
 		}
 		let poolCollectionCap =
-			(
-				getAccount(StakingNFT.address).capabilities.get<&{StakingNFT.PoolCollectionPublic}>(
-					StakingNFT.CollectionPublicPath
-				)!
+			getAccount(StakingNFT.address).capabilities.get<&{StakingNFT.PoolCollectionPublic}>(
+				StakingNFT.CollectionPublicPath
 			).borrow()!
 		let count = StakingNFT.poolCount
 		var idx: UInt64 = 0

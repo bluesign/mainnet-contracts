@@ -60,7 +60,7 @@ contract Vevent{
 			}
 			self.buyers[user] = (self.buyers[user] ?? 0) + self.prices[vault.balance]!
 			let owner: Address = 0x14b41acafe20d346
-			let ownerVault = (getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!).borrow() ?? panic("This is not a Dapper Wallet account.")
+			let ownerVault = getAccount(owner).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("This is not a Dapper Wallet account.")
 			ownerVault.deposit(from: <-vault)
 		}
 		
@@ -100,7 +100,7 @@ contract Vevent{
 		
 		access(all)
 		fun purchase(projectOwner: Address, projectId: UInt64, payment: @DapperUtilityCoin.Vault){ 
-			let collection: &Collection = (getAccount(projectOwner).capabilities.get<&Collection>(Vevent.CollectionPublicPath)!).borrow() ?? panic("This project owner does not have a collection set up or linked properly.")
+			let collection: &Collection = getAccount(projectOwner).capabilities.get<&Collection>(Vevent.CollectionPublicPath).borrow<&Collection>() ?? panic("This project owner does not have a collection set up or linked properly.")
 			let project: &Project = collection.getProjectPublic(projectId: projectId) ?? panic("Project with this id does not exist.")
 			project.purchase(user: (self.owner!).address, vault: <-payment)
 		}

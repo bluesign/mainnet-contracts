@@ -651,10 +651,8 @@ contract FRC20NFTWrapper{
 	///
 	access(all)
 	fun borrowWrapperPublic(addr: Address): &FRC20NFTWrapper.Wrapper?{ 
-		return (
-			getAccount(addr).capabilities.get<&FRC20NFTWrapper.Wrapper>(
-				self.FRC20NFTWrapperPublicPath
-			)!
+		return getAccount(addr).capabilities.get<&FRC20NFTWrapper.Wrapper>(
+			self.FRC20NFTWrapperPublicPath
 		).borrow()
 	}
 	
@@ -662,10 +660,8 @@ contract FRC20NFTWrapper{
 	///
 	access(all)
 	view fun borrowWrapperIndexerPublic(): &FRC20NFTWrapper.WrapperIndexer{ 
-		return (
-			getAccount(self.account.address).capabilities.get<&FRC20NFTWrapper.WrapperIndexer>(
-				self.FRC20NFTWrapperIndexerPublicPath
-			)!
+		return getAccount(self.account.address).capabilities.get<&FRC20NFTWrapper.WrapperIndexer>(
+			self.FRC20NFTWrapperIndexerPublicPath
 		).borrow()
 		?? panic("Could not borrow WrapperIndexer public reference")
 	}

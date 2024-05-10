@@ -165,7 +165,7 @@ contract FindMarketAdmin{
 			}
 			let string = FindMarket.getTenantPathForAddress(tenant)
 			let pp = PrivatePath(identifier: string) ?? panic("Cannot generate storage path from string : ".concat(string))
-			let cap = FindMarketAdmin.account.capabilities.get<&FindMarket.Tenant>(pp)!
+			let cap = FindMarketAdmin.account.capabilities.get<&FindMarket.Tenant>(pp)
 			return cap.borrow() ?? panic("Cannot borrow tenant reference from path. Path : ".concat(pp.toString()))
 		}
 		

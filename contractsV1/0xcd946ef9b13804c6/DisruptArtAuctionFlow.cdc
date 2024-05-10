@@ -251,10 +251,10 @@ contract DisruptArtAuctionFlow{
 					balance = bidVaultRef.balance - (marketShare + royalityShare)
 					let marketCut <- bidVaultRef.withdraw(amount: marketShare)
 					let royalityCut <- bidVaultRef.withdraw(amount: royalityShare)
-					let disruptartvaultRef = (getAccount(DisruptArtMarketplaceFlow.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to Marketplace vault")
+					let disruptartvaultRef = getAccount(DisruptArtMarketplaceFlow.marketAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to Marketplace vault")
 					
 					// let itemRef = &self.auctionItems[id] as? &AuctionItem
-					let creatorvaultRef = (getAccount(self.creator!!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow() ?? panic("failed to borrow reference to owner vault")
+					let creatorvaultRef = getAccount(self.creator!!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("failed to borrow reference to owner vault")
 					disruptartvaultRef.deposit(from: <-marketCut)
 					if self.resale{ 
 						creatorvaultRef.deposit(from: <-royalityCut)

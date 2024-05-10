@@ -193,9 +193,8 @@ contract FLOATEventSeriesGoals{
 	// get user FLOAT collection
 	access(contract)
 	fun getFLOATCollection(user: Address): &FLOAT.Collection?{ 
-		return (
-			getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!
-		).borrow()
+		return getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)
+			.borrow<&FLOAT.Collection>()
 	}
 	
 	// to check if owned some FLOAT of a Event

@@ -56,7 +56,7 @@ contract DooverseItems: NonFungibleToken{
 	var totalSupply: UInt64
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -140,7 +140,7 @@ contract DooverseItems: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			panic("Cannot withdraw Dooverse NFTs")
 		}
@@ -185,6 +185,16 @@ contract DooverseItems: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -215,7 +225,7 @@ contract DooverseItems: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &DooverseItems.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&DooverseItems.Collection>(DooverseItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&DooverseItems.Collection>(DooverseItems.CollectionPublicPath).borrow<&DooverseItems.Collection>() ?? panic("Couldn't get collection")
 		
 		// We trust DooverseItems.Collection.borowDooverseItem to get the correct itemID
 		// (it checks it before returning it).

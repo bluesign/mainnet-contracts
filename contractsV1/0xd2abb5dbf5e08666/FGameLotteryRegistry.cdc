@@ -328,9 +328,8 @@ contract FGameLotteryRegistry{
 	///
 	access(all)
 	view fun borrowRegistry(): &Registry{ 
-		return (
-			getAccount(self.account.address).capabilities.get<&Registry>(self.registryPublicPath)!
-		).borrow()
+		return getAccount(self.account.address).capabilities.get<&Registry>(self.registryPublicPath)
+			.borrow()
 		?? panic("Registry not found")
 	}
 	

@@ -210,7 +210,7 @@ contract FINDNFTCatalog{
 		let proposerManagerCap =
 			getAccount(proposer).capabilities.get<&NFTCatalog.NFTCatalogProposalManager>(
 				NFTCatalog.ProposalManagerPublicPath
-			)!
+			)
 		assert(proposerManagerCap.check(), message: "Proposer needs to set up a manager")
 		let proposerManagerRef = proposerManagerCap.borrow()!
 		assert(
@@ -250,7 +250,7 @@ contract FINDNFTCatalog{
 		let proposerManagerCap =
 			getAccount(proposer).capabilities.get<&NFTCatalog.NFTCatalogProposalManager>(
 				NFTCatalog.ProposalManagerPublicPath
-			)!
+			)
 		assert(proposerManagerCap.check(), message: "Proposer needs to set up a manager")
 		let proposerManagerRef = proposerManagerCap.borrow()!
 		assert(

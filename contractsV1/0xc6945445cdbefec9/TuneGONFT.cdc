@@ -364,7 +364,7 @@ contract TuneGONFT: NonFungibleToken{
 	// NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -500,7 +500,7 @@ contract TuneGONFT: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -541,6 +541,16 @@ contract TuneGONFT: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let tunegoNFT = nft as! &TuneGONFT.NFT
 			return tunegoNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -601,7 +611,7 @@ contract TuneGONFT: NonFungibleToken{
 			for royalty in royalties{ 
 				assert(royalty.receiver.borrow() != nil, message: "Missing royalty receiver")
 				let receiverAccount = getAccount(royalty.receiver.address)
-				let receiverDUCVaultCapability = receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!
+				let receiverDUCVaultCapability = receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
 				assert(receiverDUCVaultCapability.borrow() != nil, message: "Missing royalty receiver DapperUtilityCoin vault")
 				let royaltyPercentage = royalty.cut * 100.0
 				royaltiesData.append(RoyaltyData(receiver: receiverAccount.address, percentage: royaltyPercentage))
@@ -633,7 +643,7 @@ contract TuneGONFT: NonFungibleToken{
 			for royalty in royalties{ 
 				assert(royalty.receiver.borrow() != nil, message: "Missing royalty receiver")
 				let receiverAccount = getAccount(royalty.receiver.address)
-				let receiverDUCVaultCapability = receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!
+				let receiverDUCVaultCapability = receiverAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
 				assert(receiverDUCVaultCapability.borrow() != nil, message: "Missing royalty receiver DapperUtilityCoin vault")
 				let royaltyPercentage = royalty.cut * 100.0
 				royaltiesData.append(RoyaltyData(receiver: receiverAccount.address, percentage: royaltyPercentage))

@@ -129,7 +129,7 @@ contract EMSwap{
 					if tempCatalogEntry == nil{ 
 						continue
 					}
-					let collectionCap = ownerPublicAccount.capabilities.get<&{ViewResolver.ResolverCollection}>((tempCatalogEntry!).collectionData.publicPath)!
+					let collectionCap = ownerPublicAccount.capabilities.get<&{ViewResolver.ResolverCollection}>((tempCatalogEntry!).collectionData.publicPath)
 					if collectionCap.check(){ 
 						let collectionRef = collectionCap.borrow()!
 						if !collectionRef.getIDs().contains(nftID){ 
@@ -611,11 +611,11 @@ contract EMSwap{
 		for proposedNft in userOffer.proposedNfts{ 
 			
 			// attempt to load CollectionPublic capability and verify ownership
-			let publicCapability = userPublicAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(proposedNft.metadata.collectionData.publicPath)!
+			let publicCapability = userPublicAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(proposedNft.metadata.collectionData.publicPath)
 			let collectionPublicRef = publicCapability.borrow() ?? panic(collectionPublicMessage.concat(proposedNft.type.identifier))
 			let ownedNftIds: [UInt64] = collectionPublicRef.getIDs()
 			assert(ownedNftIds.contains(proposedNft.nftID), message: ownershipMessage.concat(proposedNft.type.identifier))
-			let nftRef = collectionPublicRef.borrowNFT(proposedNft.nftID)
+			let nftRef = collectionPublicRef.borrowNFT(id: proposedNft.nftID)
 			assert(nftRef.getType() == proposedNft.type, message: nftTypeMismatchMessage.concat(proposedNft.type.identifier))
 			if userCapabilities != nil{ 
 				

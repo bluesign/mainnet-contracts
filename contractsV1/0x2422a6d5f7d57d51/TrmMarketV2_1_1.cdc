@@ -698,10 +698,8 @@ contract TrmMarketV2_1_1{
 			auctionPeriodSeconds: UFix64?
 		){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -723,10 +721,8 @@ contract TrmMarketV2_1_1{
 			rentalPeriodSeconds: UFix64?
 		){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -750,10 +746,8 @@ contract TrmMarketV2_1_1{
 			auctionPeriodSeconds: UFix64?
 		){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -777,10 +771,8 @@ contract TrmMarketV2_1_1{
 			rentalPeriodSeconds: UFix64?
 		){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -795,10 +787,8 @@ contract TrmMarketV2_1_1{
 		access(all)
 		fun cancelTransfer(saleCollectionAddress: Address, tokenID: UInt64){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -809,10 +799,8 @@ contract TrmMarketV2_1_1{
 		access(all)
 		fun cancelRent(saleCollectionAddress: Address, tokenID: UInt64){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -823,10 +811,8 @@ contract TrmMarketV2_1_1{
 		access(all)
 		fun batchCancelTransfer(saleCollectionAddress: Address, tokenIDs: [UInt64]){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -837,10 +823,8 @@ contract TrmMarketV2_1_1{
 		access(all)
 		fun batchCancelRent(saleCollectionAddress: Address, tokenIDs: [UInt64]){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -858,10 +842,8 @@ contract TrmMarketV2_1_1{
 			paymentID: String
 		){ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"
@@ -884,10 +866,8 @@ contract TrmMarketV2_1_1{
 			paymentID: String
 		): UInt64{ 
 			let saleCollectionCapability =
-				(
-					getAccount(saleCollectionAddress).capabilities.get<
-						&TrmMarketV2_1_1.SaleCollection
-					>(TrmMarketV2_1_1.marketPublicPath)!
+				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_1_1.SaleCollection>(
+					TrmMarketV2_1_1.marketPublicPath
 				).borrow()
 				?? panic(
 					"Could not borrow sale collection capability from provided sale collection address"

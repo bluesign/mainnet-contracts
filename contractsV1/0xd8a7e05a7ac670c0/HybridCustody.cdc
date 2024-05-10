@@ -820,7 +820,7 @@ contract HybridCustody{
 			switch view{ 
 				case Type<MetadataViews.Display>():
 					let childAddress = self.getAddress()
-					let manager = getAccount(self.parent).capabilities.get<&HybridCustody.Manager>(HybridCustody.ManagerPublicPath)!
+					let manager = getAccount(self.parent).capabilities.get<&HybridCustody.Manager>(HybridCustody.ManagerPublicPath)
 					if !manager.check(){ 
 						return nil
 					}
@@ -1113,7 +1113,7 @@ contract HybridCustody{
 				active: false
 			)
 			let parentManager =
-				getAccount(parent).capabilities.get<&Manager>(HybridCustody.ManagerPublicPath)!
+				getAccount(parent).capabilities.get<&Manager>(HybridCustody.ManagerPublicPath)
 			if parentManager.check(){ 
 				parentManager.borrow()?.removeParentCallback(child: (self.owner!).address)
 			}

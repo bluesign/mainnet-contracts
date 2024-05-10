@@ -37,7 +37,7 @@ contract CounterContract{
 	
 	access(all)
 	fun currentCount(): UInt64{ 
-		let counter = self.account.capabilities.get<&{HasCount}>(self.CounterPublicPath)!
+		let counter = self.account.capabilities.get<&{HasCount}>(self.CounterPublicPath)
 		let counterRef = counter.borrow()!
 		return counterRef.currentCount()
 	}

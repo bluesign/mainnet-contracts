@@ -64,7 +64,7 @@ contract Bakesale_NFT_V1: NonFungibleToken{
 	var numberEditionsMintedPerSet:{ UInt32: UInt32}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -154,7 +154,7 @@ contract Bakesale_NFT_V1: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -213,6 +213,16 @@ contract Bakesale_NFT_V1: NonFungibleToken{
 		fun pop(): @{NonFungibleToken.NFT}{ 
 			let nextID = self.ownedNFTs.keys[0]
 			return <-self.withdraw(withdrawID: nextID)
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -346,7 +356,7 @@ contract Bakesale_NFT_V1: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &Bakesale_NFT_V1.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&{Bakesale_NFT_V1.Bakesale_NFT_V1CollectionPublic}>(Bakesale_NFT_V1.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&{Bakesale_NFT_V1.Bakesale_NFT_V1CollectionPublic}>(Bakesale_NFT_V1.CollectionPublicPath).borrow<&{Bakesale_NFT_V1.Bakesale_NFT_V1CollectionPublic}>() ?? panic("Couldn't get collection")
 		
 		// We trust Bakesale_NFT_V1.Collection.borowBakesale_NFT_V1 to get the correct itemID
 		// (it checks it before returning it).

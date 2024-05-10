@@ -39,10 +39,8 @@ contract SwapPair{
 	access(self)
 	fun metaScaledReserves(): [UInt256]{ 
 		let mpool =
-			(
-				getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
-					/public/metapierSwapPoolPublic
-				)!
+			getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
+				/public/metapierSwapPoolPublic
 			).borrow()!
 		let mpoolInfo = mpool.getReserves()
 		return [
@@ -129,10 +127,8 @@ contract SwapPair{
 		switch p{ 
 			case 0:
 				let mpool =
-					(
-						getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
-							/public/metapierSwapPoolPublic
-						)!
+					getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
+						/public/metapierSwapPoolPublic
 					).borrow()!
 				let minfo = mpool.getReserves()
 				if vaultIn.isInstance(self.token0VaultType){ 

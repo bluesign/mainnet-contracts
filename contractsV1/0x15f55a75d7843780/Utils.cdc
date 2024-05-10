@@ -98,7 +98,7 @@ contract Utils{
 		let account = getAccount(ownerAddress)
 		let normalizedNftIdentifiers: [String] = []
 		account.forEachPublic(fun (path: PublicPath, type: Type): Bool{ 
-				let capability = account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)!
+				let capability = account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)
 				if !capability.check(){ 
 					return true
 				}
@@ -133,7 +133,7 @@ contract Utils{
 				if nftId == nil{ 
 					return true
 				}
-				let nftRef: &{NonFungibleToken.INFT} = (collectionPublic!).borrowNFT(nftId!) as &{NonFungibleToken.INFT}
+				let nftRef: &{NonFungibleToken.INFT} = (collectionPublic!).borrowNFT(id: nftId!) as &{NonFungibleToken.INFT}
 				let collectionData = nftRef.resolveView(Type<MetadataViews.NFTCollectionData>()) as! MetadataViews.NFTCollectionData? ?? panic("collection lookup failed")
 				response.insert(key: nftIdentifier, collectionData)
 				return true

@@ -53,7 +53,7 @@ contract LibraryPass: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public{ 
+	resource NFT: NonFungibleToken.NFT, Public{ 
 		access(all)
 		let id: UInt64
 		
@@ -100,7 +100,7 @@ contract LibraryPass: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -134,6 +134,16 @@ contract LibraryPass: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -173,10 +183,10 @@ contract LibraryPass: NonFungibleToken{
 	fun getNft(address: Address): [NftData]{ 
 		var artData: [NftData] = []
 		let account = getAccount(address)
-		if let artCollection = (account.capabilities.get<&{LibraryPass.LibraryPassCollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let artCollection = account.capabilities.get<&{LibraryPass.LibraryPassCollectionPublic}>(self.CollectionPublicPath).borrow<&{LibraryPass.LibraryPassCollectionPublic}>(){ 
 			for id in artCollection.getIDs(){ 
 				var art = artCollection.borrowArt(id: id)
-				artData.append(NftData(metadata: *(art!).metadata, id: id, type: (art!).type))
+				artData.append(NftData(metadata: (art!).metadata, id: id, type: (art!).type))
 			}
 		}
 		return artData

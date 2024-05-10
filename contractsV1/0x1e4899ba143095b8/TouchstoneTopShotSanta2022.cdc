@@ -131,7 +131,7 @@ contract TouchstoneTopShotSanta2022: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The 'id' is the same as the 'uuid'
 		access(all)
 		let id: UInt64
@@ -177,8 +177,8 @@ contract TouchstoneTopShotSanta2022: NonFungibleToken{
 					return MetadataViews.NFTCollectionDisplay(name: TouchstoneTopShotSanta2022.getCollectionAttribute(key: "name") as! String, description: TouchstoneTopShotSanta2022.getCollectionAttribute(key: "description") as! String, externalURL: MetadataViews.ExternalURL("https://touchstone.city/discover/".concat((self.owner!).address.toString()).concat("/TouchstoneTopShotSanta2022")), squareImage: squareMedia, bannerImage: bannerMedia ?? squareMedia, socials: TouchstoneTopShotSanta2022.getCollectionAttribute(key: "socials") as!{ String: MetadataViews.ExternalURL})
 				case Type<MetadataViews.Royalties>():
 					return MetadataViews.Royalties([													// This is for Emerald City in favor of producing Touchstone, a free platform for our users. Failure to keep this in the contract may result in permanent suspension from Emerald City.
-													MetadataViews.Royalty(receiver: getAccount(0x5643fd47a29770e7).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.025, // 2.5% royalty on secondary sales																																															   
-																																															   description: "Emerald City DAO receives a 2.5% royalty from secondary sales because this collection was created using Touchstone (https://touchstone.city/), a tool for creating your own NFT collections, crafted by Emerald City DAO.")])
+													MetadataViews.Royalty(receiver: getAccount(0x5643fd47a29770e7).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.025, // 2.5% royalty on secondary sales																																															  
+																																															  description: "Emerald City DAO receives a 2.5% royalty from secondary sales because this collection was created using Touchstone (https://touchstone.city/), a tool for creating your own NFT collections, crafted by Emerald City DAO.")])
 				case Type<MetadataViews.Serial>():
 					return MetadataViews.Serial(self.serial)
 				case Type<MetadataViews.Traits>():
@@ -234,7 +234,7 @@ contract TouchstoneTopShotSanta2022: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -283,6 +283,16 @@ contract TouchstoneTopShotSanta2022: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -314,7 +324,7 @@ contract TouchstoneTopShotSanta2022: NonFungibleToken{
 		}
 		
 		// Handle Emerald City DAO royalty (5%)
-		let EmeraldCityTreasury = (getAccount(0x5643fd47a29770e7).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!
+		let EmeraldCityTreasury = getAccount(0x5643fd47a29770e7).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!
 		let emeraldCityCut: UFix64 = 0.05 * price
 		
 		// Handle royalty to user that was configured upon creation
@@ -324,7 +334,7 @@ contract TouchstoneTopShotSanta2022: NonFungibleToken{
 		EmeraldCityTreasury.deposit(from: <-payment.withdraw(amount: emeraldCityCut))
 		
 		// Give the rest to the collection owner
-		let paymentRecipient = (self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!
+		let paymentRecipient = self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!
 		paymentRecipient.deposit(from: <-payment)
 		
 		// Mint the nft 
@@ -358,7 +368,7 @@ contract TouchstoneTopShotSanta2022: NonFungibleToken{
 					"You must have an active Emerald Pass subscription to airdrop NFTs. You can purchase Emerald Pass at https://pass.ecdao.org/"
 			}
 			let nft <- create NFT(_metadataId: metadataId, _serial: serial, _recipient: recipient)
-			if let recipientCollection = (getAccount(recipient).capabilities.get<&TouchstoneTopShotSanta2022.Collection>(TouchstoneTopShotSanta2022.CollectionPublicPath)!).borrow(){ 
+			if let recipientCollection = getAccount(recipient).capabilities.get<&TouchstoneTopShotSanta2022.Collection>(TouchstoneTopShotSanta2022.CollectionPublicPath).borrow<&TouchstoneTopShotSanta2022.Collection>(){ 
 				recipientCollection.deposit(token: <-nft)
 			} else if let storage = &TouchstoneTopShotSanta2022.nftStorage[recipient] as auth(Mutate) &{UInt64: NFT}?{ 
 				storage[nft.id] <-! nft

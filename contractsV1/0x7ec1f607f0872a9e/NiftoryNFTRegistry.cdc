@@ -331,7 +331,7 @@ contract NiftoryNFTRegistry{
 	access(all)
 	fun getRegistryRecord(_ registryAddress: Address, _ brand: String): Record{ 
 		let registry =
-			(getAccount(registryAddress).capabilities.get<&{Public}>(self.PUBLIC_PATH)!).borrow()
+			getAccount(registryAddress).capabilities.get<&{Public}>(self.PUBLIC_PATH).borrow()
 			?? panic(self._notFoundError(registryAddress, brand, "Registry Record"))
 		return registry.infoFor(brand)
 	}
@@ -352,7 +352,7 @@ contract NiftoryNFTRegistry{
 		let manager =
 			getAccount(record.nftManager.account).capabilities.get<
 				&{NiftoryNonFungibleToken.ManagerPublic}
-			>(record.nftManager.paths.public)!
+			>(record.nftManager.paths.public)
 		return manager.borrow() ?? panic(self._notFoundError(registryAddress, brand, "NFT Manager"))
 	}
 	
@@ -366,7 +366,7 @@ contract NiftoryNFTRegistry{
 		let manager =
 			getAccount(record.setManager.account).capabilities.get<
 				&MutableMetadataSetManager.Manager
-			>(record.setManager.paths.public)!
+			>(record.setManager.paths.public)
 		return manager.borrow()
 		?? panic(self._notFoundError(registryAddress, brand, "MutableMetadataSetManager"))
 	}
@@ -381,7 +381,7 @@ contract NiftoryNFTRegistry{
 		let manager =
 			getAccount(record.metadataViewsManager.account).capabilities.get<
 				&MetadataViewsManager.Manager
-			>(record.metadataViewsManager.paths.public)!
+			>(record.metadataViewsManager.paths.public)
 		return manager.borrow()
 		?? panic(self._notFoundError(registryAddress, brand, "MetadataViewsManager"))
 	}

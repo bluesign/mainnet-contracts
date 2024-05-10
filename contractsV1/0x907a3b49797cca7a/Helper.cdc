@@ -25,11 +25,9 @@ contract Helper{
 		access(all)
 		fun getEventPublic(): &FLOAT.FLOATEvent{ 
 			let ownerEvents =
-				(
-					getAccount(self.host).capabilities.get<&FLOAT.FLOATEvents>(
-						FLOAT.FLOATEventsPublicPath
-					)!
-				).borrow()
+				getAccount(self.host).capabilities.get<&FLOAT.FLOATEvents>(
+					FLOAT.FLOATEventsPublicPath
+				).borrow<&FLOAT.FLOATEvents>()
 				?? panic("Could not borrow the public FLOATEvents.")
 			return ownerEvents.borrowPublicEventRef(eventId: self.eventId)
 			?? panic("Failed to get event reference.")

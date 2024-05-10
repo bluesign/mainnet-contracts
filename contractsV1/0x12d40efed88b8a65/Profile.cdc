@@ -255,7 +255,7 @@ contract Profile{
 	
 	access(all)
 	fun find(_ address: Address): &{Profile.Public}{ 
-		return (getAccount(address).capabilities.get<&{Profile.Public}>(Profile.ProfilePublicPath)!)
+		return getAccount(address).capabilities.get<&{Profile.Public}>(Profile.ProfilePublicPath)
 			.borrow()!
 	}
 	

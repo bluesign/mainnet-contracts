@@ -108,7 +108,7 @@ contract QuestReward: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: Public, NonFungibleToken.INFT{ 
+	resource NFT: Public, NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -177,7 +177,7 @@ contract QuestReward: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw QuestReward from Collection: Missing NFT")
 			emit Withdraw(id: withdrawID, from: self.owner?.address)
@@ -213,6 +213,16 @@ contract QuestReward: NonFungibleToken{
 		fun borrowEntireQuestReward(id: UInt64): &QuestReward.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return (ref as! &QuestReward.NFT?)!
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -257,7 +257,7 @@ contract TheFabricantMarketplaceHelper{
 		let itemCap =
 			getAccount(itemRef.royaltyVault.address).capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		let itemDataID = itemRef.item.itemDataID
 		let itemData = ItemNFT.getItemData(id: itemDataID)
 		let itemName = itemRef.name
@@ -266,11 +266,11 @@ contract TheFabricantMarketplaceHelper{
 		let garmentCap =
 			getAccount((itemRef.borrowGarment()!).royaltyVault.address).capabilities.get<
 				&FlowToken.Vault
-			>(/public/flowTokenReceiver)!
+			>(/public/flowTokenReceiver)
 		let materialCap =
 			getAccount((itemRef.borrowMaterial()!).royaltyVault.address).capabilities.get<
 				&FlowToken.Vault
-			>(/public/flowTokenReceiver)!
+			>(/public/flowTokenReceiver)
 		
 		// initialize sale cuts for item, garment, material and contract
 		let saleCutArray: [TheFabricantMarketplace.SaleCut] =
@@ -345,15 +345,15 @@ contract TheFabricantMarketplaceHelper{
 		let itemCap =
 			getAccount(itemRef.royaltyVault.address).capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		let garmentCap =
 			getAccount((itemRef.borrowGarment()!).royaltyVault.address).capabilities.get<
 				&FlowToken.Vault
-			>(/public/flowTokenReceiver)!
+			>(/public/flowTokenReceiver)
 		let materialCap =
 			getAccount((itemRef.borrowMaterial()!).royaltyVault.address).capabilities.get<
 				&FlowToken.Vault
-			>(/public/flowTokenReceiver)!
+			>(/public/flowTokenReceiver)
 		
 		// initialize sale cuts for item, garment, material and channelFee
 		let saleCutArray: [TheFabricantMarketplace.SaleCut] =
@@ -428,7 +428,7 @@ contract TheFabricantMarketplaceHelper{
 		let itemCap =
 			getAccount(itemRef.royaltyVault.wallet.address).capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		let itemDataID = itemRef.item.itemDataID
 		let itemData = TheFabricantS1ItemNFT.getItemData(id: itemDataID)
 		let itemMetadata = itemData.getMetadata()
@@ -517,7 +517,7 @@ contract TheFabricantMarketplaceHelper{
 		let itemCap =
 			getAccount(itemRef.royaltyVault.wallet.address).capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		let garmentData = (itemRef.borrowGarment()!).garment.garmentDataID
 		let garmentRoyalties = TheFabricantS1GarmentNFT.getGarmentData(id: garmentData).getRoyalty()
 		let materialData = (itemRef.borrowMaterial()!).material.materialDataID
@@ -599,7 +599,7 @@ contract TheFabricantMarketplaceHelper{
 		let itemCap =
 			getAccount(itemRef.royaltyVault.wallet.address).capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		let itemDataID = itemRef.item.itemDataID
 		let itemData = TheFabricantS2ItemNFT.getItemData(id: itemDataID)
 		let itemMetadata = itemData.getMetadata()
@@ -691,7 +691,7 @@ contract TheFabricantMarketplaceHelper{
 		let itemCap =
 			getAccount(itemRef.royaltyVault.wallet.address).capabilities.get<&FlowToken.Vault>(
 				/public/flowTokenReceiver
-			)!
+			)
 		let itemDataID = itemRef.item.itemDataID
 		let itemData = TheFabricantS2ItemNFT.getItemData(id: itemDataID)
 		let itemMetadata = itemData.getMetadata()

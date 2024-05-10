@@ -103,7 +103,7 @@ contract MotoGPTransfer: ContractVersion{
 		let toAccount = getAccount(toAddress)
 		if toAccount.storage.capacity < toAccount.storage.used{ 
 			let topUpAmount: UFix64 = self.flowForStorage(toAccount.storage.used - toAccount.storage.capacity)
-			let toVault = (toAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()!
+			let toVault = toAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>()!
 			toVault.deposit(from: <-self.flowVault.withdraw(amount: topUpAmount))
 		}
 	}

@@ -447,7 +447,7 @@ contract BallerzSimz{
 			let ownerGaiaCollectionCapability =
 				ballerOwner.capabilities.get<&{Gaia.CollectionPublic}>(
 					BallerzSimz.BallerzCollectionPublicPath
-				)!
+				)
 			let collectionRef = ownerGaiaCollectionCapability.borrow()!
 			if !collectionRef.getIDs().contains(baller.id){ 
 				panic("Address does not own baller")
@@ -455,7 +455,7 @@ contract BallerzSimz{
 			self.ballerIdz.append(baller.id)
 			
 			// get capability to access baller metadata
-			self.ownerCapabilities.insert(key: baller.id, ownerGaiaCollectionCapability)
+			self.ownerCapabilities.insert(key: baller.id, ownerGaiaCollectionCapability!)
 			// get capability to deposit winnings into owners account
 			self.ownerReceivers.insert(
 				key: baller.id,
@@ -968,7 +968,7 @@ contract BallerzSimz{
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
 				self.BallerzSimzConfigAdminPath
-			)!
+			)
 		let configAdminRef = configAdmin.borrow()!
 		return configAdminRef.getCurrentEntryFees()
 	}
@@ -978,7 +978,7 @@ contract BallerzSimz{
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
 				self.BallerzSimzConfigAdminPath
-			)!
+			)
 		let configAdminRef = configAdmin.borrow()!
 		return configAdminRef.getEntryFeeToFeePercentageMap()
 	}
@@ -988,7 +988,7 @@ contract BallerzSimz{
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
 				self.BallerzSimzConfigAdminPath
-			)!
+			)
 		let configAdminRef = configAdmin.borrow()!
 		return configAdminRef.getTeamSizes()
 	}
@@ -998,7 +998,7 @@ contract BallerzSimz{
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
 				self.BallerzSimzConfigAdminPath
-			)!
+			)
 		let configAdminRef = configAdmin.borrow()!
 		return configAdminRef.getContractPaused()
 	}
@@ -1008,7 +1008,7 @@ contract BallerzSimz{
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
 				self.BallerzSimzConfigAdminPath
-			)!
+			)
 		let configAdminRef = configAdmin.borrow()!
 		return configAdminRef.getAcceptedBallerzSetIdz()
 	}
@@ -1032,7 +1032,7 @@ contract BallerzSimz{
 		let feeOwnerCapability =
 			self.account.capabilities.get<&{FungibleToken.Receiver}>(
 				BounceToken.bounceTokenReceiverPath
-			)!
+			)
 		
 		// Create an empty vault and save a receiver and provider
 		self.account.storage.save(
@@ -1060,7 +1060,10 @@ contract BallerzSimz{
 		
 		// Create BallerzSimzResource
 		let ballerzSimzResource <-
-			create BallerzSimzResource(signer: self.account, feeOwnerCapability: feeOwnerCapability)
+			create BallerzSimzResource(
+				signer: self.account,
+				feeOwnerCapability: feeOwnerCapability!
+			)
 		
 		// Save BallerzSimzResource to storage
 		self.account.storage.save<@BallerzSimzResource>(

@@ -39,7 +39,7 @@ contract beta4LilaiNFT: NonFungibleToken, ViewResolver{
 	
 	/// The core resource that represents a Non Fungible Token.
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		/// The unique ID that each NFT has
 		access(all)
 		let id: UInt64
@@ -172,7 +172,7 @@ contract beta4LilaiNFT: NonFungibleToken, ViewResolver{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -215,6 +215,16 @@ contract beta4LilaiNFT: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -229,7 +239,7 @@ contract beta4LilaiNFT: NonFungibleToken, ViewResolver{
 	access(all)
 	fun mintNFT(recipientAddress: Address, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty], lilaiputiaData: String){ 
 		let recipientAccount = getAccount(recipientAddress)
-		let recipientCollection = (recipientAccount.capabilities.get<&Collection>(self.CollectionPublicPath)!).borrow() ?? panic("Could not borrow a reference to the recipient's collection")
+		let recipientCollection = recipientAccount.capabilities.get<&Collection>(self.CollectionPublicPath).borrow<&Collection>() ?? panic("Could not borrow a reference to the recipient's collection")
 		let metadata:{ String: AnyStruct} ={ "name": name, "description": description, "thumbnail": thumbnail, "ipfsLink": thumbnail, // Include IPFS link																																	  
 																																	  "mintedBlock": getCurrentBlock().height, "mintedTime": getCurrentBlock().timestamp, "minter": recipientAddress																																																													// Add other fields as needed
 																																																													}

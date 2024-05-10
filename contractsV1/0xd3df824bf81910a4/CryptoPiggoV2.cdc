@@ -51,7 +51,7 @@ contract CryptoPiggoV2: NonFungibleToken{
 	let MinterStoragePath: StoragePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -93,9 +93,9 @@ contract CryptoPiggoV2: NonFungibleToken{
 					let receivers:{ Address: UFix64} ={ 0x61a56aa81654c8a7: 0.4975, 0x22bd73c547ce8add: 0.4975, 0x5edebcc93e2e4e3d: 0.005}
 					let royalties: [MetadataViews.Royalty] = []
 					for address in receivers.keys{ 
-						let receiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
+						let receiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())
 						if receiver.check(){ 
-							royalties.append(MetadataViews.Royalty(receiver: receiver, cut: receivers[address]!, description: ""))
+							royalties.append(MetadataViews.Royalty(receiver: receiver!, cut: receivers[address]!, description: ""))
 						}
 					}
 					return MetadataViews.Royalties(royalties)
@@ -132,7 +132,7 @@ contract CryptoPiggoV2: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -200,6 +200,16 @@ contract CryptoPiggoV2: NonFungibleToken{
 				return nft as! &CryptoPiggoV2.NFT
 			}
 			panic("NFT not found in collection.")
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

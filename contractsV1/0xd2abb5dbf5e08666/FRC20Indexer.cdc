@@ -1131,7 +1131,7 @@ contract FRC20Indexer{
 			// add the seller or buyer cut
 			if sellerAddress != nil{ 
 				// borrow the receiver reference
-				let flowTokenReceiver = getAccount(sellerAddress!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+				let flowTokenReceiver = getAccount(sellerAddress!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 				assert(flowTokenReceiver.check(), message: "Could not borrow receiver reference to the seller's Vault")
 				ret.append(FRC20FTShared.SaleCut(type: FRC20FTShared.SaleCutType.SellMaker, ratio: 1.0 - salesFee,																												   // recevier is the FlowToken Vault of the seller
 																												   receiver: flowTokenReceiver))
@@ -1310,8 +1310,7 @@ contract FRC20Indexer{
 	fun getIndexer(): &InscriptionIndexer{ 
 		let addr = self.account.address
 		let cap =
-			(getAccount(addr).capabilities.get<&InscriptionIndexer>(self.IndexerPublicPath)!)
-				.borrow()
+			getAccount(addr).capabilities.get<&InscriptionIndexer>(self.IndexerPublicPath).borrow()
 		return cap ?? panic("Could not borrow InscriptionIndexer")
 	}
 	
@@ -1320,7 +1319,7 @@ contract FRC20Indexer{
 	access(all)
 	fun borrowFlowTokenReceiver(_ addr: Address): &{FungibleToken.Receiver}?{ 
 		let cap =
-			getAccount(addr).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+			getAccount(addr).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 		return cap.borrow()
 	}
 	

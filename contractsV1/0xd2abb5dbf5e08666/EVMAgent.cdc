@@ -362,7 +362,7 @@ contract EVMAgent{
 		/// Get the balance of the flow for the agency
 		access(all)
 		view fun getFlowBalance(): UFix64{ 
-			if let ref = (getAccount(self.getOwnerAddress()).capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow(){ 
+			if let ref = getAccount(self.getOwnerAddress()).capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<&FlowToken.Vault>(){ 
 				return ref.balance
 			}
 			return 0.0
@@ -627,7 +627,7 @@ contract EVMAgent{
 			let filteredAddrs: [Address] = []
 			for addr in keys{ 
 				// get flow balance of the agency
-				if let flowVaultRef = (getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).borrow(){ 
+				if let flowVaultRef = getAccount(addr).capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<&FlowToken.Vault>(){ 
 					// only the agency with enough balance can be picked
 					if flowVaultRef.balance >= 0.1{ 
 						filteredAddrs.append(addr)
@@ -661,9 +661,8 @@ contract EVMAgent{
 	///
 	access(all)
 	fun borrowEntrustStatus(_ addr: Address): &EntrustedStatus?{ 
-		return (
-			getAccount(addr).capabilities.get<&EntrustedStatus>(self.entrustedStatusPublicPath)!
-		).borrow()
+		return getAccount(addr).capabilities.get<&EntrustedStatus>(self.entrustedStatusPublicPath)
+			.borrow()
 	}
 	
 	/// Get the capability to the agency
@@ -693,10 +692,8 @@ contract EVMAgent{
 	///
 	access(all)
 	fun borrowAgencyCenter(): &AgencyCenter{ 
-		return (
-			getAccount(self.account.address).capabilities.get<&AgencyCenter>(
-				self.evmAgencyCenterPublicPath
-			)!
+		return getAccount(self.account.address).capabilities.get<&AgencyCenter>(
+			self.evmAgencyCenterPublicPath
 		).borrow()
 		?? panic("Agency center not found")
 	}

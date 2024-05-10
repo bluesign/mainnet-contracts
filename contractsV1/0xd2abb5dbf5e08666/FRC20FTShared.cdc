@@ -813,7 +813,7 @@ contract FRC20FTShared{
 	///
 	access(all)
 	fun borrowStoreRef(_ address: Address): &SharedStore?{ 
-		return (getAccount(address).capabilities.get<&SharedStore>(self.SharedStorePublicPath)!)
+		return getAccount(address).capabilities.get<&SharedStore>(self.SharedStorePublicPath)
 			.borrow()
 	}
 	
@@ -983,10 +983,8 @@ contract FRC20FTShared{
 	///
 	access(account)
 	fun borrowTransactionHook(_ address: Address): &{TransactionHook}?{ 
-		return (
-			getAccount(address).capabilities.get<&{TransactionHook}>(
-				self.TransactionHookPublicPath
-			)!
+		return getAccount(address).capabilities.get<&{TransactionHook}>(
+			self.TransactionHookPublicPath
 		).borrow()
 	}
 	
@@ -998,11 +996,9 @@ contract FRC20FTShared{
 		TransactionHook,
 		FixesHeartbeat.IHeartbeatHook
 	}?{ 
-		return (
-			getAccount(address).capabilities.get<
-				&{FRC20FTShared.TransactionHook, FixesHeartbeat.IHeartbeatHook}
-			>(self.TransactionHookPublicPath)!
-		).borrow()
+		return getAccount(address).capabilities.get<
+			&{FRC20FTShared.TransactionHook, FixesHeartbeat.IHeartbeatHook}
+		>(self.TransactionHookPublicPath).borrow()
 	}
 	
 	init(){ 

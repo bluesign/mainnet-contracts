@@ -71,7 +71,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 	
 	/* The concrete Pons NFT resource. Striaghtforward implementation of the PonsNft and INFT interfaces */
 	access(all)
-	resource NFT: PonsNftContractInterface.PonsNft, NonFungibleToken.INFT{ 
+	resource NFT: PonsNftContractInterface.PonsNft, NonFungibleToken.NFT{ 
 		/* Ensures the authenticity of this PonsNft; requirement by PonsNft */
 		access(all)
 		let ponsCertification: @PonsCertificationContract.PonsCertification
@@ -224,7 +224,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 		}
 		
 		/* Withdraw an NFT from the PonsCollection, given its serialNumber */
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let nftId = PonsNftContract_v1.ponsNftIds[withdrawID]!
 			var nft <- self.withdrawNft(nftId: nftId) as! @{NonFungibleToken.NFT}
@@ -266,6 +266,16 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 			// Get a reference to the NFT at the corresponding serialNumber, and cast it to the return type
 			let nftRef = &self.ownedNFTs[serialNumber] as &{NonFungibleToken.NFT}?
 			return nftRef!
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

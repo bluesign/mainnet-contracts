@@ -52,7 +52,7 @@ contract TokenManager{
 		
 		access(account)
 		fun distribute(to: Address, amount: UFix64){ 
-			let recipientVault = (getAccount(to).capabilities.get<&LockedVault>(TokenManager.VaultPublicPath)!).borrow() ?? panic("This user does not have a vault set up.")
+			let recipientVault = getAccount(to).capabilities.get<&LockedVault>(TokenManager.VaultPublicPath).borrow<&LockedVault>() ?? panic("This user does not have a vault set up.")
 			let tokens <- self.tokens.withdraw(amount: amount) as! @Rumble.Vault
 			recipientVault.deposit(from: <-tokens)
 		}
@@ -81,8 +81,9 @@ contract TokenManager{
 	access(all)
 	fun checkUserDepositStatusIsValid(user: Address, amount: UFix64): Bool{ 
 		let userVault =
-			(getAccount(user).capabilities.get<&LockedVault>(TokenManager.VaultPublicPath)!)
-				.borrow()
+			getAccount(user).capabilities.get<&LockedVault>(TokenManager.VaultPublicPath).borrow<
+				&LockedVault
+			>()
 			?? panic("This user does not have a vault set up.")
 		return userVault.getBalance() >= amount
 	}

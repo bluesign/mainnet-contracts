@@ -292,7 +292,7 @@ contract TrmAssetV2_2: NonFungibleToken{
 	//
 	// The main Asset NFT resource that can be bought and sold by users
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -504,7 +504,7 @@ contract TrmAssetV2_2: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				false:
@@ -882,6 +882,16 @@ contract TrmAssetV2_2: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -964,79 +974,79 @@ contract TrmAssetV2_2: NonFungibleToken{
 	resource Admin{ 
 		access(all)
 		fun withdrawAsset(assetCollectionAddress: Address, id: UInt64): @{NonFungibleToken.NFT}{ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			return <-assetCollectionCapability.withdrawAsset(id: id)
 		}
 		
 		access(all)
 		fun depositAsset(assetCollectionAddress: Address, token: @{NonFungibleToken.NFT}){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.depositAsset(token: <-token)
 		}
 		
 		access(all)
 		fun updateAsset(assetCollectionAddress: Address, id: UInt64, assetName: String?, assetDescription: String?, assetThumbnailURL: String?, assetType: String?, assetMetadata:{ String: String}?){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.updateAsset(id: id, assetName: assetName, assetDescription: assetDescription, assetThumbnailURL: assetThumbnailURL, assetType: assetType, assetMetadata: assetMetadata)
 		}
 		
 		access(all)
 		fun batchUpdateAsset(assetCollectionAddress: Address, ids: [UInt64], kID: String, assetName: String?, assetDescription: String?, assetThumbnailURL: String?, assetType: String?, assetMetadata:{ String: String}?){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchUpdateAsset(ids: ids, kID: kID, assetName: assetName, assetDescription: assetDescription, assetThumbnailURL: assetThumbnailURL, assetType: assetType, assetMetadata: assetMetadata)
 		}
 		
 		access(all)
 		fun addAssetMetadataEntry(assetCollectionAddress: Address, id: UInt64, key: String, value: String){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.addAssetMetadataEntry(id: id, key: key, value: value)
 		}
 		
 		access(all)
 		fun batchAddAssetMetadataEntry(assetCollectionAddress: Address, ids: [UInt64], kID: String, key: String, value: String){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchAddAssetMetadataEntry(ids: ids, kID: kID, key: key, value: value)
 		}
 		
 		access(all)
 		fun setAssetMetadataEntry(assetCollectionAddress: Address, id: UInt64, key: String, value: String){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.setAssetMetadataEntry(id: id, key: key, value: value)
 		}
 		
 		access(all)
 		fun batchSetAssetMetadataEntry(assetCollectionAddress: Address, ids: [UInt64], kID: String, key: String, value: String){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchSetAssetMetadataEntry(ids: ids, kID: kID, key: key, value: value)
 		}
 		
 		access(all)
 		fun removeAssetMetadataEntry(assetCollectionAddress: Address, id: UInt64, key: String){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.removeAssetMetadataEntry(id: id, key: key)
 		}
 		
 		access(all)
 		fun batchRemoveAssetMetadataEntry(assetCollectionAddress: Address, ids: [UInt64], kID: String, key: String){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchRemoveAssetMetadataEntry(ids: ids, kID: kID, key: key)
 		}
 		
 		access(all)
 		fun invite(assetCollectionAddress: Address, id: UInt64, invitee: Address){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.invite(id: id, invitee: invitee)
 		}
 		
 		access(all)
 		fun disinvite(assetCollectionAddress: Address, id: UInt64, invitee: Address){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.disinvite(id: id, invitee: invitee)
 		}
 		
 		access(all)
 		fun destroyToken(assetCollectionAddress: Address, id: UInt64){ 
-			let assetCollectionCapability = (getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath)!).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
+			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_2.Collection>(TrmAssetV2_2.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.destroyToken(id: id)
 		}
 	}

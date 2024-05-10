@@ -123,7 +123,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 	// The resource that represents the Fabricant NFTs
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		
 		// Global unique Fabricant ID
 		access(all)
@@ -276,7 +276,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 		// that is to be removed from the Collection
 		//
 		// returns: @NonFungibleToken.NFT the token that was withdrawn
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Remove the nft from the Collection
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: Fabricant does not exist in the collection")
@@ -382,6 +382,16 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

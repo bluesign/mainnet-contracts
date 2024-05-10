@@ -98,7 +98,7 @@ contract FlovatarComponent: NonFungibleToken{
 	
 	// The NFT resource that implements the Public interface as well
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -208,7 +208,7 @@ contract FlovatarComponent: NonFungibleToken{
 			}
 			if type == Type<MetadataViews.Royalties>(){ 
 				let royalties: [MetadataViews.Royalty] = []
-				royalties.append(MetadataViews.Royalty(receiver: FlovatarComponent.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.05, description: "Flovatar Royalty"))
+				royalties.append(MetadataViews.Royalty(receiver: FlovatarComponent.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.05, description: "Flovatar Royalty"))
 				return MetadataViews.Royalties(royalties)
 			}
 			if type == Type<MetadataViews.Serial>(){ 
@@ -291,7 +291,7 @@ contract FlovatarComponent: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -345,6 +345,16 @@ contract FlovatarComponent: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let componentNFT = nft as! &FlovatarComponent.NFT
 			return componentNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -404,7 +414,7 @@ contract FlovatarComponent: NonFungibleToken{
 	access(all)
 	fun getSvgForComponent(address: Address, componentId: UInt64): String?{ 
 		let account = getAccount(address)
-		if let componentCollection = (account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let componentCollection = account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath).borrow<&{FlovatarComponent.CollectionPublic}>(){ 
 			return (componentCollection.borrowComponent(id: componentId)!).getSvg()
 		}
 		return nil
@@ -414,7 +424,7 @@ contract FlovatarComponent: NonFungibleToken{
 	access(all)
 	fun getComponent(address: Address, componentId: UInt64): ComponentData?{ 
 		let account = getAccount(address)
-		if let componentCollection = (account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let componentCollection = account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath).borrow<&{FlovatarComponent.CollectionPublic}>(){ 
 			if !componentCollection.isInstance(Type<@FlovatarComponent.Collection>()){ 
 				panic("The Collection is not from the correct Type")
 			}
@@ -430,7 +440,7 @@ contract FlovatarComponent: NonFungibleToken{
 	fun getComponents(address: Address): [ComponentData]{ 
 		var componentData: [ComponentData] = []
 		let account = getAccount(address)
-		if let componentCollection = (account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let componentCollection = account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath).borrow<&{FlovatarComponent.CollectionPublic}>(){ 
 			if !componentCollection.isInstance(Type<@FlovatarComponent.Collection>()){ 
 				panic("The Collection is not from the correct Type")
 			}

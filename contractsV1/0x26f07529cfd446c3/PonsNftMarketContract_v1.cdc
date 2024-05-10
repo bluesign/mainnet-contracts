@@ -299,19 +299,19 @@ contract PonsNftMarketContract_v1{
 		if account.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault) == nil{ 
 			account.storage.save(<-FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>()), to: /storage/flowTokenVault)
 		}
-		if !(account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).check(){ 
+		if !account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).check(){ 
 			account.link<&FlowToken.Vault>(/public/flowTokenReceiver, target: /storage/flowTokenVault)
 		}
-		if !(account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance)!).check(){ 
+		if !account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).check(){ 
 			// Create a public capability to the Vault that only exposes
 			// the balance field through the Balance interface
 			account.link<&FlowToken.Vault>(/public/flowTokenBalance, target: /storage/flowTokenVault)
 		}
 		let marketReceivePaymentCap =
-			account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+			account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 		var ponsMarketV1 <-
 			create PonsNftMarket_v1(
-				marketReceivePaymentCap: marketReceivePaymentCap,
+				marketReceivePaymentCap: marketReceivePaymentCap!,
 				minimumMintingPrice: PonsUtils.FlowUnits(flowAmount: 1.0),
 				primaryCommissionRatio: PonsUtils.Ratio(amount: 0.2),
 				secondaryCommissionRatio: PonsUtils.Ratio(amount: 0.1)

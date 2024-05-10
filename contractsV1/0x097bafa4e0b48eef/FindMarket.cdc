@@ -221,9 +221,9 @@ contract FindMarket{
 		var caps: [Capability<&{FindMarket.SaleItemCollectionPublic}>] = []
 		for type in self.getSaleItemCollectionTypes(){ 
 			if type != nil{ 
-				let cap = getAccount(address).capabilities.get<&{FindMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))!
+				let cap = getAccount(address).capabilities.get<&{FindMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))
 				if cap.check(){ 
-					caps.append(cap)
+					caps.append(cap!)
 				}
 			}
 		}
@@ -238,8 +238,8 @@ contract FindMarket{
 	): Capability<&{FindMarket.SaleItemCollectionPublic}>{ 
 		for type in self.getSaleItemCollectionTypes(){ 
 			if self.getMarketOptionFromType(type) == marketOption{ 
-				let cap = getAccount(address).capabilities.get<&{FindMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))!
-				return cap
+				let cap = getAccount(address).capabilities.get<&{FindMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))
+				return cap!
 			}
 		}
 		panic("Cannot find market option : ".concat(marketOption))
@@ -477,9 +477,9 @@ contract FindMarket{
 	]{ 
 		var caps: [Capability<&{FindMarket.MarketBidCollectionPublic}>] = []
 		for type in self.getMarketBidCollectionTypes(){ 
-			let cap = getAccount(address).capabilities.get<&{FindMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))!
+			let cap = getAccount(address).capabilities.get<&{FindMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))
 			if cap.check(){ 
-				caps.append(cap)
+				caps.append(cap!)
 			}
 		}
 		return caps
@@ -493,8 +493,8 @@ contract FindMarket{
 	): Capability<&{FindMarket.MarketBidCollectionPublic}>{ 
 		for type in self.getMarketBidCollectionTypes(){ 
 			if self.getMarketOptionFromType(type) == marketOption{ 
-				let cap = getAccount(address).capabilities.get<&{FindMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))!
-				return cap
+				let cap = getAccount(address).capabilities.get<&{FindMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))
+				return cap!
 			}
 		}
 		panic("Cannot find market option : ".concat(marketOption))
@@ -950,8 +950,8 @@ contract FindMarket{
 			for key in self.findSaleItems.keys{ 
 				let val = self.findSaleItems[key]!
 				if val.cut != nil{ 
-					let newReceiver = getAccount((val.cut!).receiver.address).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)!
-					let newCut = MetadataViews.Royalty(receiver: newReceiver, cut: (val.cut!).cut, description: (val.cut!).description)
+					let newReceiver = getAccount((val.cut!).receiver.address).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)
+					let newCut = MetadataViews.Royalty(receiver: newReceiver!, cut: (val.cut!).cut, description: (val.cut!).description)
 					let newVal = FindMarket.TenantSaleItem(name: val.name, cut: newCut, rules: val.rules, status: val.status)
 					self.findSaleItems[key] = newVal
 				}
@@ -959,8 +959,8 @@ contract FindMarket{
 			for key in self.tenantSaleItems.keys{ 
 				let val = self.tenantSaleItems[key]!
 				if val.cut != nil{ 
-					let newReceiver = getAccount((val.cut!).receiver.address).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)!
-					let newCut = MetadataViews.Royalty(receiver: newReceiver, cut: (val.cut!).cut, description: (val.cut!).description)
+					let newReceiver = getAccount((val.cut!).receiver.address).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)
+					let newCut = MetadataViews.Royalty(receiver: newReceiver!, cut: (val.cut!).cut, description: (val.cut!).description)
 					let newVal = FindMarket.TenantSaleItem(name: val.name, cut: newCut, rules: val.rules, status: val.status)
 					self.tenantSaleItems[key] = newVal
 				}
@@ -968,8 +968,8 @@ contract FindMarket{
 			for key in self.findCuts.keys{ 
 				let val = self.findCuts[key]!
 				if val.cut != nil{ 
-					let newReceiver = getAccount((val.cut!).receiver.address).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)!
-					let newCut = MetadataViews.Royalty(receiver: newReceiver, cut: (val.cut!).cut, description: (val.cut!).description)
+					let newReceiver = getAccount((val.cut!).receiver.address).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)
+					let newCut = MetadataViews.Royalty(receiver: newReceiver!, cut: (val.cut!).cut, description: (val.cut!).description)
 					let newVal = FindMarket.TenantSaleItem(name: val.name, cut: newCut, rules: val.rules, status: val.status)
 					self.findCuts[key] = newVal
 				}
@@ -1160,7 +1160,7 @@ contract FindMarket{
 		access(all)
 		fun allowedAction(listingType: Type, nftType: Type, ftType: Type, action: MarketAction, seller: Address?, buyer: Address?): FindRulesCache.ActionResult{ 
 			/* Check for Honour Banning */
-			let profile = (getAccount(FindMarket.tenantNameAddress[self.name]!).capabilities.get<&Profile.User>(Profile.publicPath)!).borrow() ?? panic("Cannot get reference to Profile to check honour banning. Tenant Name : ".concat(self.name))
+			let profile = getAccount(FindMarket.tenantNameAddress[self.name]!).capabilities.get<&Profile.User>(Profile.publicPath).borrow() ?? panic("Cannot get reference to Profile to check honour banning. Tenant Name : ".concat(self.name))
 			if seller != nil && profile.isBanned(seller!){ 
 				return FindRulesCache.ActionResult(allowed: false, message: "Seller banned by Tenant", name: "Profile Ban")
 			}
@@ -1509,7 +1509,7 @@ contract FindMarket{
 		}
 		return FindMarket.account.capabilities.get<&Tenant>(
 			PublicPath(identifier: self.getTenantPathForAddress(marketplace))!
-		)!
+		)
 	}
 	
 	access(account)
@@ -1558,8 +1558,8 @@ contract FindMarket{
 		let oldProfileCap =
 			getAccount(seller).capabilities.get<&{FungibleToken.Receiver}>(
 				Profile.publicReceiverPath
-			)!
-		let oldProfile = self.getPaymentWallet(oldProfileCap, ftInfo, panicOnFailCheck: true)
+			)
+		let oldProfile = self.getPaymentWallet(oldProfileCap!, ftInfo, panicOnFailCheck: true)
 		/* Check the total royalty to prevent changing of royalties */
 		let royalties = royalty.getRoyalties()
 		if royalties.length != 0{ 
@@ -1624,7 +1624,7 @@ contract FindMarket{
 				// If the underlying is a profile, we check if the wallet type is registered in profile wallet and then return
 				// If it is not registered, it falls through and be handled by residual
 				case Type<@Profile.User>():
-					if let ProfileRef = (getAccount(cap.address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!).borrow(){ 
+					if let ProfileRef = getAccount(cap.address).capabilities.get<&{Profile.Public}>(Profile.publicPath).borrow(){ 
 						if ProfileRef.hasWallet(ftInfo.type.identifier){ 
 							return ref
 						}
@@ -1632,7 +1632,7 @@ contract FindMarket{
 				// If the underlying is a switchboard, we check if the wallet type is registered in switchboard wallet and then return
 				// If it is not registered, it falls through and be handled by residual
 				case Type<@FungibleTokenSwitchboard.Switchboard>():
-					if let sbRef = (getAccount(cap.address).capabilities.get<&{FungibleTokenSwitchboard.SwitchboardPublic}>(FungibleTokenSwitchboard.PublicPath)!).borrow(){ 
+					if let sbRef = getAccount(cap.address).capabilities.get<&{FungibleTokenSwitchboard.SwitchboardPublic}>(FungibleTokenSwitchboard.PublicPath).borrow(){ 
 						if sbRef.getVaultTypes().contains(ftInfo.type){ 
 							return ref
 						}
@@ -1657,7 +1657,7 @@ contract FindMarket{
 		}
 		if !panicOnFailCheck{ 
 			// If it all falls throught, these edge cases will be handled by a residual account that has switchboard set up
-			let residualVault = getAccount(FindMarket.residualAddress).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)!
+			let residualVault = getAccount(FindMarket.residualAddress).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath)
 			return residualVault.borrow() ?? panic("Cannot borrow residual vault in address : ".concat(FindMarket.residualAddress.toString()).concat(" type : ").concat(ftInfo.typeIdentifier))
 		}
 		let msg =

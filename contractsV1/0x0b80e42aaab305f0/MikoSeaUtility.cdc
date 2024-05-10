@@ -162,10 +162,8 @@ contract MikoSeaUtility{
 	access(all)
 	fun getListingId(addr: Address, nftType: Type, nftID: UInt64): UInt64?{ 
 		if let ref =
-			(
-				getAccount(addr).capabilities.get<&{MikoSeaMarket.StorefrontPublic}>(
-					MikoSeaMarket.MarketPublicPath
-				)!
+			getAccount(addr).capabilities.get<&{MikoSeaMarket.StorefrontPublic}>(
+				MikoSeaMarket.MarketPublicPath
 			).borrow(){ 
 			for order in ref.getOrders(){ 
 				if nftID == order.nftID && order.nftType == nftType && order.status != "done"{ 
@@ -180,7 +178,7 @@ contract MikoSeaUtility{
 	fun getNftV2Detail(_ nftID: UInt64): NFTDataCommonWithListing?{ 
 		if let addr = MIKOSEANFTV2.getHolder(nftID: nftID){ 
 			let account = getAccount(addr)
-			let collectioncap = account.capabilities.get<&{MIKOSEANFTV2.CollectionPublic}>(MIKOSEANFTV2.CollectionPublicPath)!
+			let collectioncap = account.capabilities.get<&{MIKOSEANFTV2.CollectionPublic}>(MIKOSEANFTV2.CollectionPublicPath)
 			if let collectionRef = collectioncap.borrow(){ 
 				if let nft = collectionRef.borrowMIKOSEANFTV2(id: nftID){ 
 					let project = MIKOSEANFTV2.getProjectById(nft.nftData.projectId)!
@@ -197,7 +195,7 @@ contract MikoSeaUtility{
 		let collectionCapability =
 			account.capabilities.get<&{MIKOSEANFT.MikoSeaCollectionPublic}>(
 				MIKOSEANFT.CollectionPublicPath
-			)!
+			)
 		let collectionRef = collectionCapability.borrow()
 		if let collectionRef = collectionCapability.borrow(){ 
 			if let nft = collectionRef.borrowMiKoSeaNFT(id: nftID){ 

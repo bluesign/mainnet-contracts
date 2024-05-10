@@ -79,7 +79,7 @@ contract PartyFavorz: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -185,7 +185,7 @@ contract PartyFavorz: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -223,6 +223,16 @@ contract PartyFavorz: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let PartyFavorz = nft as! &PartyFavorz.NFT
 			return PartyFavorz as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -272,9 +282,9 @@ contract PartyFavorz: NonFungibleToken{
 		self.CollectionPrivatePath = /private/PartyFavorzCollection
 		self.CollectionPublicPath = /public/PartyFavorzCollection
 		self.MinterStoragePath = /storage/PartyFavorzMinter
-		let partyFavorz = getAccount(0xded455fa967d350e).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-		let artist = getAccount(0x34f2bf4a80bb0f69).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-		self.royalties = [MetadataViews.Royalty(receiver: partyFavorz, cut: 0.03, description: "Party Favorz"), MetadataViews.Royalty(receiver: artist, cut: 0.02, description: "Artist")]
+		let partyFavorz = getAccount(0xded455fa967d350e).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+		let artist = getAccount(0x34f2bf4a80bb0f69).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+		self.royalties = [MetadataViews.Royalty(receiver: partyFavorz!, cut: 0.03, description: "Party Favorz"), MetadataViews.Royalty(receiver: artist!, cut: 0.02, description: "Artist")]
 		
 		// Create a Collection resource and save it to storage
 		let collection <- create Collection()

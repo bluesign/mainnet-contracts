@@ -289,7 +289,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver, VestingPublic{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver, VestingPublic{ 
 		access(all)
 		let id: UInt64
 		
@@ -412,7 +412,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 		// user can only release tokens
 		access(all)
 		fun release(vestingRef: &StarlyTokenVesting.NFT){ 
-			let receiverRef = (getAccount(vestingRef.beneficiary).capabilities.get<&{FungibleToken.Receiver}>(StarlyToken.TokenPublicReceiverPath)!).borrow() ?? panic("Could not borrow StarlyToken receiver reference to the beneficiary's vault!")
+			let receiverRef = getAccount(vestingRef.beneficiary).capabilities.get<&{FungibleToken.Receiver}>(StarlyToken.TokenPublicReceiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow StarlyToken receiver reference to the beneficiary's vault!")
 			let releaseAmount = vestingRef.getReleasableAmount()
 			receiverRef.deposit(from: <-vestingRef.vestedVault.withdraw(amount: releaseAmount))
 			StarlyTokenVesting.totalVested = StarlyTokenVesting.totalVested - releaseAmount
@@ -448,7 +448,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let vesting <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: vesting.id, from: self.owner?.address)
@@ -499,6 +499,16 @@ contract StarlyTokenVesting: NonFungibleToken{
 		fun borrowVestingPrivate(id: UInt64): &StarlyTokenVesting.NFT{ 
 			let vestingRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return vestingRef as! &StarlyTokenVesting.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

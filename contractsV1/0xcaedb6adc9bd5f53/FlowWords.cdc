@@ -431,7 +431,7 @@ contract FlowWords{
 		fun NewGame(){ 
 			self.currentGameId = self.currentGameId + 1
 			self.userGuesses ={} 
-			let wc = FlowWords.account.capabilities.get<&{WordInterface}>(/public/WordList)!
+			let wc = FlowWords.account.capabilities.get<&{WordInterface}>(/public/WordList)
 			let wordlist = wc.borrow() ?? panic("Cannot Load Wordlist")
 			self.games[self.currentGameId] = wordlist.GetWordAtIndex(Int(revertibleRandom<UInt64>()) % wordlist.GetCount())
 		}
@@ -511,9 +511,9 @@ contract FlowWords{
 		let highScoreAdminCapability =
 			self.account.capabilities.get<&{FlowWords.HighScoreAdminInterface}>(
 				/private/HighScoresAdmin
-			)!
+			)
 		// create game resource - and pass in admin capability to highscores resource
-		let game <- create Game(highScoreAdmin: highScoreAdminCapability)
+		let game <- create Game(highScoreAdmin: highScoreAdminCapability!)
 		self.account.storage.save(<-game, to: /storage/Game)
 		var capability_4 =
 			self.account.capabilities.storage.issue<&{FlowWords.GameInterface}>(/storage/Game)

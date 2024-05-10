@@ -162,7 +162,7 @@ contract TrmAssetV1: NonFungibleToken{
 	//
 	// The main Asset NFT resource that can be bought and sold by users
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -242,7 +242,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Error withdrawing Asset NFT")
 			emit Withdraw(id: withdrawID, from: (self.owner!).address)
@@ -382,6 +382,16 @@ contract TrmAssetV1: NonFungibleToken{
 			}
 			let oldToken <- self.ownedNFTs.remove(key: id)
 			destroy oldToken
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

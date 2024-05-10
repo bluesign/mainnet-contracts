@@ -35,10 +35,8 @@ contract InceptionExchange{
 	fun claimInceptionCrystalWithBlackBox(signerAuth: AuthAccount, tokenID: UInt64){ 
 		// Check blackbox collection to ensure ownership
 		let tokenIDs =
-			(
-				getAccount(signerAuth.address).capabilities.get<&InceptionBlackBox.Collection>(
-					InceptionBlackBox.CollectionPublicPath
-				)!
+			getAccount(signerAuth.address).capabilities.get<&InceptionBlackBox.Collection>(
+				InceptionBlackBox.CollectionPublicPath
 			).borrow()?.getIDs()
 		if !(tokenIDs!).contains(tokenID){ 
 			panic("tokenID not found in signer's collection")
@@ -72,11 +70,9 @@ contract InceptionExchange{
 		}
 		let recipient = getAccount(signerAuth.address)
 		let InceptionCrystalReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					InceptionCrystal.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				InceptionCrystal.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the InceptionCrystal Collection")
 		
 		// Mint 7 InceptionCrystal to the recipient
@@ -94,10 +90,8 @@ contract InceptionExchange{
 	fun exchangeCrystalForFlowToken(signerAuth: AuthAccount, amount: UInt64){ 
 		// Check InceptionCrystal balance
 		let tokenIDs =
-			(
-				getAccount(signerAuth.address).capabilities.get<&InceptionCrystal.Collection>(
-					InceptionCrystal.CollectionPublicPath
-				)!
+			getAccount(signerAuth.address).capabilities.get<&InceptionCrystal.Collection>(
+				InceptionCrystal.CollectionPublicPath
 			).borrow()?.getIDs()
 		if UInt64((tokenIDs!).length) < amount{ 
 			panic("Not enough InceptionCrystal to exchange")
@@ -116,7 +110,7 @@ contract InceptionExchange{
 		// Transfer FlowToken to the user
 		let recipient = getAccount(signerAuth.address)
 		let recipientFlowTokenRef =
-			(recipient.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow()
+			recipient.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow()
 			?? panic("Could not borrow a reference to the recipient's Vault")
 		let selfFlowWithdrawVault <-
 			(self.account.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)!)

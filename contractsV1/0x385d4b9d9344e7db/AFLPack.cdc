@@ -110,7 +110,7 @@ contract AFLPack{
 			AFLNFT.createTemplate(maxSupply: 1, immutableData: originalPackTemplateImmutableData)
 			let lastIssuedTemplateId = AFLNFT.getLatestTemplateId()
 			let receiptAccount = getAccount(AFLPack.ownerAddress)
-			let recipientCollection = (receiptAccount.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath)!).borrow() ?? panic("Could not get receiver reference to the flow receiver")
+			let recipientCollection = receiptAccount.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath).borrow<&FiatToken.Vault>() ?? panic("Could not get receiver reference to the flow receiver")
 			recipientCollection.deposit(from: <-flowPayment)
 			AFLNFT.mintNFT(templateId: lastIssuedTemplateId, account: receiptAddress)
 			(AFLNFT.allTemplates[packTemplateId]!).incrementIssuedSupply()
@@ -143,8 +143,8 @@ contract AFLPack{
 	init(){ 
 		self.ownerAddress = (self.account!).address
 		var adminRefCap =
-			self.account.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath)!
-		self.adminRef = adminRefCap
+			self.account.capabilities.get<&FiatToken.Vault>(FiatToken.VaultReceiverPubPath)
+		self.adminRef = adminRefCap!
 		self.PackStoragePath = /storage/AFLPack
 		self.PackPublicPath = /public/AFLPack
 		self.account.storage.save(<-create Pack(), to: self.PackStoragePath)

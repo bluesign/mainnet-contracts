@@ -124,7 +124,7 @@ contract NeoFounder: NonFungibleToken{
 	
 	//An NFT representing a founder bike, has a pointer to an motorcycle
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -292,7 +292,7 @@ contract NeoFounder: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -306,8 +306,8 @@ contract NeoFounder: NonFungibleToken{
 			let token <- token as! @NeoFounder.NFT
 			
 			//update the owner of the founder in the motorcycle so that royalty is correct when edition is sold later
-			let founderWallet = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-			(token.motorcyclePointer.resolve()!).setNeoFounderWallet(founderWallet)
+			let founderWallet = (self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+			(token.motorcyclePointer.resolve()!).setNeoFounderWallet(founderWallet!)
 			let id: UInt64 = token.id
 			emit Team(founderId: id, name: token.name, address: self.owner?.address, teamId: (token.motorcyclePointer.resolve()!).id)
 			// add the new token to the dictionary which removes the old one
@@ -340,6 +340,16 @@ contract NeoFounder: NonFungibleToken{
 		fun borrow(_ id: UInt64): &NeoFounder.NFT{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &NeoFounder.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

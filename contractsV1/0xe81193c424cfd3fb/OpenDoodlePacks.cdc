@@ -61,7 +61,7 @@ contract OpenDoodlePacks: NonFungibleToken{
 	let extra:{ String: AnyStruct}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -155,7 +155,7 @@ contract OpenDoodlePacks: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -195,6 +195,16 @@ contract OpenDoodlePacks: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let openDoodlePack = nft as! &OpenDoodlePacks.NFT
 			return openDoodlePack
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -366,10 +376,10 @@ contract OpenDoodlePacks: NonFungibleToken{
 	fun mintNFTFromPack(collection: DoodlePackTypes.Collection, receiverAddress: Address, templateId: UInt64, packId: UInt64, packType: DoodlePackTypes.PackType){ 
 		switch collection{ 
 			case DoodlePackTypes.Collection.Wearables:
-				let recipient = (getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.Receiver}>(Wearables.CollectionPublicPath)!).borrow() ?? panic("Could not borrow wearables receiver capability")
+				let recipient = getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.Receiver}>(Wearables.CollectionPublicPath).borrow() ?? panic("Could not borrow wearables receiver capability")
 				Wearables.mintNFT(recipient: recipient, template: templateId, context:{ "pack_id": packId.toString(), "pack_name": packType.name})
 			case DoodlePackTypes.Collection.Redeemables:
-				let recipient = (getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.Receiver}>(Redeemables.CollectionPublicPath)!).borrow() ?? panic("Could not borrow redeemables receiver capability")
+				let recipient = getAccount(receiverAddress).capabilities.get<&{NonFungibleToken.Receiver}>(Redeemables.CollectionPublicPath).borrow() ?? panic("Could not borrow redeemables receiver capability")
 				Redeemables.mintNFT(recipient: recipient, templateId: templateId)
 		}
 	}

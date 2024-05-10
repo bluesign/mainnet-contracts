@@ -353,7 +353,7 @@ contract BloctoIdo{
 			}
 			for addr in addrList{ 
 				// check ido user
-				let idoUserPublicRefOpt = (getAccount(addr).capabilities.get<&{BloctoIdo.UserPublic}>(BloctoIdo.BloctoIdoUserPublicPath)!).borrow()
+				let idoUserPublicRefOpt = getAccount(addr).capabilities.get<&{BloctoIdo.UserPublic}>(BloctoIdo.BloctoIdoUserPublicPath).borrow<&{BloctoIdo.UserPublic}>()
 				if idoUserPublicRefOpt == nil{ 
 					emit AddKycInfoError(name: name, addr: addr, reason: "failed to get ido user public")
 					continue
@@ -502,7 +502,7 @@ contract BloctoIdo{
 				if userInfo.poolType != "" && userInfo.deposited != 0.0{ 
 					let poolConfig = activity.poolConfig[userInfo.poolType] ?? panic("invalid pool type")
 					let vaultRef = BloctoIdo.account.storage.borrow<&{FungibleToken.Vault}>(from: activity.tokenInfo.storagePath) ?? panic("failed to get vault")
-					let receiverRefOpt = (getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(activity.tokenInfo.receiverPath)!).borrow()
+					let receiverRefOpt = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(activity.tokenInfo.receiverPath).borrow<&{FungibleToken.Receiver}>()
 					if receiverRefOpt == nil{ 
 						emit DistributingError(name: name, addr: address, reason: "failed to borrow receiver")
 						curr = curr + 1

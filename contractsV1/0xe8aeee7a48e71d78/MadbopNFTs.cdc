@@ -300,7 +300,7 @@ contract MadbopNFTs: NonFungibleToken{
 	// The resource that represents the Madbop NFTs
 	// 
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -351,7 +351,7 @@ contract MadbopNFTs: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: template does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -387,6 +387,16 @@ contract MadbopNFTs: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -576,7 +586,7 @@ contract MadbopNFTs: NonFungibleToken{
 					"Template Id must be valid"
 			}
 			let receiptAccount = getAccount(account)
-			let recipientCollection = (receiptAccount.capabilities.get<&{MadbopNFTs.MadbopNFTsCollectionPublic}>(MadbopNFTs.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let recipientCollection = receiptAccount.capabilities.get<&{MadbopNFTs.MadbopNFTsCollectionPublic}>(MadbopNFTs.CollectionPublicPath).borrow<&{MadbopNFTs.MadbopNFTsCollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			var newNFT: @NFT <- create NFT(templateID: templateId, mintNumber: (MadbopNFTs.allTemplates[templateId]!).incrementIssuedSupply())
 			recipientCollection.deposit(token: <-newNFT)
 		}

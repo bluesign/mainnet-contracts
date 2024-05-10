@@ -35,8 +35,8 @@ contract KlktnNFTProxy{
 				"sale has ended"
 		}
 		let adminFlowReceiverRef =
-			(self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
-				.borrow()
+			self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+				.borrow<&{FungibleToken.Receiver}>()
 			?? panic("Could not borrow receiver reference to the admin's Vault")
 		adminFlowReceiverRef.deposit(from: <-paymentVault)
 		let admin =

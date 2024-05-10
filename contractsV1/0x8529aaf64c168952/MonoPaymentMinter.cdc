@@ -52,7 +52,7 @@ contract MonoPaymentMinter{
 			payment.balance == self.goldPrice!:
 				"payment vault does not contain requested price"
 		}
-		let fusdReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!!
+		let fusdReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
 		let receiver = fusdReceiver.borrow()!
 		receiver.deposit(from: <-payment)
 		let minter =
@@ -79,7 +79,7 @@ contract MonoPaymentMinter{
 			payment.balance == self.silverPrice!:
 				"payment vault does not contain requested price"
 		}
-		let fusdReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!!
+		let fusdReceiver = self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
 		let receiver = fusdReceiver.borrow()!
 		receiver.deposit(from: <-payment)
 		let minter =

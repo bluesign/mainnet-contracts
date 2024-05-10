@@ -145,9 +145,9 @@ contract Tickets{
 			let saleCuts: [SaleCut] = []
 			for cut in cuts{ 
 				rate = rate + cut.rateOrAmount
-				let cap = getAccount(cut.recipient).capabilities.get<&FlowToken.Vault>(Tickets.FlowReceiverPath)!
+				let cap = getAccount(cut.recipient).capabilities.get<&FlowToken.Vault>(Tickets.FlowReceiverPath)
 				cap.borrow() ?? panic("Missing or mis-typed flow token receiver of ".concat(cut.recipient.toString()))
-				saleCuts.append(SaleCut(recipient: cap, rate: cut.rateOrAmount))
+				saleCuts.append(SaleCut(recipient: cap!, rate: cut.rateOrAmount))
 			}
 			assert(rate < 1.0, message: "The total rate of cuts should be 1.0")
 			Tickets.candidateFundRate = 1.0 - rate
@@ -306,7 +306,7 @@ contract Tickets{
 	access(self)
 	fun fundForCandidate(c: VnMissCandidate.Candidate, issuePrice: UFix64){ 
 		let recipient =
-			(getAccount(c.fundAdress).capabilities.get<&FlowToken.Vault>(Tickets.FlowReceiverPath)!)
+			getAccount(c.fundAdress).capabilities.get<&FlowToken.Vault>(Tickets.FlowReceiverPath)
 				.borrow()
 		let amount = self.candidateFundRate * issuePrice
 		if let recipient = recipient{ 

@@ -1259,7 +1259,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	/// Resource that defines a Pin NFT
 	///
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		/// This NFT's unique ID
 		access(all)
 		let id: UInt64
@@ -1775,7 +1775,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		///
 		/// Remove an NFT from the Collection and move it to the caller
 		///
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("No NFT with such ID in the Collection")
 			let nft <- token as! @NFT
@@ -1944,6 +1944,16 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -1960,7 +1970,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	///
 	access(all)
 	fun borrowCollectionPublic(owner: Address, _ publicPathID: String?): &Pinnacle.Collection?{ 
-		return (getAccount(owner).capabilities.get_<YOUR_TYPE>(publicPathID != nil ? PublicPath(identifier: publicPathID!)! : Pinnacle.CollectionPublicPath)!).borrow<&Pinnacle.Collection>()
+		return getAccount(owner).capabilities.get_<YOUR_TYPE>(publicPathID != nil ? PublicPath(identifier: publicPathID!)! : Pinnacle.CollectionPublicPath).borrow<&Pinnacle.Collection>()
 	}
 	
 	//------------------------------------------------------------

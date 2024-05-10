@@ -208,10 +208,8 @@ contract MindtrixDonation{
 		// CreatorVault = primaryRoyalty.receiver.borrow()
 		//	?? panic("Could not borrow the &{FungibleToken.Receiver} from the creator.");
 		}
-		CreatorVault = (
-				getAccount(0xf8d6e0586b0a20c7).capabilities.get<&FlowToken.Vault>(
-					/public/flowTokenReceiver
-				)!
+		CreatorVault = getAccount(0xf8d6e0586b0a20c7).capabilities.get<&FlowToken.Vault>(
+				/public/flowTokenReceiver
 			).borrow()!
 		let mindtrixFlow <- payment.withdraw(amount: payment.balance * mindtrixPrimaryCut)
 		(MindtrixVault!).deposit(from: <-mindtrixFlow)

@@ -298,7 +298,7 @@ contract NFTContract: NonFungibleToken{
 	// The resource that represents the Troon NFTs
 	// 
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -327,7 +327,7 @@ contract NFTContract: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: template does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -354,6 +354,16 @@ contract NFTContract: NonFungibleToken{
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?{ 
 			emit NFTBorrowed(id: id)
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -543,7 +553,7 @@ contract NFTContract: NonFungibleToken{
 					"Template Id must be valid"
 			}
 			let receiptAccount = getAccount(account)
-			let recipientCollection = (receiptAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(NFTContract.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection")
+			let recipientCollection = receiptAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(NFTContract.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
 			var newNFT: @NFT <- create NFT(templateID: templateId, mintNumber: (NFTContract.allTemplates[templateId]!).incrementIssuedSupply())
 			recipientCollection.deposit(token: <-newNFT)
 		}

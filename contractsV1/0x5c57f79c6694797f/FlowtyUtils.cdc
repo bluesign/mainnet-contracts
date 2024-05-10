@@ -147,13 +147,13 @@ contract FlowtyUtils{
 		}
 		for i, r in cuts{ 
 			let amount = balance * (r.cut / total)
-			let royaltyReceiverCap = getAccount(r.receiver.address).capabilities.get<&{FungibleToken.Receiver}>(path)!
+			let royaltyReceiverCap = getAccount(r.receiver.address).capabilities.get<&{FungibleToken.Receiver}>(path)
 			if v.balance < amount || i == cuts.length - 1{ 
-				FlowtyUtils.trySendFungibleTokenVault(vault: <-v, receiver: royaltyReceiverCap)
+				FlowtyUtils.trySendFungibleTokenVault(vault: <-v, receiver: royaltyReceiverCap!)
 				return
 			}
 			let cut <- v.withdraw(amount: amount)
-			FlowtyUtils.trySendFungibleTokenVault(vault: <-cut, receiver: royaltyReceiverCap)
+			FlowtyUtils.trySendFungibleTokenVault(vault: <-cut, receiver: royaltyReceiverCap!)
 		}
 		
 		// this line shouldn't ever be reached but it's best to be safe
@@ -204,7 +204,7 @@ contract FlowtyUtils{
 			let storagePaymentVault <- (flowtyFlowVault!).withdraw(amount: depositEstimate.storageFee * 1.05)
 			let item <- depositEstimate.withdraw()
 			destroy depositEstimate
-			let flowtyFlowReceiver = self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			let flowtyFlowReceiver = self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 			LostAndFound.deposit(redeemer: redeemer, item: <-item, memo: memo, display: display, storagePayment: &storagePaymentVault as &{FungibleToken.Vault}, flowTokenRepayment: flowtyFlowReceiver)
 			(flowtyFlowReceiver.borrow()!).deposit(from: <-storagePaymentVault)
 			return
@@ -279,7 +279,7 @@ contract FlowtyUtils{
 		)
 		
 		// get the FungibleToken.Balance capability located at the path
-		let vaultCap = user.capabilities.get<&{FungibleToken.Balance}>(balancePath!)!
+		let vaultCap = user.capabilities.get<&{FungibleToken.Balance}>(balancePath!)
 		
 		// check the capability exists
 		if !vaultCap.check(){ 

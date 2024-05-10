@@ -318,10 +318,8 @@ contract PPPV4{
 		}
 		let poolInfo: [AnyStruct] =
 			(
-				(
-					getAccount(swapPoolAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
-						SwapConfig.PairPublicPath
-					)!
+				getAccount(swapPoolAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(
+					SwapConfig.PairPublicPath
 				).borrow()!
 			).getPairInfo()
 		self._swapPoolReserve0 = poolInfo[2] as! UFix64
@@ -341,10 +339,8 @@ contract PPPV4{
 		}
 		let poolInfo: [AnyStruct] =
 			(
-				(
-					getAccount(self._swapPoolAddress).capabilities.get<
-						&{SwapInterfaces.PairPublic}
-					>(SwapConfig.PairPublicPath)!
+				getAccount(self._swapPoolAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(
+					SwapConfig.PairPublicPath
 				).borrow()!
 			).getPairInfo()
 		let reserve0Token = poolInfo[0] as! String
@@ -496,17 +492,13 @@ contract PPPV4{
 		
 		// Lending State
 		let lendingComptrollerRef =
-			(
-				getAccount(0xf80cb737bfe7c792).capabilities.get<
-					&{LendingInterfaces.ComptrollerPublic}
-				>(LendingConfig.ComptrollerPublicPath)!
+			getAccount(0xf80cb737bfe7c792).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(
+				LendingConfig.ComptrollerPublicPath
 			).borrow()!
 		let marketAddrs: [Address] = lendingComptrollerRef.getAllMarkets()
 		let lendingOracleRef =
-			(
-				getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
-					LendingConfig.OraclePublicPath
-				)!
+			getAccount(0x72d3a05910b6ffa3).capabilities.get<&{LendingInterfaces.OraclePublic}>(
+				LendingConfig.OraclePublicPath
 			).borrow()!
 		var totalSupplyAmountInUsd = 0.0
 		var totalBorrowAmountInUsd = 0.0
@@ -526,7 +518,7 @@ contract PPPV4{
 		let stFlowVaultCap =
 			getAccount(userAddr).capabilities.get<&{FungibleToken.Balance}>(
 				/public/stFlowTokenBalance
-			)!
+			)
 		if stFlowVaultCap.check(){ 
 			// Prevent fake stFlow token vault
 			if (stFlowVaultCap.borrow()!).getType().identifier == "A.d6f80565193ad727.stFlowToken.Vault"{ 
@@ -541,7 +533,7 @@ contract PPPV4{
 		let lpTokenCollectionCap =
 			getAccount(userAddr).capabilities.get<&{SwapInterfaces.LpTokenCollectionPublic}>(
 				SwapConfig.LpTokenCollectionPublicPath
-			)!
+			)
 		if lpTokenCollectionCap.check(){ 
 			// Prevent fake lp token vault
 			if (lpTokenCollectionCap.borrow()!).getType().identifier == "A.b063c16cac85dbd1.SwapFactory.LpTokenCollection"{ 
@@ -553,7 +545,7 @@ contract PPPV4{
 						continue
 					}
 					var lpTokenAmount = lpTokenCollectionRef.getLpTokenBalance(pairAddr: pairAddr)
-					let pairInfo = ((getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(/public/increment_swap_pair)!).borrow()!).getPairInfo()
+					let pairInfo = (getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(/public/increment_swap_pair).borrow()!).getPairInfo()
 					// Cal lp price
 					var lpPrice = 0.0
 					if lpPrices.containsKey(pairAddr){ 
@@ -573,10 +565,8 @@ contract PPPV4{
 		
 		// Swap LP in Farm & stFlow in Farm
 		let farmCollectionRef =
-			(
-				getAccount(0x1b77ba4b414de352).capabilities.get<&{Staking.PoolCollectionPublic}>(
-					Staking.CollectionPublicPath
-				)!
+			getAccount(0x1b77ba4b414de352).capabilities.get<&{Staking.PoolCollectionPublic}>(
+				Staking.CollectionPublicPath
 			).borrow()!
 		let userFarmIds = Staking.getUserStakingIds(address: userAddr)
 		for farmPoolId in userFarmIds{ 
@@ -598,7 +588,7 @@ contract PPPV4{
 				// add lp holding balance
 				let swapPoolAddress = self.type2address(acceptTokenKey)
 				if acceptTokenName == "SwapPair"{ 
-					let swapPoolInfo = ((getAccount(swapPoolAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow()!).getPairInfo()
+					let swapPoolInfo = (getAccount(swapPoolAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!).getPairInfo()
 					var lpPrice = 0.0
 					if lpPrices.containsKey(swapPoolAddress){ 
 						lpPrice = lpPrices[swapPoolAddress]!
@@ -624,11 +614,9 @@ contract PPPV4{
 	view fun isCoreMember(_ userAddr: Address): Bool{ 
 		let coreMemberEventID: UInt64 = 326723707
 		let floatCollection =
-			(
-				getAccount(userAddr).capabilities.get<&FLOAT.Collection>(
-					FLOAT.FLOATCollectionPublicPath
-				)!
-			).borrow()
+			getAccount(userAddr).capabilities.get<&FLOAT.Collection>(
+				FLOAT.FLOATCollectionPublicPath
+			).borrow<&FLOAT.Collection>()
 		if floatCollection == nil{ 
 			return false
 		}
@@ -638,10 +626,8 @@ contract PPPV4{
 			return true
 		}
 		let poolCollectionCap =
-			(
-				getAccount(StakingNFT.address).capabilities.get<&{StakingNFT.PoolCollectionPublic}>(
-					StakingNFT.CollectionPublicPath
-				)!
+			getAccount(StakingNFT.address).capabilities.get<&{StakingNFT.PoolCollectionPublic}>(
+				StakingNFT.CollectionPublicPath
 			).borrow()!
 		let count = StakingNFT.poolCount
 		var idx: UInt64 = 0

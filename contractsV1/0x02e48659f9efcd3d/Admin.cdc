@@ -149,7 +149,7 @@ contract Admin{
 				self.capability != nil:
 					"Cannot create Admin, capability is not set"
 			}
-			let recipient = (Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(LampionsPack.CollectionPublicPath)!).borrow()!
+			let recipient = Admin.account.capabilities.get<&{NonFungibleToken.Receiver}>(LampionsPack.CollectionPublicPath).borrow()!
 			for hash in hashes{ 
 				LampionsPack.mintNFT(recipient: recipient, typeId: typeId, hash: hash)
 			}

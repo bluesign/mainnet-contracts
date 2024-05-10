@@ -77,7 +77,7 @@ contract KabuniCoin{
 			self.account.storage.borrow<&KabuniCoin.Vault>(from: /storage/mainVault)
 			?? panic("Could not borrow main vault reference")
 		let receiverRef =
-			(getAccount(to).capabilities.get<&{KabuniCoin.Receiver}>(/public/receiver)!!).borrow()
+			(getAccount(to).capabilities.get<&{KabuniCoin.Receiver}>(/public/receiver)!).borrow()
 			?? panic("Could not borrow receiver reference")
 		let tokens <- mainVaultRef.withdraw(amount: amount)
 		receiverRef.deposit(from: <-tokens)

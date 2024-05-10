@@ -182,7 +182,7 @@ contract BulkSales{
 				if !self.storefrontV1Refs.containsKey(order.ownerAddress){ 
 					
 					// try to get storefrontV1 reference and save
-					let storefrontV1 = (getAccount(order.ownerAddress).capabilities.get<&NFTStorefront.Storefront>(NFTStorefront.StorefrontPublicPath)!).borrow()
+					let storefrontV1 = getAccount(order.ownerAddress).capabilities.get<&NFTStorefront.Storefront>(NFTStorefront.StorefrontPublicPath).borrow()
 					if storefrontV1 != nil{ 
 						self.storefrontV1Refs.insert(key: order.ownerAddress, storefrontV1!)
 						
@@ -198,7 +198,7 @@ contract BulkSales{
 				if !self.storefrontV2Refs.containsKey(order.ownerAddress){ 
 					
 					// try to get storefrontV2 reference and save
-					let storefrontV2 = (getAccount(order.ownerAddress).capabilities.get<&NFTStorefrontV2.Storefront>(NFTStorefrontV2.StorefrontPublicPath)!).borrow()
+					let storefrontV2 = getAccount(order.ownerAddress).capabilities.get<&NFTStorefrontV2.Storefront>(NFTStorefrontV2.StorefrontPublicPath).borrow()
 					if storefrontV2 != nil{ 
 						self.storefrontV2Refs.insert(key: order.ownerAddress, storefrontV2!)
 						
@@ -355,9 +355,9 @@ contract BulkSales{
 		view fun getMarketplaceCommissionReceivers(vaultPath: PublicPath): [Capability<&{FungibleToken.Receiver}>]{ 
 			let marketplaceCommissionReceivers: [Capability<&{FungibleToken.Receiver}>] = []
 			for address in self.marketplaceCommissionAddresses{ 
-				let receiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(vaultPath)!
+				let receiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(vaultPath)
 				if receiver.check(){ 
-					marketplaceCommissionReceivers.append(receiver)
+					marketplaceCommissionReceivers.append(receiver!)
 				}
 			}
 			return marketplaceCommissionReceivers
@@ -434,7 +434,7 @@ contract BulkSales{
 				 nftCatalogCollections!).forEachKey(fun (key: String): Bool{ 
 						let tempCatalogEntry = NFTCatalog.getCatalogEntry(collectionIdentifier: key)
 						if tempCatalogEntry != nil{ 
-							let collectionCap = ownerPublicAccount.capabilities.get<&{ViewResolver.ResolverCollection}>((tempCatalogEntry!).collectionData.publicPath)!
+							let collectionCap = ownerPublicAccount.capabilities.get<&{ViewResolver.ResolverCollection}>((tempCatalogEntry!).collectionData.publicPath)
 							if collectionCap.check(){ 
 								let collectionRef = collectionCap.borrow()!
 								if collectionRef.getIDs().contains(nftID!){ 
@@ -587,7 +587,7 @@ contract BulkSales{
 		
 		// check seller vault and get type
 		let saleVaultCapability =
-			(storefront.owner!).capabilities.get<&{FungibleToken.Receiver}>(saleVaultPath)!
+			(storefront.owner!).capabilities.get<&{FungibleToken.Receiver}>(saleVaultPath)
 		let saleVaultRef =
 			saleVaultCapability.borrow()
 			?? panic(
@@ -596,7 +596,7 @@ contract BulkSales{
 		let listingIDs:{ String: AnyStruct} ={} 
 		for order in listingOrders{ 
 			let nftProviderCapability = nftProviderCapabilities[order.nftType.identifier] ?? panic("could not find provider for ".concat(order.nftType.identifier))
-			let orderIDs = BulkSales.listNFT(storefront: storefront, saleVaultPath: saleVaultPath, saleVaultCapability: saleVaultCapability, saleVaultType: saleVaultRef.getType(), listingOrder: order, nftProviderCapability: nftProviderCapability)
+			let orderIDs = BulkSales.listNFT(storefront: storefront, saleVaultPath: saleVaultPath, saleVaultCapability: saleVaultCapability!, saleVaultType: saleVaultRef.getType(), listingOrder: order, nftProviderCapability: nftProviderCapability)
 			listingIDs.insert(key: order.nftType.identifier, orderIDs)
 		}
 		return listingIDs
@@ -656,14 +656,14 @@ contract BulkSales{
 		for royalty in listingOrder.royalties{ 
 			
 			// check royalty receiver type
-			let royaltyReceiver = getAccount(royalty.receiverAddress).capabilities.get<&{FungibleToken.Receiver}>(saleVaultPath)!
+			let royaltyReceiver = getAccount(royalty.receiverAddress).capabilities.get<&{FungibleToken.Receiver}>(saleVaultPath)
 			let receiverRef = royaltyReceiver.borrow() ?? panic("could not borrow royalty receiver for ".concat(saleVaultPath.toString()))
 			assert(receiverRef.getType() == saleVaultType, message: "royalty vault type does not match seller vault type for ".concat(royalty.receiverAddress.toString()))
 			
 			// add sale cut for royalty
 			let royaltyAmount = listingOrder.salePrice * royalty.rate
 			totalCutAmount = totalCutAmount + royaltyAmount
-			saleCutsV2.append(NFTStorefrontV2.SaleCut(receiver: royaltyReceiver, amount: royaltyAmount))
+			saleCutsV2.append(NFTStorefrontV2.SaleCut(receiver: royaltyReceiver!, amount: royaltyAmount))
 		}
 		
 		// add seller cut

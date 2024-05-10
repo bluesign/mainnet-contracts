@@ -72,7 +72,7 @@ contract BBxBarbieCard: NonFungibleToken{
 	var currentCardEditionIdByPackSeriesId:{ UInt64: UInt64}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64 // aka cardEditionID
 		
@@ -116,8 +116,8 @@ contract BBxBarbieCard: NonFungibleToken{
 					let socialMap:{ String: MetadataViews.ExternalURL} ={ "facebook": MetadataViews.ExternalURL("https://www.facebook.com/mattel"), "instagram": MetadataViews.ExternalURL("https://www.instagram.com/mattel"), "twitter": MetadataViews.ExternalURL("https://www.twitter.com/mattel")}
 					return MetadataViews.NFTCollectionDisplay(name: self.metadata["career"] ?? self.metadata["miniCollection"] ?? "BBxBarbie", description: self.metadata["careerDescription"] ?? "Digital Collectable from the Boss Beauties x Barbie collaboration", externalURL: externalURL, squareImage: squareImage, bannerImage: bannerImage, socials: socialMap)
 				case Type<MetadataViews.Royalties>():
-					let flowReciever = getAccount(0xf86e2f015cd692be).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: flowReciever, cut: 0.05, description: "Mattel 5% Royalty")])
+					let flowReciever = getAccount(0xf86e2f015cd692be).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: flowReciever!, cut: 0.05, description: "Mattel 5% Royalty")])
 				case Type<MetadataViews.Traits>():
 					let excludedTraits = ["thumbnailPath", "thumbnailCID", "career", "careerDescription", "description", "url"]
 					let traitsView = MetadataViews.dictToTraits(dict: self.metadata, excludedNames: excludedTraits)
@@ -193,7 +193,7 @@ contract BBxBarbieCard: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -237,6 +237,16 @@ contract BBxBarbieCard: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let token = nft as! &BBxBarbieCard.NFT
 			return token as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -34,7 +34,7 @@ contract BfeNFT: NonFungibleToken{
 	
 	// Declare the NFT resource type
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The unique ID that differentiates each NFT
 		access(all)
 		let id: UInt64
@@ -109,7 +109,7 @@ contract BfeNFT: NonFungibleToken{
 		//
 		// Function that removes an NFT from the collection 
 		// and moves it to the calling context
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
@@ -161,6 +161,16 @@ contract BfeNFT: NonFungibleToken{
 		access(all)
 		view fun getIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

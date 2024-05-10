@@ -35,7 +35,7 @@ contract FanfareNFTContract: NonFungibleToken{
 	let ContentCreatorPublicPath: PublicPath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -95,7 +95,7 @@ contract FanfareNFTContract: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -141,6 +141,16 @@ contract FanfareNFTContract: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -167,7 +177,7 @@ contract FanfareNFTContract: NonFungibleToken{
 			let id: UInt64 = self.idCount
 			self.idCount = self.idCount + 1
 			FanfareNFTContract.totalSupply = FanfareNFTContract.totalSupply + 1
-			var receiver = getAccount(recipient).capabilities.get<&{FanfareNFTCollectionPublic}>(FanfareNFTContract.CollectionPublicPath)!
+			var receiver = getAccount(recipient).capabilities.get<&{FanfareNFTCollectionPublic}>(FanfareNFTContract.CollectionPublicPath)
 			let account = receiver.borrow()!
 			account.deposit(token: <-token)
 			emit Minted(id: id, templateID: templateID, creatorAddress: creatorAddress, recipient: recipient, metadata: metadata)

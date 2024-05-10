@@ -40,10 +40,8 @@ contract BackpackMinter{
 		
 		// verify Flunk ownership
 		let collection =
-			(
-				getAccount(signer.address).capabilities.get<&Flunks.Collection>(
-					Flunks.CollectionPublicPath
-				)!
+			getAccount(signer.address).capabilities.get<&Flunks.Collection>(
+				Flunks.CollectionPublicPath
 			).borrow()!
 		let collectionIDs = collection.getIDs()
 		if !collectionIDs.contains(tokenID){ 
@@ -53,11 +51,9 @@ contract BackpackMinter{
 		// Get recipient receiver capoatility
 		let recipient = getAccount(signer.address)
 		let backpackReceiver =
-			(
-				recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-					Backpack.CollectionPublicPath
-				)!
-			).borrow()
+			recipient.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+				Backpack.CollectionPublicPath
+			).borrow<&{NonFungibleToken.CollectionPublic}>()
 			?? panic("Could not get receiver reference to the Backpack NFT Collection")
 		
 		// mint backpack to signer

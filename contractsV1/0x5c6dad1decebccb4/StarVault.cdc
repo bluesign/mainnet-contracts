@@ -158,7 +158,7 @@ contract StarVault: FungibleToken{
 		}
 		LPStaking.distributeFees(vaultId: self.vaultId, vault: <-fee.withdraw(amount: amount * (1.0 - feeRatio)))
 		if feeRatio > 0.0 && feeTo != nil{ 
-			let flowVaultRef = (getAccount(StarVaultConfig.feeTo!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow()!
+			let flowVaultRef = getAccount(StarVaultConfig.feeTo!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()!
 			flowVaultRef.deposit(from: <-fee)
 		} else{ 
 			destroy fee
@@ -170,7 +170,7 @@ contract StarVault: FungibleToken{
 		let token0Key = StarVaultConfig.SliceTokenTypeIdentifierFromVaultType(vaultTypeIdentifier: Type<@FlowToken.Vault>().identifier)
 		let token1Key = StarVaultConfig.SliceTokenTypeIdentifierFromVaultType(vaultTypeIdentifier: Type<@StarVault.Vault>().identifier)
 		let pairAddr = SwapFactory.getPairAddress(token0Key: token0Key, token1Key: token1Key)!
-		let pairPublicRef = (getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow()!
+		let pairPublicRef = getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!
 		let pairInfo = pairPublicRef.getPairInfo()
 		let token0Reserve = pairInfo[2] as! UFix64
 		let token1Reserve = pairInfo[3] as! UFix64

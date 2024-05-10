@@ -28,7 +28,9 @@ contract TFCPayouts{
 		){ 
 			let amount = from.balance
 			let receiver =
-				(getAccount(to).capabilities.get<&{FungibleToken.Receiver}>(receiverPath)!).borrow()
+				getAccount(to).capabilities.get<&{FungibleToken.Receiver}>(receiverPath).borrow<
+					&{FungibleToken.Receiver}
+				>()
 				?? panic("Could not borrow receiver reference to the recipient's Vault")
 			receiver.deposit(from: <-from)
 			emit PayoutCompleted(to: to, amount: amount, token: paymentVaultType.identifier)

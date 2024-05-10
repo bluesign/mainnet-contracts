@@ -340,7 +340,7 @@ contract Bobblz_NFT: NonFungibleToken{
 	// A resource that represents the Bobblz_NFT NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -402,7 +402,7 @@ contract Bobblz_NFT: NonFungibleToken{
 								let royaltyCut = Bobblz_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
 								let cutValue: UFix64 = Bobblz_NFT.royaltyCutStringToUFix64(royaltyCut)
 								if cutValue != 0.0{ 
-									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver)!, cut: cutValue, description: Bobblz_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
+									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver), cut: cutValue, description: Bobblz_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
 								}
 							}
 						}
@@ -580,7 +580,7 @@ contract Bobblz_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -679,6 +679,16 @@ contract Bobblz_NFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -707,7 +717,7 @@ contract Bobblz_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &Bobblz_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Bobblz_NFT.Collection>(Bobblz_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&Bobblz_NFT.Collection>(Bobblz_NFT.CollectionPublicPath).borrow<&Bobblz_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust Bobblz_NFT.Collection.borrowBobblz_NFT to get the correct id
 		// (it checks it before returning it).
 		return collection.borrowBobblz_NFT(id: id)

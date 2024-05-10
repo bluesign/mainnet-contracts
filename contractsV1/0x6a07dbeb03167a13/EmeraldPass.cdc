@@ -46,9 +46,9 @@ contract EmeraldPass{
 			let ecAccount: &Account = getAccount(0x5643fd47a29770e7)
 			self.tokenTypeToVault ={ 
 					Type<@FUSD.Vault>():
-					ecAccount.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!,
+					ecAccount.capabilities.get<&FUSD.Vault>(/public/fusdReceiver),
 					Type<@FlowToken.Vault>():
-					ecAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+					ecAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 				}
 		}
 	}
@@ -142,7 +142,9 @@ contract EmeraldPass{
 		access(all)
 		fun giveUserTime(user: Address, time: UFix64){ 
 			let userVault =
-				(getAccount(user).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath)!).borrow()
+				getAccount(user).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath).borrow<
+					&Vault
+				>()
 				?? panic("This receiver has not set up a Vault for Emerald Pass yet.")
 			userVault.addTime(time: time)
 		}
@@ -167,7 +169,7 @@ contract EmeraldPass{
 				"Disabled."
 		}
 		let userVault =
-			(getAccount(to).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath)!).borrow()
+			getAccount(to).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath).borrow<&Vault>()
 			?? panic("This receiver has not set up a Vault for Emerald Pass yet.")
 		let paymentType: Type = payment.getType()
 		userVault.purchase(payment: <-payment)
@@ -197,7 +199,9 @@ contract EmeraldPass{
 	
 	access(all)
 	fun getUserVault(user: Address): &Vault?{ 
-		return (getAccount(user).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath)!).borrow()
+		return getAccount(user).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath).borrow<
+			&Vault
+		>()
 	}
 	
 	init(){ 

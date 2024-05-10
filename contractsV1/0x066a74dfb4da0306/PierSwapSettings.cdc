@@ -72,7 +72,7 @@ contract PierSwapSettings{
 		access(all)
 		fun setProtocolFeeRecipient(newAddress: Address){ 
 			pre{ 
-				(getAccount(newAddress).capabilities.get<&PierLPToken.Collection>(PierLPToken.CollectionPublicPath)!).check():
+				getAccount(newAddress).capabilities.get<&PierLPToken.Collection>(PierLPToken.CollectionPublicPath).check():
 					"Metapier PierSwapSettings: Cannot find LP token collection in new protocol fee recipient"
 			}
 			PierSwapSettings.protocolFeeRecipient = newAddress
@@ -96,10 +96,8 @@ contract PierSwapSettings{
 	access(all)
 	fun depositProtocolFee(vault: @{MultiFungibleToken.Vault}){ 
 		let feeCollectionRef =
-			(
-				getAccount(self.protocolFeeRecipient).capabilities.get<&PierLPToken.Collection>(
-					PierLPToken.CollectionPublicPath
-				)!
+			getAccount(self.protocolFeeRecipient).capabilities.get<&PierLPToken.Collection>(
+				PierLPToken.CollectionPublicPath
 			).borrow()
 			?? panic("Metapier PierSwapSettings: Protocol fee receiver not found")
 		feeCollectionRef.deposit(from: <-vault)

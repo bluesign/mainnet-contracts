@@ -96,7 +96,7 @@ contract NFluence: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, NFluencePublic{ 
+	resource NFT: NonFungibleToken.NFT, NFluencePublic{ 
 		access(self)
 		let metadata: NFluenceNFTData
 		
@@ -178,7 +178,7 @@ contract NFluence: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.ownedNFTs[withdrawID] != nil:
@@ -273,6 +273,16 @@ contract NFluence: NonFungibleToken{
 			}
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &NFluence.NFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

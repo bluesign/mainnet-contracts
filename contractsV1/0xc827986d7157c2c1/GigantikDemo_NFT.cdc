@@ -340,7 +340,7 @@ contract GigantikDemo_NFT: NonFungibleToken{
 	// A resource that represents the GigantikDemo_NFT NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -402,7 +402,7 @@ contract GigantikDemo_NFT: NonFungibleToken{
 								let royaltyCut = GigantikDemo_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
 								let cutValue: UFix64 = GigantikDemo_NFT.royaltyCutStringToUFix64(royaltyCut)
 								if cutValue != 0.0{ 
-									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver)!, cut: cutValue, description: GigantikDemo_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
+									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver), cut: cutValue, description: GigantikDemo_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
 								}
 							}
 						}
@@ -580,7 +580,7 @@ contract GigantikDemo_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -683,6 +683,16 @@ contract GigantikDemo_NFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -711,7 +721,7 @@ contract GigantikDemo_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &GigantikDemo_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&GigantikDemo_NFT.Collection>(GigantikDemo_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&GigantikDemo_NFT.Collection>(GigantikDemo_NFT.CollectionPublicPath).borrow<&GigantikDemo_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust GigantikDemo_NFT.Collection.borrowGigantikDemo_NFT to get the correct id
 		// (it checks it before returning it).
 		return collection.borrowGigantikDemo_NFT(id: id)

@@ -18,7 +18,7 @@ contract Utils{
 		let response:{ String: MetadataViews.NFTCollectionData} ={} 
 		let account = getAccount(ownerAddress)
 		account.forEachPublic(fun (path: PublicPath, type: Type): Bool{ 
-				let collectionPublic = (account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path)!).borrow()
+				let collectionPublic = account.capabilities.get<&{NonFungibleToken.CollectionPublic}>(path).borrow()
 				if collectionPublic == nil{ 
 					return true
 				}
@@ -28,7 +28,7 @@ contract Utils{
 				if !nftIdentifiers.contains(nftIdentifier) || response.containsKey(nftIdentifier){ 
 					return true
 				}
-				let nftRef: &{NonFungibleToken.INFT} = (collectionPublic!).borrowNFT((collectionPublic!).getIDs()[0]) as &{NonFungibleToken.INFT}
+				let nftRef: &{NonFungibleToken.INFT} = (collectionPublic!).borrowNFT(id: (collectionPublic!).getIDs()[0]) as &{NonFungibleToken.INFT}
 				let collectionData = nftRef.resolveView(Type<MetadataViews.NFTCollectionData>()) as! MetadataViews.NFTCollectionData? ?? panic("collection lookup failed")
 				response.insert(key: nftIdentifier, collectionData)
 				return true

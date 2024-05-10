@@ -87,7 +87,7 @@ contract FixesHeartbeat{
 				
 				// iterate all the hooks
 				for hookAddr in hooks.keys{ 
-					if let hookRef = (getAccount(hookAddr).capabilities.get<&{IHeartbeatHook}>(hooks[hookAddr]!)!).borrow(){ 
+					if let hookRef = getAccount(hookAddr).capabilities.get<&{IHeartbeatHook}>(hooks[hookAddr]!).borrow(){ 
 						hookRef.onHeartbeat(deltaTime)
 					}
 				}
@@ -120,7 +120,7 @@ contract FixesHeartbeat{
 		if self.heartbeatScopes[scope] == nil{ 
 			self.heartbeatScopes[scope] ={} 
 		}
-		let hookCap = getAccount(hookAddr).capabilities.get<&{IHeartbeatHook}>(hookPath)!
+		let hookCap = getAccount(hookAddr).capabilities.get<&{IHeartbeatHook}>(hookPath)
 		if hookCap.check(){ 
 			if let hookRef = hookCap.borrow(){ 
 				let scopesRef = self.borrowHooksDictRef(scope: scope)!

@@ -126,9 +126,9 @@ contract FindLeaseMarket{
 		var caps: [Capability<&{FindLeaseMarket.SaleItemCollectionPublic}>] = []
 		for type in self.getSaleItemCollectionTypes(){ 
 			if type != nil{ 
-				let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))!
+				let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))
 				if cap.check(){ 
-					caps.append(cap)
+					caps.append(cap!)
 				}
 			}
 		}
@@ -143,8 +143,8 @@ contract FindLeaseMarket{
 	): Capability<&{FindLeaseMarket.SaleItemCollectionPublic}>{ 
 		for type in self.getSaleItemCollectionTypes(){ 
 			if FindMarket.getMarketOptionFromType(type) == marketOption{ 
-				let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))!
-				return cap
+				let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.SaleItemCollectionPublic}>(tenantRef.getPublicPath(type))
+				return cap!
 			}
 		}
 		panic("Cannot find market option : ".concat(marketOption))
@@ -338,9 +338,9 @@ contract FindLeaseMarket{
 	]{ 
 		var caps: [Capability<&{FindLeaseMarket.MarketBidCollectionPublic}>] = []
 		for type in self.getMarketBidCollectionTypes(){ 
-			let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))!
+			let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))
 			if cap.check(){ 
-				caps.append(cap)
+				caps.append(cap!)
 			}
 		}
 		return caps
@@ -354,8 +354,8 @@ contract FindLeaseMarket{
 	): Capability<&{FindLeaseMarket.MarketBidCollectionPublic}>{ 
 		for type in self.getMarketBidCollectionTypes(){ 
 			if FindMarket.getMarketOptionFromType(type) == marketOption{ 
-				let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))!
-				return cap
+				let cap = getAccount(address).capabilities.get<&{FindLeaseMarket.MarketBidCollectionPublic}>(tenantRef.getPublicPath(type))
+				return cap!
 			}
 		}
 		panic("Cannot find market option : ".concat(marketOption))
@@ -622,9 +622,9 @@ contract FindLeaseMarket{
 					"The lease capability is not valid"
 			}
 			let receiver = getAccount(to)
-			let profile = receiver.capabilities.get<&{Profile.Public}>(Profile.publicPath)!
-			let leases = receiver.capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath)!
-			self.borrow().move(name: self.name, profile: profile, to: leases)
+			let profile = receiver.capabilities.get<&{Profile.Public}>(Profile.publicPath)
+			let leases = receiver.capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath)
+			self.borrow().move(name: self.name, profile: profile!, to: leases!)
 		}
 		
 		access(all)
@@ -653,8 +653,8 @@ contract FindLeaseMarket{
 		let oldProfileCap =
 			getAccount(seller).capabilities.get<&{FungibleToken.Receiver}>(
 				Profile.publicReceiverPath
-			)!
-		let oldProfile = FindMarket.getPaymentWallet(oldProfileCap, ftInfo, panicOnFailCheck: true)
+			)
+		let oldProfile = FindMarket.getPaymentWallet(oldProfileCap!, ftInfo, panicOnFailCheck: true)
 		for key in cuts.keys{ 
 			let allCuts = cuts[key]!
 			for cut in allCuts.cuts{ 

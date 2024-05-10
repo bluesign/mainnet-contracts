@@ -1009,10 +1009,8 @@ contract Staking{
 	access(all)
 	fun updatePool(pid: UInt64){ 
 		let collectionCap =
-			(
-				Staking.account.capabilities.get<&{Staking.PoolCollectionPublic}>(
-					Staking.CollectionPublicPath
-				)!
+			Staking.account.capabilities.get<&{Staking.PoolCollectionPublic}>(
+				Staking.CollectionPublicPath
 			).borrow()
 		let pool = (collectionCap!).getPool(pid: pid)
 		pool.updatePool()

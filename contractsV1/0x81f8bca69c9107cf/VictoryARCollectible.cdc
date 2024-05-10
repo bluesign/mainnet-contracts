@@ -51,7 +51,7 @@ contract VictoryARCollectible: NonFungibleToken{
 	// A Victory Collectible as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// Original owner (for revenue sharing)
 		access(all)
 		let originalOwner: Address
@@ -177,7 +177,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			
@@ -312,6 +312,16 @@ contract VictoryARCollectible: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -367,7 +377,7 @@ contract VictoryARCollectible: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &VictoryARCollectible.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&VictoryARCollectible.Collection>(VictoryARCollectible.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&VictoryARCollectible.Collection>(VictoryARCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust VictoryARCollectible.Collection.borowVictoryItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowVictoryItem(id: itemID)

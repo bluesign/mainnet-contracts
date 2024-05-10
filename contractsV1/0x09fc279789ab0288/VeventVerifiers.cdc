@@ -10,7 +10,7 @@ contract VeventVerifiers{
 	struct DoodlesSock: Vevent.Verifier{ 
 		access(all)
 		fun verify(user: Address): Bool{ 
-			if let collection = (getAccount(user).capabilities.get<&Wearables.Collection>(Wearables.CollectionPublicPath)!).borrow(){ 
+			if let collection = getAccount(user).capabilities.get<&Wearables.Collection>(Wearables.CollectionPublicPath).borrow<&Wearables.Collection>(){ 
 				for id in collection.getIDs(){ 
 					let resolver = collection.borrowViewResolver(id: id)!
 					let view = resolver.resolveView(Type<Wearables.Metadata>())! as! Wearables.Metadata

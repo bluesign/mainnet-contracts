@@ -74,7 +74,7 @@ contract MultiFungibleToken{
 				emit CreateNewWallet(user: (self.owner!).address, type: type, amount: balance)
 				return
 			}
-			let ref = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>((ftInfo!).publicPath!)!!).borrow() // Get a reference to the recipient's Receiver
+			let ref = ((self.owner!).capabilities.get<&{FungibleToken.Receiver}>((ftInfo!).publicPath!)!).borrow() // Get a reference to the recipient's Receiver
 			
 			if ref == nil{ 
 				self.storeDeposit(<-from)

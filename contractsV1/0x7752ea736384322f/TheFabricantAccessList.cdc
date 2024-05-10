@@ -360,20 +360,16 @@ contract TheFabricantAccessList{
 		
 		access(self)
 		fun borrowAccessList(): &AddressList{ 
-			return (
-				TheFabricantAccessList.account.capabilities.get<&AddressList>(
-					self.accessListPublicPath
-				)!
+			return TheFabricantAccessList.account.capabilities.get<&AddressList>(
+				self.accessListPublicPath
 			).borrow()
 			?? panic("No access list exists in storage for this AccessListDetails")
 		}
 		
 		access(self)
 		fun borrowTestingList(): &AddressList{ 
-			return (
-				TheFabricantAccessList.account.capabilities.get<&AddressList>(
-					self.testingListPublicPath
-				)!
+			return TheFabricantAccessList.account.capabilities.get<&AddressList>(
+				self.testingListPublicPath
 			).borrow()
 			?? panic("No access list exists in storage for this AccessListDetails")
 		}
@@ -692,7 +688,7 @@ contract TheFabricantAccessList{
 	access(all)
 	fun getAccessList(accessListDetailsId: UInt64):{ Address: Bool}?{ 
 		if let accessListDetails = TheFabricantAccessList.accessListDetails[accessListDetailsId]{ 
-			if let addressListRef = (TheFabricantAccessList.account.capabilities.get<&AddressList>(accessListDetails.accessListPublicPath)!).borrow(){ 
+			if let addressListRef = TheFabricantAccessList.account.capabilities.get<&AddressList>(accessListDetails.accessListPublicPath).borrow(){ 
 				return addressListRef.getAddressList()
 			}
 		}
@@ -707,7 +703,7 @@ contract TheFabricantAccessList{
 		while i <= UInt64(keys.length){ 
 			let accessListDetails = TheFabricantAccessList.accessListDetails[i as! UInt64] ?? nil
 			let publicPath = (accessListDetails!).accessListPublicPath
-			if let addressListRef = (TheFabricantAccessList.account.capabilities.get<&AddressList>((accessListDetails!).accessListPublicPath)!).borrow(){ 
+			if let addressListRef = TheFabricantAccessList.account.capabilities.get<&AddressList>((accessListDetails!).accessListPublicPath).borrow(){ 
 				let addressList = addressListRef.getAddressList()
 				ret[i] = addressList
 			}
@@ -719,7 +715,7 @@ contract TheFabricantAccessList{
 	access(all)
 	fun getTestingList(accessListDetailsId: UInt64):{ Address: Bool}?{ 
 		if let accessListDetails = TheFabricantAccessList.accessListDetails[accessListDetailsId]{ 
-			if let addressListRef = (TheFabricantAccessList.account.capabilities.get<&AddressList>(accessListDetails.testingListPublicPath)!).borrow(){ 
+			if let addressListRef = TheFabricantAccessList.account.capabilities.get<&AddressList>(accessListDetails.testingListPublicPath).borrow(){ 
 				return addressListRef.getAddressList()
 			}
 		}
@@ -737,7 +733,7 @@ contract TheFabricantAccessList{
 				return ret
 			}
 			let publicPath = (accessListDetails!).testingListPublicPath
-			if let addressListRef = (TheFabricantAccessList.account.capabilities.get<&AddressList>((accessListDetails!).testingListPublicPath)!).borrow(){ 
+			if let addressListRef = TheFabricantAccessList.account.capabilities.get<&AddressList>((accessListDetails!).testingListPublicPath).borrow(){ 
 				let addressList = addressListRef.getAddressList()
 				ret[i as! UInt64] = addressList
 			}

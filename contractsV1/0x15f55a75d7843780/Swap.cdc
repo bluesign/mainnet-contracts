@@ -749,12 +749,12 @@ contract Swap{
 		for proposedNft in userOffer.proposedNfts{ 
 			
 			// attempt to load CollectionPublic capability and verify ownership
-			let publicCapability = userPublicAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(proposedNft.collectionData.publicPath)!
+			let publicCapability = userPublicAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(proposedNft.collectionData.publicPath)
 			let collectionPublicRef = publicCapability.borrow() ?? panic("could not borrow collectionPublic for ".concat(proposedNft.type.identifier))
 			
 			// let ownedNftIds: [UInt64] = collectionPublicRef.getIDs()
 			// assert(ownedNftIds.contains(proposedNft.nftID), message: "could not verify ownership for ".concat(proposedNft.type.identifier))
-			let nftRef = collectionPublicRef.borrowNFT(proposedNft.nftID)
+			let nftRef = collectionPublicRef.borrowNFT(id: proposedNft.nftID)
 			assert(nftRef.getType() == proposedNft.type, message: "proposedNft.type and stored asset type do not match for ".concat(proposedNft.type.identifier))
 			if userCapabilities != nil{ 
 				

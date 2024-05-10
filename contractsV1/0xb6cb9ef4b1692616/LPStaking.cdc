@@ -52,10 +52,8 @@ contract LPStaking{
 			message: "LPStaking: insufficient account creation fee"
 		)
 		let vaultRef =
-			(
-				getAccount(vaultAddress).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(
-					StarVaultConfig.VaultPublicPath
-				)!
+			getAccount(vaultAddress).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(
+				StarVaultConfig.VaultPublicPath
 			).borrow()
 			?? panic("Vault Reference was not created correctly")
 		let vaultId = vaultRef.vaultId()
@@ -81,8 +79,8 @@ contract LPStaking{
 			)
 		assert(!self.pairMap.containsKey(pairAddr), message: "LPStaking: pairAddr already exists")
 		(
-			(self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
-				.borrow()!
+			self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+				.borrow<&{FungibleToken.Receiver}>()!
 		).deposit(from: <-accountCreationFee)
 		let poolAccount = AuthAccount(payer: self.account)
 		if self.poolAccountPublicKey != nil{ 
@@ -111,10 +109,8 @@ contract LPStaking{
 		}
 		let pool = self.poolMap[vaultId]!
 		let poolRef =
-			(
-				getAccount(pool).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(
-					StarVaultConfig.PoolPublicPath
-				)!
+			getAccount(pool).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(
+				StarVaultConfig.PoolPublicPath
 			).borrow()!
 		poolRef.queueNewRewards(vault: <-vault)
 	}
@@ -136,7 +132,7 @@ contract LPStaking{
 				tokenVault.balance > 0.0:
 					"LPStakingCollection: deposit empty token vault"
 			}
-			let pairRef = (getAccount(tokenAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow()!
+			let pairRef = getAccount(tokenAddress).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!
 			assert(tokenVault.getType() == pairRef.getLpTokenVaultType(), message: "LPStakingCollection: input token vault type mismatch with token vault")
 			if self.tokenVaults.containsKey(tokenAddress){ 
 				let vaultRef = (&self.tokenVaults[tokenAddress] as &{FungibleToken.Vault}?)!
@@ -187,7 +183,7 @@ contract LPStaking{
 		access(self)
 		fun updateReward(tokenAddress: Address){ 
 			let pool = LPStaking.pairMap[tokenAddress]!
-			let poolRef = (getAccount(pool).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(StarVaultConfig.PoolPublicPath)!).borrow()!
+			let poolRef = getAccount(pool).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(StarVaultConfig.PoolPublicPath).borrow()!
 			poolRef.updateReward(account: (self.owner!).address)
 		}
 	}
@@ -225,7 +221,7 @@ contract LPStaking{
 	fun getRewards(account: Address, poolIds: [Int]){ 
 		for pid in poolIds{ 
 			let poolAddress = self.pools[pid]
-			let poolRef = (getAccount(poolAddress).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(StarVaultConfig.PoolPublicPath)!).borrow()!
+			let poolRef = getAccount(poolAddress).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(StarVaultConfig.PoolPublicPath).borrow()!
 			poolRef.getReward(account: account)
 		}
 	}
@@ -235,7 +231,7 @@ contract LPStaking{
 		let ret: [UFix64] = []
 		for pid in poolIds{ 
 			let poolAddress = self.pools[pid]
-			let poolRef = (getAccount(poolAddress).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(StarVaultConfig.PoolPublicPath)!).borrow()!
+			let poolRef = getAccount(poolAddress).capabilities.get<&{StarVaultInterfaces.PoolPublic}>(StarVaultConfig.PoolPublicPath).borrow()!
 			ret.append(poolRef.earned(account: account))
 		}
 		return ret

@@ -192,7 +192,7 @@ contract DarkCountry: NonFungibleToken{
 	// A DarkCountry item as a NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		// Increments once once any new NFT is minted
 		access(all)
@@ -261,7 +261,7 @@ contract DarkCountry: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// make sure the NFT is not staked
 			if DarkCountryStaking.stakedItems.containsKey(self.owner?.address!) && (DarkCountryStaking.stakedItems[self.owner?.address!]!).contains(withdrawID){ 
@@ -317,6 +317,16 @@ contract DarkCountry: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -407,7 +417,7 @@ contract DarkCountry: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &DarkCountry.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&DarkCountry.Collection>(DarkCountry.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&DarkCountry.Collection>(DarkCountry.CollectionPublicPath).borrow<&DarkCountry.Collection>() ?? panic("Couldn't get collection")
 		// We trust DarkCountry.Collection.borowDarkCountryNFT to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowDarkCountryNFT(id: itemID)

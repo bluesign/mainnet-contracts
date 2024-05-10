@@ -96,7 +96,7 @@ contract BasicBeastsDrop{
 			(
 				getAccount(vaultAddress).capabilities.get<&{FungibleToken.Receiver}>(
 					/public/fusdReceiver
-				)!!
+				)!
 			).borrow()!
 		).deposit(from: <-vault)
 	}

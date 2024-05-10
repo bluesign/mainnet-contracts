@@ -171,7 +171,7 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, IPackNFT.IPackNFTToken, IPackNFT.IPackNFTOwnerOperator, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, IPackNFT.IPackNFTToken, IPackNFT.IPackNFTOwnerOperator, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -260,7 +260,7 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -307,6 +307,16 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 			let ref = &token as &PackNFT.NFT
 			self.ownedNFTs[id] <-! token as! @PackNFT.NFT
 			return ref
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

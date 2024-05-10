@@ -19,8 +19,9 @@ contract SendTokenMessage{
 			message: message
 		)
 		let receiverVault =
-			(getAccount(receiver).capabilities.get<&{FungibleToken.Receiver}>(receiverPath)!)
-				.borrow()
+			getAccount(receiver).capabilities.get<&{FungibleToken.Receiver}>(receiverPath).borrow<
+				&{FungibleToken.Receiver}
+			>()
 			?? panic("Receiver does not have a vault set up to accept this delivery.")
 		receiverVault.deposit(from: <-vault)
 	}

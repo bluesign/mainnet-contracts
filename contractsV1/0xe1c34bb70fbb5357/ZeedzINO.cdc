@@ -71,7 +71,7 @@ contract ZeedzINO: NonFungibleToken{
 	var numberMintedPerType:{ UInt32: UInt64}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		//  The token's ID
 		access(all)
 		let id: UInt64
@@ -189,7 +189,7 @@ contract ZeedzINO: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Not able to find specified NFT within the owner's collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -247,6 +247,16 @@ contract ZeedzINO: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -310,7 +320,7 @@ contract ZeedzINO: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, zeedleID: UInt64): &ZeedzINO.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&ZeedzINO.Collection>(ZeedzINO.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&ZeedzINO.Collection>(ZeedzINO.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.borrowZeedle(id: zeedleID)
 	}
 	

@@ -92,7 +92,7 @@ contract BeerRun: NonFungibleToken{
 	// NFT
 	// ========================================================================
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver, NiftoryNonFungibleToken.NFTPublic{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver, NiftoryNonFungibleToken.NFTPublic{ 
 		access(all)
 		let id: UInt64
 		
@@ -212,7 +212,7 @@ contract BeerRun: NonFungibleToken{
 			destroy tokens
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.ownedNFTs[withdrawID] != nil:
@@ -230,6 +230,16 @@ contract BeerRun: NonFungibleToken{
 				tokens.append(<-self.withdraw(withdrawID: withdrawIDs.removeLast()))
 			}
 			return <-tokens
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -289,7 +299,7 @@ contract BeerRun: NonFungibleToken{
 		access(self)
 		fun _getMetadataViewsManagerPrivate(): &MetadataViewsManager.Manager{ 
 			let record = NiftoryNFTRegistry.getRegistryRecord(BeerRun.REGISTRY_ADDRESS, BeerRun.REGISTRY_BRAND)
-			let manager = (BeerRun.account.capabilities.get<&MetadataViewsManager.Manager>(record.metadataViewsManager.paths.private)!).borrow()!
+			let manager = BeerRun.account.capabilities.get<&MetadataViewsManager.Manager>(record.metadataViewsManager.paths.private).borrow()!
 			return manager
 		}
 		
@@ -312,7 +322,7 @@ contract BeerRun: NonFungibleToken{
 		access(self)
 		fun _getSetManagerPrivate(): &MutableMetadataSetManager.Manager{ 
 			let record = NiftoryNFTRegistry.getRegistryRecord(BeerRun.REGISTRY_ADDRESS, BeerRun.REGISTRY_BRAND)
-			let setManager = (BeerRun.account.capabilities.get<&MutableMetadataSetManager.Manager>(record.setManager.paths.private)!).borrow()!
+			let setManager = BeerRun.account.capabilities.get<&MutableMetadataSetManager.Manager>(record.setManager.paths.private).borrow()!
 			return setManager
 		}
 		

@@ -287,10 +287,10 @@ contract SequelMarketplace{
 					if receiverPath != nil{ 
 						path = receiverPath!
 					}
-					let receiverCap = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(path)!
+					let receiverCap = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(path)
 					if receiverCap.check(){ 
 						payments.append(Payment(role: roleID, receiver: address, amount: amount, rate: rate))
-						saleCuts.append(NFTStorefront.SaleCut(receiver: receiverCap, amount: amount))
+						saleCuts.append(NFTStorefront.SaleCut(receiver: receiverCap!, amount: amount))
 						residualRate = residualRate - rate
 						assert(residualRate >= 0.0 && residualRate <= 1.0, message: "Residual rate must be in range [0..1]")
 					} else if mustSucceed{ 

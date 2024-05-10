@@ -164,7 +164,7 @@ contract RoxContract: NonFungibleToken{
 	// NFT
 	// A Rox collectible as an NFT
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		
 		// Global unique rox id
 		access(all)
@@ -236,7 +236,7 @@ contract RoxContract: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -273,6 +273,16 @@ contract RoxContract: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -290,7 +300,7 @@ contract RoxContract: NonFungibleToken{
 	// If it has a collection and that collection contains the itemId, return a reference to that.
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &RoxContract.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&RoxContract.Collection>(RoxContract.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&RoxContract.Collection>(RoxContract.CollectionPublicPath).borrow<&RoxContract.Collection>() ?? panic("Couldn't get collection")
 		return collection.borrowRoxNft(id: itemID)
 	}
 	

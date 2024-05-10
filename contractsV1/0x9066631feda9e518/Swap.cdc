@@ -136,7 +136,7 @@ contract Swap{
 				 nftCatalogCollections!).forEachKey(fun (key: String): Bool{ 
 						let tempCatalogEntry = NFTCatalog.getCatalogEntry(collectionIdentifier: key)
 						if tempCatalogEntry != nil{ 
-							let collectionCap = ownerPublicAccount.capabilities.get<&{ViewResolver.ResolverCollection}>((tempCatalogEntry!).collectionData.publicPath)!
+							let collectionCap = ownerPublicAccount.capabilities.get<&{ViewResolver.ResolverCollection}>((tempCatalogEntry!).collectionData.publicPath)
 							if collectionCap.check(){ 
 								let collectionRef = collectionCap.borrow()!
 								if collectionRef.getIDs().contains(nftID){ 
@@ -643,11 +643,11 @@ contract Swap{
 		for proposedNft in userOffer.proposedNfts{ 
 			
 			// attempt to load CollectionPublic capability and verify ownership
-			let publicCapability = userPublicAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(proposedNft.metadata.collectionData.publicPath)!
+			let publicCapability = userPublicAccount.capabilities.get<&{NonFungibleToken.CollectionPublic}>(proposedNft.metadata.collectionData.publicPath)
 			let collectionPublicRef = publicCapability.borrow() ?? panic("could not borrow collectionPublic for ".concat(proposedNft.type.identifier))
 			let ownedNftIds: [UInt64] = collectionPublicRef.getIDs()
 			assert(ownedNftIds.contains(proposedNft.nftID), message: "could not verify ownership for ".concat(proposedNft.type.identifier))
-			let nftRef = collectionPublicRef.borrowNFT(proposedNft.nftID)
+			let nftRef = collectionPublicRef.borrowNFT(id: proposedNft.nftID)
 			assert(nftRef.getType() == proposedNft.type, message: "proposedNft.type and stored asset type do not match for ".concat(proposedNft.type.identifier))
 			if userCapabilities != nil{ 
 				

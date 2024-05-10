@@ -69,7 +69,7 @@ contract FRC20StakingForwarder{
 		access(all)
 		fun fallbackBorrow(): &{FungibleToken.Receiver}?{ 
 			let ownerAddress = self.owner?.address ?? panic("No owner set")
-			let cap = getAccount(ownerAddress).capabilities.get<&{FungibleToken.Receiver}>(FRC20StakingForwarder.getFallbackFlowTokenPublicPath())!
+			let cap = getAccount(ownerAddress).capabilities.get<&{FungibleToken.Receiver}>(FRC20StakingForwarder.getFallbackFlowTokenPublicPath())
 			return cap.check() ? cap.borrow() : nil
 		}
 		

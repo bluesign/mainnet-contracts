@@ -137,7 +137,7 @@ contract EligibilityVerifiers{
 		
 		access(all)
 		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2{ 
-			let floatCollection = (getAccount(account).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow()
+			let floatCollection = getAccount(account).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 			if floatCollection == nil{ 
 				return VerifyResultV2(isEligible: false, usedNFTs: [], extraData:{} )
 			}
@@ -382,7 +382,7 @@ contract EligibilityVerifiers{
 		
 		access(all)
 		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2{ 
-			let floatCollection = (getAccount(account).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)!).borrow()
+			let floatCollection = getAccount(account).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 			if floatCollection == nil{ 
 				return VerifyResultV2(isEligible: false, usedNFTs: [], extraData:{} )
 			}

@@ -664,7 +664,7 @@ contract FlowversePrimarySale{
 			assert(availableEntityIDs.length > 0, message: "No available entities")
 			
 			// Check if claimer is eligible for treasure based on whether they own a Flowverse Pass
-			let mysteryPassCollectionRef = (getAccount(claimerAddress).capabilities.get<&{FlowversePass.CollectionPublic}>(FlowversePass.CollectionPublicPath)!).borrow() ?? panic("FlowversePass Collection reference not found")
+			let mysteryPassCollectionRef = getAccount(claimerAddress).capabilities.get<&{FlowversePass.CollectionPublic}>(FlowversePass.CollectionPublicPath).borrow<&{FlowversePass.CollectionPublic}>() ?? panic("FlowversePass Collection reference not found")
 			var passIDs = mysteryPassCollectionRef.getIDs()
 			let numPassesOwned = passIDs.length
 			assert(numPassesOwned > 0, message: "ineligible for treasure claim as user does not own a Flowverse Pass")
@@ -673,7 +673,7 @@ contract FlowversePrimarySale{
 			var sockIDs: [UInt64] = []
 			var numSocksOwned = 0
 			if pool == "sockholders"{ 
-				let socksCollectionRef = (getAccount(claimerAddress).capabilities.get<&{FlowverseSocks.FlowverseSocksCollectionPublic}>(FlowverseSocks.CollectionPublicPath)!).borrow() ?? panic("FlowverseSocks Collection reference not found")
+				let socksCollectionRef = getAccount(claimerAddress).capabilities.get<&{FlowverseSocks.FlowverseSocksCollectionPublic}>(FlowverseSocks.CollectionPublicPath).borrow<&{FlowverseSocks.FlowverseSocksCollectionPublic}>() ?? panic("FlowverseSocks Collection reference not found")
 				sockIDs = socksCollectionRef.getIDs()
 				numSocksOwned = sockIDs.length
 				passIDs = []
@@ -743,7 +743,7 @@ contract FlowversePrimarySale{
 			
 			// check if payment is in FUT (FlowUtilityCoin used by Dapper)
 			if payment.isInstance(Type<@FlowUtilityToken.Vault>()){ 
-				let dapperFUTCapability = getAccount(0xe24e5bbd46e38be1).capabilities.get<&{FungibleToken.Receiver}>(/public/flowUtilityTokenReceiver)!!
+				let dapperFUTCapability = getAccount(0xe24e5bbd46e38be1).capabilities.get<&{FungibleToken.Receiver}>(/public/flowUtilityTokenReceiver)!
 				receiver = dapperFUTCapability.borrow()!
 			}
 			receiver.deposit(from: <-payment)

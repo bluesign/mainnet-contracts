@@ -16,7 +16,7 @@ contract bl{
 		NonFungibleToken.CollectionPublic,
 		ViewResolver.ResolverCollection{
 	
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			panic("no")
 		}
@@ -35,22 +35,23 @@ contract bl{
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?{ 
 			let owner = getAccount(0xa26986f81449592f)
 			let col =
-				(owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(/public/bl0xNFTs)!)
-					.borrow()
+				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(/public/bl0xNFTs)
+					.borrow<&{NonFungibleToken.CollectionPublic}>()
 				?? panic("NFT Collection not found")
 			if col == nil{ 
 				panic("no")
 			}
-			let nft = (col!).borrowNFT(208477736)
-			return nft!
+			let nft = (col!).borrowNFT(id: 208477736)
+			return nft
 		}
 		
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?{ 
 			let owner = getAccount(0xa26986f81449592f)
 			let col =
-				(owner.capabilities.get<&{ViewResolver.ResolverCollection}>(/public/bl0xNFTs)!)
-					.borrow()
+				owner.capabilities.get<&{ViewResolver.ResolverCollection}>(/public/bl0xNFTs).borrow<
+					&{MetadataViews.ResolverCollection}
+				>()
 				?? panic("NFT Collection not found")
 			if col == nil{ 
 				panic("no")
@@ -60,8 +61,13 @@ contract bl{
 		}
 		
 		access(all)
-		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
-			return <-create tr()
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 	}
 	

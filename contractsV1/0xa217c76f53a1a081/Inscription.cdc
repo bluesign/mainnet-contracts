@@ -53,7 +53,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 	/// and stored in the Collection resource
 	///
 	access(all)
-	resource NFT: NonFungibleToken.INFT, InscriptionMetadata.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, InscriptionMetadata.Resolver{ 
 		
 		/// The unique ID that each Inscription has
 		access(all)
@@ -74,7 +74,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 		///		 developers to know which parameter to pass to the resolveView() method.
 		///
 		access(all)
-		view fun getViews(): [Type]{ 
+		fun getViews(): [Type]{ 
 			return [Type<InscriptionMetadata.InscriptionView>()]
 		}
 		
@@ -142,7 +142,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 		/// @param withdrawID: The ID of the Inscription that wants to be withdrawn
 		/// @return The Inscription resource that has been taken out of the collection
 		///
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing Inscription")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -198,6 +198,16 @@ contract Inscription: NonFungibleToken, ViewResolver{
 				return ref as! &Inscription.NFT
 			}
 			return nil
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

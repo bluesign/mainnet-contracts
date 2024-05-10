@@ -14,42 +14,32 @@ contract Q{
 	fun q(): [AnyStruct]{ 
 		let pairInfoI_FLOWUSDC =
 			(
-				(
-					getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
-						/public/increment_swap_pair
-					)!
+				getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
+					/public/increment_swap_pair
 				).borrow()!
 			).getPairInfo()
 		let poolInfoM_FLOWUSDC =
 			(
-				(
-					getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
-						/public/metapierSwapPoolPublic
-					)!
+				getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
+					/public/metapierSwapPoolPublic
 				).borrow()!
 			).getReserves()
 		let flowBalance =
 			(
-				(
-					getAccount(0x24263c125b7770e0).capabilities.get<&{FungibleToken.Balance}>(
-						/public/flowTokenBalance
-					)!
+				getAccount(0x24263c125b7770e0).capabilities.get<&{FungibleToken.Balance}>(
+					/public/flowTokenBalance
 				).borrow()!
 			).balance
 		let usdcBalance =
 			(
-				(
-					getAccount(0x24263c125b7770e0).capabilities.get<&{FungibleToken.Balance}>(
-						/public/USDCVaultBalance
-					)!
+				getAccount(0x24263c125b7770e0).capabilities.get<&{FungibleToken.Balance}>(
+					/public/USDCVaultBalance
 				).borrow()!
 			).balance
 		let usdtBalance =
 			(
-				(
-					getAccount(0x24263c125b7770e0).capabilities.get<&{FungibleToken.Balance}>(
-						/public/teleportedTetherTokenBalance
-					)!
+				getAccount(0x24263c125b7770e0).capabilities.get<&{FungibleToken.Balance}>(
+					/public/teleportedTetherTokenBalance
 				).borrow()!
 			).balance
 		return [

@@ -112,7 +112,7 @@ contract SoulMadeMain: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: MainPublic, MainPrivate, NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: MainPublic, MainPrivate, NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -197,7 +197,7 @@ contract SoulMadeMain: NonFungibleToken{
 				case Type<MetadataViews.Display>():
 					return MetadataViews.Display(name: self.mainDetail.name, description: self.mainDetail.description, thumbnail: MetadataViews.IPFSFile(cid: self.mainDetail.ipfsHash, path: nil))
 				case Type<MetadataViews.Royalties>():
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(0x9a57dfe5c8ce609c).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: 0.00, description: "SoulMade Main Royalties")])
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: getAccount(0x9a57dfe5c8ce609c).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: 0.00, description: "SoulMade Main Royalties")])
 				case Type<MetadataViews.ExternalURL>():
 					return MetadataViews.ExternalURL("https://soulmade.art")
 				case Type<MetadataViews.NFTCollectionData>():
@@ -245,7 +245,7 @@ contract SoulMadeMain: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing Main NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -296,6 +296,16 @@ contract SoulMadeMain: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let mainNFT = nft as! &SoulMadeMain.NFT
 			return mainNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

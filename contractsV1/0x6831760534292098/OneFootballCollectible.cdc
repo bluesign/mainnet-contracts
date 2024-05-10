@@ -138,7 +138,7 @@ contract OneFootballCollectible: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -210,7 +210,7 @@ contract OneFootballCollectible: NonFungibleToken{
 		/* withdraw
 				Remove an NFT from the collection and returns it. */
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -272,6 +272,16 @@ contract OneFootballCollectible: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -321,7 +331,7 @@ contract OneFootballCollectible: NonFungibleToken{
 	
 	access(all)
 	fun check(_ address: Address): Bool{ 
-		return (getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(OneFootballCollectible.CollectionPublicPath)!).check()
+		return getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(OneFootballCollectible.CollectionPublicPath).check()
 	// else "Collection Reference was not created correctly"
 	}
 	
@@ -329,7 +339,7 @@ contract OneFootballCollectible: NonFungibleToken{
 	// Get a reference to a OneFootballCollectible from an account's Collection, if available.
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &OneFootballCollectible.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&{OneFootballCollectible.OneFootballCollectibleCollectionPublic}>(OneFootballCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&{OneFootballCollectible.OneFootballCollectibleCollectionPublic}>(OneFootballCollectible.CollectionPublicPath).borrow<&{OneFootballCollectible.OneFootballCollectibleCollectionPublic}>() ?? panic("Couldn't get collection")
 		let nft = collection.borrowOneFootballCollectible(id: itemID)
 		return nft
 	}

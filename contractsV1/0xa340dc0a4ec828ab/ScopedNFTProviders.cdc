@@ -142,7 +142,7 @@ contract ScopedNFTProviders{
 			return self.provider.check()
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				!self.isExpired():

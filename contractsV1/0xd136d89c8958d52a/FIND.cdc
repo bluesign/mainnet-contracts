@@ -831,11 +831,11 @@ contract FIND{
 			let oldProfile = lease.getProfile()!
 			if let cb = lease.offerCallback{ 
 				let offer = cb.borrow()!
-				let newProfile = getAccount(cb.address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!
+				let newProfile = getAccount(cb.address).capabilities.get<&{Profile.Public}>(Profile.publicPath)
 				let soldFor = offer.getBalance(name)
 				//move the token to the new profile
 				emit Sold(name: name, previousOwner: (lease.owner!).address, newOwner: newProfile.address, expireAt: lease.getLeaseExpireTime(), amount: soldFor)
-				lease.move(profile: newProfile)
+				lease.move(profile: newProfile!)
 				let token <- self.leases.remove(key: name)!
 				let vault <- offer.fulfill(<-token)
 				if self.networkCut != 0.0{ 
@@ -861,11 +861,11 @@ contract FIND{
 				return
 			}
 			let auction <- self.auctions.remove(key: name)!
-			let newProfile = getAccount(auction.latestBidCallback.address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!
+			let newProfile = getAccount(auction.latestBidCallback.address).capabilities.get<&{Profile.Public}>(Profile.publicPath)
 			
 			//move the token to the new profile
 			emit Sold(name: name, previousOwner: (lease.owner!).address, newOwner: newProfile.address, expireAt: lease.getLeaseExpireTime(), amount: soldFor)
-			lease.move(profile: newProfile)
+			lease.move(profile: newProfile!)
 			let token <- self.leases.remove(key: name)!
 			let vault <- (auction.latestBidCallback.borrow()!).fulfill(<-token)
 			if self.networkCut != 0.0{ 
@@ -966,13 +966,13 @@ contract FIND{
 		//This has to be here since you can only get this from a auth account and thus we ensure that you cannot use wrong paths
 		access(all)
 		fun register(name: String, vault: @FUSD.Vault){ 
-			let profileCap = (self.owner!).capabilities.get<&{Profile.Public}>(Profile.publicPath)!
-			let leases = (self.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)!
+			let profileCap = (self.owner!).capabilities.get<&{Profile.Public}>(Profile.publicPath)
+			let leases = (self.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)
 			let network = FIND.account.storage.borrow<&Network>(from: FIND.NetworkStoragePath)!
 			if !network.publicEnabled{ 
 				panic("Public registration is not enabled yet")
 			}
-			network.register(name: name, vault: <-vault, profile: profileCap, leases: leases)
+			network.register(name: name, vault: <-vault, profile: profileCap!, leases: leases!)
 		}
 	}
 	
@@ -1449,10 +1449,10 @@ contract FIND{
 			if nameStatus.status == LeaseStatus.FREE{ 
 				panic("cannot bid on name that is free")
 			}
-			let from = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)!
-			let bid <- create Bid(from: from, name: name, vault: <-vault)
+			let from = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)
+			let bid <- create Bid(from: from!, name: name, vault: <-vault)
 			let leaseCollection = from.borrow() ?? panic("Could not borrow lease bid from owner of name=".concat(name))
-			let callbackCapability = (self.owner!).capabilities.get<&BidCollection>(FIND.BidPublicPath)!
+			let callbackCapability = (self.owner!).capabilities.get<&BidCollection>(FIND.BidPublicPath)
 			let oldToken <- self.bids[bid.name] <- bid
 			//send info to leaseCollection
 			destroy oldToken
@@ -1466,11 +1466,11 @@ contract FIND{
 			if nameStatus.status == LeaseStatus.FREE{ 
 				panic("cannot increaseBid on name that is free")
 			}
-			let seller = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)!
+			let seller = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)
 			let bid = self.borrowBid(name)
 			bid.setBidAt(Clock.time())
 			bid.vault.deposit(from: <-vault)
-			let from = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)!
+			let from = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)
 			(from.borrow()!).increaseBid(name)
 		}
 		
@@ -1482,7 +1482,7 @@ contract FIND{
 				self.cancel(name)
 				return
 			}
-			let from = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)!
+			let from = getAccount(nameStatus.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)
 			(from.borrow()!).cancelBid(name)
 			self.cancel(name)
 		}
@@ -1573,7 +1573,7 @@ contract FIND{
 		self.LeaseStoragePath = /storage/findLeases
 		self.BidPublicPath = /public/findBids
 		self.BidStoragePath = /storage/findBids
-		let wallet = self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!
+		let wallet = self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)
 		
 		// these values are hardcoded here for a reason. Then plan is to throw away the key and not have setters for them so that people can trust the contract to be the same
 		let network <-
@@ -1588,7 +1588,7 @@ contract FIND{
 				secondaryCut: 0.05,
 				defaultPrice: 5.0,
 				lengthPrices:{ 3: 500.0, 4: 100.0},
-				wallet: wallet,
+				wallet: wallet!,
 				publicEnabled: false
 			)
 		self.account.storage.save(<-network, to: FIND.NetworkStoragePath)

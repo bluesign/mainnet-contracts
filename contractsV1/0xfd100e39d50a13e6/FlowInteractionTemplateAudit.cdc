@@ -179,7 +179,7 @@ contract FlowInteractionTemplateAudit{
 	}{ 
 		let audits:{ Address: Bool} ={} 
 		for auditor in auditors{ 
-			let auditManagerRef = (getAccount(auditor).capabilities.get<&FlowInteractionTemplateAudit.AuditManager>(FlowInteractionTemplateAudit.AuditManagerPublicPath)!).borrow() ?? panic("Could not borrow Audit Manager public reference")
+			let auditManagerRef = getAccount(auditor).capabilities.get<&FlowInteractionTemplateAudit.AuditManager>(FlowInteractionTemplateAudit.AuditManagerPublicPath).borrow<&FlowInteractionTemplateAudit.AuditManager>() ?? panic("Could not borrow Audit Manager public reference")
 			audits.insert(key: auditor, auditManagerRef.getHasAuditedTemplate(templateId: templateId))
 		}
 		return audits
@@ -194,11 +194,9 @@ contract FlowInteractionTemplateAudit{
 	access(all)
 	fun getAuditsByAuditor(auditor: Address): [String]{ 
 		let auditManagerRef =
-			(
-				getAccount(auditor).capabilities.get<&FlowInteractionTemplateAudit.AuditManager>(
-					FlowInteractionTemplateAudit.AuditManagerPublicPath
-				)!
-			).borrow()
+			getAccount(auditor).capabilities.get<&FlowInteractionTemplateAudit.AuditManager>(
+				FlowInteractionTemplateAudit.AuditManagerPublicPath
+			).borrow<&FlowInteractionTemplateAudit.AuditManager>()
 			?? panic("Could not borrow Audit Manager public reference")
 		return auditManagerRef.getAudits()
 	}

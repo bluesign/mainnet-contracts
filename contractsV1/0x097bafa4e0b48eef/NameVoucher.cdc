@@ -56,7 +56,7 @@ contract NameVoucher: NonFungibleToken{
 	var thumbnail:{ MetadataViews.File}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -135,7 +135,7 @@ contract NameVoucher: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -198,9 +198,9 @@ contract NameVoucher: NonFungibleToken{
 			
 			// If the lease is free, we register it
 			if status.status == FIND.LeaseStatus.FREE{ 
-				let profile = (self.owner!).capabilities.get<&{Profile.Public}>(Profile.publicPath)!
-				let lease = (self.owner!).capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath)!
-				network.internal_register(name: name, profile: profile, leases: lease)
+				let profile = (self.owner!).capabilities.get<&{Profile.Public}>(Profile.publicPath)
+				let lease = (self.owner!).capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath)
+				network.internal_register(name: name, profile: profile!, leases: lease!)
 				emit Redeemed(id: id, address: self.owner?.address, minCharLength: minLength, findName: name, action: "register")
 				return
 			}
@@ -212,6 +212,16 @@ contract NameVoucher: NonFungibleToken{
 				return
 			}
 			panic("Name is already taken by others ".concat((status.owner!).toString()))
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

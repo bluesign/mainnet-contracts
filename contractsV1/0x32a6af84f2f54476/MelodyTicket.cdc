@@ -84,7 +84,7 @@ contract MelodyTicket: NonFungibleToken{
 			 ***********************************************************/
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -157,8 +157,8 @@ contract MelodyTicket: NonFungibleToken{
 				case Type<MetadataViews.Serial>():
 					return MetadataViews.Serial(self.id)
 				case Type<MetadataViews.Royalties>():
-					let receieverCap = MelodyTicket.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-					let royalty = MetadataViews.Royalty(receiver: receieverCap, cut: 0.03, description: "LyricLabs will take 3% as second trade royalty fee")
+					let receieverCap = MelodyTicket.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+					let royalty = MetadataViews.Royalty(receiver: receieverCap!, cut: 0.03, description: "LyricLabs will take 3% as second trade royalty fee")
 					return MetadataViews.Royalties([royalty])
 				case Type<MetadataViews.ExternalURL>(): // todo
 					
@@ -227,7 +227,7 @@ contract MelodyTicket: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -307,6 +307,16 @@ contract MelodyTicket: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let MelodyTicket = nft as! &MelodyTicket.NFT
 			return MelodyTicket as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

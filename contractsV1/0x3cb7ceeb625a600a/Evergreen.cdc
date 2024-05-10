@@ -112,9 +112,9 @@ contract Evergreen{
 					path = defaultReceiverPath
 				}
 				if path != nil{ 
-					let receiverCap = getAccount(role.address).capabilities.get<&{FungibleToken.Receiver}>(path!)!
+					let receiverCap = getAccount(role.address).capabilities.get<&{FungibleToken.Receiver}>(path!)
 					if receiverCap.check(){ 
-						royalties.append(MetadataViews.Royalty(receiver: receiverCap, cut: role.secondaryMarketCommission, description: role.description))
+						royalties.append(MetadataViews.Royalty(receiver: receiverCap!, cut: role.secondaryMarketCommission, description: role.description))
 					}
 				}
 			}

@@ -123,7 +123,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		
 		// Global unique NFT ID
 		access(all)
@@ -217,7 +217,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT-Reward from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			
 			// Remove the nft from the Collection
@@ -313,6 +313,16 @@ contract ChainmonstersRewards: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let rewardNFT = nft as! &ChainmonstersRewards.NFT
 			return rewardNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -504,7 +514,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 	// Get reward metadata from the contract owner storage, can be upgraded
 	access(all)
 	fun getExternalSeasonMetadata(seasonID: UInt32):{ String: String}?{ 
-		let data = (self.account.capabilities.get<&[{String: String}]>(/public/ChainmonstersSeasonsMetadata)!).borrow()
+		let data = self.account.capabilities.get<&[{String: String}]>(/public/ChainmonstersSeasonsMetadata).borrow()
 		if data == nil{ 
 			return nil
 		}
@@ -514,7 +524,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 	// Get reward metadata from the contract owner storage, can be upgraded
 	access(all)
 	fun getExternalRewardMetadata(rewardID: UInt32):{ String: String}?{ 
-		let data = (self.account.capabilities.get<&[{String: String}]>(/public/ChainmonstersRewardsMetadata)!).borrow()
+		let data = self.account.capabilities.get<&[{String: String}]>(/public/ChainmonstersRewardsMetadata).borrow()
 		if data == nil{ 
 			return nil
 		}

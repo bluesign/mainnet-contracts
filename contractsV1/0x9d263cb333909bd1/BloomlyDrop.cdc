@@ -752,11 +752,9 @@ contract BloomlyDrop{
 			// 		?? panic("Could not borrow a reference to the receiver") 
 			let platformFeeReceiverAddress: Address = 0x91c415324f0e3f83
 			let receiverRefBloomlyVault =
-				(
-					getAccount(platformFeeReceiverAddress).capabilities.get<&FlowToken.Vault>(
-						/public/flowTokenReceiver
-					)!
-				).borrow()
+				getAccount(platformFeeReceiverAddress).capabilities.get<&FlowToken.Vault>(
+					/public/flowTokenReceiver
+				).borrow<&FlowToken.Vault>()
 				?? panic("Could not borrow a reference to the receiver")
 			receiverRefBloomlyVault.deposit(from: <-brandVault)
 			//balance = flowPayment.balance
@@ -766,7 +764,7 @@ contract BloomlyDrop{
 				let amount: UFix64 = balance * cut
 				let tempValut <- flowPayment.withdraw(amount: amount)
 				// by borrowing the reference from the public capability
-				let receiverRefVault = (contributorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow a reference to the receiver")
+				let receiverRefVault = contributorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow a reference to the receiver")
 				receiverRefVault.deposit(from: <-tempValut)
 			}
 			assert(flowPayment.balance == 0.0, message: "amount is greater than drop amount")

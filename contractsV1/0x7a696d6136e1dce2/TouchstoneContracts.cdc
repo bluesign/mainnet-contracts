@@ -149,22 +149,18 @@ contract TouchstoneContracts{
 	access(all)
 	fun getUserTouchstoneCollections(user: Address): [String]{ 
 		let collections =
-			(
-				getAccount(user).capabilities.get<&ContractsBook>(
-					TouchstoneContracts.ContractsBookPublicPath
-				)!
-			).borrow()
+			getAccount(user).capabilities.get<&ContractsBook>(
+				TouchstoneContracts.ContractsBookPublicPath
+			).borrow<&ContractsBook>()
 			?? panic("This user has not set up a Collections yet.")
 		return collections.getContracts()
 	}
 	
 	access(all)
 	fun getGlobalContractsBook(): &GlobalContractsBook{ 
-		return (
-			self.account.capabilities.get<&GlobalContractsBook>(
-				TouchstoneContracts.GlobalContractsBookPublicPath
-			)!
-		).borrow()!
+		return self.account.capabilities.get<&GlobalContractsBook>(
+			TouchstoneContracts.GlobalContractsBookPublicPath
+		).borrow<&GlobalContractsBook>()!
 	}
 	
 	init(){ 

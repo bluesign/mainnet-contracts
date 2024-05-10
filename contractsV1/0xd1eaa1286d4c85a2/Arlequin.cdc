@@ -199,7 +199,7 @@ contract Arlequin{
 			let recipientCap =
 				getAccount(Arlequin.account.address).capabilities.get<&ArleePartner.Collection>(
 					ArleePartner.CollectionPublicPath
-				)!
+				)
 			let recipient =
 				recipientCap.borrow() ?? panic("Cannot borrow Arlequin's Collection Public")
 			// deposit
@@ -272,13 +272,13 @@ contract Arlequin{
 			?? panic("Cannot find partner : ".concat(partner))
 		let partnerAddr = partnerRoyalty.wallet
 		let partnerVaultCap =
-			getAccount(partnerAddr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+			getAccount(partnerAddr).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 		let partnerVault =
 			partnerVaultCap.borrow() ?? panic("Cannot borrow partner's receiving vault reference")
 		let recipientCap =
 			getAccount(buyer).capabilities.get<&ArleePartner.Collection>(
 				ArleePartner.CollectionPublicPath
-			)!
+			)
 		let recipient =
 			recipientCap.borrow() ?? panic("Cannot borrow recipient's Collection Public")
 		// splitting vaults for partner and arlequin
@@ -311,7 +311,7 @@ contract Arlequin{
 		let recipientCap =
 			getAccount(buyer).capabilities.get<&ArleeScene.Collection>(
 				ArleeScene.CollectionPublicPath
-			)!
+			)
 		let recipient =
 			recipientCap.borrow() ?? panic("Cannot borrow recipient's Collection Public")
 		// deposit
@@ -331,7 +331,7 @@ contract Arlequin{
 		let recipientCap =
 			getAccount(buyer).capabilities.get<&ArleeScene.Collection>(
 				ArleeScene.CollectionPublicPath
-			)!
+			)
 		let recipient =
 			recipientCap.borrow() ?? panic("Cannot borrow recipient's Collection Public")
 		ArleeScene.freeMintAcct[buyer] = ArleeScene.freeMintAcct[buyer]! - 1

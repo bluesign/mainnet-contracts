@@ -64,7 +64,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	var numberEditionsMintedPerSet:{ UInt32: UInt32}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -154,7 +154,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -220,6 +220,16 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		access(all)
 		fun size(): Int{ 
 			return self.ownedNFTs.length
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -349,7 +359,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &Bakesale_Beer_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&{Bakesale_Beer_NFT.Bakesale_Beer_NFTCollectionPublic}>(Bakesale_Beer_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&{Bakesale_Beer_NFT.Bakesale_Beer_NFTCollectionPublic}>(Bakesale_Beer_NFT.CollectionPublicPath).borrow<&{Bakesale_Beer_NFT.Bakesale_Beer_NFTCollectionPublic}>() ?? panic("Couldn't get collection")
 		
 		// We trust Bakesale_Beer_NFT.Collection.borowBakesale_Beer_NFT to get the correct itemID
 		// (it checks it before returning it).

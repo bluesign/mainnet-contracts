@@ -263,7 +263,7 @@ contract AeraPanels: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -370,8 +370,8 @@ contract AeraPanels: NonFungibleToken{
 						//mainnet merchant address
 						address = 0xa9277dcbec7769df
 					}
-					let ducReceiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!
-					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: ducReceiver, cut: 0.06, description: "onefootball largest of 6% or 0.65")])
+					let ducReceiver = getAccount(address).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
+					return MetadataViews.Royalties([MetadataViews.Royalty(receiver: ducReceiver!, cut: 0.06, description: "onefootball largest of 6% or 0.65")])
 				case Type<MetadataViews.Medias>():
 					// animation
 					let file = MetadataViews.IPFSFile(cid: panel.video_hash, path: nil)
@@ -505,7 +505,7 @@ contract AeraPanels: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.ownedNFTs.containsKey(withdrawID):
@@ -688,6 +688,16 @@ contract AeraPanels: NonFungibleToken{
 			// let reward=AeraRewards.getReward(reward_template_id)
 			// emit RewardSent(id: rewardId, name: reward.reward_name, thumbnail: reward.thumbnail_hash, address: self.owner!.address, player_id:reward.detail_id["player_id"], chapter_index:reward.detail_id["chapter_index"], chapter_id: reward.detail_id["chapter_id"])
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

@@ -37,7 +37,7 @@ contract ZojaxMints: NonFungibleToken, ViewResolver{
 	/// and stored in the Collection resource
 	///
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		/// The unique ID that each NFT has
 		access(all)
 		let id: UInt64
@@ -170,7 +170,7 @@ contract ZojaxMints: NonFungibleToken, ViewResolver{
 		/// @param withdrawID: The ID of the NFT that wants to be withdrawn
 		/// @return The NFT resource that has been taken out of the collection
 		///
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -239,6 +239,16 @@ contract ZojaxMints: NonFungibleToken, ViewResolver{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let zojaxMints = nft as! &ZojaxMints.NFT
 			return zojaxMints as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

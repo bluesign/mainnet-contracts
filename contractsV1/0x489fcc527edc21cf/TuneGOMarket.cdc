@@ -171,7 +171,7 @@ contract TuneGOMarket{
 			(self.tunegoPaymentFeeReceiver.borrow()!).deposit(from: <-tunegoFeePayment)
 			for royalty in self.royalties{ 
 				let royaltyAccount = getAccount(royalty.receiver)
-				let royaltyVault = royaltyAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+				let royaltyVault = royaltyAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 				if royaltyVault.check(){ 
 					let royaltyAmount = self.price * royalty.percentage / 100.0
 					let royaltyPayment <- payment.withdraw(amount: royaltyAmount)
@@ -204,7 +204,7 @@ contract TuneGOMarket{
 			var totalRoyaltiesPercentage: UFix64 = 0.0
 			for royalty in royalties{ 
 				let account = getAccount(royalty.receiver)
-				let vault = account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
+				let vault = account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
 				assert(vault.borrow() != nil, message: "Missing royalty receiver vault")
 				totalRoyaltiesPercentage = totalRoyaltiesPercentage + royalty.percentage
 			}

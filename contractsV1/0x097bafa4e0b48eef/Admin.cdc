@@ -211,7 +211,7 @@ contract Admin{
 					"A FIND name has to be lower-cased alphanumeric or dashes and between 3 and 16 characters"
 			}
 			let user = FIND.lookupAddress(name) ?? panic("Cannot find lease owner. Lease : ".concat(name))
-			let ref = (getAccount(user).capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath)!).borrow() ?? panic("Cannot borrow reference to lease collection of user : ".concat(name))
+			let ref = getAccount(user).capabilities.get<&FIND.LeaseCollection>(FIND.LeasePublicPath).borrow() ?? panic("Cannot borrow reference to lease collection of user : ".concat(name))
 			ref.adminAddAddon(name: name, addon: addon)
 		}
 		
@@ -308,13 +308,13 @@ contract Admin{
 					"Cannot create Admin, capability is not set"
 			}
 			let privatePath = PrivatePath(identifier: pathIdentifier)!
-			var cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)!
+			var cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)
 			if !cap.check(){ 
 				let storagePath = StoragePath(identifier: pathIdentifier)!
 				Admin.account.link<&{MetadataViews.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath, target: storagePath)
-				cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)!
+				cap = Admin.account.capabilities.get<&{ViewResolver.ResolverCollection, NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>(privatePath)
 			}
-			return FindViews.AuthNFTPointer(cap: cap, id: id)
+			return FindViews.AuthNFTPointer(cap: cap!, id: id)
 		}
 		
 		access(all)
@@ -334,7 +334,7 @@ contract Admin{
 			}
 			let pathIdentifier = FindPack.getPacksCollectionPath(packTypeName: packTypeName, packTypeId: typeId)
 			let path = PublicPath(identifier: pathIdentifier)!
-			let receiver = (Admin.account.capabilities.get<&{NonFungibleToken.Receiver, ViewResolver.ResolverCollection}>(path)!).borrow() ?? panic("Cannot borrow reference to admin find pack collection public from Path : ".concat(pathIdentifier))
+			let receiver = Admin.account.capabilities.get<&{NonFungibleToken.Receiver, ViewResolver.ResolverCollection}>(path).borrow() ?? panic("Cannot borrow reference to admin find pack collection public from Path : ".concat(pathIdentifier))
 			let mintPackData = FindPack.MintPackData(packTypeName: packTypeName, typeId: typeId, hash: hash, verifierRef: FindForge.borrowVerifier())
 			FindForge.adminMint(lease: packTypeName, forgeType: Type<@FindPack.Forge>(), data: mintPackData, receiver: receiver)
 		}

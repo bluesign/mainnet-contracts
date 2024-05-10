@@ -244,8 +244,8 @@ contract OVOMarketPlace{
 			if sellerFeePersentage == nil || buyerFeePersentage == nil{ 
 				panic("Fees not found")
 			}
-			var sellerFUSDReceiver = (getAccount((orderData!).sellerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Unable to borrow seller receiver reference")
-			var feeReceiverFUSDReceiver = (getAccount(self.transactionFeeReceiverAddr!).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!).borrow() ?? panic("Unable to borrow fee receiver reference")
+			var sellerFUSDReceiver = getAccount((orderData!).sellerAddr).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Unable to borrow seller receiver reference")
+			var feeReceiverFUSDReceiver = getAccount(self.transactionFeeReceiverAddr!).capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("Unable to borrow fee receiver reference")
 			var totalPrice = (orderData!).totalPrice
 			if totalPrice == nil || totalPrice <= 0.0{ 
 				panic("Wrong total price")
@@ -271,7 +271,7 @@ contract OVOMarketPlace{
 			feeReceiverFUSDReceiver.deposit(from: <-buyerTokenVault.withdraw(amount: sellerFee))
 			// deposit valut to seller
 			sellerFUSDReceiver.deposit(from: <-buyerTokenVault)
-			var buyerNFTCap = (getAccount(buyerAddr).capabilities.get<&{NyatheesOVO.NFTCollectionPublic}>(NyatheesOVO.CollectionPublicPath)!).borrow() ?? panic("Unable to borrow NyatheesOVO Collection of the seller")
+			var buyerNFTCap = getAccount(buyerAddr).capabilities.get<&{NyatheesOVO.NFTCollectionPublic}>(NyatheesOVO.CollectionPublicPath).borrow<&{NyatheesOVO.NFTCollectionPublic}>() ?? panic("Unable to borrow NyatheesOVO Collection of the seller")
 			// deposit NFT to buyer
 			buyerNFTCap.deposit(token: <-self.onSellNFTList.remove(key: orderId)!)
 			// update order info
@@ -338,7 +338,7 @@ contract OVOMarketPlace{
 				panic("Unable to cancel the order which not belongs to you!")
 			}
 			var tokenId = (orderData!).tokenId
-			var sellerNFTCap = (getAccount(sellerAddr).capabilities.get<&{NyatheesOVO.NFTCollectionPublic}>(NyatheesOVO.CollectionPublicPath)!).borrow() ?? panic("Unable to borrow NyatheesOVO Collection of the seller!")
+			var sellerNFTCap = getAccount(sellerAddr).capabilities.get<&{NyatheesOVO.NFTCollectionPublic}>(NyatheesOVO.CollectionPublicPath).borrow<&{NyatheesOVO.NFTCollectionPublic}>() ?? panic("Unable to borrow NyatheesOVO Collection of the seller!")
 			sellerNFTCap.deposit(token: <-self.onSellNFTList.remove(key: orderId)!)
 			self.orderList[orderId] = OVOMarketPlace.orderData(orderId: (orderData!).orderId, orderStatue: orderStatues.canceled, tokenId: tokenId, sellerAddr: sellerAddr, buyerAddr: nil, tokenName: (orderData!).tokenName, totalPrice: (orderData!).totalPrice, createTime: (orderData!).createTime, soldTime: getCurrentBlock().timestamp)
 			emit CancelOrder(orderId: orderId, sellerAddr: sellerAddr, cancelTime: getCurrentBlock().timestamp)

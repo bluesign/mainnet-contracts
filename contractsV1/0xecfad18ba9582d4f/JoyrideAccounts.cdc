@@ -304,7 +304,7 @@ contract JoyrideAccounts{
 			if developerStaking == nil{ 
 				return <-profits
 			} else{ 
-				let vaultCapability = (getAccount(developerStaking!).capabilities.get<&{JoyrideMultiToken.Receiver}>(JoyrideMultiToken.UserPublicPath)!).borrow()
+				let vaultCapability = getAccount(developerStaking!).capabilities.get<&{JoyrideMultiToken.Receiver}>(JoyrideMultiToken.UserPublicPath).borrow()
 				if vaultCapability == nil{ 
 					return <-profits
 				} else{ 

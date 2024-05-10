@@ -380,7 +380,7 @@ contract Flowns{
 			if self.commissionRate > 0.0 && refer != nil{ 
 				let commissionFee = rentFee * self.commissionRate
 				let referAcc = getAccount(refer!)
-				let collectionCap = referAcc.capabilities.get<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)!
+				let collectionCap = referAcc.capabilities.get<&{Domains.CollectionPublic}>(Domains.CollectionPublicPath)
 				let collection = collectionCap.borrow()
 				if collection != nil{ 
 					let ids = (collection!).getIDs()
@@ -867,7 +867,7 @@ contract Flowns{
 		let rootCollectionCap =
 			account.capabilities.get<&{Flowns.RootDomainCollectionPublic}>(
 				self.CollectionPublicPath
-			)!
+			)
 		if let collection = rootCollectionCap.borrow(){ 
 			return collection.getDomainInfo(domainId: domainId)
 		}
@@ -881,7 +881,7 @@ contract Flowns{
 		let rootCollectionCap =
 			account.capabilities.get<&{Flowns.RootDomainCollectionPublic}>(
 				self.CollectionPublicPath
-			)!
+			)
 		if let collection = rootCollectionCap.borrow(){ 
 			return collection.getAllDomains()
 		}
@@ -903,7 +903,7 @@ contract Flowns{
 		let rootCollectionCap =
 			account.capabilities.get<&{Flowns.RootDomainCollectionPublic}>(
 				self.CollectionPublicPath
-			)!
+			)
 		if let collection = rootCollectionCap.borrow(){ 
 			return collection.getPrices(domainId: domainId)
 		}
@@ -916,7 +916,7 @@ contract Flowns{
 		let rootCollectionCap =
 			account.capabilities.get<&{Flowns.RootDomainCollectionPublic}>(
 				self.CollectionPublicPath
-			)!
+			)
 		let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
 		let balance = collection.getVaultBalance(domainId: domainId)
 		return balance
@@ -939,7 +939,7 @@ contract Flowns{
 		let rootCollectionCap =
 			account.capabilities.get<&{Flowns.RootDomainCollectionPublic}>(
 				self.CollectionPublicPath
-			)!
+			)
 		let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
 		collection.registerDomain(
 			domainId: domainId,
@@ -966,7 +966,7 @@ contract Flowns{
 		let rootCollectionCap =
 			account.capabilities.get<&{Flowns.RootDomainCollectionPublic}>(
 				self.CollectionPublicPath
-			)!
+			)
 		let collection = rootCollectionCap.borrow() ?? panic("Could not borrow collection ")
 		collection.renewDomain(
 			domainId: domainId,

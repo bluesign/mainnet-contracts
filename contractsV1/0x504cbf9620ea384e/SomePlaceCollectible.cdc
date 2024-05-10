@@ -329,7 +329,7 @@ contract SomePlaceCollectible: NonFungibleToken{
 	// NonFungibleToken Standard Resources
 	// -----------------------------------------------------------------------
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -385,7 +385,7 @@ contract SomePlaceCollectible: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: NFT does not exist in the collection")
 			emit Withdraw(id: token.uuid, from: self.owner?.address)
@@ -437,6 +437,16 @@ contract SomePlaceCollectible: NonFungibleToken{
 		access(all)
 		view fun getIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

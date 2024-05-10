@@ -86,7 +86,7 @@ contract TrartContractNFT: NonFungibleToken{
 	// NFT
 	// -----------------------------------------------------------------------
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -150,7 +150,7 @@ contract TrartContractNFT: NonFungibleToken{
 		
 		access(all)
 		fun getRoyalties(): MetadataViews.Royalties?{ 
-			let royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: getAccount(0x416e01b78d5b45ff).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!!, cut: 0.025, description: "Royalty (2.5%)")]
+			let royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: getAccount(0x416e01b78d5b45ff).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!, cut: 0.025, description: "Royalty (2.5%)")]
 			return MetadataViews.Royalties(royalties)
 		}
 		
@@ -256,7 +256,7 @@ contract TrartContractNFT: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: NFT does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -317,6 +317,16 @@ contract TrartContractNFT: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let card = nft as! &TrartContractNFT.NFT
 			return card as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

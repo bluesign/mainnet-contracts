@@ -99,7 +99,7 @@ contract ColdStorage{
 			self.pendingVault <-> pendingVault
 			let recipient = getAccount(self.request.recipientAddress)
 			let receiver =
-				(recipient.capabilities.get<&{FungibleToken.Receiver}>(fungibleTokenReceiverPath)!!)
+				(recipient.capabilities.get<&{FungibleToken.Receiver}>(fungibleTokenReceiverPath)!)
 					.borrow()
 				?? panic("Unable to borrow receiver reference for recipient")
 			receiver.deposit(from: <-pendingVault)

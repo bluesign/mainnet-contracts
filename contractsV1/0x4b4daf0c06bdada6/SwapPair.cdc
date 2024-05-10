@@ -450,7 +450,7 @@ contract SwapPair: FungibleToken{
 				let liquidity = numerator / denominator
 				if liquidity > 0.0{ 
 					let lpTokenVault <- self.mintLpToken(amount: liquidity)
-					let lpTokenCollectionCap = getAccount(SwapFactory.feeTo!).capabilities.get<&{SwapInterfaces.LpTokenCollectionPublic}>(SwapConfig.LpTokenCollectionPublicPath)!
+					let lpTokenCollectionCap = getAccount(SwapFactory.feeTo!).capabilities.get<&{SwapInterfaces.LpTokenCollectionPublic}>(SwapConfig.LpTokenCollectionPublicPath)
 					assert(lpTokenCollectionCap.check(), message: SwapError.ErrorEncode(msg: "SwapPair: Cannot borrow reference to LpTokenCollection resource in feeTo account", err: SwapError.ErrorCode.LOST_PUBLIC_CAPABILITY))
 					(lpTokenCollectionCap.borrow()!).deposit(pairAddr: self.account.address, lpTokenVault: <-lpTokenVault)
 				}

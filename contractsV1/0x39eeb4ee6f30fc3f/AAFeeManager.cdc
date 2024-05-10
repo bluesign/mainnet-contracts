@@ -331,10 +331,8 @@ contract AAFeeManager{
 			return nil
 		}
 		if let recipient =
-			(
-				getAccount(recipientAddress!).capabilities.get<&{FungibleToken.Receiver}>(
-					(path!).publicPath
-				)!
+			getAccount(recipientAddress!).capabilities.get<&{FungibleToken.Receiver}>(
+				(path!).publicPath
 			).borrow(){ 
 			let vault <- vaultRef.withdraw(amount: amount)
 			recipient.deposit(from: <-vault)

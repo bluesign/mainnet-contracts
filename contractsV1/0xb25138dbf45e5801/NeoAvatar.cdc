@@ -59,7 +59,7 @@ contract NeoAvatar: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -145,7 +145,7 @@ contract NeoAvatar: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -186,6 +186,16 @@ contract NeoAvatar: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let exampleNFT = nft as! &NeoAvatar.NFT
 			return exampleNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -230,7 +240,7 @@ contract NeoAvatar: NonFungibleToken{
 		emit Purchased(id: id, name: display.name, teamId: neoAvatar.teamId, role: neoAvatar.role, series: neoAvatar.series, address: nftReceiver.address)
 		let token <- collection.withdraw(withdrawID: id)
 		(nftReceiver.borrow()!).deposit(token: <-token)
-		let receiver = (NeoAvatar.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!).borrow()!
+		let receiver = NeoAvatar.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()!
 		receiver.deposit(from: <-vault)
 	}
 	

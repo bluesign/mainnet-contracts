@@ -136,7 +136,7 @@ contract TopTCollection2: NonFungibleToken{
 	// 	}
 	// }
 	access(all)
-	resource BADGE: NonFungibleToken.INFT{ 
+	resource BADGE: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -162,7 +162,7 @@ contract TopTCollection2: NonFungibleToken{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -295,7 +295,7 @@ contract TopTCollection2: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -413,6 +413,16 @@ contract TopTCollection2: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -442,9 +452,9 @@ contract TopTCollection2: NonFungibleToken{
 				recipient.borrowBADGE() == nil:
 					"Can only have one badge at a time!!!"
 			}
-			let marketWalletCap = getAccount(0xf8d6e0586b0a20c7).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+			let marketWalletCap = getAccount(0xf8d6e0586b0a20c7).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 			// deposit it in the recipient's account using their reference
-			recipient.depositBadge(token: <-create TopTCollection2.BADGE(initID: TopTCollection2.totalSupplyBadges, kind: kind, marketRoyalty: MetadataViews.Royalty(receiver: marketWalletCap, cut: 0.1, description: "Market")))
+			recipient.depositBadge(token: <-create TopTCollection2.BADGE(initID: TopTCollection2.totalSupplyBadges, kind: kind, marketRoyalty: MetadataViews.Royalty(receiver: marketWalletCap!, cut: 0.1, description: "Market")))
 			emit MintedBadge(id: TopTCollection2.totalSupplyBadges, name: TopTCollection2.kindToString(kind))
 			TopTCollection2.totalSupplyBadges = TopTCollection2.totalSupplyBadges + 1 as UInt64
 		}
@@ -458,7 +468,7 @@ contract TopTCollection2: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &TopTCollection2.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&TopTCollection2.Collection>(TopTCollection2.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&TopTCollection2.Collection>(TopTCollection2.CollectionPublicPath).borrow<&TopTCollection2.Collection>() ?? panic("Couldn't get collection")
 		// We trust KittyItems.Collection.borowKittyItem to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowToptItem(id: itemID)
@@ -466,8 +476,8 @@ contract TopTCollection2: NonFungibleToken{
 	
 	access(all)
 	fun mintNFT(name: String, description: String, caption: String, storagePath: String, artistAddress: Address, royalties: [MetadataViews.Royalty], thumbnail: String): @TopTCollection2.NFT{ 
-		let marketWalletCap = getAccount(0xf8d6e0586b0a20c7).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-		var newNFT <- create NFT(initID: TopTCollection2.totalSupply, metadata: Metadata(artistAddress: artistAddress, storagePath: storagePath, caption: caption), name: name, description: description, thumbnail: thumbnail, royalties: royalties.concat([MetadataViews.Royalty(receiver: marketWalletCap, cut: 0.1, description: "Market")]))
+		let marketWalletCap = getAccount(0xf8d6e0586b0a20c7).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+		var newNFT <- create NFT(initID: TopTCollection2.totalSupply, metadata: Metadata(artistAddress: artistAddress, storagePath: storagePath, caption: caption), name: name, description: description, thumbnail: thumbnail, royalties: royalties.concat([MetadataViews.Royalty(receiver: marketWalletCap!, cut: 0.1, description: "Market")]))
 		emit Minted(id: TopTCollection2.totalSupply, name: name, to: artistAddress)
 		TopTCollection2.totalSupply = TopTCollection2.totalSupply + UInt64(1)
 		return <-newNFT
@@ -475,7 +485,7 @@ contract TopTCollection2: NonFungibleToken{
 	
 	access(all)
 	fun getBadge(address: Address): &TopTCollection2.BADGE?{ 
-		if let artCollection = (getAccount(address).capabilities.get<&{TopTCollection2.TopTCollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let artCollection = getAccount(address).capabilities.get<&{TopTCollection2.TopTCollectionPublic}>(self.CollectionPublicPath).borrow<&{TopTCollection2.TopTCollectionPublic}>(){ 
 			return artCollection.borrowBADGE()
 		}
 		return nil
@@ -484,10 +494,10 @@ contract TopTCollection2: NonFungibleToken{
 	access(all)
 	fun getArt(address: Address): [ArtData]{ 
 		var artData: [ArtData] = []
-		if let artCollection = (getAccount(address).capabilities.get<&{TopTCollection2.TopTCollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let artCollection = getAccount(address).capabilities.get<&{TopTCollection2.TopTCollectionPublic}>(self.CollectionPublicPath).borrow<&{TopTCollection2.TopTCollectionPublic}>(){ 
 			for id in artCollection.getIDs(){ 
 				var art = artCollection.borrowToptItem(id: id) ?? panic("ddd")
-				artData.append(ArtData(metadata: *art.metadata, id: id))
+				artData.append(ArtData(metadata: art.metadata, id: id))
 			}
 		}
 		return artData

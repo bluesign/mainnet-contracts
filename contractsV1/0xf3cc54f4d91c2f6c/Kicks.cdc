@@ -400,7 +400,7 @@ contract Kicks: NonFungibleToken{
 		*/
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, NFTLX.ILXNFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, NFTLX.ILXNFT, ViewResolver.Resolver{ 
 		// ─────  INFT Conformance  ─────
 		access(all)
 		let id: UInt64
@@ -686,7 +686,7 @@ contract Kicks: NonFungibleToken{
 		
 		// ───────────────  NFT Collection Transfering Functions  ─────────────── \\
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -799,6 +799,16 @@ contract Kicks: NonFungibleToken{
 			}
 			let sneaker = self.borrowSneaker(id: id) ?? panic("Unable to get sneaker")
 			sneaker.setSize(size)
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

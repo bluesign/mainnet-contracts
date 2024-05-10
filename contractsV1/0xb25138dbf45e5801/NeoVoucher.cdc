@@ -158,7 +158,7 @@ contract NeoVoucher: NonFungibleToken{
 		let token <- collection.withdraw(withdrawID: voucherID)
 		
 		// establish the receiver for Redeeming NeoVoucher
-		let receiver = (NeoVoucher.account.capabilities.get<&{NonFungibleToken.Receiver}>(NeoVoucher.RedeemedCollectionPublicPath)!).borrow()!
+		let receiver = NeoVoucher.account.capabilities.get<&{NonFungibleToken.Receiver}>(NeoVoucher.RedeemedCollectionPublicPath).borrow()!
 		
 		// deposit for consumption
 		receiver.deposit(token: <-token)
@@ -172,7 +172,7 @@ contract NeoVoucher: NonFungibleToken{
 	// NeoVoucher
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -290,7 +290,7 @@ contract NeoVoucher: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -349,6 +349,16 @@ contract NeoVoucher: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let exampleNFT = nft as! &NFT
 			return exampleNFT
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -427,7 +437,7 @@ contract NeoVoucher: NonFungibleToken{
 		let recipient = getAccount(redeemer)
 		
 		// borrow a public reference to the receivers collection
-		let receiver = (recipient.capabilities.get<&NeoMember.Collection>(NeoMember.CollectionPublicPath)!).borrow() ?? panic("Could not borrow a reference to the recipient's collection")
+		let receiver = recipient.capabilities.get<&NeoMember.Collection>(NeoMember.CollectionPublicPath).borrow<&NeoMember.Collection>() ?? panic("Could not borrow a reference to the recipient's collection")
 		let members = NeoVoucher.account.storage.borrow<&NeoMember.Collection>(from: NeoMember.CollectionStoragePath) ?? panic("Could not borrow a reference to the neo members for neo")
 		let memberRef = members.borrow(rewardID)
 		emit Consumed(voucherId: voucherID, address: redeemer, memberId: rewardID, teamId: memberRef.getTeamId(), role: memberRef.role, edition: memberRef.edition, maxEdition: memberRef.maxEdition, name: memberRef.name)
@@ -446,7 +456,7 @@ contract NeoVoucher: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &NeoVoucher.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&NeoVoucher.Collection>(NeoVoucher.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&NeoVoucher.Collection>(NeoVoucher.CollectionPublicPath).borrow<&NeoVoucher.Collection>() ?? panic("Couldn't get collection")
 		// We trust NeoVoucher.Collection.borrowNeoVoucher to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowNeoVoucher(id: itemID)

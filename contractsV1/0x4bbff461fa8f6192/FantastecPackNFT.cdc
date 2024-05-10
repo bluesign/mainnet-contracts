@@ -85,7 +85,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 		
 		access(all)
 		fun open(recipient: Address){ 
-			let receiver = (getAccount(recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(FantastecNFT.CollectionPublicPath)!).borrow() ?? panic("Could not get receiver reference to the NFT Collection - ".concat(recipient.toString()))
+			let receiver = getAccount(recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(FantastecNFT.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection - ".concat(recipient.toString()))
 			for key in self.ownedNFTs.keys{ 
 				let nft <-! self.ownedNFTs.remove(key: key)
 				receiver.deposit(token: <-nft!)
@@ -104,7 +104,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 	}
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -162,7 +162,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -193,6 +193,16 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?{ 
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

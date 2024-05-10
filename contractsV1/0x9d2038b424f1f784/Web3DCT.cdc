@@ -156,7 +156,7 @@ contract Web3DCT: NonFungibleToken, ViewResolver{
 	// NFT
 	// ========================================================================
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver, NiftoryNonFungibleToken.NFTPublic{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver, NiftoryNonFungibleToken.NFTPublic{ 
 		access(all)
 		let id: UInt64
 		
@@ -276,7 +276,7 @@ contract Web3DCT: NonFungibleToken, ViewResolver{
 			destroy tokens
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.ownedNFTs[withdrawID] != nil:
@@ -294,6 +294,16 @@ contract Web3DCT: NonFungibleToken, ViewResolver{
 				tokens.append(<-self.withdraw(withdrawID: withdrawIDs.removeLast()))
 			}
 			return <-tokens
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -367,7 +377,7 @@ contract Web3DCT: NonFungibleToken, ViewResolver{
 		access(self)
 		fun _getMetadataViewsManagerPrivate(): &MetadataViewsManager.Manager{ 
 			let record = NiftoryNFTRegistry.getRegistryRecord(Web3DCT.REGISTRY_ADDRESS, Web3DCT.REGISTRY_BRAND)
-			let manager = (Web3DCT.account.capabilities.get<&MetadataViewsManager.Manager>(record.metadataViewsManager.paths.private)!).borrow()!
+			let manager = Web3DCT.account.capabilities.get<&MetadataViewsManager.Manager>(record.metadataViewsManager.paths.private).borrow()!
 			return manager
 		}
 		
@@ -395,7 +405,7 @@ contract Web3DCT: NonFungibleToken, ViewResolver{
 		access(self)
 		fun _getSetManagerPrivate(): &MutableMetadataSetManager.Manager{ 
 			let record = NiftoryNFTRegistry.getRegistryRecord(Web3DCT.REGISTRY_ADDRESS, Web3DCT.REGISTRY_BRAND)
-			let setManager = (Web3DCT.account.capabilities.get<&MutableMetadataSetManager.Manager>(record.setManager.paths.private)!).borrow()!
+			let setManager = Web3DCT.account.capabilities.get<&MutableMetadataSetManager.Manager>(record.setManager.paths.private).borrow()!
 			return setManager
 		}
 		

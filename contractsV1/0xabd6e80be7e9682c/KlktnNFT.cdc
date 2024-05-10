@@ -119,7 +119,7 @@ contract KlktnNFT: NonFungibleToken{
 	// NFT:
 	// - The resource that represents the artist-released NFTs
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// unique id for the NFT
 		access(all)
 		let id: UInt64
@@ -161,7 +161,7 @@ contract KlktnNFT: NonFungibleToken{
 		// withdraw:
 		// - Removes an NFT from the collection and moves it to the caller
 		// - parameter: withdrawID: the ID of the owned NFT that is to be removed from the Collection
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -207,6 +207,16 @@ contract KlktnNFT: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -305,7 +315,7 @@ contract KlktnNFT: NonFungibleToken{
 	// - If it has a collection and that collection contains the itemID, return a reference to that.
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &KlktnNFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&KlktnNFT.Collection>(KlktnNFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&KlktnNFT.Collection>(KlktnNFT.CollectionPublicPath).borrow<&KlktnNFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust KlktnNFT.Collection.borrowKlktnNFT to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowKlktnNFT(id: itemID)

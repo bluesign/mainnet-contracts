@@ -371,7 +371,7 @@ contract Versus{
 			}
 			var bidderName = ""
 			let bidderProfileCap =
-				getAccount(bidder).capabilities.get<&{Profile.Public}>(Profile.publicPath)!
+				getAccount(bidder).capabilities.get<&{Profile.Public}>(Profile.publicPath)
 			if bidderProfileCap.check(){ 
 				bidderName = (bidderProfileCap.borrow()!).getName()
 			}
@@ -380,7 +380,7 @@ contract Versus{
 				if oldBidder == bidder{ 
 					oldBidderName = bidderName
 				} else{ 
-					let oldBidderProfileCap = getAccount(oldBidder!).capabilities.get<&{Profile.Public}>(Profile.publicPath)!
+					let oldBidderProfileCap = getAccount(oldBidder!).capabilities.get<&{Profile.Public}>(Profile.publicPath)
 					if oldBidderProfileCap.check(){ 
 						oldBidderName = (oldBidderProfileCap.borrow()!).getName()
 					}
@@ -729,7 +729,7 @@ contract Versus{
 	access(all)
 	fun getArtForDrop(_ dropId: UInt64): String?{ 
 		let versusCap =
-			Versus.account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)!
+			Versus.account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)
 		if let versus = versusCap.borrow(){ 
 			return versus.getArt(dropId: dropId)
 		}
@@ -744,14 +744,14 @@ contract Versus{
 	access(all)
 	fun getDrops(): [Versus.DropStatus]{ 
 		let account = Versus.account
-		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)!!
+		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)!
 		return (versusCap.borrow()!).getAllStatuses().values
 	}
 	
 	access(all)
 	fun getDrop(_ id: UInt64): Versus.DropStatus?{ 
 		let account = Versus.account
-		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(Versus.CollectionPublicPath)!
+		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(Versus.CollectionPublicPath)
 		if let versus = versusCap.borrow(){ 
 			return versus.getStatus(dropId: id)
 		}
@@ -766,7 +766,7 @@ contract Versus{
 	fun getActiveDrop(): Versus.DropStatus?{ 
 		// get the accounts' public address objects
 		let account = Versus.account
-		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)!
+		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)
 		if let versus = versusCap.borrow(){ 
 			let versusStatuses = versus.getAllStatuses()
 			for s in versusStatuses.keys{ 
@@ -851,12 +851,12 @@ contract Versus{
 			let artistAccount = getAccount(artist)
 			var contentItem <- Content.createContent(content)
 			let contentId = contentItem.id
-			let contentCapability = Versus.account.capabilities.get<&Content.Collection>(Content.CollectionPrivatePath)!
+			let contentCapability = Versus.account.capabilities.get<&Content.Collection>(Content.CollectionPrivatePath)
 			(contentCapability.borrow()!).deposit(token: <-contentItem)
-			let artistWallet = artistAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-			let minterWallet = Versus.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
-			let royalty ={ "artist": Art.Royalty(wallet: artistWallet, cut: artistCut), "minter": Art.Royalty(wallet: minterWallet, cut: minterCut)}
-			let art <- Art.createArtWithPointer(name: artName, artist: artistName, artistAddress: artist, description: description, type: type, contentCapability: contentCapability, contentId: contentId, royalty: royalty)
+			let artistWallet = artistAccount.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+			let minterWallet = Versus.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+			let royalty ={ "artist": Art.Royalty(wallet: artistWallet!, cut: artistCut), "minter": Art.Royalty(wallet: minterWallet!, cut: minterCut)}
+			let art <- Art.createArtWithPointer(name: artName, artist: artistName, artistAddress: artist, description: description, type: type, contentCapability: contentCapability!, contentId: contentId, royalty: royalty)
 			return <-art
 		}
 		
@@ -872,7 +872,7 @@ contract Versus{
 			for address in to{ 
 				let editionedArt <- Art.makeEdition(original: art, edition: i, maxEdition: maxEdition)
 				let account = getAccount(address)
-				var collectionCap = account.capabilities.get<&{Art.CollectionPublic}>(Art.CollectionPublicPath)!
+				var collectionCap = account.capabilities.get<&{Art.CollectionPublic}>(Art.CollectionPublicPath)
 				(collectionCap.borrow()!).deposit(token: <-editionedArt)
 				i = i + 1 as UInt64
 			}
@@ -941,13 +941,13 @@ contract Versus{
 		self.totalDrops = 0 as UInt64
 		let account = self.account
 		let marketplaceReceiver =
-			account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
+			account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 		let marketplaceNFTTrash: Capability<&{Art.CollectionPublic}> =
 			account.capabilities.get<&{Art.CollectionPublic}>(Art.CollectionPublicPath)!
 		log("Setting up versus capability")
 		let collection <-
 			create DropCollection(
-				marketplaceVault: marketplaceReceiver,
+				marketplaceVault: marketplaceReceiver!,
 				marketplaceNFTTrash: marketplaceNFTTrash,
 				cutPercentage: 0.15
 			)

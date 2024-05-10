@@ -457,8 +457,7 @@ contract UserProfile{
 	
 	access(all)
 	fun borrowUserProfilePublic(_ acct: Address): &Profile{ 
-		return (getAccount(acct).capabilities.get<&Profile>(UserProfile.ProfilePublicPath)!)
-			.borrow()
+		return getAccount(acct).capabilities.get<&Profile>(UserProfile.ProfilePublicPath).borrow()
 		?? panic("Failed to borrow user profile: ".concat(acct.toString()))
 	}
 	

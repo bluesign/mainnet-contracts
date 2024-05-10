@@ -51,8 +51,8 @@ contract StarVaultFactory{
 			message: "StarVaultFactory: vault already exists"
 		)
 		(
-			(self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
-				.borrow()!
+			self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+				.borrow<&{FungibleToken.Receiver}>()!
 		).deposit(from: <-accountCreationFee)
 		let vaultAccount = AuthAccount(payer: self.account)
 		if self.vaultAccountPublicKey != nil{ 
@@ -88,7 +88,7 @@ contract StarVaultFactory{
 				tokenVault.balance > 0.0:
 					"VaultTokenCollection: deposit empty token vault"
 			}
-			let vaultPublicRef = (getAccount(vault).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(StarVaultConfig.VaultPublicPath)!).borrow()!
+			let vaultPublicRef = getAccount(vault).capabilities.get<&{StarVaultInterfaces.VaultPublic}>(StarVaultConfig.VaultPublicPath).borrow()!
 			assert(tokenVault.getType() == vaultPublicRef.getVaultTokenType(), message: "VaultTokenCollection: input token vault type mismatch with token vault")
 			if self.tokenVaults.containsKey(vault){ 
 				let vaultRef = (&self.tokenVaults[vault] as &{FungibleToken.Vault}?)!

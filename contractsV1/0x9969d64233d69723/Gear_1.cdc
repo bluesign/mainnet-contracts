@@ -76,7 +76,7 @@ contract Gear_1: NonFungibleToken{
 	// A Gear as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		//
 		access(all)
@@ -274,7 +274,7 @@ contract Gear_1: NonFungibleToken{
 		access(all)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}
 		
 		access(all)
@@ -351,7 +351,7 @@ contract Gear_1: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -432,6 +432,16 @@ contract Gear_1: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -499,7 +509,7 @@ contract Gear_1: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, gearId: UInt64): &Gear_1.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Gear_1.Collection>(Gear_1.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&Gear_1.Collection>(Gear_1.CollectionPublicPath).borrow<&Gear_1.Collection>() ?? panic("Couldn't get collection")
 		// We trust Gear_1.Collection.borowGear to get the correct gearId
 		// (it checks it before returning it).
 		return collection.borrowGear(id: gearId)

@@ -62,7 +62,7 @@ contract Blockletes_NFT_V2: NonFungibleToken{
 	// A Blocklete as an NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -251,7 +251,7 @@ contract Blockletes_NFT_V2: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -343,6 +343,16 @@ contract Blockletes_NFT_V2: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -403,7 +413,7 @@ contract Blockletes_NFT_V2: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, blockleteId: UInt64): &Blockletes_NFT_V2.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&Blockletes_NFT_V2.Collection>(Blockletes_NFT_V2.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&Blockletes_NFT_V2.Collection>(Blockletes_NFT_V2.CollectionPublicPath).borrow<&Blockletes_NFT_V2.Collection>() ?? panic("Couldn't get collection")
 		// We trust Blockletes.Collection.borowBlocklete to get the correct blockleteId
 		// (it checks it before returning it).
 		return collection.borrowBlocklete(id: blockleteId)

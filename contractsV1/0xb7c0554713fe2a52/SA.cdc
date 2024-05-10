@@ -31,19 +31,15 @@ contract SA{
 			(getAccount(0xb19436aae4d94622).contracts.borrow<&{FungibleToken}>(name: "FiatToken")!)
 				.createEmptyVault()
 		let pool1 =
-			(
-				getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					/public/increment_swap_pair
-				)!
+			getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				/public/increment_swap_pair
 			).borrow()!
 		let poolInfo = pool1.getPairInfo()
 		let f1 = poolInfo[2] as! UFix64
 		let u1 = poolInfo[3] as! UFix64
 		let pool2 =
-			(
-				getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
-					/public/metapierSwapPoolPublic
-				)!
+			getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
+				/public/metapierSwapPoolPublic
 			).borrow()!
 		let poolInfo2 = pool2.getReserves()
 		let f2 = poolInfo2[0]
@@ -131,19 +127,15 @@ contract SA{
 			(getAccount(0x1654653399040a61).contracts.borrow<&{FungibleToken}>(name: "FlowToken")!)
 				.createEmptyVault()
 		let pool1 =
-			(
-				getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					/public/increment_swap_pair
-				)!
+			getAccount(0xfa82796435e15832).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				/public/increment_swap_pair
 			).borrow()!
 		let poolInfo = pool1.getPairInfo()
 		let u1 = poolInfo[2] as! UFix64
 		let f1 = poolInfo[3] as! UFix64
 		let pool2 =
-			(
-				getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
-					/public/metapierSwapPoolPublic
-				)!
+			getAccount(0x18187a9d276c0329).capabilities.get<&PierPair.Pool>(
+				/public/metapierSwapPoolPublic
 			).borrow()!
 		let poolInfo2 = pool2.getReserves()
 		let u2 = poolInfo2[0]

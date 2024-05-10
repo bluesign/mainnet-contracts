@@ -268,10 +268,10 @@ contract NFTLendingPlace{
 			}
 			// pay
 			let _repayAmount = repayAmount.balance
-			if let vaultRef = (getAccount(self.lenders[uuid]!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow(){ 
+			if let vaultRef = getAccount(self.lenders[uuid]!).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>(){ 
 				vaultRef.deposit(from: <-repayAmount)
 			} else{ 
-				let vaultRef = (getAccount(0xd5613003fe383df9).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!).borrow() ?? panic("Could not borrow reference to admin token vault")
+				let vaultRef = getAccount(0xd5613003fe383df9).capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow<&FlowToken.Vault>() ?? panic("Could not borrow reference to admin token vault")
 				vaultRef.deposit(from: <-repayAmount)
 			}
 			self.lenders[uuid] = nil

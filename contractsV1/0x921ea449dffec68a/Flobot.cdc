@@ -217,7 +217,7 @@ contract Flobot: NonFungibleToken{
 	
 	//The NFT resource that implements both Private and Public interfaces
 	access(all)
-	resource NFT: NonFungibleToken.INFT, Public, Private, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, Public, Private, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -498,7 +498,7 @@ contract Flobot: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -568,6 +568,16 @@ contract Flobot: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -611,7 +621,7 @@ contract Flobot: NonFungibleToken{
 	access(all)
 	fun getFlobot(address: Address, flobotId: UInt64): FlobotData?{ 
 		let account = getAccount(address)
-		if let flobotCollection = (account.capabilities.get<&{Flobot.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let flobotCollection = account.capabilities.get<&{Flobot.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flobot.CollectionPublic}>(){ 
 			if let flobot = flobotCollection.borrowFlobot(id: flobotId){ 
 				return FlobotData(id: flobotId, name: (flobot!).getName(), metadata: (flobot!).getMetadata(), backgroundId: (flobot!).getBackground(), bio: (flobot!).getBio())
 			}
@@ -624,7 +634,7 @@ contract Flobot: NonFungibleToken{
 	fun getFlobots(address: Address): [FlobotData]{ 
 		var flobotData: [FlobotData] = []
 		let account = getAccount(address)
-		if let flobotCollection = (account.capabilities.get<&{Flobot.CollectionPublic}>(self.CollectionPublicPath)!).borrow(){ 
+		if let flobotCollection = account.capabilities.get<&{Flobot.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flobot.CollectionPublic}>(){ 
 			for id in flobotCollection.getIDs(){ 
 				var flobot = flobotCollection.borrowFlobot(id: id)
 				flobotData.append(FlobotData(id: id, name: (flobot!).getName(), metadata: (flobot!).getMetadata(), backgroundId: (flobot!).getBackground(), bio: (flobot!).getBio()))
@@ -843,8 +853,8 @@ contract Flobot: NonFungibleToken{
 		let metadata = Metadata(mint: Flobot.totalSupply + UInt64(1), series: flobotkitSeries, combination: combinationString, rarity: flobotRarity, creatorAddress: address, components:{ "body": body, "head": head, "arms": arms, "legs": legs, "face": face})
 		let royalties: [Royalty] = []
 		let creatorAccount = getAccount(address)
-		royalties.append(Royalty(wallet: creatorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: Flobot.getRoyaltyCut(), type: RoyaltyType.percentage))
-		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!, cut: Flobot.getMarketplaceCut(), type: RoyaltyType.percentage))
+		royalties.append(Royalty(wallet: creatorAccount.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: Flobot.getRoyaltyCut(), type: RoyaltyType.percentage))
+		royalties.append(Royalty(wallet: self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver), cut: Flobot.getMarketplaceCut(), type: RoyaltyType.percentage))
 		
 		// Mint the new Flobot NFT by passing the metadata to it
 		var newNFT <- create NFT(metadata: metadata, royalties: Royalties(royalty: royalties))

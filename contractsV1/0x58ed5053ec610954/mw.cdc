@@ -16,7 +16,7 @@ contract mw{
 		NonFungibleToken.Collection,
 		NonFungibleToken.CollectionPublic{
 	
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			panic("no")
 		}
@@ -35,27 +35,23 @@ contract mw{
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?{ 
 			let owner = getAccount(0x2be2eb4183c34c99)
 			let col =
-				(
-					owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
-						/public/MatrixWorldVoucherCollection
-					)!
-				).borrow()
+				owner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(
+					/public/MatrixWorldVoucherCollection
+				).borrow<&{NonFungibleToken.CollectionPublic}>()
 				?? panic("NFT Collection not found")
 			if col == nil{ 
 				panic("no")
 			}
-			let nft = (col!).borrowNFT(263)
-			return nft!
+			let nft = (col!).borrowNFT(id: 263)
+			return nft
 		}
 		
 		access(all)
 		fun borrowVoucher(id: UInt64): &MatrixWorldVoucher.NFT?{ 
 			let owner = getAccount(0x2be2eb4183c34c99)
 			let col =
-				(
-					owner.capabilities.get<
-						&{MatrixWorldVoucher.MatrixWorldVoucherCollectionPublic}
-					>(/public/MatrixWorldVoucherCollection)!
+				owner.capabilities.get<&{MatrixWorldVoucher.MatrixWorldVoucherCollectionPublic}>(
+					/public/MatrixWorldVoucherCollection
 				).borrow<&{MatrixWorldVoucher.MatrixWorldVoucherCollectionPublic}>()
 				?? panic("NFT Collection not found")
 			if col == nil{ 
@@ -66,8 +62,13 @@ contract mw{
 		}
 		
 		access(all)
-		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
-			return <-create tr()
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 	}
 	

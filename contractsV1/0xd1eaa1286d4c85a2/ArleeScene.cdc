@@ -94,7 +94,7 @@ contract ArleeScene: NonFungibleToken{
 	
 	// ArleeScene NFT (includes the CID, description, creator, royalty)
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -189,7 +189,7 @@ contract ArleeScene: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot find Alree Scene NFT in your Collection, id: ".concat(withdrawID.toString()))
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -261,6 +261,16 @@ contract ArleeScene: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -275,7 +285,7 @@ contract ArleeScene: NonFungibleToken{
 	// return true if the address holds the Scene NFT
 	access(all)
 	fun getArleeSceneIDs(addr: Address): [UInt64]?{ 
-		let holderCap = getAccount(addr).capabilities.get<&ArleeScene.Collection>(ArleeScene.CollectionPublicPath)!
+		let holderCap = getAccount(addr).capabilities.get<&ArleeScene.Collection>(ArleeScene.CollectionPublicPath)
 		if holderCap.borrow == nil{ 
 			return nil
 		}

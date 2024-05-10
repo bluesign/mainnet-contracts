@@ -71,7 +71,7 @@ contract JollyJokers: NonFungibleToken{
 	let AdminPrivatePath: PrivatePath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -174,7 +174,7 @@ contract JollyJokers: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -222,6 +222,16 @@ contract JollyJokers: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let jokersNFT = nft as! &JollyJokers.NFT
 			return jokersNFT as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -311,7 +321,7 @@ contract JollyJokers: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, jokerId: UInt64): &JollyJokers.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&JollyJokers.Collection>(JollyJokers.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&JollyJokers.Collection>(JollyJokers.CollectionPublicPath).borrow<&JollyJokers.Collection>() ?? panic("Couldn't get collection")
 		// We trust JollyJokers.Collection.borowJollyJokers to get the correct jokerId
 		// (it checks it before returning it).
 		return collection.borrowJollyJokers(id: jokerId)

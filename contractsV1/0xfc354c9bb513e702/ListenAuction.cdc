@@ -362,7 +362,7 @@ contract ListenAuction{
 			assert(bidRef.vault.balance == 0.0, message: "Auction still has a bid, can't remove")
 			for id in auctionRef.nftCollection.getIDs(){ 
 				let nft <- auctionRef.nftCollection.withdraw(withdrawID: id)
-				let adminReceiver = ListenAuction.account.capabilities.get<&{NonFungibleToken.CollectionPublic, ListenNFT.CollectionPublic}>(ListenNFT.CollectionPublicPath)!
+				let adminReceiver = ListenAuction.account.capabilities.get<&{NonFungibleToken.CollectionPublic, ListenNFT.CollectionPublic}>(ListenNFT.CollectionPublicPath)
 				let receiverRef = (adminReceiver!).borrow()!
 				receiverRef.deposit(token: <-nft)
 			}
@@ -425,7 +425,7 @@ contract ListenAuction{
 			let finalSalePrice = bidRef.vault.balance
 			let funds <- bidRef.vault.withdraw(amount: finalSalePrice)
 			let ftReceiverCap =
-				ListenAuction.account.capabilities.get_<YOUR_TYPE>(ListenUSD.ReceiverPublicPath)!
+				ListenAuction.account.capabilities.get_<YOUR_TYPE>(ListenUSD.ReceiverPublicPath)
 			let vaultRef = ftReceiverCap.borrow<&{FungibleToken.Receiver}>()!
 			vaultRef.deposit(from: <-funds)
 			let auction <- ListenAuction.auctions.remove(key: auctionID)

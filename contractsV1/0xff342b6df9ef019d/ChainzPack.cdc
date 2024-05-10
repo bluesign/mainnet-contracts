@@ -90,7 +90,7 @@ contract ChainzPack: NonFungibleToken{
 	let CollectionPublicPath: PublicPath
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		// The Pack's id
 		access(all)
 		let id: UInt64
@@ -163,7 +163,7 @@ contract ChainzPack: NonFungibleToken{
 			emit Deposit(id: id, to: self.owner?.address)
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing Pack")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -208,6 +208,16 @@ contract ChainzPack: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -249,7 +259,7 @@ contract ChainzPack: NonFungibleToken{
 		packType.minted()
 		
 		// WHERE DOES THE PAYMENT GO?
-		let treasury = (getAccount(0xd1120ae332f528f0).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)!).borrow() ?? panic("This is not a Dapper Wallet account.")
+		let treasury = getAccount(0xd1120ae332f528f0).capabilities.get<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver).borrow<&{FungibleToken.Receiver}>() ?? panic("This is not a Dapper Wallet account.")
 		treasury.deposit(from: <-payment)
 	}
 	

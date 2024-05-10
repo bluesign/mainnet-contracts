@@ -219,7 +219,7 @@ contract Everbloom2: NonFungibleToken{
 	
 	// The resource that represents the Print NFTs
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// Global unique Artwork ID
 		access(all)
 		let id: UInt64
@@ -723,7 +723,7 @@ contract Everbloom2: NonFungibleToken{
 					returns: @NonFungibleToken.NFT the token that was withdrawn
 				*/
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// Remove the nft from the Collection
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: Artwork Piece does not exist in the collection")
@@ -853,6 +853,16 @@ contract Everbloom2: NonFungibleToken{
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let print = nft as! &Everbloom2.NFT
 			return print as &{ViewResolver.Resolver}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

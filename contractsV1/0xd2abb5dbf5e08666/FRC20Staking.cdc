@@ -1170,7 +1170,7 @@ contract FRC20Staking{
 	///
 	access(all)
 	view fun borrowDelegator(_ addr: Address): &Delegator?{ 
-		return (getAccount(addr).capabilities.get<&Delegator>(self.DelegatorPublicPath)!).borrow()
+		return getAccount(addr).capabilities.get<&Delegator>(self.DelegatorPublicPath).borrow()
 	}
 	
 	/// Create the Delegator resource

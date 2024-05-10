@@ -175,7 +175,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 	// Access Pass Resource
 	// -----------------------------------------------------------------------
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -464,7 +464,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			self.ownedNFTs[nft.id] <-! nft
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			let accessPass <- token as! @NFT
@@ -537,6 +537,16 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("You do not own this TheFabricantAccessPass")
 			let nft <- token as! @NFT
 			destroy nft
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -1198,7 +1208,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		access(all)
 		fun createPublicMinter(nftFile: String, nftNumberOfAccessUnits: UInt8, promotionId: UInt64, metadataId: UInt64?, variant: String){ 
 			// This is passed into the PublicMinter
-			let promotionsCap = getAccount((self.owner!).address).capabilities.get<&Promotions>(TheFabricantAccessPass.PromotionsPublicPath)!
+			let promotionsCap = getAccount((self.owner!).address).capabilities.get<&Promotions>(TheFabricantAccessPass.PromotionsPublicPath)
 			let promotion = self.getPromotionRef(id: promotionId) ?? panic("No promotion with this Id exists")
 			let season = promotion.season
 			let campaignName = promotion.campaignName
@@ -1213,7 +1223,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			promotion.addToPublicMinterPaths(path: pathString)
 			let publicMinterStoragePath = StoragePath(identifier: pathString)
 			let publicMinterPublicPath = PublicPath(identifier: pathString)
-			let publicMinter <- create PublicMinter(nftFile: nftFile, nftNumberOfAccessUnits: nftNumberOfAccessUnits, promotionId: promotionId, variant: variant, nftMetadataId: metadataId, promoCap: promotionsCap)
+			let publicMinter <- create PublicMinter(nftFile: nftFile, nftNumberOfAccessUnits: nftNumberOfAccessUnits, promotionId: promotionId, variant: variant, nftMetadataId: metadataId, promoCap: promotionsCap!)
 			log("***PathString")
 			log(pathString)
 			log("***Public")

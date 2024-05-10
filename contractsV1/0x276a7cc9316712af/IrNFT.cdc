@@ -1097,7 +1097,7 @@ contract IrNFT: NonFungibleToken{
 				paymentVault.balance == self.price:
 					"Invalid payment balance, cannot purchase voucher"
 			}
-			let paymentTargetVault = (IrNFT.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!).borrow() ?? panic("Could not borrow reference to target token vault")
+			let paymentTargetVault = IrNFT.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver).borrow() ?? panic("Could not borrow reference to target token vault")
 			
 			// Deposit that to the Service Account
 			paymentTargetVault.deposit(from: <-paymentVault)
@@ -1245,7 +1245,7 @@ contract IrNFT: NonFungibleToken{
 	// A IN|RIFT NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT{ 
+	resource NFT: NonFungibleToken.NFT{ 
 		access(all)
 		let id: UInt64
 		
@@ -1344,7 +1344,7 @@ contract IrNFT: NonFungibleToken{
 		//
 		// Function that removes an NFT from the collection
 		// and moves it to the calling context
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Missing NFT to withdraw")
@@ -1396,6 +1396,16 @@ contract IrNFT: NonFungibleToken{
 			} else{ 
 				return nil
 			}
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)

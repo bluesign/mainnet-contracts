@@ -52,7 +52,7 @@ contract StarlyCard: NonFungibleToken{
 	var totalSupply: UInt64
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -126,7 +126,7 @@ contract StarlyCard: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -170,6 +170,16 @@ contract StarlyCard: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -195,7 +205,7 @@ contract StarlyCard: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, itemID: UInt64): &StarlyCard.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&StarlyCard.Collection>(StarlyCard.CollectionPublicPath)!!).borrow() ?? panic("Couldn't get collection")
+		let collection = (getAccount(from).capabilities.get<&StarlyCard.Collection>(StarlyCard.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust StarlyCard.Collection.borowStarlyCard to get the correct itemID
 		// (it checks it before returning it).
 		return collection.borrowStarlyCard(id: itemID)

@@ -68,7 +68,7 @@ contract FraggleRock: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 	var totalSupply: UInt64
 	
 	access(all)
-	resource NFT: NonFungibleToken.INFT, TiblesNFT.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, TiblesNFT.INFT, ViewResolver.Resolver{ 
 		access(all)
 		let id: UInt64
 		
@@ -265,7 +265,7 @@ contract FraggleRock: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			panic("Failed to borrow NFT with ID: ".concat(id.toString()))
 		}
 		
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("Cannot withdraw: tible does not exist in the collection")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -306,6 +306,16 @@ contract FraggleRock: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		fun destroyTible(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("NFT not found")
 			destroy token
+		}
+		
+		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
 		}
 		
 		access(all)
@@ -658,7 +668,7 @@ contract FraggleRock: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		self.account.capabilities.publish(capability_1, at: self.ProducerPath)
 		var capability_2 = self.account.capabilities.storage.issue<&{TiblesProducer.IContent}>(self.ProducerStoragePath)
 		self.account.capabilities.publish(capability_2, at: self.ContentPath)
-		self.contentCapability = self.account.capabilities.get_<YOUR_TYPE>(self.ContentPath)!
+		self.contentCapability = self.account.capabilities.get_<YOUR_TYPE>(self.ContentPath)
 		emit ContractInitialized()
 	}
 }

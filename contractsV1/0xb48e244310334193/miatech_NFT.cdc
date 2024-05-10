@@ -340,7 +340,7 @@ contract miatech_NFT: NonFungibleToken{
 	// A resource that represents the miatech_NFT NFT
 	//
 	access(all)
-	resource NFT: NonFungibleToken.INFT, ViewResolver.Resolver{ 
+	resource NFT: NonFungibleToken.NFT, ViewResolver.Resolver{ 
 		// The token's ID
 		access(all)
 		let id: UInt64
@@ -402,7 +402,7 @@ contract miatech_NFT: NonFungibleToken{
 								let royaltyCut = miatech_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_cut_".concat(royaltyName))!
 								let cutValue: UFix64 = miatech_NFT.royaltyCutStringToUFix64(royaltyCut)
 								if cutValue != 0.0{ 
-									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver)!, cut: cutValue, description: miatech_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
+									royalties.append(MetadataViews.Royalty(receiver: getAccount(royaltyAddress).capabilities.get<&{FungibleToken.Vault}>(royaltyReceiver), cut: cutValue, description: miatech_NFT.getSetMetadataByField(setId: self.setId, field: "royalty_desc_".concat(royaltyName))!))
 								}
 							}
 						}
@@ -580,7 +580,7 @@ contract miatech_NFT: NonFungibleToken{
 		// withdraw
 		// Removes an NFT from the collection and moves it to the caller
 		//
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -683,6 +683,16 @@ contract miatech_NFT: NonFungibleToken{
 		}
 		
 		access(all)
+		view fun getSupportedNFTTypes():{ Type: Bool}{ 
+			panic("implement me")
+		}
+		
+		access(all)
+		view fun isSupportedNFTType(type: Type): Bool{ 
+			panic("implement me")
+		}
+		
+		access(all)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}
@@ -711,7 +721,7 @@ contract miatech_NFT: NonFungibleToken{
 	//
 	access(all)
 	fun fetch(_ from: Address, id: UInt64): &miatech_NFT.NFT?{ 
-		let collection = (getAccount(from).capabilities.get<&miatech_NFT.Collection>(miatech_NFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
+		let collection = getAccount(from).capabilities.get<&miatech_NFT.Collection>(miatech_NFT.CollectionPublicPath).borrow<&miatech_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust miatech_NFT.Collection.borrowmiatech_NFT to get the correct id
 		// (it checks it before returning it).
 		return collection.borrowmiatech_NFT(id: id)

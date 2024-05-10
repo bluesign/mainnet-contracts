@@ -165,11 +165,9 @@ contract PlayAndEarn{
 			
 			// Get a reference to the recipient's Receiver
 			let receiverRef =
-				(
-					recipient.capabilities.get<&{FungibleToken.Receiver}>(
-						MoxyToken.moxyTokenReceiverPath
-					)!
-				).borrow()
+				recipient.capabilities.get<&{FungibleToken.Receiver}>(
+					MoxyToken.moxyTokenReceiverPath
+				).borrow<&{FungibleToken.Receiver}>()
 				?? panic("Could not borrow receiver reference to the recipient's Vault")
 			
 			// Deposit the withdrawn tokens in the recipient's receiver
@@ -200,11 +198,9 @@ contract PlayAndEarn{
 	
 	access(all)
 	fun getPlayAndEarnEcosystemPublicCapability(): &PlayAndEarnEcosystem{ 
-		return (
-			self.account.capabilities.get<&PlayAndEarn.PlayAndEarnEcosystem>(
-				PlayAndEarn.playAndEarnEcosystemPublic
-			)!
-		).borrow()!
+		return self.account.capabilities.get<&PlayAndEarn.PlayAndEarnEcosystem>(
+			PlayAndEarn.playAndEarnEcosystemPublic
+		).borrow<&PlayAndEarn.PlayAndEarnEcosystem>()!
 	}
 	
 	access(all)

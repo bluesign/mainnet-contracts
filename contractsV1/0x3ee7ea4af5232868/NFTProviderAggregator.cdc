@@ -210,7 +210,7 @@ contract NFTProviderAggregator{
 		
 		/// Withdraw an NFT located in one of multiple collections through iterating over each collection
 		///
-		access(NonFungibleToken.Withdraw |NonFungibleToken.Owner)
+		access(NonFungibleToken.Withdraw)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			return <-self.borrowNFTProvider(id: withdrawID).withdraw(withdrawID: withdrawID)
 		}

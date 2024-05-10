@@ -143,10 +143,10 @@ contract PackDropper{
 					"Pack selling not enabled yet!"
 				(self.packStats[packId]!).buyers.length < (self.packStats[packId]!).size as Int:
 					"All packs are bought"
-				((self.owner!).capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!).borrow() != nil:
+				(self.owner!).capabilities.get<&FUSD.Vault>(/public/fusdReceiver).borrow() != nil:
 					"FUSD receiver cant be nil"
 			}
-			let ownerReceiverVault = ((self.owner!).capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!).borrow()!
+			let ownerReceiverVault = (self.owner!).capabilities.get<&FUSD.Vault>(/public/fusdReceiver).borrow()!
 			ownerReceiverVault.deposit(from: <-buyerPayment)
 			(self.packStats[packId]!).buyers.append(buyerAddress)
 			emit PackBought(id: packId, address: buyerAddress, order: (self.packStats[packId]!).buyers.length)

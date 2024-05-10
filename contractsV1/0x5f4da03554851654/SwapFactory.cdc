@@ -92,9 +92,9 @@ contract SwapFactory{
 			)
 		)
 		(
-			(			 /// Deposit account creation fee into factory account, which then acts as payer of account creation
-			 self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
-				.borrow()!
+			/// Deposit account creation fee into factory account, which then acts as payer of account creation
+			self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
+				.borrow<&{FungibleToken.Receiver}>()!
 		).deposit(from: <-accountCreationFee)
 		let pairAccount = AuthAccount(payer: self.account)
 		if self.pairAccountPublicKey != nil{ 
@@ -156,7 +156,7 @@ contract SwapFactory{
 				lpTokenVault.balance > 0.0:
 					SwapError.ErrorEncode(msg: "LpTokenCollection: deposit empty lptoken vault", err: SwapError.ErrorCode.INVALID_PARAMETERS)
 			}
-			let pairPublicRef = (getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow()!
+			let pairPublicRef = getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!
 			assert(lpTokenVault.getType() == pairPublicRef.getLpTokenVaultType(), message: SwapError.ErrorEncode(msg: "LpTokenCollection: input token vault type mismatch with pair lptoken vault", err: SwapError.ErrorCode.MISMATCH_LPTOKEN_VAULT))
 			if self.lpTokenVaults.containsKey(pairAddr){ 
 				let vaultRef = (&self.lpTokenVaults[pairAddr] as &{FungibleToken.Vault}?)!
@@ -239,10 +239,8 @@ contract SwapFactory{
 			return nil
 		}
 		return (
-			(
-				getAccount(pairAddr!).capabilities.get<&{SwapInterfaces.PairPublic}>(
-					SwapConfig.PairPublicPath
-				)!
+			getAccount(pairAddr!).capabilities.get<&{SwapInterfaces.PairPublic}>(
+				SwapConfig.PairPublicPath
 			).borrow()!
 		).getPairInfo()
 	}
@@ -278,7 +276,7 @@ contract SwapFactory{
 		var i = 0
 		var res: [AnyStruct] = []
 		while i < pairSlice.length{ 
-			res.append(((getAccount(pairSlice[i]).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath)!).borrow()!).getPairInfo())
+			res.append((getAccount(pairSlice[i]).capabilities.get<&{SwapInterfaces.PairPublic}>(SwapConfig.PairPublicPath).borrow()!).getPairInfo())
 			i = i + 1
 		}
 		return res
