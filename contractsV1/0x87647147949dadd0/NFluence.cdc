@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 This is the main contract that manages data and behavior for minted NFTs on
 the NFluence platform
  */
@@ -91,8 +105,8 @@ contract NFluence: NonFungibleToken{
 		access(all)
 		let id: UInt64
 		
-		access(all)
-		fun getData(): NFluenceNFTData
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getData(): NFluence.NFluenceNFTData
 	}
 	
 	access(all)
@@ -120,7 +134,7 @@ contract NFluence: NonFungibleToken{
 		}
 		
 		// Getter function for the NFT metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData(): NFluenceNFTData{ 
 			return self.metadata
 		}
@@ -130,17 +144,17 @@ contract NFluence: NonFungibleToken{
 	access(all)
 	resource interface NFluenceCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
 		// Get list of ids for all NFTs in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
 		// Get metadata for a specific NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenData(id: UInt64): NFluenceNFTData{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -150,14 +164,14 @@ contract NFluence: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTokenData(): [NFluenceNFTData]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
 		// Function that returns reference to the whole public facing NFluence Resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFluenceNFT(id: UInt64): &NFluence.NFT{ 
 			post{ 
 				result == nil || result.id == id:
@@ -190,7 +204,7 @@ contract NFluence: NonFungibleToken{
 			return <-item
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -206,7 +220,7 @@ contract NFluence: NonFungibleToken{
 		
 		// deposit takes an NFT and adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFluence.NFT
 			let id: UInt64 = token.id
 			
@@ -218,7 +232,7 @@ contract NFluence: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -237,7 +251,7 @@ contract NFluence: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenData(id: UInt64): NFluenceNFTData{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -247,7 +261,7 @@ contract NFluence: NonFungibleToken{
 			return token.getData()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTokenData(): [NFluenceNFTData]{ 
 			var tokens: [NFluenceNFTData] = []
 			for key in self.ownedNFTs.keys{ 
@@ -265,7 +279,7 @@ contract NFluence: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFluenceNFT(id: UInt64): &NFluence.NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -299,7 +313,7 @@ contract NFluence: NonFungibleToken{
 	
 	// This function takes metadata arguments as well as an editionSize parameter
 	// which will mint multiple NFTs with the same metadata and increasing serial numbers
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(recipient: &NFluence.Collection, cid: String, fileType: UInt8, title: String, description: String, editionSize: UInt16){ 
 		pre{ 
 			editionSize <= NFluence.maxEditionSize:
@@ -320,7 +334,7 @@ contract NFluence: NonFungibleToken{
 	access(all)
 	resource NFluenceAdmin{ 
 		// Allows the contract owner to update the maximum number of NFTs allowed to be minted at once
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaxEditionSize(newSize: UInt16){ 
 			pre{ 
 				newSize > 0:

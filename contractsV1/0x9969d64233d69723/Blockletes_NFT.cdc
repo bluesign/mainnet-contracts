@@ -1,4 +1,18 @@
-// Blockletes.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Blockletes.cdc
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
@@ -134,7 +148,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		// in. The upgrade resource can only be created by authorized accounts,
 		// such as an administrator or blocklete trainers in the training 
 		// marketplace.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upgrade(abilitiesUpgrade: @AbilitiesUpgradeBundle){ 
 			pre{ 
 				abilitiesUpgrade != nil:
@@ -173,7 +187,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		//
 		// Returns: The new season number
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementSeason(): UInt16{ 
 			// End the current season and start a new one
 			// by incrementing the TopShot season number
@@ -182,13 +196,13 @@ contract Blockletes_NFT: NonFungibleToken{
 			return Blockletes_NFT.currentSeason
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(newBaseURI: String){ 
 			Blockletes_NFT.baseURI = newBaseURI
 			emit TokenBaseURISet(newBaseURI: newBaseURI)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAbilitiesUpgradeBundle(abilityUpgradeValues:{ UInt16: UInt16}): @AbilitiesUpgradeBundle{ 
 			return <-create AbilitiesUpgradeBundle(abilityUpgrades: abilityUpgradeValues)
 		}
@@ -199,22 +213,22 @@ contract Blockletes_NFT: NonFungibleToken{
 	// the details of Blockletes in the Collection.
 	access(all)
 	resource interface BlockletesCollectionPublic{ 
-		access(all)
-		fun upgradeBlocklete(tokenId: UInt64, abilitiesUpgrade: @AbilitiesUpgradeBundle)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun upgradeBlocklete(tokenId: UInt64, abilitiesUpgrade: @Blockletes_NFT.AbilitiesUpgradeBundle): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBlocklete(id: UInt64): &Blockletes_NFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -241,7 +255,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		// abilities upgrade resource. The abilities upgrade resource can only be created
 		// by authorized roles, such as admins or trainers
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upgradeBlocklete(tokenId: UInt64, abilitiesUpgrade: @AbilitiesUpgradeBundle){ 
 			let ref = &self.ownedNFTs[tokenId] as &{NonFungibleToken.NFT}?
 			let blockleteToken = ref as! &Blockletes_NFT.NFT
@@ -264,7 +278,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		//
 		// Returns: @NonFungibleToken.Collection: The collection of withdrawn tokens
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -283,7 +297,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Blockletes_NFT.NFT
 			let id: UInt64 = token.id
 			
@@ -295,7 +309,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -332,7 +346,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		// exposing all of its fields (including the Blocklete attributes).
 		// This is safe as there are no functions that can be called on the Blocklete.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBlocklete(id: UInt64): &Blockletes_NFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -383,7 +397,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		// Mints a new Blocklete NFT with a new ID
 		// and deposits it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBlocklete(recipient: &{NonFungibleToken.CollectionPublic}, newAttributes:{ UInt16: UInt16}){ 
 			emit Minted(id: Blockletes_NFT.totalSupply)
 			
@@ -396,7 +410,7 @@ contract Blockletes_NFT: NonFungibleToken{
 		// Mints multiple new Blocklete NFTs given a list of Blocklete attributes
 		// and deposits the NFTs into the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintBlockletes(recipient: &{NonFungibleToken.CollectionPublic}, attributesList: [{UInt16: UInt16}]){ 
 			for attributes in attributesList{ 
 				// deposit it in the recipient's account using their reference
@@ -411,7 +425,7 @@ contract Blockletes_NFT: NonFungibleToken{
 	// If it has a collection but does not contain the blockleteId, return nil.
 	// If it has a collection and that collection contains the blockleteId, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, blockleteId: UInt64): &Blockletes_NFT.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&Blockletes_NFT.Collection>(Blockletes_NFT.CollectionPublicPath).borrow<&Blockletes_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust Blockletes.Collection.borowBlocklete to get the correct blockleteId

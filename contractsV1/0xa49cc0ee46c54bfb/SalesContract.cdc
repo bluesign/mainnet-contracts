@@ -1,4 +1,18 @@
-import MotoGPAdmin from "./MotoGPAdmin.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MotoGPAdmin from "./MotoGPAdmin.cdc"
 
 import MotoGPPack from "./MotoGPPack.cdc"
 
@@ -31,7 +45,7 @@ import MotoGPTransfer from "./MotoGPTransfer.cdc"
 //
 access(all)
 contract SalesContract{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.0"
 	}
@@ -164,7 +178,7 @@ contract SalesContract{
 	
 	// isCurrencySKU returns true if a SKU's startTime is in the past and it's endTime in the future, based on getCurrentBlock's timestamp.
 	// This method should not be relied on for precise time requirements on front end, as getCurrentBlock().timestamp in a read method may be quite inaccurate.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isCurrentSKU(name: String): Bool{ 
 		let sku = self.skuMap[name]!
 		let now = UInt64(getCurrentBlock().timestamp)
@@ -174,46 +188,46 @@ contract SalesContract{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStartTimeForSKU(name: String): UInt64{ 
 		return (self.skuMap[name]!).startTime
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEndTimeForSKU(name: String): UInt64{ 
 		return (self.skuMap[name]!).endTime
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupplyForSKU(name: String): UInt64{ 
 		return (self.skuMap[name]!).totalSupply
 	}
 	
 	// Remaining supply equals the length of the serialList, since even mint event removes a serial from the list.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getRemainingSupplyForSKU(name: String): UInt64{ 
 		return UInt64((self.skuMap[name]!).serialList.length)
 	}
 	
 	// Helper method to check how many NFT an account has purchased for a particular SKU
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBuyCountForAddress(skuName: String, recipient: Address): UInt64{ 
 		return (self.skuMap[skuName]!).buyerCountMap[recipient] ?? UInt64(0)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPriceForSKU(name: String): UFix64{ 
 		return (self.skuMap[name]!).price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxPerBuyerForSKU(name: String): UInt64{ 
 		return (self.skuMap[name]!).maxPerBuyer
 	}
 	
 	// Returns a list of SKUs where start time is in the past and the end time is in the future.
 	// Don't reply on it for precise time requirements.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActiveSKUs(): [String]{ 
 		let activeSKUs: [String] = []
 		let keys = self.skuMap.keys
@@ -234,12 +248,12 @@ contract SalesContract{
 		return activeSKUs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSKUs(): [String]{ 
 		return self.skuMap.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeSKU(adminRef: &Admin, skuName: String){ 
 		self.skuMap.remove(key: skuName)
 	}
@@ -249,7 +263,7 @@ contract SalesContract{
 	resource Admin{} 
 	
 	// Sets the public key used to verify signature submitted in the buyPack request
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setVerificationKey(adminRef: &Admin, verificationKey: String){ 
 		pre{ 
 			adminRef != nil:
@@ -277,12 +291,12 @@ contract SalesContract{
 	}
 	
 	// Returns a nonce per account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNonce(address: Address): UInt64{ 
 		return self.nonceMap[address] ?? 0 as UInt64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isActiveSKU(name: String): Bool{ 
 		let sku = self.skuMap[name]!
 		let now = UInt64(getCurrentBlock().timestamp)
@@ -296,7 +310,7 @@ contract SalesContract{
 	
 	// Helper method to convert address to String (used for verificaton of signature in buyPack)
 	// public to allow testing
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun convertAddressToString(address: Address): String{ 
 		let EXPECTED_ADDRESS_LENGTH = 18
 		var addrStr = address.toString() //Cadence shortens addresses starting with 0, so 0x0123 becomes 0x123
@@ -319,7 +333,7 @@ contract SalesContract{
 		return addrStr
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyPack(
 		signature: String,
 		nonce: UInt32,
@@ -427,7 +441,7 @@ contract SalesContract{
 	}
 	
 	// Emergency-helper method to reset a serial in the map
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setSerialStatusInPackTypeMap(
 		adminRef: &Admin,
 		packType: UInt64,
@@ -444,7 +458,7 @@ contract SalesContract{
 	}
 	
 	// Allow Admin to add a new SKU 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addSKU(
 		adminRef: &Admin,
 		startTime: UInt64,
@@ -468,7 +482,7 @@ contract SalesContract{
 	}
 	
 	// Add lists of serials to a SKU
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun increaseSupplyForSKU(adminRef: &Admin, name: String, supplyList: [UInt64]){ 
 		pre{ 
 			adminRef != nil:
@@ -479,7 +493,7 @@ contract SalesContract{
 		self.skuMap[name] = sku
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setMaxPerBuyerForSKU(adminRef: &Admin, name: String, maxPerBuyer: UInt64){ 
 		pre{ 
 			adminRef != nil:
@@ -490,7 +504,7 @@ contract SalesContract{
 		self.skuMap[name] = sku
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setPriceForSKU(adminRef: &Admin, name: String, price: UFix64){ 
 		pre{ 
 			adminRef != nil:
@@ -501,7 +515,7 @@ contract SalesContract{
 		self.skuMap[name] = sku
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setEndTimeForSKU(adminRef: &Admin, name: String, endTime: UInt64){ 
 		pre{ 
 			adminRef != nil:
@@ -512,7 +526,7 @@ contract SalesContract{
 		self.skuMap[name] = sku
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setStartTimeForSKU(adminRef: &Admin, name: String, startTime: UInt64){ 
 		pre{ 
 			adminRef != nil:
@@ -523,7 +537,7 @@ contract SalesContract{
 		self.skuMap[name] = sku
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setPayoutAddressForSKU(adminRef: &Admin, name: String, payoutAddress: Address){ 
 		pre{ 
 			adminRef != nil:
@@ -534,12 +548,12 @@ contract SalesContract{
 		self.skuMap[name] = sku
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSKU(name: String): SKU{ 
 		return self.skuMap[name]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVerificationKey(): String{ 
 		return self.verificationKey
 	}

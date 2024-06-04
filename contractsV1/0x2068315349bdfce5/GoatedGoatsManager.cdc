@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	A contract that manages the creation and sale of Goated Goats, Traits, and Packs.
 
 	A manager resource exists to allow modifications to the parameters of the public
@@ -166,25 +180,25 @@ contract GoatedGoatsManager{
 		// -----------------------------------------------------------------------
 		//  Trait
 		// -----------------------------------------------------------------------
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraitCollectionMetadata(metadata:{ String: String}){ 
 			GoatedGoatsTrait.setCollectionMetadata(metadata: metadata)
 			emit UpdateTraitCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraitEditionMetadata(editionNumber: UInt64, metadata:{ String: String}){ 
 			GoatedGoatsTrait.setEditionMetadata(editionNumber: editionNumber, metadata: metadata)
 			emit UpdateTraitEditionMetadata(id: editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTraitAtEdition(edition: UInt64, packID: UInt64): @{NonFungibleToken.NFT}{ 
 			emit AdminMintTrait(id: edition)
 			return <-GoatedGoatsManager.mintTrait(edition: edition, packID: packID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialTrait(packID: UInt64): @{NonFungibleToken.NFT}{ 
 			let trait <- GoatedGoatsManager.mintSequentialTrait(packID: packID)
 			emit AdminMintTrait(id: trait.id)
@@ -194,13 +208,13 @@ contract GoatedGoatsManager{
 		// -----------------------------------------------------------------------
 		//  TraitPack
 		// -----------------------------------------------------------------------
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraitPackCollectionMetadata(metadata:{ String: String}){ 
 			GoatedGoatsTraitPack.setCollectionMetadata(metadata: metadata)
 			emit UpdateTraitPackCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraitPackEditionMetadata(editionNumber: UInt64, metadata:{ String: String}){ 
 			GoatedGoatsTraitPack.setEditionMetadata(
 				editionNumber: editionNumber,
@@ -209,7 +223,7 @@ contract GoatedGoatsManager{
 			emit UpdateTraitPackEditionMetadata(id: editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTraitPackAtEdition(edition: UInt64, packID: UInt64, packEditionID: UInt64): @{
 			NonFungibleToken.NFT
 		}{ 
@@ -221,14 +235,14 @@ contract GoatedGoatsManager{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialTraitPack(packID: UInt64): @{NonFungibleToken.NFT}{ 
 			let trait <- GoatedGoatsManager.mintSequentialTraitPack(packID: packID)
 			emit AdminMintTraitPack(id: trait.id)
 			return <-trait
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraitPackRedeemStartTime(_ redeemStartTime: UFix64){ 
 			GoatedGoatsManager.traitPackRedeemStartTime = redeemStartTime
 			emit UpdateTraitPackRedeemInfo(
@@ -239,13 +253,13 @@ contract GoatedGoatsManager{
 		// -----------------------------------------------------------------------
 		//  Goat
 		// -----------------------------------------------------------------------
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGoatCollectionMetadata(metadata:{ String: String}){ 
 			GoatedGoats.setCollectionMetadata(metadata: metadata)
 			emit UpdateGoatCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGoatEditionMetadata(
 			goatID: UInt64,
 			metadata:{ 
@@ -261,7 +275,7 @@ contract GoatedGoatsManager{
 			emit UpdateGoatEditionMetadata(id: goatID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGoatRedeemStartTime(_ redeemStartTime: UFix64){ 
 			GoatedGoatsManager.goatRedeemStartTime = redeemStartTime
 			emit UpdateGoatRedeemInfo(redeemStartTime: GoatedGoatsManager.goatRedeemStartTime)
@@ -427,7 +441,7 @@ contract GoatedGoatsManager{
 	// -----------------------------------------------------------------------
 	//  TraitPack
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicRedeemTraitPackWithVoucher(traitPackVoucher: @{NonFungibleToken.NFT}): @{
 		NonFungibleToken.Collection
 	}{ 
@@ -454,7 +468,7 @@ contract GoatedGoatsManager{
 		return <-traitPackCollection
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicRedeemTraitPack(traitPack: @{NonFungibleToken.NFT}, address: Address){ 
 		pre{ 
 			getCurrentBlock().timestamp >= self.traitPackRedeemStartTime:
@@ -477,7 +491,7 @@ contract GoatedGoatsManager{
 	// -----------------------------------------------------------------------
 	//  Goat
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicRedeemGoatWithVoucher(goatVoucher: @{NonFungibleToken.NFT}, address: Address): @{
 		NonFungibleToken.Collection
 	}{ 
@@ -519,12 +533,12 @@ contract GoatedGoatsManager{
 		access(all)
 		var unequippedTraits: @[{NonFungibleToken.NFT}]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extractGoat(): @{NonFungibleToken.NFT}{ 
 			return <-self.goat.removeFirst()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extractAllTraits(): @[{NonFungibleToken.NFT}]{ 
 			var assets: @[{NonFungibleToken.NFT}] <- []
 			self.unequippedTraits <-> assets
@@ -538,7 +552,7 @@ contract GoatedGoatsManager{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun updateGoatTraits(
 		goat: @{NonFungibleToken.NFT},
 		traitsToEquip: @[{

@@ -1,4 +1,18 @@
-//  ____   ____ _   _ __  __  ___  _____ ____  
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//  ____   ____ _   _ __  __  ___  _____ ____  
 // / ___| / ___| | | |  \/  |/ _ \| ____/ ___| 
 // \___ \| |   | |_| | |\/| | | | |  _| \___ \ 
 //  ___) | |___|  _  | |  | | |_| | |___ ___) |
@@ -204,7 +218,7 @@ contract ZayTrader{
 		access(contract)
 		let nftCollectionAccess: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReadable():{ String: AnyStruct}{ 
 			return{ "nftID": self.nftID, "type": self.type}
 		}
@@ -230,7 +244,7 @@ contract ZayTrader{
 		access(contract)
 		let fungibleTokenAccess: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReadable():{ String: AnyStruct}{ 
 			return{ "amount": self.amount, "type": self.type}
 		}
@@ -257,7 +271,7 @@ contract ZayTrader{
 		access(all)
 		let offererReceiverCapability: Capability<&{NonFungibleToken.CollectionPublic}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReadable():{ String: AnyStruct}{ 
 			return{ "nftID": self.nftID, "type": self.type}
 		}
@@ -283,7 +297,7 @@ contract ZayTrader{
 		access(all)
 		let offererReceiverCapability: Capability<&{FungibleToken.Receiver}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReadable():{ String: AnyStruct}{ 
 			return{ "amount": self.amount, "type": self.type}
 		}
@@ -354,7 +368,7 @@ contract ZayTrader{
 		// It is difficult to read the TradeOfferDetails as a struct, and faces
 		// JS conversion problems. This converts it to an easier readable format
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReadableTradeOfferDetails():{ String: AnyStruct}{ 
 			let map:{ String: AnyStruct} ={} 
 			map["tradeCollectionID"] = self.tradeCollectionID
@@ -441,14 +455,14 @@ contract ZayTrader{
 		access(all)
 		var nftAssets: @[{NonFungibleToken.NFT}]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extractAllFungibleAssets(): @[{FungibleToken.Vault}]{ 
 			var assets: @[{FungibleToken.Vault}] <- []
 			self.fungibleAssets <-> assets
 			return <-assets
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extractAllNftAssets(): @[{NonFungibleToken.NFT}]{ 
 			var assets: @[{NonFungibleToken.NFT}] <- []
 			self.nftAssets <-> assets
@@ -474,9 +488,9 @@ contract ZayTrader{
 		// fulfill the trade. Also required if a Schmoe is wanted to be used
 		// to void the otherwise required trading fee
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptTrade(
-			tradeBundle: @TradeBundle,
+			tradeBundle: @ZayTrader.TradeBundle,
 			fee: @{FungibleToken.Vault},
 			signingAddress: Address?,
 			signedMessage: String?,
@@ -487,12 +501,12 @@ contract ZayTrader{
 				String
 			],
 			signatureBlock: UInt64?
-		): @TradeBundle
+		): @ZayTrader.TradeBundle
 		
 		// getDetails
 		// Receive details of this trade offer
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): TradeOfferDetails
 	}
 	
@@ -509,7 +523,7 @@ contract ZayTrader{
 		// getDetails
 		// Get the details of the current state of the TradeOffer as a struct.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): TradeOfferDetails{ 
 			return self.details
 		}
@@ -656,7 +670,7 @@ contract ZayTrader{
 			return <-finalTradeBundle
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptTrade(tradeBundle: @TradeBundle, fee: @{FungibleToken.Vault}, signingAddress: Address?, signedMessage: String?, keyIds: [Int], signatures: [String], signatureBlock: UInt64?): @TradeBundle{ 
 			let signatureRequired = self.details.requestedAddress != nil
 			assert(self.details.requestedAddress == nil || signingAddress! == self.details.requestedAddress!, message: "Requested trade account does not match provided account or expected signature not provided")
@@ -765,20 +779,20 @@ contract ZayTrader{
 		// createListing
 		// Allows the TradeCollection owner to create and insert TradeOffers.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTradeOffer(
 			offeredNfts: [
-				OfferedNftTradeAsset
+				ZayTrader.OfferedNftTradeAsset
 			],
 			offeredFts: [
-				OfferedFungibleTradeAsset
+				ZayTrader.OfferedFungibleTradeAsset
 			],
 			offerFeePayer: Capability<&FlowToken.Vault>,
 			requestedNfts: [
-				RequestedNftTradeAsset
+				ZayTrader.RequestedNftTradeAsset
 			],
 			requestedFts: [
-				RequestedFungibleTradeAsset
+				ZayTrader.RequestedFungibleTradeAsset
 			],
 			expiration: UFix64,
 			requestedAddress: Address?,
@@ -796,7 +810,7 @@ contract ZayTrader{
 		// removeListing
 		// Allows the TradeCollection owner to remove any open trade listing, accepted or not.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTradeOffer(tradeOfferResourceID: UInt64)
 	}
 	
@@ -806,13 +820,13 @@ contract ZayTrader{
 	//
 	access(all)
 	resource interface TradeCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTradeOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTradeOffer(tradeOfferResourceID: UInt64): &TradeOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(tradeOfferResourceID: UInt64)
 	}
 	
@@ -829,7 +843,7 @@ contract ZayTrader{
 		// insert
 		// Create and publish a listing for a new trade offer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTradeOffer(offeredNfts: [OfferedNftTradeAsset], offeredFts: [OfferedFungibleTradeAsset], offerFeePayer: Capability<&FlowToken.Vault>, requestedNfts: [RequestedNftTradeAsset], requestedFts: [RequestedFungibleTradeAsset], expiration: UFix64, requestedAddress: Address?, signingAddress: Address?, signedMessage: String?, keyIds: [Int], signatures: [String], signatureBlock: UInt64?): UInt64{ 
 			var accountHasSchmoe = false
 			// If a signature was provided, check if the account has a schmoe
@@ -863,7 +877,7 @@ contract ZayTrader{
 		// removeTradeOffer
 		// Remove a TradeOffer that has not yet been executed from the collection and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTradeOffer(tradeOfferResourceID: UInt64){ 
 			let tradeOfferResource <- self.tradeOffers.remove(key: tradeOfferResourceID) ?? panic("missing Listing")
 			
@@ -874,7 +888,7 @@ contract ZayTrader{
 		// getTradeOfferIDs
 		// Returns an array of the TradeOffer resource IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTradeOfferIDs(): [UInt64]{ 
 			return self.tradeOffers.keys
 		}
@@ -882,7 +896,7 @@ contract ZayTrader{
 		// borrowTradeOffer
 		// Returns a read-only view of the TradeOffer for the given tradeOfferResourceID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTradeOffer(tradeOfferResourceID: UInt64): &TradeOffer?{ 
 			if self.tradeOffers[tradeOfferResourceID] != nil{ 
 				return &self.tradeOffers[tradeOfferResourceID] as &ZayTrader.TradeOffer?
@@ -896,7 +910,7 @@ contract ZayTrader{
 		// Anyone can call, but at present it only benefits the account owner to do so.
 		// Kind purchasers can however call it if they like.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(tradeOfferResourceID: UInt64){ 
 			pre{ 
 				self.tradeOffers[tradeOfferResourceID] != nil:
@@ -926,13 +940,13 @@ contract ZayTrader{
 	resource Admin{ 
 		
 		// Update the capability we use to send fees to
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeeReceiver(cap: Capability<&FlowToken.Vault>){ 
 			ZayTrader.feeReceiver = cap
 		}
 		
 		// Update the amount received from fees
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeeAmount(amount: UFix64){ 
 			ZayTrader.feePerTrader = amount
 		}
@@ -942,7 +956,7 @@ contract ZayTrader{
 	// createTradeCollection
 	// Make creating a TradeCollection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTradeCollection(): @TradeCollection{ 
 		return <-create TradeCollection()
 	}
@@ -950,7 +964,7 @@ contract ZayTrader{
 	// createTradeBundle
 	// Make a TradeBundle for transferring many trade assets
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTradeBundle(
 		fungibleAssets: @[{
 			FungibleToken.Vault}

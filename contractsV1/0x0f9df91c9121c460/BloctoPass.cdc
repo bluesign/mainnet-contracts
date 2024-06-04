@@ -1,4 +1,18 @@
-// This is the implementation of BloctoPass, the Blocto Non-Fungible Token
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This is the implementation of BloctoPass, the Blocto Non-Fungible Token
 // that is used in-conjunction with BLT, the Blocto Fungible Token
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -50,64 +64,64 @@ contract BloctoPass: NonFungibleToken{
 	
 	access(all)
 	resource interface BloctoPassPrivate{ 
-		access(all)
-		fun stakeNewTokens(amount: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun stakeNewTokens(amount: UFix64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeUnstakedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeRewardedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawAllUnlockedTokens(): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stampBloctoPass(from: @BloctoPassStamp.NFT)
 	}
 	
 	access(all)
 	resource interface BloctoPassPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOriginalOwner(): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStamps(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVipTier(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakingInfo(): BloctoTokenStaking.StakerInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLockupSchedule():{ UFix64: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLockupAmountAtTimestamp(timestamp: UFix64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLockupAmount(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getIdleBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTotalBalance(): UFix64
 	}
 	
@@ -178,26 +192,26 @@ contract BloctoPass: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			self.vault.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOriginalOwner(): Address?{ 
 			return self.originalOwner
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStamps(): [String]{ 
 			return self.stamps
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVipTier(): UInt64{ 
 			// Disable VIP tier at launch
 			
@@ -210,7 +224,7 @@ contract BloctoPass: NonFungibleToken{
 			return 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLockupSchedule():{ UFix64: UFix64}{ 
 			if self.lockupScheduleId == nil{ 
 				return self.lockupSchedule ??{ 0.0: 0.0}
@@ -218,12 +232,12 @@ contract BloctoPass: NonFungibleToken{
 			return BloctoPass.predefinedLockupSchedules[self.lockupScheduleId!]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakingInfo(): BloctoTokenStaking.StakerInfo{ 
 			return BloctoTokenStaking.StakerInfo(stakerID: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLockupAmountAtTimestamp(timestamp: UFix64): UFix64{ 
 			if self.lockupAmount == 0.0{ 
 				return 0.0
@@ -241,67 +255,67 @@ contract BloctoPass: NonFungibleToken{
 			return lockupPercentage * self.lockupAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLockupAmount(): UFix64{ 
 			return self.getLockupAmountAtTimestamp(timestamp: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getIdleBalance(): UFix64{ 
 			return self.vault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTotalBalance(): UFix64{ 
 			return self.getIdleBalance() + BloctoTokenStaking.StakerInfo(stakerID: self.id).totalTokensInRecord()
 		}
 		
 		// Private staking methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeNewTokens(amount: UFix64){ 
 			self.staker.stakeNewTokens(<-self.vault.withdraw(amount: amount))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeUnstakedTokens(amount: UFix64){ 
 			self.staker.stakeUnstakedTokens(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeRewardedTokens(amount: UFix64){ 
 			self.staker.stakeRewardedTokens(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64){ 
 			self.staker.requestUnstaking(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(){ 
 			self.staker.unstakeAll()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64){ 
 			let vault <- self.staker.withdrawUnstakedTokens(amount: amount)
 			self.vault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64){ 
 			let vault <- self.staker.withdrawRewardedTokens(amount: amount)
 			self.vault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawAllUnlockedTokens(): @{FungibleToken.Vault}{ 
 			let unlockedAmount = self.getTotalBalance() - self.getLockupAmount()
 			let withdrawAmount = unlockedAmount < self.getIdleBalance() ? unlockedAmount : self.getIdleBalance()
 			return <-self.vault.withdraw(amount: withdrawAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stampBloctoPass(from: @BloctoPassStamp.NFT){ 
 			self.stamps.append(from.getMessage())
 			destroy from
@@ -322,13 +336,13 @@ contract BloctoPass: NonFungibleToken{
 	// access the public fields and methods for our BloctoPass Collection
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBloctoPassPublic(id: UInt64): &BloctoPass.NFT
 	}
 	
 	access(all)
 	resource interface CollectionPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBloctoPassPrivate(id: UInt64): &BloctoPass.NFT
 	}
 	
@@ -355,7 +369,7 @@ contract BloctoPass: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BloctoPass.NFT
 			let id: UInt64 = token.id
 			
@@ -380,7 +394,7 @@ contract BloctoPass: NonFungibleToken{
 		
 		// borrowBloctoPassPublic gets the public references to a BloctoPass NFT in the collection
 		// and returns it to the caller as a reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBloctoPassPublic(id: UInt64): &BloctoPass.NFT{ 
 			let bloctoPassRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let intermediateRef = bloctoPassRef as! &BloctoPass.NFT
@@ -389,7 +403,7 @@ contract BloctoPass: NonFungibleToken{
 		
 		// borrowBloctoPassPrivate gets the private references to a BloctoPass NFT in the collection
 		// and returns it to the caller as a reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBloctoPassPrivate(id: UInt64): &BloctoPass.NFT{ 
 			let bloctoPassRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return bloctoPassRef as! &BloctoPass.NFT
@@ -419,8 +433,8 @@ contract BloctoPass: NonFungibleToken{
 	
 	access(all)
 	resource interface MinterPublic{ 
-		access(all)
-		fun mintBasicNFT(recipient: &{NonFungibleToken.CollectionPublic})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintBasicNFT(recipient: &{NonFungibleToken.CollectionPublic}): Void
 	}
 	
 	// Resource that an admin or something similar would own to be
@@ -430,7 +444,7 @@ contract BloctoPass: NonFungibleToken{
 	resource NFTMinter: MinterPublic{ 
 		
 		// adds a new predefined lockup schedule
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setupPredefinedLockupSchedule(lockupSchedule:{ UFix64: UFix64}){ 
 			BloctoPass.predefinedLockupSchedules.append(lockupSchedule)
 			emit LockupScheduleDefined(id: BloctoPass.predefinedLockupSchedules.length, lockupSchedule: lockupSchedule)
@@ -438,26 +452,26 @@ contract BloctoPass: NonFungibleToken{
 		
 		// updates a predefined lockup schedule
 		// note that this function should be avoided 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePredefinedLockupSchedule(id: Int, lockupSchedule:{ UFix64: UFix64}){ 
 			BloctoPass.predefinedLockupSchedules[id] = lockupSchedule
 			emit LockupScheduleUpdated(id: id, lockupSchedule: lockupSchedule)
 		}
 		
 		// mintBasicNFT mints a new NFT without any special metadata or lockups
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBasicNFT(recipient: &{NonFungibleToken.CollectionPublic}){ 
 			self.mintNFT(recipient: recipient, metadata:{} )
 		}
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			self.mintNFTWithCustomLockup(recipient: recipient, metadata: metadata, vault: <-BloctoToken.createEmptyVault(vaultType: Type<@BloctoToken.Vault>()), lockupSchedule:{ 0.0: 0.0})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTWithPredefinedLockup(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}, vault: @{FungibleToken.Vault}, lockupScheduleId: Int?){ 
 			
 			// create a new NFT
@@ -468,7 +482,7 @@ contract BloctoPass: NonFungibleToken{
 			BloctoPass.totalSupply = BloctoPass.totalSupply + UInt64(1)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTWithCustomLockup(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}, vault: @{FungibleToken.Vault}, lockupSchedule:{ UFix64: UFix64}){ 
 			
 			// create a new NFT
@@ -480,7 +494,7 @@ contract BloctoPass: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPredefinedLockupSchedule(id: Int):{ UFix64: UFix64}{ 
 		return self.predefinedLockupSchedules[id]
 	}

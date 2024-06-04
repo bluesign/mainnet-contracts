@@ -1,4 +1,18 @@
-// This is a complete version of the NFTKred contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This is a complete version of the NFTKred contract
 // that includes withdraw and deposit functionality, as well as a
 // collection resource that can be used to bundle NFTs together.
 //
@@ -109,15 +123,15 @@ contract NFTKred: NonFungibleToken{
 	access(all)
 	resource interface NFTKredCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTKred(id: UInt64): &NFTKred.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -161,7 +175,7 @@ contract NFTKred: NonFungibleToken{
 		// Function that takes a NFT as an argument and 
 		// adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// add the new token to the dictionary with a force assignment
 			// if there is already a value at that key, it will fail and revert
 			
@@ -198,7 +212,7 @@ contract NFTKred: NonFungibleToken{
 			return nftKredNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTKred(id: UInt64): &NFTKred.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -249,7 +263,7 @@ contract NFTKred: NonFungibleToken{
 		// mintNFT mints a new NFT with the given batch, sequence and limit combination, by creating a UNIQUE ID
 		// Function that mints a new NFT with a new ID
 		// and returns it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(glink: String, gbatch: UInt32, glimit: UInt16, gsequence: UInt16): @NFT{ 
 			// create a new NFT
 			// Cadence does not allow applying binary operation << to types: `UInt16`, `UInt32`, hence, a small typecasting trick, recommended by FLOW team

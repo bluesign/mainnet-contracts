@@ -1,4 +1,18 @@
-// FUSD Reward for claiming The Inspected Treasure Chest
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// FUSD Reward for claiming The Inspected Treasure Chest
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -42,19 +56,19 @@ contract TreasureChestFUSDReward{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimed():{ UInt64: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getChestIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBonusRewards():{ Address: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBonus(wallet: Address, amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimReward(
 			recipient: &FUSD.Vault,
 			chest: @NFTDayTreasureChest.NFT
@@ -81,22 +95,22 @@ contract TreasureChestFUSDReward{
 			self.bonusRewards ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimed():{ UInt64: Address}{ 
 			return self.claimed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getChestIDs(): [UInt64]{ 
 			return self.rewards.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBonusRewards():{ Address: String}{ 
 			return self.bonusRewards
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBonus(wallet: Address, amount: UFix64){ 
 			pre{ 
 				self.bonusRewards[wallet] == nil:
@@ -113,7 +127,7 @@ contract TreasureChestFUSDReward{
 			emit BonusAdded(wallet: wallet, amount: amount, bonus: bonus)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimReward(recipient: &FUSD.Vault, chest: @NFTDayTreasureChest.NFT): @NFTDayTreasureChest.NFT{ 
 			pre{ 
 				self.rewards[chest.id] != nil:
@@ -135,7 +149,7 @@ contract TreasureChestFUSDReward{
 		// -----------------------------------------------------------------------
 		// Admin Functions
 		// -----------------------------------------------------------------------
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(chestID: UInt64): UFix64?{ 
 			if self.rewards[chestID] != nil{ 
 				let vaultRef: &FUSD.Vault = (&self.rewards[chestID] as &FUSD.Vault?)!
@@ -145,7 +159,7 @@ contract TreasureChestFUSDReward{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminReclaimReward(chestID: UInt64, recipient: &FUSD.Vault){ 
 			pre{ 
 				self.rewards[chestID] != nil:
@@ -157,7 +171,7 @@ contract TreasureChestFUSDReward{
 			emit AdminRewardReclaim(chestID: chestID, rewardAmount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createReward(chestID: UInt64, reward: @FUSD.Vault){ 
 			pre{ 
 				self.rewards[chestID] == nil:
@@ -167,7 +181,7 @@ contract TreasureChestFUSDReward{
 			emit RewardCreated(chestID: chestID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewCentralizedInbox(): @CentralizedInbox{ 
 			return <-create CentralizedInbox()
 		}

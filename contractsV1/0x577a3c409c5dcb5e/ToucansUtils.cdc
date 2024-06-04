@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -20,7 +34,7 @@ import stFlowToken from "../0xd6f80565193ad727/stFlowToken.cdc"
 
 access(all)
 contract ToucansUtils{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ownsNFTFromCatalogCollectionIdentifier(collectionIdentifier: String, user: Address): Bool{ 
 		if let entry: NFTCatalog.NFTCatalogMetadata =
 			NFTCatalog.getCatalogEntry(collectionIdentifier: collectionIdentifier){ 
@@ -50,7 +64,7 @@ contract ToucansUtils{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositTokensToAccount(funds: @{FungibleToken.Vault}, to: Address, publicPath: PublicPath){ 
 		let vault =
 			getAccount(to).capabilities.get<&{FungibleToken.Receiver}>(publicPath).borrow<
@@ -60,7 +74,7 @@ contract ToucansUtils{
 		vault.deposit(from: <-funds)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun rangeFunc(_ start: Int, _ end: Int, _ f: fun (Int): Void){ 
 		var current = start
 		while current < end{ 
@@ -69,7 +83,7 @@ contract ToucansUtils{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun range(_ start: Int, _ end: Int): [Int]{ 
 		var res: [Int] = []
 		self.rangeFunc(start, end, fun (i: Int){ 
@@ -78,7 +92,7 @@ contract ToucansUtils{
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun index(_ s: String, _ substr: String, _ startIndex: Int): Int?{ 
 		for i in self.range(startIndex, s.length - substr.length + 1){ 
 			if s[i] == substr[0] && s.slice(from: i, upTo: i + substr.length) == substr{ 
@@ -88,7 +102,7 @@ contract ToucansUtils{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFind(_ address: Address): String{ 
 		if let name = FIND.reverseLookup(address){ 
 			return name.concat(".find")
@@ -96,7 +110,7 @@ contract ToucansUtils{
 		return address.toString()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fixToReadableString(num: UFix64): String{ 
 		let numToString: String = num.toString()
 		let indexOfDot: Int = ToucansUtils.index(numToString, ".", 1)!
@@ -104,7 +118,7 @@ contract ToucansUtils{
 	}
 	
 	// stringAddress DOES NOT include the `0x`
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stringToAddress(stringAddress: String): Address{ 
 		var r: UInt64 = 0
 		var bytes: [UInt8] = stringAddress.decodeHex()
@@ -116,7 +130,7 @@ contract ToucansUtils{
 	
 	// returns:
 	// [address, contractname]
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressAndContractNameFromCollectionIdentifier(identifier: String): [AnyStruct]{ 
 		let address: Address =
 			self.stringToAddress(stringAddress: identifier.slice(from: 2, upTo: 18))
@@ -124,7 +138,7 @@ contract ToucansUtils{
 		return [address, contractName]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEstimatedOut(amountIn: UFix64, tokenInKey: String): UFix64{ 
 		// normal xyk pool
 		let poolCapV1 =
@@ -150,7 +164,7 @@ contract ToucansUtils{
 		return estimatedSwapOut
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapTokensWithPotentialStake(inVault: @{FungibleToken.Vault}, tokenInKey: String): @{
 		FungibleToken.Vault
 	}{ 
@@ -181,7 +195,7 @@ contract ToucansUtils{
 		return <-estimatedSwapPoolCap.swap(vaultIn: <-inVault, exactAmountOut: nil)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTCatalogCollectionIdentifierFromCollectionIdentifier(
 		collectionIdentifier: String
 	): String{ 

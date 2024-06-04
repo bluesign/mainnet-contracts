@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import StringUtils from "./../../standardsV1/StringUtils.cdc"
 
@@ -13,13 +27,13 @@ access(all)
 contract ScopedFTProviders{ 
 	access(all)
 	struct interface FTFilter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canWithdrawAmount(_ amount: UFix64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAmountWithdrawn(_ amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails():{ String: AnyStruct}
 	}
 	
@@ -36,17 +50,17 @@ contract ScopedFTProviders{
 			self.allowanceUsed = 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canWithdrawAmount(_ amount: UFix64): Bool{ 
 			return amount + self.allowanceUsed <= self.allowance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAmountWithdrawn(_ amount: UFix64){ 
 			self.allowanceUsed = self.allowanceUsed + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails():{ String: AnyStruct}{ 
 			return{ "allowance": self.allowance, "allowanceUsed": self.allowanceUsed}
 		}
@@ -68,19 +82,19 @@ contract ScopedFTProviders{
 		access(self)
 		let expiration: UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(provider: Capability<&{FungibleToken.Provider}>, filters: [{FTFilter}], expiration: UFix64?){ 
 			self.provider = provider
 			self.filters = filters
 			self.expiration = expiration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun check(): Bool{ 
 			return self.provider.check()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isExpired(): Bool{ 
 			if let expiration = self.expiration{ 
 				return getCurrentBlock().timestamp >= expiration
@@ -88,7 +102,7 @@ contract ScopedFTProviders{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canWithdraw(_ amount: UFix64): Bool{ 
 			if self.isExpired(){ 
 				return false
@@ -118,7 +132,7 @@ contract ScopedFTProviders{
 			return <-(self.provider.borrow()!).withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): [{String: AnyStruct}]{ 
 			let details: [{String: AnyStruct}] = []
 			for filter in self.filters{ 
@@ -138,7 +152,7 @@ contract ScopedFTProviders{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createScopedFTProvider(
 		provider: Capability<&{FungibleToken.Provider}>,
 		filters: [{

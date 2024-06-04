@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Staking NFTs to farm
 # Multi-farming, staking seed `NFT` to get multiple ft rewards from a pool.
@@ -411,37 +425,37 @@ contract StakingNFT{
 	access(all)
 	struct interface INFTVerifier{ 
 		// Returns true if valid, otherwise false
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(nftRef: &{NonFungibleToken.NFT}, extraParams:{ String: AnyStruct}): Bool
 	}
 	
 	// store pools in collection 
 	access(all)
 	resource interface PoolCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStakingPool(
-			adminRef: &Admin?,
+			adminRef: &StakingNFT.Admin?,
 			poolAdminAddr: Address,
 			limitAmount: UInt64,
 			collection: @{NonFungibleToken.Collection},
 			rewards: [
-				RewardInfo
+				StakingNFT.RewardInfo
 			],
 			verifiers: [{
-				INFTVerifier}
+				StakingNFT.INFTVerifier}
 			],
 			extraParams:{ 
 				String: AnyStruct
 			}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionLength(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPool(pid: UInt64): &{PoolPublic}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlicedPoolInfo(from: UInt64, to: UInt64): [PoolInfo]
 	}
 	
@@ -449,59 +463,59 @@ contract StakingNFT{
 	// use userCertificateCap to verify user and record user's address
 	access(all)
 	resource interface PoolPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewReward(
-			adminRef: &Admin?,
-			poolAdminRef: &PoolAdmin,
+			adminRef: &StakingNFT.Admin?,
+			poolAdminRef: &StakingNFT.PoolAdmin,
 			newRewardToken: @{FungibleToken.Vault},
 			rewardPerSession: UFix64,
 			sessionInterval: UFix64,
 			startTimestamp: UFix64?
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendReward(rewardTokenVault: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun boostReward(rewardPerSessionToAdd: UFix64, rewardToken: @{FungibleToken.Vault}): @{
 			FungibleToken.Vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stake(staker: Address, nft: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstake(userCertificateCap: Capability<&UserCertificate>, tokenId: UInt64): @{
 			NonFungibleToken.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimRewards(userCertificateCap: Capability<&UserCertificate>): @{
 			String:{ FungibleToken.Vault}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolInfo(): PoolInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardInfo():{ String: RewardInfo}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserInfo(address: Address): UserInfo?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlicedUserInfo(from: UInt64, to: UInt64): [UserInfo]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers(): [{INFTVerifier}]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraParams():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setClear(adminRef: &Admin?, poolAdminRef: &PoolAdmin): @{String:{ FungibleToken.Vault}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUserBlockedStatus(
 			adminRef: &Admin?,
 			poolAdminRef: &PoolAdmin,
@@ -509,7 +523,7 @@ contract StakingNFT{
 			flag: Bool
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePool()
 	}
 	
@@ -587,7 +601,7 @@ contract StakingNFT{
 	// staking admin resource for manage staking contract
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(_ flag: Bool){ 
 			pre{ 
 				StakingNFT.pause != flag:
@@ -597,7 +611,7 @@ contract StakingNFT{
 			emit PauseStateChanged(pauseFlag: flag, operator: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIsPermissionless(_ flag: Bool){ 
 			pre{ 
 				StakingNFT.isPermissionless != flag:
@@ -683,7 +697,7 @@ contract StakingNFT{
 		}
 		
 		// update pool rewards info before any user action
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePool(){ 
 			if self.rewardsInfo.length == 0{ 
 				return
@@ -759,7 +773,7 @@ contract StakingNFT{
 			return <-vaults
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimRewards(userCertificateCap: Capability<&UserCertificate>): @{String:{ FungibleToken.Vault}}{ 
 			pre{ 
 				userCertificateCap.check() && (userCertificateCap.borrow()!).owner != nil:
@@ -772,7 +786,7 @@ contract StakingNFT{
 		
 		// Add a new type of reward to the pool.
 		// Reward starts immediately if no starttime is given.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewReward(adminRef: &Admin?, poolAdminRef: &PoolAdmin, newRewardToken: @{FungibleToken.Vault}, rewardPerSession: UFix64, sessionInterval: UFix64, startTimestamp: UFix64?){ 
 			pre{ 
 				adminRef != nil || (poolAdminRef.owner!).address == self.creator:
@@ -792,7 +806,7 @@ contract StakingNFT{
 		
 		// Extend the end time of an existing type of reward.
 		// Note: Caller ensures rewardInfo of the added token has been setup already
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendReward(rewardTokenVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				rewardTokenVault.balance > 0.0:
@@ -829,7 +843,7 @@ contract StakingNFT{
 		// Boost the apr of an existing type of reward token by increasing rewardPerSession. This doesn't extend the reward window.
 		// Return: any remaining reward token not added in.
 		// Note: Caller ensures rewardInfo of the added token has been setup already.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun boostReward(rewardPerSessionToAdd: UFix64, rewardToken: @{FungibleToken.Vault}): @{FungibleToken.Vault}{ 
 			pre{ 
 				rewardToken.balance > 0.0:
@@ -854,7 +868,7 @@ contract StakingNFT{
 			return <-rewardToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun eligibilityCheck(nftRef: &{NonFungibleToken.NFT}, extraParams:{ String: AnyStruct}): Bool{ 
 			for verifier in self.verifiers{ 
 				if verifier.verify(nftRef: nftRef, extraParams: extraParams) == false{ 
@@ -865,7 +879,7 @@ contract StakingNFT{
 		}
 		
 		// Deposit staking token on behalf of staker
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stake(staker: Address, nft: @{NonFungibleToken.NFT}){ 
 			pre{ 
 				self.status == PoolStatus.RUNNING || self.status == PoolStatus.CREATED:
@@ -908,7 +922,7 @@ contract StakingNFT{
 		}
 		
 		// Withdraw and return seed staking token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstake(userCertificateCap: Capability<&UserCertificate>, tokenId: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.stakingNFTCollection.getIDs().contains(tokenId):
@@ -932,23 +946,23 @@ contract StakingNFT{
 			return <-self.stakingNFTCollection.withdraw(withdrawID: tokenId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolInfo(): PoolInfo{ 
 			let poolInfo = PoolInfo(pid: self.pid, status: self.status.rawValue.toString(), rewardsInfo: self.rewardsInfo, limitAmount: self.limitAmount, totalStaking: UInt64(self.stakingNFTCollection.getIDs().length), acceptedNFTKey: self.acceptedNFTKey, creator: self.creator, verifiers: self.verifiers)
 			return poolInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardInfo():{ String: RewardInfo}{ 
 			return self.rewardsInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserInfo(address: Address): UserInfo?{ 
 			return self.usersInfo[address]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlicedUserInfo(from: UInt64, to: UInt64): [UserInfo]{ 
 			pre{ 
 				from <= to && from < UInt64(self.usersInfo.length):
@@ -967,18 +981,18 @@ contract StakingNFT{
 			return list
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers(): [{INFTVerifier}]{ 
 			return self.verifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraParams():{ String: AnyStruct}{ 
 			return self.extraParams
 		}
 		
 		// Mark ENDED pool as CLEARED after all staking tokens are withdrawn, and reclaim remaining rewards if any.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setClear(adminRef: &Admin?, poolAdminRef: &PoolAdmin): @{String:{ FungibleToken.Vault}}{ 
 			pre{ 
 				adminRef != nil || (poolAdminRef.owner!).address == self.creator:
@@ -1002,7 +1016,7 @@ contract StakingNFT{
 			return <-vaults
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUserBlockedStatus(adminRef: &Admin?, poolAdminRef: &PoolAdmin, address: Address, flag: Bool){ 
 			pre{ 
 				adminRef != nil || (poolAdminRef.owner!).address == self.creator:
@@ -1024,7 +1038,7 @@ contract StakingNFT{
 		access(self)
 		let pools: @{UInt64: Pool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStakingPool(adminRef: &Admin?, poolAdminAddr: Address, limitAmount: UInt64, collection: @{NonFungibleToken.Collection}, rewards: [RewardInfo], verifiers: [{INFTVerifier}], extraParams:{ String: AnyStruct}){ 
 			pre{ 
 				StakingNFT.isPermissionless || adminRef != nil:
@@ -1042,12 +1056,12 @@ contract StakingNFT{
 			self.pools[newPid] <-! pool
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionLength(): Int{ 
 			return self.pools.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPool(pid: UInt64): &{PoolPublic}{ 
 			pre{ 
 				self.pools[pid] != nil:
@@ -1057,7 +1071,7 @@ contract StakingNFT{
 			return poolRef as &{PoolPublic}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlicedPoolInfo(from: UInt64, to: UInt64): [PoolInfo]{ 
 			pre{ 
 				from <= to && from < UInt64(self.pools.length):
@@ -1082,7 +1096,7 @@ contract StakingNFT{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun updatePool(pid: UInt64){ 
 		let collectionCap =
 			StakingNFT.account.capabilities.get<&{StakingNFT.PoolCollectionPublic}>(
@@ -1093,20 +1107,20 @@ contract StakingNFT{
 	}
 	
 	// setup poolAdmin resource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupPoolAdmin(): @PoolAdmin{ 
 		let poolAdmin <- create PoolAdmin()
 		return <-poolAdmin
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupUser(): @UserCertificate{ 
 		let certificate <- create UserCertificate()
 		return <-certificate
 	}
 	
 	// get [id] of pools that given user participates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUserStakingIds(address: Address): [UInt64]{ 
 		let ids = self.userStakingIds[address]
 		if ids == nil{ 
@@ -1117,7 +1131,7 @@ contract StakingNFT{
 	}
 	
 	/// "A.2d4c3caffbeab845.FLOAT.Collection" -> "A.2d4c3caffbeab845.FLOAT"
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTType(collectionIdentifier: String): String{ 
 		return collectionIdentifier.slice(from: 0, upTo: collectionIdentifier.length - 11)
 	}

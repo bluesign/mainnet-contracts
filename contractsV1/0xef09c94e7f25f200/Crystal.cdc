@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import Shard from "../0x82b54037a8f180cf/Shard.cdc"
 
@@ -26,15 +40,15 @@ contract Crystal: NonFungibleToken{
 	access(all)
 	resource interface CrystalCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCrystalNFT(id: UInt64): &Crystal.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -80,7 +94,7 @@ contract Crystal: NonFungibleToken{
 		
 		// Takes a NFT and adds it to the collections dictionary and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Crystal.NFT
 			let id: UInt64 = token.id
 			
@@ -103,7 +117,7 @@ contract Crystal: NonFungibleToken{
 		}
 		
 		// Gets a reference to the Crystal NFT for metadata and such
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCrystalNFT(id: UInt64): &Crystal.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -137,7 +151,7 @@ contract Crystal: NonFungibleToken{
 	access(all)
 	resource Admin{ 
 		// Mints a new NFT with a new ID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{Crystal.CrystalCollectionPublic}, clipID: UInt32){ 
 			// Creates a new NFT with provided arguments
 			var newNFT <- create NFT(initID: Crystal.totalSupply)
@@ -147,7 +161,7 @@ contract Crystal: NonFungibleToken{
 		}
 		
 		// Creates a new Admin resource to be given to an account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -159,7 +173,7 @@ contract Crystal: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkCanMerge(shards: [&Shard.NFT]): Bool{ 
 		pre{ 
 			shards.length > 0:
@@ -178,7 +192,7 @@ contract Crystal: NonFungibleToken{
 	}
 	
 	// Merge multiple Shard NFTs to receive a Crystal NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun merge(shards: [&Shard.NFT]): @NFT?{ 
 		// Make sure the sequence of each Shard matches
 		Crystal.checkCanMerge(shards: shards)

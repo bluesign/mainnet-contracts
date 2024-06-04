@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract IrVoucher: NonFungibleToken{ 
@@ -85,18 +99,18 @@ contract IrVoucher: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVoucher(id: UInt64): &NFT?
 	}
 	
@@ -130,7 +144,7 @@ contract IrVoucher: NonFungibleToken{
 		// Function that takes a NFT as an argument and
 		// adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @IrVoucher.NFT
 			let id: UInt64 = token.id
 			
@@ -141,7 +155,7 @@ contract IrVoucher: NonFungibleToken{
 		
 		// idExists checks to see if a NFT
 		// with the given ID exists in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -162,7 +176,7 @@ contract IrVoucher: NonFungibleToken{
 		}
 		
 		// borrowVoucher
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVoucher(id: UInt64): &IrVoucher.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -217,7 +231,7 @@ contract IrVoucher: NonFungibleToken{
 		//
 		// Function that mints a new NFT with a new ID
 		// and returns it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(dropID: UInt32, serial: UInt32): @IrVoucher.NFT{ 
 			
 			// Create a new NFT

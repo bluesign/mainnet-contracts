@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -105,17 +119,17 @@ contract Doodles: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassifier(): String{ 
 			return "set"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounterSuffix(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContract(): String{ 
 			return "doodles"
 		}
@@ -142,17 +156,17 @@ contract Doodles: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassifier(): String{ 
 			return "species"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounterSuffix(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContract(): String{ 
 			return "doodles"
 		}
@@ -200,32 +214,32 @@ contract Doodles: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassifier(): String{ 
 			return "doodles"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounterSuffix(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContract(): String{ 
 			return "doodles"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSpecies(): Doodles.Species{ 
 			return Doodles.species[self.species]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSet(): Doodles.Set{ 
 			return Doodles.sets[self.set]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): [MetadataViews.Trait]{ 
 			let t: [MetadataViews.Trait] = []
 			for v in self.baseCharacterTraits.values{ 
@@ -236,7 +250,7 @@ contract Doodles: NonFungibleToken{
 			return t
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraitsAsMap():{ String: String}{ 
 			let t:{ String: String} ={} 
 			for key in self.baseCharacterTraits.keys{ 
@@ -327,12 +341,12 @@ contract Doodles: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTrait(): MetadataViews.Trait{ 
 			return MetadataViews.Trait(name: "trait_".concat(self.name), value: self.value, displayType: "string", rarity: nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraitAsMap():{ String: String}{ 
 			let t = self.tag
 			t["name"] = self.name
@@ -398,7 +412,7 @@ contract Doodles: NonFungibleToken{
 			return keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSet(): Set{ 
 			return self.baseCharacter.getSet()
 		}
@@ -411,7 +425,7 @@ contract Doodles: NonFungibleToken{
 			return (&self.wearables[id] as &Wearables.NFT?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContext():{ String: String}{ 
 			return self.context
 		}
@@ -469,25 +483,25 @@ contract Doodles: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetActive(): Bool{ 
 			let t = Doodles.sets[self.baseCharacter.set]!
 			return t.active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSpeciesActive(): Bool{ 
 			let t = Doodles.species[self.baseCharacter.species]!
 			return t.active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBaseCharacterActive(): Bool{ 
 			let t = Doodles.baseCharacters[self.baseCharacter.id]!
 			return t.active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActive(_ classifier: String): Bool{ 
 			switch classifier{ 
 				case "baseCharacter":
@@ -500,7 +514,7 @@ contract Doodles: NonFungibleToken{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String?{ 
 			if let id = self.getNameId(){ 
 				let ref = self.borrowName(id)
@@ -509,7 +523,7 @@ contract Doodles: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameId(): UInt64?{ 
 			if self.name.length > 0{ 
 				return self.name.keys[0]
@@ -517,13 +531,13 @@ contract Doodles: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties.getRoyalties()
 		}
 		
 		//This needs to change
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWearablesAt(_ position: UInt64): [UInt64]{ 
 			//map from index to resourceId
 			let ids:{ UInt64: UInt64} ={} 
@@ -543,7 +557,7 @@ contract Doodles: NonFungibleToken{
 		}
 		
 		//todo: collapse
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDoodle(wearableCollection: &Wearables.Collection, equipped: [UInt64], quote: String, expression: String, mood: String, background: String, hairStyle: String, hairColor: String, facialHair: String, facialHairColor: String, skinTone: String, pose: String, stage: String, location: String){ 
 			let existingIds = self.wearables.keys
 			for wId in existingIds{ 
@@ -585,12 +599,12 @@ contract Doodles: NonFungibleToken{
 		}
 		
 		//expand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun editDoodle(wearableCollection: &{NonFungibleToken.Collection}, equipped: [UInt64], quote: String, expression: String, mood: String, background: String, hairStyle: String, hairColor: String, facialHair: String, facialHairColor: String, skinTone: String, pose: String, stage: String, location: String, hairPinched: Bool, hideExpression: Bool){ 
 			self.internalEditDoodle(wearableReceiver: wearableCollection, wearableProviders: [wearableCollection], equipped: equipped, quote: quote, expression: expression, mood: mood, background: background, hairStyle: hairStyle, hairColor: hairColor, facialHair: facialHair, facialHairColor: facialHairColor, skinTone: skinTone, pose: pose, stage: stage, location: location, hairPinched: hairPinched, hideExpression: hideExpression)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun editDoodleWithMultipleCollections(receiverWearableCollection: &{NonFungibleToken.Receiver}, wearableCollections: [&{NonFungibleToken.CollectionPublic, NonFungibleToken.Provider}], equipped: [UInt64], quote: String, expression: String, mood: String, background: String, hairStyle: String, hairColor: String, facialHair: String, facialHairColor: String, skinTone: String, pose: String, stage: String, location: String, hairPinched: Bool, hideExpression: Bool){ 
 			self.internalEditDoodle(wearableReceiver: receiverWearableCollection, wearableProviders: wearableCollections, equipped: equipped, quote: quote, expression: expression, mood: mood, background: background, hairStyle: hairStyle, hairColor: hairColor, facialHair: facialHair, facialHairColor: facialHairColor, skinTone: skinTone, pose: pose, stage: stage, location: location, hairPinched: hairPinched, hideExpression: hideExpression)
 		}
@@ -657,7 +671,7 @@ contract Doodles: NonFungibleToken{
 			self.name[nft.id] <-! nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun equipName(_ nft: @DoodleNames.NFT){ 
 			pre{ 
 				self.name.length == 0:
@@ -734,29 +748,29 @@ contract Doodles: NonFungibleToken{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWearable(_ id: UInt64): &Wearables.NFT{ 
 			return (&self.wearables[id] as &Wearables.NFT?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowName(_ id: UInt64): &DoodleNames.NFT{ 
 			return (&self.name[id] as &DoodleNames.NFT?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWearableViewResolver(_ id: UInt64): &{ViewResolver.Resolver}{ 
 			let nft = (&self.wearables[id] as &Wearables.NFT?)!
 			let wearable = nft as! &Wearables.NFT
 			return wearable
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraitsAsTraits(): MetadataViews.Traits{ 
 			let traits = self.getAllTraitsMetadata()
 			let res: [MetadataViews.Trait] = []
@@ -766,7 +780,7 @@ contract Doodles: NonFungibleToken{
 			return MetadataViews.Traits(res)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTraitsMetadata():{ String: [MetadataViews.Trait]}{ 
 			var traitMetadata: [MetadataViews.Trait] = self.baseCharacter.getTraits()
 			let wearableTraits = self.getWearableTraits()
@@ -783,7 +797,7 @@ contract Doodles: NonFungibleToken{
 			return wearableTraits
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameTrait(): MetadataViews.Trait?{ 
 			if let name = self.getName(){ 
 				return MetadataViews.Trait(name: "doodle_name", value: name, displayType: "string", rarity: nil)
@@ -792,12 +806,12 @@ contract Doodles: NonFungibleToken{
 		}
 		
 		//b64(<doodleName>-<pose value>-<expression value>-<skinTone value>-<hairStyle value>-<hairColor value>-<id of doodle>-[<array of equipped NFT Ids>])
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateDNA(): String{ 
 			return self.calculateDNACustom(sep: "|", encode: true)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateDNACustom(sep: String, encode: Bool): String{ 
 			let seperator = sep
 			let traits = self.baseCharacter.getTraitsAsMap()
@@ -832,7 +846,7 @@ contract Doodles: NonFungibleToken{
 			return Doodles.base64encode(dna)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWearableTraits():{ String: [MetadataViews.Trait]}{ 
 			let traitsToKeep = ["name", "position", "set", "layer"]
 			let mvt:{ String: [MetadataViews.Trait]} ={} 
@@ -873,16 +887,16 @@ contract Doodles: NonFungibleToken{
 	access(all)
 	resource interface DoodlesCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowDoodlesNFT(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowDoodlesNFT(id: UInt64): &Doodles.NFT
 	}
 	
 	access(all)
@@ -907,7 +921,7 @@ contract Doodles: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			token.increaseNounce()
@@ -930,7 +944,7 @@ contract Doodles: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDoodlesNFT(id: UInt64): &NFT{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let doodles = nft as! &NFT
@@ -944,7 +958,7 @@ contract Doodles: NonFungibleToken{
 			return doodles
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSubCollection(id: UInt64): &{ViewResolver.ResolverCollection}?{ 
 			let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			if nft == nil{ 
@@ -976,7 +990,7 @@ contract Doodles: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintDoodle(recipient: &{NonFungibleToken.Receiver}, betaPass: @Wearables.NFT, doodleName: String, baseCharacter: UInt64){ 
 		pre{ 
 			recipient.owner != nil:
@@ -1046,7 +1060,7 @@ contract Doodles: NonFungibleToken{
 	
 	//MOVE TO UTIL
 	//https://forum.onflow.org/t/base64-encode-in-cadence/1915/6
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun base64encode(_ input: String): String{ 
 		let data = input.utf8
 		let baseChars: [String] = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"]

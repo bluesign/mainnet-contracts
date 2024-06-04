@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -162,7 +176,7 @@ contract Fomopoly: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @Fomopoly.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -177,7 +191,7 @@ contract Fomopoly: FungibleToken{
 		// Note: the burned tokens are automatically subtracted from the
 		// total supply in the Vault destructor.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(amount: UFix64){ 
 			pre{ 
 				self.balance >= amount:
@@ -189,7 +203,7 @@ contract Fomopoly: FungibleToken{
 			emit TokensBurned(amount: amount, from: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bridgeTokens(amount: UFix64, to: String){ 
 			pre{ 
 				self.balance >= amount:
@@ -234,7 +248,7 @@ contract Fomopoly: FungibleToken{
 	}
 	
 	// Mint FMP by burning inscription
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintTokensByBurn(collectionRef: &Inscription.Collection, burnedIds: [UInt64]): @Fomopoly.Vault{ 
 		pre{ 
 			collectionRef.getIDs().length > 0:
@@ -258,7 +272,7 @@ contract Fomopoly: FungibleToken{
 		return <-create Vault(balance: mintedAmount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stakingInscription(flowVault: @{FungibleToken.Vault}, collectionRef: &Inscription.Collection, stakeIds: [UInt64]){ 
 		pre{ 
 			collectionRef.owner != nil:
@@ -282,7 +296,7 @@ contract Fomopoly: FungibleToken{
 		emit InscriptionStaked(stakeIds: stakeIds, from: ownerAddress)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimStakingReward(identityCollectionRef: &Fomopoly.Vault, inscriptionCollectionRef: &Inscription.Collection){ 
 		pre{ 
 			getCurrentBlock().timestamp >= self.stakingEndTime:
@@ -297,7 +311,7 @@ contract Fomopoly: FungibleToken{
 		self.markStakingInfoClaimed(address: ownerAddress!)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun partialUnstake(collection: &Inscription.Collection){ 
 		let ownerAddress = collection.owner?.address
 		assert(ownerAddress != nil, message: "Owner not found!")
@@ -316,7 +330,7 @@ contract Fomopoly: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun bridgeTokens(flowVault: @{FungibleToken.Vault}, vault: &Fomopoly.Vault, to: String){ 
 		assert(flowVault.balance >= 1.5, message: "Bridging fee should be at least 1.5 Flow")
 		self.flowVault.deposit(from: <-flowVault)
@@ -342,7 +356,7 @@ contract Fomopoly: FungibleToken{
 	}
 	
 	// scripts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasRewardToClaim(address: Address): Bool{ 
 		let infos: [Fomopoly.StakingInfo] = self.stakingInfoMap[address] ?? []
 		for info in infos{ 
@@ -353,19 +367,19 @@ contract Fomopoly: FungibleToken{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stakingInfo(address: Address): [Fomopoly.StakingInfo]{ 
 		return self.stakingInfoMap[address] ?? []
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stakingModel(address: Address): &[Fomopoly.StakingModel]?{ 
 		let mapRef: &{Address: [StakingModel]} = &self.stakingModelMap as auth(Mutate) &{Address: [StakingModel]}
 		let models: &[StakingModel]? = mapRef[address] as &[Fomopoly.StakingModel]?
 		return models
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasInscriptionToUnstake(address: Address): Bool{ 
 		let mapRef: &{Address: [StakingModel]} = &self.stakingModelMap as auth(Mutate) &{Address: [StakingModel]}
 		if mapRef[address] != nil{ 
@@ -375,7 +389,7 @@ contract Fomopoly: FungibleToken{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun totalScore(endTime: UFix64): UFix64{ 
 		let keys = self.stakingInfoMap.keys
 		var finalScore: UFix64 = 0.0
@@ -386,7 +400,7 @@ contract Fomopoly: FungibleToken{
 		return finalScore
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateScore(address: Address, endTime: UFix64, includeClaimed: Bool): UFix64{ 
 		if endTime < self.stakingStartTime{ 
 			return 0.0
@@ -411,12 +425,12 @@ contract Fomopoly: FungibleToken{
 		return finalScore
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun totalStaker(): [Address]{ 
 		return self.stakingInfoMap.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun predictScore(address: Address, amount: Int, endTime: UFix64): UFix64{ 
 		if getCurrentBlock().timestamp > endTime{ 
 			return 0.0
@@ -431,7 +445,7 @@ contract Fomopoly: FungibleToken{
 		return score
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun totalStakedAmount(address: Address): Int{ 
 		let infos = self.stakingInfoMap[address] ?? []
 		var sum: Int = 0
@@ -441,7 +455,7 @@ contract Fomopoly: FungibleToken{
 		return sum
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun totalStaked(): Int{ 
 		var sum: Int = 0
 		for infos in self.stakingInfoMap.values{ 
@@ -452,7 +466,7 @@ contract Fomopoly: FungibleToken{
 		return sum
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun vaultBalance(): UFix64{ 
 		return self.flowVault.balance
 	}
@@ -534,7 +548,7 @@ contract Fomopoly: FungibleToken{
 			self.inscriptionCollection <- inscriptionCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawCollection(): @Inscription.Collection{ 
 			assert(self.inscriptionCollection != nil, message: "Collection not exist!")
 			let collection <- self.inscriptionCollection <- nil
@@ -564,7 +578,7 @@ contract Fomopoly: FungibleToken{
 	resource Administrator{ 
 		// updateStakingStartTime
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStakingTime(start: UFix64, end: UFix64){ 
 			post{ 
 				Fomopoly.stakingEndTime > Fomopoly.stakingStartTime:
@@ -574,17 +588,17 @@ contract Fomopoly: FungibleToken{
 			Fomopoly.stakingEndTime = end
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStakingDivisor(divisor: UFix64){ 
 			Fomopoly.stakingDivisor = divisor
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBurningDivisor(divisor: UFix64){ 
 			Fomopoly.burningDivisor = divisor
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun compensate(receiver: Address, burnedIds: [UInt64], txHash: String): @Fomopoly.Vault{ 
 			let mintedAmount = UFix64(burnedIds.length) / Fomopoly.burningDivisor
 			emit Compensate(receiver: receiver, burnedIds: burnedIds, txHash: txHash, amount: mintedAmount)

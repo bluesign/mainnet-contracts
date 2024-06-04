@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -124,7 +138,7 @@ contract Meme: NonFungibleToken{
 		
 		/// Update metadata
 		/// Updates the metadata key by key and reassign the original one
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(metadata:{ String: AnyStruct}){ 
 			for key in metadata.keys{ 
 				self.metadata[key] = metadata[key]
@@ -140,15 +154,15 @@ contract Meme: NonFungibleToken{
 	access(all)
 	resource interface NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMemeNFT(id: UInt64): &Meme.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -159,7 +173,7 @@ contract Meme: NonFungibleToken{
 	
 	access(all)
 	resource interface NFTTemplate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun template(id: UInt64, title: String, hash: String)
 	}
 	
@@ -185,7 +199,7 @@ contract Meme: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Meme.NFT
 			let id: UInt64 = token.id
 			
@@ -203,7 +217,7 @@ contract Meme: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, title: String, description: String, hash: String, tags: String, payment: @{FungibleToken.Vault}?){ 
 			// destroy payment for now
 			destroy payment
@@ -241,7 +255,7 @@ contract Meme: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMemeNFT(id: UInt64): &Meme.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -286,7 +300,7 @@ contract Meme: NonFungibleToken{
 	resource Administrator{ 
 		
 		/// Create a new empty collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEmptyCollection(): @{NonFungibleToken.Collection}{ 
 			return <-create Collection()
 		}

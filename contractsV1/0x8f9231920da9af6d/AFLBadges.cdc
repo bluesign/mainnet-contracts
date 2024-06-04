@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
  * @title AFLBadges
  * @author Julian Rutherford aka j00lz
  * @notice This smart contract is used to manage AFL badges.
@@ -66,13 +80,13 @@ contract AFLBadges{
 	
 	// Public Read access functions
 	/// @notice Returns a badge with the given ID, or nil if not found.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBadge(id: UInt64): Badge?{ 
 		return self.badges[id]
 	}
 	
 	/// @notice Returns an array containing all badges.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBadges(): [Badge]{ 
 		return self.badges.values
 	}
@@ -83,7 +97,7 @@ contract AFLBadges{
 		 * @return An array of badges associated with the template ID.
 		 **/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBadgesForTemplate(id: UInt64): [Badge]{ 
 		let badgeIds = self.badgeIdsByTemplateId[id]
 		if badgeIds == nil{ 
@@ -103,7 +117,7 @@ contract AFLBadges{
 		 * @return A dictionary with keys of template IDs and corresponding arrays of badges.
 		 **/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBadgesForTemplates(ids: [UInt64]):{ UInt64: [Badge]}{ 
 		var badgesByTemplateId:{ UInt64: [Badge]} ={} 
 		for id in ids{ 
@@ -118,7 +132,7 @@ contract AFLBadges{
 		 * @return An array of template IDs associated with the badge ID.
 		 */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplatesForBadge(id: UInt64): [UInt64]{ 
 		let templateIds: [UInt64] = []
 		for templateId in self.badgeIdsByTemplateId.keys{ 
@@ -146,7 +160,7 @@ contract AFLBadges{
 				 * @param imageUrl The image URL of the badge.
 				 **/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBadge(name: String, description: String, imageUrl: String): UInt64{ 
 			let badge =
 				Badge(
@@ -174,7 +188,7 @@ contract AFLBadges{
 				* @param imageUrl The new image URL of the badge.
 				**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBadge(id: UInt64, name: String, description: String, imageUrl: String){ 
 			let badge = Badge(id: id, name: name, description: description, imageUrl: imageUrl)
 			AFLBadges.badges[id] = badge
@@ -192,7 +206,7 @@ contract AFLBadges{
 				* @param badgeId The ID of the badge to remove.
 				**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBadge(id: UInt64){ 
 			// remove badge from all templates
 			for templateId in AFLBadges.badgeIdsByTemplateId.keys{ 
@@ -212,7 +226,7 @@ contract AFLBadges{
 				* @param templateId The ID of the template to add the badge to.
 				**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBadgeToTemplate(badgeId: UInt64, templateId: UInt64){ 
 			pre{ 
 				AFLBadges.badges[badgeId] != nil:
@@ -231,7 +245,7 @@ contract AFLBadges{
 				* @param templateIds The IDs of the templates to add the badge to.
 				**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBadgeToTemplates(badgeId: UInt64, templateIds: [UInt64]){ 
 			for id in templateIds{ 
 				self.addBadgeToTemplate(badgeId: badgeId, templateId: id)
@@ -244,7 +258,7 @@ contract AFLBadges{
 				* @param templateId The ID of the template to remove the badge from.
 				**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBadgeFromTemplate(badgeId: UInt64, templateId: UInt64){ 
 			pre{ 
 				AFLBadges.badges[badgeId] != nil:
@@ -266,7 +280,7 @@ contract AFLBadges{
 				* @param templateId The ID of the template to remove the badge from.
 				**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBadgeFromTemplates(badgeId: UInt64, templateIds: [UInt64]){ 
 			for id in templateIds{ 
 				self.removeBadgeFromTemplate(badgeId: badgeId, templateId: id)

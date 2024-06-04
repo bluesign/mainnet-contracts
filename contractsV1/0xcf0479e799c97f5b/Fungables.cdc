@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -30,7 +44,7 @@ contract Fungables: NonFungibleToken{
 	access(all)
 	var totalSupply: UInt64
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemPrice(): UFix64{ 
 		return 5.0
 	}
@@ -44,12 +58,12 @@ contract Fungables: NonFungibleToken{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return "One (1) Fungable"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return "Brought to you by Steamclock"
 		}
@@ -77,15 +91,15 @@ contract Fungables: NonFungibleToken{
 	access(all)
 	resource interface FungablesCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFungable(id: UInt64): &Fungables.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -109,7 +123,7 @@ contract Fungables: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Fungables.NFT
 			let id: UInt64 = token.id
 			
@@ -129,7 +143,7 @@ contract Fungables: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFungable(id: UInt64): &Fungables.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -166,7 +180,7 @@ contract Fungables: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}){ 
 			// deposit it in the recipient's account using their reference
 			recipient.deposit(token: <-create Fungables.NFT(id: Fungables.totalSupply))
@@ -175,7 +189,7 @@ contract Fungables: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Fungables.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&Fungables.Collection>(Fungables.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Fungables.Collection.borowFungable to get the correct itemID

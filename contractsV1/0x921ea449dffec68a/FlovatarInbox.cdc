@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import FlovatarComponentTemplate from "./FlovatarComponentTemplate.cdc"
@@ -152,14 +166,14 @@ contract FlovatarInbox{
 			self.blockHeight = getCurrentBlock().height
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertComponent(component: @FlovatarComponent.NFT){ 
 			let oldComponent <- self.flovatarComponents[component.id] <- component
 			destroy oldComponent
 			self.blockHeight = getCurrentBlock().height
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawComponent(id: UInt64): @FlovatarComponent.NFT{ 
 			pre{ 
 				self.blockHeight <= getCurrentBlock().height:
@@ -172,31 +186,31 @@ contract FlovatarInbox{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
-		fun depositDustToFlovatar(id: UInt64, vault: @{FungibleToken.Vault})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositDustToFlovatar(id: UInt64, vault: @{FungibleToken.Vault}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositDustToWallet(address: Address, vault: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositComponentToFlovatar(id: UInt64, component: @FlovatarComponent.NFT)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositComponentToWallet(address: Address, component: @FlovatarComponent.NFT)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarDustBalance(id: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWalletDustBalance(address: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentIDs(id: UInt64): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWalletComponentIDs(address: Address): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastClaimedDust(id: UInt64): UFix64
 	}
 	
@@ -223,7 +237,7 @@ contract FlovatarInbox{
 		}
 		
 		// Borrows the Container Collection for the Flovatar and if not present it initializes it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlovatarContainer(id: UInt64): &FlovatarInbox.Container{ 
 			if self.flovatarContainers[id] == nil{ 
 				let oldContainer <- self.flovatarContainers[id] <- create Container()
@@ -233,7 +247,7 @@ contract FlovatarInbox{
 		}
 		
 		// Borrows the Container Collection for the Flovatar Owner Wallet and if not present it initializes it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWalletContainer(address: Address): &FlovatarInbox.Container{ 
 			if self.walletContainers[address] == nil{ 
 				let oldContainer <- self.walletContainers[address] <- create Container()
@@ -242,7 +256,7 @@ contract FlovatarInbox{
 			return (&self.walletContainers[address] as &FlovatarInbox.Container?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositDustToFlovatar(id: UInt64, vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				vault.isInstance(Type<@FlovatarDustToken.Vault>()):
@@ -253,7 +267,7 @@ contract FlovatarInbox{
 			ref.dustVault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositDustToWallet(address: Address, vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				vault.isInstance(Type<@FlovatarDustToken.Vault>()):
@@ -264,45 +278,45 @@ contract FlovatarInbox{
 			ref.dustVault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositComponentToFlovatar(id: UInt64, component: @FlovatarComponent.NFT){ 
 			let ref = self.borrowFlovatarContainer(id: id)
 			emit FlovatarDepositComponent(flovatarId: id, componentId: component.id)
 			ref.insertComponent(component: <-component)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositComponentToWallet(address: Address, component: @FlovatarComponent.NFT){ 
 			let ref = self.borrowWalletContainer(address: address)
 			emit WalletDepositComponent(address: address, componentId: component.id)
 			ref.insertComponent(component: <-component)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarDustBalance(id: UInt64): UFix64{ 
 			let ref = self.borrowFlovatarContainer(id: id)
 			return ref.dustVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWalletDustBalance(address: Address): UFix64{ 
 			let ref = self.borrowWalletContainer(address: address)
 			return ref.dustVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentIDs(id: UInt64): [UInt64]{ 
 			let ref = self.borrowFlovatarContainer(id: id)
 			return *ref.flovatarComponents.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWalletComponentIDs(address: Address): [UInt64]{ 
 			let ref = self.borrowWalletContainer(address: address)
 			return *ref.flovatarComponents.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastClaimedDust(id: UInt64): UFix64{ 
 			if self.lastClaimedDust[id] == nil{ 
 				self.lastClaimedDust[id] = FlovatarInbox.dustDistributionStart
@@ -315,25 +329,25 @@ contract FlovatarInbox{
 			self.lastClaimedDust[id] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFlovatarComponent(id: UInt64, withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let ref = self.borrowFlovatarContainer(id: id)
 			return <-ref.withdrawComponent(id: withdrawID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawWalletComponent(address: Address, withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let ref = self.borrowWalletContainer(address: address)
 			return <-ref.withdrawComponent(id: withdrawID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFlovatarDust(id: UInt64): @{FungibleToken.Vault}{ 
 			let ref = self.borrowFlovatarContainer(id: id)
 			return <-ref.dustVault.withdraw(amount: ref.dustVault.balance)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawWalletDust(address: Address): @{FungibleToken.Vault}{ 
 			let ref = self.borrowWalletContainer(address: address)
 			return <-ref.dustVault.withdraw(amount: ref.dustVault.balance)
@@ -347,7 +361,7 @@ contract FlovatarInbox{
 	}
 	
 	// Returns the amount of DUST received by the Flovatar for additional rewards or activities (not coming from the Community pool)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarDustBalance(id: UInt64): UFix64{ 
 		if let inboxCollection =
 			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
@@ -359,7 +373,7 @@ contract FlovatarInbox{
 	}
 	
 	// Returns the amount of DUST received by the Flovatar Owner for additional rewards or activities (not coming from the Community pool)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWalletDustBalance(address: Address): UFix64{ 
 		if let inboxCollection =
 			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
@@ -371,7 +385,7 @@ contract FlovatarInbox{
 	}
 	
 	// Returns the IDs of the Components (Flobits) received by the Flovatar
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarComponentIDs(id: UInt64): [UInt64]{ 
 		if let inboxCollection =
 			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
@@ -383,7 +397,7 @@ contract FlovatarInbox{
 	}
 	
 	// Returns the IDs of the Components (Flobits) received by the Flovatar Owner
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWalletComponentIDs(address: Address): [UInt64]{ 
 		if let inboxCollection =
 			self.account.capabilities.get<&{FlovatarInbox.CollectionPublic}>(
@@ -395,7 +409,7 @@ contract FlovatarInbox{
 	}
 	
 	// This function withdraws all the Components assigned to a Flovatar and sends them to the Owner's address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawFlovatarComponent(id: UInt64, address: Address){ 
 		pre{ 
 			self.withdrawEnabled:
@@ -426,7 +440,7 @@ contract FlovatarInbox{
 	}
 	
 	// This function withdraws all the Components assigned to a Flovatar Owner and sends them to his address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawWalletComponent(address: Address){ 
 		pre{ 
 			self.withdrawEnabled:
@@ -458,7 +472,7 @@ contract FlovatarInbox{
 	}
 	
 	// This function withdraws all the DUST assigned to a Flovatar (not from general community pool) and sends it to the Owner's vault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawFlovatarDust(id: UInt64, address: Address){ 
 		pre{ 
 			self.withdrawEnabled:
@@ -479,7 +493,7 @@ contract FlovatarInbox{
 	}
 	
 	// This function withdraws all the DUST assigned to a Flovatar Owner (not from general community pool) and sends it to his vault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawWalletDust(address: Address){ 
 		pre{ 
 			self.withdrawEnabled:
@@ -504,14 +518,14 @@ contract FlovatarInbox{
 	}
 	
 	// Returns the amount of DUST available and yet to be distributed to the community
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommunityDustBalance(): UFix64{ 
 		return self.communityVault.balance
 	}
 	
 	// Calculates how much DUST a Flovatar should be able to claim based on
 	// his rarity score and on the amount of days passed since the last completed claim
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClaimableFlovatarCommunityDust(id: UInt64, address: Address): ClaimableDust?{ 
 		if let flovatarScore: UFix64 =
 			Flovatar.getFlovatarRarityScore(address: address, flovatarId: id){ 
@@ -545,7 +559,7 @@ contract FlovatarInbox{
 	}
 	
 	// This function will allow any Flovatar to claim his share of the daily distribution of DUST from the community pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimFlovatarCommunityDust(id: UInt64, address: Address){ 
 		pre{ 
 			self.withdrawEnabled:
@@ -567,7 +581,7 @@ contract FlovatarInbox{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimFlovatarCommunityDustFromChild(id: UInt64, parent: Address, child: Address){ 
 		pre{ 
 			self.withdrawEnabled:
@@ -612,7 +626,7 @@ contract FlovatarInbox{
 	}
 	
 	// Admin function to deposit DUST into the community pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositCommunityDust(vault: @{FungibleToken.Vault}){ 
 		pre{ 
 			vault.isInstance(Type<@FlovatarDustToken.Vault>()):
@@ -622,7 +636,7 @@ contract FlovatarInbox{
 	}
 	
 	// Returns the multiplier used to calculate the amount of DUST to distribute for each Rarity Score point per day for each Flovatar
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDustPerDayPerScore(): UFix64{ 
 		return self.dustPerDayPerScore
 	}
@@ -637,19 +651,19 @@ contract FlovatarInbox{
 	// to manage the Inbox
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDustPerDayPerScore(value: UFix64){ 
 			FlovatarInbox.setDustPerDayPerScore(value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWithdrawEnable(enabled: Bool){ 
 			FlovatarInbox.setWithdrawEnable(enabled: enabled)
 		}
 		
 		// With this function you can generate a new Admin resource
 		// and pass it to another user if needed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -145,7 +159,7 @@ contract NameVoucher: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			//TODO: add nounce and emit better event the first time it is moved.
@@ -162,7 +176,7 @@ contract NameVoucher: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(_ id: UInt64): Bool{ 
 			return self.ownedNFTs.containsKey(id)
 		}
@@ -181,7 +195,7 @@ contract NameVoucher: NonFungibleToken{
 			return vr as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(id: UInt64, name: String){ 
 			let nft <- self.ownedNFTs.remove(key: id) ?? panic("Cannot find voucher with ID ".concat(id.toString()))
 			let typedNFT <- nft as! @NameVoucher.NFT

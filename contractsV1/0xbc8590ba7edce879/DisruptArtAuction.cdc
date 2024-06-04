@@ -1,4 +1,18 @@
-// DisruptArt.io NFT Auction Token Contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// DisruptArt.io NFT Auction Token Contract
 // Owner  : DisruptionNowMedia (www.disruptionnow.com)
 // Author : www.BLAZE.ws
 // Version: 0.0.1
@@ -209,13 +223,13 @@ contract DisruptArtAuction{
 		}
 		
 		// depositBidTokens deposits the bidder's tokens into the AuctionItem's Vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBidTokens(vault: @{FungibleToken.Vault}){ 
 			self.bidVault.deposit(from: <-vault)
 		}
 		
 		// withdrawNFT removes the NFT from the AuctionItem and returns it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNFT(): @{NonFungibleToken.NFT}{ 
 			let NFT <- self.NFT <- nil
 			return <-NFT!
@@ -268,7 +282,7 @@ contract DisruptArtAuction{
 		
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(){ 
 			pre{ 
 				!self.auctionCompleted:
@@ -291,7 +305,7 @@ contract DisruptArtAuction{
 		
 		// isAuctionExpired returns true if the auction has exceeded it's length in blocks,
 		// otherwise it returns false
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool{ 
 			let currentTime = getCurrentBlock().timestamp
 			if Fix64(self.endTime) < Fix64(currentTime){ 
@@ -303,7 +317,7 @@ contract DisruptArtAuction{
 		
 		// returnAuctionItemToOwner releases any bids and returns the NFT
 		// to the owner's Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun returnAuctionItemToOwner(){ 
 			pre{ 
 				self.NFT != nil:
@@ -318,7 +332,7 @@ contract DisruptArtAuction{
 		}
 		
 		// exchangeTokens sends the purchased NFT to the buyer and the bidTokens to the seller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun exchangeTokens(){ 
 			pre{ 
 				self.NFT != nil:
@@ -330,7 +344,7 @@ contract DisruptArtAuction{
 		
 		// releasePreviousBid returns the outbid user's tokens to
 		// their vault receiver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun releasePreviousBid(){ 
 			// release the bidTokens from the vault back to the bidder
 			if let vaultCap = self.recipientVaultCap{ 
@@ -340,7 +354,7 @@ contract DisruptArtAuction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(){ 
 			pre{ 
 				!self.auctionCompleted:
@@ -355,7 +369,7 @@ contract DisruptArtAuction{
 			emit Canceled(auctionID: self.auctionID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bidTokens: @{FungibleToken.Vault},
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
@@ -397,7 +411,7 @@ contract DisruptArtAuction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(): AuctionStatus{ 
 			var leader: Address? = nil
 			if let recipient = self.recipientVaultCap{ 
@@ -424,16 +438,16 @@ contract DisruptArtAuction{
 	// retreiving the auction price list and placing bids
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionKeys(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AuctionStatus}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			id: UInt64,
 			bidTokens: @{FungibleToken.Vault},
@@ -441,7 +455,7 @@ contract DisruptArtAuction{
 			collectionCap: Capability<&{DisruptArt.DisruptArtCollectionPublic}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64)
 	}
 	
@@ -459,7 +473,7 @@ contract DisruptArtAuction{
 		}
 		
 		// addTokenToauctionItems adds an NFT to the auction items 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTokenToAuctionItems(token: @{NonFungibleToken.NFT}, minimumBidIncrement: UFix64, startPrice: UFix64, bidVault: @{FungibleToken.Vault}, collectionCap: Capability<&{DisruptArt.DisruptArtCollectionPublic}>, vaultCap: Capability<&{FungibleToken.Receiver}>, endTime: Fix64){ 
 			pre{ 
 				Fix64(getCurrentBlock().timestamp) < endTime:
@@ -486,7 +500,7 @@ contract DisruptArtAuction{
 			emit TokenAddedToAuctionItems(auctionID: id, startPrice: startPrice, minimumBidIncrement: minimumBidIncrement, auctionStartBlock: startBlock, tokenID: tokenID, endTime: endTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AuctionStatus}{ 
 			pre{ 
 				self.auctionItems.keys.length > 0:
@@ -500,7 +514,7 @@ contract DisruptArtAuction{
 			return auctionList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus{ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -513,7 +527,7 @@ contract DisruptArtAuction{
 			return status
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionKeys(): [UInt64]{ 
 			pre{ 
 				self.auctionItems.keys.length > 0:
@@ -524,7 +538,7 @@ contract DisruptArtAuction{
 		
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -534,7 +548,7 @@ contract DisruptArtAuction{
 			itemRef.settleAuction()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(_ id: UInt64){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -546,7 +560,7 @@ contract DisruptArtAuction{
 		
 		// placeBid sends the bidder's tokens to the bid vault and updates the
 		// currentPrice of the current auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(id: UInt64, bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{DisruptArt.DisruptArtCollectionPublic}>){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -560,7 +574,7 @@ contract DisruptArtAuction{
 	}
 	
 	// createAuctionCollection returns a new AuctionCollection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionCollection(): @AuctionCollection{ 
 		let auctionCollection <- create AuctionCollection()
 		return <-auctionCollection

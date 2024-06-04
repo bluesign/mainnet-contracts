@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	This contract is mostly copied from the MarketTopShot contract but with
 	modifications to integrate with Eternal's influencer system, such that
 	influencers receive cuts from transactions that take place on the marketplace.
@@ -52,7 +66,7 @@ contract Market{
 		access(all)
 		var cutPercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}): @Eternal.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -60,13 +74,13 @@ contract Market{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &Eternal.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -145,7 +159,7 @@ contract Market{
 		//
 		// Parameters: token: The NFT to be put up for sale
 		//			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @Eternal.NFT, price: UFix64){ 
 			
 			// get the ID of the token
@@ -165,7 +179,7 @@ contract Market{
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
 		// Returns: @Eternal.NFT: The nft that was withdrawn from the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @Eternal.NFT{ 
 			
 			// Remove and return the token.
@@ -192,7 +206,7 @@ contract Market{
 		//			 butTokens: the fungible tokens that are used to buy the NFT
 		//
 		// Returns: @Eternal.NFT: the purchased NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}): @Eternal.NFT{ 
 			pre{ 
 				self.forSale.ownedNFTs[tokenID] != nil && self.prices[tokenID] != nil:
@@ -249,7 +263,7 @@ contract Market{
 		//
 		// Parameters: tokenID: The ID of the NFT's price that is changing
 		//			 newPrice: The new price for the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -263,7 +277,7 @@ contract Market{
 		// changePercentage changes the cut percentage of the tokens that are for sale
 		//
 		// Parameters: newPercent: The new cut percentage for the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePercentage(_ newPercent: UFix64){ 
 			self.cutPercentage = newPercent
 			emit CutPercentageChanged(newPercent: newPercent, seller: self.owner?.address)
@@ -273,7 +287,7 @@ contract Market{
 		//
 		// Parameters: newOwnerCapability: The new fungible token capability for the account 
 		//								 who received tokens for purchases
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(_ newOwnerCapability: Capability){ 
 			pre{ 
 				newOwnerCapability.borrow<&{FungibleToken.Receiver}>() != nil:
@@ -286,7 +300,7 @@ contract Market{
 		//
 		// Parameters: newBeneficiaryCapability the new capability for the beneficiary of the cut of the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(_ newBeneficiaryCapability: Capability){ 
 			pre{ 
 				newBeneficiaryCapability.borrow<&{FungibleToken.Receiver}>() != nil:
@@ -300,13 +314,13 @@ contract Market{
 		// Parameters: tokenID: The ID of the NFT whose price to get
 		//
 		// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.getIDs()
 		}
@@ -319,7 +333,7 @@ contract Market{
 		// Returns: &Eternal.NFT? Optional reference to a moment for sale 
 		//						so that the caller can read its data
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &Eternal.NFT?{ 
 			let ref = self.forSale.borrowMoment(id: id)
 			return ref
@@ -330,7 +344,7 @@ contract Market{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ftType: Type,
 		ownerCapability: Capability,

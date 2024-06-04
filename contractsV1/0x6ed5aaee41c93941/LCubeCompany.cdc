@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract LCubeCompany{ 
 	access(all)
 	let CompanyPublicPath: PublicPath
@@ -48,17 +62,17 @@ contract LCubeCompany{
 			self.mail = mail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddr(): String{ 
 			return self.addr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getShare(): UFix64{ 
 			return self.share
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMail(): String{ 
 			return self.mail
 		}
@@ -88,19 +102,19 @@ contract LCubeCompany{
 	
 	access(all)
 	resource interface ICompany{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCompanyName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDesc(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMail(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakeRate(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct
 	}
 	
@@ -124,37 +138,37 @@ contract LCubeCompany{
 		access(contract)
 		var subAccounts: [AnyStruct]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCompanyName(): String{ 
 			return self.companyName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDesc(): String{ 
 			return self.desc
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMail(): String{ 
 			return self.mail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakeRate(): UFix64{ 
 			return self.stakeRate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSubAccounts(): [AnyStruct]{ 
 			return self.subAccounts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return CompanyDetail(companyName: self.companyName, desc: self.desc, mail: self.mail, stakeRate: self.stakeRate)
 		}
@@ -177,7 +191,7 @@ contract LCubeCompany{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCompany(
 			companyName: String,
 			desc: String,
@@ -216,7 +230,7 @@ contract LCubeCompany{
 			return <-a
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyCompany(company: @Company, address: Address){ 
 			emit CompanyDestroyed(address: address, name: company.getCompanyName())
 			destroy company

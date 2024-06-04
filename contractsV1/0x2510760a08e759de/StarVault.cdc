@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -100,7 +114,7 @@ contract StarVault: FungibleToken{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @StarVault.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -159,14 +173,14 @@ contract StarVault: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeeAmount(amountOut: UFix64): UFix64{ 
 		let path = [StarVaultConfig.SliceTokenTypeIdentifierFromVaultType(vaultTypeIdentifier: Type<@FlowToken.Vault>().identifier), StarVaultConfig.SliceTokenTypeIdentifierFromVaultType(vaultTypeIdentifier: Type<@StarVault.Vault>().identifier)]
 		let amounts: [UFix64] = SwapRouter.getAmountsIn(amountOut: amountOut, tokenKeyPath: path)
 		return amounts[0]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mint(nfts: @[{NonFungibleToken.NFT}], feeVault: @{FungibleToken.Vault}): @[AnyResource]{ 
 		pre{ 
 			self.enableMint:
@@ -193,7 +207,7 @@ contract StarVault: FungibleToken{
 		return <-ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeem(amount: Int, vault: @{FungibleToken.Vault}, specificIds: [UInt64], feeVault: @{FungibleToken.Vault}): @[AnyResource]{ 
 		pre{ 
 			vault.isInstance(Type<@StarVault.Vault>()):
@@ -234,7 +248,7 @@ contract StarVault: FungibleToken{
 		return <-ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swap(nfts: @[{NonFungibleToken.NFT}], specificIds: [UInt64], feeVault: @{FungibleToken.Vault}): @[AnyResource]{ 
 		pre{ 
 			nfts.length == specificIds.length || self.enableRandomSwap:
@@ -272,19 +286,19 @@ contract StarVault: FungibleToken{
 		return <-ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun allHoldings(): [UInt64]{ 
 		let collection = self.account.storage.borrow<&{NonFungibleToken.Collection}>(from: StarVaultConfig.VaultNFTCollectionStoragePath)!
 		return collection.getIDs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun totalHoldings(): Int{ 
 		let collection = self.account.storage.borrow<&{NonFungibleToken.Collection}>(from: StarVaultConfig.VaultNFTCollectionStoragePath)!
 		return collection.getIDs().length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultFees(): StarVaultConfig.VaultFees{ 
 		return StarVaultConfig.getVaultFees(vaultId: self.vaultId)
 	}
@@ -357,62 +371,62 @@ contract StarVault: FungibleToken{
 	
 	access(all)
 	resource VaultPublic: StarVaultInterfaces.VaultPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun vaultId(): Int{ 
 			return StarVault.vaultId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun base(): UFix64{ 
 			return StarVault.base
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(nfts: @[{NonFungibleToken.NFT}], feeVault: @{FungibleToken.Vault}): @[AnyResource]{ 
 			return <-StarVault.mint(nfts: <-nfts, feeVault: <-feeVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(amount: Int, vault: @{FungibleToken.Vault}, specificIds: [UInt64], feeVault: @{FungibleToken.Vault}): @[AnyResource]{ 
 			return <-StarVault.redeem(amount: amount, vault: <-vault, specificIds: specificIds, feeVault: <-feeVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swap(nfts: @[{NonFungibleToken.NFT}], specificIds: [UInt64], feeVault: @{FungibleToken.Vault}): @[AnyResource]{ 
 			return <-StarVault.swap(nfts: <-nfts, specificIds: specificIds, feeVault: <-feeVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultTokenType(): Type{ 
 			return Type<@StarVault.Vault>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allHoldings(): [UInt64]{ 
 			return StarVault.allHoldings()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun totalHoldings(): Int{ 
 			return StarVault.totalHoldings()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEmptyVault(): @{FungibleToken.Vault}{ 
 			return <-StarVault.createEmptyVault(vaultType: Type<@StarVault.Vault>())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun vaultName(): String{ 
 			return StarVault.vaultName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun collectionKey(): String{ 
 			return StarVault.collectionKey
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun totalSupply(): UFix64{ 
 			return StarVault.totalSupply
 		}
@@ -420,17 +434,17 @@ contract StarVault: FungibleToken{
 	
 	access(all)
 	resource Admin: StarVaultInterfaces.VaultAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVaultFeatures(enableMint: Bool, enableRandomRedeem: Bool, enableTargetRedeem: Bool, enableRandomSwap: Bool, enableTargetSwap: Bool){ 
 			StarVault.setVaultFeatures(enableMint: enableMint, enableRandomRedeem: enableRandomRedeem, enableTargetRedeem: enableTargetRedeem, enableRandomSwap: enableRandomSwap, enableTargetSwap: enableTargetSwap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-StarVault.mintToken(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVaultName(vaultName: String){ 
 			StarVault.setVaultName(vaultName: vaultName)
 		}

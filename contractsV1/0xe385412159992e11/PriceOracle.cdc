@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # This contract is the interface description of PriceOracle.
   The oracle includes an medianizer, which obtains prices from multiple feeds and calculate the median as the final price.
@@ -105,7 +119,7 @@ contract PriceOracle: OracleInterface{
 		///
 		/// @Return Median price, returns 0.0 if the current price is invalid
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedianPrice(): UFix64{ 
 			pre{ 
 				self.owner != nil:
@@ -117,17 +131,17 @@ contract PriceOracle: OracleInterface{
 			return priceMedian
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceIdentifier(): String{ 
 			return self._PriceIdentifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawMedianPrice(): UFix64{ 
 			return PriceOracle.getRawMedianPrice()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawMedianBlockHeight(): UInt64{ 
 			return PriceOracle.getRawMedianBlockHeight()
 		}
@@ -158,7 +172,7 @@ contract PriceOracle: OracleInterface{
 		///
 		/// @Param price - price from off-chain
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publishPrice(price: UFix64){ 
 			self._Price = price
 			self._LastPublishBlockHeight = getCurrentBlock().height
@@ -169,7 +183,7 @@ contract PriceOracle: OracleInterface{
 		///
 		/// @Param blockheightDuration by the block numbers
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExpiredDuration(blockheightDuration: UInt64){ 
 			self._ExpiredDuration = blockheightDuration
 		}
@@ -177,7 +191,7 @@ contract PriceOracle: OracleInterface{
 		/// Get the current feed price, returns 0 if the data is expired.
 		/// This function can only be called by the PriceOracle contract
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fetchPrice(certificate: &OracleInterface.OracleCertificate): UFix64{ 
 			pre{ 
 				certificate.getType() == Type<@OracleCertificate>():
@@ -191,7 +205,7 @@ contract PriceOracle: OracleInterface{
 		
 		/// Get the current feed price regardless of whether it's expired or not.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawPrice(certificate: &OracleInterface.OracleCertificate): UFix64{ 
 			pre{ 
 				certificate.getType() == Type<@OracleCertificate>():
@@ -200,12 +214,12 @@ contract PriceOracle: OracleInterface{
 			return self._Price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLatestPublishBlockHeight(): UInt64{ 
 			return self._LastPublishBlockHeight
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiredHeightDuration(): UInt64{ 
 			return self._ExpiredDuration
 		}
@@ -224,7 +238,7 @@ contract PriceOracle: OracleInterface{
 	resource OraclePublic: OracleInterface.OraclePublicInterface_Reader, OracleInterface.OraclePublicInterface_Feeder{ 
 		/// Users who need to read the oracle price should mint this resource and save locally.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPriceReader(): @PriceReader{ 
 			emit MintPriceReader()
 			return <-create PriceReader()
@@ -234,7 +248,7 @@ contract PriceOracle: OracleInterface{
 		///
 		/// @Return Resource of price panel
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPriceFeeder(): @PriceFeeder{ 
 			emit MintPriceFeeder()
 			return <-create PriceFeeder()
@@ -242,19 +256,19 @@ contract PriceOracle: OracleInterface{
 		
 		/// Recommended path for PriceReader, users can manage resources by themselves
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceReaderStoragePath(): StoragePath{ 
 			return PriceOracle._PriceReaderStoragePath!
 		}
 		
 		/// The oracle contract will get the feeding-price based on this path
 		/// Feeders need to expose their price panel capabilities at this public path
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceFeederStoragePath(): StoragePath{ 
 			return PriceOracle._PriceFeederStoragePath!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceFeederPublicPath(): PublicPath{ 
 			return PriceOracle._PriceFeederPublicPath!
 		}
@@ -404,12 +418,12 @@ contract PriceOracle: OracleInterface{
 		self._PriceReaderStoragePath = readerStoragePath
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeederWhiteList(): [Address]{ 
 		return PriceOracle._FeederWhiteList.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReaderWhiteList(from: UInt64, to: UInt64): [Address]{ 
 		let readerAddrs = PriceOracle._ReaderWhiteList.keys
 		let readerLen = UInt64(readerAddrs.length)
@@ -432,12 +446,12 @@ contract PriceOracle: OracleInterface{
 	access(all)
 	resource Admin: OracleInterface.Admin{ 
 		/// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configOracle(priceIdentifier: String, minFeederNumber: Int, feederStoragePath: StoragePath, feederPublicPath: PublicPath, readerStoragePath: StoragePath){ 
 			PriceOracle.configOracle(priceIdentifier: priceIdentifier, minFeederNumber: minFeederNumber, feederStoragePath: feederStoragePath, feederPublicPath: feederPublicPath, readerStoragePath: readerStoragePath)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFeederWhiteList(feederAddr: Address){ 
 			// Check if feeder prepared price panel first
 			let PriceFeederCap = getAccount(feederAddr).capabilities.get<&{OracleInterface.PriceFeederPublic}>(PriceOracle._PriceFeederPublicPath!)
@@ -446,25 +460,25 @@ contract PriceOracle: OracleInterface{
 			emit AddFeederWhiteList(addr: feederAddr)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addReaderWhiteList(readerAddr: Address){ 
 			PriceOracle._ReaderWhiteList[readerAddr] = true
 			emit AddReaderWhiteList(addr: readerAddr)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delFeederWhiteList(feederAddr: Address){ 
 			PriceOracle._FeederWhiteList.remove(key: feederAddr)
 			emit DelFeederWhiteList(addr: feederAddr)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delReaderWhiteList(readerAddr: Address){ 
 			PriceOracle._ReaderWhiteList.remove(key: readerAddr)
 			emit DelReaderWhiteList(addr: readerAddr)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeederWhiteListPrice(): [UFix64]{ 
 			return PriceOracle.getFeederWhiteListPrice()
 		}

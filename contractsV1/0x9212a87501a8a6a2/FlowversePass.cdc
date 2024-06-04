@@ -1,4 +1,18 @@
-// MAINNET
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// MAINNET
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -227,7 +241,7 @@ contract FlowversePass: NonFungibleToken{
 		// The Set needs to be not locked
 		// The entity can't have already been added to the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntity(entityID: UInt64){ 
 			pre{ 
 				FlowversePass.entityDatas[entityID] != nil:
@@ -250,7 +264,7 @@ contract FlowversePass: NonFungibleToken{
 		//
 		// Parameters: entityIDs: The IDs of the entities that are being added
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntities(entityIDs: [UInt64]){ 
 			for entity in entityIDs{ 
 				self.addEntity(entityID: entity)
@@ -264,7 +278,7 @@ contract FlowversePass: NonFungibleToken{
 		// Pre-Conditions:
 		// The Entity is part of the Set and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireEntity(entityID: UInt64){ 
 			pre{ 
 				self.retired[entityID] != nil:
@@ -279,7 +293,7 @@ contract FlowversePass: NonFungibleToken{
 		// retireAll retires all the entities in the Set
 		// Afterwards, none of the retired entities will be able to mint new instances
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for entity in self.entities{ 
 				self.retireEntity(entityID: entity)
@@ -290,7 +304,7 @@ contract FlowversePass: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -309,7 +323,7 @@ contract FlowversePass: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(entityID: UInt64, minterAddress: Address): @NFT{ 
 			pre{ 
 				self.retired[entityID] != nil:
@@ -336,7 +350,7 @@ contract FlowversePass: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the NFTs that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMint(entityID: UInt64, quantity: UInt64, minterAddress: Address): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -347,22 +361,22 @@ contract FlowversePass: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntities(): [UInt64]{ 
 			return self.entities
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt64: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerEntity():{ UInt64: UInt64}{ 
 			return self.numMintedPerEntity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalMinted(): UInt64{ 
 			return self.totalMinted
 		}
@@ -428,17 +442,17 @@ contract FlowversePass: NonFungibleToken{
 			self.isPrivate = setData.isPrivate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntities(): [UInt64]{ 
 			return self.entities
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt64: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerEntity():{ UInt64: UInt64}{ 
 			return self.numMintedPerEntity
 		}
@@ -480,7 +494,7 @@ contract FlowversePass: NonFungibleToken{
 		
 		// If the NFT is destroyed, emit an event to indicate 
 		// to outside observers that it has been destroyed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let name: String = FlowversePass.getEntityMetaDataByField(entityID: self.entityID, field: "name") ?? ""
 			return name.concat(" #").concat(self.mintNumber.toString())
@@ -542,7 +556,7 @@ contract FlowversePass: NonFungibleToken{
 			self.setID = setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(entityID: UInt64, minterAddress: Address): @NFT{ 
 			let setRef = (&FlowversePass.sets[self.setID] as &Set?)!
 			return <-setRef.mint(entityID: entityID, minterAddress: minterAddress)
@@ -557,7 +571,7 @@ contract FlowversePass: NonFungibleToken{
 	resource Admin{ 
 		// createEntity creates a new Entity struct 
 		// and stores it in the Entities dictionary in the FlowversePass smart contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEntity(metadata:{ String: String}): UInt64{ 
 			// Create the new Entity
 			var newEntity = Entity(metadata: metadata)
@@ -571,7 +585,7 @@ contract FlowversePass: NonFungibleToken{
 		}
 		
 		// updateEntity updates an existing Entity 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEntity(entityID: UInt64, metadata:{ String: String}){ 
 			let updatedEntity = FlowversePass.entityDatas[entityID]!
 			updatedEntity.metadata = metadata
@@ -581,7 +595,7 @@ contract FlowversePass: NonFungibleToken{
 		
 		// createSet creates a new Set resource and stores it
 		// in the sets mapping in the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, description: String, externalURL: String, imageIPFS: String, isPrivate: Bool): UInt64{ 
 			// Create a new SetData for this Set
 			let setData = SetData(setID: FlowversePass.nextSetID, name: name, description: description, externalURL: externalURL, imageIPFS: imageIPFS, isPrivate: isPrivate)
@@ -598,7 +612,7 @@ contract FlowversePass: NonFungibleToken{
 		}
 		
 		// updateSetData updates set info including: description, externalURL, imageIPFS
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetData(setID: UInt64, description: String?, externalURL: String?, imageIPFS: String?){ 
 			pre{ 
 				FlowversePass.setDatas.containsKey(setID):
@@ -616,7 +630,7 @@ contract FlowversePass: NonFungibleToken{
 		
 		// borrowSet returns a reference to a set in the contract
 		// so that the admin can call methods on it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			pre{ 
 				FlowversePass.sets[setID] != nil:
@@ -627,13 +641,13 @@ contract FlowversePass: NonFungibleToken{
 			return (&FlowversePass.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSetMinter(setID: UInt64): @SetMinter{ 
 			return <-create SetMinter(setID: setID)
 		}
 		
 		// createNewAdmin creates a new Admin resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -643,18 +657,18 @@ contract FlowversePass: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlowversePassNFT(id: UInt64): &FlowversePass.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -664,8 +678,8 @@ contract FlowversePass: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	// Collection
@@ -688,7 +702,7 @@ contract FlowversePass: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -698,7 +712,7 @@ contract FlowversePass: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FlowversePass.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -706,7 +720,7 @@ contract FlowversePass: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -725,7 +739,7 @@ contract FlowversePass: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlowversePassNFT(id: UInt64): &FlowversePass.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -769,24 +783,24 @@ contract FlowversePass: NonFungibleToken{
 	}
 	
 	// getAllEntities returns all the entities available
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllEntities(): [FlowversePass.Entity]{ 
 		return FlowversePass.entityDatas.values
 	}
 	
 	// getEntity returns an entity by ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEntity(entityID: UInt64): FlowversePass.Entity?{ 
 		return self.entityDatas[entityID]
 	}
 	
 	// getEntityMetaData returns all the metadata associated with a specific Entity
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEntityMetaData(entityID: UInt64):{ String: String}?{ 
 		return self.entityDatas[entityID]?.metadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEntityMetaDataByField(entityID: UInt64, field: String): String?{ 
 		if let entity = FlowversePass.entityDatas[entityID]{ 
 			return entity.metadata[field]
@@ -801,7 +815,7 @@ contract FlowversePass: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The QuerySetData struct that has all the important information about the set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(setID: UInt64): QuerySetData?{ 
 		if FlowversePass.sets[setID] == nil{ 
 			return nil
@@ -816,7 +830,7 @@ contract FlowversePass: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt64): String?{ 
 		// Don't force a revert if the setID is invalid
 		return FlowversePass.setDatas[setID]?.name
@@ -824,7 +838,7 @@ contract FlowversePass: NonFungibleToken{
 	
 	// getSetIDsByName returns the IDs that the specified Set name
 	//				 is associated with.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDsByName(setName: String): [UInt64]?{ 
 		var setIDs: [UInt64] = []
 		for setData in FlowversePass.setDatas.values{ 
@@ -840,13 +854,13 @@ contract FlowversePass: NonFungibleToken{
 	}
 	
 	// getAllSetDatas returns all the set datas available
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSetDatas(): [SetData]{ 
 		return FlowversePass.setDatas.values
 	}
 	
 	// getEntitiesInSet returns the list of Entity IDs that are in the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEntitiesInSet(setID: UInt64): [UInt64]?{ 
 		return FlowversePass.sets[setID]?.getEntities()
 	}
@@ -855,7 +869,7 @@ contract FlowversePass: NonFungibleToken{
 	//				  is retired.
 	//				  If an entity is retired, it still remains in the Set,
 	//				  but NFTs can no longer be minted from it.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetEntityRetired(setID: UInt64, entityID: UInt64): Bool?{ 
 		if let setdata = self.getSetData(setID: setID){ 
 			// See if the Entity is retired from this Set
@@ -868,7 +882,7 @@ contract FlowversePass: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt64): Bool?{ 
 		return FlowversePass.sets[setID]?.locked
 	}
@@ -881,7 +895,7 @@ contract FlowversePass: NonFungibleToken{
 	//
 	// Returns: The total number of entity instances (NFTs) 
 	//		  that have been minted in a set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumInstancesOfEntity(setID: UInt64, entityID: UInt64): UInt64?{ 
 		if let setdata = self.getSetData(setID: setID){ 
 			// return numMintedPerEntity

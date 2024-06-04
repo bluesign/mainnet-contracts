@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract TriviaGame{ 
 	// An array that stores NFT owners
 	access(all)
@@ -9,7 +23,7 @@ contract TriviaGame{
 	event OwnershipChanged(tokenId: UInt64, newOwner: Address)
 	
 	// Function to update the owner of an NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun updateOwner(tokenId: UInt64, newOwner: Address, caller: Address){ 
 		// Check if the caller is the current owner of the NFT
 		let currentOwner = self.owners[tokenId]!
@@ -37,7 +51,7 @@ contract TriviaGame{
 		}
 		
 		// Method to update metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}){ 
 			for key in newMetadata.keys{ 
 				self.metadata[key] = newMetadata[key]!
@@ -48,19 +62,19 @@ contract TriviaGame{
 	access(all)
 	resource interface NFTReceiver{ 
 		// Withdraw a token by its ID and returns the token.
-		access(all)
-		fun withdraw(id: UInt64): @NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdraw(id: UInt64): @TriviaGame.NFT
 		
 		// Deposit an NFT to this NFTReceiver instance.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @NFT)
 		
 		// Get all NFT IDs belonging to this NFTReceiver instance.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenIds(): [UInt64]
 		
 		// Get the metadata of an NFT instance by its ID.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenMetadata(id: UInt64):{ String: String}
 	}
 	
@@ -77,26 +91,26 @@ contract TriviaGame{
 		
 		// Destructor
 		// Withdraws and return an NFT token.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: UInt64): @NFT{ 
 			let token <- self.ownedNFTs.remove(key: id)
 			return <-token!
 		}
 		
 		// Deposits a token to this NFTCollection instance.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @NFT){ 
 			self.ownedNFTs[token.id] <-! token
 		}
 		
 		// Returns an array of the IDs that are in this collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenIds(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
 		
 		// Returns the metadata of an NFT based on the ID.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenMetadata(id: UInt64):{ String: String}{ 
 			let metadata = self.ownedNFTs[id]?.metadata
 			return metadata!
@@ -105,7 +119,7 @@ contract TriviaGame{
 	
 	// Public factory method to create a collection
 	// so it is callable from the contract scope.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNFTCollection(): @NFTCollection{ 
 		return <-create NFTCollection()
 	}
@@ -121,7 +135,7 @@ contract TriviaGame{
 			self.idCount = 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(_ metadata:{ String: String}): @NFT{ 
 			// Create a new @NFT resource with the current ID.
 			let token <- create NFT(id: self.idCount, metadata: metadata)

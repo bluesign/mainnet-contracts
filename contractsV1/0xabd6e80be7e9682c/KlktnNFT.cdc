@@ -1,4 +1,18 @@
-// KlktnNFT implements NonFungibleToken contract interface
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// KlktnNFT implements NonFungibleToken contract interface
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
@@ -66,15 +80,15 @@ contract KlktnNFT: NonFungibleToken{
 	access(all)
 	resource interface KlktnNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKlktnNFT(id: UInt64): &KlktnNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -138,7 +152,7 @@ contract KlktnNFT: NonFungibleToken{
 		}
 		
 		// fetch metadata from the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata():{ String: String}{ 
 			return KlktnNFT.getNFTMetadata(typeID: self.typeID)
 		}
@@ -171,7 +185,7 @@ contract KlktnNFT: NonFungibleToken{
 		// deposit:
 		// - Takes an NFT and adds it to the Collection dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @KlktnNFT.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -199,7 +213,7 @@ contract KlktnNFT: NonFungibleToken{
 		// - Gets a reference to an NFT in the collection as a KlktnNFT,
 		// - exposing all of its fields (including the typeID)
 		// - This is safe as there are no administrative functions that can be called on the KlktnNFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKlktnNFT(id: UInt64): &KlktnNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -247,7 +261,7 @@ contract KlktnNFT: NonFungibleToken{
 		
 		// mintNFT: Mints a new NFT with a new ID
 		// - and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64){ 
 			// check if template of typeID exists
 			if !KlktnNFT.klktnNFTTypeSet.containsKey(typeID){ 
@@ -273,7 +287,7 @@ contract KlktnNFT: NonFungibleToken{
 			KlktnNFT.tokenMintedPerType[typeID] = serialNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(typeID: UInt64, metadataToUpdate:{ String: String}): KlktnNFT.KlktnNFTMetadata{ 
 			if !KlktnNFT.klktnNFTTypeSet.containsKey(typeID){ 
 				panic("Token with the typeID does not exist.")
@@ -291,7 +305,7 @@ contract KlktnNFT: NonFungibleToken{
 		}
 		
 		// mintNFT: createTemplate: creates a template for token of typeID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(typeID: UInt64, tokenName: String, mintLimit: UInt64, metadata:{ String: String}): UInt64{ 
 			// check if template with the same id exists
 			if KlktnNFT.klktnNFTTypeSet.containsKey(typeID){ 
@@ -313,7 +327,7 @@ contract KlktnNFT: NonFungibleToken{
 	// - If an account does not have a KlktnNFT.Collection, panic.
 	// - If it has a collection but does not contain the itemID, return nil.
 	// - If it has a collection and that collection contains the itemID, return a reference to that.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &KlktnNFT.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&KlktnNFT.Collection>(KlktnNFT.CollectionPublicPath).borrow<&KlktnNFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust KlktnNFT.Collection.borrowKlktnNFT to get the correct itemID
@@ -323,7 +337,7 @@ contract KlktnNFT: NonFungibleToken{
 	
 	// peekTokenLimit:
 	// - Returns: enforced mint limit for a token of typeID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun peekTokenLimit(typeID: UInt64): UInt64?{ 
 		if let token = KlktnNFT.klktnNFTTypeSet[typeID]{ 
 			return token.mintLimit
@@ -335,7 +349,7 @@ contract KlktnNFT: NonFungibleToken{
 	// checkTokenExpiration
 	// - Returns: boolean indicating token of typeID is expired
 	// - We also return true representing token of typeID is expired for tokens without valid templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkTokenExpiration(typeID: UInt64): Bool{ 
 		// get enforced token mint limit
 		var tokenMintLimit = 0 as UInt64
@@ -352,7 +366,7 @@ contract KlktnNFT: NonFungibleToken{
 	
 	// checkTemplate
 	// - Returns: boolean indicating if template exists
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkTemplate(typeID: UInt64): Bool{ 
 		if KlktnNFT.klktnNFTTypeSet.containsKey(typeID){ 
 			return true
@@ -362,7 +376,7 @@ contract KlktnNFT: NonFungibleToken{
 	
 	// getNFTMetadata
 	// - returns the metadata of an NFT given a typeID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTMetadata(typeID: UInt64):{ String: String}{ 
 		if KlktnNFT.klktnNFTTypeSet.containsKey(typeID){ 
 			return (KlktnNFT.klktnNFTTypeSet[typeID]!).metadata

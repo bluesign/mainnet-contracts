@@ -1,4 +1,18 @@
-//  ____   ____ _   _ __  __  ___  _____ ____  
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//  ____   ____ _   _ __  __  ___  _____ ____  
 // / ___| / ___| | | |  \/  |/ _ \| ____/ ___| 
 // \___ \| |   | |_| | |\/| | | | |  _| \___ \ 
 //  ___) | |___|  _  | |  | | |_| | |___ ___) |
@@ -14,7 +28,7 @@ access(all)
 contract ZayVerifierV2{ 
 	// Returns timestamp of the last sealed block for when this signature was created
 	// If the signature is invalid, returns nil.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun verifySignature(
 		acctAddress: Address,
 		message: String,
@@ -109,7 +123,7 @@ contract ZayVerifierV2{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkOwnership(address: Address, collectionPath: PublicPath, nftType: Type): Bool{ 
 		let collectionRef =
 			getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(

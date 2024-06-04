@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -104,12 +118,12 @@ contract LCubeComponent: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
@@ -123,15 +137,15 @@ contract LCubeComponent: NonFungibleToken{
 	access(all)
 	resource interface LCubeComponentCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowComponent(id: UInt64): &LCubeComponent.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -157,7 +171,7 @@ contract LCubeComponent: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LCubeComponent.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -175,7 +189,7 @@ contract LCubeComponent: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowComponent(id: UInt64): &LCubeComponent.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -227,7 +241,7 @@ contract LCubeComponent: NonFungibleToken{
 			return <-packComponent
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreateComponents(gameID: UInt64, metadata:{ String: String}, royalties: [MetadataViews.Royalty], quantity: UInt8): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt8 = 0

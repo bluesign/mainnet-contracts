@@ -1,4 +1,18 @@
-//SPDX-License-Identifier : CC-BY-NC-4.0
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier : CC-BY-NC-4.0
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -117,17 +131,17 @@ contract MetaverseMarket: NonFungibleToken{
 		access(all)
 		var minted: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMinted(){ 
 			self.minted = self.minted + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(newPrice: UFix64){ 
 			self.price = newPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateList(newPreviewImage: String?, newName: String?, newDescription: String?, newCategoryId: UInt64?){ 
 			if newPreviewImage != nil{ 
 				self.previewImage = newPreviewImage!
@@ -266,18 +280,18 @@ contract MetaverseMarket: NonFungibleToken{
 	access(all)
 	resource interface MetaverseMarketCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTs(): &{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMetaverseMarket(id: UInt64): &MetaverseMarket.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -314,7 +328,7 @@ contract MetaverseMarket: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MetaverseMarket.NFT
 			let id: UInt64 = token.id
 			
@@ -332,7 +346,7 @@ contract MetaverseMarket: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTs(): &{UInt64:{ NonFungibleToken.NFT}}{ 
 			return &self.ownedNFTs as &{UInt64:{ NonFungibleToken.NFT}}
 		}
@@ -351,7 +365,7 @@ contract MetaverseMarket: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the MetaverseMarket.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMetaverseMarket(id: UInt64): &MetaverseMarket.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -361,7 +375,7 @@ contract MetaverseMarket: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: UInt64): &NFT?{ 
 			post{ 
 				result == nil || (result!).id == id:
@@ -418,7 +432,7 @@ contract MetaverseMarket: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCategory(categoryId: UInt64, categoryName: String){ 
 			if UInt64(MetaverseMarket.categoriesList.length + 1) != categoryId{ 
 				panic("Category ID already exists")
@@ -428,7 +442,7 @@ contract MetaverseMarket: NonFungibleToken{
 			emit CategoryCreated(categoryName: categoryName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createList(listId: UInt64, name: String, description: String, categoryId: UInt64, creator: Address?, creatorDapperAddress: Address?, fileName: String, previewImage: String, format: String, fileIPFS: String, price: UFix64, maxSupply: UInt64){ 
 			var max = 0 as UInt64
 			for element in MetaverseMarket.nftsToSell.keys{ 
@@ -450,7 +464,7 @@ contract MetaverseMarket: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, payment: @{FungibleToken.Vault}, listedNftId: UInt64){ 
 			pre{ 
 				MetaverseMarket.nftsToSell[listedNftId] != nil:
@@ -493,7 +507,7 @@ contract MetaverseMarket: NonFungibleToken{
 		}
 		
 		//TransferNft, mint and transfer to Account NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferNFT(recipient: &{NonFungibleToken.CollectionPublic}, listedNftId: UInt64){ 
 			pre{ 
 				MetaverseMarket.nftsToSell[listedNftId] != nil:
@@ -510,7 +524,7 @@ contract MetaverseMarket: NonFungibleToken{
 		}
 		
 		//Delete Listing
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteListing(listedNftId: UInt64){ 
 			pre{ 
 				MetaverseMarket.nftsToSell[listedNftId] != nil:
@@ -521,7 +535,7 @@ contract MetaverseMarket: NonFungibleToken{
 		}
 		
 		//Change Price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(listedNftId: UInt64, newPrice: UFix64){ 
 			pre{ 
 				MetaverseMarket.nftsToSell[listedNftId] != nil:
@@ -531,7 +545,7 @@ contract MetaverseMarket: NonFungibleToken{
 			(MetaverseMarket.nftsToSell[listedNftId]!).changePrice(newPrice: newPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateList(listedNftId: UInt64, newPreviewImage: String?, newName: String?, newDescription: String?, newCategoryId: UInt64?){ 
 			pre{ 
 				MetaverseMarket.nftsToSell[listedNftId] != nil:
@@ -548,7 +562,7 @@ contract MetaverseMarket: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &MetaverseMarket.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&MetaverseMarket.Collection>(MetaverseMarket.CollectionPublicPath).borrow<&MetaverseMarket.Collection>() ?? panic("Couldn't get collection")
 		// We trust MetaverseMarket.Collection.borowMetaverseMarket to get the correct itemID
@@ -556,33 +570,33 @@ contract MetaverseMarket: NonFungibleToken{
 		return collection.borrowMetaverseMarket(id: itemID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllNftsFromAccount(_ from: Address): &{UInt64:{ NonFungibleToken.NFT}}?{ 
 		let collection = getAccount(from).capabilities.get<&MetaverseMarket.Collection>(MetaverseMarket.CollectionPublicPath).borrow<&MetaverseMarket.Collection>() ?? panic("Couldn't get collection")
 		return collection.getNFTs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCategories():{ UInt64: String}{ 
 		return MetaverseMarket.categoriesList
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCategoriesIds(): [UInt64]{ 
 		return MetaverseMarket.categoriesList.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCategorieName(id: UInt64): String{ 
 		return MetaverseMarket.categoriesList[id] ?? panic("Category does not exists")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCategoriesListLength(): UInt64{ 
 		return UInt64(MetaverseMarket.categoriesList.length)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftToSellListLength(): UInt64{ 
 		var max = 0 as UInt64
 		for element in MetaverseMarket.nftsToSell.keys{ 
@@ -593,22 +607,22 @@ contract MetaverseMarket: NonFungibleToken{
 		return max
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCategoriesNFTsToSell(categoryId: UInt64): [UInt64]?{ 
 		return MetaverseMarket.categoriesNFTsToSell[categoryId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftToSellData(listId: UInt64): OzoneListToSellMetadata?{ 
 		return MetaverseMarket.nftsToSell[listId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllListToSell(): [UInt64]{ 
 		return MetaverseMarket.nftsToSell.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun cleanListing(listId: UInt64){ 
 		pre{ 
 			(MetaverseMarket.nftsToSell[listId]!).minted != (MetaverseMarket.nftsToSell[listId]!).maxSupply:

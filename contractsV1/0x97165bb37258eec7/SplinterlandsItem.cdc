@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for Splinterlands
 
 	authors: Bilal Shahid bilal@zay.codes
@@ -71,12 +85,12 @@ contract SplinterlandsItem: NonFungibleToken{
 			self.itemID = itemID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemID(): String{ 
 			return self.itemID
 		}
@@ -95,12 +109,12 @@ contract SplinterlandsItem: NonFungibleToken{
 			self.state = state
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getState(): SplinterlandsItemState{ 
 			return self.state
 		}
@@ -153,7 +167,7 @@ contract SplinterlandsItem: NonFungibleToken{
 		// We don't really have much metadata to give other than the itemID which is in this already
 		// Still creating this function as it may become a standard for other uses in the future
 		// and provides an upgradeable location to fill in with more data if needed someday
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			let metadata:{ String: String} ={} 
 			metadata["itemID"] = self.itemID
@@ -167,15 +181,15 @@ contract SplinterlandsItem: NonFungibleToken{
 	access(all)
 	resource interface ItemCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &SplinterlandsItem.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -201,7 +215,7 @@ contract SplinterlandsItem: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SplinterlandsItem.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -221,7 +235,7 @@ contract SplinterlandsItem: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &SplinterlandsItem.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -261,8 +275,8 @@ contract SplinterlandsItem: NonFungibleToken{
 	access(all)
 	resource interface AdminPublic{ // This should be declared immediately before the admin resource 
 		
-		access(all)
-		fun deposit(token: @SplinterlandsItem.NFT, bridgeAddress: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @SplinterlandsItem.NFT, bridgeAddress: String): Void
 	}
 	
 	access(all)
@@ -274,7 +288,7 @@ contract SplinterlandsItem: NonFungibleToken{
 			self.adminCollectionPublicCapability = adminCollectionPublicCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintItem(adminCollection: &SplinterlandsItem.Collection, recipient: &{SplinterlandsItem.ItemCollectionPublic}, itemID: String){ 
 			pre{ 
 				SplinterlandsItem.itemIDsMinted[itemID] == nil || (SplinterlandsItem.itemIDsMinted[itemID]!).getState() != SplinterlandsItemState.InFlowCirculation:
@@ -300,7 +314,7 @@ contract SplinterlandsItem: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @SplinterlandsItem.NFT, bridgeAddress: String){ 
 			let itemID = token.itemID
 			let id = token.id
@@ -310,12 +324,12 @@ contract SplinterlandsItem: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemIDs():{ String: SplinterlandsItemStateData}{ 
 		return SplinterlandsItem.itemIDsMinted
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemIDState(itemID: String): SplinterlandsItemStateData{ 
 		return SplinterlandsItem.itemIDsMinted[itemID]!
 	}

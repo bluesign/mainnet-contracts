@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Contract: FantastecSwapData
 
@@ -365,7 +379,7 @@ contract FantastecSwapData{
 			self.editionNextMintNumber[edition] = self.editionNextMintNumber[edition]! + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasEditionBeenExhausted(_ edition: UInt64): Bool{ 
 			if self.editionTotalSupply[edition]! >= self.editionMintVolume[edition]!{ 
 				return true
@@ -373,7 +387,7 @@ contract FantastecSwapData{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isEditionCurrent(_ edition: UInt64): Bool{ 
 			if self.editionMintVolume.keys[self.editionMintVolume.length - 1] == edition{ 
 				return true
@@ -381,7 +395,7 @@ contract FantastecSwapData{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasEditionCeased(_ edition: UInt64): Bool{ 
 			if self.editionHasCeased[edition] == true{ 
 				return true
@@ -389,7 +403,7 @@ contract FantastecSwapData{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isMintable(edition: UInt64): String{ 
 			if self.isDeactivated{ 
 				return "Card deactivated"
@@ -409,18 +423,18 @@ contract FantastecSwapData{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultRoyaltiesAccount(_ address: Address){ 
 			FantastecSwapData.defaultRoyaltyAddress = address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDefaultRoyaltiesAccount(): Address{ 
 			return FantastecSwapData.defaultRoyaltyAddress
 		}
 		
 		// Manage CardCollection functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCardCollection(
 			appId: String,
 			title: String,
@@ -448,7 +462,7 @@ contract FantastecSwapData{
 			return newCardCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCardCollectionById(
 			appId: String,
 			title: String,
@@ -491,7 +505,7 @@ contract FantastecSwapData{
 			return newCardCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deactivateCardCollectionById(id: UInt64): Bool{ 
 			// ensure the collection exists
 			let cardCollection: CardCollectionData =
@@ -514,7 +528,7 @@ contract FantastecSwapData{
 		}
 		
 		// Manage Card functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCard(
 			name: String,
 			level: String,
@@ -540,7 +554,7 @@ contract FantastecSwapData{
 			return newCard
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCardById(
 			name: String,
 			level: String,
@@ -577,7 +591,7 @@ contract FantastecSwapData{
 			return updatedCard
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deactivateCardById(id: UInt64): Bool{ 
 			pre{ 
 				FantastecSwapData.cardData[id] != nil:
@@ -595,7 +609,7 @@ contract FantastecSwapData{
 			return card.isDeactivated
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEditionMintVolume(cardId: UInt64, edition: UInt64, mintVolume: UInt64): Bool{ 
 			pre{ 
 				FantastecSwapData.cardData[cardId] != nil:
@@ -617,7 +631,7 @@ contract FantastecSwapData{
 	
 	/** PUBLIC GETTING FUNCTIONS */
 	// CardCollection functions
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCardCollections(): [FantastecSwapData.CardCollectionData]{ 
 		var cardCollections: [FantastecSwapData.CardCollectionData] = []
 		for cardCollection in self.cardCollectionData.values{ 
@@ -628,17 +642,17 @@ contract FantastecSwapData{
 		return cardCollections
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardCollectionById(id: UInt64): FantastecSwapData.CardCollectionData?{ 
 		return FantastecSwapData.cardCollectionData[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardColletionMarketFee(id: UInt64): UFix64{ 
 		return (FantastecSwapData.cardCollectionData[id]!).marketplaceFee
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardCollectionIds(): [UInt64]{ 
 		var keys: [UInt64] = []
 		for collection in self.cardCollectionData.values{ 
@@ -650,7 +664,7 @@ contract FantastecSwapData{
 	}
 	
 	// Card functions
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCards(): [FantastecSwapData.CardData]{ 
 		var cards: [FantastecSwapData.CardData] = []
 		for card in self.cardData.values{ 
@@ -661,12 +675,12 @@ contract FantastecSwapData{
 		return cards
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getCardById(id: UInt64): FantastecSwapData.CardData?{ 
 		return FantastecSwapData.cardData[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardIds(): [UInt64]{ 
 		var keys: [UInt64] = []
 		for card in self.cardData.values{ 
@@ -677,7 +691,7 @@ contract FantastecSwapData{
 		return keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isMintable(cardId: UInt64, edition: UInt64): String{ 
 		let card = self.getCardById(id: cardId) ?? nil
 		if card == nil{ 
@@ -690,7 +704,7 @@ contract FantastecSwapData{
 		return "yes"
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun join(_ array: [String], _ separator: String): String{ 
 		var res = ""
 		for string in array{ 

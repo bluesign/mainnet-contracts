@@ -1,4 +1,18 @@
-// Created by ethos multiverse inc. for Jade(https://jade.ethosnft.com/)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Created by ethos multiverse inc. for Jade(https://jade.ethosnft.com/)
 access(all)
 contract JadeContracts{ 
 	access(all)
@@ -24,7 +38,7 @@ contract JadeContracts{
 	
 	access(all)
 	resource interface ContractsBookPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContracts(): [String]
 	}
 	
@@ -37,7 +51,7 @@ contract JadeContracts{
 			self.contractNames ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addContract(contractName: String){ 
 			pre{ 
 				self.contractNames[contractName] == nil:
@@ -53,12 +67,12 @@ contract JadeContracts{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContracts(): [String]{ 
 			return self.contractNames.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeContract(contractName: String){ 
 			self.contractNames.remove(key: contractName)
 		}
@@ -66,10 +80,10 @@ contract JadeContracts{
 	
 	access(all)
 	resource interface GlobalContractsBookPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllUsers(): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressFromContractName(contractName: String): Address?
 	}
 	
@@ -86,7 +100,7 @@ contract JadeContracts{
 			self.reservedContractNames ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addUser(address: Address){ 
 			pre{ 
 				self.allUsers[address] == nil:
@@ -95,7 +109,7 @@ contract JadeContracts{
 			self.allUsers[address] = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reserve(contractName: String, user: Address){ 
 			pre{ 
 				self.getReservationStatus(contractName: contractName) != ReservationStatus.active:
@@ -104,17 +118,17 @@ contract JadeContracts{
 			self.reservedContractNames[contractName] = user
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeReservation(contractName: String){ 
 			self.reservedContractNames.remove(key: contractName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllReservations():{ String: Address}{ 
 			return self.reservedContractNames
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addContractName(contractName: String, address: Address){ 
 			pre{ 
 				self.reservedContractNames[contractName] == nil:
@@ -123,12 +137,12 @@ contract JadeContracts{
 			self.reservedContractNames[contractName] = address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllUsers(): [Address]{ 
 			return self.allUsers.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getReservationStatus(contractName: String): ReservationStatus{ 
 			if self.reservedContractNames[contractName] != nil{ 
 				return ReservationStatus.active
@@ -136,7 +150,7 @@ contract JadeContracts{
 			return ReservationStatus.notFound
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressFromContractName(contractName: String): Address?{ 
 			if self.getReservationStatus(contractName: contractName) == ReservationStatus.active{ 
 				return self.reservedContractNames[contractName]!
@@ -145,12 +159,12 @@ contract JadeContracts{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createContractsBook(): @ContractsBook{ 
 		return <-create ContractsBook()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUserJadeCollections(user: Address): [String]{ 
 		let collections: &JadeContracts.ContractsBook =
 			getAccount(user).capabilities.get<&JadeContracts.ContractsBook>(
@@ -160,7 +174,7 @@ contract JadeContracts{
 		return collections.getContracts()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGlobalContractsBook(): &GlobalContractsBook{ 
 		return self.account.capabilities.get<&GlobalContractsBook>(
 			JadeContracts.GlobalContractsBookPublicPath

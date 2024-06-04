@@ -1,4 +1,18 @@
-// Flickplay
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Flickplay
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -141,7 +155,7 @@ contract BarelyABear: NonFungibleToken{
 			self.tokenIDs = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNftSet(setId: UInt32, name: String, edition: String, thumbnail: String, description: String, httpFile: String, maxEditions: UInt64, mediaFile: String, externalUrl: String, twitterLink: String, toyStats: ToyStats, toyProperties:{ String: AnyStruct}){ 
 			pre{ 
 				self.setIds.contains(setId) == false:
@@ -154,7 +168,7 @@ contract BarelyABear: NonFungibleToken{
 			emit SetCreated(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetMetadata(setId: UInt32, name: String, edition: String, thumbnail: String, description: String, httpFile: String, maxEditions: UInt64, mediaFile: String, externalUrl: String, twitterLink: String, toyStats: ToyStats, toyProperties:{ String: AnyStruct}){ 
 			pre{ 
 				self.setIds.contains(setId) == true:
@@ -165,7 +179,7 @@ contract BarelyABear: NonFungibleToken{
 			emit SetMetadataUpdated(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetStats(setId: UInt32, toyStats: ToyStats){ 
 			pre{ 
 				self.setIds.contains(setId) == true:
@@ -176,7 +190,7 @@ contract BarelyABear: NonFungibleToken{
 			emit SetMetadataUpdated(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetTraits(setId: UInt32, toyProperties:{ String: AnyStruct}){ 
 			pre{ 
 				self.setIds.contains(setId) == true:
@@ -187,7 +201,7 @@ contract BarelyABear: NonFungibleToken{
 			emit SetMetadataUpdated(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGenericMetadata(setId: UInt32, name: String, edition: String, thumbnail: String, description: String, httpFile: String, maxEditions: UInt64, mediaFile: String, externalUrl: String, twitterLink: String){ 
 			pre{ 
 				self.setIds.contains(setId) == true:
@@ -198,7 +212,7 @@ contract BarelyABear: NonFungibleToken{
 			emit SetMetadataUpdated(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintFlickplaySeriesNFT(recipient: &{NonFungibleToken.CollectionPublic}, setId: UInt32){ 
 			pre{ 
 				self.numberEditionsMintedPerSet[setId] != nil:
@@ -215,7 +229,7 @@ contract BarelyABear: NonFungibleToken{
 			emit NFTMinted(tokenId: tokenId, setId: setId, editionNum: editionNum)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintFlickplaySeriesNFT(recipient: &{NonFungibleToken.CollectionPublic}, setId: UInt32, amount: UInt32){ 
 			pre{ 
 				amount > 0:
@@ -258,7 +272,7 @@ contract BarelyABear: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStats(_ viewResolver: &{ViewResolver.Resolver}): ToyStats?{ 
 		if let view = viewResolver.resolveView(Type<BarelyABear.ToyStats>()){ 
 			if let v = view as? ToyStats{ 
@@ -406,12 +420,12 @@ contract BarelyABear: NonFungibleToken{
 	
 	access(all)
 	resource Admin: IAdminSafeShare{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(): &Series{ 
 			return &BarelyABear.series as &Series
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowedActions(setId: UInt32, ids: [UInt64]){ 
 			let set = BarelyABear.allowedActions[setId] ??{} 
 			for id in ids{ 
@@ -421,7 +435,7 @@ contract BarelyABear: NonFungibleToken{
 			emit ActionsAllowed(setId: setId, ids: ids)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRestrictedActions(setId: UInt32, ids: [UInt64]){ 
 			let set = BarelyABear.allowedActions[setId] ??{} 
 			for id in ids{ 
@@ -431,7 +445,7 @@ contract BarelyABear: NonFungibleToken{
 			emit ActionsRestricted(setId: setId, ids: ids)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToWhitelist(_toAddAddresses: [Address]){ 
 			for address in _toAddAddresses{ 
 				BarelyABear.whitelist[address] = true
@@ -439,7 +453,7 @@ contract BarelyABear: NonFungibleToken{
 			emit AddedToWhitelist(addedAddresses: _toAddAddresses)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFromWhitelist(_toRemoveAddresses: [Address]){ 
 			for address in _toRemoveAddresses{ 
 				BarelyABear.whitelist[address] = false
@@ -447,26 +461,26 @@ contract BarelyABear: NonFungibleToken{
 			emit RemovedFromWhitelist(removedAddresses: _toRemoveAddresses)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unboxNft(address: Address, nftId: UInt64, newSetId: UInt32){ 
 			let collectionRef = getAccount(address).capabilities.get<&{BarelyABear.FlickplaySeriesCollectionPublic}>(BarelyABear.CollectionPublicPath).borrow()
 			let nftRef = (collectionRef!).borrowFlickplaySeries(id: nftId)
 			nftRef?.unbox(newSetId: newSetId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyCut(newRoyalty: UFix64){ 
 			BarelyABear.royaltyCut = newRoyalty
 			emit RoyaltyCutUpdated(newRoyaltyCut: newRoyalty)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyAddress(newReceiver: Address){ 
 			BarelyABear.royaltyAddress = newReceiver
 			emit RoyaltyAddressUpdated(newAddress: newReceiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -474,40 +488,40 @@ contract BarelyABear: NonFungibleToken{
 	
 	access(all)
 	resource interface IAdminSafeShare{ 
-		access(all)
-		fun borrowSeries(): &Series
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowSeries(): &BarelyABear.Series
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowedActions(setId: UInt32, ids: [UInt64])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRestrictedActions(setId: UInt32, ids: [UInt64])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToWhitelist(_toAddAddresses: [Address])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFromWhitelist(_toRemoveAddresses: [Address])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unboxNft(address: Address, nftId: UInt64, newSetId: UInt32)
 	}
 	
 	access(all)
 	resource interface FlickplaySeriesCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlickplaySeries(id: UInt64): &BarelyABear.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -531,7 +545,7 @@ contract BarelyABear: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -541,7 +555,7 @@ contract BarelyABear: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BarelyABear.NFT
 			// BarelyABear.getAllowedActionsStatus(setId: token.setId,tokenId: token.id) ?? panic("Actions for this token NOT allowed")
 			let id: UInt64 = token.id
@@ -556,7 +570,7 @@ contract BarelyABear: NonFungibleToken{
 		//	 emit Deposit(id: id, to: self.owner?.address)
 		//	 destroy oldToken
 		// }
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -575,7 +589,7 @@ contract BarelyABear: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlickplaySeries(id: UInt64): &BarelyABear.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -592,7 +606,7 @@ contract BarelyABear: NonFungibleToken{
 			return flickplayNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			let nft <- self.ownedNFTs.remove(key: id) as! @BarelyABear.NFT?
 			destroy nft
@@ -623,18 +637,18 @@ contract BarelyABear: NonFungibleToken{
 		return <-create BarelyABear.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, id: UInt64): &BarelyABear.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&BarelyABear.Collection>(BarelyABear.CollectionPublicPath).borrow<&BarelyABear.Collection>() ?? panic("Couldn't get collection")
 		return collection.borrowFlickplaySeries(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetMetadata(setId: UInt32): BarelyABear.NFTSetMetadata{ 
 		return BarelyABear.setMetadata[setId]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllowedActionsStatus(setId: UInt32, tokenId: UInt64): Bool?{ 
 		if let set = BarelyABear.allowedActions[setId]{ 
 			return set[tokenId]
@@ -643,12 +657,12 @@ contract BarelyABear: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets(): [BarelyABear.NFTSetMetadata]{ 
 		return BarelyABear.setMetadata.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSetMaxEditions(setId: UInt32): UInt64?{ 
 		return BarelyABear.setMetadata[setId]?.maxEditions
 	}

@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import Flunks from "./Flunks.cdc"
 
 access(all)
@@ -24,7 +38,7 @@ contract FlunksGraduation{
 	access(self)
 	var tokenIDToUri:{ UInt64: String}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun graduateFlunk(owner: AuthAccount, tokenID: UInt64){ 
 		pre{ 
 			!FlunksGraduation.GraduatedFlunks.containsKey(tokenID):
@@ -62,19 +76,19 @@ contract FlunksGraduation{
 		emit Graduate(address: owner.address, tokenID: tokenID, templateID: templateID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isFlunkGraduated(tokenID: UInt64): Bool{ 
 		return FlunksGraduation.GraduatedFlunks[tokenID] ?? false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlunksGraduationTimeTable():{ UInt64: UInt64}{ 
 		return FlunksGraduation.GraduationTime
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGraduationTime(tokenID: UInt64, _timeInSeconds: UInt64){ 
 			pre{ 
 				!FlunksGraduation.GraduatedFlunks.containsKey(tokenID):
@@ -85,7 +99,7 @@ contract FlunksGraduation{
 		// emit GraduateTimeUpdate(tokenID: tokenID, time: _timeInSeconds)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setGraduatedUri(tokenID: UInt64, uri: String){ 
 			if FlunksGraduation.GraduatedFlunks.containsKey(tokenID){ 
 				return
@@ -93,7 +107,7 @@ contract FlunksGraduation{
 			FlunksGraduation.tokenIDToUri[tokenID] = uri
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun alfredGraduatesForYa(ownerAddress: Address, templateID: UInt64, tokenID: UInt64){ 
 			pre{ 
 				!FlunksGraduation.GraduatedFlunks.containsKey(tokenID):
@@ -119,7 +133,7 @@ contract FlunksGraduation{
 			emit Graduate(address: ownerAddress, tokenID: tokenID, templateID: templateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refreshGraduatedMetadata(ownerAddress: Address, templateID: UInt64, tokenID: UInt64){ 
 			emit Graduate(address: ownerAddress, tokenID: tokenID, templateID: templateID)
 		}

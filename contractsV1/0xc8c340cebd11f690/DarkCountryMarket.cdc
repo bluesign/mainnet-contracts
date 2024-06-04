@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	DarkCountryMarket.cdc
 
 	Description: Contract definitions for users to sell and buy their DarkCountry NFTs
@@ -179,7 +193,7 @@ contract DarkCountryMarket{
 		// If the sale offer is for pre ordered items only,
 		// the preOrders dictionary is checked for a corresponding record
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &DarkCountry.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerPayment.balance == self.price:
@@ -253,7 +267,7 @@ contract DarkCountryMarket{
 	//
 	// NOTE: the function will be private in the initial release of the market smart contract
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleOffer(
 		sellerItemProvider: Capability<&DarkCountry.Collection>,
 		itemID: UInt64,
@@ -275,10 +289,10 @@ contract DarkCountryMarket{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(offer: @DarkCountryMarket.SaleOffer)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(offer: @DarkCountryMarket.SaleOffer): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer
 	}
 	
@@ -289,12 +303,12 @@ contract DarkCountryMarket{
 	//
 	access(all)
 	resource interface CollectionPurchaser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			itemID: UInt64,
 			buyerCollection: &DarkCountry.Collection,
 			buyerPayment: @{FungibleToken.Vault}
-		)
+		): Void
 	}
 	
 	// CollectionPublic
@@ -302,13 +316,13 @@ contract DarkCountryMarket{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			itemID: UInt64,
 			buyerCollection: &DarkCountry.Collection,
@@ -327,7 +341,7 @@ contract DarkCountryMarket{
 		// insert
 		// Insert a SaleOffer into the collection, replacing one with the same itemID if present.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @DarkCountryMarket.SaleOffer){ 
 			let itemID: UInt64 = offer.itemID
 			let itemTemplateID: UInt64 = offer.itemTemplateID
@@ -341,7 +355,7 @@ contract DarkCountryMarket{
 		
 		// remove
 		// Remove and return a SaleOffer from the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(itemID: itemID, owner: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: itemID) ?? panic("missing SaleOffer"))
@@ -359,7 +373,7 @@ contract DarkCountryMarket{
 		//   3. DarkCountry.Deposit
 		//   4. SaleOffer.SaleOfferFinished
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemID: UInt64, buyerCollection: &DarkCountry.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleOffers[itemID] != nil:
@@ -374,7 +388,7 @@ contract DarkCountryMarket{
 		// getSaleOfferIDs
 		// Returns an array of the IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
@@ -383,7 +397,7 @@ contract DarkCountryMarket{
 		// Returns an Optional read-only view of the SaleItem for the given itemID if it is contained by this collection.
 		// The optional will be nil if the provided itemID is not present in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?{ 
 			if self.saleOffers[itemID] == nil{ 
 				return nil
@@ -404,7 +418,7 @@ contract DarkCountryMarket{
 	// createEmptyCollection
 	// Make creating a Collection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}
@@ -420,7 +434,7 @@ contract DarkCountryMarket{
 		// setPercentage changes the cut percentage of the tokens that are for sale
 		//
 		// Parameters: newPercent: The new cut percentage for the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPercentage(_ newPercent: UFix64){ 
 			DarkCountryMarket.cutPercentage = newPercent
 			emit CutPercentageChanged(newPercent: newPercent)
@@ -430,7 +444,7 @@ contract DarkCountryMarket{
 		//
 		// Parameters: newBeneficiary the new capability for the beneficiary of the cut of the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBeneficiaryReceiver(_ newBeneficiaryCapability: Capability){ 
 			pre{ 
 				newBeneficiaryCapability.borrow<&{FungibleToken.Receiver}>() != nil:
@@ -443,7 +457,7 @@ contract DarkCountryMarket{
 		//
 		// Parameters: userAddress: The address of the user's account
 		// newPreOrders: dictionaty of Item Template and corresponding amount of items that are booked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPreOrdersForAddress(userAddress: Address, newPreOrders:{ UInt64: UInt64}){ 
 			DarkCountryMarket.preOrders[userAddress] = newPreOrders
 			emit PreOrderChanged(userAddress: userAddress, newPreOrders: newPreOrders)
@@ -452,7 +466,7 @@ contract DarkCountryMarket{
 		// createSaleOffer
 		// Make creating a SaleOffer publicly accessible.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPreOrderSaleOffer(
 			sellerItemProvider: Capability<&DarkCountry.Collection>,
 			itemID: UInt64,
@@ -470,7 +484,7 @@ contract DarkCountryMarket{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

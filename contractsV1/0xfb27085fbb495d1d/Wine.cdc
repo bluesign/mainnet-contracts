@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -135,7 +149,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateCreated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateName(newName: String){ 
 			pre{ 
 				self.locked == false:
@@ -145,7 +159,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDescription(newDescription: String){ 
 			pre{ 
 				self.locked == false:
@@ -155,7 +169,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateImage(newImage: String){ 
 			pre{ 
 				self.locked == false:
@@ -165,7 +179,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaxSupply(newMaxSupply: UInt64){ 
 			pre{ 
 				self.locked == false:
@@ -177,7 +191,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: AnyStruct}){ 
 			pre{ 
 				self.locked == false:
@@ -189,7 +203,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAddedToSet(setID: UInt64){ 
 			pre{ 
 				self.addedToSet == 0:
@@ -200,7 +214,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateAddedToSet(id: self.id, name: self.name, setID: setID, setName: setName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				self.locked == false:
@@ -210,7 +224,7 @@ contract Wine: NonFungibleToken{
 			emit TemplateLocked(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -242,7 +256,7 @@ contract Wine: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -326,22 +340,22 @@ contract Wine: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetData(): SetData{ 
 			return Wine.SetsData[self.setID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTemplate(): Template{ 
 			return Wine.Templates[self.templateID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return (Wine.Templates[self.templateID]!).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalUrl(): String{ 
 			let template = self.getTemplate()
 			let extBaseUrl = template.getMetadata()["external_base_url"] as! String?
@@ -357,15 +371,15 @@ contract Wine: NonFungibleToken{
 	access(all)
 	resource interface NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWine(id: UInt64): &Wine.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -387,7 +401,7 @@ contract Wine: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Wine.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -395,7 +409,7 @@ contract Wine: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -415,7 +429,7 @@ contract Wine: NonFungibleToken{
 			return ref!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWine(id: UInt64): &Wine.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -495,7 +509,7 @@ contract Wine: NonFungibleToken{
 			emit SetCreated(id: self.id, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateImage(newImage: String){ 
 			pre{ 
 				self.locked == false:
@@ -506,7 +520,7 @@ contract Wine: NonFungibleToken{
 			emit SetUpdated(id: self.id, name: oldData.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: AnyStruct}){ 
 			pre{ 
 				self.locked == false:
@@ -519,7 +533,7 @@ contract Wine: NonFungibleToken{
 			emit SetUpdated(id: self.id, name: oldData.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makePublic(){ 
 			pre{ 
 				self.isPublic == false:
@@ -528,7 +542,7 @@ contract Wine: NonFungibleToken{
 			self.isPublic = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makePrivate(){ 
 			pre{ 
 				self.isPublic == true:
@@ -537,7 +551,7 @@ contract Wine: NonFungibleToken{
 			self.isPublic = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(id: UInt64){ 
 			pre{ 
 				Wine.Templates[id] != nil:
@@ -556,14 +570,14 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).markAddedToSet(setID: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplates(templateIDs: [UInt64]){ 
 			for templateID in templateIDs{ 
 				self.addTemplate(id: templateID)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				self.locked == false:
@@ -573,7 +587,7 @@ contract Wine: NonFungibleToken{
 			emit SetLocked(id: self.id, name: (Wine.SetsData[self.id]!).name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(){ 
 			pre{ 
 				self.locked == true:
@@ -583,7 +597,7 @@ contract Wine: NonFungibleToken{
 			emit SetUnlocked(id: self.id, name: (Wine.SetsData[self.id]!).name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateID: UInt64): @NFT{ 
 			let nextEditionNumber = self.templateSupplies[templateID]! + 1
 			if nextEditionNumber >= (Wine.Templates[templateID]!).maxSupply{ 
@@ -597,7 +611,7 @@ contract Wine: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateName(id: UInt64, newName: String){ 
 			pre{ 
 				Wine.Templates[id] != nil:
@@ -612,7 +626,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateName(newName: newName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateDescription(id: UInt64, newDescription: String){ 
 			pre{ 
 				Wine.Templates[id] != nil:
@@ -627,7 +641,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateDescription(newDescription: newDescription)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateImage(id: UInt64, newImage: String){ 
 			pre{ 
 				Wine.Templates[id] != nil:
@@ -642,7 +656,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateImage(newImage: newImage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMaxSupply(id: UInt64, newMaxSupply: UInt64){ 
 			pre{ 
 				Wine.Templates[id] != nil:
@@ -657,7 +671,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateMaxSupply(newMaxSupply: newMaxSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(id: UInt64, newMetadata:{ String: AnyStruct}){ 
 			pre{ 
 				Wine.Templates[id] != nil:
@@ -672,7 +686,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateMetadata(newMetadata: newMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(id: UInt64){ 
 			pre{ 
 				Wine.Templates[id] != nil:
@@ -687,12 +701,12 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).lock()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return (Wine.SetsData[self.id]!).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplateIDs(): [UInt64]{ 
 			return self.templateIDs
 		}
@@ -700,7 +714,7 @@ contract Wine: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setID: UInt64, templateID: UInt64){ 
 			let set = self.borrowSet(id: setID)
 			if set.getTemplateIDs().length == 0{ 
@@ -709,7 +723,7 @@ contract Wine: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFT(templateID: templateID))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(name: String, description: String, image: String, maxSupply: UInt64, metadata:{ String: AnyStruct}): UInt64{ 
 			let templateID = Wine.nextTemplateID
 			
@@ -718,7 +732,7 @@ contract Wine: NonFungibleToken{
 			return templateID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateName(id: UInt64, newName: String){ 
 			pre{ 
 				Wine.Templates.containsKey(id) != nil:
@@ -729,7 +743,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateName(newName: newName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateDescription(id: UInt64, newDescription: String){ 
 			pre{ 
 				Wine.Templates.containsKey(id) != nil:
@@ -740,7 +754,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateDescription(newDescription: newDescription)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateImage(id: UInt64, newImage: String){ 
 			pre{ 
 				Wine.Templates.containsKey(id) != nil:
@@ -751,7 +765,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateImage(newImage: newImage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMaxSupply(id: UInt64, newMaxSupply: UInt64){ 
 			pre{ 
 				Wine.Templates.containsKey(id) != nil:
@@ -762,7 +776,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateMaxSupply(newMaxSupply: newMaxSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(id: UInt64, newMetadata:{ String: String}){ 
 			pre{ 
 				Wine.Templates.containsKey(id) != nil:
@@ -773,7 +787,7 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).updateMetadata(newMetadata: newMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(id: UInt64){ 
 			pre{ 
 				Wine.Templates.containsKey(id) != nil:
@@ -784,13 +798,13 @@ contract Wine: NonFungibleToken{
 			 Wine.Templates[id]!).lock()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, description: String, image: String, metadata:{ String: String}){ 
 			var newSet <- create Set(name: name, description: description, image: image, metadata: metadata)
 			Wine.sets[newSet.id] <-! newSet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(id: UInt64): &Set{ 
 			pre{ 
 				Wine.sets[id] != nil:
@@ -800,45 +814,45 @@ contract Wine: NonFungibleToken{
 			return ref!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetImage(id: UInt64, newImage: String){ 
 			let set = self.borrowSet(id: id)
 			set.updateImage(newImage: newImage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetMetadata(id: UInt64, newMetadata:{ String: AnyStruct}){ 
 			let set = self.borrowSet(id: id)
 			set.updateMetadata(newMetadata: newMetadata)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTemplate(id: UInt64): Wine.Template?{ 
 		return self.Templates[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplates():{ UInt64: Wine.Template}{ 
 		return self.Templates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDs(): [UInt64]{ 
 		return self.sets.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(id: UInt64): Wine.SetData?{ 
 		return Wine.SetsData[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetsData():{ UInt64: Wine.SetData}{ 
 		return self.SetsData
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSize(id: UInt64): UInt64{ 
 		pre{ 
 			self.sets[id] != nil:
@@ -848,7 +862,7 @@ contract Wine: NonFungibleToken{
 		return (set!).nextSerialNumber - 1
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateIDsInSet(id: UInt64): [UInt64]{ 
 		pre{ 
 			self.sets[id] != nil:

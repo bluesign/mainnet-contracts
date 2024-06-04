@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -65,7 +79,7 @@ contract Evergreen{
 			self.receiverPath = receiverPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun commissionRate(initialSale: Bool): UFix64{ 
 			return initialSale ? self.initialSaleCommission : self.secondaryMarketCommission
 		}
@@ -93,7 +107,7 @@ contract Evergreen{
 			self.roles = roles
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRole(id: String): Role?{ 
 			for role in self.roles{ 
 				if role.id == id{ 
@@ -103,7 +117,7 @@ contract Evergreen{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buildRoyalties(defaultReceiverPath: PublicPath?): [MetadataViews.Royalty]{ 
 			let royalties: [MetadataViews.Royalty] = []
 			for role in self.roles{ 
@@ -128,18 +142,18 @@ contract Evergreen{
 	resource interface Token{ 
 		// getAssetID returns the asset ID (in DID format) that uniquely identifies
 		// the NFT and all its editions.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetID(): String
 		
 		// getEvergreenProfile returns the token's Profile.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEvergreenProfile(): Profile
 	}
 	
 	// An interface for reading the details of an evengreen token in the Collection.
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEvergreenToken(id: UInt64): &{Token}?
 	}
 }

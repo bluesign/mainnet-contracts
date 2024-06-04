@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	LockedTokens implements the functionality required to manage FLOW
 	buyers locked tokens from the token sale.
@@ -86,8 +100,8 @@ contract LockedTokens{
 	/// milestone in the vesting period.
 	access(all)
 	resource interface TokenAdmin{ 
-		access(all)
-		fun increaseUnlockLimit(delta: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun increaseUnlockLimit(delta: UFix64): Void
 	}
 	
 	/// This token manager resource is stored in the shared account to manage access 
@@ -132,7 +146,7 @@ contract LockedTokens{
 		// FungibleToken.Receiver actions
 		/// Deposits unlocked tokens to the vault
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			self.depositUnlockedTokens(from: <-from)
 		}
 		
@@ -167,7 +181,7 @@ contract LockedTokens{
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			let vaultRef = self.vault.borrow()!
 			return vaultRef.balance
@@ -180,7 +194,7 @@ contract LockedTokens{
 		
 		// LockedTokens.TokenAdmin actions
 		/// Called by the admin every time a vesting release happens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseUnlockLimit(delta: UFix64){ 
 			self.unlockLimit = self.unlockLimit + delta
 		}
@@ -188,7 +202,7 @@ contract LockedTokens{
 		// LockedTokens.TokenHolder actions
 		/// Registers a new node operator with the Flow Staking contract
 		/// and commits an initial amount of locked tokens to stake
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerNode(nodeInfo: StakingProxy.NodeInfo, amount: UFix64){ 
 			let vaultRef = self.vault.borrow()!
 			let tokens <- vaultRef.withdraw(amount: amount)
@@ -205,7 +219,7 @@ contract LockedTokens{
 		/// Registers a new Delegator with the Flow Staking contract
 		/// the caller has to specify the ID of the node operator
 		/// they are delegating to
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDelegator(nodeID: String){ 
 			self.nodeDelegator <-! FlowIDTableStaking.registerNewDelegator(nodeID: nodeID)
 		}
@@ -219,13 +233,13 @@ contract LockedTokens{
 	/// This interfaces allows anybody to read information about the locked account.
 	access(all)
 	resource interface LockedAccountInfo{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedAccountAddress(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedAccountBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnlockLimit(): UFix64
 	}
 	
@@ -275,19 +289,19 @@ contract LockedTokens{
 		
 		// LockedAccountInfo actions
 		/// Returns the locked account address for this token holder.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedAccountAddress(): Address{ 
 			return self.address
 		}
 		
 		/// Returns the locked account balance for this token holder.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedAccountBalance(): UFix64{ 
 			return self.borrowTokenManager().getBalance()
 		}
 		
 		// Returns the unlocked limit for this token holder.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnlockLimit(): UFix64{ 
 			return self.borrowTokenManager().unlockLimit
 		}
@@ -295,7 +309,7 @@ contract LockedTokens{
 		/// Deposits tokens in the locked vault, which marks them as 
 		/// unlocked and available to withdraw
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			self.borrowTokenManager().deposit(from: <-from)
 		}
 		
@@ -309,7 +323,7 @@ contract LockedTokens{
 		
 		/// The user calls this function if they want to register as a node operator
 		/// They have to provide all the info for their node
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNodeStaker(nodeInfo: StakingProxy.NodeInfo, amount: UFix64){ 
 			pre{ 
 				self.nodeStakerProxy == nil && self.nodeDelegatorProxy == nil:
@@ -323,7 +337,7 @@ contract LockedTokens{
 		
 		/// The user calls this function if they want to register as a node operator
 		/// They have to provide the node ID for the node they want to delegate to
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNodeDelegator(nodeID: String){ 
 			pre{ 
 				self.nodeStakerProxy == nil && self.nodeDelegatorProxy == nil:
@@ -337,7 +351,7 @@ contract LockedTokens{
 		
 		/// Borrow a "reference" to the staking object which allows the caller
 		/// to perform all staking actions with locked tokens.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStaker(): LockedNodeStakerProxy{ 
 			pre{ 
 				self.nodeStakerProxy != nil:
@@ -348,7 +362,7 @@ contract LockedTokens{
 		
 		/// Borrow a "reference" to the delegating object which allows the caller
 		/// to perform all delegating actions with locked tokens.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDelegator(): LockedNodeDelegatorProxy{ 
 			pre{ 
 				self.nodeDelegatorProxy != nil:
@@ -378,7 +392,7 @@ contract LockedTokens{
 		}
 		
 		/// Stakes new locked tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeNewTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			let vaultRef = tokenManagerRef.vault.borrow()!
@@ -386,7 +400,7 @@ contract LockedTokens{
 		}
 		
 		/// Stakes unstaked tokens from the staking contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeUnstakedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.nodeStaker?.stakeUnstakedTokens(amount: amount)
@@ -395,7 +409,7 @@ contract LockedTokens{
 		/// Stakes rewarded tokens. Rewarded tokens are freely withdrawable
 		/// so if they are staked, the withdraw limit should be increased
 		/// because staked tokens are effectively treated as locked tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeRewardedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.nodeStaker?.stakeRewardedTokens(amount: amount)
@@ -403,7 +417,7 @@ contract LockedTokens{
 		}
 		
 		/// Requests unstaking for the node
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.nodeStaker?.requestUnstaking(amount: amount)
@@ -411,7 +425,7 @@ contract LockedTokens{
 		
 		/// Requests to unstake all of the node's tokens and all of
 		/// the tokens that have been delegated to the node
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.nodeStaker?.unstakeAll()
@@ -421,7 +435,7 @@ contract LockedTokens{
 		/// the locked token vault. This does not increase the withdraw
 		/// limit because staked/unstaked tokens are considered to still
 		/// be locked in terms of the vesting schedule
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			let vaultRef = tokenManagerRef.vault.borrow()!
@@ -431,7 +445,7 @@ contract LockedTokens{
 		
 		/// Withdraw reward tokens to the locked vault, 
 		/// which increases the withdraw limit
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.deposit(from: <-tokenManagerRef.nodeStaker?.withdrawRewardedTokens(amount: amount)!)
@@ -453,7 +467,7 @@ contract LockedTokens{
 		}
 		
 		/// delegates tokens from the locked token vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateNewTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			let vaultRef = tokenManagerRef.vault.borrow()!
@@ -461,7 +475,7 @@ contract LockedTokens{
 		}
 		
 		/// Delegate tokens from the unstaked staking bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateUnstakedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.nodeDelegator?.delegateUnstakedTokens(amount: amount)
@@ -469,7 +483,7 @@ contract LockedTokens{
 		
 		/// Delegate rewarded tokens. Increases the unlock limit
 		/// because these are freely withdrawable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateRewardedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.nodeDelegator?.delegateRewardedTokens(amount: amount)
@@ -477,7 +491,7 @@ contract LockedTokens{
 		}
 		
 		/// Request to unstake tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.nodeDelegator?.requestUnstaking(amount: amount)
@@ -485,7 +499,7 @@ contract LockedTokens{
 		
 		/// withdraw unstaked tokens back to the locked vault
 		/// This does not increase the withdraw limit
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			let vaultRef = tokenManagerRef.vault.borrow()!
@@ -495,7 +509,7 @@ contract LockedTokens{
 		/// Withdraw rewarded tokens back to the locked vault,
 		/// which increases the withdraw limit because these 
 		/// are considered unstaked in terms of the vesting schedule
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64){ 
 			let tokenManagerRef = self.tokenManager.borrow()!
 			tokenManagerRef.deposit(from: <-tokenManagerRef.nodeDelegator?.withdrawRewardedTokens(amount: amount)!)
@@ -504,12 +518,12 @@ contract LockedTokens{
 	
 	access(all)
 	resource interface AddAccount{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccount(
 			sharedAccountAddress: Address,
 			unlockedAccountAddress: Address,
-			tokenAdmin: Capability<&LockedTokenManager>
-		)
+			tokenAdmin: Capability<&LockedTokens.LockedTokenManager>
+		): Void
 	}
 	
 	/// Resource that the Dapper Labs token admin
@@ -528,7 +542,7 @@ contract LockedTokens{
 		
 		/// Add a new account's locked token manager capability
 		/// to the record
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccount(sharedAccountAddress: Address, unlockedAccountAddress: Address, tokenAdmin: Capability<&LockedTokenManager>){ 
 			self.accounts[sharedAccountAddress] = tokenAdmin
 			emit SharedAccountRegistered(address: sharedAccountAddress)
@@ -536,7 +550,7 @@ contract LockedTokens{
 		}
 		
 		/// Get an accounts capability
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccount(address: Address): Capability<&LockedTokenManager>{ 
 			return self.accounts[address]!
 		}
@@ -544,8 +558,8 @@ contract LockedTokens{
 	
 	access(all)
 	resource interface LockedAccountCreatorPublic{ 
-		access(all)
-		fun addCapability(cap: Capability<&TokenAdminCollection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(cap: Capability<&LockedTokens.TokenAdminCollection>): Void
 	}
 	
 	// account creators store this resource in their account
@@ -559,12 +573,12 @@ contract LockedTokens{
 			self.addAccountCapability = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(cap: Capability<&TokenAdminCollection>){ 
 			self.addAccountCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccount(sharedAccountAddress: Address, unlockedAccountAddress: Address, tokenAdmin: Capability<&LockedTokenManager>){ 
 			let adminRef = (self.addAccountCapability!).borrow()!
 			adminRef.addAccount(sharedAccountAddress: sharedAccountAddress, unlockedAccountAddress: unlockedAccountAddress, tokenAdmin: tokenAdmin)
@@ -572,21 +586,21 @@ contract LockedTokens{
 	}
 	
 	/// Public function to create a new token admin collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenAdminCollection(): @TokenAdminCollection{ 
 		return <-create TokenAdminCollection()
 	}
 	
 	/// Public function to create a new Locked Token Manager
 	/// every time a new user account is created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLockedTokenManager(vault: Capability<&FlowToken.Vault>): @LockedTokenManager{ 
 		return <-create LockedTokenManager(vault: vault)
 	}
 	
 	// Creates a new TokenHolder resource for this LockedTokenManager
 	/// that the user can store in their unlocked account.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenHolder(
 		lockedAddress: Address,
 		tokenManager: Capability<&LockedTokenManager>
@@ -594,7 +608,7 @@ contract LockedTokens{
 		return <-create TokenHolder(lockedAddress: lockedAddress, tokenManager: tokenManager)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLockedAccountCreator(): @LockedAccountCreator{ 
 		return <-create LockedAccountCreator()
 	}

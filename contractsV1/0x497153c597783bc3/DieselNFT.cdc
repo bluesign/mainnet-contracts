@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -167,7 +181,7 @@ contract DieselNFT: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDieselData(name: String, description: String, mainVideo: String): UInt32{ 
 			// Create the new DieselData
 			var newDiesel = DieselData(name: name, description: description, mainVideo: mainVideo)
@@ -181,13 +195,13 @@ contract DieselNFT: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Mint the new Diesel
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(dieselDataID: UInt32, royaltyVault: Capability<&{FungibleToken.Receiver}>): @NFT{ 
 			pre{ 
 				royaltyVault.check():
@@ -204,7 +218,7 @@ contract DieselNFT: NonFungibleToken{
 			return <-newDiesel
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(dieselDataID: UInt32, royaltyVault: Capability<&{FungibleToken.Receiver}>, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -216,14 +230,14 @@ contract DieselNFT: NonFungibleToken{
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyPercentage(newRoyaltyPercentage: UFix64){ 
 			DieselNFT.royaltyPercentage = newRoyaltyPercentage
 			emit RoyaltyPercentageChanged(newRoyaltyPercentage: newRoyaltyPercentage)
 		}
 		
 		// Retire dieselData so that it cannot be used to mint anymore
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireDieselData(dieselDataID: UInt32){ 
 			pre{ 
 				DieselNFT.isDieselDataRetired[dieselDataID] != nil:
@@ -242,18 +256,18 @@ contract DieselNFT: NonFungibleToken{
 	access(all)
 	resource interface DieselCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDiesel(id: UInt64): &DieselNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -301,7 +315,7 @@ contract DieselNFT: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Diesel
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -320,7 +334,7 @@ contract DieselNFT: NonFungibleToken{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as NFT to make sure
 			// it is the correct type
 			let token <- token as! @DieselNFT.NFT
@@ -343,7 +357,7 @@ contract DieselNFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -382,7 +396,7 @@ contract DieselNFT: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDiesel(id: UInt64): &DieselNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -426,37 +440,37 @@ contract DieselNFT: NonFungibleToken{
 	}
 	
 	// get dictionary of numberMintedPerDiesel
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerDiesel():{ UInt32: UInt32}{ 
 		return DieselNFT.numberMintedPerDiesel
 	}
 	
 	// get how many Diesels with dieselDataID are minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDieselNumberMinted(id: UInt32): UInt32{ 
 		let numberMinted = DieselNFT.numberMintedPerDiesel[id] ?? panic("dieselDataID not found")
 		return numberMinted
 	}
 	
 	// get the dieselData of a specific id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDieselData(id: UInt32): DieselData{ 
 		let dieselData = DieselNFT.dieselDatas[id] ?? panic("dieselDataID not found")
 		return dieselData
 	}
 	
 	// get all dieselDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDieselDatas():{ UInt32: DieselData}{ 
 		return DieselNFT.dieselDatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDieselDatasRetired():{ UInt32: Bool}{ 
 		return DieselNFT.isDieselDataRetired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDieselDataRetired(dieselDataID: UInt32): Bool{ 
 		let isDieselDataRetired = DieselNFT.isDieselDataRetired[dieselDataID] ?? panic("dieselDataID not found")
 		return isDieselDataRetired

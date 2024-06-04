@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for SportsIcon NFT Collectibles
 
 	SportsIcon Collectibles are available as part of "sets", each with
@@ -102,13 +116,13 @@ contract SportsIconCollectible: NonFungibleToken{
 			self.nftID = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftID(): UInt64?{ 
 			return self.nftID
 		}
 		
 		// Returns all metadata for this collectible
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -141,12 +155,12 @@ contract SportsIconCollectible: NonFungibleToken{
 			self.setID = setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionNumber(): UInt64{ 
 			return self.editionNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetID(): UInt64{ 
 			return self.setID
 		}
@@ -199,52 +213,52 @@ contract SportsIconCollectible: NonFungibleToken{
 					Readonly functions
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetID(): UInt64{ 
 			return self.setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMediaURL(): String{ 
 			return self.mediaURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMaxNumberOfEditions(): UInt64{ 
 			return self.maxNumberOfEditions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionCount(): UInt64{ 
 			return self.editionCount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFUSDPublicSalePrice(): UFix64?{ 
 			return self.publicFUSDSalePrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFLOWPublicSalePrice(): UFix64?{ 
 			return self.publicFLOWSalePrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicSaleStartTime(): UFix64?{ 
 			return self.publicSaleStartTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicSaleEndTime(): UFix64?{ 
 			return self.publicSaleEndTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionMetadata(editionNumber: UInt64):{ String: String}{ 
 			pre{ 
 				editionNumber >= 1 && editionNumber <= self.maxNumberOfEditions:
@@ -256,20 +270,20 @@ contract SportsIconCollectible: NonFungibleToken{
 		}
 		
 		// If there is no beneficiary data, assume that there are no royalty destinations
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMintBeneficiaries(): SportsIconBeneficiaries.Beneficiaries{ 
 			return SportsIconBeneficiaries.mintBeneficiaries[self.setID] ?? SportsIconBeneficiaries.Beneficiaries(beneficiaries: [])
 		}
 		
 		// If there is no beneficiary data, assume that there are no royalty destinations
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketBeneficiaries(): SportsIconBeneficiaries.Beneficiaries{ 
 			return SportsIconBeneficiaries.marketBeneficiaries[self.setID] ?? SportsIconBeneficiaries.Beneficiaries(beneficiaries: [])
 		}
 		
 		// A public sale allowing for direct minting from the contract is considered active if we have a valid public
 		// sale price listing, current time is after start time, and current time is before end time
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isPublicSaleActive(): Bool{ 
 			let curBlockTime = getCurrentBlock().timestamp
 			return self.publicSaleStartTime != nil && curBlockTime >= self.publicSaleStartTime! && (self.publicSaleEndTime == nil || curBlockTime < self.publicSaleEndTime!)
@@ -339,18 +353,18 @@ contract SportsIconCollectible: NonFungibleToken{
 	access(all)
 	resource interface CollectibleCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(collectibleCollection: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(collectibleCollection: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &SportsIconCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -460,7 +474,7 @@ contract SportsIconCollectible: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -470,7 +484,7 @@ contract SportsIconCollectible: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SportsIconCollectible.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -478,7 +492,7 @@ contract SportsIconCollectible: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collectibleCollection: @{NonFungibleToken.Collection}){ 
 			let keys = collectibleCollection.getIDs()
 			for key in keys{ 
@@ -492,7 +506,7 @@ contract SportsIconCollectible: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &SportsIconCollectible.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -638,45 +652,45 @@ contract SportsIconCollectible: NonFungibleToken{
 	// SportsIcon Functions
 	// -----------------------------------------------------------------------
 	// Retrieves all sets (This can be expensive)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatas():{ UInt64: SportsIconCollectible.SetMetadata}{ 
 		return self.setData
 	}
 	
 	// Retrieves how many NFT sets exist
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatasCount(): UInt64{ 
 		return UInt64(self.setData.length)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataForSetID(setID: UInt64): SportsIconCollectible.SetMetadata?{ 
 		return self.setData[setID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetMetadataForNFT(nft: &SportsIconCollectible.NFT): SportsIconCollectible.SetMetadata?{ 
 		return self.setData[nft.setID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetMetadataForNFTByUUID(uuid: UInt64): SportsIconCollectible.SetMetadata?{ 
 		let collectibleEditionData = self.allCollectibleIDs[uuid]!
 		return self.setData[collectibleEditionData.getSetID()]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataForNFTByUUID(uuid: UInt64): SportsIconCollectible.CollectibleMetadata?{ 
 		let collectibleEditionData = self.allCollectibleIDs[uuid]!
 		return (self.collectibleData[collectibleEditionData.getSetID()]!)[collectibleEditionData.getEditionNumber()]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataByEditionID(setID: UInt64, editionNumber: UInt64): SportsIconCollectible.CollectibleMetadata?{ 
 		return (self.collectibleData[setID]!)[editionNumber]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleDataForNftByUUID(uuid: UInt64): SportsIconCollectible.CollectibleEditionData?{ 
 		return self.allCollectibleIDs[uuid]!
 	}

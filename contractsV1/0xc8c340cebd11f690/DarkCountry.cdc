@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for DarkCountry NFTs
 
 	authors: Ivan Kravets evan@dapplica.io
@@ -104,7 +118,7 @@ contract DarkCountry: NonFungibleToken{
 	access(account)
 	var numberMintedPerItemTemplate:{ UInt64: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerItemTemplate(paramItemTemplateID: UInt64): UInt64?{ 
 		return self.numberMintedPerItemTemplate[paramItemTemplateID]
 	}
@@ -155,7 +169,7 @@ contract DarkCountry: NonFungibleToken{
 	//
 	// Returns: An array of all the item templates that have been created
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllItemTemplates(): [DarkCountry.ItemTemplate]{ 
 		return DarkCountry.itemTemplates.values
 	}
@@ -166,7 +180,7 @@ contract DarkCountry: NonFungibleToken{
 	//
 	// Returns: The metadata as a String to String mapping optional
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemTemplateMetaData(itemTemplateID: UInt64):{ String: String}?{ 
 		return self.itemTemplates[itemTemplateID]?.metadata
 	}
@@ -179,7 +193,7 @@ contract DarkCountry: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemTemplateMetaDataByField(itemTemplateID: UInt64, field: String): String?{ 
 		if let itemTemplate = DarkCountry.itemTemplates[itemTemplateID]{ 
 			return itemTemplate.metadata[field]
@@ -228,15 +242,15 @@ contract DarkCountry: NonFungibleToken{
 	access(all)
 	resource interface DarkCountryCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDarkCountryNFT(id: UInt64): &DarkCountry.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -277,7 +291,7 @@ contract DarkCountry: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DarkCountry.NFT
 			let id: UInt64 = token.id
 			
@@ -309,7 +323,7 @@ contract DarkCountry: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the DarkCountry.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDarkCountryNFT(id: UInt64): &DarkCountry.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -363,7 +377,7 @@ contract DarkCountry: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, itemTemplateID: UInt64){ 
 			// make sure the aseetTypeID is a valid one
 			pre{ 
@@ -390,7 +404,7 @@ contract DarkCountry: NonFungibleToken{
 		//
 		// Returns: the ID of the new itemTemplate object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItemTemplate(metadata:{ String: String}): UInt64{ 
 			// Create the new ItemTemplate
 			var newItemTemplate = ItemTemplate(metadata: metadata)
@@ -403,7 +417,7 @@ contract DarkCountry: NonFungibleToken{
 		
 		// createNewNFTMinter creates a new NFTMinter resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewNFTMinter(): @NFTMinter{ 
 			return <-create NFTMinter()
 		}
@@ -415,7 +429,7 @@ contract DarkCountry: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &DarkCountry.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&DarkCountry.Collection>(DarkCountry.CollectionPublicPath).borrow<&DarkCountry.Collection>() ?? panic("Couldn't get collection")
 		// We trust DarkCountry.Collection.borowDarkCountryNFT to get the correct itemID

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -12,10 +26,10 @@ contract Filter{
 	
 	access(all)
 	struct interface NFTFilter{ 
-		access(all)
-		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool
+		access(TMP_ENTITLEMENT_OWNER)
+		fun match(nft: &{NonFungibleToken.NFT}, cache: &Filter.MetadataCache): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct
 	}
 	
@@ -30,7 +44,7 @@ contract Filter{
 		access(all)
 		let cache: MetadataCache
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}): Bool{ 
 			for f in self.filters{ 
 				if !f.match(nft: nft, cache: &self.cache as &MetadataCache){ 
@@ -56,7 +70,7 @@ contract Filter{
 		access(all)
 		var cache:{ UInt64:{ Type: AnyStruct}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get(_ id: UInt64, _ type: Type, _ nft: &{NonFungibleToken.NFT}): AnyStruct?{ 
 			if self.cache[id] == nil{ 
 				self.cache[id] ={} 
@@ -68,7 +82,7 @@ contract Filter{
 			return (self.cache[id]!)[type]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clear(){ 
 			self.cache ={} 
 		}
@@ -86,7 +100,7 @@ contract Filter{
 		access(all)
 		let type: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			return nft.uuid == self.uuid
 		}
@@ -96,7 +110,7 @@ contract Filter{
 			self.type = self.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "uuid": self.uuid, "filterType": self.getType()}
 		}
@@ -110,7 +124,7 @@ contract Filter{
 		access(all)
 		let filterType: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			return nft.getType() == self.nftType
 		}
@@ -120,7 +134,7 @@ contract Filter{
 			self.filterType = self.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "nftType": self.nftType, "filterType": self.getType()}
 		}
@@ -137,7 +151,7 @@ contract Filter{
 		access(all)
 		let filterType: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			if nft.getType() != self.type{ 
 				return false
@@ -164,7 +178,7 @@ contract Filter{
 			self.filterType = self.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "type": self.type, "name": self.name, "filterType": self.getType()}
 		}
@@ -181,7 +195,7 @@ contract Filter{
 		access(all)
 		let filterType: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			return nft.id == self.nftID && self.nftType == nft.getType()
 		}
@@ -192,7 +206,7 @@ contract Filter{
 			self.filterType = self.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "nftType": self.nftType, "nftID": self.nftID, "filterType": self.getType()}
 		}
@@ -218,12 +232,12 @@ contract Filter{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			return self.ids[nft.id] == true && self.nftType == nft.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "nftType": self.nftType, "ids": self.ids, "filterType": self.getType()}
 		}
@@ -264,7 +278,7 @@ contract Filter{
 			self.filterType = self.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			assert(nft.getType() == self.nftType, message: "mismatched nft type")
 			let traits = cache.get(nft.uuid, Filter.TraitsType, nft)
@@ -286,13 +300,13 @@ contract Filter{
 			return countedTraits.keys.length == self.traits.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "traits": self.traits, "filterType": self.getType()}
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun equal(_ val1: AnyStruct, _ val2: AnyStruct): Bool{ 
 		if val1.getType() != val2.getType(){ 
 			return false
@@ -357,12 +371,12 @@ contract Filter{
 		access(all)
 		let filterType: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			return self.a.match(nft: nft, cache: cache) || self.b.match(nft: nft, cache: cache)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "a": self.a.getDetails(), "b": self.b.getDetails(), "filterType": self.filterType}
 		}
@@ -385,12 +399,12 @@ contract Filter{
 		access(all)
 		let filterType: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun match(nft: &{NonFungibleToken.NFT}, cache: &MetadataCache): Bool{ 
 			return self.a.match(nft: nft, cache: cache) && self.b.match(nft: nft, cache: cache)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "a": self.a.getDetails(), "b": self.b.getDetails(), "filterType": self.filterType}
 		}

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -96,12 +110,12 @@ contract GMDYNFTContract: NonFungibleToken{
 			return [Type<MetadataViews.Display>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getnftType(): String{ 
 			return self.nftType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): AnyStruct?{ 
 			return self.metadata
 		}
@@ -128,21 +142,21 @@ contract GMDYNFTContract: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRefNFT(id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -186,7 +200,7 @@ contract GMDYNFTContract: NonFungibleToken{
 		
 		/*Function to deposit a  NFT in the collection*/
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GMDYNFTContract.NFT
 			let id: UInt64 = token.id
 			self.ownedNFTs[token.id] <-! token
@@ -200,7 +214,7 @@ contract GMDYNFTContract: NonFungibleToken{
 		}
 		
 		/*Function get Ref NFT*/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRefNFT(id: UInt64): &{NonFungibleToken.NFT}?{ 
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
@@ -212,14 +226,14 @@ contract GMDYNFTContract: NonFungibleToken{
 		}
 		
 		/*Function borrow GMDY NFT*/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGMDYNFT(id: UInt64): &GMDYNFTContract.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &GMDYNFTContract.NFT?
 		}
 		
 		// fun to check if the NFT exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -251,10 +265,10 @@ contract GMDYNFTContract: NonFungibleToken{
 	// to add the first NFTs to an empty collection.
 	access(all)
 	resource interface NFTCollectionReceiver{ 
-		access(all)
-		fun generateNFT(amount: UInt64, collection: Capability<&GMDYNFTContract.Collection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun generateNFT(amount: UInt64, collection: Capability<&GMDYNFTContract.Collection>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuantityAvailablesForCreate(): Int
 	}
 	
@@ -297,7 +311,7 @@ contract GMDYNFTContract: NonFungibleToken{
 			self.generateNFT(amount: amountToCreate, collection: collection)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateNFT(amount: UInt64, collection: Capability<&GMDYNFTContract.Collection>){ 
 			if Int(amount) < 0{ 
 				panic("Error amount should be greather than 0")
@@ -324,13 +338,13 @@ contract GMDYNFTContract: NonFungibleToken{
 			self.counteriDs = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuantityAvailablesForCreate(): Int{ 
 			return Int(self.maximum) - self.collectionNFT.length
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNFTTemplate(key: AuthAccount, name: String, nftType: String, metadata:{ String: AnyStruct}, thumbnail: String, description: String, amountToCreate: UInt64, maximum: UInt64, collection: Capability<&GMDYNFTContract.Collection>): @NFTTemplate{ 
 		if key.address != self.privateKey{ 
 			panic("Address Incorrect")
@@ -346,7 +360,7 @@ contract GMDYNFTContract: NonFungibleToken{
 		return <-create Collection(name: "", metadata:{} )
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollectionNFT(name: String, metadata:{ String: AnyStruct}): @{NonFungibleToken.Collection}{ 
 		var newID = GMDYNFTContract.totalCollection + 1
 		GMDYNFTContract.totalCollection = newID

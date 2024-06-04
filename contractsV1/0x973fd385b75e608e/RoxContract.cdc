@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for ROX digital collectibles
 
 	This smart contract contains the core functionality for 
@@ -119,7 +133,7 @@ contract RoxContract: NonFungibleToken{
 		}
 		
 		// locks the Box so that no more Rox Nfts can be added to it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -127,7 +141,7 @@ contract RoxContract: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintRox(recipient: &{NonFungibleToken.CollectionPublic}, roxId: String, tier: String, metadata:{ String: String}){ 
 			pre{ 
 				!self.locked:
@@ -146,7 +160,7 @@ contract RoxContract: NonFungibleToken{
 			emit Minted(id: RoxContract.totalSupply, roxId: roxId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintRox(recipient: &{NonFungibleToken.CollectionPublic}, quantity: UInt64, roxId: String, tier: String, metadata:{ String: String}){ 
 			pre{ 
 				!self.locked:
@@ -208,15 +222,15 @@ contract RoxContract: NonFungibleToken{
 	access(all)
 	resource interface RoxCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRoxNft(id: UInt64): &RoxContract.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -244,7 +258,7 @@ contract RoxContract: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @RoxContract.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -262,7 +276,7 @@ contract RoxContract: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRoxNft(id: UInt64): &RoxContract.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -298,7 +312,7 @@ contract RoxContract: NonFungibleToken{
 	// If an account does not have a RoxContract.Collection, panic.
 	// If it has a collection but does not contain the itemId, return nil.
 	// If it has a collection and that collection contains the itemId, return a reference to that.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &RoxContract.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&RoxContract.Collection>(RoxContract.CollectionPublicPath).borrow<&RoxContract.Collection>() ?? panic("Couldn't get collection")
 		return collection.borrowRoxNft(id: itemID)
@@ -308,7 +322,7 @@ contract RoxContract: NonFungibleToken{
 	resource Admin{ 
 		
 		// Mints a new box
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBox(name: String, metadata:{ String: String}){ 
 			var newBox <- create Box(name: name, metadata: metadata)
 			RoxContract.boxes[newBox.boxId] <-! newBox
@@ -316,7 +330,7 @@ contract RoxContract: NonFungibleToken{
 		
 		// In order to mint NFT, box reference should be received
 		// All the NFTs are minted via unlocked box
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBox(boxId: UInt32): &Box{ 
 			pre{ 
 				RoxContract.boxes[boxId] != nil:
@@ -325,7 +339,7 @@ contract RoxContract: NonFungibleToken{
 			return &RoxContract.boxes[boxId] as &RoxContract.Box?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 MetadataViewsManager
 
 MetadataViews (please see that contract for more details) provides metadata
@@ -38,7 +52,7 @@ contract MetadataViewsManager{
 		let type: Type
 		
 		// The actual resolve function
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?
 	}
 	
@@ -49,19 +63,19 @@ contract MetadataViewsManager{
 	resource interface Public{ 
 		
 		// Is manager locked?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool
 		
 		// Get all views supported by the manager
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
 		// Resolve a particular view of a provided reference struct (i.e. NFT)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(view: Type, nftRef: AnyStruct): AnyStruct?
 		
 		// Inspect a raw resolver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inspectView(view: Type):{ Resolver}?
 	}
 	
@@ -69,15 +83,15 @@ contract MetadataViewsManager{
 	resource interface Private{ 
 		
 		// Lock this manager so that resolvers can be neither added nor removed
-		access(all)
-		fun lock()
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lock(): Void
 		
 		// Add the given resolver if the manager is not locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addResolver(_ resolver:{ Resolver})
 		
 		// Remove the resolver of the provided type
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeResolver(_ type: Type)
 	}
 	
@@ -99,17 +113,17 @@ contract MetadataViewsManager{
 		// ========================================================================
 		// Public
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool{ 
 			return self._locked
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return self._resolvers.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(view: Type, nftRef: AnyStruct): AnyStruct?{ 
 			let resolverRef = &self._resolvers[view] as &{Resolver}?
 			if resolverRef == nil{ 
@@ -118,7 +132,7 @@ contract MetadataViewsManager{
 			return (resolverRef!).resolve(nftRef)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inspectView(view: Type):{ Resolver}?{ 
 			return self._resolvers[view]
 		}
@@ -126,12 +140,12 @@ contract MetadataViewsManager{
 		// ========================================================================
 		// Private
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			self._locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addResolver(_ resolver:{ Resolver}){ 
 			pre{ 
 				!self._locked:
@@ -140,7 +154,7 @@ contract MetadataViewsManager{
 			self._resolvers[resolver.type] = resolver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeResolver(_ type: Type){ 
 			pre{ 
 				!self._locked:
@@ -162,7 +176,7 @@ contract MetadataViewsManager{
 	// Contract functions
 	// ========================================================================
 	// Create a new Manager
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(): @Manager{ 
 		return <-create Manager()
 	}

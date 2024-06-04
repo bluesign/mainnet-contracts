@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 NFTRegistry
 
 Niftory NFTs should ideally be functionally the same. This would allow
@@ -148,11 +162,11 @@ contract NiftoryNFTRegistry{
 	resource interface Public{ 
 		
 		// Return all entries from the registry
-		access(all)
-		fun all():{ String: Record}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun all():{ String: NiftoryNFTRegistry.Record}
 		
 		// Return information for a particular brand in the registry
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun infoFor(_ brand: String): Record
 	}
 	
@@ -160,15 +174,15 @@ contract NiftoryNFTRegistry{
 	resource interface Private{ 
 		
 		// Get a modifiable ref of the underlying registry
-		access(all)
-		fun _auth(): &{String: Record}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun _auth(): &{String: NiftoryNFTRegistry.Record}
 		
 		// Register a new brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun register(brand: String, entry: Record)
 		
 		// Deregister an existing brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deregister(_ brand: String)
 	}
 	
@@ -187,12 +201,12 @@ contract NiftoryNFTRegistry{
 		// ========================================================================
 		// Public
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun all():{ String: Record}{ 
 			return self._registry
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun infoFor(_ brand: String): Record{ 
 			pre{ 
 				self._registry.containsKey(brand):
@@ -204,17 +218,17 @@ contract NiftoryNFTRegistry{
 		// ========================================================================
 		// Private
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _auth(): &{String: Record}{ 
 			return &self._registry as &{String: Record}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun register(brand: String, entry: Record){ 
 			self._registry[brand] = entry
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deregister(_ brand: String){ 
 			pre{ 
 				self._registry.containsKey(brand):
@@ -235,13 +249,13 @@ contract NiftoryNFTRegistry{
 	// Contract functions
 	// ========================================================================
 	// Create a new Registry
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(): @Registry{ 
 		return <-create Registry()
 	}
 	
 	// Helper to generate a Paths struct with common public/private/storage paths
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generatePaths(prefix: String, suffix: String): Paths{ 
 		let public = PublicPath(identifier: prefix.concat(suffix))!
 		let private = PrivatePath(identifier: prefix.concat(suffix))!
@@ -250,31 +264,31 @@ contract NiftoryNFTRegistry{
 	}
 	
 	// Generate collection paths
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateCollectionPaths(project: String): Paths{ 
 		return self.generatePaths(prefix: project, suffix: self.NFT_COLLECTION_PATH_SUFFIX)
 	}
 	
 	// Generate NFT manager paths
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateNFTManagerPaths(project: String): Paths{ 
 		return self.generatePaths(prefix: project, suffix: self.NFT_MANAGER_PATH_SUFFIX)
 	}
 	
 	// Generate MutableMetadataSetManager paths
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateSetManagerPaths(project: String): Paths{ 
 		return self.generatePaths(prefix: project, suffix: self.SET_MANAGER_PATH_SUFFIX)
 	}
 	
 	// Generate MetadataViewsManager paths
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateMetadataViewsManagerPaths(project: String): Paths{ 
 		return self.generatePaths(prefix: project, suffix: self.METADATA_VIEWS_MANAGER_PATH_SUFFIX)
 	}
 	
 	// Default way to construct a RegistryItem, using suggested contract suffixes
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateRecordFull(
 		contractAddress: Address,
 		nftManagerAddress: Address,
@@ -308,7 +322,7 @@ contract NiftoryNFTRegistry{
 	}
 	
 	// Default way to construct a RegistryItem, using suggested contract suffixes
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateRecord(account: Address, project: String): Record{ 
 		return self.generateRecordFull(
 			contractAddress: account,
@@ -321,14 +335,14 @@ contract NiftoryNFTRegistry{
 	
 	// Nicely formatted error for a resource not found that's listed in the
 	// registry
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _notFoundError(_ registryAddress: Address, _ brand: String, _ entity: String): String{ 
 		return entity.concat(" not found for registry at ").concat(registryAddress.toString())
 			.concat(" for brand ").concat(brand).concat(".")
 	}
 	
 	// Get a registry record for a registry address and brand
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRegistryRecord(_ registryAddress: Address, _ brand: String): Record{ 
 		let registry =
 			getAccount(registryAddress).capabilities.get<&{Public}>(self.PUBLIC_PATH).borrow()
@@ -337,14 +351,14 @@ contract NiftoryNFTRegistry{
 	}
 	
 	// Get the collection paths for a registry address and brand
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionPaths(_ registryAddress: Address, _ brand: String): Paths{ 
 		let record = self.getRegistryRecord(registryAddress, brand)
 		return record.collectionPaths
 	}
 	
 	// Get the NFT Manager for a registry address and brand
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTManagerPublic(_ registryAddress: Address, _ brand: String): &{
 		NiftoryNonFungibleToken.ManagerPublic
 	}{ 
@@ -357,7 +371,7 @@ contract NiftoryNFTRegistry{
 	}
 	
 	// Get the MutableMetadataSetManager for a registry address and brand
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetManagerPublic(
 		_ registryAddress: Address,
 		_ brand: String
@@ -372,7 +386,7 @@ contract NiftoryNFTRegistry{
 	}
 	
 	// Get the MetadataViewsManager for a registry address and brand
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataViewsManagerPublic(
 		_ registryAddress: Address,
 		_ brand: String
@@ -387,7 +401,7 @@ contract NiftoryNFTRegistry{
 	}
 	
 	// Get NFTCollectionData for a registry address and brand
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buildNFTCollectionData(
 		_ registryAddress: Address,
 		_ brand: String,

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract JoyrideMultiToken{ 
@@ -59,10 +73,10 @@ contract JoyrideMultiToken{
 	
 	access(all)
 	resource interface Receiver{ 
-		access(all)
-		fun depositToken(from: @{FungibleToken.Vault})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositToken(from: @{FungibleToken.Vault}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balanceOf(tokenContext: String): UFix64
 	}
 	
@@ -85,7 +99,7 @@ contract JoyrideMultiToken{
 					destroy mtv
 				}*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken(from: @{FungibleToken.Vault}){ 
 			let tokenIdetifier: String = from.getType().identifier
 			emit JoyrideMultiTokenInfoEvent(notes: "depositToken for user".concat(tokenIdetifier))
@@ -94,26 +108,26 @@ contract JoyrideMultiToken{
 			capability.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken(tokenContext: String, amount: UFix64): @{FungibleToken.Vault}{ 
 			//let tokenIdentifier: String = tokenContext.identifier
 			let vault = self.Depositories[tokenContext]?.borrow() ?? panic("unable to borrow capability withdraw")
 			return <-(vault!).withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerCapability(tokenIdentifier: String, capability: Capability<&{FungibleToken.Vault}>){ 
 			//let tokenIdentifier: String = capability.borrow()!.getType().identifier;
 			emit JoyrideMultiTokenInfoEvent(notes: "registerCapability".concat(tokenIdentifier))
 			self.Depositories[tokenIdentifier] = capability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun doesCapabilityExists(tokenIdentifier: String): Bool{ 
 			return self.Depositories.containsKey(tokenIdentifier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balanceOf(tokenContext: String): UFix64{ 
 			//let tokenIdentifier: String = tokenContext.identifier
 			let vault = self.Depositories[tokenContext]?.borrow() ?? panic("Token tokenContext Unknown")
@@ -122,7 +136,7 @@ contract JoyrideMultiToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @Vault{ 
 		return <-create Vault(zero: 0.0)
 	}
@@ -161,37 +175,40 @@ contract JoyrideMultiToken{
 	
 	access(all)
 	resource interface PlatformBalance{ 
-		access(all)
-		fun balance(vault: Vaults, tokenContext: String): UFix64
+		access(TMP_ENTITLEMENT_OWNER)
+		fun balance(vault: JoyrideMultiToken.Vaults, tokenContext: String): UFix64
 	}
 	
 	access(all)
 	resource interface PlatformWithdraw{ 
-		access(all)
-		fun withdraw(vault: Vaults, tokenContext: String, amount: UFix64, purpose: String): @{
-			FungibleToken.Vault
-		}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdraw(
+			vault: JoyrideMultiToken.Vaults,
+			tokenContext: String,
+			amount: UFix64,
+			purpose: String
+		): @{FungibleToken.Vault}?
 	}
 	
 	access(all)
 	resource interface PlatformDeposit{ 
-		access(all)
-		fun deposit(vault: Vaults, from: @{FungibleToken.Vault})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(vault: JoyrideMultiToken.Vaults, from: @{FungibleToken.Vault}): Void
 	}
 	
 	access(all)
 	resource PlatformAdmin: PlatformBalance, PlatformWithdraw, PlatformDeposit{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balance(vault: Vaults, tokenContext: String): UFix64{ 
 			return JoyrideMultiToken.getPlatformBalance(vault: vault, tokenContext: tokenContext)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(vault: Vaults, tokenContext: String, amount: UFix64, purpose: String): @{FungibleToken.Vault}?{ 
 			return <-JoyrideMultiToken.doPlatformWithdraw(vault: vault, tokenContext: tokenContext, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(vault: Vaults, from: @{FungibleToken.Vault}){ 
 			JoyrideMultiToken.doPlatformDeposit(vault: vault, from: <-from)
 		}

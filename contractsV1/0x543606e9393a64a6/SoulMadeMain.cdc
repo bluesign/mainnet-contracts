@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -85,25 +99,25 @@ contract SoulMadeMain: NonFungibleToken{
 		access(all)
 		let mainDetail: MainDetail
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllComponentDetail():{ String: SoulMadeComponent.ComponentDetail}
 	}
 	
 	access(all)
 	resource interface MainPrivate{ 
-		access(all)
-		fun setName(_ name: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setName(_ name: String): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(_ description: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIpfsHash(_ ipfsHash: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawComponent(category: String): @SoulMadeComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositComponent(componentNft: @SoulMadeComponent.NFT): @SoulMadeComponent.NFT?
 	}
 	
@@ -124,7 +138,7 @@ contract SoulMadeMain: NonFungibleToken{
 			self.components <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllComponentDetail():{ String: SoulMadeComponent.ComponentDetail}{ 
 			var info:{ String: SoulMadeComponent.ComponentDetail} ={} 
 			for categoryKey in self.components.keys{ 
@@ -135,7 +149,7 @@ contract SoulMadeMain: NonFungibleToken{
 			return info
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawComponent(category: String): @SoulMadeComponent.NFT{ 
 			let componentNft <- self.components.remove(key: category)!
 			self.mainDetail.componentDetails = self.getAllComponentDetail().values
@@ -143,7 +157,7 @@ contract SoulMadeMain: NonFungibleToken{
 			return <-componentNft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositComponent(componentNft: @SoulMadeComponent.NFT): @SoulMadeComponent.NFT?{ 
 			let category: String = componentNft.componentDetail.category
 			var old <- self.components[category] <- componentNft
@@ -152,7 +166,7 @@ contract SoulMadeMain: NonFungibleToken{
 			return <-old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(_ name: String){ 
 			pre{ 
 				name.length > 2:
@@ -164,7 +178,7 @@ contract SoulMadeMain: NonFungibleToken{
 			emit NameSet(id: self.id, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(_ description: String){ 
 			pre{ 
 				description.length > 2:
@@ -176,7 +190,7 @@ contract SoulMadeMain: NonFungibleToken{
 			emit DescriptionSet(id: self.id, description: description)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIpfsHash(_ ipfsHash: String){ 
 			self.mainDetail.ipfsHash = ipfsHash
 			emit IpfsHashSet(id: self.id, ipfsHash: ipfsHash)
@@ -205,15 +219,15 @@ contract SoulMadeMain: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMain(id: UInt64): &{SoulMadeMain.MainPublic}
 	}
 	
@@ -234,7 +248,7 @@ contract SoulMadeMain: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SoulMadeMain.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -252,7 +266,7 @@ contract SoulMadeMain: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMain(id: UInt64): &{SoulMadeMain.MainPublic}{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -262,7 +276,7 @@ contract SoulMadeMain: NonFungibleToken{
 			return ref as! &SoulMadeMain.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMainPrivate(id: UInt64): &{SoulMadeMain.MainPrivate}{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -301,7 +315,7 @@ contract SoulMadeMain: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintMain(series: String): @NFT{ 
 		var new <- create NFT(id: SoulMadeMain.totalSupply, series: series)
 		emit SoulMadeMainCreated(id: SoulMadeMain.totalSupply, series: series)

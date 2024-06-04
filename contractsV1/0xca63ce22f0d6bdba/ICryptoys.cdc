@@ -1,8 +1,22 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
 
-access(all)
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+
+access(TMP_ENTITLEMENT_OWNER)
 contract interface ICryptoys{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface Royalty{ 
 		access(all)
 		let name: String
@@ -14,7 +28,7 @@ contract interface ICryptoys{
 		let fee: UFix64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface Display{ 
 		access(all)
 		let image: String
@@ -23,7 +37,7 @@ contract interface ICryptoys{
 		let video: String
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface INFT{ 
 		access(all)
 		let id: UInt64
@@ -37,13 +51,13 @@ contract interface ICryptoys{
 		access(account)
 		let bucket: @{String:{ UInt64:{ INFT}}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay():{ ICryptoys.Display}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [{ICryptoys.Royalty}]
 		
 		access(account)
@@ -58,7 +72,7 @@ contract interface ICryptoys{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToBucket(_ key: String, _ nft: @{INFT}){ 
 			pre{ 
 				self.owner != nil:
@@ -66,19 +80,19 @@ contract interface ICryptoys{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBucketKeys(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBucketResourceIdsByKey(_ key: String): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucketResourcesByKey(_ key: String): &{UInt64:{ ICryptoys.INFT}}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucket(): &{String:{ UInt64:{ ICryptoys.INFT}}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucketItem(_ key: String, _ itemUuid: UInt64): &{INFT}{ 
 			post{ 
 				result == nil || result.uuid == itemUuid:
@@ -86,13 +100,13 @@ contract interface ICryptoys{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface CryptoysCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCryptoy(id: UInt64): &{INFT}{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -102,7 +116,7 @@ contract interface ICryptoys{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucketItem(_ id: UInt64, _ key: String, _ itemUuid: UInt64): &{ICryptoys.INFT}{ 
 			post{ 
 				result == nil || result.uuid == itemUuid:
@@ -111,9 +125,9 @@ contract interface ICryptoys{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Collection{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBucketItem(parentId: UInt64, key: String, itemUuid: UInt64): @{ICryptoys.INFT}
 	}
 }

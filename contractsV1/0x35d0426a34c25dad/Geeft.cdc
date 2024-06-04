@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -81,7 +95,7 @@ contract Geeft: NonFungibleToken{
 		access(all)
 		let extra:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGeeftInfo(): GeeftInfo{ 
 			let nfts:{ String: Int} ={} 
 			for nftString in self.storedNFTs.keys{ 
@@ -91,14 +105,14 @@ contract Geeft: NonFungibleToken{
 			return GeeftInfo(id: self.id, message: self.message, nfts: nfts, tokens: tokens, extra: self.extra)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openNFTs(): @{String: [{NonFungibleToken.NFT}]}{ 
 			var storedNFTs: @{String: [{NonFungibleToken.NFT}]} <-{} 
 			self.storedNFTs <-> storedNFTs
 			return <-storedNFTs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openTokens(): @{String:{ FungibleToken.Vault}}{ 
 			var storedTokens: @{String:{ FungibleToken.Vault}} <-{} 
 			self.storedTokens <-> storedTokens
@@ -135,7 +149,7 @@ contract Geeft: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sendGeeft(from: Address, message: String?, nfts: @{String: [{NonFungibleToken.NFT}]}, tokens: @{String:{ FungibleToken.Vault}}, extra:{ String: AnyStruct}, recipient: Address){ 
 		let geeft <- create NFT(from: from, message: message, nfts: <-nfts, tokens: <-tokens, extra: extra)
 		let collection = getAccount(recipient).capabilities.get<&Collection>(Geeft.CollectionPublicPath).borrow<&Collection>() ?? panic("The recipient does not have a Geeft Collection")
@@ -146,16 +160,16 @@ contract Geeft: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun getGeeftInfo(geeftId: UInt64): GeeftInfo
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getGeeftInfo(geeftId: UInt64): Geeft.GeeftInfo
 	}
 	
 	access(all)
@@ -164,7 +178,7 @@ contract Geeft: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let geeft <- token as! @NFT
 			emit Deposit(id: geeft.id, to: self.owner?.address)
 			self.ownedNFTs[geeft.id] <-! geeft
@@ -187,7 +201,7 @@ contract Geeft: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGeeft(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -196,7 +210,7 @@ contract Geeft: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGeeftInfo(geeftId: UInt64): GeeftInfo{ 
 			let nft = (&self.ownedNFTs[geeftId] as &{NonFungibleToken.NFT}?)!
 			let geeft = nft as! &NFT

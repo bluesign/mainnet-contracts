@@ -1,4 +1,18 @@
-// NOTE: I deployed this to 0x05 in the playground
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// NOTE: I deployed this to 0x05 in the playground
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MyNFT from "../0x862c736691834062/MyNFT.cdc"
@@ -28,13 +42,13 @@ contract NFTMarketplace{
 	
 	access(all)
 	resource interface SaleCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(id: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(id: UInt64, recipientCollection: &MyNFT.Collection, payment: @FlowToken.Vault)
 	}
 	
@@ -50,7 +64,7 @@ contract NFTMarketplace{
 		access(all)
 		let FlowTokenVault: Capability<&FlowToken.Vault>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(id: UInt64, price: UFix64, data: String){ 
 			pre{ 
 				price >= 0.0:
@@ -62,12 +76,12 @@ contract NFTMarketplace{
 			emit ListForSale(id: id, from: self.owner?.address, price: price, publicId: data)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlistFromSale(id: UInt64){ 
 			self.forSale.remove(key: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(id: UInt64, recipientCollection: &MyNFT.Collection, payment: @FlowToken.Vault){ 
 			pre{ 
 				payment.balance == self.forSale[id]:
@@ -78,12 +92,12 @@ contract NFTMarketplace{
 			self.unlistFromSale(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(id: UInt64): UFix64{ 
 			return self.forSale[id]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
@@ -95,7 +109,7 @@ contract NFTMarketplace{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		MyNFTCollection: Capability<&MyNFT.Collection>,
 		FlowTokenVault: Capability<&FlowToken.Vault>

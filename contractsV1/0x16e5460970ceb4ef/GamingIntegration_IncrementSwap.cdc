@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ExpToken from "./ExpToken.cdc"
 
@@ -21,7 +35,7 @@ contract GamingIntegration_IncrementSwap{
 	let tokenExpWeights:{ String: UFix64}
 	
 	// The wrapper function for Swap not only accomplishes the increment of SwapPool's swaps but also integrates gamified numerical growth
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swap(
 		playerAddr: Address,
 		poolAddr: Address,
@@ -57,7 +71,7 @@ contract GamingIntegration_IncrementSwap{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTokenExpWeight(tokenKey: String, weight: UFix64){ 
 			emit NewExpWeight(weight: weight, token: tokenKey)
 			GamingIntegration_IncrementSwap.tokenExpWeights[tokenKey] = weight

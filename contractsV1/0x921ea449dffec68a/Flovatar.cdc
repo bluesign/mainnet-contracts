@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -171,7 +185,7 @@ contract Flovatar: NonFungibleToken{
 			self.legendaryCount = legendaryCount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getComponents():{ String: UInt64}{ 
 			return self.components
 		}
@@ -201,34 +215,34 @@ contract Flovatar: NonFungibleToken{
 		access(all)
 		let schema: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessory(): UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHat(): UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEyeglasses(): UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBackground(): UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarityScore(): UFix64
 	}
 	
@@ -236,43 +250,43 @@ contract Flovatar: NonFungibleToken{
 	//for the Flovatar and is accessible only to the owner of the NFT
 	access(all)
 	resource interface Private{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String, vault: @{FungibleToken.Vault}): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStory(text: String, vault: @{FungibleToken.Vault}): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock3DFile(vault: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockChat(vault: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPosition(latitude: Fix64, longitude: Fix64, vault: @{FungibleToken.Vault}): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessory(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setHat(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEyeglasses(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBackground(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeHat(): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEyeglasses(): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBackground(): @FlovatarComponent.NFT?
 	}
 	
@@ -327,27 +341,27 @@ contract Flovatar: NonFungibleToken{
 			self.bio ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties{ 
 			return self.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}{ 
 			return self.bio
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
@@ -355,7 +369,7 @@ contract Flovatar: NonFungibleToken{
 		// This will allow to change the Name of the Flovatar only once.
 		// It checks for the current name is empty, otherwise it will throw an error.
 		// $DUST vault must contain 100 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String, vault: @{FungibleToken.Vault}): String{ 
 			pre{ 
 				// TODO: Make sure that the text of the name is sanitized
@@ -389,7 +403,7 @@ contract Flovatar: NonFungibleToken{
 		// The String will be concatenated each time.
 		// There is a limit of 300 characters per story but there is no limit in the full concatenated story length
 		// $DUST vault must contain 50 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStory(text: String, vault: @{FungibleToken.Vault}): String{ 
 			pre{ 
 				// TODO: Make sure that the text of the name is sanitized
@@ -413,7 +427,7 @@ contract Flovatar: NonFungibleToken{
 		
 		// This will unlock the 3D files for a Flovatar.
 		// $DUST vault must contain 150 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock3DFile(vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.bio["3d"] == nil:
@@ -430,7 +444,7 @@ contract Flovatar: NonFungibleToken{
 		
 		// This will enable the chat customization for a Flovatar.
 		// $DUST vault must contain 5000 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockChat(vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.bio["chat"] == nil:
@@ -448,7 +462,7 @@ contract Flovatar: NonFungibleToken{
 		// This will allow to set the GPS location of a Flovatar
 		// It can be run multiple times and each time it will override the previous state
 		// $DUST vault must contain 10 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPosition(latitude: Fix64, longitude: Fix64, vault: @{FungibleToken.Vault}): String{ 
 			pre{ 
 				latitude >= -90.0:
@@ -471,14 +485,14 @@ contract Flovatar: NonFungibleToken{
 			return position
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessory(): UInt64?{ 
 			return self.accessory?.templateId
 		}
 		
 		// This will allow to change the Accessory of the Flovatar any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessory(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?{ 
 			pre{ 
 				component.getCategory() == "accessory":
@@ -492,21 +506,21 @@ contract Flovatar: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Accessory of the Flovatar any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(): @FlovatarComponent.NFT?{ 
 			emit Updated(id: self.id)
 			let compNFT <- self.accessory <- nil
 			return <-compNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHat(): UInt64?{ 
 			return self.hat?.templateId
 		}
 		
 		// This will allow to change the Hat of the Flovatar any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setHat(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?{ 
 			pre{ 
 				component.getCategory() == "hat":
@@ -520,21 +534,21 @@ contract Flovatar: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Hat of the Flovatar any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeHat(): @FlovatarComponent.NFT?{ 
 			emit Updated(id: self.id)
 			let compNFT <- self.hat <- nil
 			return <-compNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEyeglasses(): UInt64?{ 
 			return self.eyeglasses?.templateId
 		}
 		
 		// This will allow to change the Eyeglasses of the Flovatar any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEyeglasses(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?{ 
 			pre{ 
 				component.getCategory() == "eyeglasses":
@@ -548,21 +562,21 @@ contract Flovatar: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Eyeglasses of the Flovatar any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEyeglasses(): @FlovatarComponent.NFT?{ 
 			emit Updated(id: self.id)
 			let compNFT <- self.eyeglasses <- nil
 			return <-compNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBackground(): UInt64?{ 
 			return self.background?.templateId
 		}
 		
 		// This will allow to change the Background of the Flovatar any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBackground(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?{ 
 			pre{ 
 				component.getCategory() == "background":
@@ -576,7 +590,7 @@ contract Flovatar: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Background of the Flovatar any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBackground(): @FlovatarComponent.NFT?{ 
 			emit Updated(id: self.id)
 			let compNFT <- self.background <- nil
@@ -587,7 +601,7 @@ contract Flovatar: NonFungibleToken{
 		// optional components (Accessory, Hat, Eyeglasses and Background) from their
 		// original Template resources, while all the other unmutable components are
 		// taken from the Metadata directly.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			var svg: String = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3000 3000' width='100%' height='100%'>"
 			if let background = self.getBackground(){ 
@@ -615,7 +629,7 @@ contract Flovatar: NonFungibleToken{
 			return svg
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarityScore(): UFix64{ 
 			var rareCount: UInt8 = self.metadata.rareCount
 			var epicCount: UInt8 = self.metadata.epicCount
@@ -653,7 +667,7 @@ contract Flovatar: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				return MetadataViews.ExternalURL("https://flovatar.com/flovatars/".concat(self.id.toString()))
 			}
@@ -738,15 +752,15 @@ contract Flovatar: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlovatar(id: UInt64): &Flovatar.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -780,7 +794,7 @@ contract Flovatar: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Flovatar.NFT
 			let id: UInt64 = token.id
 			
@@ -805,7 +819,7 @@ contract Flovatar: NonFungibleToken{
 		
 		// borrowFlovatar returns a borrowed reference to a Flovatar
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlovatar(id: UInt64): &Flovatar.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -818,7 +832,7 @@ contract Flovatar: NonFungibleToken{
 		
 		// borrowFlovatarPrivate returns a borrowed reference to a Flovatar using the Private interface
 		// so that the caller can read data and call methods from it, like setting the optional components.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlovatarPrivate(id: UInt64): &{Flovatar.Private}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -902,7 +916,7 @@ contract Flovatar: NonFungibleToken{
 	}
 	
 	// This function will look for a specific Flovatar on a user account and return a FlovatarData if found
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatar(address: Address, flovatarId: UInt64): FlovatarData?{ 
 		let account = getAccount(address)
 		if let flovatarCollection = account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flovatar.CollectionPublic}>(){ 
@@ -917,7 +931,7 @@ contract Flovatar: NonFungibleToken{
 	}
 	
 	// This function will look for a specific Flovatar on a user account and return the Score
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarRarityScore(address: Address, flovatarId: UInt64): UFix64?{ 
 		let account = getAccount(address)
 		if let flovatarCollection = account.capabilities.get<&{Flovatar.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flovatar.CollectionPublic}>(){ 
@@ -932,7 +946,7 @@ contract Flovatar: NonFungibleToken{
 	}
 	
 	// This function will return all Flovatars on a user account and return an array of FlovatarData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatars(address: Address): [FlovatarData]{ 
 		var flovatarData: [FlovatarData] = []
 		let account = getAccount(address)
@@ -951,13 +965,13 @@ contract Flovatar: NonFungibleToken{
 	}
 	
 	// This returns all the previously minted combinations, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedCombinations(): [String]{ 
 		return Flovatar.mintedCombinations.keys
 	}
 	
 	// This returns all the previously minted names, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedNames(): [String]{ 
 		return Flovatar.mintedNames.keys
 	}
@@ -977,7 +991,7 @@ contract Flovatar: NonFungibleToken{
 	// This helper function will generate a string from a list of components,
 	// to be used as a sort of barcode to keep the inventory of the minted
 	// Flovatars and to avoid duplicates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCombinationString(body: UInt64, hair: UInt64, facialHair: UInt64?, eyes: UInt64, nose: UInt64, mouth: UInt64, clothing: UInt64): String{ 
 		let facialHairString = facialHair != nil ? (facialHair!).toString() : "x"
 		return "B".concat(body.toString()).concat("H").concat(hair.toString()).concat("F").concat(facialHairString).concat("E").concat(eyes.toString()).concat("N").concat(nose.toString()).concat("M").concat(mouth.toString()).concat("C").concat(clothing.toString())
@@ -985,7 +999,7 @@ contract Flovatar: NonFungibleToken{
 	
 	// This function will get a list of component IDs and will check if the
 	// generated string is unique or if someone already used it before.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkCombinationAvailable(body: UInt64, hair: UInt64, facialHair: UInt64?, eyes: UInt64, nose: UInt64, mouth: UInt64, clothing: UInt64): Bool{ 
 		let combinationString = Flovatar.getCombinationString(body: body, hair: hair, facialHair: facialHair, eyes: eyes, nose: nose, mouth: mouth, clothing: clothing)
 		return !Flovatar.mintedCombinations.containsKey(combinationString)
@@ -993,7 +1007,7 @@ contract Flovatar: NonFungibleToken{
 	
 	// This will check if a specific Name has already been taken
 	// and assigned to some Flovatar
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkNameAvailable(name: String): Bool{ 
 		return name.length > 2 && name.length < 32 && !Flovatar.mintedNames.containsKey(name)
 	}
@@ -1005,7 +1019,7 @@ contract Flovatar: NonFungibleToken{
 	// The Spark NFT will entitle to use any common basic component (body, hair, etc.)
 	// In order to use special rare components a boost of the same rarity will be needed
 	// for each component used
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createFlovatar(spark: @FlovatarComponent.NFT, body: UInt64, hair: UInt64, facialHair: UInt64?, eyes: UInt64, nose: UInt64, mouth: UInt64, clothing: UInt64, accessory: @FlovatarComponent.NFT?, hat: @FlovatarComponent.NFT?, eyeglasses: @FlovatarComponent.NFT?, background: @FlovatarComponent.NFT?, rareBoost: @[FlovatarComponent.NFT], epicBoost: @[FlovatarComponent.NFT], legendaryBoost: @[FlovatarComponent.NFT], address: Address): @Flovatar.NFT{ 
 		pre{ 
 			// Make sure that the spark component belongs to the correct category
@@ -1283,12 +1297,12 @@ contract Flovatar: NonFungibleToken{
 	
 	// These functions will return the current Royalty cuts for
 	// both the Creator and the Marketplace.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyCut(): UFix64{ 
 		return self.royaltyCut
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketplaceCut(): UFix64{ 
 		return self.marketplaceCut
 	}
@@ -1314,19 +1328,19 @@ contract Flovatar: NonFungibleToken{
 		// contains all the SVG and basic informations to represent
 		// a specific part of the Flovatar (body, hair, eyes, mouth, etc.)
 		// More info in the FlovatarComponentTemplate.cdc file
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createComponentTemplate(name: String, category: String, color: String, description: String, svg: String, series: UInt32, maxMintableComponents: UInt64, rarity: String): @FlovatarComponentTemplate.ComponentTemplate{ 
 			return <-FlovatarComponentTemplate.createComponentTemplate(name: name, category: category, color: color, description: description, svg: svg, series: series, maxMintableComponents: maxMintableComponents, rarity: rarity)
 		}
 		
 		// This will mint a new Component based from a selected Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createComponent(templateId: UInt64): @FlovatarComponent.NFT{ 
 			return <-FlovatarComponent.createComponent(templateId: templateId)
 		}
 		
 		// This will mint Components in batch and return a Collection instead of the single NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreateComponents(templateId: UInt64, quantity: UInt64): @FlovatarComponent.Collection{ 
 			return <-FlovatarComponent.batchCreateComponents(templateId: templateId, quantity: quantity)
 		}
@@ -1335,26 +1349,26 @@ contract Flovatar: NonFungibleToken{
 		// A random string is passed to manage permissions for the
 		// purchase of it (more info on FlovatarPack.cdc).
 		// Finally the sale price is set as well.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPack(components: @[FlovatarComponent.NFT], randomString: String, price: UFix64, sparkCount: UInt32, series: UInt32, name: String): @FlovatarPack.Pack{ 
 			return <-FlovatarPack.createPack(components: <-components, randomString: randomString, price: price, sparkCount: sparkCount, series: series, name: name)
 		}
 		
 		// With this function you can generate a new Admin resource
 		// and pass it to another user if needed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Helper functions to update the Royalty cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyCut(value: UFix64){ 
 			Flovatar.setRoyaltyCut(value: value)
 		}
 		
 		// Helper functions to update the Marketplace cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketplaceCut(value: UFix64){ 
 			Flovatar.setMarketplaceCut(value: value)
 		}

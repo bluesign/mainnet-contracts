@@ -1,4 +1,18 @@
-/** Generic Profile Contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/** Generic Profile Contract
 
 License: MIT
 
@@ -266,31 +280,31 @@ contract Profile{
 	
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvatar(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEmail(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun asReadOnly(): Profile.ReadOnly
 	}
 	
 	access(all)
 	resource interface Owner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvatar(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEmail(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUserName(_ userName: String){ 
 			pre{ 
 				userName.length <= 15:
@@ -298,10 +312,10 @@ contract Profile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAvatar(_ src: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEmail(_ email: String)
 	}
 	
@@ -322,37 +336,37 @@ contract Profile{
 			self.email = ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserName(): String{ 
 			return self.userName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvatar(): String{ 
 			return self.avatar
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEmail(): String{ 
 			return self.email
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUserName(_ userName: String){ 
 			self.userName = userName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAvatar(_ src: String){ 
 			self.avatar = src
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEmail(_ email: String){ 
 			self.email = email
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun asReadOnly(): Profile.ReadOnly{ 
 			return Profile.ReadOnly(address: self.owner?.address, userName: self.getUserName(), avatar: self.getAvatar(), email: self.getEmail())
 		}
@@ -380,22 +394,22 @@ contract Profile{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun new(): @Profile.Base{ 
 		return <-create Base()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun check(_ address: Address): Bool{ 
 		return getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath).check()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ address: Address): &{Profile.Public}{ 
 		return getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath).borrow()!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun read(_ address: Address): Profile.ReadOnly?{ 
 		if let profile =
 			getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath).borrow(){ 
@@ -405,7 +419,7 @@ contract Profile{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun readMultiple(_ addresses: [Address]):{ Address: Profile.ReadOnly}{ 
 		let profiles:{ Address: Profile.ReadOnly} ={} 
 		for address in addresses{ 

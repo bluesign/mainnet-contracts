@@ -1,4 +1,18 @@
-// import FungibleToken from "../"./FungibleToken.cdc"/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// import FungibleToken from "../"./FungibleToken.cdc"/FungibleToken.cdc"
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
@@ -83,7 +97,7 @@ contract TheToken: FungibleToken{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @TheToken.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -109,31 +123,31 @@ contract TheToken: FungibleToken{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePairAddress(pair: Address){ 
 			TheToken.pairAddress = pair
 			emit PairAddressChanged(pair: pair)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBurnAddress(burn: Address){ 
 			TheToken.burnAddress = burn
 			emit BurnAddressChanged(pair: burn)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBurnPer(per: UFix64){ 
 			TheToken.burnPer = per
 			emit BurnPerChanged(per: per)
@@ -145,7 +159,7 @@ contract TheToken: FungibleToken{
 		access(all)
 		var allowedAmount: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @TheToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -170,7 +184,7 @@ contract TheToken: FungibleToken{
 	
 	access(all)
 	resource Burner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @TheToken.Vault
 			let amount = vault.balance

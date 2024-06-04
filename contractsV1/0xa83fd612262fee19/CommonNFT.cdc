@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 // CommonNFT
 // Supporting common NFT feature.
@@ -96,18 +110,18 @@ contract CommonNFT: NonFungibleToken{
 	access(all)
 	resource interface CommonNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun depositMultiple(tokens: @[{NonFungibleToken.NFT}])
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositMultiple(tokens: @[{NonFungibleToken.NFT}]): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCommonNFT(id: UInt64): &CommonNFT.NFT?{ 
 			// If the result isn't nil, the ID of the returned reference
 			// should be the same as the argument to the function.
@@ -117,7 +131,7 @@ contract CommonNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAllCommonNFTs(): [&{NonFungibleToken.NFT}]
 	}
 	
@@ -145,7 +159,7 @@ contract CommonNFT: NonFungibleToken{
 		// withdrawMultiple
 		// Removes multiple NFTs from the collection and moves them to the caller.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawMultiple(withdrawIDs: [UInt64]): @[{NonFungibleToken.NFT}]{ 
 			var tokens: @[{NonFungibleToken.NFT}] <- []
 			var count: Int = 0
@@ -161,7 +175,7 @@ contract CommonNFT: NonFungibleToken{
 		// deleteMultiple
 		// Burns multiple NFTs from the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteMultiple(deleteIDs: [UInt64]){ 
 			var count: Int = 0
 			while count < deleteIDs.length{ 
@@ -176,7 +190,7 @@ contract CommonNFT: NonFungibleToken{
 		// and adds the ID to the id array.
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CommonNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -190,7 +204,7 @@ contract CommonNFT: NonFungibleToken{
 		// Takes multiple NFTs, adds them to the collections dictionary,
 		// and adds the IDs to the id array.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositMultiple(tokens: @[{NonFungibleToken.NFT}]){ 
 			var count = 0
 			var ids: [UInt64] = []
@@ -230,7 +244,7 @@ contract CommonNFT: NonFungibleToken{
 		// exposing all of its fields (including the edition, developer metadata, and content URL).
 		// This is safe as there are no functions that can be called on the CommonNFT.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCommonNFT(id: UInt64): &CommonNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -243,7 +257,7 @@ contract CommonNFT: NonFungibleToken{
 		// borrowAllCommonNFTs
 		// Returns an array of references to the NFTs that are in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAllCommonNFTs(): [&{NonFungibleToken.NFT}]{ 
 			var nftRefs: [&{NonFungibleToken.NFT}] = []
 			for id in self.ownedNFTs.keys{ 
@@ -295,7 +309,7 @@ contract CommonNFT: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposits it in the recipient's collection using their collection reference.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, developerID: UInt64, developerMetadata: String, contentURL: String){ 
 			CommonNFT.totalSupply = CommonNFT.totalSupply + 1 as UInt64
 			emit Minted(id: CommonNFT.totalSupply, developerID: developerID, developerMetadata: developerMetadata, contentURL: contentURL)
@@ -308,7 +322,7 @@ contract CommonNFT: NonFungibleToken{
 		// Mints multiple new NFTs with same developer metadata and content URL but different IDs and editions,
 		// then deposits them in the recipient's collection using their collection reference.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintMultipleNFTs(recipient: &{CommonNFT.CommonNFTCollectionPublic}, developerID: UInt64, startEdition: UInt64, number: UInt64, developerMetadata: String, contentURL: String){ 
 			var edition: UInt64 = startEdition
 			var tokens: @[CommonNFT.NFT] <- []

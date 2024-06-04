@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 MutableSetManager
 
 MutableSet.Set (please see that contract for more details) provides a way to
@@ -24,19 +38,19 @@ contract MutableMetadataSetManager{
 	resource interface Public{ 
 		
 		// Name of this manager
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String
 		
 		// Description of this manager
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String
 		
 		// Number of sets in this manager
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun numSets(): Int
 		
 		// Get the public version of a particular set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSet(_ id: Int): &MutableMetadataSet.Set
 	}
 	
@@ -44,19 +58,19 @@ contract MutableMetadataSetManager{
 	resource interface Private{ 
 		
 		// Set the name of the manager
-		access(all)
-		fun setName(_ name: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setName(_ name: String): Void
 		
 		// Set the name of the description
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(_ description: String)
 		
 		// Get the private version of a particular set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetMutable(_ id: Int): &MutableMetadataSet.Set
 		
 		// Add a mutable set to the set manager.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSet(_ set: @MutableMetadataSet.Set)
 	}
 	
@@ -82,22 +96,22 @@ contract MutableMetadataSetManager{
 		// ========================================================================
 		// Public functions
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return self._name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return self._description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun numSets(): Int{ 
 			return self._mutableSets.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSet(_ id: Int): &MutableMetadataSet.Set{ 
 			pre{ 
 				id >= 0 && id < self._mutableSets.length:
@@ -109,17 +123,17 @@ contract MutableMetadataSetManager{
 		// ========================================================================
 		// Private functions
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(_ name: String){ 
 			self._name = name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(_ description: String){ 
 			self._description = description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetMutable(_ id: Int): &MutableMetadataSet.Set{ 
 			pre{ 
 				id >= 0 && id < self._mutableSets.length:
@@ -128,7 +142,7 @@ contract MutableMetadataSetManager{
 			return &self._mutableSets[id] as &MutableMetadataSet.Set
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSet(_ set: @MutableMetadataSet.Set){ 
 			let id = self._mutableSets.length
 			self._mutableSets.append(<-set)
@@ -149,7 +163,7 @@ contract MutableMetadataSetManager{
 	// Contract functions
 	// ========================================================================
 	// Create a new SetManager resource with the given name and description
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(name: String, description: String): @Manager{ 
 		return <-create Manager(name: name, description: description)
 	}

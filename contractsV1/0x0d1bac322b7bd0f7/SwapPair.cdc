@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # SwapPair
 
@@ -127,7 +141,7 @@ contract SwapPair: FungibleToken{
 		/// been consumed and therefore can be destroyed.
 		///
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @SwapPair.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -183,7 +197,7 @@ contract SwapPair: FungibleToken{
 	
 	/// Add liquidity
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addLiquidity(tokenAVault: @{FungibleToken.Vault}, tokenBVault: @{FungibleToken.Vault}): @{FungibleToken.Vault}{ 
 		pre{ 
 			tokenAVault.balance > 0.0 && tokenBVault.balance > 0.0:
@@ -257,7 +271,7 @@ contract SwapPair: FungibleToken{
 	///
 	/// @Return: @[FungibleToken.Vault; 2]
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeLiquidity(lpTokenVault: @{FungibleToken.Vault}): @[{FungibleToken.Vault}]{ 
 		pre{ 
 			lpTokenVault.balance > 0.0:
@@ -301,7 +315,7 @@ contract SwapPair: FungibleToken{
 	
 	/// Swap
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swap(vaultIn: @{FungibleToken.Vault}, exactAmountOut: UFix64?): @{FungibleToken.Vault}{ 
 		pre{ 
 			vaultIn.balance > 0.0:
@@ -392,22 +406,22 @@ contract SwapPair: FungibleToken{
 	///
 	access(all)
 	resource PairPublic: SwapInterfaces.PairPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swap(vaultIn: @{FungibleToken.Vault}, exactAmountOut: UFix64?): @{FungibleToken.Vault}{ 
 			return <-SwapPair.swap(vaultIn: <-vaultIn, exactAmountOut: exactAmountOut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeLiquidity(lpTokenVault: @{FungibleToken.Vault}): @[{FungibleToken.Vault}]{ 
 			return <-SwapPair.removeLiquidity(lpTokenVault: <-lpTokenVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLiquidity(tokenAVault: @{FungibleToken.Vault}, tokenBVault: @{FungibleToken.Vault}): @{FungibleToken.Vault}{ 
 			return <-SwapPair.addLiquidity(tokenAVault: <-tokenAVault, tokenBVault: <-tokenBVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountIn(amountOut: UFix64, tokenOutKey: String): UFix64{ 
 			if tokenOutKey == SwapPair.token1Key{ 
 				return SwapConfig.getAmountIn(amountOut: amountOut, reserveIn: SwapPair.token0Vault.balance, reserveOut: SwapPair.token1Vault.balance)
@@ -416,7 +430,7 @@ contract SwapPair: FungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountOut(amountIn: UFix64, tokenInKey: String): UFix64{ 
 			if tokenInKey == SwapPair.token0Key{ 
 				return SwapConfig.getAmountOut(amountIn: amountIn, reserveIn: SwapPair.token0Vault.balance, reserveOut: SwapPair.token1Vault.balance)
@@ -425,27 +439,27 @@ contract SwapPair: FungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice0CumulativeLastScaled(): UInt256{ 
 			return SwapPair.price0CumulativeLastScaled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice1CumulativeLastScaled(): UInt256{ 
 			return SwapPair.price1CumulativeLastScaled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBlockTimestampLast(): UFix64{ 
 			return SwapPair.blockTimestampLast
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPairInfo(): [AnyStruct]{ 
 			return [SwapPair.token0Key, SwapPair.token1Key, SwapPair.token0Vault.balance, SwapPair.token1Vault.balance, SwapPair.account.address, SwapPair.totalSupply]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLpTokenVaultType(): Type{ 
 			return Type<@SwapPair.Vault>()
 		}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
 
@@ -81,7 +95,7 @@ contract BlockleteMarket_NFT{
 		access(all)
 		var cutPercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}): @Blockletes_NFT.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -89,13 +103,13 @@ contract BlockleteMarket_NFT{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBlocklete(id: UInt64): &Blockletes_NFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -170,7 +184,7 @@ contract BlockleteMarket_NFT{
 		//
 		// Parameters: token: The NFT to be put up for sale
 		//			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @Blockletes_NFT.NFT, price: UFix64){ 
 			pre{ 
 				// Check that price of the listing is > 0
@@ -194,7 +208,7 @@ contract BlockleteMarket_NFT{
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
 		// Returns: @Blockletes_NFT.NFT: The nft that was withdrawn from the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @Blockletes_NFT.NFT{ 
 			
 			// Remove and return the token.
@@ -221,7 +235,7 @@ contract BlockleteMarket_NFT{
 		//			 buyTokens: the fungible tokens that are used to buy the NFT
 		//
 		// Returns: @Blockletes_NFT.NFT: the purchased NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}): @Blockletes_NFT.NFT{ 
 			pre{ 
 				self.blockletesForSale.ownedNFTs[tokenID] != nil && self.prices[tokenID] != nil:
@@ -254,7 +268,7 @@ contract BlockleteMarket_NFT{
 		//
 		// Parameters: tokenID: The ID of the NFT's price that is changing
 		//			 newPrice: The new price for the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -268,7 +282,7 @@ contract BlockleteMarket_NFT{
 		// changePercentage changes the cut percentage of the tokens that are for sale
 		//
 		// Parameters: newPercent: The new cut percentage for the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePercentage(_ newPercent: UFix64){ 
 			pre{ 
 				newPercent >= 0.0 && newPercent <= 100.0:
@@ -283,7 +297,7 @@ contract BlockleteMarket_NFT{
 		//
 		// Parameters: newOwnerCapability: The new fungible token capability for the account 
 		//								 who received tokens for purchases
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(_ newOwnerCapability: Capability<&FUSD.Vault>){ 
 			pre{ 
 				newOwnerCapability.borrow() != nil:
@@ -296,7 +310,7 @@ contract BlockleteMarket_NFT{
 		//
 		// Parameters: newBeneficiaryCapability the new capability for the beneficiary of the cut of the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(_ newBeneficiaryCapability: Capability<&FUSD.Vault>){ 
 			pre{ 
 				newBeneficiaryCapability.borrow() != nil:
@@ -310,13 +324,13 @@ contract BlockleteMarket_NFT{
 		// Parameters: tokenID: The ID of the NFT whose price to get
 		//
 		// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.blockletesForSale.getIDs()
 		}
@@ -329,7 +343,7 @@ contract BlockleteMarket_NFT{
 		// Returns: &Blockletes_NFT.NFT? Optional reference to a Blocklete for sale 
 		//						so that the caller can read its data
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBlocklete(id: UInt64): &Blockletes_NFT.NFT?{ 
 			let ref = self.blockletesForSale.borrowBlocklete(id: id)
 			return ref
@@ -340,7 +354,7 @@ contract BlockleteMarket_NFT{
 	}
 	
 	// createSaleCollection returns a new sale collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCapability: Capability<&FUSD.Vault>,
 		beneficiaryCapability: Capability<&FUSD.Vault>,

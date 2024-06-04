@@ -1,4 +1,18 @@
-import MotoGPCard from "./MotoGPCard.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MotoGPCard from "./MotoGPCard.cdc"
 
 import MotoGPAdmin from "./MotoGPAdmin.cdc"
 
@@ -6,26 +20,26 @@ import ContractVersion from "./ContractVersion.cdc"
 
 access(all)
 contract CardMintAccess: ContractVersion{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.0"
 	}
 	
 	access(all)
 	resource interface MintProxyPublic{ 
-		access(all)
-		fun setCapability(mintCapability: Capability<&MintGuard>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setCapability(mintCapability: Capability<&CardMintAccess.MintGuard>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UInt64
 	}
 	
 	access(all)
 	resource interface MintProxyPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(cardID: UInt64, serial: UInt64): @MotoGPCard.NFT
 	}
 	
@@ -34,18 +48,18 @@ contract CardMintAccess: ContractVersion{
 		access(all)
 		var mintCapability: Capability<&MintGuard>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UInt64{ 
 			return ((self.mintCapability!).borrow()!).max
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UInt64{ 
 			return ((self.mintCapability!).borrow()!).total
 		}
 		
 		// Can be called successfully only by a MintGuard owner, since the Capability type is based on a private link
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCapability(mintCapability: Capability<&MintGuard>){ 
 			pre{ 
 				mintCapability.check() == true:
@@ -54,7 +68,7 @@ contract CardMintAccess: ContractVersion{
 			self.mintCapability = mintCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(cardID: UInt64, serial: UInt64): @MotoGPCard.NFT{ 
 			return <-((self.mintCapability!).borrow()!).mint(cardID: cardID, serial: serial)
 		}
@@ -66,7 +80,7 @@ contract CardMintAccess: ContractVersion{
 	
 	access(all)
 	resource interface MintGuardPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(cardID: UInt64, serial: UInt64): @MotoGPCard.NFT
 		
 		access(all)
@@ -78,10 +92,10 @@ contract CardMintAccess: ContractVersion{
 	
 	access(all)
 	resource interface MintGuardPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UInt64
 	}
 	
@@ -98,17 +112,17 @@ contract CardMintAccess: ContractVersion{
 		access(all)
 		var total: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UInt64{ 
 			return self.total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UInt64{ 
 			return self.max
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(cardID: UInt64, serial: UInt64): @MotoGPCard.NFT{ 
 			// check authoried amount
 			pre{ 
@@ -122,7 +136,7 @@ contract CardMintAccess: ContractVersion{
 		
 		// Setter using a MotoGPAdmin.Admin lock to set the max for a mint guard
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMax(adminRef: &MotoGPAdmin.Admin, max: UInt64){ 
 			self.max = max
 		}
@@ -174,7 +188,7 @@ contract CardMintAccess: ContractVersion{
 	access(all)
 	let mintProxyPathPrefix: String
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMintGuard(adminRef: &MotoGPAdmin.Admin, targetAddress: Address, max: UInt64){ 
 		pre{ 
 			adminRef != nil:
@@ -197,7 +211,7 @@ contract CardMintAccess: ContractVersion{
 		self.whitelisted[targetAddress] = true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMintProxy(authAccount: AuthAccount){ 
 		pre{ 
 			self.whitelisted[authAccount.address] == true:
@@ -215,7 +229,7 @@ contract CardMintAccess: ContractVersion{
 	
 	// Getter function to get storage MintGuard or MintProxy path for address
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(address: Address, objectType: MintObjectType): StoragePath{ 
 		let index = self.addressToPathIndexMap[address]!
 		let identifier = objectType == MintObjectType.MintGuard ? self.mintGuardPathPrefix : self.mintProxyPathPrefix
@@ -224,7 +238,7 @@ contract CardMintAccess: ContractVersion{
 	
 	// Getter function to get private MintGuard or MintProxy path for address
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(address: Address, objectType: MintObjectType): PrivatePath{ 
 		let index = self.addressToPathIndexMap[address]!
 		let identifier = objectType == MintObjectType.MintGuard ? self.mintGuardPathPrefix : self.mintProxyPathPrefix
@@ -234,13 +248,13 @@ contract CardMintAccess: ContractVersion{
 	// Getter function to get public MintProxy path for address (mapped to index)
 	// Always returns the Proxy path, since VaultGuards don't have a public path
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicProxyPath(address: Address): PublicPath{ 
 		let index = self.addressToPathIndexMap[address]!
 		return PublicPath(identifier: self.mintProxyPathPrefix.concat(index.toString()))!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(address: Address, objectType: MintObjectType): PublicPath{ 
 		let index = self.addressToPathIndexMap[address]!
 		let identifier = objectType == MintObjectType.MintGuard ? self.mintGuardPathPrefix : self.mintProxyPathPrefix

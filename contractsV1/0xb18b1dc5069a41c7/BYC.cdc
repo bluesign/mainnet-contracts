@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	BYC - Barter Yard Club
 
@@ -179,7 +193,7 @@ contract BYC{
 			self.publicReceiverPath = publicReceiverPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun providerIsValid(): Bool{ 
 			assert(
 				(self.providerCap!).borrow() != nil,
@@ -198,20 +212,20 @@ contract BYC{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun receiverIsValid(): Bool{ 
 			assert(self.receiverCap?.borrow() != nil, message: "invalid receiver capability")
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValid(): Bool{ 
 			self.providerIsValid()
 			self.receiverIsValid()
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMeta(): FTMeta{ 
 			return FTMeta(&self as &FTAsset)
 		}
@@ -269,7 +283,7 @@ contract BYC{
 			self.collectionPublicPath = collectionPublicPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun providerIsValid(): Bool{ 
 			assert(self.providerCap?.borrow() != nil, message: "invalid provider capability")
 			assert(
@@ -282,7 +296,7 @@ contract BYC{
 		}
 		
 		// maybe change name to signify program stops running if invalid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValid(): Bool{ 
 			assert(self.providerIsValid(), message: "invalid provider")
 			assert(
@@ -294,7 +308,7 @@ contract BYC{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun doesAddressOwnNFT(_ address: Address): Bool{ 
 			let account = getAccount(address)
 			let collectionRef =
@@ -305,7 +319,7 @@ contract BYC{
 			return (collectionRef!).borrowNFT(id: self.id!) != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMeta(): NFTMeta{ 
 			return NFTMeta(&self as &NFTAsset)
 		}
@@ -393,28 +407,28 @@ contract BYC{
 		access(all)
 		let expiresAt: UFix64
 		
-		access(all)
-		fun getMetadata(): BarterMeta
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getMetadata(): BYC.BarterMeta
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTAssetsOffered(): [NFTMeta]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFTAssetsOffered(): [FTMeta]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTAssetsRequested(): [NFTMeta]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFTAssetsRequested(): [FTMeta]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProposerFeeType(): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProposerFeeAmount(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferAddress(): Address
 	}
 	
@@ -592,17 +606,17 @@ contract BYC{
 			self.linkedID = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferAddress(): Address{ 
 			return self.nftAssetsOffered.length > 0 ? (self.nftAssetsOffered[0].providerCap!).address : (self.ftAssetsOffered[0].providerCap!).address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): BarterMeta{ 
 			return BarterMeta(&self as &Barter)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTAssetsOffered(): [NFTMeta]{ 
 			let assetsMeta: [NFTMeta] = []
 			for asset in self.nftAssetsOffered{ 
@@ -611,7 +625,7 @@ contract BYC{
 			return assetsMeta
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFTAssetsOffered(): [FTMeta]{ 
 			let assetsMeta: [FTMeta] = []
 			for asset in self.ftAssetsOffered{ 
@@ -620,7 +634,7 @@ contract BYC{
 			return assetsMeta
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTAssetsRequested(): [NFTMeta]{ 
 			let assetsMeta: [NFTMeta] = []
 			for asset in self.nftAssetsRequested{ 
@@ -629,7 +643,7 @@ contract BYC{
 			return assetsMeta
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFTAssetsRequested(): [FTMeta]{ 
 			let assetsMeta: [FTMeta] = []
 			for asset in self.ftAssetsRequested{ 
@@ -638,12 +652,12 @@ contract BYC{
 			return assetsMeta
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProposerFeeType(): Type{ 
 			return (self.proposerFeeCapability.borrow()!).getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProposerFeeAmount(): UFix64{ 
 			pre{ 
 				self.proposerFeeCapability != nil
@@ -681,22 +695,22 @@ contract BYC{
 	
 	access(all)
 	resource interface BarterCollectionPublic{ 
-		access(all)
-		fun deposit(barter: @Barter)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(barter: @BYC.Barter): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBarter(id: UInt64): &Barter?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clean(barterRef: &Barter, id: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptBarter(
 			id: UInt64,
 			offeredNFTReceiverCaps: [
@@ -714,7 +728,7 @@ contract BYC{
 			feeCapability: Capability<&{FungibleToken.Provider}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun counterBarter(
 			barterAddress: Address,
 			barterID: UInt64,
@@ -748,13 +762,13 @@ contract BYC{
 			self.barters <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBarter(id: UInt64): &Barter?{ 
 			return &self.barters[id] as &Barter?
 		}
 		
 		// public but access restricted by requiring matching reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clean(barterRef: &Barter, id: UInt64){ 
 			if barterRef.uuid != self.barters[id]?.linkedID{ 
 				return
@@ -763,7 +777,7 @@ contract BYC{
 			destroy <-self.barters.remove(key: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(barter: @Barter){ 
 			self.barters[barter.uuid] <-! barter
 		}
@@ -783,7 +797,7 @@ contract BYC{
 		// takes a barterID, removes that Barter and calls the accept barter function on it then cleans up afterwards....
 		// the Offered Receiver Caps and Requested Provider Caps are required to complete the barter
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptBarter(id: UInt64, offeredNFTReceiverCaps: [Capability<&{NonFungibleToken.CollectionPublic}>], requestedNFTProviderCaps: [Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>], offeredFTReceiverCaps: [Capability<&{FungibleToken.Receiver, FungibleToken.Balance}>], requestedFTProviderCaps: [Capability<&{FungibleToken.Provider, FungibleToken.Balance}>], feeCapability: Capability<&{FungibleToken.Provider}>){ 
 			let barter <- self.barters.remove(key: id)!
 			barter.acceptBarter(offeredNFTReceiverCaps: offeredNFTReceiverCaps, requestedNFTProviderCaps: requestedNFTProviderCaps, offeredFTReceiverCaps: offeredFTReceiverCaps, requestedFTProviderCaps: requestedFTProviderCaps, feeCapability: feeCapability)
@@ -809,7 +823,7 @@ contract BYC{
 		//
 		// creates a new barter as a response to an existing barter
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun counterBarter(barterAddress: Address, barterID: UInt64, ftAssetsOffered: [FTAsset], nftAssetsOffered: [NFTAsset], ftAssetsRequested: [FTAsset], nftAssetsRequested: [NFTAsset], expiresAt: UFix64, feeCapability: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>): @Barter{ 
 			let barterCollectionCap = getAccount(barterAddress).capabilities.get_<YOUR_TYPE>(BYC.BarterCollectionPublicPath)
 			let barterCollectionRef = barterCollectionCap.borrow<&{BarterCollectionPublic}>()!
@@ -832,7 +846,7 @@ contract BYC{
 		// This function is called to reject an offer received
 		// Can also be used to cancel an offer made by the user
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rejectBarter(id: UInt64){ 
 			pre{ 
 				self.barters.containsKey(id):
@@ -857,7 +871,7 @@ contract BYC{
 	access(all)
 	resource Admin{ 
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeeByIdentifier(
 			identifier: String,
 			fee: UFix64,
@@ -868,7 +882,7 @@ contract BYC{
 			emit FeesAcceptedUpdated(identifier: identifier, fee: fee)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFeeByIdentifier(identifier: String){ 
 			pre{ 
 				BYC.feeByTokenIdentifier[identifier] == nil:
@@ -880,13 +894,13 @@ contract BYC{
 		}
 		
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNoFeeBarterNFT(identifier: String, collectionPath: PublicPath){ 
 			BYC.noFeeBarterNFTs[identifier] = collectionPath
 			emit NoFeeBarterNFTsUpdated(identifier: identifier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNoFeeBarterNFT(identifier: String){ 
 			pre{ 
 				BYC.noFeeBarterNFTs[identifier] == nil:
@@ -896,7 +910,7 @@ contract BYC{
 			emit NoFeeBarterNFTsRemoved(identifier: identifier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFungibleTokenFee(percentage: UFix64){ 
 			pre{ 
 				percentage < 1.0:
@@ -905,7 +919,7 @@ contract BYC{
 			BYC.FT_TOKEN_FEE_PERCENTAGE = percentage
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFees(identifier: String): @{FungibleToken.Vault}{ 
 			return <-(BYC.feeVaultsByIdentifier[identifier]?.withdraw!)(
 				amount: BYC.feeVaultsByIdentifier[identifier]?.balance!
@@ -920,7 +934,7 @@ contract BYC{
 	// 1. create a barter proposal if no counterparty is provided
 	// 2. create 2 barters if counterparty already has barterCollection setup
 	// 3. create 1 barter if counterparty doesn't have barterCollection setup
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createBarter(
 		ftAssetsOffered: [
 			FTAsset
@@ -972,12 +986,12 @@ contract BYC{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @BarterCollection{ 
 		return <-create BarterCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun readFeesCollected():{ String: UFix64}{ 
 		let fees:{ String: UFix64} ={} 
 		for key in BYC.feeVaultsByIdentifier.keys{ 
@@ -1000,7 +1014,7 @@ contract BYC{
 	// Helper Functions
 	//
 	// used to check for NFTs that allow fees to be waived
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkAddressOwnsNFT(
 		address: Address,
 		collectionPath: PublicPath,
@@ -1022,12 +1036,12 @@ contract BYC{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeesAccepted():{ String: UFix64}{ 
 		return self.feeByTokenIdentifier
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNoFeeBarterNFTs(): [String]{ 
 		return self.noFeeBarterNFTs.keys
 	}

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for TKNZ
 
 	This smart contract contains the core functionality for TKNZ
@@ -283,7 +297,7 @@ contract TKNZ: NonFungibleToken{
 		// The Drop needs to be not locked
 		// The Play can't have already been added to the Drop
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlay(playID: UInt32){ 
 			pre{ 
 				TKNZ.playDatas[playID] != nil:
@@ -307,7 +321,7 @@ contract TKNZ: NonFungibleToken{
 		// Parameters: playIDs: The IDs of the Plays that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlays(playIDs: [UInt32]){ 
 			for play in playIDs{ 
 				self.addPlay(playID: play)
@@ -321,7 +335,7 @@ contract TKNZ: NonFungibleToken{
 		// Pre-Conditions:
 		// The Play is part of the Drop and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retirePlay(playID: UInt32){ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -336,7 +350,7 @@ contract TKNZ: NonFungibleToken{
 		// retireAll retires all the plays in the Drop
 		// Afterwards, none of the retired Plays will be able to mint new NFTs
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for play in self.plays{ 
 				self.retirePlay(playID: play)
@@ -347,7 +361,7 @@ contract TKNZ: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Drop should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -364,7 +378,7 @@ contract TKNZ: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(playID: UInt32): @NFT{ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -390,7 +404,7 @@ contract TKNZ: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the NFTs that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(playID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -401,17 +415,17 @@ contract TKNZ: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlays(): [UInt32]{ 
 			return self.plays
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerPlay():{ UInt32: UInt32}{ 
 			return self.numberMintedPerPlay
 		}
@@ -461,17 +475,17 @@ contract TKNZ: NonFungibleToken{
 			self.numberMintedPerPlay = *drop.numberMintedPerPlay
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlays(): [UInt32]{ 
 			return self.plays
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMintedPerPlay():{ UInt32: UInt32}{ 
 			return self.numberMintedPerPlay
 		}
@@ -543,7 +557,7 @@ contract TKNZ: NonFungibleToken{
 		//
 		// Returns: the ID of the new Play object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPlay(metadata:{ String: String}): UInt32{ 
 			// Create the new Play
 			var newPlay = Play(metadata: metadata)
@@ -562,7 +576,7 @@ contract TKNZ: NonFungibleToken{
 		// Parameters: name: The name of the Drop
 		//
 		// Returns: The ID of the created drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(name: String): UInt32{ 
 			// Create the new Drop
 			var newDrop <- create Drop(name: name)
@@ -584,7 +598,7 @@ contract TKNZ: NonFungibleToken{
 		// Returns: A reference to the Drop with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDrop(dropID: UInt32): &Drop{ 
 			pre{ 
 				TKNZ.drops[dropID] != nil:
@@ -601,7 +615,7 @@ contract TKNZ: NonFungibleToken{
 		//
 		// Returns: The new series number
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the TKNZ series number
@@ -612,7 +626,7 @@ contract TKNZ: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -624,18 +638,18 @@ contract TKNZ: NonFungibleToken{
 	access(all)
 	resource interface NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTReference(id: UInt64): &TKNZ.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -682,7 +696,7 @@ contract TKNZ: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn NFTs
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -699,7 +713,7 @@ contract TKNZ: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as a TKNZ NFT to make sure
 			// it is the correct type
 			let token <- token as! @TKNZ.NFT
@@ -718,7 +732,7 @@ contract TKNZ: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -762,7 +776,7 @@ contract TKNZ: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTReference(id: UInt64): &TKNZ.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -809,7 +823,7 @@ contract TKNZ: NonFungibleToken{
 	// getAllPlays returns all the plays in TKNZ
 	//
 	// Returns: An array of all the plays that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPlays(): [TKNZ.Play]{ 
 		return TKNZ.playDatas.values
 	}
@@ -819,7 +833,7 @@ contract TKNZ: NonFungibleToken{
 	// Parameters: playID: The id of the Play that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaData(playID: UInt32):{ String: String}?{ 
 		return self.playDatas[playID]?.metadata
 	}
@@ -833,7 +847,7 @@ contract TKNZ: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaDataByField(playID: UInt32, field: String): String?{ 
 		// Don't force a revert if the playID or field is invalid
 		if let play = TKNZ.playDatas[playID]{ 
@@ -849,7 +863,7 @@ contract TKNZ: NonFungibleToken{
 	// Parameters: dropID: The id of the Drop that is being searched
 	//
 	// Returns: The QueryDropData struct that has all the important information about the drop
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDropData(dropID: UInt32): QueryDropData?{ 
 		if TKNZ.drops[dropID] == nil{ 
 			return nil
@@ -864,7 +878,7 @@ contract TKNZ: NonFungibleToken{
 	// Parameters: dropID: The id of the Drop that is being searched
 	//
 	// Returns: The name of the Drop
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDropName(dropID: UInt32): String?{ 
 		// Don't force a revert if the dropID is invalid
 		return TKNZ.dropDatas[dropID]?.name
@@ -876,7 +890,7 @@ contract TKNZ: NonFungibleToken{
 	// Parameters: dropID: The id of the Drop that is being searched
 	//
 	// Returns: The series that the Drop belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDropSeries(dropID: UInt32): UInt32?{ 
 		// Don't force a revert if the dropID is invalid
 		return TKNZ.dropDatas[dropID]?.series
@@ -888,7 +902,7 @@ contract TKNZ: NonFungibleToken{
 	// Parameters: dropName: The name of the Drop that is being searched
 	//
 	// Returns: An array of the IDs of the Drop if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDropIDsByName(dropName: String): [UInt32]?{ 
 		var dropIDs: [UInt32] = []
 		// Iterate through all the dropDatas and search for the name
@@ -912,7 +926,7 @@ contract TKNZ: NonFungibleToken{
 	// Parameters: dropID: The id of the Drop that is being searched
 	//
 	// Returns: An array of Play IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlaysInDrop(dropID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the dropID is invalid
 		return TKNZ.drops[dropID]?.plays
@@ -927,7 +941,7 @@ contract TKNZ: NonFungibleToken{
 	//			 playID: The id of the Play that is being searched
 	//
 	// Returns: Boolean indicating if the edition is retired or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(dropID: UInt32, playID: UInt32): Bool?{ 
 		if let dropdata = self.getDropData(dropID: dropID){ 
 			// See if the Play is retired from this Drop
@@ -948,7 +962,7 @@ contract TKNZ: NonFungibleToken{
 	// Parameters: dropID: The id of the Drop that is being searched
 	//
 	// Returns: Boolean indicating if the Drop is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isDropLocked(dropID: UInt32): Bool?{ 
 		// Don't force a revert if the dropID is invalid
 		return TKNZ.drops[dropID]?.locked
@@ -962,7 +976,7 @@ contract TKNZ: NonFungibleToken{
 	//
 	// Returns: The total number of NFTs 
 	//		  that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumNFTsInEdition(dropID: UInt32, playID: UInt32): UInt32?{ 
 		if let dropdata = self.getDropData(dropID: dropID){ 
 			// Read the numMintedPerPlay

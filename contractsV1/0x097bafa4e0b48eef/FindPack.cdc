@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -192,7 +206,7 @@ contract FindPack: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateSaleInfo(): [SaleInfo]{ 
 			let saleInfo: [SaleInfo] = []
 			for s in self.saleInfo{ 
@@ -253,7 +267,7 @@ contract FindPack: NonFungibleToken{
 			self.extra = extra
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateSaleInfo(): SaleInfo{ 
 			var endTime: UFix64? = nil
 			if let et = self.extra["endTime"]{ 
@@ -306,7 +320,7 @@ contract FindPack: NonFungibleToken{
 			self.verifyAll = verifyAll
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inTime(_ time: UFix64): Bool{ 
 			let started = time >= self.startTime
 			if self.endTime == nil{ 
@@ -315,7 +329,7 @@ contract FindPack: NonFungibleToken{
 			return started && time <= self.endTime!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(_ addr: Address){ 
 			
 			// If verified false, then panic
@@ -329,12 +343,12 @@ contract FindPack: NonFungibleToken{
 			self.purchaseRecord[addr] = purchased
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkBought(_ addr: Address): UInt64{ 
 			return self.purchaseRecord[addr] ?? 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkBuyable(addr: Address, time: UFix64): Bool{ 
 			// If not in time, return false
 			if !self.inTime(time){ 
@@ -489,7 +503,7 @@ contract FindPack: NonFungibleToken{
 			self.extraData = extraData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnail():{ MetadataViews.File}{ 
 			if let hash = self.thumbnailHash{ 
 				return MetadataViews.IPFSFile(cid: hash, path: nil)
@@ -497,7 +511,7 @@ contract FindPack: NonFungibleToken{
 			return MetadataViews.HTTPFile(url: self.thumbnailUrl!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemTypesAsStringArray(): [String]{ 
 			let types: [String] = []
 			for t in self.itemTypes{ 
@@ -506,7 +520,7 @@ contract FindPack: NonFungibleToken{
 			return types
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canBeOpened(): Bool{ 
 			return self.openTime <= Clock.time()
 		}
@@ -535,7 +549,7 @@ contract FindPack: NonFungibleToken{
 		self.packMetadata[packTypeName] = _mapping
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataById(packTypeName: String, typeId: UInt64): Metadata?{ 
 		if self.packMetadata[packTypeName] != nil{ 
 			return (self.packMetadata[packTypeName]!)[typeId]
@@ -543,7 +557,7 @@ contract FindPack: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataByName(packTypeName: String):{ UInt64: Metadata}{ 
 		if self.packMetadata[packTypeName] != nil{ 
 			return self.packMetadata[packTypeName]!
@@ -585,7 +599,7 @@ contract FindPack: NonFungibleToken{
 			self.packTypeName = packTypeName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOpenedBy():{ Type: Capability<&{NonFungibleToken.Receiver}>}{ 
 			if self.openedBy == nil{ 
 				panic("Pack is not opened")
@@ -593,7 +607,7 @@ contract FindPack: NonFungibleToken{
 			return self.openedBy!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHash(): String{ 
 			return self.hash
 		}
@@ -621,12 +635,12 @@ contract FindPack: NonFungibleToken{
 			self.openedBy = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTypeID(): UInt64{ 
 			return self.typeId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata{ 
 			return FindPack.getMetadataById(packTypeName: self.packTypeName, typeId: self.typeId)!
 		}
@@ -688,28 +702,28 @@ contract FindPack: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(_ id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPacksLeft(): Int // returns the no of a type
 		
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFindPack(id: UInt64): &FindPack.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyWithSignature(packId: UInt64, signature: String, vault: @{FungibleToken.Vault}, collectionCapability: Capability<&Collection>)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(packTypeName: String, typeId: UInt64, vault: @{FungibleToken.Vault}, collectionCapability: Capability<&Collection>)
 	}
 	
@@ -725,7 +739,7 @@ contract FindPack: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		//this has to be called on the DLQ collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requeue(packId: UInt64){ 
 			let token <- self.withdraw(withdrawID: packId) as! @NFT
 			let address = token.resetOpenedBy()
@@ -735,7 +749,7 @@ contract FindPack: NonFungibleToken{
 			emit Requeued(packId: packId, address: cap.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(packId: UInt64, receiverCap:{ Type: Capability<&{NonFungibleToken.Receiver}>}){ 
 			for cap in receiverCap.values{ 
 				if !cap.check(){ 
@@ -762,7 +776,7 @@ contract FindPack: NonFungibleToken{
 			emit Opened(packTypeName: packTypeName, packTypeId: typeId, packId: packId, address: (self.owner!).address, packFields: packFields, packNFTTypes: packNFTTypes)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyWithSignature(packId: UInt64, signature: String, vault: @{FungibleToken.Vault}, collectionCapability: Capability<&Collection>){ 
 			pre{ 
 				(self.owner!).address == FindPack.account.address:
@@ -834,7 +848,7 @@ contract FindPack: NonFungibleToken{
 			emit Purchased(packTypeName: packTypeName, packTypeId: packTypeId, packId: packId, address: collectionCapability.address, amount: (saleInfo!).price, packFields: packFields, packNFTTypes: packNFTTypes)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(packTypeName: String, typeId: UInt64, vault: @{FungibleToken.Vault}, collectionCapability: Capability<&Collection>){ 
 			pre{ 
 				(self.owner!).address == FindPack.account.address:
@@ -918,7 +932,7 @@ contract FindPack: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FindPack.NFT
 			let id: UInt64 = token.id
 			let tokenTypeId = token.getTypeID()
@@ -937,13 +951,13 @@ contract FindPack: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(_ id: UInt64): Bool{ 
 			return self.ownedNFTs.containsKey(id)
 		}
 		
 		//return the number of packs left of a type
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPacksLeft(): Int{ 
 			return self.ownedNFTs.length
 		}
@@ -962,7 +976,7 @@ contract FindPack: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the FindPack.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFindPack(id: UInt64): &FindPack.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -1107,7 +1121,7 @@ contract FindPack: NonFungibleToken{
 		return "FindPack_".concat(packTypeName).concat("_").concat(packTypeId.toString())
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPacksCollection(packTypeName: String, packTypeId: UInt64): &FindPack.Collection{ 
 		let pathIdentifier = self.getPacksCollectionPath(packTypeName: packTypeName, packTypeId: packTypeId)
 		let path = PublicPath(identifier: pathIdentifier) ?? panic("Cannot create path from identifier : ".concat(pathIdentifier))
@@ -1115,7 +1129,7 @@ contract FindPack: NonFungibleToken{
 	}
 	
 	// given a path, lookin to the NFT Collection and return a new empty collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollectionFromPackData(packData: FindPack.Metadata, type: Type): @{NonFungibleToken.Collection}{ 
 		let cap = packData.providerCaps[type] ?? panic("Type passed in does not exist in this pack ".concat(type.identifier))
 		if !cap.check(){ 
@@ -1128,7 +1142,7 @@ contract FindPack: NonFungibleToken{
 		return <-collectionData.createEmptyCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun canBuy(packTypeName: String, packTypeId: UInt64, user: Address): Bool{ 
 		let packs = FindPack.getPacksCollection(packTypeName: packTypeName, packTypeId: packTypeId)
 		let packsLeft = packs.getPacksLeft()
@@ -1149,7 +1163,7 @@ contract FindPack: NonFungibleToken{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentPrice(packTypeName: String, packTypeId: UInt64, user: Address): UFix64?{ 
 		let packs = FindPack.getPacksCollection(packTypeName: packTypeName, packTypeId: packTypeId)
 		let packsLeft = packs.getPacksLeft()
@@ -1180,14 +1194,14 @@ contract FindPack: NonFungibleToken{
 		return ref.borrowSaleInfo(index)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwnerCollection(): Capability<&FindPack.Collection>{ 
 		return FindPack.account.capabilities.get<&FindPack.Collection>(FindPack.CollectionPublicPath)!
 	}
 	
 	access(all)
 	resource Forge: FindForge.Forge{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(platform: FindForge.MinterPlatform, data: AnyStruct, verifier: &FindForge.Verifier): @{NonFungibleToken.NFT}{ 
 			let royalties: [MetadataViews.Royalty] = []
 			// there should be no find cut for the pack.
@@ -1198,7 +1212,7 @@ contract FindPack: NonFungibleToken{
 			return <-FindPack.mintNFT(packTypeName: platform.name, typeId: input.typeId, hash: input.hash, royalties: royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addContractData(platform: FindForge.MinterPlatform, data: AnyStruct, verifier: &FindForge.Verifier){ 
 			let type = data.getType()
 			switch type{ 

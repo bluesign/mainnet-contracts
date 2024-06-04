@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -81,12 +95,12 @@ contract RujianNFT: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return "resourceId: ".concat(self.resourceId).concat(" resourceName:").concat(self.resourceName).concat(" resourceHash").concat(self.resourceHash)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun thumbnail(): MetadataViews.HTTPFile{ 
 			return MetadataViews.HTTPFile(url: "https://rujian-nft.rujian.com/resource/thumbnail?resourceId=".concat(self.resourceId))
 		}
@@ -151,15 +165,15 @@ contract RujianNFT: NonFungibleToken{
 	access(all)
 	resource interface RujianNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRujianNFT(id: UInt64): &RujianNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -198,7 +212,7 @@ contract RujianNFT: NonFungibleToken{
 		// and adds the ID to the id array
 		// 部署nft 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @RujianNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -230,7 +244,7 @@ contract RujianNFT: NonFungibleToken{
 		// exposing all of its fields (including the typeID & rarityID).
 		// This is safe as there are no functions that can be called on the Ezy3dItem.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRujianNFT(id: UInt64): &RujianNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -284,7 +298,7 @@ contract RujianNFT: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, resourceId: String, resourceName: String, ownerId: String, resourceHash: String, timeStamp: String, royalties: [MetadataViews.Royalty]){ 
 			// deposit it in the recipient's account using their reference
 			//  TaskId: String, TaskName: String, ImgId: String
@@ -309,7 +323,7 @@ contract RujianNFT: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &RujianNFT.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&RujianNFT.Collection>(RujianNFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust RjResourceItems.Collection.borrowRujianNFT to get the correct itemID

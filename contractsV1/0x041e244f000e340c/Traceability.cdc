@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Traceability{ 
 	access(all)
 	let CollectionStoragePath: StoragePath
@@ -17,13 +31,13 @@ contract Traceability{
 	
 	access(all)
 	resource interface ProductCodePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ProductCodeExist(code: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetAllProductCodes(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ProductCodesLength(): Integer
 	}
 	
@@ -37,29 +51,29 @@ contract Traceability{
 		}
 		
 		// public interface contains function that everyone can call
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ProductCodesLength(): Integer{ 
 			return self.CodeMap.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ProductCodeExist(code: String): Bool{ 
 			return self.CodeMap.containsKey(code)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetAllProductCodes(): [String]{ 
 			return self.CodeMap.keys
 		}
 		
 		// only account owner can call the rest of functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AddProductCode(code: String){ 
 			self.CodeMap[code] = true
 			emit ProductCodeCreate(code: code)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun RemoveProductCode(code: String){ 
 			if self.CodeMap.containsKey(code){ 
 				self.CodeMap.remove(key: code)
@@ -68,7 +82,7 @@ contract Traceability{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCodeList(): @ProductCodeList{ 
 		return <-create ProductCodeList()
 	}

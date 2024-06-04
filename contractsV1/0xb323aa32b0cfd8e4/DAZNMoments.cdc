@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract DAZNMoments: NonFungibleToken{ 
@@ -144,7 +158,7 @@ contract DAZNMoments: NonFungibleToken{
 		//
 		// Returns: the Id of the new Collectible object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollectible(metadata:{ String: String}, dbid: String): UInt64{ 
 			// Create the new Collectible
 			var newCollectible = Collectible(dbId: dbid, metadata: metadata)
@@ -159,7 +173,7 @@ contract DAZNMoments: NonFungibleToken{
 			return newId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String): UInt64{ 
 			
 			//check if set exists
@@ -181,7 +195,7 @@ contract DAZNMoments: NonFungibleToken{
 			return newId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setId: UInt64): &Set{ 
 			pre{ 
 				DAZNMoments.collectibleSets[setId] != nil:
@@ -192,7 +206,7 @@ contract DAZNMoments: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -204,18 +218,18 @@ contract DAZNMoments: NonFungibleToken{
 	access(all)
 	resource interface CollectibleCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DAZNMoments.NFT?{ 
 			// If the result isnt nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -262,7 +276,7 @@ contract DAZNMoments: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a DAZNMoments NFT to make sure
 			// it is the correct type
@@ -286,7 +300,7 @@ contract DAZNMoments: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -333,7 +347,7 @@ contract DAZNMoments: NonFungibleToken{
 		// Parameters: id: The Id of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DAZNMoments.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -411,7 +425,7 @@ contract DAZNMoments: NonFungibleToken{
 			DAZNMoments.setDatas[self.setId] = SetData(name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollectible(collectibleId: UInt64){ 
 			pre{ 
 				DAZNMoments.collectibles[collectibleId] != nil:
@@ -427,14 +441,14 @@ contract DAZNMoments: NonFungibleToken{
 			emit CollectibleAddedToSet(setId: self.setId, collectibleId: collectibleId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollectibles(collectibleIds: [UInt64]){ 
 			for collectible in collectibleIds{ 
 				self.addCollectible(collectibleId: collectible)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireCollectible(collectibleId: UInt64){ 
 			pre{ 
 				self.retired[collectibleId] != nil:
@@ -446,14 +460,14 @@ contract DAZNMoments: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for collectible in self.collectibles{ 
 				self.retireCollectible(collectibleId: collectible)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -461,7 +475,7 @@ contract DAZNMoments: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(collectibleId: UInt64): @NFT{ 
 			pre{ 
 				self.retired[collectibleId] != nil:
@@ -482,7 +496,7 @@ contract DAZNMoments: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(collectibleId: UInt64, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -493,17 +507,17 @@ contract DAZNMoments: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectibles(): [UInt64]{ 
 			return self.collectibles
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt64: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerCollectible():{ UInt64: UInt64}{ 
 			return self.numberMintedPerCollectible
 		}
@@ -525,7 +539,7 @@ contract DAZNMoments: NonFungibleToken{
 	// getAllCollectibles returns all the collectibles in DAZNMoments
 	//
 	// Returns: An array of all the collectibles that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCollectibles(): [DAZNMoments.Collectible]{ 
 		return DAZNMoments.collectibles.values
 	}
@@ -533,7 +547,7 @@ contract DAZNMoments: NonFungibleToken{
 	// getAllCollectibles returns all the collectibles in topshot
 	//
 	// Returns: An array of all the sets that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets(): [DAZNMoments.SetData]{ 
 		return DAZNMoments.setDatas.values
 	}
@@ -543,7 +557,7 @@ contract DAZNMoments: NonFungibleToken{
 	// Parameters: collectibleId: The id of the Collectible that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleMetaData(collectibleId: UInt64):{ String: String}?{ 
 		return self.collectibles[collectibleId]?.metadata
 	}
@@ -555,7 +569,7 @@ contract DAZNMoments: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleMetaDataByField(collectibleId: UInt64, field: String): String?{ 
 		// Dont force a revert if the CollectibleId or field is invalid
 		if let Collectible = DAZNMoments.collectibles[collectibleId]{ 
@@ -565,7 +579,7 @@ contract DAZNMoments: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setId: UInt64): String?{ 
 		// Dont force a revert if the setID is invalid
 		return DAZNMoments.setDatas[setId]?.name
@@ -577,7 +591,7 @@ contract DAZNMoments: NonFungibleToken{
 	// Parameters: setName: The name of the Set that is being searched
 	//
 	// Returns: The ID of the Set if it exists, or nil if doesnt
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIdByName(setName: String): UInt64{ 
 		var setId: UInt64 = 0
 		
@@ -591,7 +605,7 @@ contract DAZNMoments: NonFungibleToken{
 		return setId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectiblesInSet(setId: UInt64): [UInt64]?{ 
 		// Dont force a revert if the setID is invalid
 		return DAZNMoments.collectibleSets[setId]?.collectibles

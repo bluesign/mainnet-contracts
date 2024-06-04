@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Liquid staking config
 
@@ -83,7 +97,7 @@ contract LiquidStakingConfig{
 	access(self)
 	let _reservedFields:{ String: AnyStruct}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calcEstimatedStakingPayout(stakedAmount: UFix64): UFix64{ 
 		let scaledStakedAmount = self.UFix64ToScaledUInt256(stakedAmount)
 		let scaledSystemTotalStaked =
@@ -111,7 +125,7 @@ contract LiquidStakingConfig{
 	/// Utility function to convert a UFix64 number to its scaled equivalent in UInt256 format
 	/// e.g. 184467440737.09551615 (UFix64.max) => 184467440737095516150000000000
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun UFix64ToScaledUInt256(_ f: UFix64): UInt256{ 
 		let integral = UInt256(f)
 		let fractional = f % 1.0
@@ -123,7 +137,7 @@ contract LiquidStakingConfig{
 	/// Utility function to convert a fixed point number in form of scaled UInt256 back to UFix64 format
 	/// e.g. 184467440737095516150000000000 => 184467440737.09551615
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ScaledUInt256ToUFix64(_ scaled: UInt256): UFix64{ 
 		let integral = scaled / self.scaleFactor
 		let ufixScaledFractional =
@@ -135,7 +149,7 @@ contract LiquidStakingConfig{
 	///
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinStakingAmount(minStakingAmount: UFix64){ 
 			emit ConfigMinStakingAmount(
 				newValue: minStakingAmount,
@@ -144,13 +158,13 @@ contract LiquidStakingConfig{
 			LiquidStakingConfig.minStakingAmount = minStakingAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStakingCap(stakingCap: UFix64){ 
 			emit ConfigStakingCap(newValue: stakingCap, oldValue: LiquidStakingConfig.stakingCap)
 			LiquidStakingConfig.stakingCap = stakingCap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setQuickUnstakeFee(quickUnstakeFee: UFix64){ 
 			pre{ 
 				quickUnstakeFee < 1.0:
@@ -163,7 +177,7 @@ contract LiquidStakingConfig{
 			LiquidStakingConfig.quickUnstakeFee = quickUnstakeFee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setProtocolFee(protocolFee: UFix64){ 
 			pre{ 
 				protocolFee < 1.0:
@@ -173,7 +187,7 @@ contract LiquidStakingConfig{
 			LiquidStakingConfig.protocolFee = protocolFee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(stakingPause: Bool, unstakingPause: Bool, migratingPause: Bool){ 
 			if LiquidStakingConfig.isStakingPaused != stakingPause{ 
 				emit ConfigStakingPause(newValue: stakingPause, oldValue: LiquidStakingConfig.isStakingPaused)
@@ -189,7 +203,7 @@ contract LiquidStakingConfig{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWindowSize(windowSize: UInt64){ 
 			emit ConfigWindowSize(
 				newValue: windowSize,

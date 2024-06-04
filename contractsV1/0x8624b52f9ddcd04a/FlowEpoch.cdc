@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -342,7 +356,7 @@ contract FlowEpoch{
 		let refTimestamp: UInt64
 		
 		/// Compute target switchover time based on offset from reference counter/switchover.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTargetEndTimeForEpoch(_ targetEpochCounter: UInt64): UInt64{ 
 			return self.refTimestamp + self.duration * (targetEpochCounter - self.refCounter)
 		}
@@ -366,7 +380,7 @@ contract FlowEpoch{
 	/// or nil if it isn't found
 	/// Epoch Metadata is stored in account storage so the growing dictionary
 	/// does not have to be loaded every time the contract is loaded
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEpochMetadata(_ epochCounter: UInt64): EpochMetadata?{ 
 		if let metadataDictionary =
 			self.account.storage.borrow<&{UInt64: EpochMetadata}>(from: self.metadataStoragePath){ 
@@ -415,7 +429,7 @@ contract FlowEpoch{
 	/// Resource that can update some of the contract fields
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEpochViews(_ newEpochViews: UInt64){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.STAKINGAUCTION:
@@ -426,7 +440,7 @@ contract FlowEpoch{
 			FlowEpoch.configurableMetadata.numViewsInEpoch = newEpochViews
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAuctionViews(_ newAuctionViews: UInt64){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.STAKINGAUCTION:
@@ -437,7 +451,7 @@ contract FlowEpoch{
 			FlowEpoch.configurableMetadata.numViewsInStakingAuction = newAuctionViews
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDKGPhaseViews(_ newPhaseViews: UInt64){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.STAKINGAUCTION:
@@ -448,7 +462,7 @@ contract FlowEpoch{
 			FlowEpoch.configurableMetadata.numViewsInDKGPhase = newPhaseViews
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEpochTimingConfig(_ newConfig: EpochTimingConfig){ 
 			pre{ 
 				FlowEpoch.currentEpochCounter >= newConfig.refCounter:
@@ -458,7 +472,7 @@ contract FlowEpoch{
 			FlowEpoch.account.storage.save(newConfig, to: /storage/flowEpochTimingConfig)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNumCollectorClusters(_ newNumClusters: UInt16){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.STAKINGAUCTION:
@@ -467,7 +481,7 @@ contract FlowEpoch{
 			FlowEpoch.configurableMetadata.numCollectorClusters = newNumClusters
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFLOWSupplyIncreasePercentage(_ newPercentage: UFix64){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.STAKINGAUCTION:
@@ -479,7 +493,7 @@ contract FlowEpoch{
 		}
 		
 		// Enable or disable automatic rewards calculations and payments
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAutomaticRewardsEnabled(_ enabled: Bool){ 
 			FlowEpoch.account.storage.load<Bool>(from: /storage/flowAutomaticRewardsEnabled)
 			FlowEpoch.account.storage.save(enabled, to: /storage/flowAutomaticRewardsEnabled)
@@ -490,7 +504,7 @@ contract FlowEpoch{
 		/// This function is used during sporks - since the consensus view is reset, and the protocol is
 		/// bootstrapped with a new initial state snapshot, this initializes FlowEpoch with the first epoch
 		/// of the new spork, as defined in that snapshot.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resetEpoch(
 			currentEpochCounter: UInt64,
 			randomSource: String,
@@ -557,7 +571,7 @@ contract FlowEpoch{
 		
 		/// Function that is called every block to advance the epoch
 		/// and change phase if the required conditions have been met
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun advanceBlock(){ 
 			switch FlowEpoch.currentEpochPhase{ 
 				case EpochPhase.STAKINGAUCTION:
@@ -592,7 +606,7 @@ contract FlowEpoch{
 		
 		/// Calls `FlowEpoch` functions to end the staking auction phase
 		/// and start the Epoch Setup phase
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endStakingAuction(){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.STAKINGAUCTION:
@@ -614,7 +628,7 @@ contract FlowEpoch{
 		
 		/// Calls `FlowEpoch` functions to end the Epoch Setup phase
 		/// and start the Epoch Setup Phase
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startEpochCommit(){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.EPOCHSETUP:
@@ -625,7 +639,7 @@ contract FlowEpoch{
 		
 		/// Calls `FlowEpoch` functions to end the Epoch Commit phase
 		/// and start the Staking Auction phase of a new epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endEpoch(){ 
 			pre{ 
 				FlowEpoch.currentEpochPhase == EpochPhase.EPOCHCOMMIT:
@@ -636,12 +650,12 @@ contract FlowEpoch{
 		
 		/// Needs to be called before the epoch is over
 		/// Calculates rewards for the current epoch and stores them in epoch metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateAndSetRewards(){ 
 			FlowEpoch.calculateAndSetRewards()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payRewardsForPreviousEpoch(){ 
 			FlowEpoch.payRewardsForPreviousEpoch()
 		}
@@ -910,7 +924,7 @@ contract FlowEpoch{
 	
 	/// Makes sure the set of phase lengths (in views) are valid.
 	/// Sub-phases cannot be greater than the full epoch length.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isValidPhaseConfiguration(
 		_ auctionLen: UInt64,
 		_ dkgPhaseLen: UInt64,
@@ -921,7 +935,7 @@ contract FlowEpoch{
 	
 	/// Randomizes the list of collector node ID and uses a round robin algorithm
 	/// to assign all collector nodes to equal sized clusters
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCollectorClusters(nodeIDs: [String]): [FlowClusterQC.Cluster]{ 
 		pre{ 
 			UInt16(nodeIDs.length) >= self.configurableMetadata.numCollectorClusters:
@@ -961,7 +975,7 @@ contract FlowEpoch{
 	
 	/// A function to generate a random permutation of arr[] 
 	/// using the fisher yates shuffling algorithm
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun randomize(_ array: [String]): [String]{ 
 		var i = array.length - 1
 		
@@ -983,7 +997,7 @@ contract FlowEpoch{
 	
 	/// Collector nodes call this function to get their QC Voter resource
 	/// in order to participate the the QC generation for their cluster
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClusterQCVoter(nodeStaker: &FlowIDTableStaking.NodeStaker): @FlowClusterQC.Voter{ 
 		let nodeInfo = FlowIDTableStaking.NodeInfo(nodeID: nodeStaker.id)
 		assert(
@@ -996,7 +1010,7 @@ contract FlowEpoch{
 	
 	/// Consensus nodes call this function to get their DKG Participant resource
 	/// in order to participate in the DKG for the next epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDKGParticipant(nodeStaker: &FlowIDTableStaking.NodeStaker): @FlowDKG.Participant{ 
 		let nodeInfo = FlowIDTableStaking.NodeInfo(nodeID: nodeStaker.id)
 		assert(
@@ -1008,7 +1022,7 @@ contract FlowEpoch{
 	}
 	
 	/// Returns the metadata that is able to be configured by the admin
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getConfigMetadata(): Config{ 
 		return self.configurableMetadata
 	}
@@ -1016,18 +1030,18 @@ contract FlowEpoch{
 	/// Returns the config for epoch timing, which can be configured by the admin.
 	/// Conceptually, this should be part of `Config`, however it was added later in an
 	/// upgrade which requires new fields be specified separately from existing structs.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEpochTimingConfig(): EpochTimingConfig{ 
 		return self.account.storage.copy<EpochTimingConfig>(from: /storage/flowEpochTimingConfig)!
 	}
 	
 	/// The proposed Epoch counter is always the current counter plus 1
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun proposedEpochCounter(): UInt64{ 
 		return self.currentEpochCounter + 1 as UInt64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun automaticRewardsEnabled(): Bool{ 
 		return self.account.storage.copy<Bool>(from: /storage/flowAutomaticRewardsEnabled) ?? false
 	}
@@ -1039,7 +1053,7 @@ contract FlowEpoch{
 	/// so they are not included in that calculation
 	/// Eventually, all the bonus tokens will be destroyed and
 	/// this will not be needed anymore
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBonusTokens(): UFix64{ 
 		return self.account.storage.copy<UFix64>(from: /storage/FlowBonusTokenAmount) ?? 0.0
 	}

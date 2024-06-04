@@ -1,4 +1,18 @@
-/// # Capability Factory
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/// # Capability Factory
 ///
 /// This contract defines a Factory interface and a Manager resource to contain Factory implementations, as well as a
 /// Getter interface for retrieval of contained Factories.
@@ -28,7 +42,7 @@ contract CapabilityFactory{
 	///
 	access(all)
 	struct interface Factory{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCapability(acct: &AuthAccount, path: CapabilityPath): Capability
 	}
 	
@@ -36,10 +50,10 @@ contract CapabilityFactory{
 	///
 	access(all)
 	resource interface Getter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupportedTypes(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFactory(_ t: Type):{ CapabilityFactory.Factory}?
 	}
 	
@@ -56,7 +70,7 @@ contract CapabilityFactory{
 		///
 		/// @return List of Types supported by the Manager
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupportedTypes(): [Type]{ 
 			return self.factories.keys
 		}
@@ -65,7 +79,7 @@ contract CapabilityFactory{
 		///
 		/// @param t: Type the Factory is indexed on
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFactory(_ t: Type):{ CapabilityFactory.Factory}?{ 
 			return self.factories[t]
 		}
@@ -75,7 +89,7 @@ contract CapabilityFactory{
 		/// @param t: Type of Capability the Factory retrieves
 		/// @param f: Factory to add
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFactory(_ t: Type, _ f:{ CapabilityFactory.Factory}){ 
 			pre{ 
 				!self.factories.containsKey(t):
@@ -89,7 +103,7 @@ contract CapabilityFactory{
 		/// @param t: Type of Capability the Factory retrieves
 		/// @param f: Factory to replace existing Factory
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFactory(_ t: Type, _ f:{ CapabilityFactory.Factory}){ 
 			self.factories[t] = f
 		}
@@ -98,7 +112,7 @@ contract CapabilityFactory{
 		///
 		/// @param t: Type the Factory is indexed on
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFactory(_ t: Type):{ CapabilityFactory.Factory}?{ 
 			return self.factories.remove(key: t)
 		}
@@ -111,7 +125,7 @@ contract CapabilityFactory{
 	/// Creates a Manager resource
 	///
 	/// @return Manager resource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createFactoryManager(): @Manager{ 
 		return <-create Manager()
 	}

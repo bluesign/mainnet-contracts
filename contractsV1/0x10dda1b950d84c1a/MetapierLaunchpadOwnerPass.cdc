@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 /**
 
@@ -56,10 +70,10 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdsByPoolId(poolId: String): [UInt64]
 	}
 	
@@ -81,7 +95,7 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// make sure the token has the right type
 			let token <- token as! @MetapierLaunchpadOwnerPass.NFT
 			let id: UInt64 = token.id
@@ -92,7 +106,7 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 			emit Deposit(id: id, to: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -107,13 +121,13 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPrivatePass(id: UInt64): &MetapierLaunchpadOwnerPass.NFT{ 
 			let passRef = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return passRef as! &MetapierLaunchpadOwnerPass.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdsByPoolId(poolId: String): [UInt64]{ 
 			let ids: [UInt64] = []
 			for key in self.ownedNFTs.keys{ 
@@ -148,7 +162,7 @@ contract MetapierLaunchpadOwnerPass: NonFungibleToken{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: Capability<&{NonFungibleToken.CollectionPublic}>, launchPoolId: String){ 
 			// create a new NFT
 			let newNFT <- create NFT(id: MetapierLaunchpadOwnerPass.totalSupply, launchPoolId: launchPoolId)

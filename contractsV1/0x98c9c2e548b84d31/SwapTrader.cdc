@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract SwapTrader{ 
@@ -66,7 +80,7 @@ contract SwapTrader{
 		let targetAttributes: [SwapAttribute]
 		
 		// isPaused - if swap-pair paused
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isPaused(): Bool
 	}
 	
@@ -89,7 +103,7 @@ contract SwapTrader{
 			self.paused = paused
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isPaused(): Bool{ 
 			return self.paused
 		}
@@ -153,7 +167,7 @@ contract SwapTrader{
 		
 		// isPaused
 		// if the swap pair is paused
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isPaused(): Bool{ 
 			return self.paused
 		}
@@ -173,27 +187,27 @@ contract SwapTrader{
 	resource interface SwapPairListPublic{ 
 		// getSwapPair
 		// get swap pair info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSwapPair(_ pairID: UInt64):{ SwapTrader.SwapPairAttributes}?
 		
 		// isTradable
 		// 1. Does the swap-pair pause?
 		// 2. Has enough target to swap?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isTradable(_ pairID: UInt64): Bool
 		
 		// getTradableAmount
 		// How many tradable amount remaining
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTradableAmount(_ pairID: UInt64): UInt64
 		
 		// getSwappedAmmount
 		// How many swapped pairs traded
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSwappedAmmount(_ pairID: UInt64): UInt64
 		
 		// swapNFT - execute swap
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swapNFT(
 			pairID: UInt64,
 			sourceIDs: [
@@ -227,7 +241,7 @@ contract SwapTrader{
 		
 		// registerSwapPair
 		// Registers SwapPair for a typeID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerSwapPair(index: UInt64, pair: SwapPair){ 
 			pre{ 
 				self.registeredPairs[index] == nil:
@@ -241,7 +255,7 @@ contract SwapTrader{
 		
 		// setSwapPairState
 		// Set state of the swap pair 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSwapPairState(pairID: UInt64, paused: Bool){ 
 			pre{ 
 				self.registeredPairs[pairID] != nil:
@@ -258,7 +272,7 @@ contract SwapTrader{
 		// ------ Interface implement ------
 		// getSwapPair
 		// get swap pair info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSwapPair(_ pairID: UInt64):{ SwapTrader.SwapPairAttributes}?{ 
 			if let swapPair = self.registeredPairs[pairID]{ 
 				return SwapTrader.SwapPairInfo(sourceAttrs: swapPair.sourceAttributes, targetAttrs: swapPair.targetAttributes, paused: swapPair.paused)
@@ -270,7 +284,7 @@ contract SwapTrader{
 		// isTradable
 		// 1. Does the swap-pair pause?
 		// 2. Has enough target to swap?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isTradable(_ pairID: UInt64): Bool{ 
 			if let swapPair = self.registeredPairs[pairID]{ 
 				if swapPair.paused{ 
@@ -300,7 +314,7 @@ contract SwapTrader{
 		
 		// getTradableAmount
 		// How many trable amount remaining
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTradableAmount(_ pairID: UInt64): UInt64{ 
 			if let swapPair = self.registeredPairs[pairID]{ 
 				// check pause state
@@ -334,13 +348,13 @@ contract SwapTrader{
 		
 		// getSwappedAmmount
 		// How many swapped pairs traded
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSwappedAmmount(_ pairID: UInt64): UInt64{ 
 			return self.swappedRecords[pairID] ?? 0
 		}
 		
 		// swapNFT - execute swap
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swapNFT(pairID: UInt64, sourceIDs: [UInt64], sourceProvider: Capability<&{NonFungibleToken.Provider}>, targetReceiver: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			pre{ 
 				// check if currently tradable

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -45,7 +59,7 @@ contract LPStaking{
 	access(all)
 	event PoolAccountPublicKeyChanged(oldPublicKey: String?, newPublicKey: String?)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPool(vaultAddress: Address, accountCreationFee: @{FungibleToken.Vault}): Address{ 
 		assert(
 			accountCreationFee.balance >= 0.001,
@@ -101,7 +115,7 @@ contract LPStaking{
 		return poolAddress
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun distributeFees(vaultId: Int, vault: @{FungibleToken.Vault}){ 
 		pre{ 
 			self.poolMap.containsKey(vaultId):
@@ -124,7 +138,7 @@ contract LPStaking{
 			self.tokenVaults <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(tokenAddress: Address, tokenVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				LPStaking.pairMap.containsKey(tokenAddress):
@@ -143,7 +157,7 @@ contract LPStaking{
 			self.updateReward(tokenAddress: tokenAddress)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenAddress: Address, amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				LPStaking.pairMap.containsKey(tokenAddress):
@@ -161,12 +175,12 @@ contract LPStaking{
 			return <-withdrawVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionLength(): Int{ 
 			return self.tokenVaults.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenBalance(tokenAddress: Address): UFix64{ 
 			if self.tokenVaults.containsKey(tokenAddress){ 
 				let vaultRef = (&self.tokenVaults[tokenAddress] as &{FungibleToken.Vault}?)!
@@ -175,7 +189,7 @@ contract LPStaking{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTokens(): [Address]{ 
 			return self.tokenVaults.keys
 		}
@@ -188,12 +202,12 @@ contract LPStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyLPStakingCollection(): @LPStakingCollection{ 
 		return <-create LPStakingCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolAddress(vaultId: Int): Address?{ 
 		if self.poolMap.containsKey(vaultId){ 
 			return self.poolMap[vaultId]!
@@ -202,22 +216,22 @@ contract LPStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun pool(pid: Int): Address{ 
 		return self.pools[pid]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun allPools(): [Address]{ 
 		return self.pools
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun numPools(): Int{ 
 		return self.pools.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRewards(account: Address, poolIds: [Int]){ 
 		for pid in poolIds{ 
 			let poolAddress = self.pools[pid]
@@ -226,7 +240,7 @@ contract LPStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun earned(account: Address, poolIds: [Int]): [UFix64]{ 
 		let ret: [UFix64] = []
 		for pid in poolIds{ 
@@ -239,7 +253,7 @@ contract LPStaking{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPoolContractTemplate(newAddr: Address){ 
 			pre{ 
 				getAccount(newAddr).contracts.get(name: "RewardPool") != nil:
@@ -252,7 +266,7 @@ contract LPStaking{
 			LPStaking.poolTemplate = newAddr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPoolAccountPublicKey(publicKey: String?){ 
 			pre{ 
 				PublicKey(publicKey: (publicKey!).decodeHex(), signatureAlgorithm: SignatureAlgorithm.ECDSA_P256) != nil:

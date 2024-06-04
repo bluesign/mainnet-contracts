@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -240,7 +254,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			self.isReveal = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -282,12 +296,12 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			emit ProjectUpdated(projectId: self.projectId, title: self.title, description: self.description, thumbnail: self.thumbnail, creatorAddress: self.creatorAddress, mintPrice: self.mintPrice, maxSupply: self.maxSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties([MetadataViews.Royalty(receiver: MIKOSEANFTV2.mikoseaCap, cut: self.platformFee, description: "Platform fee"), MetadataViews.Royalty(receiver: getAccount(self.creatorAddress).capabilities.get<&{FungibleToken.Receiver}>(MIKOSEANFTV2.tokenPublicPath)!, cut: 0.0, description: "Creater market fee, when this nft is in the market, the creater fee is 5%")])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltiesMarket(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties([MetadataViews.Royalty(receiver: MIKOSEANFTV2.mikoseaCap, cut: self.platformMarketFee, description: "Platform market fee"), MetadataViews.Royalty(receiver: getAccount(self.creatorAddress).capabilities.get<&{FungibleToken.Receiver}>(MIKOSEANFTV2.tokenPublicPath)!, cut: self.creatorMarketFee, description: "Creater market fee")])
 		}
@@ -400,7 +414,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			self.isInMarket = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			let requiredMetadata = MikoSeaNFTMetadata.getNFTMetadata(nftType: "mikoseav2", nftID: self.id) ??{} 
 			if (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).isReveal{ 
@@ -419,7 +433,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			self.nftData.updateMetadata(metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImage(): String{ 
 			if (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).isReveal{ 
 				return self.nftData.image
@@ -427,7 +441,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).thumbnail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			if (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).isReveal{ 
 				let title = self.getMetadata()["title"] ?? MIKOSEANFTV2.getProjectById(self.nftData.projectId)?.title ?? ""
@@ -436,7 +450,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return MIKOSEANFTV2.getProjectById(self.nftData.projectId)?.title ?? ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			if (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).isReveal{ 
 				let name = self.getMetadata()["name"] ?? self.getTitle()
@@ -445,7 +459,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return MIKOSEANFTV2.getProjectById(self.nftData.projectId)?.title ?? ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			if (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).isReveal{ 
 				return self.getMetadata()["description"] ?? MIKOSEANFTV2.getProjectById(self.nftData.projectId)?.description ?? ""
@@ -454,7 +468,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 		}
 		
 		// receiver: Capability<&AnyResource{FungibleToken.Receiver}>, cut: UFix64, description: String
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			if self.isInMarket{ 
 				return self.getRoyaltiesMarket()
@@ -462,7 +476,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).getRoyalties()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltiesMarket(): MetadataViews.Royalties{ 
 			return (MIKOSEANFTV2.getProjectById(self.nftData.projectId)!).getRoyaltiesMarket()
 		}
@@ -473,7 +487,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			emit SetInMarket(nftID: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIsInMarket(): Bool{ 
 			return self.isInMarket
 		}
@@ -554,15 +568,15 @@ contract MIKOSEANFTV2: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMIKOSEANFTV2(id: UInt64): &MIKOSEANFTV2.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMIKOSEANFTV2s(): [&MIKOSEANFTV2.NFT]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCommentByNftID(nftID: UInt64): [CommentData]
 	}
 	
@@ -583,7 +597,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MIKOSEANFTV2.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -596,7 +610,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMIKOSEANFTV2(id: UInt64): &MIKOSEANFTV2.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -606,7 +620,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMIKOSEANFTV2s(): [&MIKOSEANFTV2.NFT]{ 
 			let res: [&MIKOSEANFTV2.NFT] = []
 			for id in self.ownedNFTs.keys{ 
@@ -618,7 +632,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCommentByNftID(nftID: UInt64): [CommentData]{ 
 			return self.borrowMIKOSEANFTV2(id: nftID)?.commentData?.values ?? []
 		}
@@ -642,7 +656,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(nftID: UInt64, recipient: &{MIKOSEANFTV2.CollectionPublic}){ 
 			post{ 
 				self.ownedNFTs[nftID] == nil:
@@ -654,7 +668,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			emit NFTTransferred(nftID: nftID, nftData: *nftData.nftData, from: (self.owner!).address, to: (recipient.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -689,7 +703,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 		/// @param id: The ID of the NFT that want to be borrowed
 		/// @return An optional reference to the desired NFT, will be nil if the passed id does not exist
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: UInt64): &{NonFungibleToken.NFT}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -697,33 +711,33 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createComment(nftID: UInt64, comment: String){ 
 			let newComment = self.borrowMIKOSEANFTV2(id: nftID)?.createComment(comment: comment) ?? panic("NFT_NOT_FOUND")
 			self.commentNFTMap[newComment.commentId] = nftID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateComment(commentId: UInt64, comment: String){ 
 			let nftID = self.commentNFTMap[commentId] ?? panic("COMMENT_NOT_FOUND")
 			self.borrowMIKOSEANFTV2(id: nftID)?.updateComment(commentId: commentId, comment: comment) ?? panic("NFT_NOT_FOUND")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteComment(commentId: UInt64){ 
 			if let nftID = self.commentNFTMap[commentId]{ 
 				self.borrowMIKOSEANFTV2(id: nftID)?.deleteComment(commentId: commentId)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInMarket(nftID: UInt64, value: Bool){ 
 			if let nft = self.borrowMIKOSEANFTV2(id: nftID){ 
 				nft.setInMarket(value)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(nftID: UInt64, metadata:{ String: String}){ 
 			if let nft = self.borrowMIKOSEANFTV2(id: nftID){ 
 				nft.updateMetadata(metadata)
@@ -758,18 +772,18 @@ contract MIKOSEANFTV2: NonFungibleToken{
 	access(all)
 	resource Minter{ 
 		// mint nfts and return list of nftID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTs(projectId: UInt64, quantity: UInt64, images: [String], metadatas: [{String: String}], recipientCap: Capability<&{CollectionPublic}>): [UInt64]{ 
 			let project = MIKOSEANFTV2.getProjectById(projectId) ?? panic("NOT_FOUND_PROJECT")
 			return project.batchMintNFT(quantity: quantity, images: images, metadatas: metadatas, recipientCap: recipientCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealProject(_ projectId: UInt64){ 
 			(MIKOSEANFTV2.getProjectById(projectId)!).reveal()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unRevealProject(_ projectId: UInt64){ 
 			(MIKOSEANFTV2.getProjectById(projectId)!).unRevealProject()
 		}
@@ -787,12 +801,12 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			self.projectData <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectById(_ projectId: UInt64): &ProjectData?{ 
 			return &self.projectData[projectId] as &ProjectData?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectFromNftId(_ nftID: UInt64): &ProjectData?{ 
 			if nftID > 0 && nftID <= MIKOSEANFTV2.totalSupply{ 
 				for projectId in self.projectData.keys{ 
@@ -804,7 +818,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjects(): [&ProjectData]{ 
 			let res: [&ProjectData] = []
 			for projectId in self.projectData.keys{ 
@@ -813,36 +827,36 @@ contract MIKOSEANFTV2: NonFungibleToken{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProject(title: String, description: String, thumbnail: String, creatorAddress: Address, platformFee: UFix64, creatorMarketFee: UFix64, platformMarketFee: UFix64, mintPrice: UFix64, maxSupply: UInt64, isPublic: Bool, metadata:{ String: AnyStruct}){ 
 			let projectData <- create ProjectData(title: title, description: description, thumbnail: thumbnail, creatorAddress: creatorAddress, platformFee: platformFee, creatorMarketFee: creatorMarketFee, platformMarketFee: platformMarketFee, mintPrice: mintPrice, maxSupply: maxSupply, isPublic: isPublic, metadata: metadata)
 			let old <- self.projectData[projectData.projectId] <- projectData
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateProject(projectId: UInt64, title: String?, description: String?, thumbnail: String?, creatorAddress: Address?, platformFee: UFix64?, creatorMarketFee: UFix64?, platformMarketFee: UFix64?, mintPrice: UFix64?, maxSupply: UInt64?, metadata:{ String: AnyStruct}?){ 
 			let projectData = self.getProjectById(projectId) ?? panic("PROJECT_NOT_FOUND")
 			projectData.update(title: title, description: description, thumbnail: thumbnail, creatorAddress: creatorAddress, platformFee: platformFee, creatorMarketFee: creatorMarketFee, platformMarketFee: platformMarketFee, mintPrice: mintPrice, maxSupply: maxSupply, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publicProject(projectId: UInt64){ 
 			self.getProjectById(projectId)?.public() ?? panic("PROJECT_NOT_FOUND")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unPublicProject(projectId: UInt64){ 
 			self.getProjectById(projectId)?.unPublic() ?? panic("PROJECT_NOT_FOUND")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTokenPublicPath(_ path: PublicPath){ 
 			MIKOSEANFTV2.tokenPublicPath = path
 			MIKOSEANFTV2.mikoseaCap = getAccount((self.owner!).address).capabilities.get<&{FungibleToken.Receiver}>(path)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMinter(): @Minter{ 
 			return <-create Minter()
 		}
@@ -850,7 +864,7 @@ contract MIKOSEANFTV2: NonFungibleToken{
 	
 	// getOwner
 	// Gets the current owner of the given item
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getHolder(nftID: UInt64): Address?{ 
 		if nftID > 0 && nftID <= self.totalSupply{ 
 			return MIKOSEANFTV2.nftHolderMap[nftID]
@@ -858,12 +872,12 @@ contract MIKOSEANFTV2: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectById(_ projectId: UInt64): &ProjectData?{ 
 		return (self.account.storage.borrow<&MIKOSEANFTV2.Admin>(from: MIKOSEANFTV2.AdminStoragePath)!).getProjectById(projectId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectImageType(_ projectId: UInt64): String?{ 
 		let str = MIKOSEANFTV2.getProjectById(projectId)?.thumbnail ?? ""
 		if str.length == 0{ 
@@ -886,12 +900,12 @@ contract MIKOSEANFTV2: NonFungibleToken{
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectFromNftId(_ nftID: UInt64): &ProjectData?{ 
 		return (self.account.storage.borrow<&MIKOSEANFTV2.Admin>(from: MIKOSEANFTV2.AdminStoragePath)!).getProjectFromNftId(nftID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjects(): [&ProjectData]{ 
 		return (self.account.storage.borrow<&MIKOSEANFTV2.Admin>(from: MIKOSEANFTV2.AdminStoragePath)!).getProjects()
 	}

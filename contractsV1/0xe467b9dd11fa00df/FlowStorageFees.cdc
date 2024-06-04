@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
  * The FlowStorageFees smart contract
  *
  * An account's storage capacity determines up to how much storage on chain it can use. 
@@ -46,7 +60,7 @@ contract FlowStorageFees{
 	resource Administrator{ 
 		
 		// Changes the amount of storage capacity an account has per accounts' reserved storage FLOW.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStorageMegaBytesPerReservedFLOW(_ storageMegaBytesPerReservedFLOW: UFix64){ 
 			if FlowStorageFees.storageMegaBytesPerReservedFLOW == storageMegaBytesPerReservedFLOW{ 
 				return
@@ -56,7 +70,7 @@ contract FlowStorageFees{
 		}
 		
 		// Changes the minimum amount of FLOW an account has to have reserved.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinimumStorageReservation(_ minimumStorageReservation: UFix64){ 
 			if FlowStorageFees.minimumStorageReservation == minimumStorageReservation{ 
 				return
@@ -73,7 +87,7 @@ contract FlowStorageFees{
 	///
 	/// Returns megabytes
 	/// If the account has no default balance it is counted as a balance of 0.0 FLOW
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateAccountCapacity(_ accountAddress: Address): UFix64{ 
 		var balance = 0.0
 		if let balanceRef =
@@ -88,7 +102,7 @@ contract FlowStorageFees{
 	}
 	
 	/// calculateAccountsCapacity returns the storage capacity of a batch of accounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateAccountsCapacity(_ accountAddresses: [Address]): [UFix64]{ 
 		let capacities: [UFix64] = []
 		for accountAddress in accountAddresses{ 
@@ -102,7 +116,7 @@ contract FlowStorageFees{
 	// This is used to check if a transaction will fail because of any account being over the storage capacity
 	// The payer is an exception as its storage capacity is derived from its balance minus the maximum possible transaction fees 
 	// (transaction fees if the execution effort is at the execution efort limit, a.k.a.: computation limit, a.k.a.: gas limit)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccountsCapacityForTransactionStorageCheck(
 		accountAddresses: [
 			Address
@@ -130,7 +144,7 @@ contract FlowStorageFees{
 	
 	// accountBalanceToAccountStorageCapacity returns the storage capacity
 	// an account would have with given the flow balance of the account.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun accountBalanceToAccountStorageCapacity(_ balance: UFix64): UFix64{ 
 		// get address token balance
 		if balance < self.minimumStorageReservation{ 
@@ -144,14 +158,14 @@ contract FlowStorageFees{
 	
 	// Amount in Flow tokens
 	// Returns megabytes
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun flowToStorageCapacity(_ amount: UFix64): UFix64{ 
 		return amount.saturatingMultiply(FlowStorageFees.storageMegaBytesPerReservedFLOW)
 	}
 	
 	// Amount in megabytes
 	// Returns Flow tokens
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun storageCapacityToFlow(_ amount: UFix64): UFix64{ 
 		if FlowStorageFees.storageMegaBytesPerReservedFLOW == 0.0 as UFix64{ 
 			return 0.0 as UFix64
@@ -162,7 +176,7 @@ contract FlowStorageFees{
 	}
 	
 	// converts storage used from UInt64 Bytes to UFix64 Megabytes.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun convertUInt64StorageBytesToUFix64Megabytes(_ storage: UInt64): UFix64{ 
 		// safe convert UInt64 to UFix64 (without overflow)
 		let f =
@@ -177,7 +191,7 @@ contract FlowStorageFees{
 	///
 	/// The available balance of an account is its default token balance minus what is reserved for storage.
 	/// If the account has no default balance it is counted as a balance of 0.0 FLOW
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun defaultTokenAvailableBalance(_ accountAddress: Address): UFix64{ 
 		//get balance of account
 		let acct = getAccount(accountAddress)
@@ -198,7 +212,7 @@ contract FlowStorageFees{
 	///
 	/// The reserved balance of an account is its storage used multiplied by the storage cost per flow token.
 	/// The reserved balance is at least the minimum storage reservation.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun defaultTokenReservedBalance(_ accountAddress: Address): UFix64{ 
 		let acct = getAccount(accountAddress)
 		var reserved =

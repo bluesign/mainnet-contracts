@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -149,7 +163,7 @@ contract XGStudio: NonFungibleToken{
 			self.data = data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(data:{ String: String}){ 
 			self.data = data
 		}
@@ -280,7 +294,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		// a method to get the immutable data of the template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}{ 
 			return self.immutableData
 		}
@@ -316,7 +330,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		// a method to get the immutable data of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}{ 
 			return self.immutableData
 		}
@@ -407,7 +421,7 @@ contract XGStudio: NonFungibleToken{
 				* Get the NFT description template's thumbnail
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetDescription(): String{ 
 			let token = XGStudio.getNFTDataById(nftId: self.id)
 			let template = XGStudio.getTemplateById(templateId: token.templateID)
@@ -444,7 +458,7 @@ contract XGStudio: NonFungibleToken{
 				 * Get the thumbnail file from the NFT template's thumbnail
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnailFile():{ MetadataViews.File}{ 
 			let token = XGStudio.getNFTDataById(nftId: self.id)
 			let template = XGStudio.getTemplateById(templateId: token.templateID)
@@ -521,7 +535,7 @@ contract XGStudio: NonFungibleToken{
 				 * Get the content file from the NFT template's contentUrl
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContentFile():{ MetadataViews.File}?{ 
 			let token = XGStudio.getNFTDataById(nftId: self.id)
 			let template = XGStudio.getTemplateById(templateId: token.templateID)
@@ -549,7 +563,7 @@ contract XGStudio: NonFungibleToken{
 			return MetadataViews.IPFSFile(cid: contentUrl!, path: nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): [MetadataViews.Edition]{ 
 			let token = XGStudio.getNFTDataById(nftId: self.id)
 			let template = XGStudio.getTemplateById(templateId: token.templateID)
@@ -587,7 +601,7 @@ contract XGStudio: NonFungibleToken{
 			return editions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			let token = XGStudio.getNFTDataById(nftId: self.id)
 			let template = XGStudio.getTemplateById(templateId: token.templateID)
@@ -625,15 +639,15 @@ contract XGStudio: NonFungibleToken{
 	access(all)
 	resource interface XGStudioCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowXGStudio_NFT(id: UInt64): &XGStudio.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -665,7 +679,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @XGStudio.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -686,7 +700,7 @@ contract XGStudio: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowXGStudio_NFT(id: UInt64): &XGStudio.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -726,36 +740,36 @@ contract XGStudio: NonFungibleToken{
 	// Special Capability, that is needed by user to utilize our contract. Only verified user can get this capability so it will add a KYC layer in our white-lable-solution
 	access(all)
 	resource interface UserSpecialCapability{ 
-		access(all)
-		fun addCapability(cap: Capability<&{NFTMethodsCapability}>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(cap: Capability<&{XGStudio.NFTMethodsCapability}>): Void
 	}
 	
 	// Interface, which contains all the methods that are called by any user to mint NFT and manage brand, schema and template funtionality
 	access(all)
 	resource interface NFTMethodsCapability{ 
-		access(all)
-		fun createNewBrand(brandName: String, data:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createNewBrand(brandName: String, data:{ String: String}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandData(brandId: UInt64, data:{ String: String})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSchema(schemaName: String, format:{ String: SchemaType})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(brandId: UInt64, schemaId: UInt64, maxSupply: UInt64, immutableData:{ String: AnyStruct})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateId: UInt64, account: Address, immutableData:{ String: AnyStruct})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplateById(templateId: UInt64): Bool
 	}
 	
 	//AdminCapability to add whiteListedAccounts
 	access(all)
 	resource AdminCapability{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addwhiteListedAccount(_user: Address){ 
 			pre{ 
 				XGStudio.whiteListedAccounts.contains(_user) == false:
@@ -764,7 +778,7 @@ contract XGStudio: NonFungibleToken{
 			XGStudio.whiteListedAccounts.append(_user)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isWhiteListedAccount(_user: Address): Bool{ 
 			return XGStudio.whiteListedAccounts.contains(_user)
 		}
@@ -792,7 +806,7 @@ contract XGStudio: NonFungibleToken{
 		var capability: Capability<&{NFTMethodsCapability}>?
 		
 		// method which provide capability to user to utilize methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(cap: Capability<&{NFTMethodsCapability}>){ 
 			pre{ 
 				// we make sure the SpecialCapability is
@@ -809,7 +823,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		//method to create new Brand, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBrand(brandName: String, data:{ String: String}){ 
 			pre{ 
 				XGStudio.whiteListedAccounts.contains((self.owner!).address):
@@ -823,7 +837,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		//method to update the existing Brand, only author of brand can update this brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandData(brandId: UInt64, data:{ String: String}){ 
 			pre{ 
 				XGStudio.whiteListedAccounts.contains((self.owner!).address):
@@ -840,7 +854,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		//method to create new Schema, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSchema(schemaName: String, format:{ String: SchemaType}){ 
 			pre{ 
 				XGStudio.whiteListedAccounts.contains((self.owner!).address):
@@ -854,7 +868,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		//method to create new Template, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(brandId: UInt64, schemaId: UInt64, maxSupply: UInt64, immutableData:{ String: AnyStruct}){ 
 			pre{ 
 				XGStudio.whiteListedAccounts.contains((self.owner!).address):
@@ -872,7 +886,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		//method to mint NFT, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateId: UInt64, account: Address, immutableData:{ String: AnyStruct}){ 
 			pre{ 
 				XGStudio.whiteListedAccounts.contains((self.owner!).address):
@@ -889,7 +903,7 @@ contract XGStudio: NonFungibleToken{
 		}
 		
 		//method to remove template by id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplateById(templateId: UInt64): Bool{ 
 			pre{ 
 				XGStudio.whiteListedAccounts.contains((self.owner!).address):
@@ -921,13 +935,13 @@ contract XGStudio: NonFungibleToken{
 	}
 	
 	//method to get all brands
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBrands():{ UInt64: Brand}{ 
 		return XGStudio.allBrands
 	}
 	
 	//method to get brand by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBrandById(brandId: UInt64): Brand{ 
 		pre{ 
 			XGStudio.allBrands[brandId] != nil:
@@ -937,13 +951,13 @@ contract XGStudio: NonFungibleToken{
 	}
 	
 	//method to get all schema
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSchemas():{ UInt64: Schema}{ 
 		return XGStudio.allSchemas
 	}
 	
 	//method to get schema by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSchemaById(schemaId: UInt64): Schema{ 
 		pre{ 
 			XGStudio.allSchemas[schemaId] != nil:
@@ -953,13 +967,13 @@ contract XGStudio: NonFungibleToken{
 	}
 	
 	//method to get all templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates():{ UInt64: Template}{ 
 		return XGStudio.allTemplates
 	}
 	
 	//method to get template by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateById(templateId: UInt64): Template{ 
 		pre{ 
 			XGStudio.allTemplates[templateId] != nil:
@@ -969,7 +983,7 @@ contract XGStudio: NonFungibleToken{
 	}
 	
 	//method to get nft-data by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTDataById(nftId: UInt64): NFTData{ 
 		pre{ 
 			XGStudio.allNFTs[nftId] != nil:

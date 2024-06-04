@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract REVV: FungibleToken{ 
@@ -104,7 +118,7 @@ contract REVV: FungibleToken{
 		// been consumed and therefore the vault can be destroyed.
 		//
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @REVV.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -154,7 +168,7 @@ contract REVV: FungibleToken{
 	// withdraw from escrowVault
 	// Public method which requires as argument an admin object reference, which only the account owner has access to
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawFromEscrow(adminRef: &Admin, amount: UFix64): @{FungibleToken.Vault}{ 
 		pre{ 
 			adminRef != nil:
@@ -167,7 +181,7 @@ contract REVV: FungibleToken{
 	//
 	// returns the balance for the contract's escrow vault
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEscrowVaultBalance(): UFix64{ 
 		return self.escrowVault.balance
 	}

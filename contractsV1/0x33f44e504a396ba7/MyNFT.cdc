@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract MyNFT: NonFungibleToken{ 
@@ -40,7 +54,7 @@ contract MyNFT: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &MyNFT.NFT?
 	}
 	
@@ -51,7 +65,7 @@ contract MyNFT: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let myToken <- token as! @MyNFT.NFT
 			emit Deposit(id: myToken.id, to: self.owner?.address)
 			self.ownedNFTs[myToken.id] <-! myToken
@@ -74,7 +88,7 @@ contract MyNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &MyNFT.NFT?{ 
 			let reference = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return reference as! &MyNFT.NFT?
@@ -105,7 +119,7 @@ contract MyNFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createToken(ipfsHash: String, metadata:{ String: String}): @MyNFT.NFT{ 
 		return <-create NFT(_ipfsHash: ipfsHash, _metadata: metadata)
 	}

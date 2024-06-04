@@ -1,4 +1,18 @@
-import DapperUtilityCoin from "./../../standardsV1/DapperUtilityCoin.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import DapperUtilityCoin from "./../../standardsV1/DapperUtilityCoin.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -285,7 +299,7 @@ contract Authenticator: NonFungibleToken{
 		* Creates an empty Content Provider Collection
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCpCollection(): @CpCollection{ 
 		return <-create CpCollection()
 	}
@@ -294,27 +308,27 @@ contract Authenticator: NonFungibleToken{
 		* Creates an empty Admin Container
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyAdminContainer(): @AdminContainer{ 
 		return <-create AdminContainer()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ownerOf(tokenId: UInt64): Address?{ 
 		return self.licenseOwners[tokenId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun allTokens(): [UInt64]{ 
 		return self.licenseOwners.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressOfContentProvider(label: String): Address?{ 
 		return self.cpOwners[label]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActiveContentProviders(): [String]{ 
 		let resp: [String] = []
 		for cpLabel in self.cpActive.keys{ 
@@ -325,7 +339,7 @@ contract Authenticator: NonFungibleToken{
 		return resp
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDescription(name: String?, cpLabel: String, objectLabel: String?, categoryLabel: String?): String{ 
 		let mainText = (name ?? Authenticator.defaultNftName).concat(" is a custom-minted NFT that grants access to the platform. It is the passport to safely verify login credentials to unlock content, forums with journalists and experts, exclusive on-line events and all the benefits only Letter members have. ")
 		let cpText = "Content Provider: ".concat(cpLabel).concat(". ")
@@ -353,8 +367,8 @@ contract Authenticator: NonFungibleToken{
 		access(all)
 		let privateInfoUrl: String?
 		
-		access(all)
-		fun borrowCategoriesAsPublic():{ String: &Category}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowCategoriesAsPublic():{ String: &Authenticator.Category}
 	}
 	
 	access(all)
@@ -368,8 +382,8 @@ contract Authenticator: NonFungibleToken{
 		access(all)
 		let title: String?
 		
-		access(all)
-		fun borrowObjectsAsPublic():{ String: &Object}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowObjectsAsPublic():{ String: &Authenticator.Object}
 	}
 	
 	access(all)
@@ -377,64 +391,64 @@ contract Authenticator: NonFungibleToken{
 		access(all)
 		let label: String
 		
-		access(all)
-		fun borrowObjectsAsPublic():{ String: &Object}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowObjectsAsPublic():{ String: &Authenticator.Object}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoriesAsPublic():{ String: &Category}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowObjectAsPublic(label: String): &Object?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoryAsPublic(label: String): &Category?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyLicenseWithFUSD(vault: @FUSD.Vault, objectLabel: String?, categoryLabel: String?): @NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyLicenseWithDUC(vault: @DapperUtilityCoin.Vault, objectLabel: String?, categoryLabel: String?): @NFT
 	}
 	
 	access(all)
 	resource interface PublicAdminContainer{ 
-		access(all)
-		fun deposit(admin: @Admin)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(admin: @Authenticator.Admin): Void
 	}
 	
 	access(all)
 	resource interface PublicCpCollection{ 
-		access(all)
-		fun deposit(token: @ContentProvider)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @Authenticator.ContentProvider): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLabels(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowContentProviderAsPublic(label: String): &ContentProvider
 	}
 	
 	access(all)
 	resource interface PublicLicenseCollection{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balance(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTAsPublic(id: UInt64): &NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasAccess(label: String, contentProvider: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessExpiration(label: String, contentProvider: String): Int?
 	}
 	
@@ -465,15 +479,15 @@ contract Authenticator: NonFungibleToken{
 		var image: String
 		
 		access(all)
-		fun getViews(): [Type]
+		view fun getViews(): [Type]
 		
 		access(all)
 		fun resolveView(_ view: Type): AnyStruct?
 		
-		access(all)
-		fun borrowObjectAsPublic(): &Object?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowObjectAsPublic(): &Authenticator.Object?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoryAsPublic(): &Category?
 		
 		access(contract)
@@ -488,7 +502,7 @@ contract Authenticator: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createContentProvider(label: String): @ContentProvider{ 
 			pre{ // throws an error if the condition is false 
 				
@@ -498,13 +512,13 @@ contract Authenticator: NonFungibleToken{
 			return <-create ContentProvider(label: label)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun banContentProvider(label: String){ 
 			Authenticator.cpActive[label] = false
 			emit RemoveContentProvider(label: label)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unbanContentProvider(label: String){ 
 			pre{ // throws an error if the condition is false 
 				
@@ -515,7 +529,7 @@ contract Authenticator: NonFungibleToken{
 			emit RegisterContentProvider(label: label, address: Authenticator.cpOwners[label]!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerAdmin(adminAddress: Address?, adminDapperWalletAddress: Address?){ 
 			if adminAddress != nil{ 
 				Authenticator.adminAddress = adminAddress!
@@ -525,7 +539,7 @@ contract Authenticator: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeStoragePaths(licenseCollectionStoragePath: StoragePath?, cpCollectionStoragePath: StoragePath?, adminContainerStoragePath: StoragePath?){ 
 			if licenseCollectionStoragePath != nil{ 
 				Authenticator.licenseCollectionStoragePath = licenseCollectionStoragePath!
@@ -538,12 +552,12 @@ contract Authenticator: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeNftPrice(nftPrice: UFix64){ 
 			Authenticator.nftPrice = nftPrice!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeDefaultNftStrings(defaultNftName: String?, defaultNftImage: String?, defaultNftExternalUrl: String?){ 
 			if defaultNftName != nil{ 
 				Authenticator.defaultNftName = defaultNftName!
@@ -595,7 +609,7 @@ contract Authenticator: NonFungibleToken{
 			self.categories[label] = obj
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoriesAsPublic():{ String: &Category}{ 
 			let resp:{ String: &Category} ={} 
 			for catLabel in self.categories.keys{ 
@@ -631,7 +645,7 @@ contract Authenticator: NonFungibleToken{
 			self.objects[label] = obj
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowObjectsAsPublic():{ String: &Object}{ 
 			let resp:{ String: &Object} ={} 
 			for objLabel in self.objects.keys{ 
@@ -640,7 +654,7 @@ contract Authenticator: NonFungibleToken{
 			return resp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowObjectAsPrivate(label: String): &Object?{ 
 			return self.objects[label]?.borrow() ?? nil
 		}
@@ -667,7 +681,7 @@ contract Authenticator: NonFungibleToken{
 			self.categories ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowObjectsAsPublic():{ String: &Object}{ 
 			let resp:{ String: &Object} ={} 
 			for objLabel in self.objects.keys{ 
@@ -676,7 +690,7 @@ contract Authenticator: NonFungibleToken{
 			return resp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoriesAsPublic():{ String: &Category}{ 
 			let resp:{ String: &Category} ={} 
 			for catLabel in self.categories.keys{ 
@@ -685,17 +699,17 @@ contract Authenticator: NonFungibleToken{
 			return resp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowObjectAsPublic(label: String): &Object?{ 
 			return self.objects[label]?.borrow() ?? nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoryAsPublic(label: String): &Category?{ 
 			return self.categories[label]?.borrow() ?? nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createObject(label: String, metadata: String?, hiddenMetadata: String?, codeGenerationUrl: String?, privateInfoUrl: String?): @Object{ 
 			pre{ 
 				Authenticator.cpActive[self.label] == true:
@@ -706,7 +720,7 @@ contract Authenticator: NonFungibleToken{
 			return <-create Object(label: label, contentProviderLabel: self.label, metadata: metadata, hiddenMetadata: hiddenMetadata, codeGenerationUrl: codeGenerationUrl, privateInfoUrl: privateInfoUrl)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publishObject(object: Capability<&Object>, categoryLabels: [String]){ 
 			pre{ 
 				Authenticator.cpActive[self.label] == true:
@@ -731,7 +745,7 @@ contract Authenticator: NonFungibleToken{
 			emit CreateObject(contentProvider: self.label, label: objRef.label, categories: categoryLabels)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCategory(label: String, title: String?): @Category{ 
 			pre{ 
 				Authenticator.cpActive[self.label] == true:
@@ -742,7 +756,7 @@ contract Authenticator: NonFungibleToken{
 			return <-create Category(label: label, contentProviderLabel: self.label, title: title)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publishCategory(category: Capability<&Category>){ 
 			pre{ 
 				Authenticator.cpActive[self.label] == true:
@@ -759,7 +773,7 @@ contract Authenticator: NonFungibleToken{
 			emit CreateCategory(contentProvider: self.label, label: ref.label, title: ref.title ?? "")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyLicenseWithFUSD(vault: @FUSD.Vault, objectLabel: String?, categoryLabel: String?): @NFT{ 
 			pre{ 
 				vault.balance == Authenticator.nftPrice:
@@ -776,7 +790,7 @@ contract Authenticator: NonFungibleToken{
 			return <-self.createLicenseNFT(transferable: Authenticator.boughtNftIsTransferable, expiration: Authenticator.boughtNftExpiration, objectLabel: objectLabel, categoryLabel: categoryLabel, image: Authenticator.boughtNftImage, name: Authenticator.boughtNftName, url: nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyLicenseWithDUC(vault: @DapperUtilityCoin.Vault, objectLabel: String?, categoryLabel: String?): @NFT{ 
 			pre{ 
 				vault.balance == Authenticator.nftPrice:
@@ -793,7 +807,7 @@ contract Authenticator: NonFungibleToken{
 			return <-self.createLicenseNFT(transferable: Authenticator.boughtNftIsTransferable, expiration: Authenticator.boughtNftExpiration, objectLabel: objectLabel, categoryLabel: categoryLabel, image: Authenticator.boughtNftImage, name: Authenticator.boughtNftName, url: nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createLicenseNFT(transferable: Bool?, expiration: UInt?, objectLabel: String?, categoryLabel: String?, image: String?, name: String?, url: String?): @NFT{ 
 			pre{ 
 				Authenticator.cpActive[self.label] == true:
@@ -816,12 +830,12 @@ contract Authenticator: NonFungibleToken{
 			self.admin <- nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(admin: @Admin){ 
 			self.admin <-! admin
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAdmin(): &Admin{ 
 			return (&self.admin as &Admin?)!
 		}
@@ -836,7 +850,7 @@ contract Authenticator: NonFungibleToken{
 			self.ownedCPs <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @ContentProvider){ 
 			Authenticator.cpOwners[token.label] = (self.owner!).address
 			if Authenticator.cpActive[token.label] == nil{ 
@@ -846,23 +860,23 @@ contract Authenticator: NonFungibleToken{
 			self.ownedCPs[token.label] <-! token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: String): @ContentProvider{ 
 			let token <- self.ownedCPs.remove(key: withdrawID) ?? panic("This collection doesnt contain the required Content Provider")
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLabels(): [String]{ 
 			return self.ownedCPs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowContentProviderAsPublic(label: String): &ContentProvider{ 
 			return (&self.ownedCPs[label] as &ContentProvider?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowContentProvider(label: String): &ContentProvider{ 
 			return (&self.ownedCPs[label] as &ContentProvider?)!
 		}
@@ -942,22 +956,22 @@ contract Authenticator: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowObjectAsPublic(): &Object?{ 
 			return self.object?.borrow() ?? nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoryAsPublic(): &Category?{ 
 			return self.category?.borrow() ?? nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowObjectAsPrivate(): &Object?{ 
 			return self.object?.borrow() ?? nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCategoryAsPrivate(): &Category?{ 
 			return self.category?.borrow() ?? nil
 		}
@@ -1003,7 +1017,7 @@ contract Authenticator: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let license <- token as! @NFT
 			if Authenticator.licenseOwners[license.id] == nil{ 
 				Authenticator.totalSupply = Authenticator.totalSupply + 1
@@ -1026,7 +1040,7 @@ contract Authenticator: NonFungibleToken{
 			return <-license
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balance(): Int{ 
 			return self.ownedNFTs.length
 		}
@@ -1048,7 +1062,7 @@ contract Authenticator: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? ?? panic("Nothing exists at this index")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTAsPublic(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -1058,7 +1072,7 @@ contract Authenticator: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPrivateNFT(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -1068,7 +1082,7 @@ contract Authenticator: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBestNftIdOfObject(label: String, contentProvider: String): UInt64?{ 
 			var accessExpiration: UInt = 0
 			var nftId: UInt64? = nil
@@ -1088,7 +1102,7 @@ contract Authenticator: NonFungibleToken{
 			return nftId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasAccess(label: String, contentProvider: String): Bool{ 
 			for tokenID in self.ownedNFTs.keys{ 
 				let nft = self.borrowNFTAsPublic(id: tokenID)
@@ -1099,7 +1113,7 @@ contract Authenticator: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessExpiration(label: String, contentProvider: String): Int?{ 
 			var accessExpiration: Int = -1
 			for tokenID in self.ownedNFTs.keys{ 

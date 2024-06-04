@@ -1,4 +1,18 @@
-// VeraEvent
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// VeraEvent
 // Events Contract!
 //
 access(all)
@@ -133,12 +147,12 @@ contract VeraEvent{
 			self.ticketsMinted = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementTicketMinted(){ 
 			self.ticketsMinted = self.ticketsMinted + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementTicketMinted(){ 
 			self.ticketsMinted = self.ticketsMinted - 1
 		}
@@ -186,12 +200,12 @@ contract VeraEvent{
 			self.subtier = subtier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementTicketMinted(){ 
 			self.ticketsMinted = self.ticketsMinted + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementTicketMinted(){ 
 			self.ticketsMinted = self.ticketsMinted - 1
 		}
@@ -261,23 +275,23 @@ contract VeraEvent{
 			self.totalTicketsMinted = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementTicketMinted(tier: UInt64, subtier: UInt64){ 
 			self.totalTicketsMinted = self.totalTicketsMinted + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementTicketMinted(tier: UInt64, subtier: UInt64){ 
 			self.totalTicketsMinted = self.totalTicketsMinted - 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTier(tier: UInt64): VeraEvent.Tier{ 
 			let tier = self.tier[tier] ?? panic("missing Tier")
 			return tier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSubTier(tier: UInt64, subtier: UInt64): VeraEvent.SubTier{ 
 			let tier = self.tier[tier] ?? panic("missing Tier")
 			let subtier = tier.subtier[subtier] ?? panic("missing Sub Tier")
@@ -293,7 +307,7 @@ contract VeraEvent{
 		access(all)
 		var metadataObjs:{ UInt64:{ String: String}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEvent(veraevent: VeraEvent.EventStruct, metadata:{ String: String}){ 
 			let eventId = veraevent.id
 			self.eventsCollection[eventId] = veraevent
@@ -301,7 +315,7 @@ contract VeraEvent{
 			emit EventCreated(eventId: eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEvent(veraevent: VeraEvent.EventStruct, metadata:{ String: String}){ 
 			let eventId = veraevent.id
 			self.eventsCollection[eventId] = veraevent
@@ -309,19 +323,19 @@ contract VeraEvent{
 			emit EventUpdated(eventId: eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEvent(eventId: UInt64): VeraEvent.EventStruct{ 
 			let veraevent = self.eventsCollection[eventId] ?? panic("missing Event")
 			return veraevent
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(eventId: UInt64):{ String: String}{ 
 			let metadata = self.metadataObjs[eventId] ?? panic("missing Metadata")
 			return metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementTicketMinted(eventId: UInt64, tier: UInt64, subtier: UInt64){ 
 			let veraevent = self.eventsCollection[eventId] ?? panic("missing Event")
 			(self.eventsCollection[eventId]!).incrementTicketMinted(tier: tier, subtier: subtier)
@@ -335,7 +349,7 @@ contract VeraEvent{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementTicketMinted(eventId: UInt64, tier: UInt64, subtier: UInt64){ 
 			let veraevent = self.eventsCollection[eventId] ?? panic("missing Event")
 			(self.eventsCollection[eventId]!).decrementTicketMinted(tier: tier, subtier: subtier)
@@ -349,7 +363,7 @@ contract VeraEvent{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.eventsCollection.keys
 		}
@@ -373,7 +387,7 @@ contract VeraEvent{
 		// createEvent
 		// Create an Event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEvent(
 			type: VeraEvent.EventType,
 			tier:{ 
@@ -417,7 +431,7 @@ contract VeraEvent{
 		// updateEvent
 		// Update an Event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEvent(
 			id: UInt64,
 			type: VeraEvent.EventType,
@@ -463,7 +477,7 @@ contract VeraEvent{
 	// Mints a new NFT with a new ID
 	// and deposit it in the recipients collection using their collection reference
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEvent(id: UInt64): VeraEvent.EventStruct{ 
 		let collection =
 			VeraEvent.account.storage.borrow<&VeraEvent.EventCollection>(
@@ -472,7 +486,7 @@ contract VeraEvent{
 		return collection.getEvent(eventId: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(id: UInt64):{ String: String}{ 
 		let collection =
 			VeraEvent.account.storage.borrow<&VeraEvent.EventCollection>(

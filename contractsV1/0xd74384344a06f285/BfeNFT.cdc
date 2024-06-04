@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
@@ -47,7 +61,7 @@ contract BfeNFT: NonFungibleToken{
 			return <-create Collection()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -66,15 +80,15 @@ contract BfeNFT: NonFungibleToken{
 	access(all)
 	resource interface NFTReceiver{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBfeNFT(id: UInt64): &BfeNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -84,7 +98,7 @@ contract BfeNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 	}
 	
@@ -122,7 +136,7 @@ contract BfeNFT: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BfeNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -140,7 +154,7 @@ contract BfeNFT: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBfeNFT(id: UInt64): &BfeNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -152,7 +166,7 @@ contract BfeNFT: NonFungibleToken{
 		
 		// idExists checks to see if a NFT 
 		// with the given ID exists in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -208,7 +222,7 @@ contract BfeNFT: NonFungibleToken{
 		// Function that mints a new NFT with a new ID
 		// and, instead of depositing the NFT into a specific recipient's collection storage location,
 		// just returns the NFT itself!
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(metadata:{ String: String}): @{NonFungibleToken.NFT}{ 
 			
 			// create a new NFT! This is where the NFT's core ID gets created.

@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Unlicense
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Unlicense
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -238,25 +252,25 @@ contract StoreFront: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun airdrop(token: @{NonFungibleToken.NFT})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun airdrop(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &StoreFront.NFT?
 	}
 	
 	access(all)
 	resource interface IRevealNFT{ 
-		access(all)
-		fun revealNFT(id: UInt64, admin: &Admin, metadata:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun revealNFT(id: UInt64, admin: &StoreFront.Admin, metadata:{ String: String}): Void
 	}
 	
 	// Collection is a resource that every user who owns NFTs
@@ -293,7 +307,7 @@ contract StoreFront: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -307,7 +321,7 @@ contract StoreFront: NonFungibleToken{
 		//
 		// Parameters: token: the NFT to be airdropped in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun airdrop(token: @{NonFungibleToken.NFT}){ 
 			let token <- token as! @NFT
 			let id = token.id
@@ -331,7 +345,7 @@ contract StoreFront: NonFungibleToken{
 		//
 		// Returns: A reference to the NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &StoreFront.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -353,7 +367,7 @@ contract StoreFront: NonFungibleToken{
 			return storeFrontNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealNFT(id: UInt64, admin: &Admin, metadata:{ String: String}){ 
 			if self.ownedNFTs[id] != nil{ 
 				let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -391,12 +405,12 @@ contract StoreFront: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateId: UInt64, databaseID: String, hash: String, start: UInt64, end: UInt64): @{NonFungibleToken.NFT}{ 
 			return <-StoreFront.mintNFT(templateId: templateId, databaseID: databaseID, hashMetadata: HashMetadata(hash: hash, start: start, end: end))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(metadata:{ String: String}, maxEditions: UInt64, creationDate: UInt64): UInt64{ 
 			return StoreFront.createTemplate(metadata: metadata, maxEditions: maxEditions, creationDate: creationDate)
 		}
@@ -415,14 +429,14 @@ contract StoreFront: NonFungibleToken{
 	
 	// getTemplate get a specific templates stored in the contract by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplate(templateId: UInt64): Template?{ 
 		return StoreFront.templateDatas[templateId]
 	}
 	
 	// getAllTemplates get all templates stored in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates(): [Template]{ 
 		return StoreFront.templateDatas.values
 	}

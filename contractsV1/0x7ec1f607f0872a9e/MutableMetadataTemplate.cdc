@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 MutableMetadataTemplate
 
 We want to be able to:
@@ -38,19 +52,19 @@ contract MutableMetadataTemplate{
 	resource interface Public{ 
 		
 		// Is this template locked for future minting?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool
 		
 		// Max mint allowed for this metadata. Can be set to nil for unlimited
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun maxMint(): UInt64?
 		
 		// Public version of underyling MutableMetadata.Metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): &MutableMetadata.Metadata
 		
 		// Number of times registerMint has been called on this template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minted(): UInt64
 	}
 	
@@ -58,20 +72,20 @@ contract MutableMetadataTemplate{
 	resource interface Private{ 
 		
 		// Lock the metadata from any additional future minting.
-		access(all)
-		fun lock()
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lock(): Void
 		
 		// Set the maximum mint of this template if not already set and if not
 		// locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxMint(_ max: UInt64)
 		
 		// Private version of underyling MutableMetadata.Metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadataMutable(): &MutableMetadata.Metadata
 		
 		// Register a new mint.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerMint()
 	}
 	
@@ -101,22 +115,22 @@ contract MutableMetadataTemplate{
 		// ========================================================================
 		// Public
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool{ 
 			return self._locked
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun maxMint(): UInt64?{ 
 			return self._maxMint
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): &MutableMetadata.Metadata{ 
 			return &self._metadata as &MutableMetadata.Metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minted(): UInt64{ 
 			return self._minted
 		}
@@ -124,12 +138,12 @@ contract MutableMetadataTemplate{
 		// ========================================================================
 		// Private
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			self._locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxMint(_ max: UInt64){ 
 			pre{ 
 				self._maxMint == nil:
@@ -142,12 +156,12 @@ contract MutableMetadataTemplate{
 			self._maxMint = max
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadataMutable(): &MutableMetadata.Metadata{ 
 			return &self._metadata as &MutableMetadata.Metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerMint(){ 
 			pre{ 
 				self._maxMint == nil || self._minted < self._maxMint!:
@@ -173,7 +187,7 @@ contract MutableMetadataTemplate{
 	// Contract functions
 	// ========================================================================
 	// Create a Template resource with the given metadata and maxMint
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(metadata: @MutableMetadata.Metadata, maxMint: UInt64?): @Template{ 
 		return <-create Template(metadata: <-metadata, maxMint: maxMint)
 	}

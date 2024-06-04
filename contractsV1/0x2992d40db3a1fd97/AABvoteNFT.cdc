@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -109,7 +123,7 @@ contract AABvoteNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -123,15 +137,15 @@ contract AABvoteNFT: NonFungibleToken{
 	access(all)
 	resource interface AABvoteNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAABvoteNFT(id: UInt64): &AABvoteNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -157,7 +171,7 @@ contract AABvoteNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @AABvoteNFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -175,7 +189,7 @@ contract AABvoteNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAABvoteNFT(id: UInt64): &AABvoteNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -214,7 +228,7 @@ contract AABvoteNFT: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, candidateId: String, name: String, description: String, thumbnail: String, rarity: UInt8, metadata:{ String: String}){ 
 			var newNFT <- create NFT(id: AABvoteNFT.totalSupply, candidateId: candidateId, name: name, description: description, thumbnail: thumbnail, rarity: rarity, metadata: metadata)
 			recipient.deposit(token: <-newNFT)
@@ -224,13 +238,13 @@ contract AABvoteNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollection(_ from: Address): &Collection{ 
 		let collection = (getAccount(from).capabilities.get<&AABvoteNFT.Collection>(AABvoteNFT.CollectionPublicPath)!).borrow() ?? panic("Could not borrow capability from public collection")
 		return collection
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFT(_ from: Address, id: UInt64): &AABvoteNFT.NFT?{ 
 		let collection = self.getCollection(from)
 		return collection.borrowAABvoteNFT(id: id)
@@ -247,7 +261,7 @@ contract AABvoteNFT: NonFungibleToken{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMinter(): @NFTMinter{ 
 			return <-create NFTMinter()
 		}

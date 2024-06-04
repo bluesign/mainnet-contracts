@@ -1,4 +1,18 @@
-// NonFungibleToken - MAINNET
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// NonFungibleToken - MAINNET
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 // VictoryARCollectible
@@ -114,24 +128,24 @@ contract VictoryARCollectible: NonFungibleToken{
 	access(all)
 	resource interface VictoryARCollectibleCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBundleIDs(bundleID: UInt64): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextBundleID(): UInt64
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isNFTForSale(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVictoryItem(id: UInt64): &VictoryARCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -145,13 +159,13 @@ contract VictoryARCollectible: NonFungibleToken{
 	// The interface that users can use to manage their own bundles for sale
 	access(all)
 	resource interface VictoryARCollectibleBundle{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBundle(itemIDs: [UInt64]): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBundle(bundleID: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAllBundles()
 	}
 	
@@ -198,7 +212,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @VictoryARCollectible.NFT
 			let id: UInt64 = token.id
 			
@@ -219,7 +233,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// getBundleIDs
 		// Returns an array of the IDs that are in the specified bundle
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBundleIDs(bundleID: UInt64): [UInt64]{ 
 			return self.bundles[bundleID] ?? panic("Bundle does not exist")
 		}
@@ -227,7 +241,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// getNextBundleID
 		// Returns the next bundle ID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextBundleID(): UInt64{ 
 			return self.nextBundleID
 		}
@@ -243,7 +257,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		
 		// isNFTForSale
 		// Gets a reference to an NFT in the collection as a VictoryItem,
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isNFTForSale(id: UInt64): Bool{ 
 			for key in self.bundles.keys{ 
 				if (self.bundles[key]!).contains(id){ 
@@ -258,7 +272,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the VictoryItem.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVictoryItem(id: UInt64): &VictoryARCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -272,7 +286,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// Creates a new array of itemIDs which can be used to list multiple items
 		// for sale as one bundle
 		// Returns the id of the bundle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBundle(itemIDs: [UInt64]): UInt64{ 
 			var bundle: [UInt64] = []
 			for id in itemIDs{ 
@@ -290,7 +304,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		
 		// removeBundle
 		// Removes the specified bundle from the dictionary
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBundle(bundleID: UInt64){ 
 			for key in self.bundles.keys{ 
 				if key == bundleID{ 
@@ -305,7 +319,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// removeAllBundles
 		// Removes all bundles from the dictionary - use with caution!
 		// Note: nextBundleID is *not* set to 0 to avoid unexpected collision
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAllBundles(){ 
 			self.bundles ={} 
 			emit AllBundlesRemoved(owner: self.owner?.address!)
@@ -355,7 +369,7 @@ contract VictoryARCollectible: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, owner: Address, typeID: UInt64, brandID: UInt64, seriesID: UInt64, dropID: UInt64, contentHash: UInt256, startIssueNum: UInt32, maxIssueNum: UInt32, totalIssueNum: UInt32){ 
 			var i: UInt32 = 0
 			while i < maxIssueNum{ 
@@ -375,7 +389,7 @@ contract VictoryARCollectible: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &VictoryARCollectible.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&VictoryARCollectible.Collection>(VictoryARCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust VictoryARCollectible.Collection.borowVictoryItem to get the correct itemID

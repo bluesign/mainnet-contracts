@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -86,19 +100,19 @@ contract BarterYardClubWerewolfSale{
 		access(all)
 		var opened: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openSale(){ 
 			self.opened = true
 			emit SaleOpened(self.name.rawValue)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeSale(){ 
 			self.opened = false
 			emit SaleClosed(self.name.rawValue)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sold(number: UInt16){ 
 			self.remaining = self.remaining - number
 		}
@@ -151,7 +165,7 @@ contract BarterYardClubWerewolfSale{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mint(
 		recipient: &BarterYardClubWerewolf.Collection,
 		mintingNumber: UInt8,
@@ -231,7 +245,7 @@ contract BarterYardClubWerewolfSale{
 		return <-refundVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStages(): [Stage]{ 
 		return self.stages.values
 	}
@@ -239,7 +253,7 @@ contract BarterYardClubWerewolfSale{
 	/// Resource that an admin would own to manage the sale
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startStage(_ stageName: StageName){ 
 			let stage =
 				BarterYardClubWerewolfSale.stages[stageName]
@@ -248,7 +262,7 @@ contract BarterYardClubWerewolfSale{
 			BarterYardClubWerewolfSale.stages[stageName] = stage
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeStage(_ stageName: StageName){ 
 			let stage =
 				BarterYardClubWerewolfSale.stages[stageName]
@@ -257,7 +271,7 @@ contract BarterYardClubWerewolfSale{
 			BarterYardClubWerewolfSale.stages[stageName] = stage
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun putWerewolfForSale(werewolfInfo: WerewolfInfo){ 
 			let barterYardTraits = BarterYardClubWerewolf.getNftTraits()
 			for trait in werewolfInfo.attributes{ 
@@ -269,13 +283,13 @@ contract BarterYardClubWerewolfSale{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWerewolfFromSale(key: UInt16){ 
 			BarterYardClubWerewolfSale.nftsForSale.remove(key: key)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftsForSale(): [BarterYardClubWerewolfSale.WerewolfInfo]{ 
 		return BarterYardClubWerewolfSale.nftsForSale.values
 	}

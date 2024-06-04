@@ -1,4 +1,18 @@
-// The TheFabricantAccessPass NFT (AP) is a resource that can be used by holders to gain access to
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// The TheFabricantAccessPass NFT (AP) is a resource that can be used by holders to gain access to
 // different parts of the platform, at all levels of the architecture (FE/BE/BC)
 // The main principle behind the AP is it contains AccessUnits. These can be spent
 // by the user. When spent, they produce an AccessUnitSpent event, an AccessToken
@@ -247,7 +261,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		let promotionsCap: Capability<&Promotions>
 		
 		// Returns an AccessToken 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun spendAccessUnit(): @AccessToken{ 
 			pre{ 
 				self.accessUnits > 0:
@@ -273,24 +287,24 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return <-accessToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraMetadata():{ String: String}?{ 
 			return self.extraMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTFRoyalties(): [TheFabricantMetadataViews.Royalty]{ 
 			return self.royaltiesTFMarketplace
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStandardRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
 		
 		// An AccessPass might have metadata associated with it that is provided
 		// by the Promotion
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPromotionMetadata():{ String: String}?{ 
 			pre{ 
 				self.promotionsCap.check():
@@ -414,16 +428,16 @@ contract TheFabricantAccessPass: NonFungibleToken{
 	access(all)
 	resource interface TheFabricantAccessPassCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowTheFabricantAccessPass(id: UInt64): &NFT?{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowTheFabricantAccessPass(id: UInt64): &TheFabricantAccessPass.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
 			post{ 
@@ -432,11 +446,11 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTheFabricantAccessPassIdsUsingPromoId(promoId: UInt64): [UInt64]?
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	access(all)
@@ -448,7 +462,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		var promotionIdsToTheFabricantAccessPassIds:{ UInt64: [UInt64]}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let accessPass <- token as! @NFT
 			let promotionId = accessPass.promotionId
 			if self.promotionIdsToTheFabricantAccessPassIds[promotionId] == nil{ 
@@ -504,7 +518,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return response
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTheFabricantAccessPassIdsUsingPromoId(promoId: UInt64): [UInt64]?{ 
 			return self.promotionIdsToTheFabricantAccessPassIds[promoId]
 		}
@@ -514,7 +528,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTheFabricantAccessPass(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -532,7 +546,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		}
 		
 		// Since TheFabricantAccessPass's can't be withdrawn, they can be deleted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyTheFabricantAccessPass(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("You do not own this TheFabricantAccessPass")
 			let nft <- token as! @NFT
@@ -569,13 +583,13 @@ contract TheFabricantAccessPass: NonFungibleToken{
 	access(all)
 	resource interface PromotionPublic{ 
 		access(all)
-		fun getViews(): [Type]
+		view fun getViews(): [Type]
 		
 		access(all)
 		fun resolveView(_ view: Type): AnyStruct?
 		
 		// Added because of bug in BC that prevents PromotionMetadataView from being populated in scripts
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftsUsedForClaim():{ UInt64: TheFabricantMetadataViews.Identifier}
 	}
 	
@@ -584,49 +598,49 @@ contract TheFabricantAccessPass: NonFungibleToken{
 	// separately
 	access(all)
 	resource interface PromotionPublicAccessList{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessList(): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accessListContains(address: Address): Bool?
 	}
 	
 	access(all)
 	resource interface PromotionAdminAccess{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpen(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsAccessListUsed(useAccessList: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOnlyUseAccessList(onlyUseAccessList: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsOpenAccess(isOpenAccess: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleActive(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMetadataForTheFabricantAccessPasses(metadatas: [{String: String}])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToAccessList(addresses: [Address])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFromAccessList(address: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accessListContains(address: Address): Bool?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyAccessList()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPromotionAccessIds(promotionIds: [UInt64])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSpentAccessUnits():{ UInt64: [TheFabricantMetadataViews.SpentAccessUnitView]}
 	}
 	
@@ -786,7 +800,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		access(all)
 		let limited: Limited?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpen(): Bool{ 
 			var open: Bool = true
 			if let timelock = self.timelock{ 
@@ -803,33 +817,33 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return self.active && open
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsOpenAccess(isOpenAccess: Bool){ 
 			self.isOpenAccess = isOpenAccess
 			emit PromotionIsOpenAccessChanged(promotionId: self.id, promotionHost: self.host, campaignName: self.campaignName, isOpenAccess: self.isOpenAccess)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsAccessListUsed(useAccessList: Bool){ 
 			self.isAccessListUsed = useAccessList
 			emit PromotionIsAccessListUsedChanged(promotionId: self.id, promotionHost: self.host, campaignName: self.campaignName, isAccessListUsed: self.isAccessListUsed)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOnlyUseAccessList(onlyUseAccessList: Bool){ 
 			self.onlyUseAccessList = onlyUseAccessList
 			emit PromotionOnlyUseAccessListChanged(promotionId: self.id, promotionHost: self.host, campaignName: self.campaignName, onlyUseAccessList: self.onlyUseAccessList)
 		}
 		
 		// Toggle master switch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleActive(): Bool{ 
 			self.active = !self.active
 			emit PromotionActiveChanged(promotionId: self.id, promotionHost: self.host, campaignName: self.campaignName, active: self.active)
 			return self.active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMetadataForTheFabricantAccessPasses(metadatas: [{String: String}]){ 
 			self.accessPassMetadatas ={} 
 			var i = 0
@@ -841,47 +855,47 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessList(): [Address]{ 
 			return self.accessList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTypeRestrictions(): [Type]?{ 
 			return self.typeRestrictions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPromotionAccessIds(): [UInt64]?{ 
 			return self.promotionAccessIds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getAddressesClaimed():{ Address: [TheFabricantMetadataViews.Identifier]}{ 
 			return self.addressesClaimed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftsUsedForClaim():{ UInt64: TheFabricantMetadataViews.Identifier}{ 
 			return self.nftsUsedForClaim
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolders():{ UInt64: TheFabricantMetadataViews.Identifier}{ 
 			return self.currentHolders
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSpentAccessUnits():{ UInt64: [TheFabricantMetadataViews.SpentAccessUnitView]}{ 
 			return self.spentAccessUnits
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTFRoyalties(): [TheFabricantMetadataViews.Royalty]{ 
 			return self.royaltiesTFMarketplace
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStandardRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
@@ -899,7 +913,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			self.publicMinterPaths.append(path)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToAccessList(addresses: [Address]){ 
 			if self.accessList == nil{ 
 				self.accessList = []
@@ -914,7 +928,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			emit UpdatedAccessList(promotionId: self.id, promotionHost: self.host, campaignName: self.campaignName, active: self.active, newAddresses: addressesAdded)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFromAccessList(address: Address){ 
 			var count = 0
 			if !(self.accessList!).contains(address){ 
@@ -929,18 +943,18 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accessListContains(address: Address): Bool?{ 
 			return self.accessList.contains(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyAccessList(){ 
 			self.accessList = []
 			emit AccessListEmptied(promotionId: self.id, promotionHost: self.host, campaignName: self.campaignName, active: self.active)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPromotionAccessIds(promotionIds: [UInt64]){ 
 			if self.promotionAccessIds == nil{ 
 				self.promotionAccessIds = []
@@ -1101,13 +1115,13 @@ contract TheFabricantAccessPass: NonFungibleToken{
 	// associated PublicMinter.
 	access(all)
 	resource interface PromotionsPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllPromotionsByName():{ String: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPromotionsToPublicPath():{ UInt64: [String]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPromotionPublic(id: UInt64): &TheFabricantAccessPass.Promotion?
 	}
 	
@@ -1131,7 +1145,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		access(account)
 		var promotionsToPublicMinterPath:{ UInt64: [String]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPromotion(typeRestrictions: [Type]?, season: String, campaignName: String, promotionName: String, promotionAccessIds: [UInt64]?, description: String, maxMintsPerAddress: Int, accessPassMetadatas:{ UInt64:{ String: String}}?, image: String, limited: Limited?, timelock: Timelock?, url: String, royalties: [MetadataViews.Royalty], royaltiesTFMarketplace: [TheFabricantMetadataViews.Royalty]){ 
 			pre{ 
 				self.nameToId[campaignName] == nil:
@@ -1144,7 +1158,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		
 		// You can only delete a promotion if 0 people are currently holding associated 
 		// TheFabricantAccessPass's.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deletePromotion(id: UInt64){ 
 			let ref: &Promotion = self.getPromotionRef(id: id) ?? panic("Can't delete promotion, it doesn't exist!")
 			let name: String = ref.campaignName
@@ -1159,23 +1173,23 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return &self.promotions[id] as &TheFabricantAccessPass.Promotion?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllPromotionsByName():{ String: UInt64}{ 
 			return self.nameToId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPromotionsToPublicPath():{ UInt64: [String]}{ 
 			return self.promotionsToPublicMinterPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPromotionPublic(id: UInt64): &TheFabricantAccessPass.Promotion?{ 
 			return &self.promotions[id] as &TheFabricantAccessPass.Promotion?
 		}
 		
 		// Used by admin in txs to access Promotion level functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAdminPromotion(id: UInt64): &TheFabricantAccessPass.Promotion?{ 
 			return &self.promotions[id] as &TheFabricantAccessPass.Promotion?
 		}
@@ -1205,7 +1219,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		// SSeason_CampaignName_PromotionName_PromotionId_MetadataId <- we must prepend 'S' as path can't start with number or special characters, and Season is likely number
 		// S2_StephyFung_RedEnvelope_123_456
 		// If metadataId is not provided, then it is not included. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPublicMinter(nftFile: String, nftNumberOfAccessUnits: UInt8, promotionId: UInt64, metadataId: UInt64?, variant: String){ 
 			// This is passed into the PublicMinter
 			let promotionsCap = getAccount((self.owner!).address).capabilities.get<&Promotions>(TheFabricantAccessPass.PromotionsPublicPath)
@@ -1242,7 +1256,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			TheFabricantAccessPass.account.link<&PublicMinter>(publicMinterPublicPath!, target: publicMinterStoragePath!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyPublicMinter(publicMinterPath: String){ 
 			let storagePath = StoragePath(identifier: publicMinterPath) ?? panic("Couldn't construct storage path from string")
 			let minter <- TheFabricantAccessPass.account.storage.load<@PublicMinter>(from: storagePath)
@@ -1250,7 +1264,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			emit PublicMinterDestroyed(path: publicMinterPath)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun distributeDirectly(promotionId: UInt64, variant: String, recipient: &{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}, numberOfAccessUnits: UInt8, file: String, metadataId: UInt64?){ 
 			let promo = self.getPromotionRef(id: promotionId) ?? panic("This promotion doesn't exist")
 			let nft <- promo.mint(recipient: (recipient.owner!).address, variant: variant, numberOfAccessUnits: numberOfAccessUnits, file: file, metadataId: metadataId, claimNftUuid: nil)
@@ -1274,28 +1288,28 @@ contract TheFabricantAccessPass: NonFungibleToken{
 	// and meet the criteria (AccessList, resource ownership restrictions)
 	access(all)
 	resource interface IPublicMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinterData(): TheFabricantMetadataViews.PublicMinterView
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAccessListOnly(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun promotionIsOpen(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getAddressesClaimed():{ Address: [TheFabricantMetadataViews.Identifier]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getnftsUsedForClaim():{ UInt64: TheFabricantMetadataViews.Identifier}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingAccessList(receiver: &{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingNftRefs(receiver: &{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}, refs: [&{NonFungibleToken.INFT}]?)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingAccessToken(receiver: &{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}, accessToken: @AccessToken)
 	}
 	
@@ -1336,7 +1350,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		access(self)
 		let promotionsCap: Capability<&Promotions>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinterData(): TheFabricantMetadataViews.PublicMinterView{ 
 			return TheFabricantMetadataViews.PublicMinterView(id: self.id, season: self.season, campaignName: self.campaignName, promotionName: self.promotionName, promotionId: self.promotionId, nftFile: self.nftFile, nftMetadataId: self.nftMetadataId, nftNumberOfAccessUnits: self.nftNumberOfAccessUnits, variant: self.variant, numberOfMints: self.numberOfMints)
 		}
@@ -1349,7 +1363,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return nftsUsedForClaim.keys.contains(uuid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getnftsUsedForClaim():{ UInt64: TheFabricantMetadataViews.Identifier}{ 
 			let promotions = self.promotionsCap.borrow() ?? panic("Couldn't get promotions capability to check if address in access list")
 			let promotion = promotions.getPromotionRef(id: self.promotionId) ?? panic("Couldn't get promotionRef to check if address in access list")
@@ -1371,7 +1385,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getAddressesClaimed():{ Address: [TheFabricantMetadataViews.Identifier]}{ 
 			let promotions = self.promotionsCap.borrow() ?? panic("Couldn't get promotions capability to check if address in access list")
 			let promotion = promotions.getPromotionRef(id: self.promotionId) ?? panic("Couldn't get promotionRef to check if address in access list")
@@ -1406,14 +1420,14 @@ contract TheFabricantAccessPass: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun promotionIsOpen(): Bool{ 
 			let promotions = self.promotionsCap.borrow() ?? panic("Couldn't get promotions capability to check if address in access list")
 			let promotion = promotions.getPromotionRef(id: self.promotionId) ?? panic("Couldn't get promotionRef to check if address in access list")
 			return promotion.isOpen()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAccessListOnly(): Bool{ 
 			let promotions = self.promotionsCap.borrow() ?? panic("Couldn't get promotions capability to check if address in access list")
 			let promotion = promotions.getPromotionRef(id: self.promotionId) ?? panic("Couldn't get promotionRef to check if address in access list")
@@ -1429,7 +1443,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		// openAccess √
 		// OR address on access list AND accessListIsUsed √
 		// If open access or access list only, use this function
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingAccessList(receiver: &{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}){ 
 			let promotions = self.promotionsCap.borrow() ?? panic("Couldn't get promotions capability to check if address in access list")
 			let promotion = promotions.getPromotionRef(id: self.promotionId) ?? panic("Couldn't get promotionRef for mintTheFabricantAccessPass")
@@ -1456,7 +1470,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		// mint if:
 		// openAccess 
 		// OR nft is of correct Type AND hasn't been used for claim before √
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingNftRefs(receiver: &{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}, refs: [&{NonFungibleToken.INFT}]?){ 
 			pre{ 
 				!self.isAccessListOnly():
@@ -1483,7 +1497,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		// no promotionAccessIds provided √
 		// mint if:
 		// accessToken is valid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingAccessToken(receiver: &{TheFabricantAccessPass.TheFabricantAccessPassCollectionPublic}, accessToken: @AccessToken){ 
 			pre{ 
 				!self.isAccessListOnly():
@@ -1548,7 +1562,7 @@ contract TheFabricantAccessPass: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyPromotionsCollection(): @Promotions{ 
 		return <-create Promotions()
 	}

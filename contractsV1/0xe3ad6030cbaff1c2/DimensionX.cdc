@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -53,7 +67,7 @@ contract DimensionX: NonFungibleToken{
 	access(all)
 	var crypthulhuSleepTime: UFix64
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun crypthulhuSleeps(): Bool{ 
 		return getCurrentBlock().timestamp - DimensionX.crypthulhuAwake > DimensionX.crypthulhuSleepTime
 	}
@@ -154,15 +168,15 @@ contract DimensionX: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDimensionX(id: UInt64): &DimensionX.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -182,7 +196,7 @@ contract DimensionX: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stake(id: UInt64){ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -195,7 +209,7 @@ contract DimensionX: NonFungibleToken{
 			emit Stake(id: id, to: ownerAddress)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstake(id: UInt64){ 
 			pre{ 
 				DimensionX.stakedNfts.containsKey(id):
@@ -225,7 +239,7 @@ contract DimensionX: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DimensionX.NFT
 			let id: UInt64 = token.id
 			
@@ -248,7 +262,7 @@ contract DimensionX: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDimensionX(id: UInt64): &DimensionX.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -293,7 +307,7 @@ contract DimensionX: NonFungibleToken{
 	access(all)
 	resource NFTMinter{ 
 		// range if possible
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextCustomID(): UInt64{ 
 			var nextId = DimensionX.customSupply + UInt64(1)
 			return nextId <= 1000 ? nextId : self.getNextCommonID()
@@ -301,7 +315,7 @@ contract DimensionX: NonFungibleToken{
 		
 		// Determine the next available ID for genesis NFTs and use the reserved
 		// range if possible
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextGenesisID(): UInt64{ 
 			var nextId = UInt64(1000) + DimensionX.genesisSupply + UInt64(1)
 			return nextId <= 11000 ? nextId : panic("Cannot mint more than 10000 genesis NFTs")
@@ -310,14 +324,14 @@ contract DimensionX: NonFungibleToken{
 		// Determine the next available ID for the rest of NFTs and take into
 		// account the custom NFTs that have been minted outside of the reserved
 		// range
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextCommonID(): UInt64{ 
 			var customIdOverflow = Int256(DimensionX.customSupply) - Int256(1000)
 			customIdOverflow = customIdOverflow > 0 ? customIdOverflow : 0
 			return 11000 + DimensionX.commonSupply + UInt64(customIdOverflow) + UInt64(1)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCustomNFT(recipient: &Collection){ 
 			var nextId = self.getNextCustomID()
 			
@@ -327,7 +341,7 @@ contract DimensionX: NonFungibleToken{
 			self.mint(recipient: recipient, id: nextId, type: DimensionX.NFTType.custom)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintGenesisNFT(recipient: &Collection){ 
 			// Determine the next available ID
 			var nextId = self.getNextGenesisID()
@@ -338,7 +352,7 @@ contract DimensionX: NonFungibleToken{
 			self.mint(recipient: recipient, id: nextId, type: DimensionX.NFTType.genesis)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &Collection){ 
 			// Determine the next available ID
 			var nextId = self.getNextCommonID()
@@ -349,7 +363,7 @@ contract DimensionX: NonFungibleToken{
 			self.mint(recipient: recipient, id: nextId, type: DimensionX.NFTType.common)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintStakedNFT(recipient: &Collection){ 
 			var nextId = self.getNextCommonID()
 			self.mintNFT(recipient: recipient)
@@ -377,7 +391,7 @@ contract DimensionX: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstake(id: UInt64){ 
 			pre{ 
 				DimensionX.stakedNfts.containsKey(id):
@@ -388,40 +402,40 @@ contract DimensionX: NonFungibleToken{
 			emit Unstake(id: id, from: ownerAddress)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataUrl(url: String){ 
 			DimensionX.metadataUrl = url
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setThulMintPrice(price: UFix64){ 
 			DimensionX.thulMintPrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setThulMintEnabled(enabled: Bool){ 
 			DimensionX.thulMintEnabled = enabled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMinter(): @NFTMinter{ 
 			emit MinterCreated()
 			return <-create NFTMinter()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCrypthulhuSleepTime(time: UFix64){ 
 			DimensionX.crypthulhuSleepTime = time
 			self.crypthulhuAwake()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun crypthulhuAwake(){ 
 			DimensionX.crypthulhuAwake = getCurrentBlock().timestamp
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mint(recipient: &Collection, paymentVault: @ThulToken.Vault){ 
 		pre{ 
 			DimensionX.thulMintEnabled:

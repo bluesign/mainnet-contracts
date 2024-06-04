@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -161,7 +175,7 @@ contract AeraPanels: NonFungibleToken{
 			return self
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStringDetail():{ String: String}{ 
 			let map:{ String: String} ={} 
 			map["mint_count"] = self.mint_count?.toString()
@@ -244,12 +258,12 @@ contract AeraPanels: NonFungibleToken{
 		}
 		
 		// This should never be nil unless it is set up with error
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlayer(): AeraNFT.Player{ 
 			return AeraNFT.getPlayer(self.player_id)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLicense(): AeraNFT.License?{ 
 			return AeraNFT.getLicense(self.license_id)
 		}
@@ -326,7 +340,7 @@ contract AeraPanels: NonFungibleToken{
 			self.activated = bool
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPanel(): AeraPanels.PanelTemplate{ 
 			return (AeraPanels.panelTemplates[self.panel_id]!).panel_template
 		}
@@ -445,7 +459,7 @@ contract AeraPanels: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
@@ -455,7 +469,7 @@ contract AeraPanels: NonFungibleToken{
 			self.extra["lastOwner"] = (self.owner!).address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastOwner(): Address?{ 
 			if let owner = self.extra["lastOwner"]{ 
 				return owner as? Address
@@ -471,10 +485,10 @@ contract AeraPanels: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPanelIdMap():{ UInt64: [UInt64]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasNFT(_ id: UInt64): Bool
 	}
 	
@@ -494,12 +508,12 @@ contract AeraPanels: NonFungibleToken{
 			self.panelIdMap ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasNFT(_ id: UInt64): Bool{ 
 			return self.ownedNFTs.containsKey(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPanelIdMap():{ UInt64: [UInt64]}{ 
 			return self.panelIdMap
 		}
@@ -524,7 +538,7 @@ contract AeraPanels: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			assert(!token.activated || token.getLastOwner() == nil || token.getLastOwner()! == (self.owner!).address, message: "This panel is staked. Cannot be deposited. ID ".concat(token.id.toString()))
 			let id: UInt64 = token.id
@@ -555,7 +569,7 @@ contract AeraPanels: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPanelNFT(id: UInt64): &AeraPanels.NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -576,7 +590,7 @@ contract AeraPanels: NonFungibleToken{
 			return aeraPanelNFTs as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stake(chapterId: UInt64, nftIds: [UInt64]){ 
 			let chapter = AeraPanels.chapterTemplates[chapterId] ?? panic("Chapter ID does not exist : ".concat(chapterId.toString()))
 			for id in nftIds{ 
@@ -599,7 +613,7 @@ contract AeraPanels: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstake(nftIds: [UInt64]){ 
 			for id in nftIds{ 
 				let nft = self.borrowPanelNFT(id: id)
@@ -611,7 +625,7 @@ contract AeraPanels: NonFungibleToken{
 		// get information for verification from chapter struct
 		// store nft reference for sorting and emit better event
 		// burn the nfts and emit events with reward id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun queryActivateStatus(chapterId: UInt64, nftIds: [UInt64]): CompletionStatus{ 
 			let checked:{ UInt64: UInt64} ={} 
 			let chapter = AeraPanels.chapterTemplates[chapterId] ?? panic("Chapter ID does not exist : ".concat(chapterId.toString()))
@@ -639,7 +653,7 @@ contract AeraPanels: NonFungibleToken{
 			return CompletionStatus(message: "Completed", complete: true, slot_id_to_id: checked)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun activate(chapterId: UInt64, nfts: [FindViews.AuthNFTPointer], receiver: &{NonFungibleToken.Receiver}){ 
 			
 			// create a id map to pointers and get the ids

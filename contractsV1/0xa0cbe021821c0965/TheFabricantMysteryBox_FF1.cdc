@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -159,7 +173,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFabricantData(mainImage: String): UInt32{ 
 			// Create the new FabricantData
 			var newFabricant = FabricantData(mainImage: mainImage)
@@ -173,13 +187,13 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Mint the new Fabricant
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(fabricantDataID: UInt32, royaltyVault: Capability<&{FungibleToken.Receiver}>): @NFT{ 
 			pre{ 
 				royaltyVault.check():
@@ -196,7 +210,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 			return <-newFabricant
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(fabricantDataID: UInt32, royaltyVault: Capability<&{FungibleToken.Receiver}>, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -208,14 +222,14 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyPercentage(newRoyaltyPercentage: UFix64){ 
 			TheFabricantMysteryBox_FF1.royaltyPercentage = newRoyaltyPercentage
 			emit RoyaltyPercentageChanged(newRoyaltyPercentage: newRoyaltyPercentage)
 		}
 		
 		// Retire fabricantData so that it cannot be used to mint anymore
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireFabricantData(fabricantDataID: UInt32){ 
 			pre{ 
 				TheFabricantMysteryBox_FF1.isFabricantDataRetired[fabricantDataID] != nil:
@@ -234,18 +248,18 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 	access(all)
 	resource interface FabricantCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFabricant(id: UInt64): &TheFabricantMysteryBox_FF1.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -293,7 +307,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Fabricant
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -312,7 +326,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as NFT to make sure
 			// it is the correct type
 			let token <- token as! @TheFabricantMysteryBox_FF1.NFT
@@ -335,7 +349,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -374,7 +388,7 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFabricant(id: UInt64): &TheFabricantMysteryBox_FF1.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -418,37 +432,37 @@ contract TheFabricantMysteryBox_FF1: NonFungibleToken{
 	}
 	
 	// get dictionary of numberMintedPerFabricant
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerFabricant():{ UInt32: UInt32}{ 
 		return TheFabricantMysteryBox_FF1.numberMintedPerFabricant
 	}
 	
 	// get how many Fabricants with fabricantDataID are minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFabricantNumberMinted(id: UInt32): UInt32{ 
 		let numberMinted = TheFabricantMysteryBox_FF1.numberMintedPerFabricant[id] ?? panic("fabricantDataID not found")
 		return numberMinted
 	}
 	
 	// get the fabricantData of a specific id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFabricantData(id: UInt32): FabricantData{ 
 		let fabricantData = TheFabricantMysteryBox_FF1.fabricantDatas[id] ?? panic("fabricantDataID not found")
 		return fabricantData
 	}
 	
 	// get all fabricantDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFabricantDatas():{ UInt32: FabricantData}{ 
 		return TheFabricantMysteryBox_FF1.fabricantDatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFabricantDatasRetired():{ UInt32: Bool}{ 
 		return TheFabricantMysteryBox_FF1.isFabricantDataRetired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFabricantDataRetired(fabricantDataID: UInt32): Bool{ 
 		let isFabricantDataRetired = TheFabricantMysteryBox_FF1.isFabricantDataRetired[fabricantDataID] ?? panic("fabricantDataID not found")
 		return isFabricantDataRetired

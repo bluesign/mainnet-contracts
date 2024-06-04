@@ -1,4 +1,18 @@
-/* SPDX-License-Identifier: UNLICENSED */
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* SPDX-License-Identifier: UNLICENSED */
 import DimeCollectibleV3 from "../0xf5cdaace879e5a79/DimeCollectibleV3.cdc"
 
 import DimeRoyalties from "../0xb1f55a636af51134/DimeRoyalties.cdc"
@@ -54,7 +68,7 @@ contract DimeStorefrontV3{
 			self.allotments = allotments
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getShares():{ Address: UFix64}{ 
 			return self.allotments
 		}
@@ -72,8 +86,8 @@ contract DimeStorefrontV3{
 		access(all)
 		var price: UFix64
 		
-		access(all)
-		fun getSaleShares(): SaleShares
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getSaleShares(): DimeStorefrontV3.SaleShares
 	}
 	
 	// A DimeCollectibleV3 NFT being offered to sale for a set fee
@@ -102,7 +116,7 @@ contract DimeStorefrontV3{
 		access(self)
 		var saleShares: SaleShares
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleShares(): SaleShares{ 
 			return self.saleShares
 		}
@@ -120,12 +134,12 @@ contract DimeStorefrontV3{
 			emit SaleOfferCreated(itemId: self.itemId, price: self.price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(newPrice: UFix64){ 
 			self.price = newPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleShares(newShares: SaleShares){ 
 			self.saleShares = newShares
 		}
@@ -135,10 +149,10 @@ contract DimeStorefrontV3{
 	// the Storefront
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(itemId: UInt64): &SaleOffer?
 	}
 	
@@ -147,23 +161,23 @@ contract DimeStorefrontV3{
 	// and changing the price and shares of existing offers
 	access(all)
 	resource interface StorefrontManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffers(
 			itemProvider: Capability<&DimeCollectibleV3.Collection>,
 			items: [
 				UInt64
 			],
 			price: UFix64,
-			saleShares: SaleShares
-		)
+			saleShares: DimeStorefrontV3.SaleShares
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffers(itemIds: [UInt64], beingPurchased: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrices(itemIds: [UInt64], newPrice: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleShares(itemIds: [UInt64], newShares: SaleShares)
 	}
 	
@@ -176,14 +190,14 @@ contract DimeStorefrontV3{
 		var saleOffers: @{UInt64: SaleOffer}
 		
 		// Returns an array of the Ids that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIds(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
 		
 		// Returns an Optional read-only view of the SaleItem for the given itemId if it is contained by this collection.
 		// The optional will be nil if the provided itemId is not present in the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(itemId: UInt64): &SaleOffer?{ 
 			if self.saleOffers[itemId] == nil{ 
 				return nil
@@ -191,7 +205,7 @@ contract DimeStorefrontV3{
 			return &self.saleOffers[itemId] as &SaleOffer?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffers(itemProvider: Capability<&DimeCollectibleV3.Collection>, items: [UInt64], price: UFix64, saleShares: SaleShares){ 
 			assert(itemProvider.borrow() != nil, message: "Couldn't get a capability to the seller's collection")
 			for itemId in items{ 
@@ -208,7 +222,7 @@ contract DimeStorefrontV3{
 		}
 		
 		// Remove and return a SaleOffer from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffers(itemIds: [UInt64], beingPurchased: Bool){ 
 			for itemId in itemIds{ 
 				let offer <- self.saleOffers.remove(key: itemId) ?? panic("missing SaleOffer")
@@ -233,7 +247,7 @@ contract DimeStorefrontV3{
 			return <-offer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrices(itemIds: [UInt64], newPrice: UFix64){ 
 			for itemId in itemIds{ 
 				assert(self.saleOffers[itemId] != nil, message: "Tried to change price of an item that's not on sale")
@@ -243,7 +257,7 @@ contract DimeStorefrontV3{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleShares(itemIds: [UInt64], newShares: SaleShares){ 
 			for itemId in itemIds{ 
 				assert(self.saleOffers[itemId] != nil, message: "Tried to change sale shares of an item that's not on sale")
@@ -259,7 +273,7 @@ contract DimeStorefrontV3{
 	}
 	
 	// Make creating a Storefront publicly accessible.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStorefront(): @Storefront{ 
 		return <-create Storefront()
 	}

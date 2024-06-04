@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	  _____				 __	___.						 __
 	_/ ____\____	_______/  |_  \_ |_________   ____ _____  |  | __
 	\   __\\__  \  /  ___/\   __\  | __ \_  __ \_/ __ \\__  \ |  |/ /
@@ -231,7 +245,7 @@ contract FastBreakV1: NonFungibleToken{
 	
 	/// Get a Fast Break Run by Id
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFastBreakRun(id: String): FastBreakV1.FastBreakRun?{ 
 		return FastBreakV1.fastBreakRunByID[id]
 	}
@@ -306,7 +320,7 @@ contract FastBreakV1: NonFungibleToken{
 		
 		/// Get a account's active Fast Break Submission
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFastBreakSubmissionByPlayerId(playerId: UInt64): FastBreakV1.FastBreakSubmission?{ 
 			let fastBreakSubmissions = self.submissions
 			return fastBreakSubmissions[playerId]
@@ -368,21 +382,21 @@ contract FastBreakV1: NonFungibleToken{
 	
 	/// Validate Fast Break Submission
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isValidSubmission(submissionDeadline: UInt64): Bool{ 
 		return submissionDeadline > UInt64(getCurrentBlock().timestamp)
 	}
 	
 	/// Get a Fast Break Game by Id
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFastBreakGame(id: String): FastBreakV1.FastBreakGame?{ 
 		return FastBreakV1.fastBreakGameByID[id]
 	}
 	
 	/// Get the game stats of a Fast Break
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFastBreakGameStats(id: String): [FastBreakV1.FastBreakStat]{ 
 		if let fastBreak = FastBreakV1.getFastBreakGame(id: id){ 
 			return fastBreak.stats
@@ -392,7 +406,7 @@ contract FastBreakV1: NonFungibleToken{
 	
 	/// Get a Fast Break account by playerId
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFastBreakPlayer(id: UInt64): Address?{ 
 		return FastBreakV1.playerAccountMapping[id]
 	}
@@ -495,7 +509,7 @@ contract FastBreakV1: NonFungibleToken{
 		/// Play the game of Fast Break with an array of Top Shots
 		/// Each account must own a top shot collection to play fast break
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun play(fastBreakGameID: String, topShots: [UInt64]): @FastBreakV1.NFT{ 
 			pre{ 
 				FastBreakV1.fastBreakGameByID.containsKey(fastBreakGameID):
@@ -538,7 +552,7 @@ contract FastBreakV1: NonFungibleToken{
 		/// Update FastBreak Game Submission with an array of Top Shots
 		/// Each account must have a submission before being able to update
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSubmission(fastBreakGameID: String, topShots: [UInt64]){ 
 			pre{ 
 				FastBreakV1.fastBreakGameByID.containsKey(fastBreakGameID):
@@ -594,14 +608,14 @@ contract FastBreakV1: NonFungibleToken{
 	
 	/// Get a player id by account address
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayerIdByAccount(accountAddress: Address): UInt64{ 
 		return FastBreakV1.accountPlayerMapping[accountAddress]!
 	}
 	
 	/// Validate Fast Break Submission topShots
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun validatePlaySubmission(fastBreakGame: FastBreakGame, topShots: [UInt64]): Bool{ 
 		if topShots.length < 1{ 
 			return false
@@ -652,7 +666,7 @@ contract FastBreakV1: NonFungibleToken{
 			self.mintedTo = mintedTo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isWinner(): Bool{ 
 			if let fastBreak = FastBreakV1.fastBreakGameByID[self.fastBreakGameID]{ 
 				if let submission = fastBreak.submissions[self.mintedTo]{ 
@@ -662,7 +676,7 @@ contract FastBreakV1: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun points(): UInt64{ 
 			if let fastBreak = FastBreakV1.fastBreakGameByID[self.fastBreakGameID]{ 
 				if let submission = fastBreak.submissions[self.mintedTo]{ 
@@ -683,21 +697,21 @@ contract FastBreakV1: NonFungibleToken{
 	access(all)
 	resource interface FastBreakNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFastBreakNFT(id: UInt64): &FastBreakV1.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -710,7 +724,7 @@ contract FastBreakV1: NonFungibleToken{
 	///
 	access(all)
 	resource interface FastBreakPlayer{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun play(fastBreakGameID: String, topShots: [UInt64]): @FastBreakV1.NFT
 	}
 	
@@ -729,7 +743,7 @@ contract FastBreakV1: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FastBreakV1.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -737,7 +751,7 @@ contract FastBreakV1: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -756,12 +770,12 @@ contract FastBreakV1: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: UInt64): &{NonFungibleToken.NFT}?{ 
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFastBreakNFT(id: UInt64): &FastBreakV1.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -796,7 +810,7 @@ contract FastBreakV1: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPlayer(playerName: String): @FastBreakV1.Player{ 
 		FastBreakV1.nextPlayerId = FastBreakV1.nextPlayerId + UInt64(1)
 		emit FastBreakPlayerCreated(id: FastBreakV1.nextPlayerId, playerName: playerName)
@@ -807,22 +821,22 @@ contract FastBreakV1: NonFungibleToken{
 	///
 	access(all)
 	resource interface GameOracle{ 
-		access(all)
-		fun createFastBreakRun(id: String, name: String, runStart: UInt64, runEnd: UInt64, fatigueModeOn: Bool)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createFastBreakRun(id: String, name: String, runStart: UInt64, runEnd: UInt64, fatigueModeOn: Bool): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFastBreakRunStatus(id: String, status: UInt8)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFastBreakGame(id: String, name: String, fastBreakRunID: String, submissionDeadline: UInt64, numPlayers: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFastBreakGame(id: String, status: UInt8, winner: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFastBreakScore(fastBreakGameID: String, playerId: UInt64, points: UInt64, win: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStatToFastBreakGame(fastBreakGameID: String, name: String, rawType: UInt8, valueNeeded: UInt64)
 	}
 	
@@ -833,7 +847,7 @@ contract FastBreakV1: NonFungibleToken{
 		
 		/// Create a Fast Break Run
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFastBreakRun(id: String, name: String, runStart: UInt64, runEnd: UInt64, fatigueModeOn: Bool){ 
 			let fastBreakRun = FastBreakV1.FastBreakRun(id: id, name: name, runStart: runStart, runEnd: runEnd, fatigueModeOn: fatigueModeOn)
 			FastBreakV1.fastBreakRunByID[fastBreakRun.id] = fastBreakRun
@@ -842,7 +856,7 @@ contract FastBreakV1: NonFungibleToken{
 		
 		/// Update the status of a Fast Break Run
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFastBreakRunStatus(id: String, status: UInt8){ 
 			let fastBreakRun = &FastBreakV1.fastBreakRunByID[id] as &FastBreakV1.FastBreakRun? ?? panic("Fast break run does not exist with Id: ".concat(id))
 			let runStatus: FastBreakV1.RunStatus = FastBreakV1.RunStatus(rawValue: status) ?? panic("Run status does not exist with rawValue: ".concat(status.toString()))
@@ -852,7 +866,7 @@ contract FastBreakV1: NonFungibleToken{
 		
 		/// Create a game of Fast Break
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFastBreakGame(id: String, name: String, fastBreakRunID: String, submissionDeadline: UInt64, numPlayers: UInt64){ 
 			let fastBreakGame: FastBreakV1.FastBreakGame = FastBreakV1.FastBreakGame(id: id, name: name, fastBreakRunID: fastBreakRunID, submissionDeadline: submissionDeadline, numPlayers: numPlayers)
 			FastBreakV1.fastBreakGameByID[fastBreakGame.id] = fastBreakGame
@@ -861,7 +875,7 @@ contract FastBreakV1: NonFungibleToken{
 		
 		/// Add a Fast Break Statistic to a game of Fast Break during game creation
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStatToFastBreakGame(fastBreakGameID: String, name: String, rawType: UInt8, valueNeeded: UInt64){ 
 			let fastBreakGame: &FastBreakV1.FastBreakGame = &FastBreakV1.fastBreakGameByID[fastBreakGameID] as &FastBreakV1.FastBreakGame? ?? panic("Fast break does not exist with Id: ".concat(fastBreakGameID))
 			let statType: FastBreakV1.StatisticType = FastBreakV1.StatisticType(rawValue: rawType) ?? panic("Fast break stat type does not exist with rawType: ".concat(rawType.toString()))
@@ -872,7 +886,7 @@ contract FastBreakV1: NonFungibleToken{
 		
 		/// Update the status of a Fast Break
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFastBreakGame(id: String, status: UInt8, winner: UInt64){ 
 			let fastBreakGame: &FastBreakV1.FastBreakGame = &FastBreakV1.fastBreakGameByID[id] as &FastBreakV1.FastBreakGame? ?? panic("Fast break does not exist with Id: ".concat(id))
 			let fastBreakStatus: FastBreakV1.GameStatus = FastBreakV1.GameStatus(rawValue: status) ?? panic("Fast break status does not exist with rawValue: ".concat(status.toString()))
@@ -882,7 +896,7 @@ contract FastBreakV1: NonFungibleToken{
 		
 		/// Updates the submission scores of a Fast Break
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFastBreakScore(fastBreakGameID: String, playerId: UInt64, points: UInt64, win: Bool){ 
 			let fastBreakGame: &FastBreakV1.FastBreakGame = &FastBreakV1.fastBreakGameByID[fastBreakGameID] as &FastBreakV1.FastBreakGame? ?? panic("Fast break does not exist with Id: ".concat(fastBreakGameID))
 			let isNewWin = fastBreakGame.updateScore(playerId: playerId, points: points, win: win)

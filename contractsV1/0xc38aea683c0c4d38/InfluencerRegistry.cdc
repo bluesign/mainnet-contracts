@@ -1,4 +1,18 @@
-// The Influencer Registry stores the mappings from the name of an
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// The Influencer Registry stores the mappings from the name of an
 // influencer to the vaults in which they'd like to receive tokens,
 // as well as the cut they'd like to take from marketplace transactions.
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -39,7 +53,7 @@ contract InfluencerRegistry{
 	var defaultCutPercentage: UFix64
 	
 	// Get the capability for depositing accounting tokens to the influencer
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCapability(name: String, ftType: Type): Capability?{ 
 		let ftId = ftType.identifier
 		if let caps = self.capabilities[name]{ 
@@ -50,7 +64,7 @@ contract InfluencerRegistry{
 	}
 	
 	// Get the current cut percentage for the influencer
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCutPercentage(name: String): UFix64{ 
 		if let cut = InfluencerRegistry.cutPercentages[name]{ 
 			return cut
@@ -65,7 +79,7 @@ contract InfluencerRegistry{
 	resource Admin{ 
 		
 		// Update the FT-receiving capability for an influencer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCapability(
 			name: String,
 			ftType: Type,
@@ -94,14 +108,14 @@ contract InfluencerRegistry{
 		}
 		
 		// Update the cut percentage for the influencer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCutPercentage(name: String, cutPercentage: UFix64?){ 
 			InfluencerRegistry.cutPercentages[name] = cutPercentage
 			emit CutPercentageUpdated(name: name, cutPercentage: cutPercentage)
 		}
 		
 		// Update the default cut percentage
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultCutPercentage(cutPercentage: UFix64){ 
 			InfluencerRegistry.defaultCutPercentage = cutPercentage
 			emit DefaultCutPercentageUpdated(cutPercentage: cutPercentage)

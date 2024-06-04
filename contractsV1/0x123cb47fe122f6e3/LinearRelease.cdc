@@ -1,4 +1,18 @@
-import MoxyData from "./MoxyData.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MoxyData from "./MoxyData.cdc"
 
 access(all)
 contract LinearRelease{ 
@@ -28,23 +42,23 @@ contract LinearRelease{
 		access(all)
 		var lastReleaseDate: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartDate(timestamp: UFix64){ 
 			self.tgeDate = timestamp
 			self.lastReleaseDate = timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLastReleaseDate(){ 
 			self.setLastReleaseDate(timestamp: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLastReleaseDate(timestamp: UFix64){ 
 			self.lastReleaseDate = timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun splitWith(amount: UFix64): LinearSchedule{ 
 			pre{ 
 				amount <= self.totalAmount:
@@ -86,7 +100,7 @@ contract LinearRelease{
 			return newLinearRelease
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalToUnlock(): UFix64{ 
 			var total = 0.0
 			total = total + self.getAmountAtTGEToPay()
@@ -95,7 +109,7 @@ contract LinearRelease{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDaysRemaining(): UFix64{ 
 			/* 
 							Returns the remaining days to pay depending the last release paid
@@ -119,7 +133,7 @@ contract LinearRelease{
 			return (today0000 - last0000) / 86400.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDaysRemainingToEnd(): UFix64{ 
 			/* 
 							Returns the remaining days to pay depending the last release paid
@@ -139,13 +153,13 @@ contract LinearRelease{
 			return (end0000 - last0000) / 86400.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndDate(): UFix64{ 
 			// Days starts from unlock date
 			return self.unlockDate + UFix64(self.days * 86400)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAtTGEToPay(): UFix64{ 
 			if self.lastReleaseDate <= self.tgeDate{ 
 				return self.initialAmount
@@ -154,12 +168,12 @@ contract LinearRelease{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAtTGE(): UFix64{ 
 			return self.initialAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAfterUnlockToPay(): UFix64{ 
 			if MoxyData.getTimestampTo0000(timestamp: self.lastReleaseDate)
 			== MoxyData.getTimestampTo0000(timestamp: self.unlockDate){ 
@@ -169,12 +183,12 @@ contract LinearRelease{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAfterUnlock(): UFix64{ 
 			return self.unlockAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAmountToPay(): UFix64{ 
 			// First is checked that the locked time has passed
 			if getCurrentBlock().timestamp < self.unlockDate{ 
@@ -184,17 +198,17 @@ contract LinearRelease{
 			return self.dailyAmount * days
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAmount(): UFix64{ 
 			return self.dailyAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalDailyAmount(): UFix64{ 
 			return self.totalAmount - (self.initialAmount + self.unlockAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun printInfo(){ 
 			log("************************************************")
 			log("self.totalAmount")
@@ -232,7 +246,7 @@ contract LinearRelease{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLinearSchedule(
 		tgeDate: UFix64,
 		totalAmount: UFix64,

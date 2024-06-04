@@ -1,4 +1,18 @@
-import ExpToken from "./ExpToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import ExpToken from "./ExpToken.cdc"
 
 access(all)
 contract DailyTask{ 
@@ -26,7 +40,7 @@ contract DailyTask{
 	event claimTaskReward(day: UInt64, taskType: String, playerAddr: Address, amount: UFix64)
 	
 	// Determine current date using block's timestamp modulo the number of seconds in a day
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentDate(): UInt64{ 
 		let secondsInADay: UFix64 = 86400.0 // 24 hours * 60 minutes * 60 seconds
 		
@@ -34,7 +48,7 @@ contract DailyTask{
 	}
 	
 	// Generate a random task for the day
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTodayTaskType(): String{ 
 		let today = self.getCurrentDate()
 		let totalTaskTypeCount = self.taskTypes.keys.length
@@ -62,7 +76,7 @@ contract DailyTask{
 	}
 	
 	// Claim reward for today's task
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimTodayReward(
 		dayIndex: UInt64,
 		taskType: String,
@@ -87,7 +101,7 @@ contract DailyTask{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNewTaskType(taskType: String){ 
 			emit NewTaskType(taskType: taskType)
 			DailyTask.taskTypes[taskType] = true

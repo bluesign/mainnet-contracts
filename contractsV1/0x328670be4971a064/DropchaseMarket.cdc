@@ -1,4 +1,18 @@
-//SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier: UNLICENSED
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -53,7 +67,7 @@ contract DropchaseMarket{
 		access(all)
 		var cutPercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @DropchaseCoin.Vault): @Dropchase.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -61,13 +75,13 @@ contract DropchaseMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &Dropchase.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -144,7 +158,7 @@ contract DropchaseMarket{
 		///
 		/// Parameters: tokenID: The id of the NFT to be put up for sale
 		///			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenID: UInt64, price: UFix64){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowItem(id: tokenID) != nil:
@@ -162,7 +176,7 @@ contract DropchaseMarket{
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
 		// Returns: @Dropchase.NFT: The nft that was withdrawn from the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @Dropchase.NFT{ 
 			
 			// Remove and return the token.
@@ -186,7 +200,7 @@ contract DropchaseMarket{
 		///
 		/// Parameters: tokenID: the ID of the token to withdraw from the sale
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64){ 
 			
 			// First check this version of the sale
@@ -209,7 +223,7 @@ contract DropchaseMarket{
 		///			 buyTokens: the fungible tokens that are used to buy the NFT
 		///
 		/// Returns: @Dropchase.NFT: the purchased NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @DropchaseCoin.Vault): @Dropchase.NFT{ 
 			
 			// First check this sale collection for the NFT
@@ -265,7 +279,7 @@ contract DropchaseMarket{
 		///
 		/// Parameters: newOwnerCapability: The new fungible token capability for the account 
 		///								 who received tokens for purchases
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(_ newOwnerCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newOwnerCapability.borrow() != nil:
@@ -278,7 +292,7 @@ contract DropchaseMarket{
 		///
 		/// Parameters: newBeneficiaryCapability the new capability for the beneficiary of the cut of the sale
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(_ newBeneficiaryCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newBeneficiaryCapability.borrow() != nil:
@@ -292,7 +306,7 @@ contract DropchaseMarket{
 		/// Parameters: tokenID: The ID of the NFT whose price to get
 		///
 		/// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			if let price = self.prices[tokenID]{ 
 				return price
@@ -301,7 +315,7 @@ contract DropchaseMarket{
 		}
 		
 		/// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			let vKeys = self.prices.keys
 			return vKeys
@@ -315,7 +329,7 @@ contract DropchaseMarket{
 		/// Returns: &Dropchase.NFT? Optional reference to a item for sale 
 		///						so that the caller can read its data
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &Dropchase.NFT?{ 
 			// first check this collection
 			if self.prices[id] != nil{ 
@@ -328,7 +342,7 @@ contract DropchaseMarket{
 	}
 	
 	/// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&Dropchase.Collection>,
 		ownerCapability: Capability<&{FungibleToken.Receiver}>

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	PRNG - A Pseudo-Random Number Generator 
 
 	Usage: 
@@ -29,29 +43,29 @@ contract PRNG{
 			self.g()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generate(): UInt256{ 
 			return self.g()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun g(): UInt256{ 
 			self.seed = PRNG.random(seed: self.seed)
 			return self.seed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ufix64(): UFix64{ 
 			let s: UInt256 = self.g()
 			return UFix64(s / UInt256.max)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun range(_ min: UInt256, _ max: UInt256): UInt256{ 
 			return min + self.g() % (max - min + 1)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pickWeighted(_ choices: [AnyStruct], _ weights: [UInt256]): AnyStruct{ 
 			var weightsRange: [UInt256] = []
 			var totalWeight: UInt256 = 0
@@ -72,14 +86,14 @@ contract PRNG{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(seed: UInt256): @Generator{ 
 		return <-create Generator(seed: seed)
 	}
 	
 	// creates a rng seeded from blockheight salted with hash of a resource uuid (or any UInt64 value)
 	// can be used to define traits based on a future block height etc.  
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createFrom(blockHeight: UInt64, uuid: UInt64): @Generator{ 
 		let hash = (getBlock(at: blockHeight)!).id
 		let h: [UInt8] = HashAlgorithm.SHA3_256.hash(uuid.toBigEndianBytes())
@@ -94,12 +108,12 @@ contract PRNG{
 		return <-self._create(seed: seed)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun random(seed: UInt256): UInt256{ 
 		return self.lcg(modulus: 4294967296, a: 1664525, c: 1013904223, seed: seed)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun lcg(modulus: UInt256, a: UInt256, c: UInt256, seed: UInt256): UInt256{ 
 		return (a * seed + c) % modulus
 	}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -57,10 +71,10 @@ contract NFTLendingPlace{
 	// Interface for users to publish their lending collection, which only exposes public methods
 	access(all)
 	resource interface LendingManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(uuid: UInt64): @{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForLending(
 			owner: Address,
 			token: @{NonFungibleToken.NFT},
@@ -69,39 +83,39 @@ contract NFTLendingPlace{
 			duration: UFix64
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repay(uuid: UInt64, repayAmount: @FlowToken.Vault): @{NonFungibleToken.NFT}
 	}
 	
 	access(all)
 	resource interface LendingPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lendOut(
 			uuid: UInt64,
 			recipient: Address,
 			lendAmount: @FlowToken.Vault,
-			ticket: &LenderTicket
-		)
+			ticket: &NFTLendingPlace.LenderTicket
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forcedRedeem(uuid: UInt64, lendticket: &LenderTicket): @{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idBaseAmounts(uuid: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idInterests(uuid: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idDuration(uuid: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idLenders(uuid: UInt64): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idKinds(uuid: UInt64): Type?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
@@ -157,7 +171,7 @@ contract NFTLendingPlace{
 		}
 		
 		// listForLending lists an NFT as collateral
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForLending(owner: Address, token: @{NonFungibleToken.NFT}, baseAmount: UFix64, interest: UFix64, duration: UFix64){ 
 			let uuid = token.uuid
 			let type = token.getType()
@@ -173,7 +187,7 @@ contract NFTLendingPlace{
 		}
 		
 		// withdraw gives NFT owners a chance to unlist NFT as collateral
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(uuid: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.lenders[uuid] == nil:
@@ -193,7 +207,7 @@ contract NFTLendingPlace{
 		}
 		
 		// changeBaseAmount changes the currently lending token amount
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBaseAmount(uuid: UInt64, newBaseAmount: UFix64){ 
 			pre{ 
 				self.lenders[uuid] == nil:
@@ -205,7 +219,7 @@ contract NFTLendingPlace{
 			emit BaseAmountChanged(id: uuid, newBaseAmount: newBaseAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeInterest(uuid: UInt64, newInterest: UFix64){ 
 			pre{ 
 				self.lenders[uuid] == nil:
@@ -217,7 +231,7 @@ contract NFTLendingPlace{
 			emit InterestChanged(id: uuid, newInterest: newInterest)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeExpiredBlock(uuid: UInt64, newDuration: UFix64){ 
 			pre{ 
 				self.lenders[uuid] == nil:
@@ -230,7 +244,7 @@ contract NFTLendingPlace{
 		}
 		
 		// lendOut lets a user lend tokens to the borrower
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lendOut(uuid: UInt64, recipient: Address, lendAmount: @FlowToken.Vault, ticket: &LenderTicket){ 
 			pre{ 
 				self.forLend[uuid] != nil:
@@ -252,7 +266,7 @@ contract NFTLendingPlace{
 		}
 		
 		// Repay lets the borrower repays token to lender
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repay(uuid: UInt64, repayAmount: @FlowToken.Vault): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.forLend[uuid] != nil:
@@ -281,7 +295,7 @@ contract NFTLendingPlace{
 		}
 		
 		// forceRedeem lets the lender force redeem the NFT from borrower when expiration
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forcedRedeem(uuid: UInt64, lendticket: &LenderTicket): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				lendticket.owner?.address == self.lenders[uuid]:
@@ -304,33 +318,33 @@ contract NFTLendingPlace{
 			return <-self.withdraw(uuid: uuid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idBaseAmounts(uuid: UInt64): UFix64?{ 
 			return self.baseAmounts[uuid]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idInterests(uuid: UInt64): UFix64?{ 
 			return self.interests[uuid]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idDuration(uuid: UInt64): UFix64?{ 
 			return self.duration[uuid]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idLenders(uuid: UInt64): Address?{ 
 			return self.lenders[uuid]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idKinds(uuid: UInt64): Type?{ 
 			return self.kinds[uuid]
 		}
 		
 		// getIDs returns collateral's token ID as array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forLend.keys
 		}
@@ -352,13 +366,13 @@ contract NFTLendingPlace{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLenderTicket(): @LenderTicket{ 
 		return <-create LenderTicket()
 	}
 	
 	// create LendingCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLendingCollection(ownerVault: Capability<&FlowToken.Vault>): @LendingCollection{ 
 		return <-create LendingCollection(vault: ownerVault)
 	}

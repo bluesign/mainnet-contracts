@@ -1,4 +1,18 @@
-import FindMarketCutInterface from "./FindMarketCutInterface.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FindMarketCutInterface from "./FindMarketCutInterface.cdc"
 
 import FindMarketCutStruct from "./FindMarketCutStruct.cdc"
 
@@ -22,7 +36,7 @@ contract FindMarketInfrastructureCut: FindMarketCutInterface{
 	access(all)
 	event Cut(tenant: String, type: String, cutInfo: [FindMarketCutStruct.EventSafeCut], action: String, remark: String?)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCut(tenant: String, listingType: Type, nftType: Type, ftType: Type): FindMarketCutStruct.Cuts?{ 
 		let ruleId = FindMarketCut.getRuleId(listingType: listingType, nftType: nftType, ftType: ftType)
 		if let cache = self.getTenantRulesCache(tenant: tenant, ruleId: ruleId){ 
@@ -82,7 +96,7 @@ contract FindMarketInfrastructureCut: FindMarketCutInterface{
 		self.cutsCache[tenant] = old
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTenantRulesCache(tenant: String, ruleId: String): FindMarketCutStruct.Cuts?{ 
 		if self.cutsCache[tenant] == nil{ 
 			return nil

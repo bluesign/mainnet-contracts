@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	A NFT contract for the Goated Goats NFT.
 	
 	Key Callouts: 
@@ -182,7 +196,7 @@ contract GoatedGoats: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			if GoatedGoats.idToGoatMetadata[self.goatID] != nil{ 
 				return (GoatedGoats.idToGoatMetadata[self.goatID]!).metadata
@@ -191,7 +205,7 @@ contract GoatedGoats: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraitSlots(): UInt8?{ 
 			if GoatedGoats.idToGoatMetadata[self.goatID] != nil{ 
 				return (GoatedGoats.idToGoatMetadata[self.goatID]!).traitSlots
@@ -201,13 +215,13 @@ contract GoatedGoats: NonFungibleToken{
 		}
 		
 		// Check if a trait name is currently equipped on this goat.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isTraitEquipped(traitSlot: String): Bool{ 
 			return self.traits.containsKey(traitSlot)
 		}
 		
 		// Get metadata for all traits currently equipped on the NFT.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEquippedTraits(): [{String: AnyStruct}]{ 
 			let traitsData: [{String: AnyStruct}] = []
 			for traitSlot in self.traits.keys{ 
@@ -242,18 +256,18 @@ contract GoatedGoats: NonFungibleToken{
 	access(all)
 	resource interface GoatCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGoatIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGoat(id: UInt64): &GoatedGoats.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -279,7 +293,7 @@ contract GoatedGoats: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GoatedGoats.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -292,7 +306,7 @@ contract GoatedGoats: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGoatIDs(): [UInt64]{ 
 			let goatIDs: [UInt64] = []
 			for id in self.getIDs(){ 
@@ -306,7 +320,7 @@ contract GoatedGoats: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGoat(id: UInt64): &GoatedGoats.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -361,22 +375,22 @@ contract GoatedGoats: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	// Public Functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return self.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getName(): String{ 
 		return self.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionMetadata():{ String: String}{ 
 		return self.collectionMetadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionMetadata(_ goatID: UInt64):{ String: String}{ 
 		if self.idToGoatMetadata[goatID] != nil{ 
 			return (self.idToGoatMetadata[goatID]!).metadata
@@ -385,7 +399,7 @@ contract GoatedGoats: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionTraitSlots(_ goatID: UInt64): UInt8?{ 
 		if self.idToGoatMetadata[goatID] != nil{ 
 			return (self.idToGoatMetadata[goatID]!).traitSlots

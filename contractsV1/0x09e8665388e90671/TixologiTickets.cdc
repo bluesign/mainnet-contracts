@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for Tixologi Tickets
 
 	This smart contract contains the core functionality for 
@@ -337,7 +351,7 @@ contract TixologiTickets: NonFungibleToken{
 		// The Event needs to be not locked
 		// The TicketType can't have already been added to the Event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTicketType(ticketTypeID: UInt32){ 
 			pre{ 
 				TixologiTickets.ticketTypeDatas[ticketTypeID] != nil:
@@ -364,7 +378,7 @@ contract TixologiTickets: NonFungibleToken{
 		// Parameters: ticketTypesIDs: The IDs of the TicketTypes that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTicketTypes(ticketTypeIDs: [UInt32]){ 
 			for ticketType in ticketTypeIDs{ 
 				self.addTicketType(ticketTypeID: ticketType)
@@ -378,7 +392,7 @@ contract TixologiTickets: NonFungibleToken{
 		// Pre-Conditions:
 		// The TicketType is part of the Event and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireTicketType(ticketTypeID: UInt32){ 
 			pre{ 
 				self.retired[ticketTypeID] != nil:
@@ -393,7 +407,7 @@ contract TixologiTickets: NonFungibleToken{
 		// retireAll retires all the ticketTypes in the Event
 		// Afterwards, none of the retired TicketTypes will be able to mint new Tickets
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for ticketType in self.ticketTypes{ 
 				self.retireTicketType(ticketTypeID: ticketType)
@@ -409,7 +423,7 @@ contract TixologiTickets: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTicket(ticketTypeID: UInt32, metadata: String?): @NFT{ 
 			pre{ 
 				self.retired[ticketTypeID] != nil:
@@ -438,7 +452,7 @@ contract TixologiTickets: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Tickets that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintTicket(ticketTypeID: UInt32, metadatas: [String?], quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -449,17 +463,17 @@ contract TixologiTickets: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketTypes(): [UInt32]{ 
 			return self.ticketTypes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerTicketType():{ UInt32: UInt32}{ 
 			return self.numberMintedPerTicketType
 		}
@@ -505,17 +519,17 @@ contract TixologiTickets: NonFungibleToken{
 			self.numberMintedPerTicketType = *_event.numberMintedPerTicketType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketTypes(): [UInt32]{ 
 			return self.ticketTypes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMintedPerTicketType():{ UInt32: UInt32}{ 
 			return self.numberMintedPerTicketType
 		}
@@ -616,14 +630,14 @@ contract TixologiTickets: NonFungibleToken{
 		
 		// If the Ticket is destroyed, emit an event to indicate 
 		// to outside ovbservers that it has been destroyed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let ticketTypeName: String = TixologiTickets.getTicketTypeName(ticketTypeID: self.data.ticketTypeID) ?? ""
 			let eventName: String = TixologiTickets.getEventName(eventID: self.data.eventID) ?? ""
 			return eventName.concat(" ").concat(ticketTypeName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let eventName: String = TixologiTickets.getEventName(eventID: self.data.eventID) ?? ""
 			let ticketTypeName: String = TixologiTickets.getTicketTypeName(ticketTypeID: self.data.ticketTypeID) ?? ""
@@ -672,7 +686,7 @@ contract TixologiTickets: NonFungibleToken{
 		//
 		// Returns: the ID of the new TicketType object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTicketType(ticketTypeID: UInt32, eventID: UInt32, name: String, initialPrice: UFix64, totalAmount: UInt32, image: String?, description: String?): UInt32{ 
 			// Create the new TicketType
 			var newTicketType = TicketType(ticketTypeID: ticketTypeID, eventID: eventID, name: name, initialPrice: initialPrice, totalAmount: totalAmount, image: image, description: description)
@@ -701,7 +715,7 @@ contract TixologiTickets: NonFungibleToken{
 		//			 description : description of the event. example {NBA finals between Lakers and Golden States}
 		//
 		// Returns: The ID of the created event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEvent(eventID: UInt32, name: String, startTime: String, venue: String, eventType: String, timeZone: Int, gateTime: String, image: String?, description: String?): UInt32{ 
 			
 			// Create the new Event
@@ -725,7 +739,7 @@ contract TixologiTickets: NonFungibleToken{
 		// Returns: A reference to the Event with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEvent(eventID: UInt32): &Event{ 
 			pre{ 
 				TixologiTickets.events[eventID] != nil:
@@ -739,7 +753,7 @@ contract TixologiTickets: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -751,18 +765,18 @@ contract TixologiTickets: NonFungibleToken{
 	access(all)
 	resource interface TixologiTicketsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: UInt64): &TixologiTickets.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -814,7 +828,7 @@ contract TixologiTickets: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -833,7 +847,7 @@ contract TixologiTickets: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a TopShot NFT to make sure
 			// it is the correct type
@@ -857,7 +871,7 @@ contract TixologiTickets: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -904,7 +918,7 @@ contract TixologiTickets: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: UInt64): &TixologiTickets.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -957,12 +971,12 @@ contract TixologiTickets: NonFungibleToken{
 	// getAllTicketTypes returns all the TicketTypes in tixologi tickets
 	//
 	// Returns: An array of all the TicketTypes that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTicketTypes(): [TixologiTickets.TicketType]{ 
 		return TixologiTickets.ticketTypeDatas.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeName(ticketTypeID: UInt32): String?{ 
 		if let ticketType = TixologiTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.name
@@ -971,7 +985,7 @@ contract TixologiTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeInitialPrice(ticketTypeID: UInt32): UFix64?{ 
 		if let ticketType = TixologiTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.initialPrice
@@ -980,7 +994,7 @@ contract TixologiTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeTotalAmount(ticketTypeID: UInt32): UInt32?{ 
 		if let ticketType = TixologiTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.totalAmount
@@ -989,7 +1003,7 @@ contract TixologiTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeImage(ticketTypeID: UInt32): String?{ 
 		if let ticketType = TixologiTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.image
@@ -998,7 +1012,7 @@ contract TixologiTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeDescription(ticketTypeID: UInt32): String?{ 
 		if let ticketType = TixologiTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.description
@@ -1013,7 +1027,7 @@ contract TixologiTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The QueryEventData struct that has all the important information about the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventData(eventID: UInt32): QueryEventData?{ 
 		if TixologiTickets.events[eventID] == nil{ 
 			return nil
@@ -1028,7 +1042,7 @@ contract TixologiTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The name of the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventName(eventID: UInt32): String?{ 
 		// Don't force a revert if the eventID is invalid
 		return TixologiTickets.eventDatas[eventID]?.name
@@ -1040,7 +1054,7 @@ contract TixologiTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The venue of the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventVenue(eventID: UInt32): String?{ 
 		// Don't force a revert if the eventID is invalid
 		return TixologiTickets.eventDatas[eventID]?.venue
@@ -1052,7 +1066,7 @@ contract TixologiTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The StartDate of the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventStartDate(eventID: UInt32): String?{ 
 		// Don't force a revert if the eventID is invalid
 		return TixologiTickets.eventDatas[eventID]?.startTime
@@ -1064,7 +1078,7 @@ contract TixologiTickets: NonFungibleToken{
 	// Parameters: eventName: The name of the Event that is being searched
 	//
 	// Returns: An array of the IDs of the Event if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventIDsByName(eventName: String): [UInt32]?{ 
 		var eventIDs: [UInt32] = []
 		
@@ -1090,7 +1104,7 @@ contract TixologiTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: An array of TicketTypeIDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypesInEvent(eventID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the eventID is invalid
 		return TixologiTickets.events[eventID]?.ticketTypes
@@ -1104,7 +1118,7 @@ contract TixologiTickets: NonFungibleToken{
 	//
 	// Returns: The total number of Tickets 
 	//		  that have been minted from an from a certain TicketType on an event.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumTicketsInTicketType(eventID: UInt32, ticketTypeID: UInt32): UInt32?{ 
 		if let eventData = self.getEventData(eventID: eventID){ 
 			

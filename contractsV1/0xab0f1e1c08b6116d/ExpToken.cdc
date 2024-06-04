@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract ExpToken: FungibleToken{ 
@@ -35,7 +49,7 @@ contract ExpToken: FungibleToken{
 	}
 	
 	// Due to the absence of msg.sender in Cadence, a certificate must be passed in for address verification
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimTokens(amount: UFix64, userCertificateCap: Capability<&UserCertificate>): @ExpToken.Vault{ 
 		let userAddr = ((userCertificateCap.borrow()!).owner!).address
 		// UFix64 can automatically detect situations where the value is less than 0。
@@ -44,7 +58,7 @@ contract ExpToken: FungibleToken{
 		return <-expVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalance(at: Address): UFix64{ 
 		return self.unclaimedTokens[at] == nil ? self.unclaimedTokens[at]! : 0.0
 	}
@@ -53,7 +67,7 @@ contract ExpToken: FungibleToken{
 	access(all)
 	resource UserCertificate{} 
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupUser(): @UserCertificate{ 
 		let certificate <- create UserCertificate()
 		return <-certificate
@@ -138,7 +152,7 @@ contract ExpToken: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @ExpToken.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)

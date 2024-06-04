@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import TeleportedTetherToken from "../0xcfdd90d4a00f7b5b/TeleportedTetherToken.cdc"
 
@@ -261,7 +275,7 @@ contract BloctoIdo{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun selectPool(name: String, poolType: String, vault: @BloctoToken.Vault){ 
 			let activity = BloctoIdo.activities[name] ?? panic("ido does not exist")
 			let interval = activity.schedule["SELECT_POOL"] ?? panic("stage does not exist")
@@ -293,7 +307,7 @@ contract BloctoIdo{
 			BloctoIdo.fee.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(name: String, vault: @TeleportedTetherToken.Vault){ 
 			let activity = BloctoIdo.activities[name] ?? panic("ido does not exist")
 			let interval = activity.schedule["DEPOSIT"] ?? panic("stage does not exist")
@@ -324,7 +338,7 @@ contract BloctoIdo{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertActivity(_ name: String, _ activity: Activity){ 
 			if BloctoIdo.activities[name] == nil{ 
 				BloctoIdo.activitiesOrder.append(name)
@@ -332,7 +346,7 @@ contract BloctoIdo{
 			BloctoIdo.activities[name] = activity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeActivity(_ name: String){ 
 			var idx = 0
 			while idx < BloctoIdo.activitiesOrder.length{ 
@@ -346,7 +360,7 @@ contract BloctoIdo{
 			BloctoIdo.activities.remove(key: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addKycList(_ name: String, _ addrList: [Address]){ 
 			if !BloctoIdo.activities.containsKey(name){ 
 				panic("activity doesn't exist")
@@ -372,7 +386,7 @@ contract BloctoIdo{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStakeInfo(
 			name: String,
 			addrList: [
@@ -425,7 +439,7 @@ contract BloctoIdo{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStakeInfo(name: String, addr: Address, stakeInfos: [StakeInfo]){ 
 			if !BloctoIdo.activities.containsKey(name){ 
 				panic("activity doesn't exist")
@@ -451,7 +465,7 @@ contract BloctoIdo{
 			(BloctoIdo.activities[name]!).addUserInfo(address: addr, userInfo: userInfo)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateQuota(name: String, addrList: [Address], quotaList: [UFix64]){ 
 			if !BloctoIdo.activities.containsKey(name){ 
 				panic("activity doesn't exist")
@@ -477,12 +491,12 @@ contract BloctoIdo{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIdToAddress(id: UInt64, address: Address){ 
 			BloctoIdo.idToAddress[id] = address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun distribute(_ name: String, start: UInt64, num: UInt64){ 
 			let activity = BloctoIdo.activities[name] ?? panic("ido does not exist")
 			let interval = activity.schedule["DISTRIBUTE"] ?? panic("stage does not exist")
@@ -521,23 +535,23 @@ contract BloctoIdo{
 			BloctoIdo.activities[name] = activity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFromFee(amount: UFix64): @BloctoToken.Vault{ 
 			return <-(BloctoIdo.fee.withdraw(amount: amount) as! @BloctoToken.Vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFromVault(amount: UFix64): @TeleportedTetherToken.Vault{ 
 			return <-(BloctoIdo.vault.withdraw(amount: amount) as! @TeleportedTetherToken.Vault)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActivity(_ name: String): Activity?{ 
 		return BloctoIdo.activities[name]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActivityConfig(_ name: String): ActivityConfig?{ 
 		let activityOpt = BloctoIdo.activities[name]
 		if activityOpt == nil{ 
@@ -552,24 +566,24 @@ contract BloctoIdo{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressById(id: UInt64): Address?{ 
 		return BloctoIdo.idToAddress[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActivityNames(): [String]{ 
 		return BloctoIdo.activitiesOrder
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewUser(): @User{ 
 		let newUser <- create User(id: BloctoIdo.userId)
 		BloctoIdo.userId = BloctoIdo.userId + 1
 		return <-newUser
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateValidStake(poolType: String, stakeInfos: [StakeInfo], upperBound: UFix64): UFix64{ 
 		var lastEpochStakeAmount = 0.0
 		var validStake = 0.0
@@ -611,12 +625,12 @@ contract BloctoIdo{
 		return validStake
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeeBalance(): UFix64{ 
 		return BloctoIdo.fee.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultBalance(): UFix64{ 
 		return BloctoIdo.vault.balance
 	}

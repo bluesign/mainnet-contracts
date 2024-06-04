@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract toddmain2_NFT: NonFungibleToken{ 
@@ -121,17 +135,17 @@ contract toddmain2_NFT: NonFungibleToken{
 			emit SetCreated(seriesId: self.seriesId, setId: self.setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIpfsMetadataHash(editionNum: UInt32): String?{ 
 			return self.ipfsMetadataHashes[editionNum]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataField(field: String): String?{ 
 			return self.metadata[field]
 		}
@@ -156,7 +170,7 @@ contract toddmain2_NFT: NonFungibleToken{
 			emit SeriesCreated(seriesId: self.seriesId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -196,7 +210,7 @@ contract toddmain2_NFT: NonFungibleToken{
 			toddmain2_NFT.seriesData[seriesId] = SeriesData(seriesId: seriesId, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNftSet(setId: UInt32, maxEditions: UInt32, ipfsMetadataHashes:{ UInt32: String}, metadata:{ String: String}){ 
 			pre{ 
 				self.setIds.contains(setId) == false:
@@ -222,7 +236,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		// following Series creation or minting of the NFT editions. Once the Series is
 		// sealed, no updates to the Series metadata will be possible - the information
 		// is permanent and immutable.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSeriesMetadata(metadata:{ String: String}){ 
 			pre{ 
 				self.seriesSealedState == false:
@@ -239,7 +253,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		// following Set creation or minting of the NFT editions. Once the Series is
 		// sealed, no updates to the Set metadata will be possible - the information
 		// is permanent and immutable.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetMetadata(setId: UInt32, maxEditions: UInt32, ipfsMetadataHashes:{ UInt32: String}, metadata:{ String: String}){ 
 			pre{ 
 				self.seriesSealedState == false:
@@ -257,7 +271,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposits it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minttoddmain2_NFT(recipient: &{NonFungibleToken.CollectionPublic}, tokenId: UInt64, setId: UInt32){ 
 			pre{ 
 				self.numberEditionsMintedPerSet[setId] != nil:
@@ -283,7 +297,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		// batchMinttoddmain2_NFT
 		// Mints multiple new NFTs given and deposits the NFTs
 		// into the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMinttoddmain2_NFT(recipient: &{NonFungibleToken.CollectionPublic}, setId: UInt32, tokenIds: [UInt64]){ 
 			pre{ 
 				tokenIds.length > 0:
@@ -298,7 +312,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		// Once a series is sealed, the metadata for the NFTs in the Series can no
 		// longer be updated
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sealSeries(){ 
 			pre{ 
 				self.seriesSealedState == false:
@@ -349,7 +363,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSeries(seriesId: UInt32, metadata:{ String: String}){ 
 			pre{ 
 				toddmain2_NFT.series[seriesId] == nil:
@@ -363,7 +377,7 @@ contract toddmain2_NFT: NonFungibleToken{
 			toddmain2_NFT.series[seriesId] <-! newSeries
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(seriesId: UInt32): &Series{ 
 			pre{ 
 				toddmain2_NFT.series[seriesId] != nil:
@@ -374,7 +388,7 @@ contract toddmain2_NFT: NonFungibleToken{
 			return &toddmain2_NFT.series[seriesId] as &toddmain2_NFT.Series?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -386,18 +400,18 @@ contract toddmain2_NFT: NonFungibleToken{
 	access(all)
 	resource interface toddmain2_NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowtoddmain2_NFT(id: UInt64): &toddmain2_NFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -435,7 +449,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		//
 		// Returns: @NonFungibleToken.Collection: The collection of withdrawn tokens
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -454,7 +468,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @toddmain2_NFT.NFT
 			let id: UInt64 = token.id
 			
@@ -466,7 +480,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -503,7 +517,7 @@ contract toddmain2_NFT: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the toddmain2_NFT.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowtoddmain2_NFT(id: UInt64): &toddmain2_NFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -550,7 +564,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// If it has a collection but does not contain the Id, return nil.
 	// If it has a collection and that collection contains the Id, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, id: UInt64): &toddmain2_NFT.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&toddmain2_NFT.Collection>(toddmain2_NFT.CollectionPublicPath).borrow<&toddmain2_NFT.Collection>() ?? panic("Couldn't get collection")
 		// We trust toddmain2_NFT.Collection.borrowtoddmain2_NFT to get the correct id
@@ -561,7 +575,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// getAllSeries returns all the sets
 	//
 	// Returns: An array of all the series that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeries(): [toddmain2_NFT.SeriesData]{ 
 		return toddmain2_NFT.seriesData.values
 	}
@@ -569,7 +583,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// getAllSets returns all the sets
 	//
 	// Returns: An array of all the sets that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets(): [toddmain2_NFT.NFTSetData]{ 
 		return toddmain2_NFT.setData.values
 	}
@@ -580,7 +594,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// Parameters: seriesId: The id of the Series that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesMetadata(seriesId: UInt32):{ String: String}?{ 
 		return toddmain2_NFT.seriesData[seriesId]?.getMetadata()
 	}
@@ -591,7 +605,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The max number of NFT editions in this Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSetMaxEditions(setId: UInt32): UInt32?{ 
 		return toddmain2_NFT.setData[setId]?.maxEditions
 	}
@@ -601,7 +615,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetMetadata(setId: UInt32):{ String: String}?{ 
 		return toddmain2_NFT.setData[setId]?.getMetadata()
 	}
@@ -611,7 +625,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The Series Id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeriesId(setId: UInt32): UInt32?{ 
 		return toddmain2_NFT.setData[setId]?.seriesId
 	}
@@ -622,7 +636,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The ipfs hashes of nft editions as a Array of Strings
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIpfsMetadataHashByNftEdition(setId: UInt32, editionNum: UInt32): String?{ 
 		// Don't force a revert if the setId or field is invalid
 		if let set = toddmain2_NFT.setData[setId]{ 
@@ -639,7 +653,7 @@ contract toddmain2_NFT: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetMetadataByField(setId: UInt32, field: String): String?{ 
 		// Don't force a revert if the setId or field is invalid
 		if let set = toddmain2_NFT.setData[setId]{ 

@@ -1,4 +1,18 @@
-// HelloWorldResource.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// HelloWorldResource.cdc
 //
 // This is a variation of the HelloWorld contract that introduces the concept of
 // resources, a new form of linear type that is unique to Cadence. Resources can be
@@ -12,7 +26,7 @@ contract HelloWorld2{
 	resource HelloAsset{ 
 		// A transaction can call this function to get the "Hello, World!"
 		// message from the resource.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hello(): String{ 
 			return "Hello, World!"
 		}

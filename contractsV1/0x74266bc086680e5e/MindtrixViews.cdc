@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -90,7 +104,7 @@ contract MindtrixViews{
 	// verify the conditions that a user should pass during minting
 	access(all)
 	struct interface IVerifier{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}, _ isAssert: Bool):{ String: Bool}
 	}
 	
@@ -220,7 +234,7 @@ contract MindtrixViews{
 	
 	access(all)
 	resource interface IPackAdminCreator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPackTemplate(
 			strMetadata:{ 
 				String: String
@@ -234,7 +248,7 @@ contract MindtrixViews{
 			}
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPack(
 			packTemplate:{ MindtrixViews.IPackTemplate},
 			adminRef: Capability<&{MindtrixViews.IPackAdminOpener}>,
@@ -247,7 +261,7 @@ contract MindtrixViews{
 	
 	access(all)
 	resource interface IPackAdminOpener{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(
 			userPack: &{MindtrixViews.IPack},
 			packID: UInt64,
@@ -272,16 +286,16 @@ contract MindtrixViews{
 	// IHashVerifier should be implemented in the Tracker resource to verify the hash from the NFT
 	access(all)
 	resource interface IHashVerifier{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataHash(): [UInt8]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifyHash(setID: UInt64, packID: UInt64, metadataHash: [UInt8]): Bool
 	}
 	
 	access(all)
 	resource interface IHashProvider{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHashVerifier(setID: UInt64, packID: UInt64): &{IHashVerifier}
 	}
 }

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -25,7 +39,7 @@ contract FlowtyOffersResolver{
 	
 	access(all)
 	resource OfferResolver: Resolver.ResolverPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkOfferResolver(item: &{NonFungibleToken.INFT, ViewResolver.Resolver}, offerParamsString:{ String: String}, offerParamsUInt64:{ String: UInt64}, offerParamsUFix64:{ String: UFix64}): Bool{ 
 			if let expiry = offerParamsUInt64["expiry"]{ 
 				assert(expiry > UInt64(getCurrentBlock().timestamp), message: "offer is expired")
@@ -44,12 +58,12 @@ contract FlowtyOffersResolver{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createResolver(): @OfferResolver{ 
 		return <-create OfferResolver()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getResolverCap(): Capability<&FlowtyOffersResolver.OfferResolver>{ 
 		return self.account.capabilities.get<&FlowtyOffersResolver.OfferResolver>(
 			FlowtyOffersResolver.PublicPath

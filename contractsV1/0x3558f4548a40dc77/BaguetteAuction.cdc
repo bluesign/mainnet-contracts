@@ -1,4 +1,18 @@
-/** 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/** 
 
 # BaguetteAuction contract
 
@@ -407,7 +421,7 @@ contract BaguetteAuction{
 		}
 		
 		// get the remaning time can be negative if it's expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64{ 
 			let currentTime = getCurrentBlock().timestamp
 			let remaining = Fix64(self.auctionEndTime) - Fix64(currentTime)
@@ -415,20 +429,20 @@ contract BaguetteAuction{
 		}
 		
 		// Has the auction expired?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool{ 
 			let timeRemaining = self.timeRemaining()
 			return timeRemaining < Fix64(0.0)
 		}
 		
 		// Has the auction been settled
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAuctionCompleted(): Bool{ 
 			return self.auctionCompleted
 		}
 		
 		// What the next bid has to match
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun minNextBid(): UFix64{ 
 			if self.currentBid != 0.0{ 
 				return self.currentBid + self.parameters.bidIncrement
@@ -437,7 +451,7 @@ contract BaguetteAuction{
 		}
 		
 		// Settle the auction once it's expired. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(){ 
 			pre{ 
 				!self.auctionCompleted:
@@ -482,7 +496,7 @@ contract BaguetteAuction{
 		}
 		
 		// Place a new bid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bidTokens: @{FungibleToken.Vault},
 			fVault: Capability<&FUSD.Vault>,
@@ -527,7 +541,7 @@ contract BaguetteAuction{
 		// Get the auction status
 		// Will fail if the auction is completed (item is nil). 
 		// A completed auction should be deleted anyway as it is worthless
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(): AuctionStatus{ 
 			return AuctionStatus(
 				id: self.auctionID,
@@ -559,14 +573,14 @@ contract BaguetteAuction{
 		access(all)
 		let parameters: AuctionParameters
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ recordID: UInt64): AuctionStatus
 		
 		// the settle functions are public since they just transfer NFT/tokens when the auction is done
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ recordID: UInt64)
 	}
 	
@@ -582,13 +596,13 @@ contract BaguetteAuction{
 		access(all)
 		let parameters: AuctionParameters
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			recordID: UInt64,
 			bidTokens: @{FungibleToken.Vault},
 			fVault: Capability<&FUSD.Vault>,
 			rCollection: Capability<&Record.Collection>
-		)
+		): Void
 	}
 	
 	// AuctionCreator
@@ -603,13 +617,13 @@ contract BaguetteAuction{
 		access(all)
 		let parameters: AuctionParameters
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(
 			record: @Record.NFT,
 			startPrice: UFix64,
 			ownerFVault: Capability<&FUSD.Vault>,
 			ownerRCollection: Capability<&Record.Collection>
-		)
+		): Void
 	}
 	
 	// Collection
@@ -636,7 +650,7 @@ contract BaguetteAuction{
 		}
 		
 		// Create an auction with the parameters given at the collection initialization
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(record: @Record.NFT, startPrice: UFix64, ownerFVault: Capability<&FUSD.Vault>, ownerRCollection: Capability<&Record.Collection>){ 
 			let id = record.id
 			let auction <- create Auction(item: <-record, parameters: self.parameters, auctionStartTime: getCurrentBlock().timestamp + self.parameters.auctionDelay, startPrice: startPrice, ownerFVault: ownerFVault, ownerRCollection: ownerRCollection)
@@ -646,12 +660,12 @@ contract BaguetteAuction{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.auctionItems.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ recordID: UInt64): AuctionStatus{ 
 			pre{ 
 				self.auctionItems[recordID] != nil:
@@ -665,7 +679,7 @@ contract BaguetteAuction{
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
 		// destroys the auction if it has already been settled
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ recordID: UInt64){ 
 			let auctionRef = &self.auctionItems[recordID] as &BaguetteAuction.Auction?
 			if auctionRef.isAuctionExpired(){ 
@@ -679,7 +693,7 @@ contract BaguetteAuction{
 		
 		// placeBid sends the bidder's tokens to the bid vault and updates the
 		// currentPrice of the current auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(recordID: UInt64, bidTokens: @{FungibleToken.Vault}, fVault: Capability<&FUSD.Vault>, rCollection: Capability<&Record.Collection>){ 
 			pre{ 
 				self.auctionItems[recordID] != nil:
@@ -695,19 +709,19 @@ contract BaguetteAuction{
 	// An auction collection creator can create auction collections with default parameters
 	access(all)
 	resource interface CollectionCreator{ 
-		access(all)
-		fun createAuctionCollection(): @Collection
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createAuctionCollection(): @BaguetteAuction.Collection
 	}
 	
 	// Admin can change the default Auction parameters, the market vault and create custom collections
 	access(all)
 	resource Admin: CollectionCreator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setParameters(parameters: AuctionParameters){ 
 			BaguetteAuction.parameters = parameters
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketVault(marketVault: Capability<&FUSD.Vault>){ 
 			pre{ 
 				marketVault.check():
@@ -716,7 +730,7 @@ contract BaguetteAuction{
 			BaguetteAuction.marketVault = marketVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLostAndFoundVaults(fVault: Capability<&FUSD.Vault>, rCollection: Capability<&Record.Collection>){ 
 			pre{ 
 				fVault.check():
@@ -729,13 +743,13 @@ contract BaguetteAuction{
 		}
 		
 		// create collection with default parameters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuctionCollection(): @Collection{ 
 			return <-create Collection(parameters: BaguetteAuction.parameters)
 		}
 		
 		// create collection with custom parameters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCustomAuctionCollection(parameters: AuctionParameters): @Collection{ 
 			return <-create Collection(parameters: parameters)
 		}
@@ -744,8 +758,8 @@ contract BaguetteAuction{
 	// This interface is used to add a Admin capability to a client
 	access(all)
 	resource interface ManagerClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Admin>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&BaguetteAuction.Admin>): Void
 	}
 	
 	// An Manager can create an auction collection with the default parameters
@@ -758,7 +772,7 @@ contract BaguetteAuction{
 			self.server = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Admin>){ 
 			pre{ 
 				cap.check():
@@ -769,7 +783,7 @@ contract BaguetteAuction{
 			self.server = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuctionCollection(): @Collection{ 
 			pre{ 
 				self.server != nil:
@@ -783,7 +797,7 @@ contract BaguetteAuction{
 	// Contract public functions
 	// -----------------------------------------------------------------------
 	// make it possible to delegate auction collection creation (with default parameters)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createManager(): @Manager{ 
 		return <-create Manager()
 	}

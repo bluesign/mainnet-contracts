@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 OneFootballCollectible.cdc
 
@@ -126,13 +140,13 @@ contract OneFootballCollectible: NonFungibleToken{
 	access(self)
 	let templates:{ UInt64: Template}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplates():{ UInt64: Template}{ 
 		return self.templates
 	}
 	
 	// Get metadata for a specific templateID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplate(templateID: UInt64): Template?{ 
 		return self.templates[templateID]
 	}
@@ -157,7 +171,7 @@ contract OneFootballCollectible: NonFungibleToken{
 			emit Minted(id: self.id, templateID: self.templateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): Template?{ 
 			return OneFootballCollectible.getTemplate(templateID: self.templateID)
 		}
@@ -169,15 +183,15 @@ contract OneFootballCollectible: NonFungibleToken{
 	access(all)
 	resource interface OneFootballCollectibleCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOneFootballCollectible(id: UInt64): &OneFootballCollectible.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -221,7 +235,7 @@ contract OneFootballCollectible: NonFungibleToken{
 				Deposit an NFT to the collection. */
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @OneFootballCollectible.NFT
 			let id: UInt64 = token.id
 			
@@ -244,7 +258,7 @@ contract OneFootballCollectible: NonFungibleToken{
 		/* borrowOneFootballCollectible
 				Gets a reference to an NFT in the collection as a OneFootballCollectible. */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOneFootballCollectible(id: UInt64): &OneFootballCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -257,7 +271,7 @@ contract OneFootballCollectible: NonFungibleToken{
 		/* pop
 				Removes and returns the next NFT from the collection.*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pop(): @{NonFungibleToken.NFT}{ 
 			let nextID = self.ownedNFTs.keys[0]
 			return <-self.withdraw(withdrawID: nextID)
@@ -266,7 +280,7 @@ contract OneFootballCollectible: NonFungibleToken{
 		/* size
 				Returns the current size of the collection. */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun size(): Int{ 
 			return self.ownedNFTs.length
 		}
@@ -294,42 +308,42 @@ contract OneFootballCollectible: NonFungibleToken{
 	
 	access(all)
 	resource interface Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateID: UInt64): @OneFootballCollectible.NFT
 	}
 	
 	access(all)
 	resource interface TemplateEditor{ 
-		access(all)
-		fun setTemplate(templateID: UInt64, seriesName: String, name: String, description: String, preview: String, media: String, data:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setTemplate(templateID: UInt64, seriesName: String, name: String, description: String, preview: String, media: String, data:{ String: String}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplate(templateID: UInt64)
 	}
 	
 	access(all)
 	resource Admin: Minter, TemplateEditor{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateID: UInt64): @OneFootballCollectible.NFT{ 
 			let nft <- create OneFootballCollectible.NFT(templateID: templateID)
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTemplate(templateID: UInt64, seriesName: String, name: String, description: String, preview: String, media: String, data:{ String: String}){ 
 			let metadata = OneFootballCollectible.Template(templateID: templateID, seriesName: seriesName, name: name, description: description, preview: preview, media: media, data: data)
 			OneFootballCollectible.templates[templateID] = metadata
 			emit TemplateEdited(templateID: templateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplate(templateID: UInt64){ 
 			OneFootballCollectible.templates.remove(key: templateID)
 			emit TemplateRemoved(templateID: templateID)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun check(_ address: Address): Bool{ 
 		return getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(OneFootballCollectible.CollectionPublicPath).check()
 	// else "Collection Reference was not created correctly"
@@ -337,7 +351,7 @@ contract OneFootballCollectible: NonFungibleToken{
 	
 	// fetch
 	// Get a reference to a OneFootballCollectible from an account's Collection, if available.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &OneFootballCollectible.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&{OneFootballCollectible.OneFootballCollectibleCollectionPublic}>(OneFootballCollectible.CollectionPublicPath).borrow<&{OneFootballCollectible.OneFootballCollectibleCollectionPublic}>() ?? panic("Couldn't get collection")
 		let nft = collection.borrowOneFootballCollectible(id: itemID)

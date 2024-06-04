@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
  * Copyright (c) 2021 24Karat. All rights reserved.
  *
  * SPDX-License-Identifier: MIT
@@ -122,7 +136,7 @@ contract KaratNFTMarket{
 		// If they send the correct payment in FungibleToken, and if the item is still available,
 		// the KaratNFT will be placed in their KaratNFT.Collection .
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &KaratNFT.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerPayment.balance == self.price:
@@ -171,7 +185,7 @@ contract KaratNFTMarket{
 	// createSaleOffer
 	// Make creating a SaleOffer publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleOffer(
 		sellerItemProvider: Capability<&KaratNFT.Collection>,
 		itemID: UInt64,
@@ -194,10 +208,10 @@ contract KaratNFTMarket{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(offer: @KaratNFTMarket.SaleOffer)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(offer: @KaratNFTMarket.SaleOffer): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer
 	}
 	
@@ -206,13 +220,13 @@ contract KaratNFTMarket{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			itemID: UInt64,
 			buyerCollection: &KaratNFT.Collection,
@@ -231,7 +245,7 @@ contract KaratNFTMarket{
 		// insert
 		// Insert a SaleOffer into the collection, replacing one with the same itemID if present.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @KaratNFTMarket.SaleOffer){ 
 			let itemID: UInt64 = offer.itemID
 			let price: UFix64 = offer.price
@@ -244,7 +258,7 @@ contract KaratNFTMarket{
 		
 		// remove
 		// Remove and return a SaleOffer from the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(itemID: itemID, owner: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: itemID) ?? panic("missing SaleOffer"))
@@ -262,7 +276,7 @@ contract KaratNFTMarket{
 		//   3. KaratNFT.Deposit
 		//   4. SaleOffer.SaleOfferFinished
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemID: UInt64, buyerCollection: &KaratNFT.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleOffers[itemID] != nil:
@@ -276,7 +290,7 @@ contract KaratNFTMarket{
 		// getSaleOfferIDs
 		// Returns an array of the IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
@@ -285,7 +299,7 @@ contract KaratNFTMarket{
 		// Returns an Optional read-only view of the SaleItem for the given itemID if it is contained by this collection.
 		// The optional will be nil if the provided itemID is not present in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?{ 
 			if self.saleOffers[itemID] == nil{ 
 				return nil
@@ -306,7 +320,7 @@ contract KaratNFTMarket{
 	// createEmptyCollection
 	// Make creating a Collection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}
@@ -314,19 +328,19 @@ contract KaratNFTMarket{
 	// Admin is a special authorization resource 
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeRate(_ newRate: UFix64){ 
 			KaratNFTMarket.feeRate = newRate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeReceiver(_ addr: Address){ 
 			KaratNFTMarket.feeReceiverAddress = addr
 		}
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

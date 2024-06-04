@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 *   A contract that manages the creation and sale of packs and tokens
 *
 *   A manager resource exists allow modifying the parameters of the public
@@ -175,7 +189,7 @@ contract HWGaragePM{
 				*   HWGarageCard
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateHWGarageCardEditionMetadata(
 			editionNumber: UInt64,
 			metadata:{ 
@@ -193,19 +207,19 @@ contract HWGaragePM{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateHWGarageCardCollectionMetadata(metadata:{ String: String}){ 
 			HWGarageCard.setCollectionMetadata(metadata: metadata)
 			emit UpdateHWGarageCardCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintHWGarageCardAtEdition(edition: UInt64, packID: UInt64): @{NonFungibleToken.NFT}{ 
 			emit AdminMintHWGarageCard(id: edition)
 			return <-HWGaragePM.mintHWGarageCard(edition: edition, packID: packID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialHWGarageCard(packID: UInt64): @{NonFungibleToken.NFT}{ 
 			let HWGarageCard <- HWGaragePM.mintSequentialHWGarageCard(packID: packID)
 			emit AdminMintHWGarageCard(id: HWGarageCard.id)
@@ -216,19 +230,19 @@ contract HWGaragePM{
 				*   HWGaragePack
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePackEditionMetadata(editionNumber: UInt64, metadata:{ String: String}){ 
 			HWGaragePack.setEditionMetadata(editionNumber: editionNumber, metadata: metadata)
 			emit UpdatePackEditionMetadata(id: editionNumber, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePackCollectionMetadata(metadata:{ String: String}){ 
 			HWGaragePack.setCollectionMetadata(metadata: metadata)
 			emit UpdatePackCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPackAtEdition(
 			edition: UInt64,
 			packID: UInt64,
@@ -246,7 +260,7 @@ contract HWGaragePM{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialHWGaragePack(packID: UInt64, address: Address, packHash: String): @{
 			NonFungibleToken.NFT
 		}{ 
@@ -256,7 +270,7 @@ contract HWGaragePM{
 			return <-HWGarageCard
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateHWGaragePackRedeemStartTime(_ redeemStartTime: UFix64){ 
 			HWGaragePM.packRedeemStartTime = redeemStartTime
 			emit UpdateHWGaragePackRedeemInfo(redeemStartTime: HWGaragePM.packRedeemStartTime)
@@ -266,7 +280,7 @@ contract HWGaragePM{
 				*   HWGarageAirdrop
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun airdropRedeemable(
 			airdropSeriesID: UInt64,
 			address: Address,
@@ -389,7 +403,7 @@ contract HWGaragePM{
 		*   HWGaragePack
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimPack(address: Address, packHash: String){ 
 		// this event is picked up by a web hook to verify packHash
 		// if packHash is valid, the backend will mint the pack and
@@ -397,7 +411,7 @@ contract HWGaragePM{
 		emit PackClaimBegin(address: address, packHash: packHash)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicRedeemPack(pack: @{NonFungibleToken.NFT}, address: Address, packHash: String){ 
 		pre{ 
 			getCurrentBlock().timestamp >= self.packRedeemStartTime:
@@ -419,7 +433,7 @@ contract HWGaragePM{
 	}
 	
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun burnAirdrop(
 		walletAddress: Address,
 		tokenSerial: String,

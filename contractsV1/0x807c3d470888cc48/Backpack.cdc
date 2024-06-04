@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -77,15 +91,15 @@ contract Backpack: NonFungibleToken{
 	access(all)
 	resource interface BackpackCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBackpack(id: UInt64): &Backpack.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -117,17 +131,17 @@ contract Backpack: NonFungibleToken{
 		access(self)
 		var metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(){ 
 			self.locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}, newSlots: UInt64){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -139,7 +153,7 @@ contract Backpack: NonFungibleToken{
 			self.slots = newSlots
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementSlot(){ 
 			pre{ 
 				self.slots + 1 <= 20:
@@ -148,7 +162,7 @@ contract Backpack: NonFungibleToken{
 			self.slots = self.slots + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAddedToSet(setID: UInt64){ 
 			self.addedToSet = setID
 		}
@@ -217,7 +231,7 @@ contract Backpack: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTTemplate(): BackpackTemplate{ 
 			return Backpack.BackpackTemplates[self.templateID]!
 		}
@@ -233,17 +247,17 @@ contract Backpack: NonFungibleToken{
 			emit PatchAddedToBackpack(backpackId: self.id, patchIds: patchIDs)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSlots(): UInt64{ 
 			return (Backpack.BackpackTemplates[self.templateID]!).slots
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPatchIds(): [UInt64]{ 
 			return self.patches.getIDs()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata():{ String: String}{ 
 			return (Backpack.BackpackTemplates[self.templateID]!).getMetadata()
 		}
@@ -285,7 +299,7 @@ contract Backpack: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Backpack.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -293,7 +307,7 @@ contract Backpack: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -312,7 +326,7 @@ contract Backpack: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBackpack(id: UInt64): &Backpack.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -329,7 +343,7 @@ contract Backpack: NonFungibleToken{
 			return exampleNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPatches(tokenID: UInt64, patches: @Patch.Collection){ 
 			pre{ 
 				self.ownedNFTs.keys.contains(tokenID):
@@ -339,7 +353,7 @@ contract Backpack: NonFungibleToken{
 			backpackRef.addPatches(patches: <-patches)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePatches(tokenID: UInt64, patchTokenIDs: [UInt64]): @Patch.Collection{ 
 			pre{ 
 				self.ownedNFTs.keys.contains(tokenID):
@@ -413,22 +427,22 @@ contract Backpack: NonFungibleToken{
 			emit SetCreated(setID: self.setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableTemplateIDs(): [UInt64]{ 
 			return self.availableTemplateIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPublic(){ 
 			self.isPublic = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPrivate(){ 
 			self.isPublic = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(templateID: UInt64){ 
 			pre{ 
 				Backpack.BackpackTemplates[templateID] != nil:
@@ -447,14 +461,14 @@ contract Backpack: NonFungibleToken{
 			emit TemplateAddedToSet(setID: self.setID, templateID: templateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplates(templateIDs: [UInt64]){ 
 			for template in templateIDs{ 
 				self.addTemplate(templateID: template)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(templateID: UInt64){ 
 			pre{ 
 				self.lockedTemplates[templateID] != nil:
@@ -468,14 +482,14 @@ contract Backpack: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockAllTemplates(){ 
 			for template in self.templateIDs{ 
 				self.lockTemplate(templateID: template)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -483,7 +497,7 @@ contract Backpack: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			let templateID = self.availableTemplateIDs[0]
 			if (Backpack.BackpackTemplates[templateID]!).locked{ 
@@ -497,7 +511,7 @@ contract Backpack: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(templateID: UInt64, newMetadata:{ String: String}, newSlots: UInt64): BackpackTemplate{ 
 			pre{ 
 				Backpack.BackpackTemplates[templateID] != nil:
@@ -513,7 +527,7 @@ contract Backpack: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setID: UInt64){ 
 			let set = self.borrowSet(setID: setID)
 			if (set.getAvailableTemplateIDs()!).length == 0{ 
@@ -525,18 +539,18 @@ contract Backpack: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFT())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBackpackTemplate(name: String, description: String, metadata:{ String: String}, slots: UInt64){ 
 			Backpack.BackpackTemplates[Backpack.nextTemplateID] = BackpackTemplate(templateID: Backpack.nextTemplateID, name: name, description: description, metadata: metadata, slots: slots)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String){ 
 			var newSet <- create Set(name: name)
 			Backpack.sets[newSet.setID] <-! newSet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			pre{ 
 				Backpack.sets[setID] != nil:
@@ -545,7 +559,7 @@ contract Backpack: NonFungibleToken{
 			return (&Backpack.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBackpackTemplate(templateID: UInt64, newMetadata:{ String: String}, newSlots: UInt64){ 
 			pre{ 
 				Backpack.BackpackTemplates.containsKey(templateID) != nil:
@@ -554,7 +568,7 @@ contract Backpack: NonFungibleToken{
 			(Backpack.BackpackTemplates[templateID]!).updateMetadata(newMetadata: newMetadata, newSlots: newSlots)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementBackpackSlot(templateID: UInt64){ 
 			pre{ 
 				Backpack.BackpackTemplates.containsKey(templateID) != nil:
@@ -565,17 +579,17 @@ contract Backpack: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBackpackTemplateByID(templateID: UInt64): Backpack.BackpackTemplate{ 
 		return Backpack.BackpackTemplates[templateID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBackpackTemplates():{ UInt64: Backpack.BackpackTemplate}{ 
 		return Backpack.BackpackTemplates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableTemplateIDsInSet(setID: UInt64): [UInt64]{ 
 		pre{ 
 			Backpack.sets[setID] != nil:

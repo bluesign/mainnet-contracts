@@ -1,4 +1,18 @@
-import Analogs from "./Analogs.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Analogs from "./Analogs.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -81,7 +95,7 @@ contract AnalogMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPrivateNFTWithFUT(
 		buyer: Address,
 		setID: UInt64,
@@ -151,7 +165,7 @@ contract AnalogMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPublicNFTWithFUT(
 		buyer: Address,
 		setID: UInt64,
@@ -211,7 +225,7 @@ contract AnalogMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintFreeNFT(buyer: Address, numberOfTokens: UInt64){ 
 		pre{ 
 			numberOfTokens > 0:
@@ -259,7 +273,7 @@ contract AnalogMinter{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMintableSet(setID: UInt64, privateSalePrice: UFix64, publicSalePrice: UFix64){ 
 			pre{ 
 				AnalogMinter.mintableSets[setID] == nil:
@@ -271,7 +285,7 @@ contract AnalogMinter{
 				)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhiteListAddress(setID: UInt64, address: Address, amount: UInt64){ 
 			(AnalogMinter.mintableSets[setID]!).addWhiteListAddress(
 				address: address,
@@ -279,17 +293,17 @@ contract AnalogMinter{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhiteListAddress(setID: UInt64, address: Address){ 
 			(AnalogMinter.mintableSets[setID]!).removeWhiteListAddress(address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pruneWhitelist(setID: UInt64){ 
 			(AnalogMinter.mintableSets[setID]!).pruneWhitelist()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhiteListAddressAmount(setID: UInt64, address: Address, amount: UInt64){ 
 			(AnalogMinter.mintableSets[setID]!).updateWhiteListAddressAmount(
 				address: address,
@@ -297,18 +311,18 @@ contract AnalogMinter{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrivateSalePrice(setID: UInt64, price: UFix64){ 
 			(AnalogMinter.mintableSets[setID]!).updatePrivateSalePrice(price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSalePrice(setID: UInt64, price: UFix64){ 
 			(AnalogMinter.mintableSets[setID]!).updatePublicSalePrice(price: price)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistedAccounts(setID: UInt64):{ Address: UInt64}{ 
 		return (AnalogMinter.mintableSets[setID]!).whitelistedAccounts
 	}

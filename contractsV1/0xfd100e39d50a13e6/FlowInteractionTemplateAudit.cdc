@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
   FlowInteractionTemplateAudit
 
   The FlowInteractionTemplateAudit contract manages the creation 
@@ -54,10 +68,10 @@ contract FlowInteractionTemplateAudit{
 	//
 	access(all)
 	resource interface AuditManagerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAudits(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHasAuditedTemplate(templateId: String): Bool
 	}
 	
@@ -69,10 +83,10 @@ contract FlowInteractionTemplateAudit{
 	//
 	access(all)
 	resource interface AuditManagerPrivate{ 
-		access(all)
-		fun addAudit(templateId: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addAudit(templateId: String): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revokeAudit(templateId: String)
 	}
 	
@@ -106,7 +120,7 @@ contract FlowInteractionTemplateAudit{
 		// @return An array of Interaction Template IDs that the owner of this 
 		// AuditManager has audited.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAudits(): [String]{ 
 			return self.audits.keys
 		}
@@ -119,7 +133,7 @@ contract FlowInteractionTemplateAudit{
 		// @return Whether the AuditManager has templateId as one of the
 		// Interaction Template IDs the owner of the AuditManager has audited.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHasAuditedTemplate(templateId: String): Bool{ 
 			return self.audits.containsKey(templateId)
 		}
@@ -130,7 +144,7 @@ contract FlowInteractionTemplateAudit{
 		//
 		// @param templateId: ID of an Interaction Template
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAudit(templateId: String){ 
 			pre{ 
 				!self.audits.containsKey(templateId):
@@ -146,7 +160,7 @@ contract FlowInteractionTemplateAudit{
 		//
 		// @param templateId: ID of an Interaction Template
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revokeAudit(templateId: String){ 
 			pre{ 
 				self.audits.containsKey(templateId):
@@ -161,7 +175,7 @@ contract FlowInteractionTemplateAudit{
 	//
 	// @return An AuditManager resource
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuditManager(): @AuditManager{ 
 		return <-create AuditManager()
 	}
@@ -173,7 +187,7 @@ contract FlowInteractionTemplateAudit{
 	// 
 	// @return A map of auditorAddress => isAuditedByAuditor
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getHasTemplateBeenAuditedByAuditors(templateId: String, auditors: [Address]):{ 
 		Address: Bool
 	}{ 
@@ -191,7 +205,7 @@ contract FlowInteractionTemplateAudit{
 	// 
 	// @return An array of Interaction Template IDs
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAuditsByAuditor(auditor: Address): [String]{ 
 		let auditManagerRef =
 			getAccount(auditor).capabilities.get<&FlowInteractionTemplateAudit.AuditManager>(

@@ -1,4 +1,18 @@
-// This contract represents the Otter NFT minted from the Pack NFT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This contract represents the Otter NFT minted from the Pack NFT
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -164,7 +178,7 @@ contract MindtrixOtter: NonFungibleToken{
 			self.traits = MetadataViews.Traits(traits)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaxSupply(_ maxSupply: UInt64){ 
 			self.maxSupply = maxSupply
 		}
@@ -182,25 +196,25 @@ contract MindtrixOtter: NonFungibleToken{
 		let minterAddress: Address
 		
 		// getVo() aims to provide commonly-used data, such as fields defined in MetadataViews.
-		access(all)
-		fun getVo(): OtterVo
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getVo(): MindtrixOtter.OtterVo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataHash(): [UInt8]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStrMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntMetadata():{ String: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFixMetadata():{ String: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getComponents():{ String: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifyHash(): Bool
 	}
 	
@@ -255,17 +269,17 @@ contract MindtrixOtter: NonFungibleToken{
 			MindtrixOtter.totalSupply = serial
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataHash(): [UInt8]{ 
 			return self.metadataHash
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateMetadataHash(): [UInt8]{ 
 			return MindtrixUtility.generateMetadataHash(strMetadata: self.getStrMetadata())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifyHash(): Bool{ 
 			let setID = self.intMetadata["setID"]!
 			let packID = self.intMetadata["packID"]!
@@ -273,32 +287,32 @@ contract MindtrixOtter: NonFungibleToken{
 			return hashVerifier.verifyHash(setID: setID, packID: packID, metadataHash: self.generateMetadataHash())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetCollectionPublicCap(): Capability<&{MindtrixViews.IHashProvider}>{ 
 			return self.setCollectionPublicCap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStrMetadata():{ String: String}{ 
 			return self.strMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntMetadata():{ String: UInt64}{ 
 			return self.intMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFixMetadata():{ String: UFix64}{ 
 			return self.fixMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getComponents():{ String: UInt64}{ 
 			return self.getComponents()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVo(): OtterVo{ 
 			return OtterVo(nftID: self.id, strMetadata: self.strMetadata, intMetadata: self.intMetadata, components: self.components, metadataHash: self.getMetadataHash(), royalties: self.royalties)
 		}
@@ -349,15 +363,15 @@ contract MindtrixOtter: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMindtrixOtterNFTPublic(id: UInt64): &MindtrixOtter.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -365,8 +379,8 @@ contract MindtrixOtter: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	access(all)
@@ -386,7 +400,7 @@ contract MindtrixOtter: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MindtrixOtter.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -404,7 +418,7 @@ contract MindtrixOtter: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMindtrixOtterNFTPublic(id: UInt64): &MindtrixOtter.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -439,7 +453,7 @@ contract MindtrixOtter: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataSerial(nameWithSerial: String): UInt64?{ 
 		let prefixName = "Otter #"
 		let serialStr = nameWithSerial.slice(from: prefixName.length, upTo: nameWithSerial.length)
@@ -447,7 +461,7 @@ contract MindtrixOtter: NonFungibleToken{
 		return int == nil ? nil : UInt64(int!)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessoryRarityByTraitName(_ traitName: String, _ traitValue: String?): MetadataViews.Rarity{ 
 		let max = 5.0
 		let commonTraitName = ["Background"]
@@ -480,7 +494,7 @@ contract MindtrixOtter: NonFungibleToken{
 		return defaultRarity
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOtterRarityByTraits(_ traits: MetadataViews.Traits): MetadataViews.Rarity{ 
 		let max = 35.0
 		let defaultRarity = MetadataViews.Rarity(score: 0.0, max: max, description: "Common")

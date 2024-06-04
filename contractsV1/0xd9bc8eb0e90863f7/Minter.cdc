@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract Minter{ 
@@ -16,16 +30,16 @@ contract Minter{
 		access(all)
 		let addr: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(acct: AuthAccount, amount: UFix64): @{FungibleToken.Vault}
 	}
 	
 	access(all)
 	resource interface AdminPublic{ 
-		access(all)
-		fun borrowMinter(_ t: Type): &{FungibleTokenMinter}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowMinter(_ t: Type): &{Minter.FungibleTokenMinter}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTypes(): [Type]
 	}
 	
@@ -35,18 +49,18 @@ contract Minter{
 		let minters: @{Type:{ FungibleTokenMinter}} // type to a minter interface
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerMinter(_ m: @{FungibleTokenMinter}){ 
 			emit MinterAdded(m.getType())
 			destroy <-self.minters.insert(key: m.type, <-m)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMinter(_ t: Type): &{FungibleTokenMinter}{ 
 			return (&self.minters[t] as &{FungibleTokenMinter}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTypes(): [Type]{ 
 			return self.minters.keys
 		}
@@ -56,12 +70,12 @@ contract Minter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowAdminPublic(): &Admin?{ 
 		return self.account.storage.borrow<&Admin>(from: self.StoragePath)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdmin(): @Admin{ 
 		return <-create Admin()
 	}

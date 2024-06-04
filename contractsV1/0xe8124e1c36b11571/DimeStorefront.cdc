@@ -1,4 +1,18 @@
-/* SPDX-License-Identifier: UNLICENSED */
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* SPDX-License-Identifier: UNLICENSED */
 import DimeCollectible from "../0xf5cdaace879e5a79/DimeCollectible.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -67,7 +81,7 @@ contract DimeStorefront{
 		access(all)
 		var price: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHistory(): [[AnyStruct]]
 	}
 	
@@ -94,7 +108,7 @@ contract DimeStorefront{
 		access(self)
 		let history: [[AnyStruct]]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHistory(): [[AnyStruct]]{ 
 			return self.history
 		}
@@ -137,7 +151,7 @@ contract DimeStorefront{
 			emit SaleOfferCreated(itemId: self.itemId, price: self.price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(newPrice: UFix64){ 
 			self.price = newPrice
 		}
@@ -147,7 +161,7 @@ contract DimeStorefront{
 	// use by the collection's owner
 	access(all)
 	resource interface StorefrontManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(
 			sellerItemProvider: Capability<&DimeCollectible.Collection>,
 			itemId: UInt64,
@@ -160,22 +174,22 @@ contract DimeStorefront{
 				]
 			],
 			receiver: Capability<&FUSD.Vault>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffer(itemId: UInt64, beingPurchased: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(itemId: UInt64, newPrice: UFix64)
 	}
 	
 	// An interface to allow listing and borrowing SaleOffers, and purchasing items via SaleOffers in a collection
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(itemId: UInt64): &SaleOffer?
 	}
 	
@@ -186,14 +200,14 @@ contract DimeStorefront{
 		var saleOffers: @{UInt64: SaleOffer}
 		
 		// Returns an array of the Ids that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIds(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
 		
 		// Returns an Optional read-only view of the SaleItem for the given itemId if it is contained by this collection.
 		// The optional will be nil if the provided itemId is not present in the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(itemId: UInt64): &SaleOffer?{ 
 			if self.saleOffers[itemId] == nil{ 
 				return nil
@@ -202,7 +216,7 @@ contract DimeStorefront{
 		}
 		
 		// Insert a SaleOffer into the collection, replacing one with the same itemId if present
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(sellerItemProvider: Capability<&DimeCollectible.Collection>, itemId: UInt64, creator: Address, content: String, price: UFix64, history: [[AnyStruct]], receiver: Capability<&FUSD.Vault>){ 
 			let nft = (sellerItemProvider.borrow()!).borrowCollectible(id: itemId) ?? panic("Couldn't borrow nft from seller")
 			if !nft.tradeable{ 
@@ -217,7 +231,7 @@ contract DimeStorefront{
 		}
 		
 		// Remove and return a SaleOffer from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffer(itemId: UInt64, beingPurchased: Bool){ 
 			let offer <- self.saleOffers.remove(key: itemId) ?? panic("missing SaleOffer")
 			if beingPurchased{ 
@@ -240,7 +254,7 @@ contract DimeStorefront{
 			return <-offer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(itemId: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.saleOffers[itemId] != nil:
@@ -257,7 +271,7 @@ contract DimeStorefront{
 	}
 	
 	// Make creating a Storefront publicly accessible.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStorefront(): @Storefront{ 
 		return <-create Storefront()
 	}

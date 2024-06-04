@@ -1,4 +1,18 @@
-import FlowToken from "./../../standardsV1/FlowToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
 import MotoGPAdmin from "./MotoGPAdmin.cdc"
 
@@ -20,7 +34,7 @@ import PackOpener from "./PackOpener.cdc"
 //
 access(all)
 contract MotoGPTransfer: ContractVersion{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "0.7.8"
 	}
@@ -46,7 +60,7 @@ contract MotoGPTransfer: ContractVersion{
 	
 	// Transfers packs from one collection to another, with storage top-up if needed
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun transferPacks(fromCollection: @MotoGPPack.Collection, toCollection: &MotoGPPack.Collection, toAddress: Address){ 
 		pre{ 
 			fromCollection.getIDs().length > 0:
@@ -61,7 +75,7 @@ contract MotoGPTransfer: ContractVersion{
 	
 	// Transfer cards from one collection to another, with storage top-up if needed
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun transferCards(fromCollection: @MotoGPCard.Collection, toCollection: &MotoGPCard.Collection, toAddress: Address){ 
 		pre{ 
 			fromCollection.getIDs().length > 0:
@@ -75,7 +89,7 @@ contract MotoGPTransfer: ContractVersion{
 	}
 	
 	// Transfer a pack to a Pack opener collection, with storage top-up if needed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun transferPackToPackOpenerCollection(pack: @MotoGPPack.NFT, toCollection: &PackOpener.Collection, toAddress: Address){ 
 		toCollection.deposit(token: <-pack)
 		self.topUp(toAddress)
@@ -83,7 +97,7 @@ contract MotoGPTransfer: ContractVersion{
 	
 	// Admin-controlled method for use in transactions where admin wants to do top-up, e.g. open packs
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun topUpFlowForAccount(adminRef: &MotoGPAdmin.Admin, toAddress: Address){ 
 		pre{ 
 			adminRef != nil:
@@ -115,7 +129,7 @@ contract MotoGPTransfer: ContractVersion{
 		return FlowStorageFees.storageCapacityToFlow(FlowStorageFees.convertUInt64StorageBytesToUFix64Megabytes(storage))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setMinFlowTopUp(adminRef: &MotoGPAdmin.Admin, amount: UFix64){ 
 		pre{ 
 			adminRef != nil:
@@ -124,7 +138,7 @@ contract MotoGPTransfer: ContractVersion{
 		self.minFlowTopUp = amount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setMaxFlowTopUp(adminRef: &MotoGPAdmin.Admin, amount: UFix64){ 
 		pre{ 
 			adminRef != nil:
@@ -133,18 +147,18 @@ contract MotoGPTransfer: ContractVersion{
 		self.maxFlowTopUp = amount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlowBalance(): UFix64{ 
 		return self.flowVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositFlow(from: @{FungibleToken.Vault}){ 
 		let vault <- from as! @FlowToken.Vault
 		self.flowVault.deposit(from: <-vault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawFlow(adminRef: &MotoGPAdmin.Admin, amount: UFix64): @{FungibleToken.Vault}{ 
 		pre{ 
 			adminRef != nil:

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	The TradeScores object creates a append only store for historical trade and equity data.
 	This data can be processed to determine performance information for a given trade account.
@@ -160,7 +174,7 @@ contract TraderflowScores{
 			self.achievement_onfire = _achievement_onfire
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun equal(md: TradeMetadata): Bool{ 
 			if self.score != md.score{ 
 				return false
@@ -377,7 +391,7 @@ contract TraderflowScores{
 			self.average_short_loss_ema150 = 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun findOpen(_symbol: String, _ticket: UInt64): Trade?{ 
 			var pos: Int = self.historical.length - 1
 			var openTrade: Trade? = nil
@@ -393,7 +407,7 @@ contract TraderflowScores{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun equityMinMaxBetween(start: UFix64, end: UFix64): [UFix64]{ 
 			var min: UFix64 = UFix64.max
 			var max: UFix64 = 0.0
@@ -418,7 +432,7 @@ contract TraderflowScores{
 			return [min, max]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pushEquity(_equity: UFix64): TradeMetadataRebuild{ 
 			let oldMetadata = self.metadata()
 			var eq: Equity = Equity(_value: _equity)
@@ -434,7 +448,7 @@ contract TraderflowScores{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pushTrade(_trade: Trade): TradeMetadataRebuild{ 
 			let oldMetadata = self.metadata()
 			self.pushEquity(_equity: _trade.equity)
@@ -521,7 +535,7 @@ contract TraderflowScores{
 		
 		/* INTERMEDIATE CALCULATIONS */
 		/* Return last recorded equity value */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Equity(): UFix64{ 
 			let len: Int = self.historical_equity.length
 			if len == 0{ 
@@ -531,7 +545,7 @@ contract TraderflowScores{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun DrawDown(): UFix64{ 
 			let equity = self.Equity()
 			if equity == 0.0{ 
@@ -541,7 +555,7 @@ contract TraderflowScores{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun WinRate(): UFix64{ 
 			var ptotal: UFix64 = UFix64(self.positive_long_total + self.positive_short_total)
 			var total: UFix64 =
@@ -553,7 +567,7 @@ contract TraderflowScores{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AverageProfitAndLoss(): [UFix64]{ 
 			var aveP: Fix64 = 0.0
 			var aveL: Fix64 = 0.0
@@ -582,7 +596,7 @@ contract TraderflowScores{
 			return avePnL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Score(): UFix64{ 
 			var pl: [UFix64] = self.AverageProfitAndLoss()
 			var win: UFix64 = self.WinRate()
@@ -598,7 +612,7 @@ contract TraderflowScores{
 		}
 		
 		/* ACHIEVEMENTS */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Provisional_Achievement(): Bool{ 
 			/* Duration of 60 days in seconds */
 			let sixty_days: UFix64 = 60.0 * 24.0 * 60.0 * 60.0
@@ -613,72 +627,72 @@ contract TraderflowScores{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Bear_Achievement(): Bool{ 
 			return self.positive_short_total > 25
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Bull_Achievement(): Bool{ 
 			return self.positive_long_total > 25
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Piggybank_Achievement(): Bool{ 
 			return self.positive_long_total + self.positive_short_total > 50
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Scales_Achievement(): Bool{ 
 			return self.positive_short_total > 25 && self.positive_long_total > 25
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Robot_Achievement(): Bool{ 
 			return self.positive_long_total + self.positive_short_total > 100
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Bank_Achievement(): Bool{ 
 			return self.Equity() > 1000.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Moneybags_Achievement(): Bool{ 
 			return self.Equity() > 10000.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Safe_Achievement(): Bool{ 
 			return self.DrawDown() < 0.10
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Crown1_Achievement(): Bool{ 
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Crown2_Achievement(): Bool{ 
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Diamond1_Achievement(): Bool{ 
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Diamond2_Achievement(): Bool{ 
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun OnFire_Achievement(): Bool{ 
 			return self.positive_long_run > 10 || self.positive_short_run > 10
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): TradeMetadata{ 
 			var pl: [UFix64] = self.AverageProfitAndLoss()
 			return TradeMetadata(

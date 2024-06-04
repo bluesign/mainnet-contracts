@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -78,7 +92,7 @@ contract Ezy3dItems: NonFungibleToken{
 			self.TaskDetail = TaskDetail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return "TaskId: ".concat(self.TaskId).concat(" TaskName:").concat(self.TaskName)
 		}
@@ -109,15 +123,15 @@ contract Ezy3dItems: NonFungibleToken{
 	access(all)
 	resource interface Ezy3dItemsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEzy3dItem(id: UInt64): &Ezy3dItems.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -154,7 +168,7 @@ contract Ezy3dItems: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Ezy3dItems.NFT
 			let id: UInt64 = token.id
 			
@@ -186,7 +200,7 @@ contract Ezy3dItems: NonFungibleToken{
 		// exposing all of its fields (including the typeID & rarityID).
 		// This is safe as there are no functions that can be called on the Ezy3dItem.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEzy3dItem(id: UInt64): &Ezy3dItems.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -245,7 +259,7 @@ contract Ezy3dItems: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, TaskId: String, TaskName: String, ImgId: String, taskFrame: String, taskHolder: String, taskDetail: String){ 
 			// deposit it in the recipient's account using their reference
 			//  TaskId: String, TaskName: String, ImgId: String
@@ -261,7 +275,7 @@ contract Ezy3dItems: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Ezy3dItems.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&Ezy3dItems.Collection>(Ezy3dItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Ezy3dItems.Collection.borowEzy3dItem to get the correct itemID

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -157,7 +171,7 @@ contract FindForgeOrder{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @FindForgeOrder.Order{ 
 			let token <- self.orders.remove(key: withdrawID) ?? panic("missing Order : ".concat(withdrawID.toString()))
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -166,7 +180,7 @@ contract FindForgeOrder{
 		
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @FindForgeOrder.Order){ 
 			emit Deposit(id: token.id, to: self.owner?.address)
 			self.orders[token.id] <-! token
@@ -180,7 +194,7 @@ contract FindForgeOrder{
 		
 		// borrowNFT gets a reference to an NFT in the collection
 		// so that the caller can read its metadata and call its methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ id: UInt64): &FindForgeOrder.Order{ 
 			return (&self.orders[id] as &FindForgeOrder.Order?)!
 		}
@@ -310,7 +324,7 @@ contract FindForgeOrder{
 	}
 	
 	// public function that anyone can call to create a new empty collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @FindForgeOrder.Collection{ 
 		return <-create Collection()
 	}

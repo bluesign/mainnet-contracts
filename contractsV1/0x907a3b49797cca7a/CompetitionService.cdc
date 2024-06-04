@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 ## The contract of main service on Flow Quest
 
 > Author: Bohao Tang<tech@btang.cn>
@@ -124,25 +138,25 @@ contract CompetitionService{
 	
 	access(all)
 	resource interface BountyInfoPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountyIdentifier(): Community.BountyEntityIdentifier
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLaunched(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isFeatured(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProperties():{ UInt8: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipants():{ Address:{ String: AnyStruct}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipantsAddress(): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipantsAmount(): Int
 	}
 	
@@ -176,62 +190,62 @@ contract CompetitionService{
 		}
 		
 		// ---- readonly methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPreconditions(): [{Interfaces.UnlockCondition}]{ 
 			return self.preconditions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipants():{ Address:{ String: AnyStruct}}{ 
 			return self.participants
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipantsAddress(): [Address]{ 
 			return self.participants.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipantsAmount(): Int{ 
 			return self.participants.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier():{ Interfaces.BountyEntityIdentifier}{ 
 			return self.identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountyIdentifier(): Community.BountyEntityIdentifier{ 
 			return self.identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLaunched(): Bool{ 
 			return self.properties[BountyProperty.Launched] ?? false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isFeatured(): Bool{ 
 			return self.properties[BountyProperty.Featured] ?? false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isForBeginner(): Bool{ 
 			return self.properties[BountyProperty.ForBeginner] ?? false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isForExpert(): Bool{ 
 			return self.properties[BountyProperty.ForExpert] ?? false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProperties():{ UInt8: Bool}{ 
 			let ret:{ UInt8: Bool} ={} 
 			for key in self.properties.keys{ 
@@ -240,7 +254,7 @@ contract CompetitionService{
 			return ret
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequiredMissionKeys(): [String]{ 
 			let ret: [String] = []
 			if self.identifier.category == Interfaces.BountyType.mission{ 
@@ -254,12 +268,12 @@ contract CompetitionService{
 			return ret
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardType(): Helper.MissionRewardType{ 
 			return self.rewardType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPointReward(): Helper.PointReward{ 
 			if self.rewardType == Helper.MissionRewardType.Points{ 
 				return self.rewardInfo as! Helper.PointReward
@@ -267,7 +281,7 @@ contract CompetitionService{
 			panic("Reward type is not Points")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFLOATReward(): Helper.FLOATReward{ 
 			if self.rewardType == Helper.MissionRewardType.FLOAT{ 
 				return self.rewardInfo as! Helper.FLOATReward
@@ -276,7 +290,7 @@ contract CompetitionService{
 		}
 		
 		// ---- writable methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun onParticipantCompleted(acct: Address){ 
 			let now = getCurrentBlock().timestamp
 			if self.participants[acct] == nil{ 
@@ -361,20 +375,20 @@ contract CompetitionService{
 	
 	access(all)
 	resource interface CompetitionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isDefault(): Bool
 		
 		// --- Properties ---
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndDate(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralThreshold(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRankingRewards(): String
 	}
 	
@@ -416,43 +430,43 @@ contract CompetitionService{
 		}
 		
 		// ---- readonly methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeasonId(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isDefault(): Bool{ 
 			return self.default
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isActive(): Bool{ 
 			return self.default ? true : self.getEndDate() > getCurrentBlock().timestamp
 		}
 		
 		// properties
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndDate(): UFix64{ 
 			return self.default ? 0.0 : (self.properties[CompetitionProperty.EndDate] as! UFix64?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralThreshold(): UInt64{ 
 			return self.default ? UInt64.max : (self.properties[CompetitionProperty.ReferralThreshold] as! UInt64?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return self.default ? "" : self.properties[CompetitionProperty.Title] as! String? ?? ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRankingRewards(): String{ 
 			return self.default ? "" : self.properties[CompetitionProperty.RankingRewards] as! String? ?? ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRank(_ addr: Address): Int{ 
 			let profileRef = UserProfile.borrowUserProfilePublic(addr)
 			let point = self.default ? profileRef.getProfilePoints() : profileRef.getSeasonPoints(seasonId: self.getSeasonId())
@@ -464,7 +478,7 @@ contract CompetitionService{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaderboardRanking(limit: Int?):{ UInt64: [Address]}{ 
 			let maxAmount = limit ?? 100
 			let totalLen = self.leaderboardRanking.length
@@ -563,27 +577,27 @@ contract CompetitionService{
 	access(all)
 	resource interface CompetitionServicePublic{ 
 		// Admin related
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAdminValid(_ addr: Address): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(claimer: &UserProfile.Profile): @CompetitionAdmin
 		
 		// Bounty
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBountyInfoByKey(_ key: String): &BountyInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBountyDetail(_ bountyId: UInt64): &BountyInfo
 		
 		// season related
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeasonDetail(seasonId: UInt64): &CompetitionSeason
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPermanentSeason(): &CompetitionSeason
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLastActiveSeason(): &CompetitionSeason?
 	}
 	
@@ -637,12 +651,12 @@ contract CompetitionService{
 		}
 		
 		// ---- factory methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSeasonPointsController(): @SeasonPointsController{ 
 			return <-create SeasonPointsController()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(claimer: &UserProfile.Profile): @CompetitionAdmin{ 
 			let claimerAddr = claimer.owner?.address ?? panic("Failed to load profile")
 			assert(self.isAdminValid(claimerAddr), message: "Admin is invalid")
@@ -652,54 +666,54 @@ contract CompetitionService{
 		}
 		
 		// ---- readonly methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAdminValid(_ addr: Address): Bool{ 
 			return self.adminWhitelist[addr] ?? false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralAddress(_ code: String): Address?{ 
 			return self.referralCodesToAddrs[code]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralCode(_ addr: Address): String?{ 
 			return self.referralAddrsToCodes[addr]
 		}
 		
 		// --- bounties ---
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountyIDs(): [UInt64]{ 
 			return self.bounties.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrimaryBountyIDs(): [UInt64]{ 
 			return self.primaryBounties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasBountyByKey(_ key: String): Bool{ 
 			return self.keyIdMapping[key] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBountyInfo(_ bountyId: UInt64): &{Interfaces.BountyInfoPublic}{ 
 			return self.borrowBountyPrivateRef(bountyId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBountyInfoByKey(_ key: String): &BountyInfo{ 
 			let bountyId = self.keyIdMapping[key] ?? panic("Missing missionKey.")
 			return self.borrowBountyDetail(bountyId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBountyDetail(_ bountyId: UInt64): &BountyInfo{ 
 			return self.borrowBountyPrivateRef(bountyId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMissionRef(_ missionKey: String): &{
 			Interfaces.BountyEntityPublic,
 			Interfaces.MissionInfoPublic
@@ -717,7 +731,7 @@ contract CompetitionService{
 				 * check if bounty completed
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkBountyCompleteStatus(acct: Address, bountyId: UInt64): Bool{ 
 			// get profile and update points
 			let profileRef = UserProfile.borrowUserProfilePublic(acct)
@@ -746,7 +760,7 @@ contract CompetitionService{
 		}
 		
 		// --- seasons ---
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSeasonID(): UInt64{ 
 			let season =
 				&self.seasons[self.latestActiveSeasonId] as &CompetitionSeason?
@@ -755,22 +769,22 @@ contract CompetitionService{
 			return season.getSeasonId()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeason(seasonId: UInt64): &{Interfaces.CompetitionPublic}{ 
 			return self.borrowSeasonPrivateRef(seasonId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeasonDetail(seasonId: UInt64): &CompetitionSeason{ 
 			return self.borrowSeasonPrivateRef(seasonId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPermanentSeason(): &CompetitionSeason{ 
 			return self.borrowSeasonPrivateRef(0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLastActiveSeason(): &CompetitionSeason?{ 
 			return self.latestActiveSeasonId == 0
 				? nil
@@ -784,7 +798,7 @@ contract CompetitionService{
 		}
 		
 		// ---- writable methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhitelistFlag(addr: Address, flag: Bool){ 
 			self.adminWhitelist[addr] = flag
 			emit ServiceWhitelistUpdated(target: addr, flag: flag)
@@ -876,7 +890,7 @@ contract CompetitionService{
 	access(all)
 	resource CompetitionAdmin{ 
 		// Bounty related
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBounty(
 			identifier: Community.BountyEntityIdentifier,
 			preconditions: [{
@@ -898,32 +912,32 @@ contract CompetitionService{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBountyProperty(bountyId: UInt64, property: BountyProperty, value: Bool){ 
 			let bounty = self.borrowBountyPrivRef(bountyId: bountyId)
 			bounty.updateBountyProperty(property: property, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBountyReward(bountyId: UInt64, reward:{ Helper.RewardInfo}){ 
 			let bounty = self.borrowBountyPrivRef(bountyId: bountyId)
 			bounty.updateRewardInfo(reward: reward)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBountyPrecondition(bountyId: UInt64, cond:{ Interfaces.UnlockCondition}){ 
 			let bounty = self.borrowBountyPrivRef(bountyId: bountyId)
 			bounty.addPrecondition(cond: cond)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBountyPrecondition(bountyId: UInt64, idx: Int){ 
 			let bounty = self.borrowBountyPrivRef(bountyId: bountyId)
 			bounty.removePrecondition(idx: idx)
 		}
 		
 		// Season related
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeason(endDate: UFix64, referralThreshold: UInt64): UInt64{ 
 			let serviceIns = CompetitionService.borrowServiceRef()
 			assert(
@@ -933,7 +947,7 @@ contract CompetitionService{
 			return serviceIns.startNewSeason(endDate: endDate, referralThreshold: referralThreshold)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEndDate(seasonId: UInt64, datetime: UFix64){ 
 			let serviceIns = CompetitionService.borrowServiceRef()
 			assert(
@@ -944,7 +958,7 @@ contract CompetitionService{
 			season.updateEndDate(datetime: datetime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateReferralThreshold(seasonId: UInt64, threshold: UInt64){ 
 			let serviceIns = CompetitionService.borrowServiceRef()
 			assert(
@@ -955,7 +969,7 @@ contract CompetitionService{
 			season.updateReferralThreshold(threshold: threshold)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSeasonPropertyString(
 			seasonId: UInt64,
 			property: CompetitionProperty,
@@ -985,7 +999,7 @@ contract CompetitionService{
 	/// Mainly used to update user profile
 	access(all)
 	resource SeasonPointsController{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNewParams(
 			acct: Address,
 			missionKey: String,
@@ -999,7 +1013,7 @@ contract CompetitionService{
 			profileRef.updateMissionNewParams(missionKey: missionKey, step: step, params: params)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun missionStepCompleted(acct: Address, missionKey: String, step: Int){ 
 			// get profile and update points
 			let profileRef = UserProfile.borrowUserProfilePublic(acct)
@@ -1010,7 +1024,7 @@ contract CompetitionService{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun missionStepFailure(acct: Address, missionKey: String, step: Int){ 
 			// get profile and update points
 			let profileRef = UserProfile.borrowUserProfilePublic(acct)
@@ -1021,7 +1035,7 @@ contract CompetitionService{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeBounty(acct: Address, bountyId: UInt64){ 
 			let serviceIns = CompetitionService.borrowServiceRef()
 			let bounty = serviceIns.borrowBountyPrivateRef(bountyId)
@@ -1064,7 +1078,7 @@ contract CompetitionService{
 			profileRef.completeBounty(bountyId: bountyId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setupReferralCode(acct: Address){ 
 			// get profile
 			let profileRef = UserProfile.borrowUserProfilePublic(acct)
@@ -1114,13 +1128,13 @@ contract CompetitionService{
 	}
 	
 	// ---- public methods ----
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowServicePublic(): &CompetitionServiceStore{ 
 		return self.getPublicCapability().borrow()
 		?? panic("Missing the capability of service store resource")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicCapability(): Capability<&CompetitionServiceStore>{ 
 		return self.account.capabilities.get<&CompetitionServiceStore>(self.ServicePublicPath)!
 	}

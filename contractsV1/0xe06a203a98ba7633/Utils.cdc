@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Utils{ 
 	access(all)
 	struct AddressNamePair{ 
@@ -14,7 +28,7 @@ contract Utils{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun convertStringToAddress(_ input: String): Address?{ 
 		var address = input
 		if input.utf8[1] == 120{ 
@@ -28,7 +42,7 @@ contract Utils{
 		return Address(r)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun royaltyCutStringToUFix64(_ royaltyCut: String): UFix64{ 
 		var decimalPos = 0
 		if royaltyCut[0] == "."{ 
@@ -67,7 +81,7 @@ contract Utils{
 		return UFix64(cutValueInteger) / cutValueDivisor
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMimeType(_ metadataFileType: String): String{ 
 		switch metadataFileType{ 
 			case "mp4":

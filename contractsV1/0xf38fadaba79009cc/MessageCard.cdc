@@ -1,4 +1,18 @@
-// _____________________________________________________________________________
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// _____________________________________________________________________________
 //	 _   _											__					  
 //	 /  /|										  /	)				   /
 // ---/| /-|----__---__---__----__----__----__-------/---------__---)__----__-/-
@@ -97,7 +111,7 @@ contract MessageCard: NonFungibleToken{
 	
 	access(all)
 	struct interface IRenderer{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun render(params:{ String: AnyStruct}): RenderResult
 	}
 	
@@ -135,7 +149,7 @@ contract MessageCard: NonFungibleToken{
 			emit UsedTemplateChanged(id: self.id, templateId: self.templateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValidTemplate(): Bool{ 
 			if let templates = self.templatesCapability.borrow(){ 
 				if let template = templates.borrowPublicTemplateRef(templateId: self.templateId){ 
@@ -145,7 +159,7 @@ contract MessageCard: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRenderer():{ IRenderer}?{ 
 			if let templates = self.templatesCapability.borrow(){ 
 				if let template = templates.borrowPublicTemplateRef(templateId: self.templateId){ 
@@ -222,15 +236,15 @@ contract MessageCard: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMessageCard(id: UInt64): &MessageCard.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -256,7 +270,7 @@ contract MessageCard: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MessageCard.NFT
 			let id: UInt64 = token.id
 			self.ownedNFTs[id] <-! token
@@ -273,7 +287,7 @@ contract MessageCard: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMessageCard(id: UInt64): &MessageCard.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &MessageCard.NFT
@@ -287,13 +301,13 @@ contract MessageCard: NonFungibleToken{
 			return nft as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateParams(id: UInt64, params:{ String: AnyStruct}){ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &MessageCard.NFT
 			nft.updateParams(params: params)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplate(id: UInt64, templatesCapability: Capability<&Templates>, templateId: UInt64){ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &MessageCard.NFT
 			nft.updateTemplate(templatesCapability: templatesCapability, templateId: templateId)
@@ -320,8 +334,8 @@ contract MessageCard: NonFungibleToken{
 		access(all)
 		let templateId: UInt64
 		
-		access(all)
-		fun getRenderer():{ IRenderer}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getRenderer():{ MessageCard.IRenderer}
 	}
 	
 	access(all)
@@ -341,12 +355,12 @@ contract MessageCard: NonFungibleToken{
 		access(all)
 		var renderer:{ IRenderer}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRenderer():{ IRenderer}{ 
 			return self.renderer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRenderer(renderer:{ IRenderer}){ 
 			self.renderer = renderer
 		}
@@ -364,10 +378,10 @@ contract MessageCard: NonFungibleToken{
 	
 	access(all)
 	resource interface TemplatesPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowPublicTemplateRef(templateId: UInt64): &Template?
 		
 		access(account)
@@ -379,7 +393,7 @@ contract MessageCard: NonFungibleToken{
 		access(account)
 		var templates: @{UInt64: Template}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(name: String, description: String, renderer:{ IRenderer}): UInt64{ 
 			let template <- create Template(creator: (self.owner!).address, name: name, description: description, renderer: renderer)
 			let templateId = template.templateId
@@ -387,19 +401,19 @@ contract MessageCard: NonFungibleToken{
 			return templateId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteTemplate(templateId: UInt64){ 
 			let template <- self.templates.remove(key: templateId)
 			assert(template != nil, message: "Not Found")
 			destroy template
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.templates.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowPublicTemplateRef(templateId: UInt64): &Template?{ 
 			return &self.templates[templateId] as &Template?
 		}
@@ -409,7 +423,7 @@ contract MessageCard: NonFungibleToken{
 			return &self as &Templates
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTemplateRef(templateId: UInt64): &Template?{ 
 			return &self.templates[templateId] as &Template?
 		}
@@ -421,27 +435,27 @@ contract MessageCard: NonFungibleToken{
 	
 	access(all)
 	resource Maintainer{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setThumbnailBaseUrl(url: String){ 
 			MessageCard.thumbnailBaseUrl = url
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(description: String){ 
 			MessageCard.description = description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalties(royalties: MetadataViews.Royalties){ 
 			MessageCard.royalties = royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExternalURLBase(externalURLBase: String){ 
 			MessageCard.externalURLBase = externalURLBase
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNFTCollectionDisplay(nftCollectionDisplay: MetadataViews.NFTCollectionDisplay){ 
 			MessageCard.nftCollectionDisplay = nftCollectionDisplay
 		}
@@ -452,12 +466,12 @@ contract MessageCard: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyTemplateCollection(): @Templates{ 
 		return <-create Templates()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mint(params:{ String: AnyStruct}, templatesCapability: Capability<&Templates>, templateId: UInt64): @NFT{ 
 		return <-create NFT(params: params, templatesCapability: templatesCapability, templateId: templateId)
 	}

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: 
 
 	authors: Joseph Djenandji, Matthew Balazsi, Jennifer McIntyre
@@ -254,7 +268,7 @@ contract OpenLockerInc: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintItem(): @NFT{ 
 			pre{ 
 				self.numberOfItemsMinted < self.printingLimit ?? 4294967295 as UInt32:
@@ -284,7 +298,7 @@ contract OpenLockerInc: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Items that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintItems(quantity: UInt32): @Collection{ 
 			pre{ 
 				self.numberOfItemsMinted + quantity <= self.printingLimit ?? 4294967295 as UInt32:
@@ -311,7 +325,7 @@ contract OpenLockerInc: NonFungibleToken{
 		// 
 		// Returns: the EditionID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(updates:{ String: String}, suffix: String): UInt32{ 
 			
 			// prevalidation 
@@ -485,7 +499,7 @@ contract OpenLockerInc: NonFungibleToken{
 		//  name: The name of the Edition
 		//  printingLimit: We can only mint this quantity of NFTs. If printingLimit is nil there is no limit (theoretically UInt32.max)
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(merchantID: UInt32, metadata:{ String: String}, name: String, printingLimit: UInt32?){ 
 			// Create the new Edition
 			var newEdition <- create Edition(merchantID: merchantID, metadata: metadata, name: name, printingLimit: printingLimit)
@@ -504,7 +518,7 @@ contract OpenLockerInc: NonFungibleToken{
 		// Returns: A reference to the Edition with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEdition(editionID: UInt32): &Edition{ 
 			pre{ 
 				OpenLockerInc.editions[editionID] != nil:
@@ -529,7 +543,7 @@ contract OpenLockerInc: NonFungibleToken{
 		// 
 		// Returns: the EditionID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEditionMetadata(editionID: UInt32, updates:{ String: String}, suffix: String): UInt32{ 
 			pre{ 
 				OpenLockerInc.editions[editionID] != nil:
@@ -543,7 +557,7 @@ contract OpenLockerInc: NonFungibleToken{
 		}
 		
 		// set default royalties
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultRoyaltyByName(name: String, royalty: MetadataViews.Royalty){ 
 			OpenLockerInc.defaultRoyalties[name] = royalty
 			// verify total
@@ -552,7 +566,7 @@ contract OpenLockerInc: NonFungibleToken{
 			emit DefaultRoyaltiesUpdated(name: name, cut: royalty.cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeDefaultRoyaltyByName(name: String){ 
 			if !OpenLockerInc.defaultRoyalties.containsKey(name){ 
 				var errorMsg = "Default Royalty with name ["
@@ -564,7 +578,7 @@ contract OpenLockerInc: NonFungibleToken{
 		}
 		
 		// set royalties for edition
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEditionRoyaltyByName(editionID: UInt32, name: String, royalty: MetadataViews.Royalty){ 
 			if !OpenLockerInc.royaltiesForSpecificEdition.containsKey(editionID){ 
 				OpenLockerInc.royaltiesForSpecificEdition.insert(key: editionID,{} )
@@ -578,7 +592,7 @@ contract OpenLockerInc: NonFungibleToken{
 		}
 		
 		// remove royalty for edition
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEditionRoyaltyByName(editionID: UInt32, name: String){ 
 			if !OpenLockerInc.royaltiesForSpecificEdition.containsKey(editionID){ 
 				var errorMsg = "Royalty specific to editionID"
@@ -595,7 +609,7 @@ contract OpenLockerInc: NonFungibleToken{
 			emit RoyaltiesForEditionRemoved(editionID: editionID, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revertRoyaltiesForEditionToDefault(editionID: UInt32){ 
 			if !OpenLockerInc.royaltiesForSpecificEdition.containsKey(editionID){ 
 				var errorMsg = "Royalty for editionID "
@@ -608,7 +622,7 @@ contract OpenLockerInc: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			let newID = OpenLockerInc.nextAdminID
 			// Increment the ID so that it isn't used again
@@ -623,18 +637,18 @@ contract OpenLockerInc: NonFungibleToken{
 	access(all)
 	resource interface OpenLockerIncCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOpenLockerInc(id: UInt64): &OpenLockerInc.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -684,7 +698,7 @@ contract OpenLockerInc: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn OpenLockerInc items
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -704,7 +718,7 @@ contract OpenLockerInc: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a OpenLockerInc NFT to make sure
 			// it is the correct type
@@ -728,7 +742,7 @@ contract OpenLockerInc: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -775,7 +789,7 @@ contract OpenLockerInc: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOpenLockerInc(id: UInt64): &OpenLockerInc.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -825,31 +839,31 @@ contract OpenLockerInc: NonFungibleToken{
 		return <-create OpenLockerInc.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyOpenLockerIncCollection(): @OpenLockerInc.Collection{ 
 		return <-create OpenLockerInc.Collection()
 	}
 	
 	// getDefaultRoyalties returns the default royalties
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultRoyalties():{ String: MetadataViews.Royalty}{ 
 		return self.defaultRoyalties
 	}
 	
 	// getDefaultRoyalties returns the default royalties
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultRoyaltyNames(): [String]{ 
 		return self.defaultRoyalties.keys
 	}
 	
 	// getDefaultRoyalties returns the default royalties
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultRoyaltyByName(name: String): MetadataViews.Royalty?{ 
 		return self.defaultRoyalties[name]
 	}
 	
 	// getDefaultRoyalties returns the default royalties total rate
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultRoyaltyTotalRate(): UFix64{ 
 		var cut = 0.0
 		for name in self.defaultRoyalties.keys{ 
@@ -859,27 +873,27 @@ contract OpenLockerInc: NonFungibleToken{
 	}
 	
 	// getRoyaltiesForEdition returns the royalties set for a specific edition, that overrides the default
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionRoyalties(editionID: UInt32):{ String: MetadataViews.Royalty}{ 
 		return self.royaltiesForSpecificEdition[editionID] ?? self.defaultRoyalties
 	}
 	
 	// getRoyaltiesForEdition returns the royalties set for a specific edition, that overrides the default
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionRoyaltyNames(editionID: UInt32): [String]{ 
 		let royalties = OpenLockerInc.getEditionRoyalties(editionID: editionID)
 		return royalties.keys
 	}
 	
 	// getRoyaltiesForEdition returns the royalties set for a specific edition, that overrides the default
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionRoyaltyByName(editionID: UInt32, name: String): MetadataViews.Royalty{ 
 		let royaltiesForSpecificEdition = OpenLockerInc.getEditionRoyalties(editionID: editionID)
 		return royaltiesForSpecificEdition[name]!
 	}
 	
 	// getDefaultRoyalties returns the default royalties total rate
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionRoyaltyTotalRate(editionID: UInt32): UFix64{ 
 		let royalties = OpenLockerInc.getEditionRoyalties(editionID: editionID)
 		var cut = 0.0

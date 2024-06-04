@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -41,7 +55,7 @@ contract VIV3{
 		access(all)
 		var royalty: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenId: UInt64, kind: Type, vault: @{FungibleToken.Vault}): @{
 			NonFungibleToken.NFT
 		}{ 
@@ -53,7 +67,7 @@ contract VIV3{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenId: UInt64): UFix64?
 	}
 	
@@ -104,12 +118,12 @@ contract VIV3{
 			self.currency = currency
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun tokenSaleEnabled(): Bool{ 
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenId: UInt64, price: UFix64){ 
 			pre{ 
 				self.tokenSaleEnabled() == true:
@@ -123,7 +137,7 @@ contract VIV3{
 			emit TokenListed(id: token.id, type: token.getType(), price: price, seller: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenId: UInt64){ 
 			pre{ 
 				(self.collection.borrow()!).borrowNFT(tokenId) != nil:
@@ -137,7 +151,7 @@ contract VIV3{
 			emit TokenWithdrawn(id: token.id, type: token.getType(), owner: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenId: UInt64, kind: Type, vault: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.tokenSaleEnabled() == true:
@@ -170,7 +184,7 @@ contract VIV3{
 			return <-(self.collection.borrow()!).withdraw(withdrawID: token.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenId: UInt64, price: UFix64){ 
 			pre{ 
 				self.tokenSaleEnabled() == true:
@@ -185,19 +199,19 @@ contract VIV3{
 			emit TokenPriceChanged(id: token.id, type: token.getType(), price: price, seller: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeFee(_ fee: UFix64){ 
 			self.fee = fee
 			emit FeeChanged(fee: self.fee, seller: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyalty(_ royalty: UFix64){ 
 			self.royalty = royalty
 			emit RoyaltyChanged(royalty: self.royalty, seller: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(_ newOwnerCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newOwnerCapability.borrow() != nil:
@@ -206,7 +220,7 @@ contract VIV3{
 			self.ownerCapability = newOwnerCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(_ newBeneficiaryCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newBeneficiaryCapability.borrow() != nil:
@@ -215,7 +229,7 @@ contract VIV3{
 			self.beneficiaryCapability = newBeneficiaryCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyReceiver(_ newRoyaltyCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newRoyaltyCapability.borrow() != nil:
@@ -224,7 +238,7 @@ contract VIV3{
 			self.royaltyCapability = newRoyaltyCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenId: UInt64): UFix64?{ 
 			if let cap = self.collection.borrow(){ 
 				if (cap!).getIDs().contains(tokenId){ 
@@ -236,7 +250,7 @@ contract VIV3{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenSaleCollection(
 		collection: Capability<&{NonFungibleToken.Collection}>,
 		ownerCapability: Capability<&{FungibleToken.Receiver}>,

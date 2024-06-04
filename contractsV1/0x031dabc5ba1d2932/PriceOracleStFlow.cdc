@@ -1,4 +1,18 @@
-import OracleInterface from "../0xcec15c814971c1dc/OracleInterface.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import OracleInterface from "../0xcec15c814971c1dc/OracleInterface.cdc"
 
 import OracleConfig from "../0xcec15c814971c1dc/OracleConfig.cdc"
 
@@ -58,7 +72,7 @@ contract PriceOracleStFlow: OracleInterface{
 		let _PriceIdentifier: String
 		
 		/// @Return the median price of stFlow/USD price feed, return 0.0 if there's no valid price data to provide
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedianPrice(): UFix64{ 
 			// If no this feed's PriceReader resource, or the reader is not in stFlow/USD feed's whitelist
 			if self.owner == nil || PriceOracleStFlow._ReaderWhiteList.containsKey((self.owner!).address) != true{ 
@@ -74,7 +88,7 @@ contract PriceOracleStFlow: OracleInterface{
 			return LiquidStakingConfig.ScaledUInt256ToUFix64(scaledStFlowToFlow) * flowToUsd
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawMedianPrice(): UFix64{ 
 			let flowPriceReaderRef = PriceOracleStFlow.account.storage.borrow<&OracleInterface.PriceReader>(from: PriceOracleStFlow._FlowPriceReaderPath)
 			// If no Flow/USD feed's PriceReader resource
@@ -86,7 +100,7 @@ contract PriceOracleStFlow: OracleInterface{
 			return LiquidStakingConfig.ScaledUInt256ToUFix64(scaledStFlowToFlow) * rawFlowToUsd
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawMedianBlockHeight(): UInt64{ 
 			let flowPriceReaderRef = PriceOracleStFlow.account.storage.borrow<&OracleInterface.PriceReader>(from: PriceOracleStFlow._FlowPriceReaderPath)
 			// If no Flow/USD feed's PriceReader resource
@@ -96,7 +110,7 @@ contract PriceOracleStFlow: OracleInterface{
 			return (flowPriceReaderRef!).getRawMedianBlockHeight()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceIdentifier(): String{ 
 			return self._PriceIdentifier
 		}
@@ -109,15 +123,15 @@ contract PriceOracleStFlow: OracleInterface{
 	/// PriceFeeder is *unused* for PriceOracle_stFlowToken, put here simply for implementing the OracleInterface.
 	access(all)
 	resource PriceFeeder: OracleInterface.PriceFeederPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publishPrice(price: UFix64){} 
 		
 		/* Do nothing */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExpiredDuration(blockheightDuration: UInt64){} 
 		
 		/* Do nothing */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fetchPrice(certificate: &OracleInterface.OracleCertificate): UFix64{ 
 			/* Do nothing */
 			return 0.0
@@ -132,21 +146,21 @@ contract PriceOracleStFlow: OracleInterface{
 	access(all)
 	resource OraclePublic: OracleInterface.OraclePublicInterface_Reader{ 
 		/// Users who need to read the oracle price should mint this resource and save locally.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPriceReader(): @PriceReader{ 
 			emit MintPriceReader()
 			return <-create PriceReader()
 		}
 		
 		/// Recommended path for PriceReader, users can manage resources by themselves
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceReaderStoragePath(): StoragePath{ 
 			return PriceOracleStFlow._PriceReaderStoragePath!
 		}
 	}
 	
 	/// Get reader whitelist of stFlow/USD price feed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReaderWhiteList(from: UInt64, to: UInt64): [Address]{ 
 		let readerAddrs = PriceOracleStFlow._ReaderWhiteList.keys
 		let readerLen = UInt64(readerAddrs.length)
@@ -166,7 +180,7 @@ contract PriceOracleStFlow: OracleInterface{
 	
 	access(all)
 	resource Admin: OracleInterface.Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configOracle(priceIdentifier: String, minFeederNumber: Int, feederStoragePath: StoragePath, feederPublicPath: PublicPath, readerStoragePath: StoragePath){ 
 			emit ConfigOracle(oldType: PriceOracleStFlow._PriceIdentifier, newType: priceIdentifier, oldReaderStoragePath: PriceOracleStFlow._PriceReaderStoragePath, newReaderStoragePath: readerStoragePath)
 			if PriceOracleStFlow._PriceIdentifier != priceIdentifier{ 
@@ -177,26 +191,26 @@ contract PriceOracleStFlow: OracleInterface{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addReaderWhiteList(readerAddr: Address){ 
 			PriceOracleStFlow._ReaderWhiteList[readerAddr] = true
 			emit AddReaderWhiteList(addr: readerAddr)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delReaderWhiteList(readerAddr: Address){ 
 			PriceOracleStFlow._ReaderWhiteList.remove(key: readerAddr)
 			emit DelReaderWhiteList(addr: readerAddr)
 		}
 		
 		// Feeder-related are *unused*.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFeederWhiteList(feederAddr: Address){} 
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delFeederWhiteList(feederAddr: Address){} 
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeederWhiteListPrice(): [UFix64]{ 
 			return []
 		}

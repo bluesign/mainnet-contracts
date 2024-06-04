@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -99,34 +113,34 @@ contract FindForge{
 			self.socials = socials
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinterFTReceiver(): Capability<&{FungibleToken.Receiver}>{ 
 			return getAccount(self.minter).capabilities.get<&{FungibleToken.Receiver}>(
 				Profile.publicReceiverPath
 			)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateExternalURL(_ d: String){ 
 			self.externalURL = d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDesription(_ d: String){ 
 			self.description = d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSquareImagen(_ d: String){ 
 			self.squareImage = d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBannerImage(_ d: String){ 
 			self.bannerImage = d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSocials(_ d:{ String: String}){ 
 			self.socials = d
 		}
@@ -139,12 +153,12 @@ contract FindForge{
 	// ForgeMinter Interface 
 	access(all)
 	resource interface Forge{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(platform: MinterPlatform, data: AnyStruct, verifier: &Verifier): @{
 			NonFungibleToken.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addContractData(platform: MinterPlatform, data: AnyStruct, verifier: &Verifier)
 	}
 	
@@ -153,7 +167,7 @@ contract FindForge{
 		return &FindForge.forgeTypes[type] as &{Forge}?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMinterPlatform(name: String, forgeType: Type): MinterPlatform?{ 
 		if FindForge.minterPlatforms[forgeType] == nil{ 
 			return nil
@@ -161,12 +175,12 @@ contract FindForge{
 		return (FindForge.minterPlatforms[forgeType]!)[name]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMinterPlatformsByName():{ Type:{ String: MinterPlatform}}{ 
 		return FindForge.minterPlatforms
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkMinterPlatform(name: String, forgeType: Type): Bool{ 
 		if FindForge.minterPlatforms[forgeType] == nil{ 
 			return false
@@ -179,7 +193,7 @@ contract FindForge{
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setMinterPlatform(
 		lease: &FIND.Lease,
 		forgeType: Type,
@@ -263,7 +277,7 @@ contract FindForge{
 		panic("Please give the user forge addon to start forging. Name: ".concat(leaseName))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeMinterPlatform(lease: &FIND.Lease, forgeType: Type){ 
 		if FindForge.minterPlatforms[forgeType] == nil{ 
 			panic("This minter platform does not exist. Forge Type : ".concat(forgeType.identifier))
@@ -320,7 +334,7 @@ contract FindForge{
 	
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun orderForge(
 		lease: &FIND.Lease,
 		mintType: String,
@@ -382,7 +396,7 @@ contract FindForge{
 		return *c
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mint(
 		lease: &FIND.Lease,
 		forgeType: Type,
@@ -459,7 +473,7 @@ contract FindForge{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addContractData(lease: &FIND.Lease, forgeType: Type, data: AnyStruct){ 
 		FindForge.adminAddContractData(lease: lease.getName(), forgeType: forgeType, data: data)
 	}
@@ -499,7 +513,7 @@ contract FindForge{
 		forge.addContractData(platform: minterPlatform, data: data, verifier: verifier)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addForgeType(_ forge: @{Forge}){ 
 		if FindForge.forgeTypes.containsKey(forge.getType()){ 
 			panic("This type is already registered to the registry. Type : ".concat(forge.getType().identifier))
@@ -585,7 +599,7 @@ contract FindForge{
 		return &self.verifier as &Verifier
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createForgeAdminProxyClient(): @ForgeAdminProxy{ 
 		return <-create ForgeAdminProxy()
 	}
@@ -593,8 +607,8 @@ contract FindForge{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface ForgeAdminProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&FIND.Network>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&FIND.Network>): Void
 	}
 	
 	//admin proxy with capability receiver 
@@ -607,7 +621,7 @@ contract FindForge{
 			self.capability = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&FIND.Network>){ 
 			pre{ 
 				cap.check():
@@ -618,7 +632,7 @@ contract FindForge{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillForgeOrder(_ contractName: String, forgeType: Type): MetadataViews.NFTCollectionDisplay{ 
 			pre{ 
 				self.capability != nil:

@@ -1,4 +1,18 @@
-import FindViews from "./FindViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FindViews from "./FindViews.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -108,7 +122,7 @@ contract FindThoughts{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowThoughtPublic(): &{ThoughtPublic}?{ 
 			if self.cap.check(){ 
 				let ref = self.cap.borrow()!
@@ -119,7 +133,7 @@ contract FindThoughts{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun valid(): Bool{ 
 			if self.borrowThoughtPublic() != nil{ 
 				return true
@@ -127,7 +141,7 @@ contract FindThoughts{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun owner(): Address{ 
 			return self.cap.address
 		}
@@ -171,10 +185,10 @@ contract FindThoughts{
 		access(contract)
 		fun internal_react(user: Address, reaction: String?)
 		
-		access(all)
-		fun getQuotedThought(): ThoughtPointer?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getQuotedThought(): FindThoughts.ThoughtPointer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHide(): Bool
 	}
 	
@@ -245,7 +259,7 @@ contract FindThoughts{
 			self.reactions ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuotedThought(): ThoughtPointer?{ 
 			if let r = self.extras["quote"]{ 
 				return r as! ThoughtPointer
@@ -253,7 +267,7 @@ contract FindThoughts{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHide(): Bool{ 
 			if let r = self.extras["hidden"]{ 
 				return r as! Bool
@@ -261,7 +275,7 @@ contract FindThoughts{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hide(_ hide: Bool){ 
 			self.extras["hidden"] = hide
 			let medias: [String] = []
@@ -271,7 +285,7 @@ contract FindThoughts{
 			emit Edited(id: self.id, creator: self.creator, creatorName: FIND.reverseLookup(self.creator), header: self.header, message: self.body, medias: medias, hide: hide, tags: self.tags)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun edit(header: String, body: String, tags: [String]){ 
 			self.header = header
 			self.body = body
@@ -311,7 +325,7 @@ contract FindThoughts{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			switch type{ 
 				case Type<MetadataViews.Display>():
 					let content = self.body.concat("  -- FIND Thought by ").concat(FIND.reverseLookup((self.owner!).address) ?? (self.owner!).address.toString())
@@ -323,13 +337,13 @@ contract FindThoughts{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(_ id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowThoughtPublic(_ id: UInt64): &FindThoughts.Thought
 	}
 	
@@ -346,7 +360,7 @@ contract FindThoughts{
 			self.sequence = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(_ id: UInt64): Bool{ 
 			return self.ownedThoughts.containsKey(id)
 		}
@@ -356,7 +370,7 @@ contract FindThoughts{
 			return self.ownedThoughts.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ id: UInt64): &FindThoughts.Thought{ 
 			pre{ 
 				self.ownedThoughts.containsKey(id):
@@ -365,7 +379,7 @@ contract FindThoughts{
 			return (&self.ownedThoughts[id] as &FindThoughts.Thought?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowThoughtPublic(_ id: UInt64): &FindThoughts.Thought{ 
 			pre{ 
 				self.ownedThoughts.containsKey(id):
@@ -385,7 +399,7 @@ contract FindThoughts{
 		
 		// TODO : Restructure this to take structs , and declare the structs in Trxn.  And identify IPFS and url
 		// So take pointer, thought pointer and media
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publish(header: String, body: String, tags: [String], media: MetadataViews.Media?, nftPointer: FindViews.ViewReadPointer?, quote: FindThoughts.ThoughtPointer?){ 
 			let medias: [MetadataViews.Media] = []
 			let m: [String] = []
@@ -407,7 +421,7 @@ contract FindThoughts{
 			self.ownedThoughts[thought.uuid] <-! thought
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delete(_ id: UInt64){ 
 			pre{ 
 				self.ownedThoughts.containsKey(id):
@@ -419,7 +433,7 @@ contract FindThoughts{
 			destroy thought
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun react(user: Address, id: UInt64, reaction: String?){ 
 			let cap = FindThoughts.getFindThoughtsCapability(user)
 			let ref = cap.borrow() ?? panic("Cannot borrow reference to Find Thoughts Collection from user : ".concat(user.toString()))
@@ -427,19 +441,19 @@ contract FindThoughts{
 			thought.internal_react(user: (self.owner!).address, reaction: reaction)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hide(id: UInt64, hide: Bool){ 
 			let thought = self.borrow(id)
 			thought.hide(hide)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @FindThoughts.Collection{ 
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFindThoughtsCapability(_ user: Address): Capability<&FindThoughts.Collection>{ 
 		return getAccount(user).capabilities.get<&FindThoughts.Collection>(
 			FindThoughts.CollectionPublicPath

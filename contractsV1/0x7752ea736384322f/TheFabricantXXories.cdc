@@ -1,4 +1,18 @@
-import TheFabricantMetadataViews from "./TheFabricantMetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import TheFabricantMetadataViews from "./TheFabricantMetadataViews.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -252,7 +266,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		access(contract)
 		var revealableTraits:{ String: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevealableTraits():{ String: Bool}{ 
 			return self.revealableTraits
 		}
@@ -309,12 +323,12 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		
 		// Called by the nft owner to modify if a trait can be 
 		// revealed or not - used to revoke admin access
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIsTraitRevealable(key: String, value: Bool){ 
 			self.revealableTraits[key] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkRevealableTrait(traitName: String): Bool?{ 
 			if let revealable = self.revealableTraits[traitName]{ 
 				return revealable
@@ -373,49 +387,49 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 	// Ensures that the returned NFT ref is read only.
 	access(all)
 	resource interface PublicNFT{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFullName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): MetadataViews.Editions
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getRarity(): MetadataViews.Rarity?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalRoyalties(): MetadataViews.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTFRoyalties(): TheFabricantMetadataViews.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCharacteristics():{ String:{ CoCreatable.Characteristic}}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData(): MetadataViews.NFTCollectionData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTView(): MetadataViews.NFTView
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -445,18 +459,18 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		access(contract)
 		let nftMetadataId: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFullName(): String{ 
 			return ((TheFabricantXXories.nftMetadata[self.nftMetadataId]!).name!).concat(" #".concat(self.editionNumber.toString()))
 		}
 		
 		// NOTE: This is important for Edition view
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionName(): String{ 
 			return (TheFabricantXXories.nftMetadata[self.nftMetadataId]!).collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): MetadataViews.Editions{ 
 			// NOTE: In this case, id == edition number
 			let edition = MetadataViews.Edition(name: (TheFabricantXXories.nftMetadata[self.nftMetadataId]!).collection, number: self.editionNumber, max: TheFabricantXXories.maxSupply)
@@ -467,7 +481,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		//NOTE: This will be different for each campaign, determined by how
 		// many media files there are and their keys in metadata! Pay attention
 		// to where the media files are stored and therefore accessed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias{ 
 			let nftMetadata = TheFabricantXXories.nftMetadata[self.id]!
 			let mainImage = nftMetadata.metadata["mainImage"]! as! String
@@ -480,7 +494,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImages():{ String: String}{ 
 			let nftMetadata = TheFabricantXXories.nftMetadata[self.id]!
 			let mainImage = nftMetadata.metadata["mainImage"]! as! String
@@ -488,7 +502,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideos():{ String: String}{ 
 			let nftMetadata = TheFabricantXXories.nftMetadata[self.id]!
 			let mainVideo = nftMetadata.metadata["video"]! as! String
@@ -498,40 +512,40 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		// NOTE: Customise
 		// What are the traits that you want external marketplaces
 		// to display?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits?{ 
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getRarity(): MetadataViews.Rarity?{ 
 			return MetadataViews.Rarity(score: TheFabricantXXories.nftMetadata[self.nftMetadataId]?.rarity, max: 100.0, description: TheFabricantXXories.nftMetadata[self.nftMetadataId]?.rarityDescription)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalRoyalties(): MetadataViews.Royalties{ 
 			let nftMetadata = TheFabricantXXories.nftMetadata[self.id]!
 			return nftMetadata.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTFRoyalties(): TheFabricantMetadataViews.Royalties{ 
 			let nftMetadata = TheFabricantXXories.nftMetadata[self.id]!
 			return nftMetadata.royaltiesTFMarketplace
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return (TheFabricantXXories.nftMetadata[self.id]!).metadata
 		}
 		
 		//NOTE: This is not a CoCreatable NFT, so no characteristics are present
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCharacteristics():{ String:{ CoCreatable.Characteristic}}?{ 
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevealableTraits():{ String: Bool}?{ 
 			return (TheFabricantXXories.nftMetadata[self.id]!).getRevealableTraits()
 		}
@@ -539,12 +553,12 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		//NOTE: The first file in medias will be the thumbnail.
 		// Maybe put a file type check in here to ensure it is 
 		// an image?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display{ 
 			return MetadataViews.Display(name: self.getFullName(), description: (TheFabricantXXories.nftMetadata[self.nftMetadataId]!).description, thumbnail: self.getMedias().items[0].file)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: TheFabricantXXories.TheFabricantXXoriesCollectionStoragePath, publicPath: TheFabricantXXories.TheFabricantXXoriesCollectionPublicPath, publicCollection: Type<&TheFabricantXXories.Collection>(), publicLinkedType: Type<&TheFabricantXXories.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-TheFabricantXXories.createEmptyCollection(nftType: Type<@TheFabricantXXories.Collection>())
@@ -554,14 +568,14 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		//NOTE: Customise
 		// NOTE: Update this function with the collection display image
 		// and TF socials
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let squareImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://xxories.s3.eu-central-1.amazonaws.com/images/campaign-image.png"), mediaType: "image/png")
 			let bannerImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://xxories.s3.eu-central-1.amazonaws.com/images/twitter-header.png"), mediaType: "image/png")
 			return MetadataViews.NFTCollectionDisplay(name: self.getEditionName(), description: "The Fabricant XXories", externalURL: (TheFabricantXXories.nftMetadata[self.id]!).externalURL, squareImage: squareImage, bannerImage: bannerImage, socials:{ "twitter": MetadataViews.ExternalURL("https://twitter.com/thefabricant"), "instagram": MetadataViews.ExternalURL("https://www.instagram.com/the_fab_ric_ant/"), "facebook": MetadataViews.ExternalURL("https://www.facebook.com/thefabricantdesign/"), "artstation": MetadataViews.ExternalURL("https://www.artstation.com/thefabricant"), "behance": MetadataViews.ExternalURL("https://www.behance.net/thefabricant"), "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/the-fabricant"), "sketchfab": MetadataViews.ExternalURL("https://sketchfab.com/thefabricant"), "clolab": MetadataViews.ExternalURL("https://www.clo3d.com/en/clollab/thefabricant"), "tiktok": MetadataViews.ExternalURL("@digital_fashion"), "discord": MetadataViews.ExternalURL("https://discord.com/channels/692039738751713280/778601303013195836")})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTView(): MetadataViews.NFTView{ 
 			return MetadataViews.NFTView(id: self.id, uuid: self.uuid, display: self.getDisplay(), externalURL: (TheFabricantXXories.nftMetadata[self.id]!).externalURL, collectionData: self.getCollectionData(), collectionDisplay: self.getCollectionDisplay(), royalties: (TheFabricantXXories.nftMetadata[self.id]!).royalties, traits: self.getTraits())
 		}
@@ -613,7 +627,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIsTraitRevealable(key: String, value: Bool){ 
 			let nftMetadata = TheFabricantXXories.nftMetadata[self.id]!
 			nftMetadata.updateIsTraitRevealable(key: key, value: value)
@@ -648,17 +662,17 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 	// -----------------------------------------------------------------------
 	access(all)
 	resource interface TheFabricantXXoriesCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTheFabricantXXories(id: UInt64): &TheFabricantXXories.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 	}
 	
 	access(all)
@@ -689,7 +703,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		// deposit takes an NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// By ensuring self.owner.address is not nil we keep the nftIdsToOwner dict 
 			// up to date.
 			pre{ 
@@ -726,7 +740,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTheFabricantXXories(id: UInt64): &TheFabricantXXories.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -764,26 +778,26 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPublicReceiverCap(paymentReceiverCap: Capability<&{FungibleToken.Receiver}>){ 
 			TheFabricantXXories.paymentReceiverCap = paymentReceiverCap
 			emit AdminPaymentReceiverCapabilityChanged(address: paymentReceiverCap.address, paymentType: paymentReceiverCap.getType())
 		}
 		
 		// The max supply determines the maximum number of NFTs that can be minted from this contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxSupply(maxSupply: UInt64){ 
 			TheFabricantXXories.maxSupply = maxSupply
 			emit AdminSetMaxSupply(maxSupply: maxSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddressMintLimit(addressMintLimit: UInt64){ 
 			TheFabricantXXories.addressMintLimit = addressMintLimit
 			emit AdminSetAddressMintLimit(addressMintLimit: addressMintLimit)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionId(collectionId: String){ 
 			TheFabricantXXories.collectionId = collectionId
 			emit AdminSetCollectionId(collectionId: collectionId)
@@ -801,7 +815,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		// nftMetadata √
 		// update mints per address √
 		//NOTE: !Used for CC payments via MoonPay!
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun distributeDirectlyViaAccessList(receiver: &{NonFungibleToken.CollectionPublic}, publicMinterPathString: String){ 
 			
 			// Ensure that the maximum supply of nfts for this contract has not been hit
@@ -869,7 +883,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		// NFT √
 		// nftMetadata √
 		// update mints per address √
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun distributeDirectlyViaTFNFT(receiver: &{NonFungibleToken.CollectionPublic}, publicMinterPathString: String, refs: [&{NonFungibleToken.INFT}]){ 
 			pre{ 
 				refs.length != 0 || refs == nil:
@@ -934,7 +948,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		
 		// NOTE: It is in the public minter that you would create the restrictions
 		// for minting. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPublicMinter(name: String, description: String, collection: String, license: MetadataViews.License?, externalURL: MetadataViews.ExternalURL, coCreatable: Bool, revealableTraits:{ String: Bool}, minterMintLimit: UInt64?, royalties: MetadataViews.Royalties, royaltiesTFMarketplace: TheFabricantMetadataViews.Royalties, paymentAmount: UFix64, paymentType: Type, paymentSplit: MetadataViews.Royalties?, typeRestrictions: [Type], accessListId: UInt64){ 
 			pre{ 
 				TheFabricantXXories.paymentReceiverCap != nil:
@@ -950,7 +964,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 			TheFabricantXXories.account.link<&PublicMinter>(publicMinterPublicPath!, target: publicMinterStoragePath!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealTraits(nftMetadataId: UInt64, traits: [{Revealable.RevealableTrait}]){ 
 			let nftMetadata = TheFabricantXXories.nftMetadata[nftMetadataId]! as! TheFabricantXXories.RevealableMetadata
 			nftMetadata.revealTraits(traits: traits)
@@ -984,13 +998,13 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 	// Update the mint functions
 	access(all)
 	resource interface Minter{ 
-		access(all)
-		fun mintUsingAccessList(receiver: &{NonFungibleToken.CollectionPublic}, payment: @{FungibleToken.Vault})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintUsingAccessList(receiver: &{NonFungibleToken.CollectionPublic}, payment: @{FungibleToken.Vault}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingNftRefs(receiver: &{NonFungibleToken.CollectionPublic}, refs: [&{NonFungibleToken.INFT}], payment: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicMinterDetails():{ String: AnyStruct}
 	}
 	
@@ -1062,44 +1076,44 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		access(all)
 		var accessListId: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsOpenAccess(isOpenAccess: Bool){ 
 			self.isOpenAccess = isOpenAccess
 			emit PublicMinterIsOpenAccessChanged(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsAccessListOnly(isAccessListOnly: Bool){ 
 			self.isAccessListOnly = isAccessListOnly
 			emit PublicMinterIsAccessListOnly(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMintingIsOpen(isOpen: Bool){ 
 			self.isOpen = isOpen
 			emit PublicMinterMintingIsOpen(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessListId(accessListId: UInt64){ 
 			self.accessListId = accessListId
 			emit PublicMinterSetAccessListId(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen, accessListId: self.accessListId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPaymentAmount(amount: UFix64){ 
 			self.paymentAmount = amount
 			emit PublicMinterSetPaymentAmount(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen, paymentAmount: self.paymentAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterMintLimit(minterMintLimit: UInt64){ 
 			self.minterMintLimit = minterMintLimit
 			emit PublicMinterSetMinterMintLimit(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen, minterMintLimit: self.minterMintLimit)
 		}
 		
 		// The owner of the pM can access this via borrow in tx.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTypeRestrictions(types: [Type]){ 
 			self.typeRestrictions = types
 		}
@@ -1118,7 +1132,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		// NFT √
 		// nftMetadata √
 		// update mints per address √
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingAccessList(receiver: &{NonFungibleToken.CollectionPublic}, payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.isOpen:
@@ -1209,7 +1223,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		// NFT √
 		// nftMetadata √
 		// update mints per address √
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingNftRefs(receiver: &{NonFungibleToken.CollectionPublic}, refs: [&{NonFungibleToken.INFT}], payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				!self.isAccessListOnly:
@@ -1288,7 +1302,7 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicMinterDetails():{ String: AnyStruct}{ 
 			let ret:{ String: AnyStruct} ={} 
 			ret["name"] = self.name
@@ -1382,32 +1396,32 @@ contract TheFabricantXXories: NonFungibleToken, TheFabricantNFTStandard, Reveala
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicMinterPaths():{ UInt64: String}{ 
 		return TheFabricantXXories.publicMinterPaths
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftIdsToOwner():{ UInt64: Address}{ 
 		return TheFabricantXXories.nftIdsToOwner
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxSupply(): UInt64?{ 
 		return TheFabricantXXories.maxSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionId(): String?{ 
 		return TheFabricantXXories.collectionId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftMetadatas():{ UInt64:{ Revealable.RevealableMetadata}}{ 
 		return self.nftMetadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPaymentCap(): Address?{ 
 		return TheFabricantXXories.paymentReceiverCap?.address
 	}

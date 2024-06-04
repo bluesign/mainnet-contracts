@@ -1,4 +1,18 @@
-import Pb from "./Pb.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Pb from "./Pb.cdc"
 
 // only need to support signer verify for now
 access(all)
@@ -44,7 +58,7 @@ contract cBridge{
 	// allows the owner to perform important functions to modify the contract state
 	access(all)
 	resource BridgeAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resetSigners(signers:{ String: UInt256}){ 
 			cBridge.signers = signers
 			cBridge.totalPower = 0
@@ -53,20 +67,20 @@ contract cBridge{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBridgeAdmin(): @BridgeAdmin{ 
 			return <-create BridgeAdmin()
 		}
 	}
 	
 	// getter for signers/power as self.signers is not accessible outside contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSigners():{ String: UInt256}{ 
 		return self.signers
 	}
 	
 	// return true if sigs have more than 2/3 total power
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun verify(data: [UInt8], sigs: [SignerSig]): Bool{ 
 		var signedPower: UInt256 = 0
 		var quorum: UInt256 = self.totalPower * 2 / 3 + 1
@@ -164,7 +178,7 @@ contract cBridge{
 	
 	// new signers can be updated if cosigned by existing signers w/ 2/3 power
 	// pbmsg is serialized PbSignerPowerMap
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun updateSigners(pbmsg: [UInt8], sigs: [SignerSig]){ 
 		let domain = self.domainPrefix.concat(".UpdateSigners".utf8)
 		assert(self.verify(data: domain.concat(pbmsg), sigs: sigs), message: "verify sigs failed")

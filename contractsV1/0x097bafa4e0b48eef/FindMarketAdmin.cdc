@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -22,7 +36,7 @@ contract FindMarketAdmin{
 	// Admin things
 	/// ===================================================================================
 	//Admin client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxyClient(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -30,8 +44,8 @@ contract FindMarketAdmin{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface AdminProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&FIND.Network>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&FIND.Network>): Void
 	}
 	
 	//admin proxy with capability receiver
@@ -40,7 +54,7 @@ contract FindMarketAdmin{
 		access(self)
 		var capability: Capability<&FIND.Network>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&FIND.Network>){ 
 			pre{ 
 				cap.check():
@@ -51,7 +65,7 @@ contract FindMarketAdmin{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFindMarket(name: String, address: Address, findCutSaleItem: FindMarket.TenantSaleItem?): Capability<&FindMarket.Tenant>{ 
 			pre{ 
 				self.capability != nil:
@@ -60,7 +74,7 @@ contract FindMarketAdmin{
 			return FindMarket.createFindMarket(name: name, address: address, findCutSaleItem: findCutSaleItem)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFindMarketTenant(tenant: Address){ 
 			pre{ 
 				self.capability != nil:
@@ -69,7 +83,7 @@ contract FindMarketAdmin{
 			FindMarket.removeFindMarketTenant(tenant: tenant)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFindMarketClient(): &FindMarket.TenantClient{ 
 			pre{ 
 				self.capability != nil:
@@ -82,7 +96,7 @@ contract FindMarketAdmin{
 		/// ===================================================================================
 		// Find Market Options
 		/// ===================================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSaleItemType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -91,7 +105,7 @@ contract FindMarketAdmin{
 			FindMarket.addSaleItemType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMarketBidType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -100,7 +114,7 @@ contract FindMarketAdmin{
 			FindMarket.addMarketBidType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSaleItemCollectionType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -109,7 +123,7 @@ contract FindMarketAdmin{
 			FindMarket.addSaleItemCollectionType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMarketBidCollectionType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -118,7 +132,7 @@ contract FindMarketAdmin{
 			FindMarket.addMarketBidCollectionType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleItemType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -127,7 +141,7 @@ contract FindMarketAdmin{
 			FindMarket.removeSaleItemType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMarketBidType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -136,7 +150,7 @@ contract FindMarketAdmin{
 			FindMarket.removeMarketBidType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleItemCollectionType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -145,7 +159,7 @@ contract FindMarketAdmin{
 			FindMarket.removeSaleItemCollectionType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMarketBidCollectionType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -157,7 +171,7 @@ contract FindMarketAdmin{
 		/// ===================================================================================
 		// Tenant Rules Management
 		/// ===================================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTenantRef(_ tenant: Address): &FindMarket.Tenant{ 
 			pre{ 
 				self.capability != nil:
@@ -169,7 +183,7 @@ contract FindMarketAdmin{
 			return cap.borrow() ?? panic("Cannot borrow tenant reference from path. Path : ".concat(pp.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFindBlockItem(tenant: Address, item: FindMarket.TenantSaleItem){ 
 			pre{ 
 				self.capability != nil:
@@ -179,7 +193,7 @@ contract FindMarketAdmin{
 			tenant.addSaleItem(item, type: "find")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFindBlockItem(tenant: Address, name: String){ 
 			pre{ 
 				self.capability != nil:
@@ -189,7 +203,7 @@ contract FindMarketAdmin{
 			tenant.removeSaleItem(name, type: "find")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFindCut(tenant: Address, saleItem: FindMarket.TenantSaleItem){ 
 			pre{ 
 				self.capability != nil:
@@ -199,7 +213,7 @@ contract FindMarketAdmin{
 			tenant.addSaleItem(saleItem, type: "cut")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExtraCut(tenant: Address, types: [Type], category: String, cuts: FindMarketCutStruct.Cuts){ 
 			pre{ 
 				self.capability != nil:
@@ -209,7 +223,7 @@ contract FindMarketAdmin{
 			tenant.setExtraCut(types: types, category: category, cuts: cuts)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketOption(tenant: Address, saleItem: FindMarket.TenantSaleItem){ 
 			pre{ 
 				self.capability != nil:
@@ -220,7 +234,7 @@ contract FindMarketAdmin{
 		//Emit Event here
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMarketOption(tenant: Address, name: String){ 
 			pre{ 
 				self.capability != nil:
@@ -230,7 +244,7 @@ contract FindMarketAdmin{
 			tenant.removeSaleItem(name, type: "tenant")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun enableMarketOption(tenant: Address, name: String){ 
 			pre{ 
 				self.capability != nil:
@@ -240,7 +254,7 @@ contract FindMarketAdmin{
 			tenant.alterMarketOption(name: name, status: "active")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deprecateMarketOption(tenant: Address, name: String){ 
 			pre{ 
 				self.capability != nil:
@@ -250,7 +264,7 @@ contract FindMarketAdmin{
 			tenant.alterMarketOption(name: name, status: "deprecated")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stopMarketOption(tenant: Address, name: String){ 
 			pre{ 
 				self.capability != nil:
@@ -260,7 +274,7 @@ contract FindMarketAdmin{
 			tenant.alterMarketOption(name: name, status: "stopped")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setupSwitchboardCut(tenant: Address){ 
 			pre{ 
 				self.capability != nil:
@@ -273,7 +287,7 @@ contract FindMarketAdmin{
 		/// ===================================================================================
 		// Royalty Residual
 		/// ===================================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setResidualAddress(_ address: Address){ 
 			pre{ 
 				self.capability != nil:
@@ -282,7 +296,7 @@ contract FindMarketAdmin{
 			FindMarket.setResidualAddress(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSwitchboardReceiverPublic(): Capability<&{FungibleToken.Receiver}>{ 
 			// we hard code it here instead, to avoid importing just for path
 			return FindMarketAdmin.account.capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)!

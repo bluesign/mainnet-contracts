@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -70,7 +84,7 @@ contract AeraNFT: NonFungibleToken{
 			self.badges ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBadge(_ badge: Badge){ 
 			self.badges[badge.id] = badge
 		}
@@ -86,7 +100,7 @@ contract AeraNFT: NonFungibleToken{
 			return views
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isSoulBound(): Bool{ 
 			return self.badges[1] != nil && (self.badges[1]!).name == "soulbound"
 		}
@@ -176,7 +190,7 @@ contract AeraNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
@@ -214,7 +228,7 @@ contract AeraNFT: NonFungibleToken{
 		access(account)
 		fun addBadge(id: UInt64, badge: Badge)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasNFT(_ id: UInt64): Bool
 	}
 	
@@ -229,7 +243,7 @@ contract AeraNFT: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasNFT(_ id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -243,7 +257,7 @@ contract AeraNFT: NonFungibleToken{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(_ id: UInt64){ 
 			let token <- self.withdraw(withdrawID: id) as! @NFT
 			emit Burned(id: token.id, from: self.owner?.address, playId: token.play.id, edition: token.edition)
@@ -253,7 +267,7 @@ contract AeraNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			//TODO: add nounce and emit better event the first time it is moved.
@@ -385,7 +399,7 @@ contract AeraNFT: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): [MetadataViews.Trait]{ 
 			var winner = "tie"
 			if self.homeScore > self.awayScore{ 
@@ -409,12 +423,12 @@ contract AeraNFT: NonFungibleToken{
 		self.games[game.id] = game
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGames():{ UInt64: Game}{ 
 		return self.games
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGame(_ id: UInt64): Game?{ 
 		return self.games[id]
 	}
@@ -445,12 +459,12 @@ contract AeraNFT: NonFungibleToken{
 		self.licenses[license.id] = license
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLicenses():{ UInt64: License}{ 
 		return self.licenses
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLicense(_ id: UInt64): License?{ 
 		return self.licenses[id]
 	}
@@ -527,7 +541,7 @@ contract AeraNFT: NonFungibleToken{
 			self.awayScore = awayScore
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLicenseID(): UInt64?{ 
 			let playId = self.id
 			if let licence = self.playersInvolved["license"]{ 
@@ -543,7 +557,7 @@ contract AeraNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): [MetadataViews.Trait]{ 
 			let traits = [MetadataViews.Trait(name: "play_id", value: self.id, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "play_period", value: self.period, displayType: "String", rarity: nil), MetadataViews.Trait(name: "play_time", value: self.time, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "play_home_score", value: self.homeScore, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "play_away_score", value: self.awayScore, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "play_score", value: self.homeScore.toString().concat("-").concat(self.awayScore.toString()), displayType: "String", rarity: nil), MetadataViews.Trait(name: "play_type", value: self.type, displayType: "String", rarity: nil)]
 			let game = AeraNFT.getGame(self.gameID)!
@@ -579,7 +593,7 @@ contract AeraNFT: NonFungibleToken{
 			return traits
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(_ field: String): AnyStruct?{ 
 			if let metadata = AeraNFT.getPlayMetadata(self.id){ 
 				return metadata.metadata[field]
@@ -587,7 +601,7 @@ contract AeraNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias{ 
 			let imageFile = MetadataViews.IPFSFile(cid: self.imageIpfsHash, path: nil)
 			let medias = [self.getVideo(), MetadataViews.Media(file: imageFile, mediaType: "image/png")]
@@ -598,19 +612,19 @@ contract AeraNFT: NonFungibleToken{
 			return MetadataViews.Medias(medias)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun asDisplay(): MetadataViews.Display{ 
 			let imageFile = MetadataViews.IPFSFile(cid: self.imageIpfsHash, path: nil)
 			return MetadataViews.Display(name: self.title, description: self.description, thumbnail: imageFile)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideo(): MetadataViews.Media{ 
 			let file = MetadataViews.IPFSFile(cid: self.videoIpfsHash, path: nil)
 			return MetadataViews.Media(file: file, mediaType: self.getVideoMediaType())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideoMediaType(): String{ 
 			if let videoMediaType = self.getMetadata("videoMediaType"){ 
 				return videoMediaType as! String
@@ -641,12 +655,12 @@ contract AeraNFT: NonFungibleToken{
 		self.playMetadata[play.id] = play
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPlayMetadata():{ UInt64: PlayMetadata}{ 
 		return self.playMetadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetadata(_ id: UInt64): PlayMetadata?{ 
 		return self.playMetadata[id]
 	}
@@ -686,7 +700,7 @@ contract AeraNFT: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(_ role: String): [MetadataViews.Trait]{ 
 			return [MetadataViews.Trait(name: "player_".concat(role).concat("_jersey"), value: self.jerseyname, displayType: "String", rarity: nil), MetadataViews.Trait(name: "player_".concat(role).concat("_position"), value: self.position, displayType: "String", rarity: nil), MetadataViews.Trait(name: "player_".concat(role).concat("_number"), value: self.number, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "player_".concat(role).concat("_nationality"), value: self.nationality, displayType: "String", rarity: nil), MetadataViews.Trait(name: "player_".concat(role).concat("_birthday"), value: self.birthday, displayType: "String", rarity: nil)]
 		}
@@ -700,17 +714,17 @@ contract AeraNFT: NonFungibleToken{
 		self.players[player.id] = player
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayers():{ UInt64: Player}{ 
 		return self.players
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayer(_ id: UInt64): Player?{ 
 		return self.players[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveLicence(_ viewResolver: &{ViewResolver.Resolver}): License?{ 
 		if let view = viewResolver.resolveView(Type<License>()){ 
 			if let v = view as? License{ 
@@ -741,7 +755,7 @@ contract AeraNFT: NonFungibleToken{
 			self.completed = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkPlay(playId: UInt64, id: UInt64){ 
 			if self.playIds.contains(playId) && self.qualification[playId] == nil{ 
 				self.qualification[playId] = id

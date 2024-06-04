@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MemeToken from "./MemeToken.cdc"
 
@@ -27,7 +41,7 @@ contract MarketplaceFees{
 	access(self)
 	var vault: @MemeToken.Vault
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deposit(from: @{FungibleToken.Vault}){ 
 		let from <- from as! @MemeToken.Vault
 		let balance = from.balance
@@ -36,7 +50,7 @@ contract MarketplaceFees{
 	}
 	
 	/// Get the balance of the Fees Vault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeeBalance(): UFix64{ 
 		return self.vault.balance
 	}
@@ -46,7 +60,7 @@ contract MarketplaceFees{
 		// withdraw
 		//
 		// Allows the administrator to withdraw tokens from the fee vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawTokensFromFeeVault(amount: UFix64): @{FungibleToken.Vault}{ 
 			let vault <- MarketplaceFees.vault.withdraw(amount: amount)
 			emit TokensWithdrawn(amount: amount)
@@ -54,7 +68,7 @@ contract MarketplaceFees{
 		}
 		
 		/// Allows the administrator to change all the fee parameters at once
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeParameters(
 			rate: UFix64,
 			receiverCapability: Capability<&{FungibleToken.Receiver}>
@@ -83,7 +97,7 @@ contract MarketplaceFees{
 	
 	/// Called when a transaction is submitted to deduct the fee
 	/// from the AuthAccount that submitted it
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deductFee(_ account: AuthAccount, totalAmount: UFix64){ 
 		var feeAmount = self.computeFees(amount: totalAmount, description: nil)
 		if feeAmount == UFix64(0){ 
@@ -109,7 +123,7 @@ contract MarketplaceFees{
 		emit FeesDeducted(amount: feeAmount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeeParameters(): FeeParameters{ 
 		return self.account.storage.copy<FeeParameters>(from: /storage/MarketplaceFeeParameters)
 		?? panic("Error getting marketplace fee parameters. They need to be initialized first!")
@@ -124,7 +138,7 @@ contract MarketplaceFees{
 	}
 	
 	// compute the transaction fees with the current fee parameters and the given inclusionEffort and executionEffort
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun computeFees(amount: UFix64, description: String?): UFix64{ 
 		let params = self.getFeeParameters()
 		return params.rate * amount

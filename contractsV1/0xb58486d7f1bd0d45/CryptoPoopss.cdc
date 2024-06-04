@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract CryptoPoopss: NonFungibleToken{ 
@@ -37,16 +51,16 @@ contract CryptoPoopss: NonFungibleToken{
 	access(all)
 	resource interface MyCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowEntireNFT(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowEntireNFT(id: UInt64): &CryptoPoopss.NFT
 	}
 	
 	access(all)
@@ -56,7 +70,7 @@ contract CryptoPoopss: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let cryptoPoop <- token as! @NFT
 			emit Deposit(id: cryptoPoop.id, to: (self.owner!).address)
 			self.ownedNFTs[cryptoPoop.id] <-! cryptoPoop
@@ -79,7 +93,7 @@ contract CryptoPoopss: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? ?? panic("nothing in this index")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &NFT{ 
 			let refNFT = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? ?? panic("something")
 			return refNFT as! &NFT
@@ -112,7 +126,7 @@ contract CryptoPoopss: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFT(metadata:{ String: String}): @NFT{ 
 			let newNFT <- create NFT(metadata: metadata)
 			return <-newNFT

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -264,7 +278,7 @@ contract TicalUniverse: NonFungibleToken{
 		// The Item exists.
 		// The Set is unlocked.
 		// The Item is not present in the Set.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItem(itemId: UInt32){ 
 			pre{ 
 				TicalUniverse.itemDatas[itemId] != nil:
@@ -287,7 +301,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// Adds multiple Items to the Set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItems(itemIds: [UInt32]){ 
 			for id in itemIds{ 
 				self.addItem(itemId: id)
@@ -297,7 +311,7 @@ contract TicalUniverse: NonFungibleToken{
 		// Retire an Item from the Set. The Set can't mint new Collectibles for the Item.
 		// Pre-Conditions:
 		// The Item is part of the Set and not retired.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireItem(itemId: UInt32){ 
 			pre{ 
 				self.retired[itemId] != nil:
@@ -310,7 +324,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// Retire all the Items in the Set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for id in self.items{ 
 				self.retireItem(itemId: id)
@@ -321,7 +335,7 @@ contract TicalUniverse: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set is unlocked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -332,7 +346,7 @@ contract TicalUniverse: NonFungibleToken{
 		// Mint a new Collectible and returns the newly minted Collectible.
 		// Pre-Conditions:
 		// The Item must exist in the Set and be allowed to mint new Collectibles
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCollectible(itemId: UInt32): @NFT{ 
 			pre{ 
 				self.retired[itemId] != nil:
@@ -354,7 +368,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// Mint an arbitrary quantity of Collectibles and return them as a Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintCollectible(itemId: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -458,7 +472,7 @@ contract TicalUniverse: NonFungibleToken{
 	access(all)
 	resource Admin{ 
 		// Create a new Item struct and store it in the Items dictionary in the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(metadata:{ String: String}): UInt32{ 
 			var newItem = Item(metadata: metadata)
 			let newId = newItem.itemId
@@ -467,14 +481,14 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// Create a new Set resource and store it in the sets mapping in the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, description: String?){ 
 			var newSet <- create Set(name: name, description: description)
 			TicalUniverse.sets[newSet.setId] <-! newSet
 		}
 		
 		// Return a reference to a set in the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setId: UInt32): &Set{ 
 			pre{ 
 				TicalUniverse.sets[setId] != nil:
@@ -484,7 +498,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// End the current series and start a new one
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			TicalUniverse.currentSeries = TicalUniverse.currentSeries + UInt32(1)
 			emit NewSeriesStarted(newCurrentSeries: TicalUniverse.currentSeries)
@@ -492,7 +506,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// Create a new Admin resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -503,18 +517,18 @@ contract TicalUniverse: NonFungibleToken{
 	access(all)
 	resource interface TicalUniverseCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &TicalUniverse.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -546,7 +560,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// Withdraw multiple tokens and returns them as a Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -557,7 +571,7 @@ contract TicalUniverse: NonFungibleToken{
 		
 		// Add a Collectible to the Collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Collectible NFT to make sure
 			// it is the correct type
@@ -575,7 +589,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 		
 		// Deposit multiple NFTs into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -603,7 +617,7 @@ contract TicalUniverse: NonFungibleToken{
 		// Return a borrowed reference to a Collectible
 		// This  allows the caller to read the setId, itemId, serialNumber,
 		// and use them to read the setData or Item data from the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &TicalUniverse.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -650,19 +664,19 @@ contract TicalUniverse: NonFungibleToken{
 	}
 	
 	// Return all the Collectible Items
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllItems(): [TicalUniverse.Item]{ 
 		return TicalUniverse.itemDatas.values
 	}
 	
 	// Get all metadata of an Item
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemMetadata(itemId: UInt32):{ String: String}?{ 
 		return self.itemDatas[itemId]?.metadata
 	}
 	
 	// Get a metadata field of an Item
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemMetadataByField(itemId: UInt32, field: String): String?{ 
 		if let item = TicalUniverse.itemDatas[itemId]{ 
 			return item.metadata[field]
@@ -672,25 +686,25 @@ contract TicalUniverse: NonFungibleToken{
 	}
 	
 	// Get the name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setId: UInt32): String?{ 
 		return TicalUniverse.setDatas[setId]?.name
 	}
 	
 	// Get the description of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetDescription(setId: UInt32): String?{ 
 		return TicalUniverse.setDatas[setId]?.description
 	}
 	
 	// Get the series that the specified Set is associated with
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeries(setId: UInt32): UInt32?{ 
 		return TicalUniverse.setDatas[setId]?.series
 	}
 	
 	// Get the Ids that the specified Set name is associated with
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIdsByName(setName: String): [UInt32]?{ 
 		var setIds: [UInt32] = []
 		for setData in TicalUniverse.setDatas.values{ 
@@ -706,13 +720,13 @@ contract TicalUniverse: NonFungibleToken{
 	}
 	
 	// Get the list of Item Ids that are in the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemsInSet(setId: UInt32): [UInt32]?{ 
 		return TicalUniverse.sets[setId]?.items
 	}
 	
 	// Indicates if a Set/Item combo (otherwise known as an edition) is retired
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setId: UInt32, itemId: UInt32): Bool?{ 
 		if let setToRead <- TicalUniverse.sets.remove(key: setId){ 
 			let retired = setToRead.retired[itemId]
@@ -724,13 +738,13 @@ contract TicalUniverse: NonFungibleToken{
 	}
 	
 	// Indicates if the Set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setId: UInt32): Bool?{ 
 		return TicalUniverse.sets[setId]?.locked
 	}
 	
 	// Total number of Collectibles that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberCollectiblesInEdition(setId: UInt32, itemId: UInt32): UInt32?{ 
 		if let setToRead <- TicalUniverse.sets.remove(key: setId){ 
 			let amount = setToRead.numberMintedPerItem[itemId]
@@ -743,7 +757,7 @@ contract TicalUniverse: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 		let media = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://tunegonft.com/assets/images/collections-page/tical.png"), mediaType: "image/png")
 		let socials:{ String: MetadataViews.ExternalURL} ={} 

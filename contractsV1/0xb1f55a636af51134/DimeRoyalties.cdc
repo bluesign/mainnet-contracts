@@ -1,4 +1,18 @@
-/* SPDX-License-Identifier: UNLICENSED */
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* SPDX-License-Identifier: UNLICENSED */
 import DimeCollectibleV3 from "../0xf5cdaace879e5a79/DimeCollectibleV3.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -44,7 +58,7 @@ contract DimeRoyalties{
 			self.allotments = allotments
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getShares():{ Address: UFix64}{ 
 			return self.allotments
 		}
@@ -61,28 +75,28 @@ contract DimeRoyalties{
 		access(all)
 		let numRoyaltyNFTs: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyOwners():{ UInt64: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateOwner(id: UInt64, newOwner: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseIds(): [UInt64]
 		
 		access(all)
 		let managerFees: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtistShares(): SaleShares
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getManagerShares(): SaleShares
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSecondarySaleRoyalties(): DimeCollectibleV3.Royalties
 	}
 	
@@ -104,17 +118,17 @@ contract DimeRoyalties{
 		access(self)
 		let royaltyNFTs:{ UInt64: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyIds(): [UInt64]{ 
 			return self.royaltyNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyOwners():{ UInt64: Address}{ 
 			return self.royaltyNFTs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRoyaltyNFT(id: UInt64){ 
 			assert(UInt64(self.royaltyNFTs.keys.length) < self.numRoyaltyNFTs, message: "This release already has the maximum number of royalty NFTs")
 			self.royaltyNFTs[id] = (self.owner!).address
@@ -125,7 +139,7 @@ contract DimeRoyalties{
 		// Since this is publicly accessible, anyone call call it. We verify
 		// that the address given currently owns the specified NFT to make sure that
 		// only the actual owner can change the listing
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateOwner(id: UInt64, newOwner: Address){ 
 			let collection = getAccount(newOwner).capabilities.get<&DimeCollectibleV3.Collection>(DimeCollectibleV3.CollectionPublicPath).borrow() ?? panic("Couldn't borrow a capability to the new owner's collection")
 			let nft = collection.borrowCollectible(id: id)
@@ -140,17 +154,17 @@ contract DimeRoyalties{
 		access(self)
 		let releaseNFTs: [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseIds(): [UInt64]{ 
 			return self.releaseNFTs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addReleaseNFT(id: UInt64){ 
 			self.releaseNFTs.append(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeReleaseNFT(id: UInt64){ 
 			self.releaseNFTs.remove(at: id)
 		}
@@ -165,12 +179,12 @@ contract DimeRoyalties{
 		access(self)
 		var managerShares: SaleShares
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtistShares(): SaleShares{ 
 			return self.artistShares
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getManagerShares(): SaleShares{ 
 			return self.managerShares
 		}
@@ -178,12 +192,12 @@ contract DimeRoyalties{
 		access(all)
 		let secondarySaleRoyalties: DimeCollectibleV3.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSecondarySaleRoyalties(): DimeCollectibleV3.Royalties{ 
 			return self.secondarySaleRoyalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(id: UInt64, royaltiesPerShare: UFix64, numRoyaltyNFTs: UInt64, managerFees: UFix64, artistShares: SaleShares, managerShares: SaleShares, secondarySaleRoyalties: DimeCollectibleV3.Royalties){ 
 			self.id = id
 			self.royaltiesPerShare = royaltiesPerShare
@@ -200,10 +214,10 @@ contract DimeRoyalties{
 	
 	access(all)
 	resource interface ReleaseCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicRelease(id: UInt64): &Release?
 	}
 	
@@ -216,12 +230,12 @@ contract DimeRoyalties{
 			self.releases <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseIds(): [UInt64]{ 
 			return self.releases.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicRelease(id: UInt64): &Release?{ 
 			if self.releases[id] == nil{ 
 				return nil
@@ -229,7 +243,7 @@ contract DimeRoyalties{
 			return &self.releases[id] as &Release?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPrivateRelease(id: UInt64): &Release?{ 
 			if self.releases[id] == nil{ 
 				return nil
@@ -237,7 +251,7 @@ contract DimeRoyalties{
 			return &self.releases[id] as &Release?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRelease(collection: &DimeCollectibleV3.Collection, totalRoyalties: UFix64, numRoyaltyNFTs: UInt64, tradeable: Bool, managerFees: UFix64, artistShares: SaleShares, managerShares: SaleShares, secondarySaleRoyalties: DimeCollectibleV3.Royalties){ 
 			let minterAddress: Address = 0xf5cdaace879e5a79
 			let minterRef = getAccount(minterAddress).capabilities.get<&DimeCollectibleV3.NFTMinter>(DimeCollectibleV3.MinterPublicPath).borrow()!
@@ -251,7 +265,7 @@ contract DimeRoyalties{
 		
 		// A release can only be deleted if the creator still owns all the associated royalty
 		// and release NFTs. In this case, we delete all of them and then destroy the Release.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteRelease(releaseId: UInt64, collection: Capability<&DimeCollectibleV3.Collection>){ 
 			let release <- self.releases.remove(key: releaseId)!
 			let collectionRef = collection.borrow() ?? panic("Couldn't borrow provided collection")
@@ -269,7 +283,7 @@ contract DimeRoyalties{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createReleaseCollection(): @ReleaseCollection{ 
 		return <-create ReleaseCollection()
 	}

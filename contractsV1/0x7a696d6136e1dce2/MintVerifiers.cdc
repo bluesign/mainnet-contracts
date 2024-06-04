@@ -1,4 +1,18 @@
-import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 import EmeraldPass from "../0x6a07dbeb03167a13/EmeraldPass.cdc"
 
@@ -15,7 +29,7 @@ contract MintVerifiers{
 		
 		// A return value of nil means passing, otherwise
 		// you return the error.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}): String?
 	}
 	
@@ -39,7 +53,7 @@ contract MintVerifiers{
 		access(all)
 		let eventCap: Capability<&FLOAT.FLOATEvents>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}): String?{ 
 			let minter: Address = params["minter"]! as! Address
 			if let minterCollection = getAccount(minter).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>(){ 
@@ -72,7 +86,7 @@ contract MintVerifiers{
 		access(all)
 		let type: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}): String?{ 
 			let minter: Address = params["minter"]! as! Address
 			if !EmeraldPass.isActive(user: minter){ 
@@ -87,7 +101,7 @@ contract MintVerifiers{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkPassing(verifiers: [{IVerifier}], params:{ String: AnyStruct}): [Bool]{ 
 		let answer: [Bool] = []
 		for verifier in verifiers{ 

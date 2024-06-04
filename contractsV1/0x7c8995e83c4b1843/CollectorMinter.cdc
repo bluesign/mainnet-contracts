@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -51,7 +65,7 @@ contract CollectorMinter{
 	access(all)
 	var merchantAccount: Address
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun registerForPrivateSale(buyer: Address){ 
 		pre{ 
 			self.privateSaleRegistrationOpen == true:
@@ -62,7 +76,7 @@ contract CollectorMinter{
 		self.privateSaleAccounts[buyer] = self.privateSaleMaxTokens
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun privateSaleMintNFTWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -131,7 +145,7 @@ contract CollectorMinter{
 		self.privateSaleAccounts[buyer] = self.privateSaleAccounts[buyer]! - numberOfTokens
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun registerForPresale(buyer: Address){ 
 		pre{ 
 			self.presaleRegistrationOpen == true:
@@ -142,7 +156,7 @@ contract CollectorMinter{
 		self.presaleAccounts[buyer] = self.presaleMaxTokens
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun presaleMintNFTWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -213,7 +227,7 @@ contract CollectorMinter{
 		self.presaleAccounts[buyer] = self.presaleAccounts[buyer]! - numberOfTokens
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicSaleMintNFTWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -295,7 +309,7 @@ contract CollectorMinter{
 		//
 		// PRIVATE SALE FUNCTIONS
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccountToPrivateSale(address: Address, amount: UInt64){ 
 			pre{ 
 				amount <= CollectorMinter.privateSaleMaxTokens:
@@ -306,7 +320,7 @@ contract CollectorMinter{
 			CollectorMinter.privateSaleAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccountFromPrivateSale(address: Address){ 
 			pre{ 
 				CollectorMinter.privateSaleAccounts[address] != nil:
@@ -315,7 +329,7 @@ contract CollectorMinter{
 			CollectorMinter.privateSaleAccounts.remove(key: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrivateSaleAccountAmount(address: Address, amount: UInt64){ 
 			pre{ 
 				CollectorMinter.privateSaleAccounts[address] != nil:
@@ -324,27 +338,27 @@ contract CollectorMinter{
 			CollectorMinter.privateSaleAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrivateSaleMaxTokens(amount: UInt64){ 
 			CollectorMinter.privateSaleMaxTokens = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrivateSalePrice(price: UFix64){ 
 			CollectorMinter.privateSalePrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun prunePrivateSaleAccounts(){ 
 			CollectorMinter.privateSaleAccounts ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closePrivateSaleRegistration(){ 
 			CollectorMinter.privateSaleRegistrationOpen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPrivateSaleRegistration(){ 
 			CollectorMinter.privateSaleRegistrationOpen = true
 		}
@@ -352,7 +366,7 @@ contract CollectorMinter{
 		//
 		// PRESALE FUNCTIONS
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccountToPresale(address: Address, amount: UInt64){ 
 			pre{ 
 				amount <= CollectorMinter.presaleMaxTokens:
@@ -363,7 +377,7 @@ contract CollectorMinter{
 			CollectorMinter.presaleAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccountFromPresale(address: Address){ 
 			pre{ 
 				CollectorMinter.presaleAccounts[address] != nil:
@@ -372,7 +386,7 @@ contract CollectorMinter{
 			CollectorMinter.presaleAccounts.remove(key: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePresaleAccountAmount(address: Address, amount: UInt64){ 
 			pre{ 
 				CollectorMinter.presaleAccounts[address] != nil:
@@ -381,27 +395,27 @@ contract CollectorMinter{
 			CollectorMinter.presaleAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePresaleMaxTokens(amount: UInt64){ 
 			CollectorMinter.presaleMaxTokens = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePresalePrice(price: UFix64){ 
 			CollectorMinter.presalePrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun prunePresaleAccounts(){ 
 			CollectorMinter.presaleAccounts ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closePresaleRegistration(){ 
 			CollectorMinter.presaleRegistrationOpen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPresaleRegistration(){ 
 			CollectorMinter.presaleRegistrationOpen = true
 		}
@@ -409,17 +423,17 @@ contract CollectorMinter{
 		//
 		// PUBLIC SALE FUNCTIONS
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSaleMaxTokens(amount: UInt64){ 
 			CollectorMinter.publicSaleMaxTokens = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSalePrice(price: UFix64){ 
 			CollectorMinter.publicSalePrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun prunePublicSaleAccounts(){ 
 			CollectorMinter.publicSaleAccounts ={} 
 		}
@@ -427,23 +441,23 @@ contract CollectorMinter{
 		//
 		// COMMON
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMerchantAccount(newAddr: Address){ 
 			CollectorMinter.merchantAccount = newAddr
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivateSaleAccounts():{ Address: UInt64}{ 
 		return self.privateSaleAccounts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPresaleAccounts():{ Address: UInt64}{ 
 		return self.presaleAccounts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicSaleAccounts():{ Address: UInt64}{ 
 		return self.publicSaleAccounts
 	}

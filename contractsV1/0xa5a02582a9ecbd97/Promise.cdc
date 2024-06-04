@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Promise{ 
 	access(self)
 	var templates:{ UInt32: Template}
@@ -70,7 +84,7 @@ contract Promise{
 			self.authorName = authorName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementEdition(){ 
 			self.edition = self.edition + 1
 		}
@@ -121,8 +135,8 @@ contract Promise{
 	
 	access(all)
 	resource interface PublicCollection{ 
-		access(all)
-		fun list(): [NftInfo]
+		access(TMP_ENTITLEMENT_OWNER)
+		fun list(): [Promise.NftInfo]
 	}
 	
 	access(all)
@@ -134,7 +148,7 @@ contract Promise{
 			self.nfts <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(nft: @NFT){ 
 			if self.nfts[nft.data.templateId] != nil{ 
 				panic("You have already holded accountable for this promise")
@@ -142,7 +156,7 @@ contract Promise{
 			self.nfts[nft.data.templateId] <-! nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun list(): [NftInfo]{ 
 			var results: [NftInfo] = []
 			for key in self.nfts.keys{ 
@@ -156,8 +170,8 @@ contract Promise{
 	
 	access(all)
 	resource interface PublicVault{ 
-		access(all)
-		fun deposit(temporaryVault: @Vault)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(temporaryVault: @Promise.Vault): Void
 		
 		access(all)
 		var balance: UInt64
@@ -172,7 +186,7 @@ contract Promise{
 			self.balance = balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UInt64): @Vault{ 
 			if self.balance < amount{ 
 				let temporaryVault <- create Vault(balance: 0)
@@ -183,7 +197,7 @@ contract Promise{
 			return <-temporaryVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(temporaryVault: @Vault){ 
 			self.balance = self.balance + temporaryVault.balance
 			destroy temporaryVault
@@ -210,25 +224,25 @@ contract Promise{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createProfile(name: String, termsAcceptedAt: UInt64): @Profile{ 
 		let profile <- create Profile(name: name, termsAcceptedAt: termsAcceptedAt)
 		return <-profile
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createVault(): @Vault{ 
 		let vault <- create Vault(balance: 0)
 		return <-vault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCollection(): @Collection{ 
 		let collection <- create Collection()
 		return <-collection
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTemplate(author: Address, content: String): @NFT{ 
 		let account = getAccount(author)
 		let vault =
@@ -253,7 +267,7 @@ contract Promise{
 		return <-nft
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNextEdition(author: Address, templateId: UInt32, payment: @Vault): @NFT?{ 
 		if payment.balance < 1{ 
 			panic("Not enough balance")

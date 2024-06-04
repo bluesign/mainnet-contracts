@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 # ArtistRegistery contract
 
 This contract, owned by the platform admin, allows to define the artists metadata and vaults to receive their cut. 
@@ -98,7 +112,7 @@ contract ArtistRegistery{
 		}
 		
 		// Send the artist share. If the artist vault is not available, it is put in a temporary vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sendShare(deposit: @{FungibleToken.Vault}){ 
 			let balance = deposit.balance
 			if self.vault != nil && (self.vault!).check(){ 
@@ -115,7 +129,7 @@ contract ArtistRegistery{
 		
 		// When an artist vault is not available, the tokens are put in a temporary vault
 		// This function allows to release the funds to the artist's newly set vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockArtistShare(){ 
 			let artistTempVault = &ArtistRegistery.artistTempVaults[self.id] as &FUSD.Vault?
 			if self.vault != nil && (self.vault!).check(){ 
@@ -134,16 +148,16 @@ contract ArtistRegistery{
 	access(all)
 	resource interface ArtistModifier{ 
 		// Update an artist's name
-		access(all)
-		fun updateName(id: UInt64, name: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun updateName(id: UInt64, name: String): Void
 		
 		// Update an artist's vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateVault(id: UInt64, vault: Capability<&FUSD.Vault>)
 		
 		// When an artist vault is not available, the tokens are put in a temporary vault
 		// This function allows to release the funds to the artist's newly set vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockArtistShare(id: UInt64)
 	}
 	
@@ -151,7 +165,7 @@ contract ArtistRegistery{
 	access(all)
 	resource Admin: ArtistModifier{ 
 		// Create an artist
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createArtist(name: String){ 
 			let artist <- create Artist(name: name)
 			ArtistRegistery.artistTempVaults[artist.id] <-! FUSD.createEmptyVault(vaultType: Type<@FUSD.Vault>()) as! @FUSD.Vault
@@ -160,14 +174,14 @@ contract ArtistRegistery{
 		
 		// Update an artist's name
 		// If artist doesn't exist, will not fail, nothing will happen
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateName(id: UInt64, name: String){ 
 			ArtistRegistery.artists[id]?.updateName(name: name)
 		}
 		
 		// Update an artist's vault
 		// If artist doesn't exist, will not fail, nothing will happen
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateVault(id: UInt64, vault: Capability<&FUSD.Vault>){ 
 			pre{ 
 				vault.check():
@@ -179,7 +193,7 @@ contract ArtistRegistery{
 		// When an artist vault is not available, the tokens are put in a temporary vault
 		// This function allows to release the funds to the artist's newly set vault
 		// If artist doesn't exist, will not fail, nothing will happen
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockArtistShare(id: UInt64){ 
 			ArtistRegistery.artists[id]?.unlockArtistShare()
 		}
@@ -187,8 +201,8 @@ contract ArtistRegistery{
 	
 	access(all)
 	resource interface ManagerClient{ 
-		access(all)
-		fun setArtist(artistID: UInt64, server: Capability<&Admin>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setArtist(artistID: UInt64, server: Capability<&ArtistRegistery.Admin>): Void
 	}
 	
 	// Manager
@@ -208,7 +222,7 @@ contract ArtistRegistery{
 			self.server = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setArtist(artistID: UInt64, server: Capability<&Admin>){ 
 			pre{ 
 				server.check():
@@ -223,7 +237,7 @@ contract ArtistRegistery{
 		}
 		
 		// Update an artist's name
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateName(name: String){ 
 			pre{ 
 				self.server != nil:
@@ -239,7 +253,7 @@ contract ArtistRegistery{
 		}
 		
 		// Update an artist's vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateVault(vault: Capability<&FUSD.Vault>){ 
 			pre{ 
 				self.server != nil:
@@ -256,7 +270,7 @@ contract ArtistRegistery{
 		
 		// When an artist vault is not available, the tokens are put in a temporary vault
 		// This function allows to release the funds to the artist's newly set vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockArtistShare(){ 
 			pre{ 
 				self.server != nil:
@@ -275,13 +289,13 @@ contract ArtistRegistery{
 	// -----------------------------------------------------------------------
 	// Contract public functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createManager(): @Manager{ 
 		return <-create Manager()
 	}
 	
 	// Send the artist share. If the artist vault is not available, it is put in a temporary vault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sendArtistShare(id: UInt64, deposit: @{FungibleToken.Vault}){ 
 		pre{ 
 			ArtistRegistery.artists[id] != nil:
@@ -292,7 +306,7 @@ contract ArtistRegistery{
 	}
 	
 	// Get an artist's data (name, vault capability)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArtistName(id: UInt64): String{ 
 		pre{ 
 			ArtistRegistery.artists[id] != nil:

@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # The router supports a chained swap trade
 
@@ -24,7 +38,7 @@ contract SwapRouter{
 	/// @Param  - tokenKeyPath: e.g. [A.f8d6e0586b0a20c7.FUSD, A.f8d6e0586b0a20c7.FlowToken, A.f8d6e0586b0a20c7.USDC]
 	/// @Return - [UFix64]:	 e.g. [50.0, 10.0, 48.0]
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountsOut(amountIn: UFix64, tokenKeyPath: [String]): [UFix64]{ 
 		pre{ 
 			tokenKeyPath.length >= 2:
@@ -48,7 +62,7 @@ contract SwapRouter{
 	
 	/// Perform a chained swap calculation end with exact amountOut
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountsIn(amountOut: UFix64, tokenKeyPath: [String]): [UFix64]{ 
 		pre{ 
 			tokenKeyPath.length >= 2:
@@ -81,7 +95,7 @@ contract SwapRouter{
 	/// @Param  - deadline:	 The timeout block timestamp for the transaction
 	/// @Return - Vault:		outVault
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapExactTokensForTokens(
 		exactVaultIn: @{FungibleToken.Vault},
 		amountOutMin: UFix64,
@@ -122,7 +136,7 @@ contract SwapRouter{
 	/// @Param  - deadline:	   The timeout block timestamp for the transaction
 	/// @Return - [OutVault, RemainingInVault]
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapTokensForExactTokens(
 		vaultInMax: @{FungibleToken.Vault},
 		exactAmountOut: UFix64,
@@ -162,7 +176,7 @@ contract SwapRouter{
 	
 	/// SwapWithPath
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapWithPath(
 		vaultIn: @{FungibleToken.Vault},
 		tokenKeyPath: [
@@ -252,7 +266,7 @@ contract SwapRouter{
 	
 	/// SwapWithPair
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapWithPair(
 		vaultIn: @{FungibleToken.Vault},
 		exactAmountOut: UFix64?,

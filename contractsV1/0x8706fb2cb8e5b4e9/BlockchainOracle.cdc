@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 BlockchainOracle
 
 This is the contract for BlockchainOracle NFTs!
@@ -169,17 +183,17 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 		access(all)
 		let serial: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun _contract(): &{NiftoryNonFungibleToken.ManagerPublic}{ 
 			return BlockchainOracle._contract()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun set(): &MutableMetadataSet.Set{ 
 			return self._contract().getSetManagerPublic().getSet(self.setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): &MutableMetadata.Metadata{ 
 			return self.set().getTemplate(self.templateId).metadata()
 		}
@@ -217,7 +231,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun _contract(): &{NiftoryNonFungibleToken.ManagerPublic}{ 
 			return BlockchainOracle._contract()
 		}
@@ -236,7 +250,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -259,7 +273,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BlockchainOracle.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -267,7 +281,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBulk(tokens: @[{NonFungibleToken.NFT}]){ 
 			while tokens.length > 0{ 
 				let token <- tokens.removeLast() as! @BlockchainOracle.NFT
@@ -287,7 +301,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBulk(withdrawIDs: [UInt64]): @[{NonFungibleToken.NFT}]{ 
 			let tokens: @[{NonFungibleToken.NFT}] <- []
 			while withdrawIDs.length > 0{ 
@@ -329,22 +343,22 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 		// ========================================================================
 		// Public
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): AnyStruct?{ 
 			return BlockchainOracle.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetManagerPublic(): &MutableMetadataSetManager.Manager{ 
 			return NiftoryNFTRegistry.getSetManagerPublic(BlockchainOracle.REGISTRY_ADDRESS, BlockchainOracle.REGISTRY_BRAND)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataViewsManagerPublic(): &MetadataViewsManager.Manager{ 
 			return NiftoryNFTRegistry.getMetadataViewsManagerPublic(BlockchainOracle.REGISTRY_ADDRESS, BlockchainOracle.REGISTRY_BRAND)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return NiftoryNFTRegistry.buildNFTCollectionData(BlockchainOracle.REGISTRY_ADDRESS, BlockchainOracle.REGISTRY_BRAND, fun (): @{NonFungibleToken.Collection}{ 
 					return <-BlockchainOracle.createEmptyCollection(nftType: Type<@BlockchainOracle.Collection>())
@@ -354,7 +368,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 		// ========================================================================
 		// Contract metadata
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun modifyContractMetadata(): &AnyStruct{ 
 			emit ContractMetadataUpdated()
 			let maybeMetadata = BlockchainOracle.metadata
@@ -365,7 +379,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return (&BlockchainOracle.metadata as &AnyStruct?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceContractMetadata(_ metadata: AnyStruct?){ 
 			emit ContractMetadataUpdated()
 			BlockchainOracle.metadata = metadata
@@ -381,19 +395,19 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return manager
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockMetadataViewsManager(){ 
 			self._getMetadataViewsManagerPrivate().lock()
 			emit MetadataViewsManagerLocked()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataViewsResolver(_ resolver:{ MetadataViewsManager.Resolver}){ 
 			self._getMetadataViewsManagerPrivate().addResolver(resolver)
 			emit MetadataViewsResolverAdded(type: resolver.type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMetadataViewsResolver(_ type: Type){ 
 			self._getMetadataViewsManagerPrivate().removeResolver(type)
 			emit MetadataViewsResolverRemoved(type: type)
@@ -409,19 +423,19 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return setManager
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataManagerName(_ name: String){ 
 			self._getSetManagerPrivate().setName(name)
 			emit SetManagerMetadataUpdated()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataManagerDescription(_ description: String){ 
 			self._getSetManagerPrivate().setDescription(description)
 			emit SetManagerMetadataUpdated()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSet(_ set: @MutableMetadataSet.Set){ 
 			let setManager = self._getSetManagerPrivate()
 			let setId = setManager.numSets()
@@ -437,31 +451,31 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return self._getSetManagerPrivate().getSetMutable(setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockSet(setId: Int){ 
 			self._getSetMutable(setId).lock()
 			emit SetLocked(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockSetMetadata(setId: Int){ 
 			self._getSetMutable(setId).metadataMutable().lock()
 			emit SetMetadataLocked(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun modifySetMetadata(setId: Int): &AnyStruct{ 
 			emit SetMetadataModified(setId: setId)
 			return self._getSetMutable(setId).metadataMutable().getMutable()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceSetMetadata(setId: Int, new: AnyStruct){ 
 			self._getSetMutable(setId).metadataMutable().replace(new)
 			emit SetMetadataModified(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(setId: Int, template: @MutableMetadataTemplate.Template){ 
 			let set = self._getSetMutable(setId)
 			let templateId = set.numTemplates()
@@ -477,19 +491,19 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return self._getSetMutable(setId).getTemplateMutable(templateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(setId: Int, templateId: Int){ 
 			self._getTemplateMutable(setId, templateId).lock()
 			emit TemplateLocked(setId: setId, templateId: templateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTemplateMaxMint(setId: Int, templateId: Int, max: UInt64){ 
 			self._getTemplateMutable(setId, templateId).setMaxMint(max)
 			emit TemplateMaxMintSet(setId: setId, templateId: templateId, maxMint: max)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(setId: Int, templateId: Int): @{NonFungibleToken.NFT}{ 
 			let template = self._getTemplateMutable(setId, templateId)
 			template.registerMint()
@@ -499,7 +513,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBulk(setId: Int, templateId: Int, numToMint: UInt64): @[{NonFungibleToken.NFT}]{ 
 			pre{ 
 				numToMint > 0:
@@ -527,19 +541,19 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 			return self._getTemplateMutable(setId, templateId).metadataMutable()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockNFTMetadata(setId: Int, templateId: Int){ 
 			self._getNFTMetadata(setId, templateId).lock()
 			emit NFTMetadataLocked(setId: setId, templateId: templateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun modifyNFTMetadata(setId: Int, templateId: Int): &AnyStruct{ 
 			emit NFTMetadataModified(setId: setId, templateId: templateId)
 			return self._getNFTMetadata(setId, templateId).getMutable()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceNFTMetadata(setId: Int, templateId: Int, new: AnyStruct){ 
 			self._getNFTMetadata(setId, templateId).replace(new)
 			emit NFTMetadataModified(setId: setId, templateId: templateId)
@@ -549,12 +563,12 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 	// ========================================================================
 	// Contract functions
 	// ========================================================================
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun _contract(): &{NiftoryNonFungibleToken.ManagerPublic}{ 
 		return NiftoryNFTRegistry.getNFTManagerPublic(BlockchainOracle.REGISTRY_ADDRESS, BlockchainOracle.REGISTRY_BRAND)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		let possibleViews = [Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.ExternalURL>()]
 		let views: [Type] = [Type<MetadataViews.NFTCollectionData>()]
@@ -567,7 +581,7 @@ contract BlockchainOracle: NonFungibleToken, ViewResolver{
 		return views
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		let viewManager = self._contract().getMetadataViewsManagerPublic()
 		switch view{ 

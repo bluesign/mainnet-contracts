@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 PierMath provides the math utility functions for other contracts
 under Pier Wharf v1.
@@ -26,7 +40,7 @@ contract PierMath{
 	// Examples:
 	//  1.23456789 -> 123456789
 	//  1.00000000 -> 100000000
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun UFix64ToRawUInt256(_ n: UFix64): UInt256{ 
 		let fractionalPart = n % 1.0
 		return UInt256(n) * self.scaleUI256 + UInt256(fractionalPart * self.scaleUF64)
@@ -36,7 +50,7 @@ contract PierMath{
 	// Examples:
 	//  123456789 -> 1.23456789
 	//  100000000 -> 1.00000000
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun rawUInt256ToUFix64(_ n: UInt256): UFix64{ 
 		let fractionalPart = n % self.scaleUI256
 		return UFix64(n / self.scaleUI256) + UFix64(fractionalPart) / self.scaleUF64
@@ -47,7 +61,7 @@ contract PierMath{
 	//  0 -> 0
 	//  4 -> 2
 	//  5 -> 2
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sqrt(_ x: UInt256): UInt256{ 
 		var z = x / 2 + 1
 		var y = x
@@ -65,7 +79,7 @@ contract PierMath{
 	// @param reserve2 The reserve balance of token 2
 	// @param timeElapsed The time elapsed since `lastPrice1Cumulative` was recorded
 	// @return The new cumulative price for TWAP
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun computePriceCumulative(
 		lastPrice1Cumulative: Word64,
 		reserve1: UFix64,
@@ -87,7 +101,7 @@ contract PierMath{
 	// Examples:
 	//  0x1 -> 1
 	//  0xf8d6e0586b0a20c7 -> 17930765636779778247
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun AddressToUInt64(address: Address): UInt64{ 
 		let addressBytes = address.toBytes()
 		assert(addressBytes.length == 8, message: "Metapier PierMath: Address should be 64 bits")

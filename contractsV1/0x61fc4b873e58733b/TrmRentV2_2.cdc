@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 	TrmRentV2_2.cdc
 
@@ -186,51 +200,51 @@ contract TrmRentV2_2: NonFungibleToken{
 		fun depositRent(token: @{NonFungibleToken.NFT})
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetTokenIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(assetTokenID: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetTokenID(id: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun assetTokenIDExists(assetTokenID: UInt64): Bool
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTUsingAssetTokenID(assetTokenID: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRent(id: UInt64): &NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRentUsingAssetTokenID(assetTokenID: UInt64): &NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiryTimestamp(id: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiryTimestampUsingAssetTokenID(assetTokenID: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExpired(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExpiredUsingAssetTokenID(assetTokenID: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRentValid(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRentValidUsingAssetTokenID(assetTokenID: UInt64): Bool
 	}
 	
@@ -271,7 +285,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		
 		// deposit takes an NFT as an argument and adds it to the Collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			pre{ 
 				false:
 					"Depositing Rent directly to Rent contract is not allowed"
@@ -308,19 +322,19 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// getAssetTokenIDs returns an array of the asset token IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetTokenIDs(): [UInt64]{ 
 			return self.rentedNFTs.keys
 		}
 		
 		// Returns the rent token ID for an NFT from assetTokenID in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(assetTokenID: UInt64): UInt64{ 
 			return self.rentedNFTs[assetTokenID] ?? panic("Asset Token ID does not exist")
 		}
 		
 		// Returns the asset token ID for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetTokenID(id: UInt64): UInt64{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -332,13 +346,13 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Checks if id of NFT exists in collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
 		// Checks if id of NFT exists in collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun assetTokenIDExists(assetTokenID: UInt64): Bool{ 
 			if self.rentedNFTs[assetTokenID] == nil{ 
 				return false
@@ -354,14 +368,14 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns a borrowed reference to an NFT in the collection using asset token id so that the caller can read data and call methods from it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTUsingAssetTokenID(assetTokenID: UInt64): &{NonFungibleToken.NFT}?{ 
 			let rentTokenID = self.rentedNFTs[assetTokenID] ?? panic("Rent Token ID does not exist")
 			return &self.ownedNFTs[rentTokenID] as &{NonFungibleToken.NFT}?
 		}
 		
 		// Returns a borrowed reference to the Rent NFT in the collection so that the caller can read data and call methods from it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRent(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -372,7 +386,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns a borrowed reference to the RENT NFT in the collection using asset token id so that the caller can read data and call methods from it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRentUsingAssetTokenID(assetTokenID: UInt64): &NFT{ 
 			pre{ 
 				self.rentedNFTs[assetTokenID] != nil:
@@ -386,7 +400,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns the expiry for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiryTimestamp(id: UInt64): UFix64{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -398,7 +412,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns the expiry for an NFT in the collection using asset token id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiryTimestampUsingAssetTokenID(assetTokenID: UInt64): UFix64{ 
 			pre{ 
 				self.rentedNFTs[assetTokenID] != nil:
@@ -413,7 +427,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns if token is expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExpired(id: UInt64): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -425,7 +439,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns if token is expired using asset token id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExpiredUsingAssetTokenID(assetTokenID: UInt64): Bool{ 
 			pre{ 
 				self.rentedNFTs[assetTokenID] != nil:
@@ -440,7 +454,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns if rent is valid for rent id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRentValid(id: UInt64): Bool{ 
 			if self.ownedNFTs[id] != nil{ 
 				let refNFT = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -452,7 +466,7 @@ contract TrmRentV2_2: NonFungibleToken{
 		}
 		
 		// Returns if rent is valid for asset token id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRentValidUsingAssetTokenID(assetTokenID: UInt64): Bool{ 
 			if let rentTokenID = self.rentedNFTs[assetTokenID]{ 
 				if self.ownedNFTs[rentTokenID] != nil{ 
@@ -533,7 +547,7 @@ contract TrmRentV2_2: NonFungibleToken{
 	}
 	
 	// emitCreateEmptyRentCollectionEvent emits events for asset collection initialization
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun emitCreateEmptyRentCollectionEvent(userAccountAddress: Address){ 
 		emit RentCollectionInitialized(userAccountAddress: userAccountAddress)
 	}
@@ -545,7 +559,7 @@ contract TrmRentV2_2: NonFungibleToken{
 	resource Minter{ 
 		
 		// mintNFT mints the rent NFT and stores it in the collection of recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(assetTokenID: UInt64, kID: String, assetName: String, assetDescription: String, assetURL: String, assetThumbnailURL: String, assetMetadata:{ String: String}, expiryTimestamp: UFix64, recipient: &{CollectionPublic}): UInt64{ 
 			// pre {
 			//	 expiryTimestamp > getCurrentBlock().timestamp:

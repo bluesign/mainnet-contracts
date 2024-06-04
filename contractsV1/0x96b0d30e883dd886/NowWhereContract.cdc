@@ -1,4 +1,18 @@
-import NFTContract from "../0x73b22c80a051e2ff/NFTContract.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NFTContract from "../0x73b22c80a051e2ff/NFTContract.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -90,12 +104,12 @@ contract NowWhereContract{
 		access(contract)
 		var ownerVault: Capability<&{FungibleToken.Receiver}>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addOwnerVault(_ownerVault: Capability<&{FungibleToken.Receiver}>){ 
 			self.ownerVault = _ownerVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(
 			dropId: UInt64,
 			startDate: UFix64,
@@ -136,7 +150,7 @@ contract NowWhereContract{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeDrop(dropId: UInt64){ 
 			pre{ 
 				dropId != nil:
@@ -150,7 +164,7 @@ contract NowWhereContract{
 			emit DropRemoved(dropId: dropId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseNFT(
 			dropId: UInt64,
 			templateId: UInt64,
@@ -195,7 +209,7 @@ contract NowWhereContract{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseNFTWithFlow(
 			dropId: UInt64,
 			templateId: UInt64,
@@ -260,14 +274,14 @@ contract NowWhereContract{
 	
 	// getDropById returns the IDs that the specified Drop id
 	// is associated with 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDropById(dropId: UInt64): Drop{ 
 		return self.allDrops[dropId]!
 	}
 	
 	// getAllDrops returns all the Drops in NowWhereContract
 	// Returns: A dictionary of all the Drop that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllDrops():{ UInt64: Drop}{ 
 		return self.allDrops
 	}

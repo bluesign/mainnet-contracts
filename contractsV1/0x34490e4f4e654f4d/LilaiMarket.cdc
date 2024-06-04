@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -26,16 +40,16 @@ contract LilaiMarket{
 		access(all)
 		var cutPercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemId: UInt64, buyTokens: @{FungibleToken.Vault}): @LilaiQuest.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(itemId: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &LilaiQuest.NFT?
 	}
 	
@@ -64,7 +78,7 @@ contract LilaiMarket{
 			self.cutPercentage = cutPercentage
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(item: @LilaiQuest.NFT, price: UFix64, caller: Address){ 
 			assert(caller == self.owner?.address, message: "Caller is not the owner of the item")
 			let id = item.id
@@ -73,7 +87,7 @@ contract LilaiMarket{
 			emit ItemListed(id: id, price: price, seller: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(itemId: UInt64): @LilaiQuest.NFT{ 
 			let item <- self.forSale.withdraw(id: itemId)
 			self.prices.remove(key: itemId)
@@ -81,7 +95,7 @@ contract LilaiMarket{
 			return <-item
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemId: UInt64, buyTokens: @{FungibleToken.Vault}): @LilaiQuest.NFT{ 
 			pre{ 
 				self.forSale.borrowNFT(id: itemId) != nil && self.prices[itemId] != nil:
@@ -98,7 +112,7 @@ contract LilaiMarket{
 			return <-self.withdraw(itemId: itemId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(itemId: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.prices[itemId] != nil:
@@ -108,7 +122,7 @@ contract LilaiMarket{
 			emit ItemPriceChanged(id: itemId, newPrice: newPrice, seller: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePercentage(newPercent: UFix64){ 
 			pre{ 
 				newPercent <= 1.0:
@@ -118,7 +132,7 @@ contract LilaiMarket{
 			emit CutPercentageChanged(newPercent: newPercent, seller: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(newOwnerCapability: Capability){ 
 			pre{ 
 				newOwnerCapability.borrow<&{FungibleToken.Receiver}>() != nil:
@@ -127,7 +141,7 @@ contract LilaiMarket{
 			self.ownerCapability = newOwnerCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(newBeneficiaryCapability: Capability){ 
 			pre{ 
 				newBeneficiaryCapability.borrow<&{FungibleToken.Receiver}>() != nil:
@@ -136,24 +150,24 @@ contract LilaiMarket{
 			self.beneficiaryCapability = newBeneficiaryCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(itemId: UInt64): UFix64?{ 
 			return self.prices[itemId]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.getTokenIds()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &LilaiQuest.NFT?{ 
 			let ref = self.forSale.borrowNFT(id: id)
 			return ref
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCapability: Capability<&{FungibleToken.Receiver}>,
 		beneficiaryCapability: Capability<&{FungibleToken.Receiver}>,

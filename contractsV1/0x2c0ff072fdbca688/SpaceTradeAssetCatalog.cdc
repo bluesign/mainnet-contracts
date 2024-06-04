@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -136,17 +150,17 @@ contract SpaceTradeAssetCatalog{
 	
 	access(all)
 	resource Manager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertNFT(_ nftCollection: NFTCollectionMetadata){ 
 			SpaceTradeAssetCatalog.nfts.insert(key: nftCollection.name, nftCollection)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertFT(_ ftVault: FTVaultMetadata){ 
 			SpaceTradeAssetCatalog.fts.insert(key: ftVault.name, ftVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleSupportedNFT(_ collectionName: String, _ supported: Bool){ 
 			pre{ 
 				SpaceTradeAssetCatalog.nfts[collectionName] != nil:
@@ -159,7 +173,7 @@ contract SpaceTradeAssetCatalog{
 			ref.setSupported(supported)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleSupportedFT(_ tokenName: String, _ supported: Bool){ 
 			pre{ 
 				SpaceTradeAssetCatalog.fts[tokenName] != nil:
@@ -170,7 +184,7 @@ contract SpaceTradeAssetCatalog{
 			ref.setSupported(supported)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFT(_ tokenName: String){ 
 			pre{ 
 				SpaceTradeAssetCatalog.fts[tokenName] != nil:
@@ -180,7 +194,7 @@ contract SpaceTradeAssetCatalog{
 			?? panic("Unable to remove fungible token")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNFT(_ collectionName: String){ 
 			pre{ 
 				SpaceTradeAssetCatalog.nfts[collectionName] != nil:
@@ -191,7 +205,7 @@ contract SpaceTradeAssetCatalog{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSupportedNFT(_ collectionName: String): Bool{ 
 		if let collection = self.nfts[collectionName]{ 
 			return collection.supported
@@ -201,7 +215,7 @@ contract SpaceTradeAssetCatalog{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSupportedFT(_ tokenName: String): Bool{ 
 		if let token = self.fts[tokenName]{ 
 			return token.supported
@@ -210,19 +224,19 @@ contract SpaceTradeAssetCatalog{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberOfNFTCollections(): Int{ 
 		let ourNFTs = self.nfts.keys
 		let officialNFTs = NFTCatalog.getCatalog().keys
 		return ourNFTs.length + officialNFTs.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberOfFTs(): Int{ 
 		return self.fts.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTCollectionMetadatas(_ offset: Int, _ limit: Int):{ String: NFTCollectionMetadata}{ 
 		let nfts:{ String: NFTCollectionMetadata} ={} 
 		let ourNFTs = self.nfts
@@ -246,18 +260,18 @@ contract SpaceTradeAssetCatalog{
 		return nfts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTMetadatas():{ String: FTVaultMetadata}{ 
 		return self.fts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTCollectionMetadata(_ collectionName: String): NFTCollectionMetadata?{ 
 		return self.nfts[collectionName]
 		?? self.getNFTCollectionMetadataFromOfficialCatalog(collectionName)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTMetadata(_ tokenName: String): FTVaultMetadata?{ 
 		return self.fts[tokenName]
 	}

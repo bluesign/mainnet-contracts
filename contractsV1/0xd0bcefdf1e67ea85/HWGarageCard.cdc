@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 *
 *   An NFT contract demo for redeeming/minting unlimited tokens
 *
@@ -125,7 +139,7 @@ contract HWGarageCard: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			if HWGarageCard.idToTokenMetadata[self.id] != nil{ 
 				return (HWGarageCard.idToTokenMetadata[self.id]!).metadata
@@ -149,15 +163,15 @@ contract HWGarageCard: NonFungibleToken{
 	access(all)
 	resource interface HWGarageCardCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHWGarageCard(id: UInt64): &HWGarageCard.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -183,7 +197,7 @@ contract HWGarageCard: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// let token <- token as! @HWGarageCard.NFT
 			// let id: UInt64 = token.id
 			let HWGarageCard <- token as! @HWGarageCard.NFT
@@ -206,7 +220,7 @@ contract HWGarageCard: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHWGarageCard(id: UInt64): &HWGarageCard.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -263,17 +277,17 @@ contract HWGarageCard: NonFungibleToken{
 		*   Public Functions
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return self.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getName(): String{ 
 		return self.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun transfer(uuid: UInt64, id: UInt64, packSeriesId: UInt64, cardEditionId: UInt64, toAddress: Address){ 
 		let HWGarageCardV2UUID: UInt64 = uuid
 		let HWGarageCardV2SeriesId: UInt64 = packSeriesId
@@ -282,12 +296,12 @@ contract HWGarageCard: NonFungibleToken{
 		emit TransferEvent(uuid: HWGarageCardV2UUID, id: HWGarageCardV2ID, seriesId: HWGarageCardV2SeriesId, editionId: HWGarageCardV2cardEditionID, to: toAddress)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionMetadata():{ String: String}{ 
 		return self.collectionMetadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionMetadata(_ edition: UInt64):{ String: String}{ 
 		if self.idToTokenMetadata[edition] != nil{ 
 			return (self.idToTokenMetadata[edition]!).metadata
@@ -296,7 +310,7 @@ contract HWGarageCard: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataLength(): Int{ 
 		return self.idToTokenMetadata.length
 	}

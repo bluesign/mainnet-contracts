@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -68,7 +82,7 @@ contract DooverseItems: NonFungibleToken{
 			self.metadata = initMeta
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -115,10 +129,10 @@ contract DooverseItems: NonFungibleToken{
 	access(all)
 	resource interface DooverseItemsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
@@ -126,7 +140,7 @@ contract DooverseItems: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowDooverseItem(id: UInt64): &DooverseItems.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -146,11 +160,11 @@ contract DooverseItems: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			panic("Cannot desposit Dooverse NFTs")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			panic("Cannot transfer Dooverse NFTs")
 		}
@@ -168,7 +182,7 @@ contract DooverseItems: NonFungibleToken{
 			panic("NFT not found in collection.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowDooverseItem(id: UInt64): &DooverseItems.NFT?{ 
 			if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?{ 
 				return nft as! &DooverseItems.NFT
@@ -211,7 +225,7 @@ contract DooverseItems: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, initMetadata:{ String: String}){ 
 			panic("Cannot mint new Dooverse NFTs")
 		}
@@ -223,7 +237,7 @@ contract DooverseItems: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &DooverseItems.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&DooverseItems.Collection>(DooverseItems.CollectionPublicPath).borrow<&DooverseItems.Collection>() ?? panic("Couldn't get collection")
 		

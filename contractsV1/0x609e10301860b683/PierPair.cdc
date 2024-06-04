@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MultiFungibleToken from "../0xa378eeb799df8387/MultiFungibleToken.cdc"
 
@@ -77,12 +91,12 @@ contract PierPair: IPierPair{
 		access(self)
 		let lpTokenMaster: @PierLPToken.TokenMaster
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReserves(): [UFix64; 2]{ 
 			return [self.tokenAVault.balance, self.tokenBVault.balance]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swap(fromVault: @{FungibleToken.Vault}, forAmount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				!self.lock:
@@ -127,7 +141,7 @@ contract PierPair: IPierPair{
 			return <-outputVault!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(vaultA: @{FungibleToken.Vault}, vaultB: @{FungibleToken.Vault}): @PierLPToken.Vault{ 
 			pre{ 
 				!self.lock:
@@ -179,7 +193,7 @@ contract PierPair: IPierPair{
 			return <-lpTokenVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(lpTokenVault: @PierLPToken.Vault): @[{FungibleToken.Vault}; 2]{ 
 			pre{ 
 				!self.lock:

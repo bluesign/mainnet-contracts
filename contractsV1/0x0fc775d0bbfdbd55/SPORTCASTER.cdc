@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -83,7 +97,7 @@ contract SPORTCASTER: NonFungibleToken{
 			self.description = description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -115,21 +129,21 @@ contract SPORTCASTER: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRefNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSPORTCASTERNFT(id: UInt64): &SPORTCASTER.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -173,7 +187,7 @@ contract SPORTCASTER: NonFungibleToken{
 		
 		/*Function to deposit a  NFT in the collection*/
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SPORTCASTER.NFT
 			let id: UInt64 = token.id
 			let name: String = token.name
@@ -190,7 +204,7 @@ contract SPORTCASTER: NonFungibleToken{
 		}
 		
 		/*Function get Ref NFT*/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRefNFT(id: UInt64): &{NonFungibleToken.NFT}{ 
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
@@ -202,14 +216,14 @@ contract SPORTCASTER: NonFungibleToken{
 		}
 		
 		/*Function borrow SPORTCASTER View NFT*/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSPORTCASTERNFT(id: UInt64): &SPORTCASTER.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &SPORTCASTER.NFT?
 		}
 		
 		// fun to check if the NFT exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -234,8 +248,8 @@ contract SPORTCASTER: NonFungibleToken{
 	// to add the first NFTs to an empty collection.
 	access(all)
 	resource interface NFTCollectionReceiver{ 
-		access(all)
-		fun mintNFT(collection: Capability<&SPORTCASTER.Collection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintNFT(collection: Capability<&SPORTCASTER.Collection>): Void
 	}
 	
 	access(all)
@@ -269,7 +283,7 @@ contract SPORTCASTER: NonFungibleToken{
 			self.mintNFT(collection: collection)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(collection: Capability<&SPORTCASTER.Collection>){ 
 			let collectionBorrow = collection.borrow() ?? panic("cannot borrow collection")
 			SPORTCASTER.totalSupply = SPORTCASTER.totalSupply + 1
@@ -280,7 +294,7 @@ contract SPORTCASTER: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTTemplate(name: String, metadata:{ String: AnyStruct}, thumbnail: String, description: String, collection: Capability<&SPORTCASTER.Collection>): @NFTTemplate{ 
 			return <-create NFTTemplate(name: name, metadata: metadata, thumbnail: thumbnail, description: description, collection: collection)
 		}
@@ -291,7 +305,7 @@ contract SPORTCASTER: NonFungibleToken{
 		return <-create Collection(name: "", metadata:{} )
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollectionNFT(name: String, metadata:{ String: AnyStruct}): @{NonFungibleToken.Collection}{ 
 		var newID = SPORTCASTER.totalCollection + 1
 		SPORTCASTER.totalCollection = newID

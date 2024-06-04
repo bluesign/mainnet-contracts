@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 // eternal.gg
 access(all)
@@ -167,7 +181,7 @@ contract Shard: NonFungibleToken{
 		
 		// Takes a NFT and adds it to the collections dictionary and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Shard.NFT
 			let id: UInt64 = token.id
 			
@@ -191,7 +205,7 @@ contract Shard: NonFungibleToken{
 		}
 		
 		// Gets a reference to the Shard NFT for metadata and such
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowShardNFT(id: UInt64): &Shard.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -221,7 +235,7 @@ contract Shard: NonFungibleToken{
 	access(all)
 	resource Admin{ 
 		// Creates a new Moment and returns the ID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMoment(influencerID: String, splits: UInt8, metadata:{ String: String}): UInt32{ 
 			var newMoment = Moment(influencerID: influencerID, splits: splits, metadata: metadata)
 			let newID = newMoment.id
@@ -232,7 +246,7 @@ contract Shard: NonFungibleToken{
 		}
 		
 		// Creates a new Clip struct and returns the ID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createClip(momentID: UInt32, sequence: UInt8, metadata:{ String: String}): UInt32{ 
 			// Create the new Clip
 			var newClip = Clip(momentID: momentID, sequence: sequence, metadata: metadata)
@@ -244,7 +258,7 @@ contract Shard: NonFungibleToken{
 		}
 		
 		// Mints a new NFT with a new ID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, clipID: UInt32){ 
 			// Creates a new NFT with provided arguments
 			var newNFT <- create NFT(initID: Shard.totalSupply, clipID: clipID)
@@ -253,7 +267,7 @@ contract Shard: NonFungibleToken{
 			recipient.deposit(token: <-newNFT)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, clipID: UInt32, quantity: UInt64){ 
 			var i: UInt64 = 0
 			while i < quantity{ 
@@ -263,7 +277,7 @@ contract Shard: NonFungibleToken{
 		}
 		
 		// Creates a new Admin resource to be given to an account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -276,31 +290,31 @@ contract Shard: NonFungibleToken{
 	}
 	
 	// Publicly get a Moment for a given Moment ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMoment(momentID: UInt32): Moment?{ 
 		return self.moments[momentID]
 	}
 	
 	// Publicly get a Clip for a given Clip ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClip(clipID: UInt32): Clip?{ 
 		return self.clips[clipID]
 	}
 	
 	// Publicly get metadata for a given Moment ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMomentMetadata(momentID: UInt32):{ String: String}?{ 
 		return self.moments[momentID]?.metadata
 	}
 	
 	// Publicly get metadata for a given Clip ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClipMetadata(clipID: UInt32):{ String: String}?{ 
 		return self.clips[clipID]?.metadata
 	}
 	
 	// Publicly get all Clips
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllClips(): [Shard.Clip]{ 
 		return Shard.clips.values
 	}

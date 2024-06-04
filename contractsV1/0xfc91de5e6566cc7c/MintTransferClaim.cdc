@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -45,7 +59,7 @@ contract MintTransferClaim{
 	resource Admin{ 
 		
 		//deposit FBRC to contract vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{FungibleToken.Vault}){ 
 			let from <- from as! @FBRC.Vault
 			let balance = from.balance
@@ -53,19 +67,19 @@ contract MintTransferClaim{
 		}
 		
 		//change claim FBRC claim amount from contract vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeClaimAmount(amount: UFix64){ 
 			MintTransferClaim.claimAmount = amount
 		}
 		
 		//prevent claiming
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeClaim(){ 
 			MintTransferClaim.closed = true
 		}
 		
 		//withdraw FBRC from the contract vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64, to: &FBRC.Vault){ 
 			let withdrawnVault <- MintTransferClaim.fbrcVault.withdraw(amount: amount)
 			to.deposit(from: <-withdrawnVault)
@@ -73,7 +87,7 @@ contract MintTransferClaim{
 		
 		//combine garment and material to mint item, then return the itemd
 		//each address can only use this function once
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAndTransferItem(
 			name: String,
 			fbrcCap: Capability<&FBRC.Vault>,
@@ -128,14 +142,14 @@ contract MintTransferClaim{
 			return <-item
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 	}
 	
 	//users can claim FBRC if they have minted an item
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimFBRC(fbrcCap: Capability<&FBRC.Vault>){ 
 		
 		//Make sure they are in the claim list (not null) and they have not claimed yet (not true)
@@ -157,20 +171,20 @@ contract MintTransferClaim{
 	}
 	
 	//get balance of contract vault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalance(): UFix64{ 
 		let balance = MintTransferClaim.fbrcVault.balance
 		return balance
 	}
 	
 	// get all claimedItems created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClaimedItems(): [UInt32]{ 
 		return MintTransferClaim.claimedItems
 	}
 	
 	// get all ItemDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressClaim():{ Address: Bool}{ 
 		return MintTransferClaim.addressClaim
 	}

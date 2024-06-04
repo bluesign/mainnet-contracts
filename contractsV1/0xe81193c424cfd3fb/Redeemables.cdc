@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -92,12 +106,12 @@ contract Redeemables: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRedeemLimitExceeded(): Bool{ 
 			return self.redeemLimitTimestamp < getCurrentBlock().timestamp
 		}
@@ -180,7 +194,7 @@ contract Redeemables: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSet(): Redeemables.Set{ 
 			return Redeemables.sets[self.setId]!
 		}
@@ -190,7 +204,7 @@ contract Redeemables: NonFungibleToken{
 			self.active = active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTermsOfService(): String?{ 
 			return self.extra["termsOfService"] as! String?
 		}
@@ -229,12 +243,12 @@ contract Redeemables: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.Traits>(), Type<MetadataViews.Editions>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): Template{ 
 			return Redeemables.templates[self.templateId]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSet(): Set{ 
 			return self.getTemplate().getSet()
 		}
@@ -291,15 +305,15 @@ contract Redeemables: NonFungibleToken{
 	access(all)
 	resource interface RedeemablesCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRedeemable(id: UInt64): &Redeemables.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -307,10 +321,10 @@ contract Redeemables: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(id: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnUnredeemedSet(set: Redeemables.Set)
 	}
 	
@@ -332,7 +346,7 @@ contract Redeemables: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			assert(!token.getSet().isRedeemLimitExceeded(), message: "Set redeem limit timestamp reached")
 			let set = token.getSet()
@@ -354,7 +368,7 @@ contract Redeemables: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRedeemable(id: UInt64): &Redeemables.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -370,7 +384,7 @@ contract Redeemables: NonFungibleToken{
 			return redeemable
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(id: UInt64){ 
 			let nft <- (self.ownedNFTs.remove(key: id) ?? panic("missing NFT")) as! @NFT
 			let template = nft.getTemplate()
@@ -382,7 +396,7 @@ contract Redeemables: NonFungibleToken{
 			destroy nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnUnredeemedSet(set: Redeemables.Set){ 
 			assert(set.isRedeemLimitExceeded(), message: "Set redeem limit timestamp not reached: ".concat(set.name))
 			let ids = self.ownedNFTs.keys
@@ -517,12 +531,12 @@ contract Redeemables: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.NFTCollectionData>()]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionDisplay>():

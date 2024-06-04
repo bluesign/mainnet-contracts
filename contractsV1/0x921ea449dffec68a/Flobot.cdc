@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import FlovatarComponentTemplate from "./FlovatarComponentTemplate.cdc"
@@ -152,7 +166,7 @@ contract Flobot: NonFungibleToken{
 			self.components = components
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getComponents():{ String: UInt64}{ 
 			return self.components
 		}
@@ -182,22 +196,22 @@ contract Flobot: NonFungibleToken{
 		access(all)
 		let schema: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBackground(): UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}
 	}
 	
@@ -205,13 +219,13 @@ contract Flobot: NonFungibleToken{
 	//for the Flobot and is accessible only to the owner of the NFT
 	access(all)
 	resource interface Private{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBackground(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBackground(): @FlovatarComponent.NFT?
 	}
 	
@@ -254,34 +268,34 @@ contract Flobot: NonFungibleToken{
 			self.bio ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties{ 
 			return self.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}{ 
 			return self.bio
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
 		// This will allow to change the Name of the Flobot only once.
 		// It checks for the current name is empty, otherwise it will throw an error.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String): String{ 
 			pre{ 
 				// TODO: Make sure that the text of the name is sanitized
@@ -308,14 +322,14 @@ contract Flobot: NonFungibleToken{
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBackground(): UInt64?{ 
 			return self.background?.templateId
 		}
 		
 		// This will allow to change the Background of the Flobot any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBackground(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?{ 
 			pre{ 
 				component.getCategory() == "background":
@@ -329,7 +343,7 @@ contract Flobot: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Background of the Flobot any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBackground(): @FlovatarComponent.NFT?{ 
 			emit Updated(id: self.id)
 			let compNFT <- self.background <- nil
@@ -340,7 +354,7 @@ contract Flobot: NonFungibleToken{
 		// optional components (Accessory, Hat, Eyeglasses and Background) from their
 		// original Template resources, while all the other unmutable components are
 		// taken from the Metadata directly.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			var svg: String = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3000 3000' width='100%' height='100%'>"
 			if let background = self.getBackground(){ 
@@ -353,7 +367,7 @@ contract Flobot: NonFungibleToken{
 			return svg
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvgNoBg(): String{ 
 			var svg: String = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3000 3000' width='100%' height='100%'>"
 			svg = svg.concat(self.getTraitsSvg())
@@ -361,7 +375,7 @@ contract Flobot: NonFungibleToken{
 			return svg
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraitsSvg(): String{ 
 			var svg: String = ""
 			let components:{ String: UInt64} = self.metadata.getComponents()
@@ -393,7 +407,7 @@ contract Flobot: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				return MetadataViews.ExternalURL("https://flovatar.com/flobots/".concat(self.id.toString()))
 			}
@@ -466,15 +480,15 @@ contract Flobot: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlobot(id: UInt64): &Flobot.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -508,7 +522,7 @@ contract Flobot: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Flobot.NFT
 			let id: UInt64 = token.id
 			
@@ -533,7 +547,7 @@ contract Flobot: NonFungibleToken{
 		
 		// borrowFlobot returns a borrowed reference to a Flobot
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlobot(id: UInt64): &Flobot.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -546,7 +560,7 @@ contract Flobot: NonFungibleToken{
 		
 		// borrowFlobotPrivate returns a borrowed reference to a Flobot using the Private interface
 		// so that the caller can read data and call methods from it, like setting the optional components.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlobotPrivate(id: UInt64): &{Flobot.Private}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -618,7 +632,7 @@ contract Flobot: NonFungibleToken{
 	}
 	
 	// This function will look for a specific Flobot on a user account and return a FlobotData if found
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlobot(address: Address, flobotId: UInt64): FlobotData?{ 
 		let account = getAccount(address)
 		if let flobotCollection = account.capabilities.get<&{Flobot.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Flobot.CollectionPublic}>(){ 
@@ -630,7 +644,7 @@ contract Flobot: NonFungibleToken{
 	}
 	
 	// This function will return all Flobots on a user account and return an array of FlobotData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlobots(address: Address): [FlobotData]{ 
 		var flobotData: [FlobotData] = []
 		let account = getAccount(address)
@@ -644,13 +658,13 @@ contract Flobot: NonFungibleToken{
 	}
 	
 	// This returns all the previously minted combinations, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedCombinations(): [String]{ 
 		return Flobot.mintedCombinations.keys
 	}
 	
 	// This returns all the previously minted names, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedNames(): [String]{ 
 		return Flobot.mintedNames.keys
 	}
@@ -670,14 +684,14 @@ contract Flobot: NonFungibleToken{
 	// This helper function will generate a string from a list of components,
 	// to be used as a sort of barcode to keep the inventory of the minted
 	// Flobots and to avoid duplicates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCombinationString(body: UInt64, head: UInt64, arms: UInt64, legs: UInt64, face: UInt64): String{ 
 		return "B".concat(body.toString()).concat("H").concat(head.toString()).concat("A").concat(arms.toString()).concat("L").concat(legs.toString()).concat("F").concat(face.toString())
 	}
 	
 	// This function will get a list of component IDs and will check if the
 	// generated string is unique or if someone already used it before.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkCombinationAvailable(body: UInt64, head: UInt64, arms: UInt64, legs: UInt64, face: UInt64): Bool{ 
 		let combinationString = Flobot.getCombinationString(body: body, head: head, arms: arms, legs: legs, face: face)
 		return !Flobot.mintedCombinations.containsKey(combinationString)
@@ -685,7 +699,7 @@ contract Flobot: NonFungibleToken{
 	
 	// This will check if a specific Name has already been taken
 	// and assigned to some Flobot
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkNameAvailable(name: String): Bool{ 
 		return name.length > 2 && name.length < 20 && !Flobot.mintedNames.containsKey(name)
 	}
@@ -697,7 +711,7 @@ contract Flobot: NonFungibleToken{
 	// The Spark NFT will entitle to use any common basic component (body, hair, etc.)
 	// In order to use special rare components a boost of the same rarity will be needed
 	// for each component used
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createFlobot(flobotkit: @[FlovatarComponent.NFT], body: UInt64, head: UInt64, arms: UInt64, legs: UInt64, face: UInt64, background: @FlovatarComponent.NFT?, address: Address): @Flobot.NFT{ 
 		var i: Int = 0
 		var flobotkitSeries: UInt32 = UInt32(0)
@@ -881,12 +895,12 @@ contract Flobot: NonFungibleToken{
 	
 	// These functions will return the current Royalty cuts for
 	// both the Creator and the Marketplace.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyCut(): UFix64{ 
 		return self.royaltyCut
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketplaceCut(): UFix64{ 
 		return self.marketplaceCut
 	}
@@ -910,19 +924,19 @@ contract Flobot: NonFungibleToken{
 		
 		// With this function you can generate a new Admin resource
 		// and pass it to another user if needed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Helper functions to update the Royalty cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyCut(value: UFix64){ 
 			Flobot.setRoyaltyCut(value: value)
 		}
 		
 		// Helper functions to update the Marketplace cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketplaceCut(value: UFix64){ 
 			Flobot.setMarketplaceCut(value: value)
 		}

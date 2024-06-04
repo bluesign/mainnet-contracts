@@ -1,4 +1,18 @@
-import StringUtils from "./../../standardsV1/StringUtils.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import StringUtils from "./../../standardsV1/StringUtils.cdc"
 
 access(all)
 contract AddressUtils{ 
@@ -39,7 +53,7 @@ contract AddressUtils{
 		return r
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun parseAddress(_ input: AnyStruct): Address?{ 
 		if let parsed = self.parseUInt64(input){ 
 			return Address(parsed)
@@ -47,7 +61,7 @@ contract AddressUtils{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isValidAddress(_ input: AnyStruct, forNetwork: String): Bool{ 
 		if let address = self.parseUInt64(input){ 
 			var codeWords:{ String: UInt64} ={ "MAINNET": 0, "TESTNET": 0x6834ba37b3980209, "EMULATOR": 0x1cb159857af02018}
@@ -70,7 +84,7 @@ contract AddressUtils{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNetworkFromAddress(_ input: AnyStruct): String?{ 
 		for network in ["MAINNET", "TESTNET", "EMULATOR"]{ 
 			if self.isValidAddress(input, forNetwork: network){ 
@@ -80,7 +94,7 @@ contract AddressUtils{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun currentNetwork(): String{ 
 		return self.getNetworkFromAddress(self.account.address)!
 	}

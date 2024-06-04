@@ -1,4 +1,18 @@
-import AABvoteNFT from "./AABvoteNFT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import AABvoteNFT from "./AABvoteNFT.cdc"
 
 access(all)
 contract AABvoteVote{ 
@@ -35,7 +49,7 @@ contract AABvoteVote{
 		case silver
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun levelToStar(_ level: Level): UInt64{ 
 		switch level{ 
 			case Level.diamond:
@@ -68,7 +82,7 @@ contract AABvoteVote{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun rarityToStar(rarity: UInt8, amount: Int): UInt64{ 
 		if rarity == AABvoteNFT.Rarity.common.rawValue && amount == 1{ 
 			return AABvoteVote.levelToStar(Level.silver)
@@ -87,7 +101,7 @@ contract AABvoteVote{
 	
 	access(all)
 	resource AdminVote{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun vote(voter: Address, candidateId: String, nfts: [UInt64], type: UInt8){ 
 			pre{ 
 				voter != nil:
@@ -150,12 +164,12 @@ contract AABvoteVote{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowVote(_ allowVote: Bool){ 
 			AABvoteVote.allowVote = allowVote
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdminVote(): @AdminVote{ 
 			return <-create AdminVote()
 		}

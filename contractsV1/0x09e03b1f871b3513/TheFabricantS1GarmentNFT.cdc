@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: TheFabricantS1GarmentNFT Contract
    
 	TheFabricantS1GarmentNFT NFTs are minted by admins, and can be combined with 
@@ -129,12 +143,12 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 			emit GarmentDataCreated(garmentDataID: self.garmentDataID, designerAddress: designerAddress, metadata: self.metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty():{ String: Royalty}{ 
 			return self.royalty
 		}
@@ -194,7 +208,7 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createGarmentData(designerAddress: Address, metadata:{ String: String}, royalty:{ String: Royalty}): UInt32{ 
 			// Create the new GarmentData
 			var newGarment = GarmentData(designerAddress: designerAddress, metadata: metadata, royalty: royalty)
@@ -208,13 +222,13 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Mint the new Garment
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(garmentDataID: UInt32): @NFT{ 
 			let numInGarment = TheFabricantS1GarmentNFT.numberMintedPerGarment[garmentDataID] ?? panic("Cannot mint Garment. garmentData not found")
 			if TheFabricantS1GarmentNFT.isGarmentDataRetired[garmentDataID]! == nil{ 
@@ -227,7 +241,7 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 			return <-newGarment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(garmentDataID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -239,7 +253,7 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 		}
 		
 		// Retire garmentData so that it cannot be used to mint anymore
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireGarmentData(garmentDataID: UInt32){ 
 			pre{ 
 				TheFabricantS1GarmentNFT.isGarmentDataRetired[garmentDataID] != nil:
@@ -258,18 +272,18 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 	access(all)
 	resource interface GarmentCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGarment(id: UInt64): &TheFabricantS1GarmentNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -317,7 +331,7 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Garment
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -336,7 +350,7 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as NFT to make sure
 			// it is the correct type
 			let token <- token as! @TheFabricantS1GarmentNFT.NFT
@@ -359,7 +373,7 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -398,7 +412,7 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGarment(id: UInt64): &TheFabricantS1GarmentNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -442,37 +456,37 @@ contract TheFabricantS1GarmentNFT: NonFungibleToken{
 	}
 	
 	// get dictionary of numberMintedPerGarment
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerGarment():{ UInt32: UInt32}{ 
 		return TheFabricantS1GarmentNFT.numberMintedPerGarment
 	}
 	
 	// get how many Garments with garmentDataID are minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGarmentNumberMinted(id: UInt32): UInt32{ 
 		let numberMinted = TheFabricantS1GarmentNFT.numberMintedPerGarment[id] ?? panic("garmentDataID not found")
 		return numberMinted
 	}
 	
 	// get the garmentData of a specific id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGarmentData(id: UInt32): GarmentData{ 
 		let garmentData = TheFabricantS1GarmentNFT.garmentDatas[id] ?? panic("garmentDataID not found")
 		return garmentData
 	}
 	
 	// get all garmentDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGarmentDatas():{ UInt32: GarmentData}{ 
 		return TheFabricantS1GarmentNFT.garmentDatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGarmentDatasRetired():{ UInt32: Bool}{ 
 		return TheFabricantS1GarmentNFT.isGarmentDataRetired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGarmentDataRetired(garmentDataID: UInt32): Bool{ 
 		let isGarmentDataRetired = TheFabricantS1GarmentNFT.isGarmentDataRetired[garmentDataID] ?? panic("garmentDataID not found")
 		return isGarmentDataRetired

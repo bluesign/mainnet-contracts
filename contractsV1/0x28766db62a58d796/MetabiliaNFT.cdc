@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -68,17 +82,17 @@ contract MetabiliaNFT: NonFungibleToken{
 	access(all)
 	var totalSupply: UInt64
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun externalURL(): MetadataViews.ExternalURL{ 
 		return MetadataViews.ExternalURL("https://metabilia.io/")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun squareImageCID(): String{ 
 		return "QmSDXWBAERtuhb9h9UXE6kYioJgtr8FAwXE3Qdk2yiA32h"
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun bannerImageCID(): String{ 
 		return "QmQ9RXqrsAF39bhSkmJsC8eTbXybH6JKJcuGNpxiRDKLse"
 	}
@@ -98,22 +112,22 @@ contract MetabiliaNFT: NonFungibleToken{
 	struct interface TemplateMetadata{ 
 		
 		// Hash representation of implementing structs.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hash(): [UInt8]
 		
 		// Representative Display
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun display(): MetadataViews.Display
 		
 		// Representative {string: string} serialization
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repr():{ String: String}
 		
 		// MetadataViews compliant
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -125,22 +139,22 @@ contract MetabiliaNFT: NonFungibleToken{
 		access(self)
 		let _metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hash(): [UInt8]{ 
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun display(): MetadataViews.Display{ 
 			return self._display
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.NFTCollectionData>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			switch view{ 
 				case Type<MetadataViews.Display>():
@@ -160,12 +174,12 @@ contract MetabiliaNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repr():{ String: String}{ 
 			return self.metadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata():{ String: String}{ 
 			return self._metadata
 		}
@@ -200,7 +214,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		let creator: Address
 		
 		// Fetch the metadata Template represented by this NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun template():{ NFTTemplate}{ 
 			return MetabiliaNFT.getTemplate(setID: self.setID, templateID: self.templateID)
 		}
@@ -254,16 +268,16 @@ contract MetabiliaNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowMetabiliaNFT(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowMetabiliaNFT(id: UInt64): &MetabiliaNFT.NFT
 	}
 	
 	access(all)
@@ -275,7 +289,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		
 		// Deposit a MetabiliaNFT into the collection. Safe to assume id's are unique.
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Required to ensure this is a MetabiliaNFT
 			let token <- token as! @MetabiliaNFT.NFT
 			let id: UInt64 = token.id
@@ -316,7 +330,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		
 		// Borrow a reference to the specified NFT as a MetabiliaNFT.
 		// Panics if NFT does not exist in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMetabiliaNFT(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -389,7 +403,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		var minted: UInt64
 		
 		// Add a new Template to the Set, only if the Set is Open
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(template: Template){ 
 			pre{ 
 				!self.isLocked:
@@ -403,7 +417,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		
 		// Lock the Set if it is Open. This signals that this Set
 		// will mint NFTs based only on the Templates configured in this Set.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				!self.isLocked:
@@ -417,7 +431,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		
 		// Mint numToMint NFTs with the supplied creator attribute. The NFT will
 		// be minted into the provided receiver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(templateID: UInt64, creator: Address): @NFT{ 
 			pre{ 
 				templateID < UInt64(self.templates.length):
@@ -432,7 +446,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		}
 		
 		// Reveal a specified Template in a Set.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealTemplate(templateID: UInt64, metadata:{ TemplateMetadata}, salt: [UInt8]){ 
 			pre{ 
 				templateID < UInt64(self.templates.length):
@@ -467,7 +481,7 @@ contract MetabiliaNFT: NonFungibleToken{
 	}
 	
 	// Number of sets created by contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setsCount(): UInt64{ 
 		return MetabiliaNFT.totalSets
 	}
@@ -519,7 +533,7 @@ contract MetabiliaNFT: NonFungibleToken{
 	}
 	
 	// Generate a SetReport for informational purposes (to be used with scripts)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateSetReport(setID: UInt64): SetReport{ 
 		let setRef = (&self.sets[setID] as &Set?)!
 		return SetReport(id: setID, isLocked: setRef.isLocked, metadata: *setRef.metadata, numTemplates: setRef.templates.length, numMinted: setRef.minted)
@@ -550,19 +564,19 @@ contract MetabiliaNFT: NonFungibleToken{
 		access(all)
 		var mintID: UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checksum(): [UInt8]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun salt(): [UInt8]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun revealed(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -591,7 +605,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		
 		// Helper function to check if a proposed metadata and salt reveal would
 		// produce the configured checksum in a Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun validate(metadata:{ TemplateMetadata}, salt: [UInt8]): Bool{ 
 			let hash = String.encodeHex(HashAlgorithm.SHA3_256.hash(salt.concat(metadata.hash())))
 			let checksum = String.encodeHex(self.checksum())
@@ -600,7 +614,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		
 		// Reveal template metadata and salt. validate() is called as a precondition
 		// so collector can be assured metadata was not changed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(metadata:{ TemplateMetadata}, salt: [UInt8]){ 
 			pre{ 
 				self.mintID != nil:
@@ -614,30 +628,30 @@ contract MetabiliaNFT: NonFungibleToken{
 			self._salt = salt
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checksum(): [UInt8]{ 
 			return self._checksum
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun salt(): [UInt8]?{ 
 			return self._salt
 		}
 		
 		// Check to see if metadata has been revealed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun revealed(): Bool{ 
 			return self.metadata != nil
 		}
 		
 		// Mark the NFT as minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markMinted(nftID: UInt64){ 
 			self.mintID = nftID
 		}
 		
 		// Implements MetadataResolver.getViews
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			if !self.revealed(){ 
 				return [Type<MetadataViews.Display>()]
@@ -646,7 +660,7 @@ contract MetabiliaNFT: NonFungibleToken{
 		}
 		
 		// Implements MetadataResolver.resolveView
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			if !self.revealed(){ 
 				if view != Type<MetadataViews.Display>(){ 
@@ -667,7 +681,7 @@ contract MetabiliaNFT: NonFungibleToken{
 	}
 	
 	// Public helper function to be able to inspect any Template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTemplate(setID: UInt64, templateID: UInt64):{ NFTTemplate}{ 
 		let setRef = (&self.sets[setID] as &Set?)!
 		return setRef.templates[templateID]
@@ -682,7 +696,7 @@ contract MetabiliaNFT: NonFungibleToken{
 			self.setID = setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(templateID: UInt64, creator: Address): @NFT{ 
 			let set = (&MetabiliaNFT.sets[self.setID] as &Set?)!
 			return <-set.mint(templateID: templateID, creator: creator)
@@ -697,17 +711,17 @@ contract MetabiliaNFT: NonFungibleToken{
 	resource Admin{ 
 		
 		// Create a set with the provided SetMetadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(metadata: SetMetadata): UInt64{ 
 			return MetabiliaNFT.createSet(metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			return (&MetabiliaNFT.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSetMinter(setID: UInt64): @SetMinter{ 
 			return <-create SetMinter(setID: setID)
 		}

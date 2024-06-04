@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -209,11 +223,11 @@ contract BridgeManager{
 	
 	access(all)
 	resource interface LockUpPublic{ 
-		access(all)
-		fun getInfo(): LockUpInfo
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getInfo(): BridgeManager.LockUpInfo
 		
 		// E.g Type<FlowToken>().identifier => A.7e60df042a9c0868.FlowToken
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFT(
 			identifier: String,
 			amount: UFix64,
@@ -222,7 +236,7 @@ contract BridgeManager{
 		)
 		
 		// E.g Type<Domains>().identifier => A.9a0766d93b6608b7.Domains
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNFT(
 			identifier: String,
 			receiver: Capability<&{NonFungibleToken.Receiver}>,
@@ -235,13 +249,17 @@ contract BridgeManager{
 	
 	access(all)
 	resource interface LockUpPrivate{ 
-		access(all)
-		fun lockFT(identifier: String, vault: Capability<&{FungibleToken.Vault}>, balance: UFix64?)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lockFT(
+			identifier: String,
+			vault: Capability<&{FungibleToken.Vault}>,
+			balance: UFix64?
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockFTs(_ ftsMapping:{ String: FTLockUp})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockNFT(
 			identifier: String,
 			collection: Capability<&{NonFungibleToken.Collection}>,
@@ -250,22 +268,22 @@ contract BridgeManager{
 			]?
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReleasedAt(releasedAt: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(description: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRecipient(recipient: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBalance(identifier: String, balance: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNFTIDs(identifier: String, nftIDs: [UInt64])
 	}
 	
@@ -282,7 +300,7 @@ contract BridgeManager{
 			self.balance = balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBalance(balance: UFix64){ 
 			self.balance = balance
 		}
@@ -301,7 +319,7 @@ contract BridgeManager{
 			self.nftIDs = nftIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTIDs(nftIDs: [UInt64]){ 
 			self.nftIDs = nftIDs
 		}
@@ -344,7 +362,7 @@ contract BridgeManager{
 			self.nftLockUps ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInfo(): LockUpInfo{ 
 			let fungibleTokens: [FTLockUpInfo] = []
 			let nonFungibleTokens: [NFTLockUpInfo] = []
@@ -359,7 +377,7 @@ contract BridgeManager{
 			return LockUpInfo(holder: self.holder, releasedAt: self.releasedAt, createdAt: self.createdAt, name: self.name, description: self.description, recipient: self.recipient, fungibleTokens: fungibleTokens, nonFungibleTokens: nonFungibleTokens)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFT(identifier: String, amount: UFix64, receiver: Capability<&{FungibleToken.Receiver}>, feeTokens: @{FungibleToken.Vault}){ 
 			let currentTime = UInt64(getCurrentBlock().timestamp)
 			// if self.releasedAt > currentTime {
@@ -388,7 +406,7 @@ contract BridgeManager{
 			admin.deposit(feeTokens: <-feeTokens)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNFT(identifier: String, receiver: Capability<&{NonFungibleToken.Receiver}>, feeTokens: @{FungibleToken.Vault}, nftIDs: [UInt64]?){ 
 			let currentTime = UInt64(getCurrentBlock().timestamp)
 			// if self.releasedAt > currentTime {
@@ -427,12 +445,12 @@ contract BridgeManager{
 			admin.deposit(feeTokens: <-feeTokens)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockFT(identifier: String, vault: Capability<&{FungibleToken.Vault}>, balance: UFix64?){ 
 			self.ftLockUps[identifier] = FTLockUp(vault: vault, balance: balance)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockFTs(_ ftMapping:{ String: FTLockUp}){ 
 			for identifier in self.ftLockUps.keys{ 
 				if !ftMapping.containsKey(identifier){ 
@@ -444,7 +462,7 @@ contract BridgeManager{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockNFT(identifier: String, collection: Capability<&{NonFungibleToken.Collection}>, nftIDs: [UInt64]?){ 
 			var IDs: [UInt64] = []
 			if let ids = nftIDs{ 
@@ -465,25 +483,25 @@ contract BridgeManager{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReleasedAt(releasedAt: UInt64){ 
 			self.releasedAt = releasedAt
 			emit LockUpReleasedAtChanged(holder: self.holder, releasedAt: releasedAt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String){ 
 			self.name = name
 			emit LockUpNameChanged(holder: self.holder, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(description: String){ 
 			self.description = description
 			emit LockUpDescriptionChanged(holder: self.holder, description: description)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRecipient(recipient: Address){ 
 			BridgeManager.removeFromLockUpsMapping(holder: self.holder, recipient: self.recipient)
 			self.recipient = recipient
@@ -491,7 +509,7 @@ contract BridgeManager{
 			emit LockUpRecipientChanged(holder: self.holder, recipient: recipient)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBalance(identifier: String, balance: UFix64){ 
 			if !self.ftLockUps.containsKey(identifier){ 
 				panic("Non-supported FungibleToken.")
@@ -499,7 +517,7 @@ contract BridgeManager{
 			(self.ftLockUps[identifier]!).updateBalance(balance: balance)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNFTIDs(identifier: String, nftIDs: [UInt64]){ 
 			if !self.nftLockUps.containsKey(identifier){ 
 				panic("Non-supported NonFungibleToken.")
@@ -544,33 +562,33 @@ contract BridgeManager{
 			self.nonFungibleTokenInfoMapping ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFungibleTokenInfo(identifier: String, tokenInfo: FungibleTokenInfo){ 
 			self.fungibleTokenInfoMapping[identifier] = tokenInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNonFungibleTokenInfo(identifier: String, tokenInfo: NonFungibleTokenInfo){ 
 			self.nonFungibleTokenInfoMapping[identifier] = tokenInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCreationFees(fees: UFix64){ 
 			self.lockUpCreationFees = fees
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWithdrawFees(fees: UFix64){ 
 			self.lockUpWithdrawFees = fees
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(feeTokens: @{FungibleToken.Vault}){ 
 			self.feesVault.deposit(from: <-feeTokens)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLockUp(
 		holder: Address,
 		releasedAt: UInt64,
@@ -604,25 +622,25 @@ contract BridgeManager{
 		return <-lockUp
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFungibleTokenInfoMapping():{ String: FungibleTokenInfo}{ 
 		let admin = self.getAdmin()
 		return *admin.fungibleTokenInfoMapping
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNonFungibleTokenInfoMapping():{ String: NonFungibleTokenInfo}{ 
 		let admin = self.getAdmin()
 		return *admin.nonFungibleTokenInfoMapping
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCreationFees(): UFix64{ 
 		let admin = self.getAdmin()
 		return admin.lockUpCreationFees
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWithdrawFees(): UFix64{ 
 		let admin = self.getAdmin()
 		return admin.lockUpWithdrawFees

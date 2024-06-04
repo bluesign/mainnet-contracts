@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FindViews from "./FindViews.cdc"
 
@@ -68,32 +82,32 @@ contract FindLeaseMarketSale{
 			self.saleItemExtraField = saleItemExtraField
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleType(): String{ 
 			return "active_listed"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type{ 
 			return Type<@SaleItem>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingTypeIdentifier(): String{ 
 			return Type<@SaleItem>().identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBuyer(_ address: Address){ 
 			self.buyer = address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyer(): Address?{ 
 			return self.buyer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyerName(): String?{ 
 			if let address = self.buyer{ 
 				return FIND.reverseLookup(address)
@@ -101,68 +115,68 @@ contract FindLeaseMarketSale{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseName(): String{ 
 			return self.pointer.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type{ 
 			return Type<@FIND.Lease>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.pointer.getUUID()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeller(): Address{ 
 			return self.pointer.owner()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerName(): String?{ 
 			let address = self.pointer.owner()
 			return FIND.reverseLookup(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.salePrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuction(): FindLeaseMarket.AuctionItem?{ 
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFtType(): Type{ 
 			return self.vaultType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setValidUntil(_ time: UFix64?){ 
 			self.validUntil = time
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValidUntil(): UFix64?{ 
 			return self.validUntil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toLeaseInfo(): FindLeaseMarket.LeaseInfo{ 
 			return FindLeaseMarket.LeaseInfo(self.pointer)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkPointer(): Bool{ 
 			return self.pointer.valid()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleItemExtraField():{ String: AnyStruct}{ 
 			return self.saleItemExtraField
 		}
@@ -171,16 +185,16 @@ contract FindLeaseMarketSale{
 	access(all)
 	resource interface SaleItemCollectionPublic{ 
 		//fetch all the tokens in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameSales(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameSale(_ name: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(_ name: String): &{FindLeaseMarket.SaleItem}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(name: String, vault: @{FungibleToken.Vault}, to: Address)
 	}
 	
@@ -210,12 +224,12 @@ contract FindLeaseMarketSale{
 			return self.tenantCapability.borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type{ 
 			return Type<@SaleItem>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(name: String, vault: @{FungibleToken.Vault}, to: Address){ 
 			pre{ 
 				self.items.containsKey(name):
@@ -287,7 +301,7 @@ contract FindLeaseMarketSale{
 			destroy <-self.items.remove(key: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(
 			pointer: FindLeaseMarket.AuthLeasePointer,
 			vaultType: Type,
@@ -347,7 +361,7 @@ contract FindLeaseMarketSale{
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delist(_ name: String){ 
 			pre{ 
 				self.items.containsKey(name):
@@ -373,22 +387,22 @@ contract FindLeaseMarketSale{
 			destroy saleItem
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameSales(): [String]{ 
 			return self.items.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameSale(_ name: String): Bool{ 
 			return self.items.containsKey(name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ name: String): &SaleItem{ 
 			return (&self.items[name] as &SaleItem?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(_ name: String): &{FindLeaseMarket.SaleItem}{ 
 			pre{ 
 				self.items.containsKey(name):
@@ -399,14 +413,14 @@ contract FindLeaseMarketSale{
 	}
 	
 	//Create an empty lease collection that store your leases to a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptySaleItemCollection(
 		_ tenantCapability: Capability<&FindMarket.Tenant>
 	): @SaleItemCollection{ 
 		return <-create SaleItemCollection(tenantCapability)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCapability(marketplace: Address, user: Address): Capability<
 		&FindLeaseMarketSale.SaleItemCollection
 	>?{ 

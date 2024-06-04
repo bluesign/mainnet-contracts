@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -55,7 +69,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 		case epic
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateAttribute(_ rarity: String): UInt64{ 
 		let commonRange = revertibleRandom<UInt64>() % 5 + 1 // 1-5
 		
@@ -254,15 +268,15 @@ contract YDYHeartNFTs: NonFungibleToken{
 	access(all)
 	resource interface YDYNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYDYNFT(id: UInt64): &YDYHeartNFTs.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -270,8 +284,8 @@ contract YDYHeartNFTs: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	access(all)
@@ -297,7 +311,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @YDYHeartNFTs.NFT
 			let id: UInt64 = token.id
 			emit Deposit(id: id, to: self.owner?.address)
@@ -314,7 +328,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYDYNFT(id: UInt64): &YDYHeartNFTs.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -353,7 +367,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(metadata:{ String: String}, recipient: Capability<&Collection>){ 
 			pre{ 
 				metadata["thumbnailCID"] != nil:
@@ -380,7 +394,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 			recipientCollection.deposit(token: <-nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun levelUp(id: UInt64, recipientCollectionCapability: Capability<&Collection>): &YDYHeartNFTs.NFT?{ 
 			post{ 
 				nft.level == beforeLevel + 1:
@@ -393,7 +407,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repair(points: UFix64, id: UInt64, recipientCollectionCapability: Capability<&Collection>): &YDYHeartNFTs.NFT?{ 
 			let receiver = recipientCollectionCapability.borrow() ?? panic("Cannot borrow")
 			let nft = receiver.borrowYDYNFT(id: id) ?? panic("No NFT with this ID exists for user")
@@ -402,7 +416,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reduceStamina(points: UFix64, id: UInt64, recipientCollectionCapability: Capability<&Collection>): &YDYHeartNFTs.NFT?{ 
 			post{ 
 				nft.stamina == beforeStamina - points:
@@ -415,7 +429,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun boostEndurance(points: UFix64, id: UInt64, recipientCollectionCapability: Capability<&Collection>): &YDYHeartNFTs.NFT?{ 
 			let receiver = recipientCollectionCapability.borrow() ?? panic("Cannot borrow")
 			let nft = receiver.borrowYDYNFT(id: id) ?? panic("No NFT with this ID exists for user")
@@ -423,7 +437,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun boostEfficiency(points: UFix64, id: UInt64, recipientCollectionCapability: Capability<&Collection>): &YDYHeartNFTs.NFT?{ 
 			let receiver = recipientCollectionCapability.borrow() ?? panic("Cannot borrow")
 			let nft = receiver.borrowYDYNFT(id: id) ?? panic("No NFT with this ID exists for user")
@@ -431,7 +445,7 @@ contract YDYHeartNFTs: NonFungibleToken{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun boostLuck(points: UFix64, id: UInt64, recipientCollectionCapability: Capability<&Collection>): &YDYHeartNFTs.NFT?{ 
 			let receiver = recipientCollectionCapability.borrow() ?? panic("Cannot borrow")
 			let nft = receiver.borrowYDYNFT(id: id) ?? panic("No NFT with this ID exists for user")
@@ -439,12 +453,12 @@ contract YDYHeartNFTs: NonFungibleToken{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(price: UFix64){ 
 			YDYHeartNFTs.price = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsMintingEnabled(isMinting: Bool){ 
 			YDYHeartNFTs.isMintingEnabled = isMinting
 		}

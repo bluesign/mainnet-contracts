@@ -1,4 +1,18 @@
-import FIND from 0x97bafa4e0b48eef
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FIND from 0x97bafa4e0b48eef
 
 import NFTStorefront from "./../../standardsV1/NFTStorefront.cdc"
 
@@ -484,7 +498,7 @@ contract FindUserStatus{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStorefrontListing(user: Address, id: UInt64, type: Type): StorefrontListing?{ 
 		var listingsV1: StorefrontListing? = nil
 		let account = getAccount(user)
@@ -512,7 +526,7 @@ contract FindUserStatus{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStorefrontV2Listing(user: Address, id: UInt64, type: Type): StorefrontListing?{ 
 		var listingsV2: StorefrontListing? = nil
 		let account = getAccount(user)
@@ -542,7 +556,7 @@ contract FindUserStatus{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlowtyListing(user: Address, id: UInt64, type: Type): FlowtyListing?{ 
 		var flowty: FlowtyListing? = nil
 		let account = getAccount(user)
@@ -570,7 +584,7 @@ contract FindUserStatus{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlowtyRentals(user: Address, id: UInt64, type: Type): FlowtyRental?{ 
 		var flowtyRental: FlowtyRental? = nil
 		let account = getAccount(user)
@@ -599,7 +613,7 @@ contract FindUserStatus{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarListing(user: Address, id: UInt64, type: Type): FlovatarListing?{ 
 		let nftType = Type<@Flovatar.NFT>()
 		if type != nftType{ 
@@ -633,7 +647,7 @@ contract FindUserStatus{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarComponentListing(
 		user: Address,
 		id: UInt64,

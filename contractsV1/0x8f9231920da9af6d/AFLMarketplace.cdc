@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -59,23 +73,23 @@ contract AFLMarketplace{
 	// to allow others to access their sale
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenID: UInt64,
 			recipientCap: Capability<&{AFLNFT.AFLNFTCollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails():{ UInt64: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &AFLNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -127,7 +141,7 @@ contract AFLMarketplace{
 		//
 		// Parameters: token: The NFT to be put up for sale
 		//			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @AFLNFT.NFT, price: UFix64){ 
 			
 			// get the ID of the token
@@ -152,7 +166,7 @@ contract AFLMarketplace{
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
 		// Returns: @AFLNFT.NFT: The nft that was withdrawn from the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @AFLNFT.NFT{ 
 			// remove the price
 			self.prices.remove(key: tokenID)
@@ -167,7 +181,7 @@ contract AFLMarketplace{
 		//
 		// Parameters: tokenID: the ID of the NFT to purchase
 		//			 butTokens: the fungible tokens that are used to buy the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, recipientCap: Capability<&{AFLNFT.AFLNFTCollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyTokens.getType() == (self.ownerVault.borrow()!).getType():
@@ -207,7 +221,7 @@ contract AFLMarketplace{
 		//
 		// Parameters: tokenID: The ID of the NFT's price that is changing
 		//			 newPrice: The new price for the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -223,19 +237,19 @@ contract AFLMarketplace{
 		// Parameters: tokenID: The ID of the NFT whose price to get
 		//
 		// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		/// getDetails returns the prices of all tokens listed for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails():{ UInt64: UFix64}{ 
 			return self.prices
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
@@ -248,7 +262,7 @@ contract AFLMarketplace{
 		// Returns: &AFL.NFT? Optional reference to a moment for sale 
 		//						so that the caller can read its data
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &AFLNFT.NFT?{ 
 			if self.forSale[id] != nil{ 
 				return (&self.forSale[id] as &AFLNFT.NFT?)!
@@ -262,7 +276,7 @@ contract AFLMarketplace{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(ownerVault: Capability<&FiatToken.Vault>): @SaleCollection{ 
 		emit SaleCollectionCreated(owner: ownerVault.address)
 		return <-create SaleCollection(vault: ownerVault)
@@ -273,7 +287,7 @@ contract AFLMarketplace{
 		// changePercentage changes the cut percentage of the tokens that are for sale
 		//
 		// Parameters: newPercent: The new cut percentage for the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePercentage(_ newPercent: UFix64){ 
 			pre{ 
 				newPercent <= 1.0:
@@ -283,14 +297,14 @@ contract AFLMarketplace{
 			emit CutPercentageChanged(newPercent: newPercent, owner: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMarketplaceWallet(_ newCap: Capability<&FiatToken.Vault>){ 
 			AFLMarketplace.marketplaceWallet = newCap
 			emit MarketplaceWalletChanged(address: newCap.address)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPercentage(): UFix64{ 
 		return AFLMarketplace.cutPercentage
 	}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -89,7 +103,7 @@ contract TicketsAuction{
 			self.ref = ref
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun doRefund(): Bool{ 
 			if let recipient = self.refund.borrow(){ 
 				if self.vault.getType() == recipient.getType(){ 
@@ -100,14 +114,14 @@ contract TicketsAuction{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun doIncrease(from: @{FungibleToken.Vault}, ref: String?){ 
 			self.vault.deposit(from: <-from)
 			self.price = self.vault.balance
 			self.ref = ref
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payout(){ 
 			Tickets.payAndRewardDiamond(
 				recipient: self.recipient,
@@ -116,12 +130,12 @@ contract TicketsAuction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address{ 
 			return self.refund.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidAmount(): UFix64{ 
 			return self.vault.balance
 		}
@@ -129,15 +143,15 @@ contract TicketsAuction{
 	
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
-			refund: Capability<&{FungibleToken.Receiver}>,
+			refun placeBidd: Capability<&{FungibleToken.Receiver}>,
 			recipient: Capability<&{NonFungibleToken.CollectionPublic}>,
 			vault: @{FungibleToken.Vault},
 			ref: String?
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64
 	}
 	
@@ -149,7 +163,7 @@ contract TicketsAuction{
 		access(contract)
 		var bid: @Bid?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.bid?.bidder() == address{ 
 				return self.bid?.bidAmount()!
@@ -157,7 +171,7 @@ contract TicketsAuction{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(refund: Capability<&{FungibleToken.Receiver}>, recipient: Capability<&{NonFungibleToken.CollectionPublic}>, vault: @{FungibleToken.Vault}, ref: String?){ 
 			pre{ 
 				refund.address == recipient.address:
@@ -250,21 +264,21 @@ contract TicketsAuction{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTime(startAt: UFix64, endAt: UFix64){ 
 			TicketsAuction.startAt = startAt
 			TicketsAuction.endAt = endAt
 			emit ConfigChange(type: "setTime", value: [startAt, endAt])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(startPrice: UFix64, increment: UFix64){ 
 			TicketsAuction.startPrice = startPrice
 			TicketsAuction.increment = increment
 			emit ConfigChange(type: "setStartPrice", value: [startPrice, increment])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(): UInt64{ 
 			pre{ 
 				TicketsAuction.total < 71:
@@ -281,7 +295,7 @@ contract TicketsAuction{
 			return auctionID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeAuction(auctionID: UInt64){ 
 			let auction <-
 				TicketsAuction.auctions.remove(key: auctionID) ?? panic("missing auction")
@@ -289,7 +303,7 @@ contract TicketsAuction{
 			destroy auction
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refundUnclaimedBidForUser(address: Address){ 
 			if let bids <- TicketsAuction.unclaimedBids.remove(key: address){ 
 				var i = 0
@@ -303,7 +317,7 @@ contract TicketsAuction{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isOpen(): Bool{ 
 		let now = getCurrentBlock().timestamp
 		if self.startAt > now{ 
@@ -315,17 +329,17 @@ contract TicketsAuction{
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUnclaimBids(): [Address]{ 
 		return self.unclaimedBids.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAuctionIDs(): [UInt64]{ 
 		return self.auctions.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrow(auctionID: UInt64): &Auction?{ 
 		if self.auctions[auctionID] != nil{ 
 			return (&self.auctions[auctionID] as &Auction?)!

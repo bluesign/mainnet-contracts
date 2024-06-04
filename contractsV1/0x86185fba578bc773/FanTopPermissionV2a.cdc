@@ -1,4 +1,18 @@
-import FanTopToken from "./FanTopToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FanTopToken from "./FanTopToken.cdc"
 
 import FanTopMarket from "./FanTopMarket.cdc"
 
@@ -34,18 +48,18 @@ contract FanTopPermissionV2a{
 		access(all)
 		let role: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAdmin(receiver: &{Receiver}){ 
 			FanTopPermissionV2a.addPermission((receiver.owner!).address, role: "admin")
 			receiver.receive(<-create Admin())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPermission(_ address: Address, role: String){ 
 			FanTopPermissionV2a.addPermission(address, role: role)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePermission(_ address: Address, role: String){ 
 			FanTopPermissionV2a.removePermission(address, role: role)
 		}
@@ -61,40 +75,40 @@ contract FanTopPermissionV2a{
 		access(all)
 		let role: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addOperator(receiver: &{Receiver}){ 
 			FanTopPermissionV2a.addPermission((receiver.owner!).address, role: "operator")
 			receiver.receive(<-create Operator())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOperator(_ address: Address){ 
 			FanTopPermissionV2a.removePermission(address, role: "operator")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMinter(receiver: &{Receiver}){ 
 			FanTopPermissionV2a.addPermission((receiver.owner!).address, role: "minter")
 			receiver.receive(<-create Minter())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMinter(_ address: Address){ 
 			FanTopPermissionV2a.removePermission(address, role: "minter")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAgent(receiver: &{Receiver}){ 
 			FanTopPermissionV2a.addPermission((receiver.owner!).address, role: "agent")
 			receiver.receive(<-create Agent())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAgent(_ address: Address){ 
 			FanTopPermissionV2a.removePermission(address, role: "agent")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendMarketCapacity(_ capacity: Int){ 
 			FanTopMarket.extendCapacity(by: (self.owner!).address, capacity: capacity)
 		}
@@ -110,27 +124,27 @@ contract FanTopPermissionV2a{
 		access(all)
 		let role: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(itemId: String, version: UInt32, limit: UInt32, metadata:{ String: String}, active: Bool){ 
 			FanTopToken.createItem(itemId: itemId, version: version, limit: limit, metadata: metadata, active: active)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(itemId: String, version: UInt32, metadata:{ String: String}){ 
 			FanTopToken.updateMetadata(itemId: itemId, version: version, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLimit(itemId: String, limit: UInt32){ 
 			FanTopToken.updateLimit(itemId: itemId, limit: limit)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateActive(itemId: String, active: Bool){ 
 			FanTopToken.updateActive(itemId: itemId, active: active)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun truncateSerialBox(itemId: String, limit: Int){ 
 			let boxRef = FanTopSerial.getBoxRef(itemId: itemId) ?? panic("Boxes that do not exist cannot be truncated")
 			boxRef.truncate(limit: limit)
@@ -147,17 +161,17 @@ contract FanTopPermissionV2a{
 		access(all)
 		let role: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintToken(refId: String, itemId: String, itemVersion: UInt32, metadata:{ String: String}): @FanTopToken.NFT{ 
 			return <-FanTopToken.mintToken(refId: refId, itemId: itemId, itemVersion: itemVersion, metadata: metadata, minter: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokenWithSerialNumber(refId: String, itemId: String, itemVersion: UInt32, metadata:{ String: String}, serialNumber: UInt32): @FanTopToken.NFT{ 
 			return <-FanTopToken.mintTokenWithSerialNumber(refId: refId, itemId: itemId, itemVersion: itemVersion, metadata: metadata, serialNumber: serialNumber, minter: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun truncateSerialBox(itemId: String, limit: Int){ 
 			let boxRef = FanTopSerial.getBoxRef(itemId: itemId) ?? panic("Boxes that do not exist cannot be truncated")
 			boxRef.truncate(limit: limit)
@@ -174,17 +188,17 @@ contract FanTopPermissionV2a{
 		access(all)
 		let role: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(orderId: String, version: UInt32, metadata:{ String: String}){ 
 			FanTopMarket.update(agent: (self.owner!).address, orderId: orderId, version: version, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfill(orderId: String, version: UInt32, recipient: &{FanTopToken.CollectionPublic}){ 
 			FanTopMarket.fulfill(agent: (self.owner!).address, orderId: orderId, version: version, recipient: recipient)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(orderId: String){ 
 			FanTopMarket.cancel(agent: (self.owner!).address, orderId: orderId)
 		}
@@ -197,7 +211,7 @@ contract FanTopPermissionV2a{
 	
 	access(all)
 	struct User{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sell(
 			agent: Address,
 			capability: Capability<&FanTopToken.Collection>,
@@ -254,7 +268,7 @@ contract FanTopPermissionV2a{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(account: AuthAccount, orderId: String){ 
 			pre{ 
 				FanTopMarket.containsOrder(orderId):
@@ -268,10 +282,10 @@ contract FanTopPermissionV2a{
 	
 	access(all)
 	resource interface Receiver{ 
-		access(all)
-		fun receive(_ _resource: @{Role})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun receive(_ _resource: @{FanTopPermissionV2a.Role}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun check(address: Address): Bool
 	}
 	
@@ -283,12 +297,12 @@ contract FanTopPermissionV2a{
 		access(self)
 		let resources: @{String:{ Role}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun check(address: Address): Bool{ 
 			return address == self.owner?.address && address == self.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun receive(_ _resource: @{Role}){ 
 			assert(!self.resources.containsKey(_resource.role), message: "Resources for roles that already exist cannot be received")
 			self.resources[_resource.role] <-! _resource
@@ -305,27 +319,27 @@ contract FanTopPermissionV2a{
 			return &self.resources[role] as &{Role}? ?? panic("Could not borrow role")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAdmin(by: AuthAccount): &Admin{ 
 			return self.borrow(by: by, role: "admin") as! &Admin
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOperator(by: AuthAccount): &Operator{ 
 			return self.borrow(by: by, role: "operator") as! &Operator
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMinter(by: AuthAccount): &Minter{ 
 			return self.borrow(by: by, role: "minter") as! &Minter
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAgent(by: AuthAccount): &Agent{ 
 			return self.borrow(by: by, role: "agent") as! &Agent
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revoke(_ role: String){ 
 			pre{ 
 				FanTopPermissionV2a.isRole(role):
@@ -342,7 +356,7 @@ contract FanTopPermissionV2a{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createHolder(account: AuthAccount): @Holder{ 
 		return <-create Holder(account.address)
 	}
@@ -382,12 +396,12 @@ contract FanTopPermissionV2a{
 		emit PermissionRemoved(target: address, role: role)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPermissions():{ Address:{ String: Bool}}{ 
 		return self.permissions
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun hasPermission(_ address: Address, role: String): Bool{ 
 		if let permission = self.permissions[address]{ 
 			return permission[role] ?? false
@@ -395,7 +409,7 @@ contract FanTopPermissionV2a{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isRole(_ role: String): Bool{ 
 		switch role{ 
 			case "owner":

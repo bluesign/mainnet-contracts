@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 *
 *  Manages the process of generating a group key with the participation of all the consensus nodes
 *  for the upcoming epoch.
@@ -139,7 +153,7 @@ contract FlowDKG{
 		/// If the Participant resource is destroyed,
 		/// It could potentially be claimed again
 		/// Posts a whiteboard message to the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun postMessage(_ content: String){ 
 			pre{ 
 				FlowDKG.participantIsRegistered(self.nodeID):
@@ -159,7 +173,7 @@ contract FlowDKG{
 		/// Sends the final key vector submission. 
 		/// Can only be called by consensus nodes that are registered
 		/// and can only be called once per consensus node per epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sendFinalSubmission(_ submission: [String?]){ 
 			pre{ 
 				FlowDKG.participantIsRegistered(self.nodeID):
@@ -216,16 +230,16 @@ contract FlowDKG{
 	/// These are accessed by the `FlowEpoch` contract through a capability
 	access(all)
 	resource interface EpochOperations{ 
-		access(all)
-		fun createParticipant(nodeID: String): @Participant
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createParticipant(nodeID: String): @FlowDKG.Participant
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startDKG(nodeIDs: [String])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endDKG()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceEndDKG()
 	}
 	
@@ -235,7 +249,7 @@ contract FlowDKG{
 		
 		/// Sets the optional safe DKG success threshold
 		/// Set the threshold to nil if it isn't needed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSafeSuccessThreshold(newThresholdPercentage: UFix64?){ 
 			pre{ 
 				!FlowDKG.dkgEnabled:
@@ -253,7 +267,7 @@ contract FlowDKG{
 		}
 		
 		/// Creates a new Participant resource for a consensus node
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createParticipant(nodeID: String): @Participant{ 
 			let participant <- create Participant(nodeID: nodeID)
 			FlowDKG.nodeClaimed[nodeID] = true
@@ -262,7 +276,7 @@ contract FlowDKG{
 		
 		/// Resets all the fields for tracking the current DKG process
 		/// and sets the given node IDs as registered
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startDKG(nodeIDs: [String]){ 
 			pre{ 
 				FlowDKG.dkgEnabled == false:
@@ -283,7 +297,7 @@ contract FlowDKG{
 		
 		/// Disables the DKG and closes the opportunity for messages and submissions
 		/// until the next time the DKG is enabled
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endDKG(){ 
 			pre{ 
 				FlowDKG.dkgEnabled == true:
@@ -298,7 +312,7 @@ contract FlowDKG{
 		/// Ends the DKG without checking if it is completed
 		/// Should only be used if something goes wrong with the DKG,
 		/// the protocol halts, or needs to be reset for some reason
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceEndDKG(){ 
 			FlowDKG.dkgEnabled = false
 			emit EndDKG(finalSubmission: FlowDKG.dkgCompleted())
@@ -331,27 +345,27 @@ contract FlowDKG{
 	}
 	
 	/// Returns true if a node is registered as a consensus node for the proposed epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun participantIsRegistered(_ nodeID: String): Bool{ 
 		return FlowDKG.finalSubmissionByNodeID[nodeID] != nil
 	}
 	
 	/// Returns true if a consensus node has claimed their Participant resource
 	/// which is valid for all future epochs where the node is registered
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun participantIsClaimed(_ nodeID: String): Bool?{ 
 		return FlowDKG.nodeClaimed[nodeID]
 	}
 	
 	/// Gets an array of all the whiteboard messages
 	/// that have been submitted by all nodes in the DKG
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhiteBoardMessages(): [Message]{ 
 		return self.whiteboardMessages
 	}
 	
 	/// Returns whether this node has successfully submitted a final submission for this epoch.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun nodeHasSubmitted(_ nodeID: String): Bool{ 
 		if let submission = self.finalSubmissionByNodeID[nodeID]{ 
 			return submission.length > 0
@@ -362,7 +376,7 @@ contract FlowDKG{
 	
 	/// Gets the specific final submission for a node ID
 	/// If the node hasn't submitted or registered, this returns `nil`
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNodeFinalSubmission(_ nodeID: String): [String?]?{ 
 		if let submission = self.finalSubmissionByNodeID[nodeID]{ 
 			if submission.length > 0{ 
@@ -376,19 +390,19 @@ contract FlowDKG{
 	}
 	
 	/// Get the list of all the consensus node IDs participating
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getConsensusNodeIDs(): [String]{ 
 		return self.finalSubmissionByNodeID.keys
 	}
 	
 	/// Get the array of all the unique final submissions
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFinalSubmissions(): [[String?]]{ 
 		return self.uniqueFinalSubmissions
 	}
 	
 	/// Get the count of the final submissions array
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFinalSubmissionCount():{ Int: UInt64}{ 
 		return self.uniqueFinalSubmissionCount
 	}
@@ -401,7 +415,7 @@ contract FlowDKG{
 	/// We have 10 DKG nodes (n=10)
 	/// The threshold value is t=floor(10-1)/2) (t=4)
 	/// There must be AT LEAST 5 honest nodes for the DKG to succeed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getNativeSuccessThreshold(): UInt64{ 
 		return UInt64((self.getConsensusNodeIDs().length - 1) / 2)
 	}
@@ -411,7 +425,7 @@ contract FlowDKG{
 	/// 
 	/// This function returns the NON-INCLUSIVE lower bound of honest participants. If this function 
 	/// returns threshold t, there must be AT LEAST t+1 honest nodes for the DKG to succeed.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSafeSuccessThreshold(): UInt64{ 
 		var threshold = self.getNativeSuccessThreshold()
 		if let safetyRate = self.getSafeThresholdPercentage(){ 
@@ -427,7 +441,7 @@ contract FlowDKG{
 	/// This safe threshold is used to artificially increase the DKG participation requirements to 
 	/// ensure a lower-bound number of Random Beacon Committee members (beyond the bare minimum required
 	/// by the DKG protocol).
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSafeThresholdPercentage(): UFix64?{ 
 		let safetyRate = self.account.storage.copy<UFix64>(from: /storage/flowDKGSafeThreshold)
 		return safetyRate
@@ -435,7 +449,7 @@ contract FlowDKG{
 	
 	/// Returns the final set of keys if any one set of keys has strictly more than (nodes-1)/2 submissions
 	/// Returns nil if not found (incomplete)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun dkgCompleted(): [String?]?{ 
 		if !self.dkgEnabled{ 
 			return nil

@@ -1,4 +1,18 @@
-//
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//
 //  _____		 _			_
 // /  ___|	   | |		  | |
 // \ `--.   __ _ | | __ _   _ | |_   __ _  _ __   ___
@@ -113,7 +127,7 @@ contract SakutaroPoem: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoemID(): UInt32?{ 
 			if self.owner == nil{ 
 				return nil
@@ -126,7 +140,7 @@ contract SakutaroPoem: NonFungibleToken{
 			return num % 39
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoem(): SakutaroPoemContent.Poem?{ 
 			let poemID = self.getPoemID()
 			if poemID == nil{ 
@@ -144,15 +158,15 @@ contract SakutaroPoem: NonFungibleToken{
 	access(all)
 	resource interface SakutaroPoemCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPoem(id: UInt64): &SakutaroPoem.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -178,7 +192,7 @@ contract SakutaroPoem: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SakutaroPoem.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -196,7 +210,7 @@ contract SakutaroPoem: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPoem(id: UInt64): &SakutaroPoem.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -232,7 +246,7 @@ contract SakutaroPoem: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(): @NFT{ 
 		pre{ 
 			SakutaroPoem.totalSupply < 39:
@@ -244,7 +258,7 @@ contract SakutaroPoem: NonFungibleToken{
 		return <-token
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(): MetadataViews.Royalties{ 
 		return MetadataViews.Royalties(SakutaroPoem.royalties)
 	}

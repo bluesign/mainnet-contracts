@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Wallet{ 
 	
 	/// Total supply of ExampleTokens in existence
@@ -77,8 +91,8 @@ contract Wallet{
 		/// @param amount: The amount of tokens to be withdrawn from the vault
 		/// @return The Vault resource containing the withdrawn funds
 		/// 
-		access(all)
-		fun withdraw(amount: UFix64): @Vault{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdraw(amount: UFix64): @Wallet.Vault{ 
 			post{ 
 				// `result` refers to the return value
 				result.balance == amount:
@@ -102,8 +116,8 @@ contract Wallet{
 		///
 		/// @param from: The Vault resource containing the funds that will be deposited
 		///
-		access(all)
-		fun deposit(from: @Vault)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(from: @Wallet.Vault): Void
 	}
 	
 	access(all)
@@ -144,7 +158,7 @@ contract Wallet{
 		/// @param amount: The amount of tokens to be withdrawn from the vault
 		/// @return The Vault resource containing the withdrawn funds
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @Vault{ 
 			self.balance = self.balance - amount
 			emit TokensWithdrawn(amount: amount, from: self.owner?.address)
@@ -159,7 +173,7 @@ contract Wallet{
 		///
 		/// @param from: The Vault resource containing the funds that will be deposited
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @Vault){ 
 			let vault <- from as! @Wallet.Vault
 			self.balance = self.balance + vault.balance
@@ -176,7 +190,7 @@ contract Wallet{
 	///
 	/// @return The new Vault resource
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @Vault{ 
 		return <-create Vault(balance: 0.0)
 	}
@@ -189,7 +203,7 @@ contract Wallet{
 		/// @param allowedAmount: The maximum quantity of tokens that the minter could create
 		/// @return The Minter resource that would allow to mint tokens
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
@@ -199,7 +213,7 @@ contract Wallet{
 		///
 		/// @return The Burner resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()
@@ -221,7 +235,7 @@ contract Wallet{
 		/// @param amount: The quantity of tokens to mint
 		/// @return The Vault resource containing the minted tokens
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @Wallet.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -252,7 +266,7 @@ contract Wallet{
 		///
 		/// @param from: The Vault resource containing the tokens to burn
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @Vault){ 
 			let vault <- from as! @Wallet.Vault
 			let amount = vault.balance

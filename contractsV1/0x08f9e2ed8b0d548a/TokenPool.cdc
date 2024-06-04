@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -55,17 +69,17 @@ contract TokenPool{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			TokenPool.isFrozen = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			TokenPool.isFrozen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLiquidity(from: @FlowSwapPair.TokenBundle){ 
 			let token1Vault <- from.withdrawToken1()
 			let token2Vault <- from.withdrawToken2()
@@ -82,7 +96,7 @@ contract TokenPool{
 			destroy from
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeLiquidity(amountToken1: UFix64, amountToken2: UFix64): @FlowSwapPair.TokenBundle{ 
 			let token1Vault <-
 				TokenPool.token1Vault.withdraw(amount: amountToken1) as! @FlowToken.Vault
@@ -95,20 +109,20 @@ contract TokenPool{
 			return <-tokenBundle
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFspLpTokens(amount: UFix64): @FlowSwapPair.Vault{ 
 			let tokenVault <-
 				TokenPool.fspLpTokenVault.withdraw(amount: amount) as! @FlowSwapPair.Vault
 			return <-tokenVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateVirtualAmounts(amountToken1: UFix64, amountToken2: UFix64){ 
 			TokenPool.virtualToken1Amount = amountToken1
 			TokenPool.virtualToken2Amount = amountToken2
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBuyBackPrice(price: UFix64){ 
 			TokenPool.buyBackPrice = price
 		}
@@ -133,7 +147,7 @@ contract TokenPool{
 	}
 	
 	// Check current pool amounts (virtual pool)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVirtualPoolAmounts(): FlowSwapPair.PoolAmounts{ 
 		return FlowSwapPair.PoolAmounts(
 			token1Amount: TokenPool.virtualToken1Amount,
@@ -142,7 +156,7 @@ contract TokenPool{
 	}
 	
 	// Check current pool amounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActualPoolAmounts(): PoolAmounts{ 
 		return PoolAmounts(
 			token1Amount: TokenPool.token1Vault.balance,
@@ -152,13 +166,13 @@ contract TokenPool{
 	}
 	
 	// Precise division to mitigate fixed-point division error
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun preciseDiv(numerator: UFix64, denominator: UFix64): UFix64{ 
 		return numerator / (denominator / self.shifter) / self.shifter
 	}
 	
 	// Get quote for Token1 (given) -> Token2
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken1ForToken2(amount: UFix64): UFix64{ 
 		let quote = amount * self.buyBackPrice
 		assert(self.token2Vault.balance > quote, message: "Not enough Token2 in the pool")
@@ -166,14 +180,14 @@ contract TokenPool{
 	}
 	
 	// Get quote for Token1 -> Token2 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken1ForExactToken2(amount: UFix64): UFix64{ 
 		assert(self.token2Vault.balance > amount, message: "Not enough Token2 in the pool")
 		return self.preciseDiv(numerator: amount, denominator: self.buyBackPrice)
 	}
 	
 	// Get quote for Token2 (given) -> Token1
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken2ForToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getVirtualPoolAmounts()
 		
@@ -187,7 +201,7 @@ contract TokenPool{
 	}
 	
 	// Get quote for Token2 -> Token1 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken2ForExactToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getVirtualPoolAmounts()
 		if poolAmounts.token1Amount <= amount || self.token1Vault.balance < amount{ 
@@ -205,7 +219,7 @@ contract TokenPool{
 	}
 	
 	// Swaps Token1 (FLOW) -> Token2 (tUSDT)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken1ForToken2(from: @FlowToken.Vault): @TeleportedTetherToken.Vault{ 
 		pre{ 
 			!TokenPool.isFrozen:
@@ -225,7 +239,7 @@ contract TokenPool{
 	}
 	
 	// Swap Token2 (tUSDT) -> Token1 (FLOW)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken2ForToken1(from: @TeleportedTetherToken.Vault): @FlowToken.Vault{ 
 		pre{ 
 			!TokenPool.isFrozen:

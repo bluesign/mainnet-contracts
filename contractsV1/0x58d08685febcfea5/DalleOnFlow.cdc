@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -114,19 +128,19 @@ contract DalleOnFlow: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDalleOnFlowNFT(id: UInt64): &DalleOnFlow.NFT
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	access(all)
@@ -135,7 +149,7 @@ contract DalleOnFlow: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let myToken <- token as! @DalleOnFlow.NFT
 			emit Deposit(id: myToken.id, to: self.owner?.address)
 			self.ownedNFTs[myToken.id] <-! myToken
@@ -158,7 +172,7 @@ contract DalleOnFlow: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDalleOnFlowNFT(id: UInt64): &DalleOnFlow.NFT{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &DalleOnFlow.NFT
@@ -198,7 +212,7 @@ contract DalleOnFlow: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(description: String, thumbnailCID: String, metadata:{ String: String}, recepient: Capability<&DalleOnFlow.Collection>, payment: @FlowToken.Vault){ 
 			pre{ 
 				DalleOnFlow.mintingEnabled == true:
@@ -215,19 +229,19 @@ contract DalleOnFlow: NonFungibleToken{
 			recepientCollection.deposit(token: <-nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun flagNFT(id: UInt64, recepient: Capability<&DalleOnFlow.Collection>): &DalleOnFlow.NFT{ 
 			let nft = (recepient.borrow()!).borrowDalleOnFlowNFT(id: id)
 			nft.flagNFT()
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(newPrice: UFix64){ 
 			DalleOnFlow.price = newPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMintingEnabled(isEnabled: Bool){ 
 			DalleOnFlow.mintingEnabled = isEnabled
 		}

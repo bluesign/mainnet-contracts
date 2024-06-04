@@ -1,4 +1,18 @@
-// VictoryCollectible - MAINNET
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// VictoryCollectible - MAINNET
 import VictoryCollectible from "./VictoryCollectible.cdc"
 
 // FungibleToken - MAINNET
@@ -183,7 +197,7 @@ contract VictoryCollectibleSaleOffer{
 		// Also called when an auction end time is reached to complete the transaction with the highest bidder
 		// NOTE: need to take action if buyer does not have sufficient funds
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &VictoryCollectible.Collection, buyerPayment: @{FungibleToken.Vault}, ownerPaymentReceiver: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				buyerPayment.balance == self.price:
@@ -220,7 +234,7 @@ contract VictoryCollectibleSaleOffer{
 		
 		// Called by a bidder to raise the bid on a sale offer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun raisePrice(newPrice: UFix64, bidder: Address, bidderReceiver: Capability<&{FungibleToken.Receiver}>, bidVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleCompleted == false:
@@ -306,7 +320,7 @@ contract VictoryCollectibleSaleOffer{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(
 			sellerItemProvider: Capability<&VictoryCollectible.Collection>,
 			bundleID: UInt64,
@@ -318,12 +332,12 @@ contract VictoryCollectibleSaleOffer{
 			targetPrice: UFix64,
 			royaltyPaymentReceiver: Capability<&{FungibleToken.Receiver}>,
 			royaltyFactor: UFix64
-		): @SaleOffer
+		): @VictoryCollectibleSaleOffer.SaleOffer
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @VictoryCollectibleSaleOffer.SaleOffer)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(bundleID: UInt64): @SaleOffer
 	}
 	
@@ -334,13 +348,13 @@ contract VictoryCollectibleSaleOffer{
 	//
 	access(all)
 	resource interface CollectionPurchaser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			bundleID: UInt64,
 			buyerCollection: &VictoryCollectible.Collection,
 			buyerPayment: @{FungibleToken.Vault},
 			ownerPaymentReceiver: Capability<&{FungibleToken.Receiver}>
-		)
+		): Void
 	}
 	
 	// CollectionPublic
@@ -348,13 +362,13 @@ contract VictoryCollectibleSaleOffer{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(bundleID: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bundleID: UInt64,
 			bidPrice: UFix64,
@@ -363,7 +377,7 @@ contract VictoryCollectibleSaleOffer{
 			bidVault: @{FungibleToken.Vault}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			bundleID: UInt64,
 			buyerCollection: &VictoryCollectible.Collection,
@@ -383,7 +397,7 @@ contract VictoryCollectibleSaleOffer{
 		// createSaleOffer
 		// Make creating a SaleOffer publicly accessible.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(sellerItemProvider: Capability<&VictoryCollectible.Collection>, bundleID: UInt64, sellerPaymentReceiver: Capability<&{FungibleToken.Receiver}>, price: UFix64, saleType: UInt8, startTime: UInt32, endTime: UInt32, targetPrice: UFix64, royaltyPaymentReceiver: Capability<&{FungibleToken.Receiver}>, royaltyFactor: UFix64): @SaleOffer{ 
 			return <-create SaleOffer(sellerItemProvider: sellerItemProvider, bundleID: bundleID, sellerPaymentReceiver: sellerPaymentReceiver, price: price, saleType: saleType, startTime: startTime, endTime: endTime, targetPrice: targetPrice, royaltyPaymentReceiver: royaltyPaymentReceiver, royaltyFactor: royaltyFactor)
 		}
@@ -391,7 +405,7 @@ contract VictoryCollectibleSaleOffer{
 		// insert
 		// Insert a SaleOffer into the collection, replacing one with the same itemID if present.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @VictoryCollectibleSaleOffer.SaleOffer){ 
 			let bundleID: UInt64 = offer.bundleID
 			let owner: Address = offer.originalOwner
@@ -409,7 +423,7 @@ contract VictoryCollectibleSaleOffer{
 		
 		// remove
 		// Remove and return a SaleOffer from the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(bundleID: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(bundleID: bundleID, owner: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: bundleID) ?? panic("missing SaleOffer"))
@@ -427,7 +441,7 @@ contract VictoryCollectibleSaleOffer{
 		//   3. VictoryCollectible.Deposit
 		//   4. SaleOffer.SaleOfferFinished
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(bundleID: UInt64, buyerCollection: &VictoryCollectible.Collection, buyerPayment: @{FungibleToken.Vault}, ownerPaymentReceiver: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				self.saleOffers[bundleID] != nil:
@@ -441,7 +455,7 @@ contract VictoryCollectibleSaleOffer{
 		// placeBid
 		// Accept a bid on a bundle from a specified potential buyer.
 		// Buyer vault is used to verify available balance.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(bundleID: UInt64, bidPrice: UFix64, bidder: Address, bidderReceiver: Capability<&{FungibleToken.Receiver}>, bidVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleOffers[bundleID] != nil:
@@ -461,7 +475,7 @@ contract VictoryCollectibleSaleOffer{
 		// getSaleOfferIDs
 		// Returns an array of the IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
@@ -470,7 +484,7 @@ contract VictoryCollectibleSaleOffer{
 		// Returns an Optional read-only view of the SaleItem for the given itemID if it is contained by this collection.
 		// The optional will be nil if the provided itemID is not present in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(bundleID: UInt64): &SaleOffer?{ 
 			if self.saleOffers[bundleID] == nil{ 
 				return nil
@@ -491,7 +505,7 @@ contract VictoryCollectibleSaleOffer{
 	// createEmptyCollection
 	// Make creating a Collection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

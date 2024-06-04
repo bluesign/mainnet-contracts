@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -92,16 +106,16 @@ contract FairyPuppy: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFairyPuppy(id: UInt64): &FairyPuppy.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -132,7 +146,7 @@ contract FairyPuppy: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FairyPuppy.NFT
 			let id: UInt64 = token.id
 			
@@ -144,7 +158,7 @@ contract FairyPuppy: NonFungibleToken{
 		
 		// transfer takes an NFT ID and a reference to a recipient's collection
 		// and transfers the NFT corresponding to that ID to the recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -157,7 +171,7 @@ contract FairyPuppy: NonFungibleToken{
 		}
 		
 		// burn destroys an NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -184,7 +198,7 @@ contract FairyPuppy: NonFungibleToken{
 			panic("NFT not found in collection.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFairyPuppy(id: UInt64): &FairyPuppy.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -247,7 +261,7 @@ contract FairyPuppy: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, royalties: [MetadataViews.Royalty], metadata:{ String: String}){ 
 			// create a new NFT
 			let newNFT <- create NFT(metadata: self.transformMetadata(metadata), royalties: royalties)
@@ -256,7 +270,7 @@ contract FairyPuppy: NonFungibleToken{
 			recipient.deposit(token: <-newNFT)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseUrl(url: String){ 
 			FairyPuppy.BaseURL = url
 		}

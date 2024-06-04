@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	ListenNFT
 	Author: Flowstarter
 	Extends the NonFungibleToken standard with an ipfs pin field and metadata for each ListenNFT. 
@@ -39,7 +53,7 @@ contract ListenNFT: NonFungibleToken{
 	// allows access to read the metadata and ipfs pin of the nft
 	access(all)
 	resource interface ListenNFTPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
 		access(all)
@@ -70,7 +84,7 @@ contract ListenNFT: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			let metadata = self.metadata
 			metadata.insert(key: "ipfsPin", self.ipfsPin)
@@ -82,10 +96,10 @@ contract ListenNFT: NonFungibleToken{
 	// Can change this to return a structure custom rather than key value pairs  
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListenNFTMetadata(id: UInt64):{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListenNFT(id: UInt64): &ListenNFT.NFT?
 	}
 	
@@ -113,7 +127,7 @@ contract ListenNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ListenNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -138,7 +152,7 @@ contract ListenNFT: NonFungibleToken{
 		
 		// borrowListenNFT gets a reference to an ListenNFT from the collection
 		// so the caller can read the NFT's extended information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListenNFT(id: UInt64): &ListenNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -148,7 +162,7 @@ contract ListenNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListenNFTMetadata(id: UInt64):{ String: String}{ 
 			let listenNFT = self.borrowListenNFT(id: id)
 			if listenNFT == nil{ 
@@ -193,7 +207,7 @@ contract ListenNFT: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}, ipfsPin: String){ 
 			let initID = ListenNFT.totalSupply
 			// create a new NFT

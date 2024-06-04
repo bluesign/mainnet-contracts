@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -175,7 +189,7 @@ contract MiamiNFT: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMiamiData(name: String, description: String, mainVideo: String, season: String, creator: Address): UInt32{ 
 			// Create the new MiamiData
 			var newMiami = MiamiData(name: name, description: description, mainVideo: mainVideo, season: season, creator: creator)
@@ -189,13 +203,13 @@ contract MiamiNFT: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Mint the new Miami
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(miamiDataID: UInt32, royaltyVault: Capability<&{FungibleToken.Receiver}>): @NFT{ 
 			pre{ 
 				royaltyVault.check():
@@ -212,7 +226,7 @@ contract MiamiNFT: NonFungibleToken{
 			return <-newMiami
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(miamiDataID: UInt32, royaltyVault: Capability<&{FungibleToken.Receiver}>, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -224,14 +238,14 @@ contract MiamiNFT: NonFungibleToken{
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyPercentage(newRoyaltyPercentage: UFix64){ 
 			MiamiNFT.royaltyPercentage = newRoyaltyPercentage
 			emit RoyaltyPercentageChanged(newRoyaltyPercentage: newRoyaltyPercentage)
 		}
 		
 		// Retire miamiData so that it cannot be used to mint anymore
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireMiamiData(miamiDataID: UInt32){ 
 			pre{ 
 				MiamiNFT.isMiamiDataRetired[miamiDataID] != nil:
@@ -250,18 +264,18 @@ contract MiamiNFT: NonFungibleToken{
 	access(all)
 	resource interface MiamiCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMiami(id: UInt64): &MiamiNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -309,7 +323,7 @@ contract MiamiNFT: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Miami
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -328,7 +342,7 @@ contract MiamiNFT: NonFungibleToken{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as NFT to make sure
 			// it is the correct type
 			let token <- token as! @MiamiNFT.NFT
@@ -351,7 +365,7 @@ contract MiamiNFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -390,7 +404,7 @@ contract MiamiNFT: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMiami(id: UInt64): &MiamiNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -434,37 +448,37 @@ contract MiamiNFT: NonFungibleToken{
 	}
 	
 	// get dictionary of numberMintedPerMiami
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerMiami():{ UInt32: UInt32}{ 
 		return MiamiNFT.numberMintedPerMiami
 	}
 	
 	// get how many Miamis with miamiDataID are minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMiamiNumberMinted(id: UInt32): UInt32{ 
 		let numberMinted = MiamiNFT.numberMintedPerMiami[id] ?? panic("miamiDataID not found")
 		return numberMinted
 	}
 	
 	// get the miamiData of a specific id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMiamiData(id: UInt32): MiamiData{ 
 		let miamiData = MiamiNFT.miamiDatas[id] ?? panic("miamiDataID not found")
 		return miamiData
 	}
 	
 	// get all miamiDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMiamiDatas():{ UInt32: MiamiData}{ 
 		return MiamiNFT.miamiDatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMiamiDatasRetired():{ UInt32: Bool}{ 
 		return MiamiNFT.isMiamiDataRetired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMiamiDataRetired(miamiDataID: UInt32): Bool{ 
 		let isMiamiDataRetired = MiamiNFT.isMiamiDataRetired[miamiDataID] ?? panic("miamiDataID not found")
 		return isMiamiDataRetired

@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 MultiFungibleToken is a semi-fungible token contract which helps to publish a group of fungible tokens without the need
 of deploying multiple contracts. There are two cases to consider:
@@ -9,7 +23,7 @@ of deploying multiple contracts. There are two cases to consider:
 
  */
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface MultiFungibleToken{ 
 	
 	/// TokensInitialized
@@ -42,7 +56,7 @@ contract interface MultiFungibleToken{
 	/// because it leaves open the possibility of creating custom providers
 	/// that do not necessarily need their own balance.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Provider{ 
 		
 		/// withdraw subtracts tokens from the owner's Vault
@@ -60,7 +74,7 @@ contract interface MultiFungibleToken{
 		/// capability that allows all users to access the provider
 		/// resource through a reference.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenId: UInt64, amount: UFix64): @{MultiFungibleToken.Vault}{ 
 			post{ 
 				// `result` refers to the return value
@@ -82,12 +96,12 @@ contract interface MultiFungibleToken{
 	/// can do custom things with the tokens, like split them up and
 	/// send them to different places.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Receiver{ 
 		
 		/// deposit takes a Vault and deposits it into the implementing resource type
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{MultiFungibleToken.Vault})
 	}
 	
@@ -97,7 +111,7 @@ contract interface MultiFungibleToken{
 	/// fields of the Vault and enforces that when new Vaults are
 	/// created, the fields are initialized correctly.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface View{ 
 		access(all)
 		var balance: UFix64
@@ -119,7 +133,7 @@ contract interface MultiFungibleToken{
 	///
 	/// The resource that contains the functions to send and receive tokens.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Vault: Receiver, View{ 
 		
 		/// The total balance of the vault
@@ -142,7 +156,7 @@ contract interface MultiFungibleToken{
 		/// and returns a new Vault with the same token ID and
 		/// the subtracted balance
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @{MultiFungibleToken.Vault}{ 
 			pre{ 
 				self.balance >= amount:
@@ -161,7 +175,7 @@ contract interface MultiFungibleToken{
 		/// deposit takes a Vault of the same token ID and adds its
 		/// balance to the balance of this Vault
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{MultiFungibleToken.Vault}){ 
 			pre{ 
 				from.isInstance(self.getType()):
@@ -179,33 +193,33 @@ contract interface MultiFungibleToken{
 	// Interface that an account would commonly use to
 	// organize and store all the published tokens
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface CollectionPublic{ 
 		
 		/// deposit stores the given vault into the collection
 		/// or merges it into the vault of the same token ID in
 		/// the collection if one exists
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{MultiFungibleToken.Vault})
 		
 		/// getTokenIds returns the token IDs of all vaults
 		/// in the collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTokenIds(): [UInt64]
 		
 		/// hasToken returns true iff the vault of the given
 		/// token ID exists in the collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasToken(tokenId: UInt64): Bool
 		
 		/// getPublicVault returns a restricted vault for
 		/// public access, or throws an error if it doesn't
 		/// have a vault of the requested token id
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicVault(tokenId: UInt64): &{Receiver, View}{ 
 			pre{ 
 				self.hasToken(tokenId: tokenId):
@@ -217,28 +231,28 @@ contract interface MultiFungibleToken{
 	/// Requirement for the the concrete resource type
 	/// to be declared in the implementing contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Collection: Provider, Receiver, CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenId: UInt64, amount: UFix64): @{MultiFungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{MultiFungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTokenIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasToken(tokenId: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicVault(tokenId: UInt64): &{Receiver, View}
 	}
 	
 	/// createEmptyCollection creates an empty Collection
 	/// and returns it to the caller so that they can own NFTs
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @{MultiFungibleToken.Collection}{ 
 		post{ 
 			result.getTokenIds().length == 0:
@@ -250,7 +264,7 @@ contract interface MultiFungibleToken{
 	/// that has a zero balance, or throws an error if the requested token id has
 	/// not yet been initialized
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(tokenId: UInt64): @{MultiFungibleToken.Vault}{ 
 		pre{ 
 			self.getTotalSupply(tokenId: tokenId) != nil:
@@ -268,6 +282,6 @@ contract interface MultiFungibleToken{
 	/// corresponds to the given token ID, or nil if the token
 	/// does not exist
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTotalSupply(tokenId: UInt64): UFix64?
 }

@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract StrikeNowData{ 
 	
 	//Should look like:
@@ -519,7 +533,7 @@ contract StrikeNowData{
 		}
 		
 		//Returns the number of mints expressed in the set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getAmountInSet(): UInt32{ 
 			var amount: UInt32 = 0
 			for set in self.setIdToAmountMap.keys{ 
@@ -534,7 +548,7 @@ contract StrikeNowData{
 		//{
 		//  SET_ID: AMOUNT_FROM_SET_TO_MINT  
 		//}
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun takeMintListAndDeplete(amountToTake: UInt32):{ UInt32: UInt32}{ 
 			pre{ 
 				amountToTake <= self.getAmountInSet():

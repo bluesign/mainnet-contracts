@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MoxyData from "./MoxyData.cdc"
 
@@ -82,32 +96,32 @@ contract ScoreToken: FungibleToken{
 			self.dailyBalances <- MoxyData.createNewOrderedDictionary()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceFor(timestamp: UFix64): UFix64?{ 
 			return self.dailyBalances.getValueOrMostRecentFor(timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalanceFor(timestamp: UFix64): UFix64?{ 
 			return self.dailyBalances.getValueFor(timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceChangeForToday(): Fix64{ 
 			return self.dailyBalances.getValueChangeForToday()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceChange(timestamp: UFix64): Fix64{ 
 			return self.dailyBalances.getValueChange(timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastTimestampAdded(): UFix64?{ 
 			return self.dailyBalances.getLastKeyAdded()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstTimestampAdded(): UFix64?{ 
 			return self.dailyBalances.getFirstKeyAdded()
 		}
@@ -138,7 +152,7 @@ contract ScoreToken: FungibleToken{
 		/// been consumed and therefore can be destroyed.
 		///
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			panic("SCORE can't be deposited")
 		}
 		
@@ -188,7 +202,7 @@ contract ScoreToken: FungibleToken{
 		///
 		/// Function that creates and returns a new minter resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
@@ -198,7 +212,7 @@ contract ScoreToken: FungibleToken{
 		///
 		/// Function that creates and returns a new burner resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()
@@ -221,7 +235,7 @@ contract ScoreToken: FungibleToken{
 		/// Function that mints new tokens, adds them to the total supply,
 		/// and returns them to the calling context.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokensTo(amount: UFix64, address: Address){ 
 			let tokenReceiver = getAccount(address).capabilities.get<&{ScoreToken.ReceiverInterface}>(ScoreToken.scoreTokenReceiverTimestampPath).borrow<&{ScoreToken.ReceiverInterface}>() ?? panic("Unable to borrow receiver reference")
 			let mintedVault <- self.mintTokensFor(amount: amount, timestamp: getCurrentBlock().timestamp)
@@ -265,7 +279,7 @@ contract ScoreToken: FungibleToken{
 		/// Note: the burned tokens are automatically subtracted from the
 		/// total supply in the Vault destructor.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @ScoreToken.Vault
 			let amount = vault.balance
@@ -274,17 +288,17 @@ contract ScoreToken: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLastTotalSupplyTimestampAdded(): UFix64?{ 
 		return self.totalSupplies.getLastKeyAdded()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupplyFor(timestamp: UFix64): UFix64{ 
 		return self.totalSupplies.getValueOrMostRecentFor(timestamp: timestamp)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDailyChangeTo(timestamp: UFix64): Fix64{ 
 		return self.totalSupplies.getValueChange(timestamp: timestamp)
 	}
@@ -296,22 +310,22 @@ contract ScoreToken: FungibleToken{
 	
 	access(all)
 	resource interface DailyBalancesInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceFor(timestamp: UFix64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalanceFor(timestamp: UFix64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceChange(timestamp: UFix64): Fix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceChangeForToday(): Fix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastTimestampAdded(): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstTimestampAdded(): UFix64?
 	}
 	

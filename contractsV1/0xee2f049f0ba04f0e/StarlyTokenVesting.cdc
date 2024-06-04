@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -60,19 +74,19 @@ contract StarlyTokenVesting: NonFungibleToken{
 	
 	access(all)
 	resource interface VestingPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBeneficiary(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInitialVestedAmount(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestedAmount(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestingSchedule(): &{StarlyTokenVesting.IVestingSchedule}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleasableAmount(): UFix64
 	}
 	
@@ -87,22 +101,22 @@ contract StarlyTokenVesting: NonFungibleToken{
 	
 	access(all)
 	resource interface IVestingSchedule{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleasePercent(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStartTimestamp(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndTimestamp(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextUnlock():{ UFix64: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestingType(): VestingType
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toString(): String
 	}
 	
@@ -123,7 +137,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 			self.endTimestamp = endTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleasePercent(): UFix64{ 
 			let timestamp = getCurrentBlock().timestamp
 			if timestamp >= self.endTimestamp{ 
@@ -137,27 +151,27 @@ contract StarlyTokenVesting: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStartTimestamp(): UFix64{ 
 			return self.startTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndTimestamp(): UFix64{ 
 			return self.endTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestingType(): VestingType{ 
 			return VestingType.linear
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextUnlock():{ UFix64: UFix64}{ 
 			return{ getCurrentBlock().timestamp: self.getReleasePercent()}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toString(): String{ 
 			return "LinearVestingSchedule(startTimestamp: ".concat(self.startTimestamp.toString()).concat(", endTimestamp: ").concat(self.endTimestamp.toString()).concat(", releasePercent: ").concat(self.getReleasePercent().toString()).concat(")")
 		}
@@ -191,7 +205,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 			self.endTimestamp = endTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleasePercent(): UFix64{ 
 			let timestamp = getCurrentBlock().timestamp
 			let keys = self.schedule.keys
@@ -206,22 +220,22 @@ contract StarlyTokenVesting: NonFungibleToken{
 			return releasePercent
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStartTimestamp(): UFix64{ 
 			return self.startTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndTimestamp(): UFix64{ 
 			return self.endTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestingType(): VestingType{ 
 			return VestingType.period
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNextUnlock():{ UFix64: UFix64}{ 
 			let timestamp = getCurrentBlock().timestamp
 			let keys = self.schedule.keys
@@ -236,7 +250,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 			return{ closestTimestamp: releasePercent}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toString(): String{ 
 			return "PeriodVestingSchedule(releasePercent: ".concat(self.getReleasePercent().toString()).concat(")")
 		}
@@ -329,27 +343,27 @@ contract StarlyTokenVesting: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBeneficiary(): Address{ 
 			return self.beneficiary
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInitialVestedAmount(): UFix64{ 
 			return self.initialVestedAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestedAmount(): UFix64{ 
 			return self.vestedVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestingSchedule(): &{StarlyTokenVesting.IVestingSchedule}{ 
 			return &self.vestingSchedule as &{StarlyTokenVesting.IVestingSchedule}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleasableAmount(): UFix64{ 
 			let initialAmount = self.initialVestedAmount
 			let currentAmount = self.vestedVault.balance
@@ -368,13 +382,13 @@ contract StarlyTokenVesting: NonFungibleToken{
 	// We put vesting creation logic into minter, its job is to have checks, emit events, update counters
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintLinear(beneficiary: Address, vestedVault: @StarlyToken.Vault, startTimestamp: UFix64, endTimestamp: UFix64): @StarlyTokenVesting.NFT{ 
 			let vestingSchedule <- create LinearVestingSchedule(startTimestamp: startTimestamp, endTimestamp: endTimestamp)
 			return <-self.mintInternal(beneficiary: beneficiary, vestedVault: <-vestedVault, vestingSchedule: <-vestingSchedule)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPeriod(beneficiary: Address, vestedVault: @StarlyToken.Vault, schedule:{ UFix64: UFix64}): @StarlyTokenVesting.NFT{ 
 			let vestingSchedule <- create PeriodVestingSchedule(schedule: schedule)
 			return <-self.mintInternal(beneficiary: beneficiary, vestedVault: <-vestedVault, vestingSchedule: <-vestingSchedule)
@@ -399,7 +413,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 	access(all)
 	resource NFTBurner{ 
 		// if admin owns the vesting NFT we can burn it to release tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(vesting: @StarlyTokenVesting.NFT){ 
 			let vestedAmount = vesting.vestedVault.balance
 			let returnVaultRef = StarlyTokenVesting.account.storage.borrow<&StarlyToken.Vault>(from: StarlyToken.TokenStoragePath)!
@@ -410,7 +424,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 		}
 		
 		// user can only release tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun release(vestingRef: &StarlyTokenVesting.NFT){ 
 			let receiverRef = getAccount(vestingRef.beneficiary).capabilities.get<&{FungibleToken.Receiver}>(StarlyToken.TokenPublicReceiverPath).borrow<&{FungibleToken.Receiver}>() ?? panic("Could not borrow StarlyToken receiver reference to the beneficiary's vault!")
 			let releaseAmount = vestingRef.getReleasableAmount()
@@ -423,19 +437,19 @@ contract StarlyTokenVesting: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVestingPublic(id: UInt64): &StarlyTokenVesting.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
 	access(all)
 	resource interface CollectionPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVestingPrivate(id: UInt64): &StarlyTokenVesting.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun release(id: UInt64)
 	}
 	
@@ -456,7 +470,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StarlyTokenVesting.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -481,21 +495,21 @@ contract StarlyTokenVesting: NonFungibleToken{
 			return vesting as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVestingPublic(id: UInt64): &StarlyTokenVesting.NFT{ 
 			let vestingRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let intermediateRef = vestingRef as! &StarlyTokenVesting.NFT
 			return intermediateRef as &StarlyTokenVesting.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun release(id: UInt64){ 
 			let burner = StarlyTokenVesting.account.storage.borrow<&NFTBurner>(from: StarlyTokenVesting.BurnerStoragePath)!
 			let vestingRef = self.borrowVestingPrivate(id: id)
 			return burner.release(vestingRef: vestingRef)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVestingPrivate(id: UInt64): &StarlyTokenVesting.NFT{ 
 			let vestingRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return vestingRef as! &StarlyTokenVesting.NFT
@@ -522,7 +536,7 @@ contract StarlyTokenVesting: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollectionAndNotify(beneficiary: Address): @{NonFungibleToken.Collection}{ 
 		emit VestingInitialized(beneficiary: beneficiary)
 		return <-self.createEmptyCollection(nftType: Type<@Collection>())
@@ -530,12 +544,12 @@ contract StarlyTokenVesting: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMinter(): @NFTMinter{ 
 			return <-create NFTMinter()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTBurner(): @NFTBurner{ 
 			return <-create NFTBurner()
 		}

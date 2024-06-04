@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -67,17 +81,17 @@ contract TrartContractNFT: NonFungibleToken{
 	}
 	
 	// Get all metadatas
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatas():{ UInt64: Metadata}{ 
 		return self.metadatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatasCount(): UInt64{ 
 		return UInt64(self.metadatas.length)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataForCardID(cardID: UInt64): Metadata?{ 
 		return self.metadatas[cardID]
 	}
@@ -97,7 +111,7 @@ contract TrartContractNFT: NonFungibleToken{
 			emit Mint(id: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCardMetadata(): Metadata?{ 
 			return TrartContractNFT.getMetadataForCardID(cardID: self.id)
 		}
@@ -126,7 +140,7 @@ contract TrartContractNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display?{ 
 			if let info = self.getCardMetadata(){ 
 				let metadata = info.data
@@ -148,13 +162,13 @@ contract TrartContractNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties?{ 
 			let royalties: [MetadataViews.Royalty] = [MetadataViews.Royalty(receiver: getAccount(0x416e01b78d5b45ff).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!, cut: 0.025, description: "Royalty (2.5%)")]
 			return MetadataViews.Royalties(royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits?{ 
 			if let info = self.getCardMetadata(){ 
 				let metadata = info.data
@@ -167,7 +181,7 @@ contract TrartContractNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalURL(): MetadataViews.ExternalURL?{ 
 			if let info = self.getCardMetadata(){ 
 				let metadata = info.data
@@ -184,12 +198,12 @@ contract TrartContractNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			return MetadataViews.NFTCollectionDisplay(name: "Trart", description: "TRART is an international platform with NFTs (non-fungible tokens) from well-known artists around the world.", externalURL: MetadataViews.ExternalURL("https://trart.io"), squareImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://trart.io/images/TRART_Logo.svg"), mediaType: "image/svg+xml"), bannerImage: MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://trart.io/images/TRART_Banner_1200x630px.png"), mediaType: "image/png"), socials:{ "twitter": MetadataViews.ExternalURL("https://twitter.com/IoTrart"), "discord": MetadataViews.ExternalURL("https://discord.com/invite/yEyse2VkQB")})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: TrartContractNFT.CollectionStoragePath, publicPath: TrartContractNFT.CollectionPublicPath, publicCollection: Type<&TrartContractNFT.Collection>(), publicLinkedType: Type<&TrartContractNFT.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-TrartContractNFT.createEmptyCollection(nftType: Type<@TrartContractNFT.Collection>())
@@ -227,18 +241,18 @@ contract TrartContractNFT: NonFungibleToken{
 	access(all)
 	resource interface ICardCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCard(id: UInt64): &TrartContractNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -263,7 +277,7 @@ contract TrartContractNFT: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -273,7 +287,7 @@ contract TrartContractNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @TrartContractNFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -283,7 +297,7 @@ contract TrartContractNFT: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -302,7 +316,7 @@ contract TrartContractNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCard(id: UInt64): &TrartContractNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -345,12 +359,12 @@ contract TrartContractNFT: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun newNFT(cardID: UInt64, data:{ String: String}): @NFT{ 
 			return <-TrartContractNFT.createNFT(cardID: cardID, metadata: data)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, cardID: UInt64, data:{ String: String}){ 
 			recipient.deposit(token: <-TrartContractNFT.createNFT(cardID: cardID, metadata: data))
 		}

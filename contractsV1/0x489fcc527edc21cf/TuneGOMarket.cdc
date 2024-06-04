@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -115,10 +129,10 @@ contract TuneGOMarket{
 		access(all)
 		var isCompleted: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			payment: @{FungibleToken.Vault},
 			buyerCollection: Capability<&{NonFungibleToken.Receiver}>
@@ -156,7 +170,7 @@ contract TuneGOMarket{
 		access(self)
 		let tunegoPaymentFeePercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}, buyerCollection: Capability<&{NonFungibleToken.Receiver}>): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				payment.balance == self.price:
@@ -184,7 +198,7 @@ contract TuneGOMarket{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(): &{NonFungibleToken.NFT}{ 
 			let saleItemProvider = (self.saleItemProviderCapability.borrow()!).borrowNFT(self.collectibleId)
 			assert(saleItemProvider.isInstance(self.collectibleType), message: "Collectible has wrong type")
@@ -227,7 +241,7 @@ contract TuneGOMarket{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(
 			saleItemProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -235,13 +249,13 @@ contract TuneGOMarket{
 			collectibleType: Type,
 			collectibleId: UInt64,
 			royalties: [
-				Royalty
+				TuneGOMarket.Royalty
 			],
 			price: UFix64,
 			paymentReceiver: Capability<&FlowToken.Vault>
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffer(saleOfferId: UInt64)
 	}
 	
@@ -249,10 +263,10 @@ contract TuneGOMarket{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(saleOfferId: UInt64): &SaleOffer?
 	}
 	
@@ -263,7 +277,7 @@ contract TuneGOMarket{
 		access(self)
 		var saleOffers: @{UInt64: SaleOffer}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(saleItemProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, collectibleType: Type, collectibleId: UInt64, royalties: [Royalty], price: UFix64, paymentReceiver: Capability<&FlowToken.Vault>): UInt64{ 
 			assert(false, message: "This method has been disabled - the contract is no longer supported")
 			let saleOffer <- create SaleOffer(saleItemProviderCapability: saleItemProviderCapability, collectibleType: collectibleType, collectibleId: collectibleId, royalties: royalties, price: price, paymentReceiver: paymentReceiver)
@@ -274,19 +288,19 @@ contract TuneGOMarket{
 			return saleOfferId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffer(saleOfferId: UInt64){ 
 			let saleOffer <- self.saleOffers.remove(key: saleOfferId) ?? panic("missing SaleOffer")
 			emit SaleOfferRemoved(saleOfferId: saleOfferId, collectibleId: saleOffer.collectibleId, collectibleType: saleOffer.collectibleType.identifier)
 			destroy saleOffer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(saleOfferId: UInt64): &SaleOffer?{ 
 			if self.saleOffers[saleOfferId] == nil{ 
 				return nil
@@ -300,30 +314,30 @@ contract TuneGOMarket{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketFee(): MarketFee{ 
 		return MarketFee(receiver: self.TuneGOFee.receiver, percentage: self.TuneGOFee.percentage)
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTuneGOFee(tunegoFee: MarketFee){ 
 			TuneGOMarket.TuneGOFee = tunegoFee
 			emit TuneGOMarketFeeSet(receiver: tunegoFee.receiver, percentage: tunegoFee.percentage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSupportedNFTType(nftType: Type){ 
 			TuneGOMarket.SupportedNFTTypes.append(nftType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

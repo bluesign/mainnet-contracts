@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import FlovatarComponentTemplate from "./FlovatarComponentTemplate.cdc"
@@ -77,7 +91,7 @@ contract FlovatarComponentUpgrader{
 		access(self)
 		let uuid: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(uuid: UInt64, field: String, minValue: UInt64, maxValue: UInt64){ 
 			self.uuid = uuid
 			self.field = field
@@ -86,7 +100,7 @@ contract FlovatarComponentUpgrader{
 			self.value = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValue(): UInt64{ 
 			if let value = self.value{ 
 				return value
@@ -108,8 +122,8 @@ contract FlovatarComponentUpgrader{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
-		fun depositComponent(component: @FlovatarComponent.NFT)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositComponent(component: @FlovatarComponent.NFT): Void
 	}
 	
 	// The main Collection that manages the Containers
@@ -126,7 +140,7 @@ contract FlovatarComponentUpgrader{
 			self.rarityLookup ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositComponent(component: @FlovatarComponent.NFT){ 
 			if !self.rarityLookup.containsKey(component.getSeries()){ 
 				self.rarityLookup.insert(key: component.getSeries(),{}  as{ String:{ String:{ UInt64: UInt64}}})
@@ -144,7 +158,7 @@ contract FlovatarComponentUpgrader{
 			destroy oldComponent
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawComponent(id: UInt64): @FlovatarComponent.NFT{ 
 			let component <- self.flovatarComponents.remove(key: id) ?? panic("missing NFT")
 			(((self.rarityLookup[component.getSeries()]!)[component.getRarity()]!)["all"]!).remove(key: component.id)
@@ -152,7 +166,7 @@ contract FlovatarComponentUpgrader{
 			return <-component
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRandomComponent(series: UInt32, rarity: String, category: String?): @FlovatarComponent.NFT{ 
 			//FILTER BY SERIES AND RARITY AND THEN RANDOMIZE AND PICK ONE
 			var components: [UInt64] = []
@@ -189,7 +203,7 @@ contract FlovatarComponentUpgrader{
 			return <-component
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getComponentIDs(): [UInt64]{ 
 			return self.flovatarComponents.keys
 		}
@@ -202,7 +216,7 @@ contract FlovatarComponentUpgrader{
 	}
 	
 	// This function withdraws all the Components assigned to a Flovatar and sends them to the Owner's address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun upgradeFlovatarComponent(
 		components: @[
 			FlovatarComponent.NFT

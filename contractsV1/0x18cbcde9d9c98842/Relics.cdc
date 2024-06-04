@@ -1,4 +1,18 @@
-/*******************************************
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*******************************************
 Modern Musician Relic Contract v.0.1.3
 description: This smart contract functions as the main Modern Musician NFT ('Relics') production contract.
 It follows Flow's NonFungibleToken standards as well as uses a MetadataViews implementation.
@@ -57,25 +71,25 @@ contract Relics: NonFungibleToken{
 	var creatorEditionMap:{ String: [UInt64]}
 	
 	// returns total supply
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return Relics.totalSupply
 	}
 	
 	// mapping of RelicIds produced by CreatorId, returns an array of Strings or nil
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRelicsByCreatorId(_creatorId: String): [String]?{ 
 		return Relics.creatorRelicMap[_creatorId]
 	}
 	
 	// mapping of Edition ids by relicId, returns an array of UInt64 or nil
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionsByRelicId(_relicId: String): [UInt64]?{ 
 		return Relics.relicEditionMap[_relicId]
 	}
 	
 	// mapping of Editions by creatorId, returns an array of UInt64 or nil
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionsByCreatorId(_creatorId: String): [UInt64]?{ 
 		return Relics.creatorEditionMap[_creatorId]
 	}
@@ -158,32 +172,32 @@ contract Relics: NonFungibleToken{
 			self.royalties = _royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAssetVideoURL(_newAssetVideoURL: String){ 
 			self.assetVideoURL = _newAssetVideoURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAssetImageURL(_newAssetImageURL: String){ 
 			self.assetImageURL = _newAssetImageURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMusicURL(_newMusicURL: String){ 
 			self.musicURL = _newMusicURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateArtworkURL(_newArtworkURL: String){ 
 			self.artworkURL = _newArtworkURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMarketDisplay(_newURL: String){ 
 			self.marketDisplay = _newURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMediaURLs(_newAssetVideoURL: String, _newAssetImageURL: String, _newMusicURL: String, _newArtworkURL: String){ 
 			self.assetVideoURL = _newAssetVideoURL
 			self.assetImageURL = _newAssetImageURL
@@ -191,7 +205,7 @@ contract Relics: NonFungibleToken{
 			self.artworkURL = _newArtworkURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return self.creatorName.concat(" - ").concat(self.title)
 		}
@@ -240,15 +254,15 @@ contract Relics: NonFungibleToken{
 	access(all)
 	resource interface RelicCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRelic(id: UInt64): &Relics.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -273,13 +287,13 @@ contract Relics: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let relic <- token as! @Relics.NFT
 			emit Deposit(id: relic.id, to: self.owner?.address)
 			self.ownedNFTs[relic.id] <-! relic
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("Relic not found.")
 			recipient.deposit(token: <-token)
@@ -296,7 +310,7 @@ contract Relics: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRelic(id: UInt64): &Relics.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -341,7 +355,7 @@ contract Relics: NonFungibleToken{
 	// the RelicMinter is stored on the deployment account and used to mint all Relics
 	access(all)
 	resource RelicMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintRelic(recipient: &{NonFungibleToken.CollectionPublic}, _creatorId: String, _relicId: String, _rarity: String, _category: String, _type: String, _creatorName: String, _title: String, _description: String, _edition: UInt64, _editionSize: UInt64, _mintDate: String, _assetVideoURL: String, _assetImageURL: String, _musicURL: String, _artworkURL: String, _royalties: [MetadataViews.Royalty]){ 
 			recipient.deposit(token: <-create NFT(_initID: Relics.totalSupply, _creatorId: _creatorId, _relicId: _relicId, _rarity: _rarity, _category: _category, _type: _type, _creatorName: _creatorName, _title: _title, _description: _description, _edition: _edition, _editionSize: _editionSize, _mintDate: _mintDate, _assetVideoURL: _assetVideoURL, _assetImageURL: _assetImageURL, _musicURL: _musicURL, _artworkURL: _artworkURL, _royalties: _royalties))
 			emit Minted(id: Relics.totalSupply, rarity: _rarity, creatorName: _creatorName)

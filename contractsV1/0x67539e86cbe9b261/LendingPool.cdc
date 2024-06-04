@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # The contract implementation of the lending pool.
 
@@ -224,13 +238,13 @@ contract LendingPool{
 	event Flashloan(executor: Address, executorType: Type, originator: Address, amount: UFix64)
 	
 	// Return underlying asset's type of current pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUnderlyingAssetType(): String{ 
 		return self.underlyingAssetType.identifier
 	}
 	
 	// Gets current underlying balance of this pool, scaled up by 1e18
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPoolCash(): UInt256{ 
 		return LendingConfig.UFix64ToScaledUInt256(self.underlyingVault.balance)
 	}
@@ -245,7 +259,7 @@ contract LendingPool{
 	/// Calculates interest accrued from the last checkpointed block to the current block 
 	/// This function is a readonly function and can be called by scripts.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun accrueInterestReadonly(): [UInt256; 4]{ 
 		pre{ 
 			self.interestRateModelCap != nil && (self.interestRateModelCap!).check() == true:
@@ -284,7 +298,7 @@ contract LendingPool{
 	///
 	/// Applies accrued interest to total borrows and reserves.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun accrueInterest(){ 
 		if UInt256(getCurrentBlock().height) == self.accrualBlockNumber{ 
 			return
@@ -307,7 +321,7 @@ contract LendingPool{
 	/// Calculates the exchange rate from the underlying to virtual lpToken (i.e. how many UnderlyingToken per virtual lpToken)
 	/// Note: It doesn't call accrueInterest() first to update with latest states which is used in calculating the exchange rate.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun underlyingToLpTokenRateSnapshotScaled(): UInt256{ 
 		if self.scaledTotalSupply == 0{ 
 			return self.scaledInitialExchangeRate
@@ -319,7 +333,7 @@ contract LendingPool{
 	/// Calculates the scaled borrow balance of borrower address based on stored states
 	/// Note: It doesn't call accrueInterest() first to update with latest states which is used in calculating the borrow balance.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun borrowBalanceSnapshotScaled(borrowerAddress: Address): UInt256{ 
 		if self.accountBorrows.containsKey(borrowerAddress) == false{ 
 			return 0
@@ -337,7 +351,7 @@ contract LendingPool{
 	/// The lending pool will mint the corresponding lptoken according to the current
 	/// exchange rate of lptoken as the user's deposit certificate and save it in the contract.
 	/// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun supply(supplierAddr: Address, inUnderlyingVault: @{FungibleToken.Vault}){ 
 		pre{ 
 			inUnderlyingVault.balance > 0.0:
@@ -477,7 +491,7 @@ contract LendingPool{
 	/// which is stored in user account and can only be given by its owner.
 	/// The special value of numLpTokenToRedeem `UFIx64.max` indicating to redeem all virtual LP tokens the redeemer has.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeem(
 		userCertificateCap: Capability<&{LendingInterfaces.IdentityCertificate}>,
 		numLpTokenToRedeem: UFix64
@@ -512,7 +526,7 @@ contract LendingPool{
 	/// which is stored in user account and can only be given by its owner.
 	/// The special value of numUnderlyingToRedeem `UFIx64.max` indicating to redeem all the underlying liquidity.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeemUnderlying(
 		userCertificateCap: Capability<&{LendingInterfaces.IdentityCertificate}>,
 		numUnderlyingToRedeem: UFix64
@@ -545,7 +559,7 @@ contract LendingPool{
 	///
 	/// Since borrower would decrease his overall collateral ratio across all markets, safety check happenes inside comptroller
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun borrow(
 		userCertificateCap: Capability<&{LendingInterfaces.IdentityCertificate}>,
 		borrowAmount: UFix64
@@ -654,7 +668,7 @@ contract LendingPool{
 	/// @Note: Note that the borrower address can potentially not be the same as the repayer address (which means someone can repay on behave of borrower),
 	///		this is allowed as there's no safety issue to do so.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun repayBorrow(borrower: Address, repayUnderlyingVault: @{FungibleToken.Vault}): @{
 		FungibleToken.Vault
 	}?{ 
@@ -684,7 +698,7 @@ contract LendingPool{
 	///
 	/// The collateral lpTokens seized is transferred to the liquidator.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun liquidate(
 		liquidator: Address,
 		borrower: Address,
@@ -766,7 +780,7 @@ contract LendingPool{
 	///
 	/// Only used for "external" seize. Run-time type check of pool certificate ensures it can only be called by other supported markets.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun seize(
 		seizerPoolCertificate: @{LendingInterfaces.IdentityCertificate},
 		seizerPool: Address,
@@ -856,7 +870,7 @@ contract LendingPool{
 	/// all in one atomic function call.
 	/// @params: User-definited extra data passed to executor for further auth/check/decode
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun flashloan(
 		executorCap: Capability<&{LendingInterfaces.FlashLoanExecutor}>,
 		requestedAmount: UFix64,
@@ -915,12 +929,12 @@ contract LendingPool{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlashloanRateBps(): UInt64{ 
 		return self._reservedFields["flashloanRateBps"] as! UInt64? ?? 5
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isFlashloanOpen(): Bool{ 
 		return self._reservedFields["isFlashloanOpen"] as! Bool? ?? false
 	}
@@ -939,39 +953,39 @@ contract LendingPool{
 	///
 	access(all)
 	resource PoolPublic: LendingInterfaces.PoolPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolAddress(): Address{ 
 			return LendingPool.poolAddress
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnderlyingTypeString(): String{ 
 			let underlyingType = LendingPool.getUnderlyingAssetType()
 			// "A.1654653399040a61.FlowToken.Vault" => "FlowToken"
 			return underlyingType.slice(from: 19, upTo: underlyingType.length - 6)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnderlyingAssetType(): String{ 
 			return LendingPool.getUnderlyingAssetType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnderlyingToLpTokenRateScaled(): UInt256{ 
 			return LendingPool.underlyingToLpTokenRateSnapshotScaled()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountLpTokenBalanceScaled(account: Address): UInt256{ 
 			return LendingPool.accountLpTokens[account] ?? 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountBorrowBalanceScaled(account: Address): UInt256{ 
 			return LendingPool.borrowBalanceSnapshotScaled(borrowerAddress: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountBorrowPrincipalSnapshotScaled(account: Address): UInt256{ 
 			if LendingPool.accountBorrows.containsKey(account) == false{ 
 				return 0
@@ -980,7 +994,7 @@ contract LendingPool{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountBorrowIndexSnapshotScaled(account: Address): UInt256{ 
 			if LendingPool.accountBorrows.containsKey(account) == false{ 
 				return 0
@@ -989,12 +1003,12 @@ contract LendingPool{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountSnapshotScaled(account: Address): [UInt256; 5]{ 
 			return [self.getUnderlyingToLpTokenRateScaled(), self.getAccountLpTokenBalanceScaled(account: account), self.getAccountBorrowBalanceScaled(account: account), self.getAccountBorrowPrincipalSnapshotScaled(account: account), self.getAccountBorrowIndexSnapshotScaled(account: account)]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountRealtimeScaled(account: Address): [UInt256; 5]{ 
 			let accrueInterestRealtimeRes = self.accrueInterestReadonly()
 			let poolBorrowIndexRealtime = accrueInterestRealtimeRes[1]
@@ -1008,67 +1022,67 @@ contract LendingPool{
 			return [underlyingTolpTokenRateRealtime, self.getAccountLpTokenBalanceScaled(account: account), borrowBalanceRealtimeScaled, self.getAccountBorrowPrincipalSnapshotScaled(account: account), self.getAccountBorrowIndexSnapshotScaled(account: account)]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolReserveFactorScaled(): UInt256{ 
 			return LendingPool.scaledReserveFactor
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInterestRateModelAddress(): Address{ 
 			return LendingPool.interestRateModelAddress!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolTotalBorrowsScaled(): UInt256{ 
 			return LendingPool.scaledTotalBorrows
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolAccrualBlockNumber(): UInt256{ 
 			return LendingPool.accrualBlockNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolBorrowIndexScaled(): UInt256{ 
 			return LendingPool.scaledBorrowIndex
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolTotalLpTokenSupplyScaled(): UInt256{ 
 			return LendingPool.scaledTotalSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolTotalSupplyScaled(): UInt256{ 
 			return LendingPool.getPoolCash() + LendingPool.scaledTotalBorrows
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolTotalReservesScaled(): UInt256{ 
 			return LendingPool.scaledTotalReserves
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getPoolCash(): UInt256{ 
 			return LendingPool.getPoolCash()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolSupplierCount(): UInt256{ 
 			return UInt256(LendingPool.accountLpTokens.length)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolBorrowerCount(): UInt256{ 
 			return UInt256(LendingPool.accountBorrows.length)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolSupplierList(): [Address]{ 
 			return LendingPool.accountLpTokens.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolSupplierSlicedList(from: UInt64, to: UInt64): [Address]{ 
 			pre{ 
 				from <= to && to < UInt64(LendingPool.accountLpTokens.length):
@@ -1084,12 +1098,12 @@ contract LendingPool{
 			return list
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolBorrowerList(): [Address]{ 
 			return LendingPool.accountBorrows.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolBorrowerSlicedList(from: UInt64, to: UInt64): [Address]{ 
 			pre{ 
 				from <= to && to < UInt64(LendingPool.accountBorrows.length):
@@ -1105,19 +1119,19 @@ contract LendingPool{
 			return list
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolBorrowRateScaled(): UInt256{ 
 			return ((LendingPool.interestRateModelCap!).borrow()!).getBorrowRate(cash: LendingPool.getPoolCash(), borrows: LendingPool.scaledTotalBorrows, reserves: LendingPool.scaledTotalReserves)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolBorrowAprScaled(): UInt256{ 
 			let scaledBorrowRatePerBlock = ((LendingPool.interestRateModelCap!).borrow()!).getBorrowRate(cash: LendingPool.getPoolCash(), borrows: LendingPool.scaledTotalBorrows, reserves: LendingPool.scaledTotalReserves)
 			let blocksPerYear = ((LendingPool.interestRateModelCap!).borrow()!).getBlocksPerYear()
 			return scaledBorrowRatePerBlock * blocksPerYear
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolSupplyAprScaled(): UInt256{ 
 			let scaledSupplyRatePerBlock = ((LendingPool.interestRateModelCap!).borrow()!).getSupplyRate(cash: LendingPool.getPoolCash(), borrows: LendingPool.scaledTotalBorrows, reserves: LendingPool.scaledTotalReserves, reserveFactor: LendingPool.scaledReserveFactor)
 			let blocksPerYear = ((LendingPool.interestRateModelCap!).borrow()!).getBlocksPerYear()
@@ -1125,62 +1139,62 @@ contract LendingPool{
 		}
 		
 		/// The default flashloan rate is 5 bps (0.05%)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlashloanRateBps(): UInt64{ 
 			return LendingPool.getFlashloanRateBps()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun accrueInterest(){ 
 			LendingPool.accrueInterest()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun accrueInterestReadonly(): [UInt256; 4]{ 
 			return LendingPool.accrueInterestReadonly()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolCertificateType(): Type{ 
 			return Type<@LendingPool.PoolCertificate>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun seize(seizerPoolCertificate: @{LendingInterfaces.IdentityCertificate}, seizerPool: Address, liquidator: Address, borrower: Address, scaledBorrowerCollateralLpTokenToSeize: UInt256){ 
 			LendingPool.seize(seizerPoolCertificate: <-seizerPoolCertificate, seizerPool: seizerPool, liquidator: liquidator, borrower: borrower, scaledBorrowerCollateralLpTokenToSeize: scaledBorrowerCollateralLpTokenToSeize)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supply(supplierAddr: Address, inUnderlyingVault: @{FungibleToken.Vault}){ 
 			LendingPool.supply(supplierAddr: supplierAddr, inUnderlyingVault: <-inUnderlyingVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(userCertificateCap: Capability<&{LendingInterfaces.IdentityCertificate}>, numLpTokenToRedeem: UFix64): @{FungibleToken.Vault}{ 
 			return <-LendingPool.redeem(userCertificateCap: userCertificateCap, numLpTokenToRedeem: numLpTokenToRedeem)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeemUnderlying(userCertificateCap: Capability<&{LendingInterfaces.IdentityCertificate}>, numUnderlyingToRedeem: UFix64): @{FungibleToken.Vault}{ 
 			return <-LendingPool.redeemUnderlying(userCertificateCap: userCertificateCap, numUnderlyingToRedeem: numUnderlyingToRedeem)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrow(userCertificateCap: Capability<&{LendingInterfaces.IdentityCertificate}>, borrowAmount: UFix64): @{FungibleToken.Vault}{ 
 			return <-LendingPool.borrow(userCertificateCap: userCertificateCap, borrowAmount: borrowAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repayBorrow(borrower: Address, repayUnderlyingVault: @{FungibleToken.Vault}): @{FungibleToken.Vault}?{ 
 			return <-LendingPool.repayBorrow(borrower: borrower, repayUnderlyingVault: <-repayUnderlyingVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun liquidate(liquidator: Address, borrower: Address, poolCollateralizedToSeize: Address, repayUnderlyingVault: @{FungibleToken.Vault}): @{FungibleToken.Vault}?{ 
 			return <-LendingPool.liquidate(liquidator: liquidator, borrower: borrower, poolCollateralizedToSeize: poolCollateralizedToSeize, repayUnderlyingVault: <-repayUnderlyingVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun flashloan(executorCap: Capability<&{LendingInterfaces.FlashLoanExecutor}>, requestedAmount: UFix64, params:{ String: AnyStruct}){ 
 			LendingPool.flashloan(executorCap: executorCap, requestedAmount: requestedAmount, params: params)
 		}
@@ -1191,7 +1205,7 @@ contract LendingPool{
 	access(all)
 	resource PoolAdmin: LendingInterfaces.PoolAdminPublic{ 
 		/// Admin function to call accrueInterest() to checkpoint latest states, and then update the interest rate model
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInterestRateModel(newInterestRateModelAddress: Address){ 
 			post{ 
 				LendingPool.interestRateModelCap != nil && (LendingPool.interestRateModelCap!).check() == true:
@@ -1208,7 +1222,7 @@ contract LendingPool{
 		}
 		
 		/// Admin function to call accrueInterest() to checkpoint latest states, and then update reserveFactor
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReserveFactor(newReserveFactor: UFix64){ 
 			pre{ 
 				newReserveFactor <= 1.0:
@@ -1222,7 +1236,7 @@ contract LendingPool{
 		}
 		
 		/// Admin function to update poolSeizeShare
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPoolSeizeShare(newPoolSeizeShare: UFix64){ 
 			pre{ 
 				newPoolSeizeShare <= 1.0:
@@ -1235,7 +1249,7 @@ contract LendingPool{
 		}
 		
 		/// Admin function to set comptroller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setComptroller(newComptrollerAddress: Address){ 
 			post{ 
 				LendingPool.comptrollerCap != nil && (LendingPool.comptrollerCap!).check() == true:
@@ -1251,7 +1265,7 @@ contract LendingPool{
 		
 		/// Admin function to initialize pool.
 		/// Note: can be called only once
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun initializePool(reserveFactor: UFix64, poolSeizeShare: UFix64, interestRateModelAddress: Address){ 
 			pre{ 
 				LendingPool.accrualBlockNumber == 0 && LendingPool.scaledBorrowIndex == 0:
@@ -1272,7 +1286,7 @@ contract LendingPool{
 		}
 		
 		/// Admin function to withdraw pool reserve
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawReserves(reduceAmount: UFix64): @{FungibleToken.Vault}{ 
 			LendingPool.accrueInterest()
 			let reduceAmountScaled = reduceAmount == UFix64.max ? LendingPool.scaledTotalReserves : LendingConfig.UFix64ToScaledUInt256(reduceAmount)
@@ -1283,7 +1297,7 @@ contract LendingPool{
 			return <-LendingPool.underlyingVault.withdraw(amount: LendingConfig.ScaledUInt256ToUFix64(reduceAmountScaled))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFlashloanRateBps(rateBps: UInt64){ 
 			pre{ 
 				rateBps >= 0 && rateBps <= 10000:
@@ -1293,7 +1307,7 @@ contract LendingPool{
 			LendingPool._reservedFields["flashloanRateBps"] = rateBps
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFlashloanOpen(isOpen: Bool){ 
 			emit FlashloanOpen(isOpen: isOpen)
 			LendingPool._reservedFields["isFlashloanOpen"] = isOpen

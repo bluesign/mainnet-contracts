@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract OWLD{ 
 	
 	// Total supply of all tokens in existence.
@@ -28,8 +42,8 @@ contract OWLD{
 		// them access by publishing a resource that exposes the withdraw
 		// function.
 		//
-		access(all)
-		fun withdraw(amount: UFix64): @Vault{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdraw(amount: UFix64): @OWLD.Vault{ 
 			post{ 
 				// `result` refers to the return value of the function
 				result.balance == UFix64(amount):
@@ -55,8 +69,8 @@ contract OWLD{
 		// Function that can be called to deposit tokens
 		// into the implementing resource type
 		//
-		access(all)
-		fun deposit(from: @Vault){ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(from: @OWLD.Vault): Void{ 
 			pre{ 
 				from.balance > 0.0:
 					"Deposit balance must be positive"
@@ -76,7 +90,7 @@ contract OWLD{
 	
 	access(all)
 	resource interface TotalSupply{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalSupply(): UFix64
 	}
 	
@@ -102,7 +116,7 @@ contract OWLD{
 		}
 		
 		//The default withdrawal interface is prohibited
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @Vault{ 
 			pre{ 
 				amount < 0.0:
@@ -112,25 +126,25 @@ contract OWLD{
 			return <-create Vault(balance: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(amount: UFix64): @Vault{ 
 			self.balance = self.balance - amount
 			return <-create Vault(balance: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @Vault){ 
 			self.balance = self.balance + from.balance
 			destroy from
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDestroy(from: @Vault){ 
 			OWLD.totalSupply = OWLD.totalSupply - from.balance
 			destroy from
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalSupply(): UFix64{ 
 			return OWLD.totalSupply
 		}
@@ -143,7 +157,7 @@ contract OWLD{
 	// and store the returned Vault in their storage in order to allow their
 	// account to be able to receive deposits of this token type.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @Vault{ 
 		return <-create Vault(balance: 0.0)
 	}
@@ -158,7 +172,7 @@ contract OWLD{
 		// using their `Receiver` reference.
 		// We say `&AnyResource{Receiver}` to say that the recipient can be any resource
 		// as long as it implements the Receiver interface
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64, recipient: Capability<&{Receiver}>){ 
 			let recipientRef =
 				recipient.borrow() ?? panic("Could not borrow a receiver reference to the vault")

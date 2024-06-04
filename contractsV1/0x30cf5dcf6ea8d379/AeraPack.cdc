@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -160,7 +174,7 @@ contract AeraPack: NonFungibleToken{
 			self.requiresReservation = requiresReservation
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnail():{ MetadataViews.File}{ 
 			if let hash = self.thumbnailHash{ 
 				return MetadataViews.IPFSFile(cid: hash, path: nil)
@@ -168,7 +182,7 @@ contract AeraPack: NonFungibleToken{
 			return MetadataViews.HTTPFile(url: self.thumbnailUrl!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canBeOpened(): Bool{ 
 			return self.openTime < Clock.time()
 		}
@@ -180,7 +194,7 @@ contract AeraPack: NonFungibleToken{
 		self.packMetadata[typeId] = metadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(typeId: UInt64): Metadata?{ 
 		return self.packMetadata[typeId]
 	}
@@ -211,7 +225,7 @@ contract AeraPack: NonFungibleToken{
 			self.hash = hash
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOpenedBy(): Capability<&{NonFungibleToken.Receiver}>{ 
 			if self.openedBy == nil{ 
 				panic("Pack is not opened")
@@ -219,7 +233,7 @@ contract AeraPack: NonFungibleToken{
 			return self.openedBy!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHash(): String{ 
 			return self.hash
 		}
@@ -247,12 +261,12 @@ contract AeraPack: NonFungibleToken{
 			self.openedBy = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTypeID(): UInt64{ 
 			return self.typeId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata{ 
 			return AeraPack.getMetadata(typeId: self.typeId)!
 		}
@@ -291,24 +305,24 @@ contract AeraPack: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPacksLeftForType(_ type: UInt64): UInt64
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAeraPack(id: UInt64): &AeraPack.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyWithSignature(packId: UInt64, signature: String, vault: @{FungibleToken.Vault}, collectionCapability: Capability<&Collection>)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimFreePackWithReservation(packId: UInt64, signature: String, collectionCapability: Capability<&Collection>)
 	}
 	
@@ -341,7 +355,7 @@ contract AeraPack: NonFungibleToken{
 		}
 		
 		//this has to be called on the DLQ collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requeue(packId: UInt64){ 
 			let token <- self.withdraw(withdrawID: packId) as! @NFT
 			let address = token.resetOpenedBy()
@@ -351,7 +365,7 @@ contract AeraPack: NonFungibleToken{
 			emit Requeued(packId: packId, address: cap.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(packId: UInt64, receiverCap: Capability<&{NonFungibleToken.Receiver}>){ 
 			if !receiverCap.check(){ 
 				panic("Receiver cap is not valid")
@@ -371,7 +385,7 @@ contract AeraPack: NonFungibleToken{
 			emit Opened(packId: packId, address: (self.owner!).address, packTypeId: typeId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimFreePackWithReservation(packId: UInt64, signature: String, collectionCapability: Capability<&Collection>){ 
 			pre{ 
 				(self.owner!).address == AeraPack.account.address:
@@ -429,7 +443,7 @@ contract AeraPack: NonFungibleToken{
 			emit Purchased(packId: packId, address: collectionCapability.address, amount: metadata.price, packTypeId: packTypeId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyWithSignature(packId: UInt64, signature: String, vault: @{FungibleToken.Vault}, collectionCapability: Capability<&Collection>){ 
 			pre{ 
 				(self.owner!).address == AeraPack.account.address:
@@ -518,7 +532,7 @@ contract AeraPack: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @AeraPack.NFT
 			let id: UInt64 = token.id
 			let oldNumber = self.nftsPerType[token.getTypeID()] ?? 0
@@ -538,7 +552,7 @@ contract AeraPack: NonFungibleToken{
 		}
 		
 		//return the number of packs left of a type
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPacksLeftForType(_ type: UInt64): UInt64{ 
 			return self.nftsPerType[type] ?? 0
 		}
@@ -562,7 +576,7 @@ contract AeraPack: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the AeraPack.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAeraPack(id: UInt64): &AeraPack.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -682,12 +696,12 @@ contract AeraPack: NonFungibleToken{
 		dlq.deposit(token: <-pack)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPacksCollection(): &AeraPack.Collection{ 
 		return AeraPack.account.capabilities.get<&AeraPack.Collection>(AeraPack.CollectionPublicPath).borrow() ?? panic("Could not borow AeraPack collection")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun canBuy(packTypeId: UInt64, user: Address): Bool{ 
 		let packs = AeraPack.getPacksCollection()
 		let packsLeft = packs.getPacksLeftForType(packTypeId)
@@ -720,7 +734,7 @@ contract AeraPack: NonFungibleToken{
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasFloat(floatEventId: UInt64, user: Address): Bool{ 
 		let float = getAccount(user).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 		if float == nil{ 
@@ -737,7 +751,7 @@ contract AeraPack: NonFungibleToken{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwnerCollection(): Capability<&AeraPack.Collection>{ 
 		return AeraPack.account.capabilities.get<&AeraPack.Collection>(AeraPack.CollectionPublicPath)!
 	}

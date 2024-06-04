@@ -1,4 +1,18 @@
-/// Testnet
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/// Testnet
 /// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
 
 /// Mainnet
@@ -59,7 +73,7 @@ contract TitToken: FungibleToken{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @TitToken.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -88,7 +102,7 @@ contract TitToken: FungibleToken{
 		access(all)
 		var allowedAmount: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @TitToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -109,7 +123,7 @@ contract TitToken: FungibleToken{
 	
 	access(all)
 	resource Burner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @TitToken.Vault
 			let amount = vault.balance
@@ -120,13 +134,13 @@ contract TitToken: FungibleToken{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()

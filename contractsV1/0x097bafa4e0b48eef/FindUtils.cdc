@@ -1,6 +1,20 @@
-access(all)
-contract FindUtils{ 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
 	access(all)
+contract FindUtils{ 
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deDupTypeArray(_ arr: [Type]): [Type]{ 
 		let removeElement = fun (_ arr: [Type], _ element: Type): [Type]{ 
 				var i = arr.firstIndex(of: element)
@@ -23,7 +37,7 @@ contract FindUtils{
 		return arr
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun joinString(_ arr: [String], sep: String): String{ 
 		var message = ""
 		for i, key in arr{ 
@@ -35,7 +49,7 @@ contract FindUtils{
 		return message
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun joinMapToString(_ map:{ String: String}): String{ 
 		var message = ""
 		for i, key in map.keys{ 
@@ -47,7 +61,7 @@ contract FindUtils{
 		return message
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun containsChar(_ string: String, char: Character): Bool{ 
 		if var index = string.utf8.firstIndex(of: char.toString().utf8[0]){ 
 			return true
@@ -55,7 +69,7 @@ contract FindUtils{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun contains(_ string: String, element: String): Bool{ 
 		if element.length == 0{ 
 			return true
@@ -71,7 +85,7 @@ contract FindUtils{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun trimSuffix(_ name: String, suffix: String): String{ 
 		if !self.hasSuffix(name, suffix: suffix){ 
 			return name
@@ -80,7 +94,7 @@ contract FindUtils{
 		return name.slice(from: 0, upTo: pos)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasSuffix(_ string: String, suffix: String): Bool{ 
 		if suffix.length > string.length{ 
 			return false
@@ -88,7 +102,7 @@ contract FindUtils{
 		return string.slice(from: string.length - suffix.length, upTo: string.length) == suffix
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasPrefix(_ string: String, prefix: String): Bool{ 
 		if prefix.length > string.length{ 
 			return false
@@ -96,7 +110,7 @@ contract FindUtils{
 		return string.slice(from: 0, upTo: prefix.length) == prefix
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun splitString(_ string: String, sep: Character): [String]{ 
 		if var index = string.utf8.firstIndex(of: sep.toString().utf8[0]){ 
 			let first = string.slice(from: 0, upTo: index)
@@ -108,7 +122,7 @@ contract FindUtils{
 		return [string]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toUpper(_ string: String): String{ 
 		let map = FindUtils.getLowerCaseToUpperCase()
 		var res = ""
@@ -121,7 +135,7 @@ contract FindUtils{
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun firstUpperLetter(_ string: String): String{ 
 		if string.length < 1{ 
 			return string
@@ -133,7 +147,7 @@ contract FindUtils{
 		return string
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun to_snake_case(_ string: String): String{ 
 		var res = ""
 		var i = 0
@@ -161,7 +175,7 @@ contract FindUtils{
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toCamelCase(_ string: String): String{ 
 		var res = ""
 		var i = 0
@@ -188,7 +202,7 @@ contract FindUtils{
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLowerCaseToUpperCase():{ String: String}{ 
 		return{ 
 			"a": "A",
@@ -220,7 +234,7 @@ contract FindUtils{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUpperCaseToLowerCase():{ String: String}{ 
 		return{ 
 			"A": "a",

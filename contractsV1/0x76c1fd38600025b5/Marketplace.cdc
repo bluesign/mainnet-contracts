@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -164,13 +178,13 @@ contract Marketplace{
 		}
 		
 		// changes the price of the listing
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(newPrice: UFix64){ 
 			self.price = newPrice
 		}
 		
 		// gets the salecuts array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleCuts(): [SaleCut]{ 
 			return self.saleCuts
 		}
@@ -182,23 +196,23 @@ contract Marketplace{
 	// to allow others to access their sale
 	access(all)
 	resource interface ListingsPublic{ 
-		access(all)
-		fun getListings():{ UInt64: ListingDetails}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getListings():{ UInt64: Marketplace.ListingDetails}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemListingDetail(itemID: UInt64): Marketplace.ListingDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(itemID: UInt64): &ItemNFT.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseListing(
 			itemID: UInt64,
 			recipientCap: Capability<&{ItemNFT.ItemCollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanUp()
 	}
 	
@@ -236,7 +250,7 @@ contract Marketplace{
 		//
 		// Parameters: token: The ItemNFT to be put up for sale
 		//			 price: The price of the ItemNFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(itemID: UInt64, price: UFix64){ 
 			pre{ 
 				// Check that owner's FlowToken Capability is valid
@@ -269,7 +283,7 @@ contract Marketplace{
 		// Parameters: itemID: the ID of the token to withdraw from the sale
 		//
 		// Returns: @ItemNFT.NFT: The nft the was withdrawn from the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(itemID: UInt64){ 
 			pre{ 
 				self.listings[itemID] != nil
@@ -282,7 +296,7 @@ contract Marketplace{
 		}
 		
 		// purchase lets a user send FlowToken to purchase an NFT that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseListing(itemID: UInt64, recipientCap: Capability<&{ItemNFT.ItemCollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.listings[itemID] != nil:
@@ -345,7 +359,7 @@ contract Marketplace{
 		}
 		
 		//change the price of a listing with itemID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(itemID: UInt64, newPrice: UFix64){ 
 			(self.listings[itemID]!).changePrice(newPrice: newPrice)
 			emit ItemPriceChanged(itemID: itemID, newPrice: newPrice, seller: self.owner?.address)
@@ -355,7 +369,7 @@ contract Marketplace{
 		// Remove all listings that are not in accounts collection anymore
 		// Anyone can call, but at present it only benefits the account owner to do so.
 		// Kind purchasers can however call it if they like.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanUp(){ 
 			let ref = (self.itemProviderCapability.borrow()!).getIDs()
 			for itemID in self.listings.keys{ 
@@ -370,13 +384,13 @@ contract Marketplace{
 		// Parameters: itemID: The ID of the NFT whose price to get
 		//
 		// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListings():{ UInt64: ListingDetails}{ 
 			return self.listings
 		}
 		
 		// returns a single ItemNFT's listing details
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemListingDetail(itemID: UInt64): Marketplace.ListingDetails{ 
 			return self.listings[itemID]!
 		}
@@ -389,14 +403,14 @@ contract Marketplace{
 		// Returns: &ItemNFT.NFT? Optional reference to a Item for sale 
 		//						so the the caller can read its data
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(itemID: UInt64): &ItemNFT.NFT?{ 
 			let ref = (self.itemProviderCapability.borrow()!).borrowItem(id: itemID)! as &ItemNFT.NFT
 			return ref
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createListings(
 		itemProviderCapability: Capability<&ItemNFT.Collection>,
 		ownerFlowTokenCapability: Capability<&FlowToken.Vault>
@@ -452,13 +466,13 @@ contract Marketplace{
 		}
 		
 		//change the price of an offer with itemID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(newPrice: UFix64){ 
 			self.price = newPrice
 		}
 		
 		// gets the salecuts array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleCuts(): [SaleCut]{ 
 			return self.saleCuts
 		}
@@ -466,22 +480,22 @@ contract Marketplace{
 	
 	access(all)
 	resource interface OffersPublic{ 
-		access(all)
-		fun getOffers():{ UInt64: OfferDetails}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getOffers():{ UInt64: Marketplace.OfferDetails}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemOfferDetail(itemID: UInt64): Marketplace.OfferDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(ownerVault: Capability<&FlowToken.Vault>, item: @ItemNFT.NFT)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(itemID: UInt64): Fix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeExpiredOffers()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOfferExpired(itemID: UInt64): Bool
 	}
 	
@@ -518,7 +532,7 @@ contract Marketplace{
 		//
 		// Parameters: token: The ItemNFT to be put up for sale
 		//			 price: The price of the ItemNFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeOffer(itemAddress: Address, itemID: UInt64, price: UFix64){ 
 			pre{ 
 				// Check the Item capability of seller
@@ -551,7 +565,7 @@ contract Marketplace{
 		// Removes an offer from offer dictionary
 		//
 		// Parameters: itemID: the ID of the token to be removed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(itemID: UInt64){ 
 			pre{ 
 				self.offers[itemID] != nil
@@ -565,7 +579,7 @@ contract Marketplace{
 		// accept lets a user send NFT to user who made an offer for it
 		// FlowToken vault of offerer needs to have a balance higher than offer price
 		// Offer needs to not have expired to be accepted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(ownerVault: Capability<&FlowToken.Vault>, item: @ItemNFT.NFT){ 
 			pre{ 
 				self.offers[item.id] != nil:
@@ -626,14 +640,14 @@ contract Marketplace{
 		}
 		
 		// changes the price of the offer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(itemID: UInt64, newPrice: UFix64){ 
 			(self.offers[itemID]!).changePrice(newPrice: newPrice)
 			emit OfferPriceChanged(itemID: itemID, newPrice: newPrice, buyer: self.owner?.address)
 		}
 		
 		// public function that anyone can call to remove offers that have expired 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeExpiredOffers(){ 
 			for itemID in self.offers.keys{ 
 				if self.isOfferExpired(itemID: itemID){ 
@@ -643,19 +657,19 @@ contract Marketplace{
 		}
 		
 		// getOffers returns all offerdetails
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOffers():{ UInt64: OfferDetails}{ 
 			return self.offers
 		}
 		
 		// returns a single ItemNFT's offerdetails
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemOfferDetail(itemID: UInt64): Marketplace.OfferDetails{ 
 			return self.offers[itemID]!
 		}
 		
 		// get the time remaining of an ItemNFT's offer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(itemID: UInt64): Fix64{ 
 			let offerDuration = Marketplace.offerDuration
 			let endTime = (self.offers[itemID]!).endTime
@@ -665,7 +679,7 @@ contract Marketplace{
 		}
 		
 		// Check if offer of ItemNFT has expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOfferExpired(itemID: UInt64): Bool{ 
 			let timeRemaining = self.timeRemaining(itemID: itemID)
 			return timeRemaining <= Fix64(0.0)
@@ -673,7 +687,7 @@ contract Marketplace{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createOffers(
 		itemVaultCapability: Capability<&{ItemNFT.ItemCollectionPublic}>,
 		flowTokenProviderCapability: Capability<&FlowToken.Vault>
@@ -688,7 +702,7 @@ contract Marketplace{
 	resource Admin{ 
 		
 		// change contract royalty address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setContractRoyaltyCap(contractCap: Capability<&FlowToken.Vault>){ 
 			pre{ 
 				contractCap.borrow() != nil:
@@ -698,7 +712,7 @@ contract Marketplace{
 		}
 		
 		// change the duration of offers before they expire
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOfferDuration(duration: UFix64){ 
 			Marketplace.offerDuration = duration
 			emit OfferDurationChanged(duration: duration)
@@ -706,24 +720,24 @@ contract Marketplace{
 	}
 	
 	// borrow contract capability
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowContractCap(): &FlowToken.Vault?{ 
 		return Marketplace.contractCap.borrow()
 	}
 	
 	// get the amount of times each item is sold/accepted
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemsSaleCount():{ UInt64: UInt32}{ 
 		return Marketplace.itemSaleCount
 	}
 	
 	// get the amount of times an item is sold/accepted
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemSaleCount(itemID: UInt64): UInt32{ 
 		return Marketplace.itemSaleCount[itemID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	init(){ 
 		self.ListingsPublicPath = /public/fabricantPublicMarketplaceListings0001
 		self.ListingsStoragePath = /storage/fabricantStorageMarketplaceListings0001

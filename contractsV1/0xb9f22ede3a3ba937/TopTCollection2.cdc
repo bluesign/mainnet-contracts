@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -92,7 +106,7 @@ contract TopTCollection2: NonFungibleToken{
 		case Singing
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun kindToStoragePath(_ kind: Kind): String{ 
 		switch kind{ 
 			case Kind.Cooking:
@@ -105,7 +119,7 @@ contract TopTCollection2: NonFungibleToken{
 		return ""
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun kindToString(_ kind: Kind): String{ 
 		switch kind{ 
 			case Kind.Cooking:
@@ -191,7 +205,7 @@ contract TopTCollection2: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtData(): TopTCollection2.ArtData{ 
 			return TopTCollection2.ArtData(metadata: self.metadata, id: self.id)
 		}
@@ -235,21 +249,21 @@ contract TopTCollection2: NonFungibleToken{
 	access(all)
 	resource interface TopTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun depositBadge(token: @TopTCollection2.BADGE)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositBadge(token: @TopTCollection2.BADGE): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowBADGE(): &BADGE?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowToptItem(id: UInt64): &TopTCollection2.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -264,18 +278,18 @@ contract TopTCollection2: NonFungibleToken{
 	resource interface BadgeReceiver{ 
 		// deposit takes an NFT as an argument and adds it to the Collection
 		//
-		access(all)
-		fun depositBadge(token: @BADGE)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositBadge(token: @TopTCollection2.BADGE): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExists(): Bool
 	}
 	
 	access(all)
 	resource interface BadgeProvider{ 
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(all)
-		fun withdrawBadge(): @BADGE
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdrawBadge(): @TopTCollection2.BADGE
 	}
 	
 	// Collection
@@ -302,7 +316,7 @@ contract TopTCollection2: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBadge(): @BADGE{ 
 			pre{ 
 				self.badge != nil:
@@ -323,7 +337,7 @@ contract TopTCollection2: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @TopTCollection2.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -336,7 +350,7 @@ contract TopTCollection2: NonFungibleToken{
 		// Takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBadge(token: @BADGE){ 
 			pre{ 
 				self.badge == nil:
@@ -367,7 +381,7 @@ contract TopTCollection2: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExists(): Bool{ 
 			return self.badge != nil
 		}
@@ -377,7 +391,7 @@ contract TopTCollection2: NonFungibleToken{
 		// exposing all of its fields (including the typeID & rarityID).
 		// This is safe as there are no functions that can be called on the KittyItem.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowToptItem(id: UInt64): &TopTCollection2.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -387,7 +401,7 @@ contract TopTCollection2: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowBADGE(): &TopTCollection2.BADGE?{ 
 			if self.badge != nil{ 
 				let ref = (&self.badge as &TopTCollection2.BADGE?)!
@@ -446,7 +460,7 @@ contract TopTCollection2: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBADGE(recipient: &{TopTCollection2.TopTCollectionPublic}, kind: Kind, marketRoyalty: MetadataViews.Royalty){ 
 			pre{ 
 				recipient.borrowBADGE() == nil:
@@ -466,7 +480,7 @@ contract TopTCollection2: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &TopTCollection2.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&TopTCollection2.Collection>(TopTCollection2.CollectionPublicPath).borrow<&TopTCollection2.Collection>() ?? panic("Couldn't get collection")
 		// We trust KittyItems.Collection.borowKittyItem to get the correct itemID
@@ -474,7 +488,7 @@ contract TopTCollection2: NonFungibleToken{
 		return collection.borrowToptItem(id: itemID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(name: String, description: String, caption: String, storagePath: String, artistAddress: Address, royalties: [MetadataViews.Royalty], thumbnail: String): @TopTCollection2.NFT{ 
 		let marketWalletCap = getAccount(0xf8d6e0586b0a20c7).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 		var newNFT <- create NFT(initID: TopTCollection2.totalSupply, metadata: Metadata(artistAddress: artistAddress, storagePath: storagePath, caption: caption), name: name, description: description, thumbnail: thumbnail, royalties: royalties.concat([MetadataViews.Royalty(receiver: marketWalletCap!, cut: 0.1, description: "Market")]))
@@ -483,7 +497,7 @@ contract TopTCollection2: NonFungibleToken{
 		return <-newNFT
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBadge(address: Address): &TopTCollection2.BADGE?{ 
 		if let artCollection = getAccount(address).capabilities.get<&{TopTCollection2.TopTCollectionPublic}>(self.CollectionPublicPath).borrow<&{TopTCollection2.TopTCollectionPublic}>(){ 
 			return artCollection.borrowBADGE()
@@ -491,7 +505,7 @@ contract TopTCollection2: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArt(address: Address): [ArtData]{ 
 		var artData: [ArtData] = []
 		if let artCollection = getAccount(address).capabilities.get<&{TopTCollection2.TopTCollectionPublic}>(self.CollectionPublicPath).borrow<&{TopTCollection2.TopTCollectionPublic}>(){ 

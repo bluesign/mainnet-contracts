@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -148,17 +162,17 @@ contract SpaceTradeAssetCatalog{
 	
 	access(all)
 	resource Manager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertNFT(_ nftCollection: NFTCollectionMetadata){ 
 			SpaceTradeAssetCatalog.nfts.insert(key: nftCollection.identifier, nftCollection)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertFT(_ ftVault: FTVaultMetadata){ 
 			SpaceTradeAssetCatalog.fts.insert(key: ftVault.identifier, ftVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleSupportedNFT(_ identifier: String, _ supported: Bool){ 
 			pre{ 
 				SpaceTradeAssetCatalog.nfts[identifier] != nil:
@@ -171,7 +185,7 @@ contract SpaceTradeAssetCatalog{
 			ref.setSupported(supported)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleSupportedFT(_ tokenKey: String, _ supported: Bool){ 
 			pre{ 
 				SpaceTradeAssetCatalog.fts[tokenKey] != nil:
@@ -182,7 +196,7 @@ contract SpaceTradeAssetCatalog{
 			ref.setSupported(supported)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFT(_ tokenKey: String){ 
 			pre{ 
 				SpaceTradeAssetCatalog.fts[tokenKey] != nil:
@@ -192,7 +206,7 @@ contract SpaceTradeAssetCatalog{
 			?? panic("Unable to remove fungible token")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNFT(_ collectionName: String){ 
 			pre{ 
 				SpaceTradeAssetCatalog.nfts[collectionName] != nil:
@@ -203,7 +217,7 @@ contract SpaceTradeAssetCatalog{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSupportedNFT(_ identifier: String): Bool{ 
 		if let collection = self.nfts[identifier]{ 
 			return collection.supported
@@ -213,7 +227,7 @@ contract SpaceTradeAssetCatalog{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSupportedFT(_ tokenKey: String): Bool{ 
 		if let token = self.fts[tokenKey]{ 
 			return token.supported
@@ -222,12 +236,12 @@ contract SpaceTradeAssetCatalog{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberOfFTs(): Int{ 
 		return self.fts.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTCollectionMetadatas(_ offset: Int, _ limit: Int):{ String: NFTCollectionMetadata}{ 
 		let nfts:{ String: NFTCollectionMetadata} ={} 
 		let officialNFTs = NFTCatalog.getCatalog().keys
@@ -252,22 +266,22 @@ contract SpaceTradeAssetCatalog{
 		return nfts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTMetadatas():{ String: FTVaultMetadata}{ 
 		return self.fts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTCollectionMetadata(_ identifier: String): NFTCollectionMetadata?{ 
 		return self.nfts[identifier] ?? self.getNFTCollectionMetadataFromOfficialCatalog(identifier)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTMetadata(_ tokenKey: String): FTVaultMetadata?{ 
 		return self.fts[tokenKey]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTCollectionMetadataFromOfficialCatalog(_ identifier: String): NFTCollectionMetadata?{ 
 		if let collectionFromOfficialCatalog =
 			NFTCatalog.getCatalogEntry(collectionIdentifier: identifier){ 

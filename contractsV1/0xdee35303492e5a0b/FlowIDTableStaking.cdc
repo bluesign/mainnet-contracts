@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -415,7 +429,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Add new tokens to the system to stake during the next epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeNewTokens(_ tokens: @{FungibleToken.Vault}){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.id)
 			emit TokensCommitted(nodeID: nodeRecord.id, amount: tokens.balance)
@@ -426,7 +440,7 @@ contract FlowIDTableStaking{
 		
 		/// Stake tokens that are in the tokensUnstaked bucket
 		/// but haven't been officially staked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeUnstakedTokens(amount: UFix64){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.id)
 			
@@ -439,7 +453,7 @@ contract FlowIDTableStaking{
 		
 		/// Stake tokens that are in the tokensRewarded bucket
 		/// but haven't been officially staked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeRewardedTokens(amount: UFix64){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.id)
 			
@@ -452,7 +466,7 @@ contract FlowIDTableStaking{
 		
 		/// Request amount tokens to be removed from staking
 		/// at the end of the next epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.id)
 			assert(
@@ -490,7 +504,7 @@ contract FlowIDTableStaking{
 		
 		/// Requests to unstake all of the node operators staked and committed tokens,
 		/// as well as all the staked and committed tokens of all of their delegators
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.id)
 			
@@ -517,7 +531,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Withdraw tokens from the unstaked bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.id)
 			emit UnstakedTokensWithdrawn(nodeID: nodeRecord.id, amount: amount)
@@ -525,7 +539,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Withdraw tokens from the rewarded bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.id)
 			emit RewardTokensWithdrawn(nodeID: nodeRecord.id, amount: amount)
@@ -552,7 +566,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Delegate new tokens to the node operator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateNewTokens(from: @{FungibleToken.Vault}){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.nodeID)
 			let delRecord = nodeRecord.borrowDelegatorRecord(self.id)
@@ -560,7 +574,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Delegate tokens from the unstaked bucket to the node operator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateUnstakedTokens(amount: UFix64){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.nodeID)
 			let delRecord = nodeRecord.borrowDelegatorRecord(self.id)
@@ -570,7 +584,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Delegate tokens from the rewards bucket to the node operator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateRewardedTokens(amount: UFix64){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.nodeID)
 			let delRecord = nodeRecord.borrowDelegatorRecord(self.id)
@@ -580,7 +594,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Request to unstake delegated tokens during the next epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64){ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.nodeID)
 			let delRecord = nodeRecord.borrowDelegatorRecord(self.id)
@@ -609,7 +623,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Withdraw tokens from the unstaked bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.nodeID)
 			let delRecord = nodeRecord.borrowDelegatorRecord(self.id)
@@ -624,7 +638,7 @@ contract FlowIDTableStaking{
 		}
 		
 		/// Withdraw tokens from the rewarded bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			let nodeRecord = FlowIDTableStaking.borrowNodeRecord(self.nodeID)
 			let delRecord = nodeRecord.borrowDelegatorRecord(self.id)
@@ -646,7 +660,7 @@ contract FlowIDTableStaking{
 	resource Admin{ 
 		
 		/// Remove a node from the record
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNode(_ nodeID: String): @NodeRecord{ 
 			
 			// Remove the node from the table
@@ -663,7 +677,7 @@ contract FlowIDTableStaking{
 		/// after the staking auction phase
 		///
 		/// Also sets the initial weight of all the accepted nodes
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endStakingAuction(approvedNodeIDs:{ String: Bool}){ 
 			let allNodeIDs = FlowIDTableStaking.getNodeIDs()
 			
@@ -695,7 +709,7 @@ contract FlowIDTableStaking{
 		
 		/// Called at the end of the epoch to pay rewards to node operators
 		/// based on the tokens that they have staked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payRewards(){ 
 			let allNodeIDs = FlowIDTableStaking.getNodeIDs()
 			let flowTokenMinter =
@@ -761,7 +775,7 @@ contract FlowIDTableStaking{
 		/// Tokens that have been committed are moved to the staked bucket
 		/// Tokens that were unstaking during the last epoch are fully unstaked
 		/// Unstaking requests are filled by moving those tokens from staked to unstaking
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun moveTokens(){ 
 			let allNodeIDs = FlowIDTableStaking.getNodeIDs()
 			for nodeID in allNodeIDs{ 
@@ -812,14 +826,14 @@ contract FlowIDTableStaking{
 		}
 		
 		// Changes the total weekly payout to a new value
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEpochTokenPayout(_ newPayout: UFix64){ 
 			FlowIDTableStaking.epochTokenPayout = newPayout
 		}
 		
 		/// Admin calls this to change the percentage
 		/// of delegator rewards every node operator takes
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeCutPercentage(_ newCutPercentage: UFix64){ 
 			pre{ 
 				newCutPercentage > 0.0 && newCutPercentage < 1.0:
@@ -835,7 +849,7 @@ contract FlowIDTableStaking{
 	/// Any node can call this function to register a new Node
 	/// It returns the resource for nodes that they can store in
 	/// their account storage
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addNodeRecord(
 		id: String,
 		role: UInt8,
@@ -866,7 +880,7 @@ contract FlowIDTableStaking{
 	/// and returns a delegator object to the caller
 	/// The node operator would make a public capability for potential delegators
 	/// to access this function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun registerNewDelegator(nodeID: String): @NodeDelegator{ 
 		let nodeRecord = FlowIDTableStaking.borrowNodeRecord(nodeID)
 		assert(
@@ -898,7 +912,7 @@ contract FlowIDTableStaking{
 	/// Gets an array of the node IDs that are proposed for the next epoch
 	/// Nodes that are proposed are nodes that have enough tokens staked + committed
 	/// for the next epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProposedNodeIDs(): [String]{ 
 		var proposedNodes: [String] = []
 		for nodeID in FlowIDTableStaking.getNodeIDs(){ 
@@ -914,7 +928,7 @@ contract FlowIDTableStaking{
 	/// Only nodes that are participating in the current epoch
 	/// can be staked, so this is an array of all the active
 	/// node operators
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakedNodeIDs(): [String]{ 
 		var stakedNodes: [String] = []
 		for nodeID in FlowIDTableStaking.getNodeIDs(){ 
@@ -927,7 +941,7 @@ contract FlowIDTableStaking{
 	}
 	
 	/// Gets an array of all the node IDs that have ever applied
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNodeIDs(): [String]{ 
 		return FlowIDTableStaking.nodes.keys
 	}
@@ -935,7 +949,7 @@ contract FlowIDTableStaking{
 	/// Gets the total amount of tokens that have been staked and
 	/// committed for a node. The sum from the node operator and all
 	/// its delegators
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalCommittedBalance(_ nodeID: String): UFix64{ 
 		let nodeRecord = self.borrowNodeRecord(nodeID)
 		if nodeRecord.tokensCommitted.balance + nodeRecord.tokensStaked.balance
@@ -953,22 +967,22 @@ contract FlowIDTableStaking{
 	}
 	
 	/// Functions to return contract fields
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMinimumStakeRequirements():{ UInt8: UFix64}{ 
 		return self.minimumStakeRequired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalTokensStakedByNodeType():{ UInt8: UFix64}{ 
 		return self.totalTokensStakedByNodeType
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEpochTokenPayout(): UFix64{ 
 		return self.epochTokenPayout
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRewardRatios():{ UInt8: UFix64}{ 
 		return self.rewardRatios
 	}

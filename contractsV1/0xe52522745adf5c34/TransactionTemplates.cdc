@@ -1,4 +1,18 @@
-// TransactionTemplates is an auto-generated contract created from https://github.com/dapperlabs/nft-catalog
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// TransactionTemplates is an auto-generated contract created from https://github.com/dapperlabs/nft-catalog
 //
 // Why is this string stuff on-chain?!?
 // This is on-chain and consummable from a Cadence script in order to allow consumers
@@ -28,7 +42,7 @@ contract TransactionTemplates{
 	  NFTInitTemplate, StorefrontListItemTemplate, StorefrontBuyItemTemplate, DapperBuyNFTMarketplaceTemplate, StorefrontRemoveItemTemplate, DapperCreateListingTemplate, DapperBuyNFTDirectTemplate, DapperGetPrimaryListingMetadataTemplate, DapperGetSecondaryListingMetadataTemplate
 	*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun NFTInitTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -103,7 +117,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun StorefrontListItemTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -364,7 +378,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun StorefrontBuyItemTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -548,7 +562,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun DapperBuyNFTMarketplaceTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -751,7 +765,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun StorefrontRemoveItemTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -813,7 +827,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun DapperCreateListingTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -1124,7 +1138,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun DapperBuyNFTDirectTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -1339,7 +1353,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun DapperGetPrimaryListingMetadataTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,
@@ -1459,7 +1473,7 @@ contract TransactionTemplates{
 		return StringUtils.join(combinedLines, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun DapperGetSecondaryListingMetadataTemplate(
 		nftSchema: TransactionGenerationUtils.NFTSchema?,
 		ftSchema: TransactionGenerationUtils.FTSchemaV2?,

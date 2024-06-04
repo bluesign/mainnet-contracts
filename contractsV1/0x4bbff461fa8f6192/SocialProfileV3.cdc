@@ -1,4 +1,18 @@
-// TODOs
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// TODOs
 // * check events have enough information to be useful
 // * add FLOW balance checking
 // * Refactor Post to a simpler set of attributes, and put Newsfeed fields in a metadata field
@@ -343,37 +357,37 @@ contract SocialProfileV3{
 	
 	access(all)
 	resource interface SocialProfilePublic{ 
-		access(all)
-		fun borrowPost(_ id: UInt64): &Post?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowPost(_ id: UInt64): &SocialProfileV3.Post?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPostIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLikedPosts(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvatar(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCoverMedia(): FantastecSwapDataProperties.Media?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUsername(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowing():{ Address: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowersCount(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: [{FantastecSwapDataProperties.MetadataElement}]} // pub let metadata: {String: [AnyStruct{FantastecSwapDataProperties.MetadataElement}]}
 		
 		
@@ -388,16 +402,19 @@ contract SocialProfileV3{
 	
 	access(all)
 	resource interface SocialProfilePrivate{ 
-		access(all)
-		fun addMetadata(_ type: String, _ metadata:{ FantastecSwapDataProperties.MetadataElement})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addMetadata(
+			_ type: String,
+			_ metadata:{ FantastecSwapDataProperties.MetadataElement}
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createComment(theirAddress: Address, postId: UInt64, content: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPost(content: String, image: FantastecSwapDataProperties.Media?)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewsFeedPost(
 			content: String,
 			title: String,
@@ -407,46 +424,46 @@ contract SocialProfileV3{
 			buttonText: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteComment(theirAddress: Address, postId: UInt64, commentId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun follow(theirAddress: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun likeComment(theirAddress: Address, postId: UInt64, commentId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun likePost(theirAddress: Address, id: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMetadata(_ type: String, _ id: UInt64?)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePost(_ id: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAvatar(avatar: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBio(bio: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUsername(username: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCoverMedia(media: FantastecSwapDataProperties.Media?)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfollow(theirAddress: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlikeComment(theirAddress: Address, postId: UInt64, commentId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlikePost(theirAddress: Address, id: UInt64)
 	}
 	
@@ -486,32 +503,32 @@ contract SocialProfileV3{
 		var metadata:{ String: [{FantastecSwapDataProperties.MetadataElement}]}
 		
 		/* Profile Getters */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvatar(): String{ 
 			return self.avatar
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio(): String{ 
 			return self.bio
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: [{FantastecSwapDataProperties.MetadataElement}]}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCoverMedia(): FantastecSwapDataProperties.Media?{ 
 			return self.coverMedia
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUsername(): String{ 
 			return self.username
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
@@ -522,48 +539,48 @@ contract SocialProfileV3{
 			emit ProfileUpdated(owner: (self.owner!).address, field: field)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAvatar(avatar: String){ 
 			self.avatar = avatar
 			self.emitUpdateEvent("avatar")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBio(bio: String){ 
 			self.bio = bio
 			self.emitUpdateEvent("bio")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUsername(username: String){ 
 			self.username = username
 			self.emitUpdateEvent("username")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCoverMedia(media: FantastecSwapDataProperties.Media?){ 
 			self.coverMedia = media
 			self.emitUpdateEvent("coverMedia")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String){ 
 			self.name = name
 			self.emitUpdateEvent("name")
 		}
 		
 		/* Follow */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowing():{ Address: Bool}{ 
 			return self.following
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowersCount(): Int{ 
 			return self.followers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun follow(theirAddress: Address){ 
 			if self.following[theirAddress] == true{ 
 				panic("You already follow this profile")
@@ -577,7 +594,7 @@ contract SocialProfileV3{
 			emit ProfileFollowed(owner: (self.owner!).address, follower: theirAddress)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfollow(theirAddress: Address){ 
 			if self.following[theirAddress] == nil{ 
 				panic("You can not unfollow as you do not follow profile")
@@ -589,14 +606,14 @@ contract SocialProfileV3{
 		}
 		
 		/* Posts */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPost(content: String, image: FantastecSwapDataProperties.Media?){ 
 			let _post <- create Post(content: content, author: (self.owner!).address, image: image)
 			emit PostCreated(owner: (self.owner!).address, postId: _post.id)
 			self.posts[_post.id] <-! _post
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewsFeedPost(content: String, title: String, publishedDate: UFix64, image: FantastecSwapDataProperties.Media?, buttonUrl: String, buttonText: String){ 
 			let _post <- create Post(content: content, author: (self.owner!).address, image: image)
 			let metadataItemId: UInt64 = 1
@@ -607,19 +624,19 @@ contract SocialProfileV3{
 			destroy oldPost
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPost(_ id: UInt64): &Post?{ 
 			return &self.posts[id] as &Post?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePost(_ id: UInt64){ 
 			let _post <- self.posts.remove(key: id) ?? panic("Post with that id does not exist")
 			emit PostDestroyed(owner: (self.owner!).address, postId: _post.id)
 			destroy _post
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun likePost(theirAddress: Address, id: UInt64){ 
 			if self.likedPosts[id] == true{ 
 				panic("You already liked this post")
@@ -631,7 +648,7 @@ contract SocialProfileV3{
 			emit PostLiked(owner: theirAddress, postId: id, liker: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlikePost(theirAddress: Address, id: UInt64){ 
 			if self.likedPosts[id] == false || self.likedPosts[id] == nil{ 
 				panic("Post cannot be unliked as it was not previously liked")
@@ -643,18 +660,18 @@ contract SocialProfileV3{
 			emit PostUnliked(owner: theirAddress, postId: id, liker: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLikedPosts(): [UInt64]{ 
 			return self.likedPosts.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPostIds(): [UInt64]{ 
 			return self.posts.keys
 		}
 		
 		/* Comments */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createComment(theirAddress: Address, postId: UInt64, content: String){ 
 			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost = socialProfileRef.borrowPost(postId) ?? panic("Post does not exist with that id")
@@ -665,7 +682,7 @@ contract SocialProfileV3{
 			emit CommentCreated(owner: theirAddress, postId: theirPost.id, commenter: (self.owner!).address, commentId: commentId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteComment(theirAddress: Address, postId: UInt64, commentId: UInt64){ 
 			let socialProfileRef = getAccount(theirAddress).capabilities.get<&SocialProfileV3.SocialProfile>(SocialProfileV3.SocialProfilePublicPath).borrow()!
 			let theirPost = socialProfileRef.borrowPost(postId) ?? panic("Post does not exist with that id")
@@ -683,7 +700,7 @@ contract SocialProfileV3{
 			emit CommentDestroyed(owner: theirAddress, postId: theirPost.id, commenter: (self.owner!).address, commentId: commentId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun likeComment(theirAddress: Address, postId: UInt64, commentId: UInt64){ 
 			if self.likedComments[commentId] == true{ 
 				panic("You already liked this comment")
@@ -696,7 +713,7 @@ contract SocialProfileV3{
 			emit CommentLiked(owner: theirAddress, postId: postId, commentId: commentId, liker: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlikeComment(theirAddress: Address, postId: UInt64, commentId: UInt64){ 
 			if self.likedComments[commentId] == nil{ 
 				panic("You havent liked this comment so you can not unlike")
@@ -724,7 +741,7 @@ contract SocialProfileV3{
 		}
 		
 		/* Metadata */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMetadata(_ type: String, _ metadata:{ FantastecSwapDataProperties.MetadataElement}){ 
 			if self.metadata[type] == nil{ 
 				self.metadata[type] = []
@@ -733,7 +750,7 @@ contract SocialProfileV3{
 			self.emitUpdateEvent("metadata add - ".concat(type))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMetadata(_ type: String, _ id: UInt64?){ 
 			if self.metadata[type] == nil{ 
 				self.metadata[type] = []
@@ -742,12 +759,12 @@ contract SocialProfileV3{
 			self.emitUpdateEvent("metadata remove - ".concat(type))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emitInstalledEvent(){ 
 			emit Installed(owner: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emitDestroyedEvent(_ address: Address){ 
 			emit Destroyed(owner: address)
 		}
@@ -767,7 +784,7 @@ contract SocialProfileV3{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSocialProfile(): @SocialProfile{ 
 		return <-create SocialProfile()
 	}

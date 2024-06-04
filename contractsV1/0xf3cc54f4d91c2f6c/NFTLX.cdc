@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 /** NFTLX
 
@@ -49,13 +63,13 @@ contract NFTLX{
 	var setsCapability: Capability<&{UInt32:{ ISet}}>
 	
 	// ---------------  Sets Getters  --------------- \\
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetsCount(): Int{ 
 		let sets = self.setsCapability.borrow() ?? panic("Unable to load sets from capability")
 		return sets.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSet(withID id: UInt32): &{ISet}?{ 
 		pre{ 
 			self.setsCapability.check():
@@ -65,7 +79,7 @@ contract NFTLX{
 		return sets[id] as &{NFTLX.ISet}?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSets(): [&{ISet}]{ 
 		pre{ 
 			self.setsCapability.check():
@@ -109,16 +123,16 @@ contract NFTLX{
 		access(all)
 		URI: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt32]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClasses(): [&{IClass}]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClass(atIndex index: Int): &{IClass}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalSupply(): UInt32
 	}
 	
@@ -148,10 +162,10 @@ contract NFTLX{
 		access(all)
 		let maxSupply: UInt32?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt32]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}
 	}
 	
@@ -181,7 +195,7 @@ contract NFTLX{
 		let instanceID: UInt32 // NOTE: To distinguish NFTs within same class. Assigned in incremental order. 
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}
 	}
 	
@@ -197,7 +211,7 @@ contract NFTLX{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewSet(set: @{ISet}){ 
 			var sets <-
 				NFTLX.account.storage.load<@{UInt32:{ ISet}}>(from: NFTLX.SetsStoragePath)
@@ -209,7 +223,7 @@ contract NFTLX{
 			NFTLX.nextSetID = NFTLX.nextSetID + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSet(withID id: UInt32){ 
 			var sets <-
 				NFTLX.account.storage.load<@{UInt32:{ ISet}}>(from: NFTLX.SetsStoragePath)
@@ -220,7 +234,7 @@ contract NFTLX{
 			emit SetRemoved(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

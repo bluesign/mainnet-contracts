@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 *
 *   An NFT contract for redeeming/minting unlimited tokens
 *
@@ -140,15 +154,15 @@ contract BBxBarbieToken: NonFungibleToken{
 	access(all)
 	resource interface TokenCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowToken(id: UInt64): &BBxBarbieToken.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -174,7 +188,7 @@ contract BBxBarbieToken: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let BBxBarbieToken <- token as! @BBxBarbieToken.NFT
 			let BBxBarbieTokenUUID: UInt64 = BBxBarbieToken.uuid
 			let BBxBarbieTokenSeriesId: UInt64 = BBxBarbieToken.packSeriesID
@@ -195,7 +209,7 @@ contract BBxBarbieToken: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowToken(id: UInt64): &BBxBarbieToken.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -253,17 +267,17 @@ contract BBxBarbieToken: NonFungibleToken{
 		*   Public Functions
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return self.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getName(): String{ 
 		return self.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun transfer(uuid: UInt64, id: UInt64, packSeriesId: UInt64, tokenEditionId: UInt64, toAddress: Address){ 
 		let BBxBarbieTokenV2UUID: UInt64 = uuid
 		let BBxBarbieTokenV2SeriesId: UInt64 = packSeriesId

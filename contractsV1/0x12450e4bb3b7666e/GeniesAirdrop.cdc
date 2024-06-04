@@ -1,4 +1,18 @@
-import Genies from "./Genies.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Genies from "./Genies.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -43,14 +57,14 @@ contract GeniesAirdrop{
 		}
 		
 		// This gives Admin the capability to claim the Airdrop on behalf of you.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addClaimCapability(cap: Capability<&{GeniesNFTAirdropVaultClaim}>){ 
 			self.claimCapabilities[cap.address] = cap
 			emit CapabilityAdded(address: cap.address)
 		}
 		
 		// get the GeniesNFTAirdropVaultClaim capability for the resource owner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimCapability(address: Address): Capability<&{GeniesNFTAirdropVaultClaim}>?{ 
 			pre{ 
 				self.claimCapabilities[address] != nil:
@@ -59,7 +73,7 @@ contract GeniesAirdrop{
 			return self.claimCapabilities[address]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEmptyGeniesNFTAirdropVault(): @GeniesAirdrop.GeniesNFTAirdropVault{ 
 			return <-create GeniesNFTAirdropVault()
 		}
@@ -67,14 +81,14 @@ contract GeniesAirdrop{
 	
 	access(all)
 	resource interface GeniesNFTAirdropVaultPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
 	access(all)
 	resource interface GeniesNFTAirdropVaultClaim{ 
-		access(all)
-		fun claim(nftId: UInt64, address: Address)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun claim(nftId: UInt64, address: Address): Void
 	}
 	
 	access(all)
@@ -92,7 +106,7 @@ contract GeniesAirdrop{
 		
 		// nft owner can create airdrop and store the nft in their vault with optional receiverAddress.
 		// If the receiverAddress is provided, only that address will be able to claim this nft. Otherwise, anyone can claim.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAirdrop(nftProviderCap: Capability<&Genies.Collection>, nftId: UInt64, receiverAddress: Address?){ 
 			// Make sure the dictionary doesn't contain this nft id, so we don't accidentally destroy resource.
 			// This should not happen in theory given nft id is unique.
@@ -111,7 +125,7 @@ contract GeniesAirdrop{
 		}
 		
 		// claim an airdrop. nftId has to be valid.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(nftId: UInt64, address: Address){ 
 			pre{ 
 				self.giftNFTs.containsKey(nftId):
@@ -135,7 +149,7 @@ contract GeniesAirdrop{
 		}
 		
 		// delisting the Airdrop back to the owner, nftId must be valid.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delistingAirdrop(nftId: UInt64){ 
 			pre{ 
 				self.giftNFTs.containsKey(nftId):
@@ -149,7 +163,7 @@ contract GeniesAirdrop{
 		}
 		
 		// remove all Airdrops and store them back to the Genies.Collection resource.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delistingAllAirdrops(claimerCollection: &Genies.Collection){ 
 			let keys = self.getIDs()
 			for key in keys{ 
@@ -157,7 +171,7 @@ contract GeniesAirdrop{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.giftNFTs.keys
 		}

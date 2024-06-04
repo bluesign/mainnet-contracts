@@ -1,26 +1,40 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract FlowWords{ 
 	// HIGH SCORES //
 	// Stored on game account storage //
 	access(all)
 	resource interface HighScoreInterface{ 
-		access(all)
-		fun GetHighScores(): [Scores]
+		access(TMP_ENTITLEMENT_OWNER)
+		fun GetHighScores(): [FlowWords.Scores]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerScores(accId: Address):{ UInt32: UInt} // gameid: score
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerCumulativeScore(accId: Address): UInt
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerWinningStreak(accId: Address): UInt
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerMaxWinningStreak(accId: Address): UInt
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerGuessDistribution(accId: Address): [UInt; 6]
 	}
 	
@@ -107,41 +121,41 @@ contract FlowWords{
 		}
 		
 		// returns a list of top 10 scores
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetHighScores(): [Scores]{ 
 			return self.TopScores
 		}
 		
 		// returns a dictionary of gameid:score for every game the account has played
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerScores(accId: Address):{ UInt32: UInt}{ 
 			let output = self.PlayerAccounts[accId]?.Games ??{} 
 			return output
 		}
 		
 		// returns the cumulative score of all games the account has played
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerCumulativeScore(accId: Address): UInt{ 
 			let output = self.PlayerAccounts[accId]?.CumulativeScore ?? 0
 			return output
 		}
 		
 		// returns the winning streak count for the current account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerWinningStreak(accId: Address): UInt{ 
 			let output = self.PlayerAccounts[accId]?.CurrentStreak ?? 0
 			return output
 		}
 		
 		// returns the highest ever winning streak count for the current account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerMaxWinningStreak(accId: Address): UInt{ 
 			let output = self.PlayerAccounts[accId]?.MaxWinningStreak ?? 0
 			return output
 		}
 		
 		// returns an array with the winning guess count distribution for all played games on this account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerGuessDistribution(accId: Address): [UInt; 6]{ 
 			let output = self.PlayerAccounts[accId]?.GuessDistribution ?? [0, 0, 0, 0, 0, 0]
 			return output
@@ -196,10 +210,10 @@ contract FlowWords{
 	// private interface, only accessible to owner and game contract
 	access(all)
 	resource interface UserGameStateInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetGameState(gameId: UInt32): [UserGuess]
 		
 		access(contract)
@@ -208,7 +222,7 @@ contract FlowWords{
 	
 	access(all)
 	resource interface UserGameStatePublicInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetName(): String
 	}
 	
@@ -237,13 +251,13 @@ contract FlowWords{
 		}
 		
 		// returns Name associated with this account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetName(): String{ 
 			return self.Name
 		}
 		
 		// sets name for this account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun SetName(username: String){ 
 			self.Name = username
 		}
@@ -258,7 +272,7 @@ contract FlowWords{
 		}
 		
 		// get gamestate for gameId, if current, else returns [] (we dont store history of games)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetGameState(gameId: UInt32): [UserGuess]{ 
 			if gameId == self.CurrentGameId{ 
 				return self.CurrentState
@@ -271,16 +285,16 @@ contract FlowWords{
 	// GAME //
 	access(all)
 	resource interface GameInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetCurrentGameId(): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun SubmitGuess(
 			guess: String,
 			userStateCapability: Capability<&{FlowWords.UserGameStateInterface}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetUserGameState(
 			userStateCapability: Capability<&{FlowWords.UserGameStateInterface}>
 		): [
@@ -325,7 +339,7 @@ contract FlowWords{
 		}
 		
 		// returns current game id, starts a new game if 'current' id has expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetCurrentGameId(): UInt32{ 
 			// check if newgame needed
 			var currentTimeStamp: UFix64 = getCurrentBlock().timestamp
@@ -341,7 +355,7 @@ contract FlowWords{
 		}
 		
 		// returns current gamestate and gameStartTime for userState/account, via emitted events (also returns via return value for script querying)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetUserGameState(userStateCapability: Capability<&{FlowWords.UserGameStateInterface}>): [UserGuess]{ 
 			let userState = userStateCapability.borrow() ?? panic("Cannot get user game state")
 			let gameState = userState.GetGameState(gameId: self.GetCurrentGameId())
@@ -352,7 +366,7 @@ contract FlowWords{
 		
 		// submits a guess for the provided userstate/account - calls SubmitHighScore if player wins.
 		// emits result via event.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun SubmitGuess(guess: String, userStateCapability: Capability<&{FlowWords.UserGameStateInterface}>){ 
 			let userState = userStateCapability.borrow() ?? panic("Cannot borrow user State")
 			var accId: Address = userState.owner?.address ?? panic("User state has no owner")
@@ -439,13 +453,13 @@ contract FlowWords{
 	
 	access(all)
 	resource interface WordInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun CheckWord(_ word: String): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetWordAtIndex(_ index: Int): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetCount(): Int
 	}
 	
@@ -465,7 +479,7 @@ contract FlowWords{
 		}
 		
 		// checks if word is valid word from one of our lists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun CheckWord(_ word: String): String{ 
 			if self.words.contains(word){ 
 				return "OK"
@@ -476,12 +490,12 @@ contract FlowWords{
 			return "Not Found"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetWordAtIndex(_ index: Int): String{ 
 			return self.words[index]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetCount(): Int{ 
 			return self.words.length
 		}
@@ -521,7 +535,7 @@ contract FlowWords{
 	}
 	
 	// function to create UserGameState resource - called by users in login transaction if required
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun CreateGameState(name: String): @UserGameState{ 
 		return <-create UserGameState(name: name)
 	}

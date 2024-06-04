@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
  This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -62,7 +76,7 @@ contract CryptoPiggo: NonFungibleToken{
 		access(self)
 		let metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -114,10 +128,10 @@ contract CryptoPiggo: NonFungibleToken{
 	access(all)
 	resource interface CryptoPiggoCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
@@ -125,7 +139,7 @@ contract CryptoPiggo: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &CryptoPiggo.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -158,7 +172,7 @@ contract CryptoPiggo: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CryptoPiggo.NFT
 			let id: UInt64 = token.id
 			
@@ -173,7 +187,7 @@ contract CryptoPiggo: NonFungibleToken{
 		
 		// transfer takes an NFT ID and a reference to a recipient's collection
 		// and transfers the NFT corresponding to that ID to the recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -186,7 +200,7 @@ contract CryptoPiggo: NonFungibleToken{
 		}
 		
 		// burn destroys an NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -214,7 +228,7 @@ contract CryptoPiggo: NonFungibleToken{
 		// borrowItem gets a reference to an NFT in the collection as a CryptoPiggo,
 		// exposing all of its fields. This is safe as there are no functions that 
 		// can be called on the CryptoPiggo.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &CryptoPiggo.NFT?{ 
 			if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?{ 
 				return nft as! &CryptoPiggo.NFT
@@ -259,7 +273,7 @@ contract CryptoPiggo: NonFungibleToken{
 	// all the NFT metadata of this collection. The file will not contain any of the 
 	// NFTs burned by the admin account.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataCID(): MetadataViews.IPFSFile{ 
 		return MetadataViews.IPFSFile(cid: "QmTd2TspsYLNLsg7HrGcmHhCAJcSkQbLKGWJKPwsLGQuvq", path: nil)
 	}
@@ -269,7 +283,7 @@ contract CryptoPiggo: NonFungibleToken{
 	// all the NFT metadata of this collection. The file will not contain any of the 
 	// NFTs burned by the admin account.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataURL(): String{ 
 		return "https://ipfs.tenzingai.com/ipfs/QmTd2TspsYLNLsg7HrGcmHhCAJcSkQbLKGWJKPwsLGQuvq"
 	}
@@ -284,7 +298,7 @@ contract CryptoPiggo: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: Address, initMetadata:{ String: String}){ 
 			let nftID = CryptoPiggo.totalSupply
 			if nftID < CryptoPiggo.maxSupply{ 
@@ -302,7 +316,7 @@ contract CryptoPiggo: NonFungibleToken{
 	// getOwner
 	// Gets the current owner of the given item
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwner(itemID: UInt64): Address?{ 
 		if itemID >= 0 && itemID < self.maxSupply{ 
 			if itemID < CryptoPiggo.totalSupply{ 

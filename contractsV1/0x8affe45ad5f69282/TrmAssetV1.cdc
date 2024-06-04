@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 	TrmAssetV1.cdc
 
@@ -98,7 +112,7 @@ contract TrmAssetV1: NonFungibleToken{
 		case public
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assetTypeToString(_ assetType: AssetType): String{ 
 		switch assetType{ 
 			case AssetType.private:
@@ -110,7 +124,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stringToAssetType(_ assetTypeStr: String): AssetType{ 
 		switch assetTypeStr{ 
 			case "private":
@@ -198,30 +212,30 @@ contract TrmAssetV1: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowAsset(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowAsset(id: UInt64): &TrmAssetV1.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKID(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(id: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetURL(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetType(id: UInt64): String
 	}
 	
@@ -251,7 +265,7 @@ contract TrmAssetV1: NonFungibleToken{
 		
 		// deposit takes an NFT as an argument and adds it to the Collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let assetToken <- token as! @NFT
 			emit Deposit(id: assetToken.id, to: (self.owner!).address)
 			let oldToken <- self.ownedNFTs[assetToken.id] <- assetToken
@@ -271,7 +285,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Returns a borrowed reference to the Asset in the collection so that the caller can read data and call methods from it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsset(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -282,13 +296,13 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Checks if id of NFT exists in collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
 		// Returns the asset ID for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKID(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -300,7 +314,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Returns the serial number for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(id: UInt64): UInt64{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -312,7 +326,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Returns the asset URL for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetURL(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -324,7 +338,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Returns the asset type for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetType(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -336,7 +350,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Sets the asset type. Only the owner of the asset is allowed to set this
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAssetType(id: UInt64, assetType: String){ 
 			pre{ 
 				assetType == "private" || assetType == "public":
@@ -350,7 +364,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Sets the asset type of multiple tokens. Only the owner of the asset is allowed to set this
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchSetAssetType(ids: [UInt64], kID: String, assetType: String){ 
 			pre{ 
 				assetType == "private" || assetType == "public":
@@ -374,7 +388,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// Destroys specified token in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyToken(id: UInt64){ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -415,7 +429,7 @@ contract TrmAssetV1: NonFungibleToken{
 	resource Minter{ 
 		
 		// mintNFT mints the asset NFT and stores it in the collection of recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(kID: String, serialNumber: UInt64, assetURL: String, assetType: String, recipient: &TrmAssetV1.Collection): UInt64{ 
 			pre{ 
 				assetType == "private" || assetType == "public":
@@ -432,7 +446,7 @@ contract TrmAssetV1: NonFungibleToken{
 		}
 		
 		// batchMintNFTs mints the asset NFT in batch and stores it in the collection of recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFTs(kID: String, totalSerialNumbers: UInt64, assetURL: String, assetType: String, recipient: &TrmAssetV1.Collection): UInt64{ 
 			pre{ 
 				assetType == "private" || assetType == "public":

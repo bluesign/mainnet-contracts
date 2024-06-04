@@ -1,4 +1,18 @@
-import ConcreteAlphabets from "./ConcreteAlphabets.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import ConcreteAlphabets from "./ConcreteAlphabets.cdc"
 
 access(all)
 contract ConcreteBlockPoetry{ 
@@ -7,13 +21,13 @@ contract ConcreteBlockPoetry{
 	
 	access(all)
 	struct interface IPoetryLogic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generatePoem(blockID: [UInt8; 32]): String
 	}
 	
 	access(all)
 	struct PoetryLogic: IPoetryLogic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generatePoem(blockID: [UInt8; 32]): String{ 
 			var poem = ""
 			var i = 0
@@ -124,7 +138,7 @@ contract ConcreteBlockPoetry{
 			self.poems <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun writePoem(poetryLogic:{ IPoetryLogic}){ 
 			let poem = poetryLogic.generatePoem(blockID: getCurrentBlock().id)
 			self.poems[getCurrentBlock().timestamp] <-! <-ConcreteAlphabets.newText(poem)
@@ -132,7 +146,7 @@ contract ConcreteBlockPoetry{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyPoetryCollection(): @PoetryCollection{ 
 		return <-create PoetryCollection()
 	}

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -75,10 +89,10 @@ contract TestCollection: NonFungibleToken{
 	access(all)
 	resource interface TestCollectionCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
@@ -106,7 +120,7 @@ contract TestCollection: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @TestCollection.NFT
 			let id: UInt64 = token.id
 			let oldToken: @{NonFungibleToken.NFT}? <- self.ownedNFTs[id] <- token
@@ -149,14 +163,14 @@ contract TestCollection: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, metadata:{ String: AnyStruct}){ 
 			var newNFT <- create NFT(id: TestCollection.totalSupply, name: name, description: description, thumbnail: thumbnail, metadata: metadata)
 			recipient.deposit(token: <-newNFT)
 			TestCollection.totalSupply = TestCollection.totalSupply + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			switch view{ 
 				case Type<MetadataViews.NFTCollectionData>():
@@ -173,7 +187,7 @@ contract TestCollection: NonFungibleToken{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>()]
 	}

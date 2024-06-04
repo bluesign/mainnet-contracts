@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -69,7 +83,7 @@ contract AvatarArtMarketplace{
 			self.receiver = receiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSalePrice(_ newPrice: UFix64){ 
 			self.salePrice = newPrice
 		}
@@ -114,21 +128,21 @@ contract AvatarArtMarketplace{
 	//
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenID: UInt64,
 			buyTokens: @{FungibleToken.Vault},
 			receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
 			affiliateVaultCap: Capability<&{FungibleToken.Receiver}>?
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(tokenID: UInt64): ListingDetails?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(tokenID: UInt64): &{NonFungibleToken.NFT}?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -172,7 +186,7 @@ contract AvatarArtMarketplace{
 		// listForSale
 		// listForSale lists NFT(s) for sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(nftID: UInt64, price: UFix64, paymentType: Type, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowAvatarArtNFT(id: nftID) != nil:
@@ -194,7 +208,7 @@ contract AvatarArtMarketplace{
 		// simply unlists the NFT from the SaleCollection
 		// so it is no longer for sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlistSale(tokenID: UInt64){ 
 			pre{ 
 				self.listing.containsKey(tokenID):
@@ -271,7 +285,7 @@ contract AvatarArtMarketplace{
 		// purchase
 		// purchase lets a user send tokens to purchase a NFT that is for sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}, receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>, affiliateVaultCap: Capability<&{FungibleToken.Receiver}>?){ 
 			pre{ 
 				self.listing[tokenID] != nil:
@@ -298,7 +312,7 @@ contract AvatarArtMarketplace{
 			emit TokenPurchased(nftID: tokenID, price: price, seller: self.owner?.address, buyer: receiverCap.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(id: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.listing[id] != nil:
@@ -314,7 +328,7 @@ contract AvatarArtMarketplace{
 		// getPrice returns the price of a specific NFT in the sale
 		// if it exists, otherwise nil
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(tokenID: UInt64): ListingDetails?{ 
 			return self.listing[tokenID]
 		}
@@ -322,12 +336,12 @@ contract AvatarArtMarketplace{
 		// getIDs
 		// getIDs returns an array of all the NFT IDs that are up for sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.listing.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(tokenID: UInt64): &{NonFungibleToken.NFT}?{ 
 			return (self.ownerCollection.borrow()!).borrowAvatarArtNFT(id: tokenID)
 		}
@@ -336,7 +350,7 @@ contract AvatarArtMarketplace{
 	// createSaleCollection
 	// createCollection returns a new SaleCollection resource to the caller
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&AvatarArtNFT.Collection>
 	): @SaleCollection{ 
@@ -345,7 +359,7 @@ contract AvatarArtMarketplace{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeePreference(
 			feeReference: Capability<&AvatarArtTransactionInfo.FeeInfo>,
 			feeRecepientReference: Capability<&AvatarArtTransactionInfo.TransactionAddress>

@@ -1,4 +1,18 @@
-import BasicBeasts from "./BasicBeasts.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import BasicBeasts from "./BasicBeasts.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -123,19 +137,19 @@ contract Pack: NonFungibleToken{
 		access(all)
 		var opened: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpened(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun containsFungibleTokens(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun containsBeast(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberOfFungibleTokenVaults(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberOfBeasts(): Int
 	}
 	
@@ -181,7 +195,7 @@ contract Pack: NonFungibleToken{
 			self.beast <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retrieveAllFungibleTokens(): @[{FungibleToken.Vault}]{ 
 			pre{ 
 				self.containsFungibleTokens():
@@ -225,27 +239,27 @@ contract Pack: NonFungibleToken{
 			self.fungibleTokens.append(<-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpened(): Bool{ 
 			return self.opened
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun containsFungibleTokens(): Bool{ 
 			return self.fungibleTokens.length > 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun containsBeast(): Bool{ 
 			return self.beast.keys.length > 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberOfFungibleTokenVaults(): Int{ 
 			return self.fungibleTokens.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberOfBeasts(): Int{ 
 			return self.beast.keys.length
 		}
@@ -286,7 +300,7 @@ contract Pack: NonFungibleToken{
 			self.id = self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retrieveBeast(pack: @NFT): @BasicBeasts.Collection{ 
 			pre{ 
 				pack.containsBeast():
@@ -318,7 +332,7 @@ contract Pack: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPackTemplate(packTemplateID: UInt32, name: String, image: String, description: String): UInt32{ 
 			pre{ 
 				Pack.packTemplates[packTemplateID] == nil:
@@ -331,13 +345,13 @@ contract Pack: NonFungibleToken{
 			return newPackTemplate.packTemplateID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPack(stockNumber: UInt64, packTemplateID: UInt32): @Pack.NFT{ 
 			let newPack: @Pack.NFT <- Pack.mintPack(stockNumber: stockNumber, packTemplateID: packTemplateID)
 			return <-newPack
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertBeast(pack: @Pack.NFT, beast: @BasicBeasts.NFT): @Pack.NFT{ 
 			pre{ 
 				pack.beast.keys.length == 0:
@@ -350,13 +364,13 @@ contract Pack: NonFungibleToken{
 			return <-pack
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertFungible(pack: @Pack.NFT, vault: @{FungibleToken.Vault}): @Pack.NFT{ 
 			pack.insertFungible(vault: <-vault)
 			return <-pack
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -365,15 +379,15 @@ contract Pack: NonFungibleToken{
 	access(all)
 	resource interface PackCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &Pack.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -399,7 +413,7 @@ contract Pack: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Pack.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -419,13 +433,13 @@ contract Pack: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &Pack.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &Pack.NFT?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntirePack(id: UInt64): &Pack.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &Pack.NFT?
@@ -467,37 +481,37 @@ contract Pack: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	// Public Functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewPackManager(): @PackManager{ 
 		return <-create PackManager()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPackTemplates():{ UInt32: PackTemplate}{ 
 		return self.packTemplates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackTemplate(packTemplateID: UInt32): PackTemplate?{ 
 		return self.packTemplates[packTemplateID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllstockNumbers(): [UInt64]{ 
 		return self.stockNumbers
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isMinted(stockNumber: UInt64): Bool{ 
 		return self.stockNumbers.contains(stockNumber)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllNumberMintedPerPackTemplate():{ UInt32: UInt32}{ 
 		return self.numberMintedPerPackTemplate
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerPackTemplate(packTemplateID: UInt32): UInt32?{ 
 		return self.numberMintedPerPackTemplate[packTemplateID]
 	}

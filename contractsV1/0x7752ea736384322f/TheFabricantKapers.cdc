@@ -1,4 +1,18 @@
-import TheFabricantMetadataViewsV2 from "./TheFabricantMetadataViewsV2.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import TheFabricantMetadataViewsV2 from "./TheFabricantMetadataViewsV2.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -298,7 +312,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		access(contract)
 		var revealableTraits:{ String: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevealableTraits():{ String: Bool}{ 
 			return self.revealableTraits
 		}
@@ -353,12 +367,12 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		
 		// Called by the nft owner to modify if a trait can be 
 		// revealed or not - used to revoke admin access
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIsTraitRevealable(key: String, value: Bool){ 
 			self.revealableTraits[key] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkRevealableTrait(traitName: String): Bool?{ 
 			if let revealable = self.revealableTraits[traitName]{ 
 				return revealable
@@ -471,7 +485,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		
 		// NOTE: Customise
 		//Helper function that converts to traits for MetadataViews 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun convertToTraits(): [MetadataViews.Trait]{ 
 			let traits: [MetadataViews.Trait] = []
 			let idTrait = MetadataViews.Trait(name: self.traitName.concat(" ID"), value: self.id, displayType: "Number", rarity: nil)
@@ -506,49 +520,49 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 	// Ensures that the returned NFT ref is read only.
 	access(all)
 	resource interface PublicNFT{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFullName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): MetadataViews.Editions
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getRarity(): MetadataViews.Rarity?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalRoyalties(): MetadataViews.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTFRoyalties(): TheFabricantMetadataViewsV2.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCharacteristics():{ String:{ CoCreatableV2.Characteristic}}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData(): MetadataViews.NFTCollectionData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTView(): MetadataViews.NFTView
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -579,18 +593,18 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		access(contract)
 		let nftMetadataId: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFullName(): String{ 
 			return ((TheFabricantKapers.nftMetadata[self.nftMetadataId]!).name!).concat(" #".concat(self.editionNumber.toString()))
 		}
 		
 		// NOTE: This is important for Edition view
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionName(): String{ 
 			return (TheFabricantKapers.nftMetadata[self.nftMetadataId]!).collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): MetadataViews.Editions{ 
 			// NOTE: In this case, id == edition number
 			let edition = MetadataViews.Edition(name: (TheFabricantKapers.nftMetadata[self.nftMetadataId]!).collection, number: self.editionNumber, max: TheFabricantKapers.maxSupply)
@@ -602,7 +616,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		// many media files there are and their keys in metadata! Pay attention
 		// to where the media files are stored and therefore accessed
 		// NOTE: DOUBLE CHECK THE fileType IS CORRECT!!!
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias{ 
 			let nftMetadata = TheFabricantKapers.nftMetadata[self.id]!
 			let mainImage = nftMetadata.metadata["mainImage"]! as! String
@@ -615,7 +629,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImages():{ String: String}{ 
 			let nftMetadata = TheFabricantKapers.nftMetadata[self.id]!
 			let mainImage = nftMetadata.metadata["mainImage"]! as! String
@@ -623,7 +637,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideos():{ String: String}{ 
 			let nftMetadata = TheFabricantKapers.nftMetadata[self.id]!
 			let mainVideo = nftMetadata.metadata["video"]! as! String
@@ -633,7 +647,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		// NOTE: Customise
 		// What are the traits that you want external marketplaces
 		// to display?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits?{ 
 			let characteristics = (TheFabricantKapers.nftMetadata[self.id]!).characteristics
 			let garmentCharacteristic = characteristics["garment"]!
@@ -648,35 +662,35 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 			return MetadataViews.Traits(concatenatedArrays)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getRarity(): MetadataViews.Rarity?{ 
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalRoyalties(): MetadataViews.Royalties{ 
 			let nftMetadata = TheFabricantKapers.nftMetadata[self.id]!
 			return nftMetadata.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTFRoyalties(): TheFabricantMetadataViewsV2.Royalties{ 
 			let nftMetadata = TheFabricantKapers.nftMetadata[self.id]!
 			return nftMetadata.royaltiesTFMarketplace
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return (TheFabricantKapers.nftMetadata[self.id]!).metadata
 		}
 		
 		//NOTE: This is not a CoCreatableV2 NFT, so no characteristics are present
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCharacteristics():{ String:{ CoCreatableV2.Characteristic}}?{ 
 			return (TheFabricantKapers.nftMetadata[self.id]!).characteristics
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevealableTraits():{ String: Bool}?{ 
 			return (TheFabricantKapers.nftMetadata[self.id]!).getRevealableTraits()
 		}
@@ -684,12 +698,12 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		//NOTE: The first file in medias will be the thumbnail.
 		// Maybe put a file type check in here to ensure it is 
 		// an image?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display{ 
 			return MetadataViews.Display(name: self.getFullName(), description: (TheFabricantKapers.nftMetadata[self.nftMetadataId]!).description, thumbnail: self.getMedias().items[0].file)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: TheFabricantKapers.TheFabricantKapersCollectionStoragePath, publicPath: TheFabricantKapers.TheFabricantKapersCollectionPublicPath, publicCollection: Type<&TheFabricantKapers.Collection>(), publicLinkedType: Type<&TheFabricantKapers.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-TheFabricantKapers.createEmptyCollection(nftType: Type<@TheFabricantKapers.Collection>())
@@ -699,14 +713,14 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		//NOTE: Customise
 		// NOTE: Update this function with the collection display image
 		// and TF socials
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let squareImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://leela.mypinata.cloud/ipfs/QmVPbbS7zVEyBGARHSVX8KcYBZ7bqV48koT2ibBFbL4iYy/BULLISH_KAPER_01.png"), mediaType: "image/png")
 			let bannerImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://leela.mypinata.cloud/ipfs/QmVPbbS7zVEyBGARHSVX8KcYBZ7bqV48koT2ibBFbL4iYy/VENICE_SCENE1_SHOT3_2K0530-studio.png"), mediaType: "image/png")
 			return MetadataViews.NFTCollectionDisplay(name: self.getEditionName(), description: "Inspired by club culture in the 90s and 2000s, the Kapers are headgear to get you moving up to speed. Next to the XXories, they form a part of the overall look of the collection and we want you to co-create them with us.", externalURL: (TheFabricantKapers.nftMetadata[self.id]!).externalURL, squareImage: squareImage, bannerImage: bannerImage, socials:{ "twitter": MetadataViews.ExternalURL("https://twitter.com/thefabricant"), "instagram": MetadataViews.ExternalURL("https://www.instagram.com/the_fab_ric_ant/"), "facebook": MetadataViews.ExternalURL("https://www.facebook.com/thefabricantdesign/"), "artstation": MetadataViews.ExternalURL("https://www.artstation.com/thefabricant"), "behance": MetadataViews.ExternalURL("https://www.behance.net/thefabricant"), "linkedin": MetadataViews.ExternalURL("https://www.linkedin.com/company/the-fabricant"), "sketchfab": MetadataViews.ExternalURL("https://sketchfab.com/thefabricant"), "clolab": MetadataViews.ExternalURL("https://www.clo3d.com/en/clollab/thefabricant"), "tiktok": MetadataViews.ExternalURL("@digital_fashion"), "discord": MetadataViews.ExternalURL("https://discord.com/channels/692039738751713280/778601303013195836")})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTView(): MetadataViews.NFTView{ 
 			return MetadataViews.NFTView(id: self.id, uuid: self.uuid, display: self.getDisplay(), externalURL: (TheFabricantKapers.nftMetadata[self.id]!).externalURL, collectionData: self.getCollectionData(), collectionDisplay: self.getCollectionDisplay(), royalties: (TheFabricantKapers.nftMetadata[self.id]!).royalties, traits: self.getTraits())
 		}
@@ -758,7 +772,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIsTraitRevealable(key: String, value: Bool){ 
 			let nftMetadata = TheFabricantKapers.nftMetadata[self.id]!
 			nftMetadata.updateIsTraitRevealable(key: key, value: value)
@@ -793,17 +807,17 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 	// -----------------------------------------------------------------------
 	access(all)
 	resource interface TheFabricantKapersCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTheFabricantKapers(id: UInt64): &TheFabricantKapers.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 	}
 	
 	access(all)
@@ -834,7 +848,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		// deposit takes an NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// By ensuring self.owner.address is not nil we keep the nftIdsToOwner dict 
 			// up to date.
 			pre{ 
@@ -871,7 +885,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTheFabricantKapers(id: UInt64): &TheFabricantKapers.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -909,38 +923,38 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPublicReceiverCap(paymentReceiverCap: Capability<&{FungibleToken.Receiver}>){ 
 			TheFabricantKapers.paymentReceiverCap = paymentReceiverCap
 			emit AdminPaymentReceiverCapabilityChanged(address: paymentReceiverCap.address, paymentType: paymentReceiverCap.getType())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(baseURI: String){ 
 			TheFabricantKapers.baseTokenURI = baseURI
 			emit AdminSetBaseURI(baseURI: baseURI)
 		}
 		
 		// The max supply determines the maximum number of NFTs that can be minted from this contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxSupply(maxSupply: UInt64){ 
 			TheFabricantKapers.maxSupply = maxSupply
 			emit AdminSetMaxSupply(maxSupply: maxSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddressMintLimit(addressMintLimit: UInt64){ 
 			TheFabricantKapers.addressMintLimit = addressMintLimit
 			emit AdminSetAddressMintLimit(addressMintLimit: addressMintLimit)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionId(collectionId: String){ 
 			TheFabricantKapers.collectionId = collectionId
 			emit AdminSetCollectionId(collectionId: collectionId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIsFreeMintActive(isActive: Bool){ 
 			TheFabricantKapers.isFreeMintActive = isActive
 			emit AdminSetIsFreeMintActive(isActive: isActive)
@@ -959,7 +973,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		// nftMetadata √
 		// update mints per address √
 		//NOTE: !Used for CC payments via MoonPay!
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun distributeDirectlyViaAccessList(receiver: &{NonFungibleToken.CollectionPublic}, publicMinterPathString: String, garmentId: UInt64, materialId: UInt64, primaryColorId: UInt64, secondaryColorId: UInt64){ 
 			pre{ 
 				TheFabricantKapers.paymentReceiverCap != nil:
@@ -1050,7 +1064,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		
 		// NOTE: It is in the public minter that you would create the restrictions
 		// for minting. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPublicMinter(name: String, description: String, collection: String, license: MetadataViews.License?, externalURL: MetadataViews.ExternalURL, coCreatable: Bool, revealableTraits:{ String: Bool}, minterMintLimit: UInt64?, royalties: MetadataViews.Royalties, royaltiesTFMarketplace: TheFabricantMetadataViewsV2.Royalties, paymentAmount: UFix64, paymentType: Type, paymentSplit: MetadataViews.Royalties?, typeRestrictions: [Type], accessListId: UInt64){ 
 			pre{ 
 				TheFabricantKapers.baseTokenURI != nil:
@@ -1074,7 +1088,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 			TheFabricantKapers.account.link<&PublicMinter>(publicMinterPublicPath!, target: publicMinterStoragePath!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealTraits(nftMetadataId: UInt64, traits: [{RevealableV2.RevealableTrait}]){ 
 			let nftMetadata = TheFabricantKapers.nftMetadata[nftMetadataId]! as! TheFabricantKapers.RevealableMetadata
 			nftMetadata.revealTraits(traits: traits)
@@ -1092,7 +1106,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGarments(shapes:{ UInt64:{ CoCreatableV2.Characteristic}}){ 
 			var i: UInt64 = 0
 			let keys = shapes.keys
@@ -1104,13 +1118,13 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyGarments(){ 
 			TheFabricantKapers.garments ={} 
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaterials(materials:{ UInt64:{ CoCreatableV2.Characteristic}}){ 
 			var i: UInt64 = 0
 			let keys = materials.keys
@@ -1122,13 +1136,13 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyMaterials(){ 
 			TheFabricantKapers.materials ={} 
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrimaryColors(primaryColors:{ UInt64:{ CoCreatableV2.Characteristic}}){ 
 			var i: UInt64 = 0
 			let keys = primaryColors.keys
@@ -1140,13 +1154,13 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyPrimaryColors(){ 
 			TheFabricantKapers.primaryColors ={} 
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSecondaryColors(secondaryColors:{ UInt64:{ CoCreatableV2.Characteristic}}){ 
 			var i: UInt64 = 0
 			let keys = secondaryColors.keys
@@ -1158,7 +1172,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		}
 		
 		// NOTE: Customise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptySecondaryColors(){ 
 			TheFabricantKapers.secondaryColors ={} 
 		}
@@ -1180,10 +1194,10 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 	// Update the mint functions
 	access(all)
 	resource interface Minter{ 
-		access(all)
-		fun mintUsingAccessList(receiver: &{NonFungibleToken.CollectionPublic}, payment: @{FungibleToken.Vault}, garmentId: UInt64, materialId: UInt64, primaryColorId: UInt64, secondaryColorId: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintUsingAccessList(receiver: &{NonFungibleToken.CollectionPublic}, payment: @{FungibleToken.Vault}, garmentId: UInt64, materialId: UInt64, primaryColorId: UInt64, secondaryColorId: UInt64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicMinterDetails():{ String: AnyStruct}
 	}
 	
@@ -1255,44 +1269,44 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		access(all)
 		var accessListId: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsOpenAccess(isOpenAccess: Bool){ 
 			self.isOpenAccess = isOpenAccess
 			emit PublicMinterIsOpenAccessChanged(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsAccessListOnly(isAccessListOnly: Bool){ 
 			self.isAccessListOnly = isAccessListOnly
 			emit PublicMinterIsAccessListOnly(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMintingIsOpen(isOpen: Bool){ 
 			self.isOpen = isOpen
 			emit PublicMinterMintingIsOpen(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessListId(accessListId: UInt64){ 
 			self.accessListId = accessListId
 			emit PublicMinterSetAccessListId(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen, accessListId: self.accessListId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPaymentAmount(amount: UFix64){ 
 			self.paymentAmount = amount
 			emit PublicMinterSetPaymentAmount(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen, paymentAmount: self.paymentAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterMintLimit(minterMintLimit: UInt64){ 
 			self.minterMintLimit = minterMintLimit
 			emit PublicMinterSetMinterMintLimit(uuid: self.uuid, name: self.name, description: self.description, collection: self.collection, path: self.path, isOpenAccess: self.isOpenAccess, isAccessListOnly: self.isAccessListOnly, isOpen: self.isOpen, minterMintLimit: self.minterMintLimit)
 		}
 		
 		// The owner of the pM can access this via borrow in tx.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTypeRestrictions(types: [Type]){ 
 			self.typeRestrictions = types
 		}
@@ -1314,7 +1328,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		// Characteristics √
 		// adds to dataAllocations dicts √
 		// update mints per address √
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintUsingAccessList(receiver: &{NonFungibleToken.CollectionPublic}, payment: @{FungibleToken.Vault}, garmentId: UInt64, materialId: UInt64, primaryColorId: UInt64, secondaryColorId: UInt64){ 
 			pre{ 
 				self.isOpen:
@@ -1437,7 +1451,7 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicMinterDetails():{ String: AnyStruct}{ 
 			let ret:{ String: AnyStruct} ={} 
 			ret["name"] = self.name
@@ -1566,73 +1580,73 @@ contract TheFabricantKapers: NonFungibleToken, TheFabricantNFTStandardV2, Reveal
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicMinterPaths():{ UInt64: String}{ 
 		return TheFabricantKapers.publicMinterPaths
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftIdsToOwner():{ UInt64: Address}{ 
 		return TheFabricantKapers.nftIdsToOwner
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxSupply(): UInt64?{ 
 		return TheFabricantKapers.maxSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return TheFabricantKapers.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionId(): String?{ 
 		return TheFabricantKapers.collectionId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftMetadatas():{ UInt64:{ RevealableV2.RevealableMetadata}}{ 
 		return self.nftMetadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDataAllocations():{ String: UInt64}{ 
 		return self.dataAllocations
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllIdsToDataAllocations():{ UInt64: String}{ 
 		return self.idsToDataAllocations
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIdToDataAllocation(id: UInt64): String?{ 
 		return self.idsToDataAllocations[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCharacteristics(): AnyStruct{ 
 		let res ={ "garments": TheFabricantKapers.garments, "materials": TheFabricantKapers.materials, "primaryColors": TheFabricantKapers.primaryColors, "secondaryColors": TheFabricantKapers.secondaryColors}
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBaseUri(): String?{ 
 		return TheFabricantKapers.baseTokenURI
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIsFreeMintActive(): Bool{ 
 		return TheFabricantKapers.isFreeMintActive
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPaymentCap(): Address?{ 
 		return TheFabricantKapers.paymentReceiverCap?.address
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClaimedFreeMints():{ Address: UInt64}{ 
 		return TheFabricantKapers.claimedFreeMints
 	}

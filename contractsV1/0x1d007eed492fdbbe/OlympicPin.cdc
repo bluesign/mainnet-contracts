@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract OlympicPin: NonFungibleToken{ 
@@ -223,7 +237,7 @@ contract OlympicPin: NonFungibleToken{
 		// The Set needs to be not locked
 		// The Pin can't have already been added to the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPin(pinId: UInt32){ 
 			pre{ 
 				OlympicPin.pins[pinId] != nil:
@@ -250,7 +264,7 @@ contract OlympicPin: NonFungibleToken{
 		// Parameters: pinIds: The Ids of the pins that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPins(pinIds: [UInt32]){ 
 			for pinId in pinIds{ 
 				self.addPin(pinId: pinId)
@@ -264,7 +278,7 @@ contract OlympicPin: NonFungibleToken{
 		// Pre-Conditions:
 		// The Pin is part of the Set and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retirePin(pinId: UInt32){ 
 			pre{ 
 				self.retired[pinId] != nil:
@@ -279,7 +293,7 @@ contract OlympicPin: NonFungibleToken{
 		// retireAll retires all the pins in the Set
 		// Afterwards, none of the retired pins will be able to mint new NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for pinId in self.pins{ 
 				self.retirePin(pinId: pinId)
@@ -290,7 +304,7 @@ contract OlympicPin: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -307,7 +321,7 @@ contract OlympicPin: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPiece(pinId: UInt32): @NFT{ 
 			pre{ 
 				self.retired[pinId] != nil:
@@ -336,7 +350,7 @@ contract OlympicPin: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Pieces that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintPiece(pinId: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -347,17 +361,17 @@ contract OlympicPin: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPins(): [UInt32]{ 
 			return self.pins
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerPlay():{ UInt32: UInt32}{ 
 			return self.numberMintedPerPin
 		}
@@ -419,7 +433,7 @@ contract OlympicPin: NonFungibleToken{
 		//
 		// Returns: the Id of the new Pin object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPin(metadata:{ String: String}): UInt32{ 
 			// Create the new Pin
 			var newPin = Pin(metadata: metadata)
@@ -441,7 +455,7 @@ contract OlympicPin: NonFungibleToken{
 		//
 		// Returns: the Id of the new SetData object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String): UInt32{ 
 			
 			// Create the new Set
@@ -466,7 +480,7 @@ contract OlympicPin: NonFungibleToken{
 		// Returns: A reference to the Set with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setId: UInt32): &Set{ 
 			pre{ 
 				OlympicPin.sets[setId] != nil:
@@ -484,7 +498,7 @@ contract OlympicPin: NonFungibleToken{
 		//
 		// Returns: The new series number
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the OlympicPin series number
@@ -495,7 +509,7 @@ contract OlympicPin: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -504,18 +518,18 @@ contract OlympicPin: NonFungibleToken{
 	access(all)
 	resource interface PieceCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPiece(id: UInt64): &OlympicPin.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -553,7 +567,7 @@ contract OlympicPin: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn pieces
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -568,7 +582,7 @@ contract OlympicPin: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @OlympicPin.NFT
 			let id = token.id
 			
@@ -585,7 +599,7 @@ contract OlympicPin: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -620,7 +634,7 @@ contract OlympicPin: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPiece(id: UInt64): &OlympicPin.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -662,7 +676,7 @@ contract OlympicPin: NonFungibleToken{
 	// getAllPins returns all the pins in OlympicPin
 	//
 	// Returns: An array of all the pins that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPins(): [OlympicPin.Pin]{ 
 		return OlympicPin.pins.values
 	}
@@ -672,7 +686,7 @@ contract OlympicPin: NonFungibleToken{
 	// Parameters: pinId: The id of the Pin that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPinMetaData(pinId: UInt32):{ String: String}?{ 
 		return self.pins[pinId]?.metadata
 	}
@@ -684,7 +698,7 @@ contract OlympicPin: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPinMetaDataByField(pinId: UInt32, field: String): String?{ 
 		// Don't force a revert if the pinId or field is invalid
 		if let pin = OlympicPin.pins[pinId]{ 
@@ -700,7 +714,7 @@ contract OlympicPin: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setId: UInt32): String?{ 
 		// Don't force a revert if the setId is invalid
 		return OlympicPin.setDatas[setId]?.name
@@ -712,7 +726,7 @@ contract OlympicPin: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The series that the Set belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeries(setId: UInt32): UInt32?{ 
 		// Don't force a revert if the setId is invalid
 		return OlympicPin.setDatas[setId]?.series
@@ -724,7 +738,7 @@ contract OlympicPin: NonFungibleToken{
 	// Parameters: setName: The name of the Set that is being searched
 	//
 	// Returns: An array of the Ids of the Set if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIdsByName(setName: String): [UInt32]?{ 
 		var setIds: [UInt32] = []
 		
@@ -750,7 +764,7 @@ contract OlympicPin: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: An array of Pin Ids
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPinsInSet(setId: UInt32): [UInt32]?{ 
 		// Don't force a revert if the setId is invalid
 		return OlympicPin.sets[setId]?.pins
@@ -765,7 +779,7 @@ contract OlympicPin: NonFungibleToken{
 	//			 pinId: The id of the Pin that is being searched
 	//
 	// Returns: Boolean indicating if the edition is retired or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setId: UInt32, pinId: UInt32): Bool?{ 
 		if let retired = OlympicPin.sets[setId]?.retired{ 
 			let retired = retired[pinId]
@@ -787,7 +801,7 @@ contract OlympicPin: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: Boolean indicating if the Set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setId: UInt32): Bool?{ 
 		// Don't force a revert if the setId is invalid
 		return OlympicPin.sets[setId]?.locked
@@ -801,7 +815,7 @@ contract OlympicPin: NonFungibleToken{
 	//
 	// Returns: The total number of NFTs 
 	//		  that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumPiecesInEdition(setId: UInt32, pinId: UInt32): UInt32?{ 
 		if let numberMintedPerPin = OlympicPin.sets[setId]?.numberMintedPerPin{ 
 			let amount = numberMintedPerPin[pinId]

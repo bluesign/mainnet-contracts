@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Adapted from: AllDay.cdc
 	Author: Innocent Abdullahi innocent.abdullahi@dapperlabs.com
 */
@@ -199,7 +213,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Close this series
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			pre{ 
 				self.active == true:
@@ -230,7 +244,7 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get the publicly available data for a Series by id
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSeriesData(id: UInt64): DapperSport.SeriesData{ 
 		pre{ 
 			DapperSport.seriesByID[id] != nil:
@@ -241,7 +255,7 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get the publicly available data for a Series by name
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesDataByName(name: String): DapperSport.SeriesData?{ 
 		let id = DapperSport.seriesIDByName[name]
 		if id == nil{ 
@@ -252,14 +266,14 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get all series names (this will be *long*)
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeriesNames(): [String]{ 
 		return DapperSport.seriesIDByName.keys
 	}
 	
 	/// Get series id by name
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesIDByName(name: String): UInt64?{ 
 		return DapperSport.seriesIDByName[name]
 	}
@@ -284,7 +298,7 @@ contract DapperSport: NonFungibleToken{
 		var setPlaysInEditions:{ UInt64: Bool}
 		
 		/// member function to check the setPlaysInEditions to see if this Set/Play combination already exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPlayExistsInEdition(playID: UInt64): Bool{ 
 			return self.setPlaysInEditions.containsKey(playID)
 		}
@@ -327,13 +341,13 @@ contract DapperSport: NonFungibleToken{
 		var locked: Bool
 		
 		/// member function to insert a new Play to the setPlaysInEditions dictionary
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertNewPlay(playID: UInt64){ 
 			self.setPlaysInEditions[playID] = true
 		}
 		
 		/// returns the plays added to the set in an edition
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSetPlaysInEditions():{ UInt64: Bool}{ 
 			return self.setPlaysInEditions
 		}
@@ -361,7 +375,7 @@ contract DapperSport: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -372,7 +386,7 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get the publicly available data for a Set
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSetData(id: UInt64): DapperSport.SetData?{ 
 		if DapperSport.setByID[id] == nil{ 
 			return nil
@@ -382,7 +396,7 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get the publicly available data for a Set by name
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetDataByName(name: String): DapperSport.SetData?{ 
 		let id = DapperSport.setIDByName[name]
 		if id == nil{ 
@@ -393,7 +407,7 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get all set names (this will be *long*)
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSetNames(): [String]{ 
 		return DapperSport.setIDByName.keys
 	}
@@ -438,7 +452,7 @@ contract DapperSport: NonFungibleToken{
 		let metadata:{ String: String}
 		
 		/// returns the metadata set for this play
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -456,7 +470,7 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get the publicly available data for a Play
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayData(id: UInt64): DapperSport.PlayData?{ 
 		if DapperSport.playByID[id] == nil{ 
 			return nil
@@ -493,7 +507,7 @@ contract DapperSport: NonFungibleToken{
 		var numMinted: UInt64
 		
 		/// member function to check if max edition size has been reached
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun maxEditionMintSizeReached(): Bool{ 
 			return self.numMinted == self.maxMintSize
 		}
@@ -554,7 +568,7 @@ contract DapperSport: NonFungibleToken{
 		/// Mint a Moment NFT in this edition, with the given minting mintingDate.
 		/// Note that this will panic if the max mint size has already been reached.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(): @DapperSport.NFT{ 
 			pre{ 
 				self.numMinted != self.maxMintSize:
@@ -609,7 +623,7 @@ contract DapperSport: NonFungibleToken{
 	
 	/// Get the publicly available data for an Edition
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionData(id: UInt64): EditionData?{ 
 		if DapperSport.editionByID[id] == nil{ 
 			return nil
@@ -656,7 +670,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// get the name of an nft
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let editionData = DapperSport.getEditionData(id: self.editionID)!
 			let fullName: String = DapperSport.PlayData(id: editionData.playID).metadata["PlayerJerseyName"] ?? ""
@@ -666,7 +680,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// get the description of an nft
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let editionData = DapperSport.getEditionData(id: self.editionID)!
 			let setName: String = (DapperSport.SetData(id: editionData.setID)!).name
@@ -677,7 +691,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// get a thumbnail image that represents this nft
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun thumbnail(): MetadataViews.HTTPFile{ 
 			let editionData = DapperSport.getEditionData(id: self.editionID)!
 			// TODO: change to image for DapperSport
@@ -734,18 +748,18 @@ contract DapperSport: NonFungibleToken{
 	access(all)
 	resource interface MomentNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMomentNFT(id: UInt64): &DapperSport.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -779,7 +793,7 @@ contract DapperSport: NonFungibleToken{
 		/// and adds the ID to the id array
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DapperSport.NFT
 			let id: UInt64 = token.id
 			
@@ -792,7 +806,7 @@ contract DapperSport: NonFungibleToken{
 		/// batchDeposit takes a Collection object as an argument
 		/// and deposits each contained NFT into this Collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -822,7 +836,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// borrowMomentNFT gets a reference to an NFT in the collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMomentNFT(id: UInt64): &DapperSport.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -880,7 +894,7 @@ contract DapperSport: NonFungibleToken{
 		// Mint a single NFT
 		// The Edition for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @DapperSport.NFT
 	}
 	
@@ -890,7 +904,7 @@ contract DapperSport: NonFungibleToken{
 	resource Admin: NFTMinter{ 
 		/// Borrow a Series
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(id: UInt64): &DapperSport.Series{ 
 			pre{ 
 				DapperSport.seriesByID[id] != nil:
@@ -901,7 +915,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Borrow a Set
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(id: UInt64): &DapperSport.Set{ 
 			pre{ 
 				DapperSport.setByID[id] != nil:
@@ -912,7 +926,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Borrow a Play
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPlay(id: UInt64): &DapperSport.Play{ 
 			pre{ 
 				DapperSport.playByID[id] != nil:
@@ -923,7 +937,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Borrow an Edition
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEdition(id: UInt64): &DapperSport.Edition{ 
 			pre{ 
 				DapperSport.editionByID[id] != nil:
@@ -934,7 +948,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Create a Series
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSeries(name: String): UInt64{ 
 			// Create and store the new series
 			let series <- create DapperSport.Series(name: name)
@@ -947,7 +961,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Close a Series
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeSeries(id: UInt64): UInt64{ 
 			let series = (&DapperSport.seriesByID[id] as &DapperSport.Series?)!
 			series.close()
@@ -956,7 +970,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Create a Set
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String): UInt64{ 
 			// Create and store the new set
 			let set <- create DapperSport.Set(name: name)
@@ -969,7 +983,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Locks a Set
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockSet(id: UInt64): UInt64{ 
 			let set = (&DapperSport.setByID[id] as &DapperSport.Set?)!
 			set.lock()
@@ -978,7 +992,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Create a Play
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPlay(classification: String, metadata:{ String: String}): UInt64{ 
 			// Create and store the new play
 			let play <- create DapperSport.Play(classification: classification, metadata: metadata)
@@ -991,7 +1005,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Create an Edition
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(seriesID: UInt64, setID: UInt64, playID: UInt64, maxMintSize: UInt64?, tier: String): UInt64{ 
 			let edition <- create Edition(seriesID: seriesID, setID: setID, playID: playID, maxMintSize: maxMintSize, tier: tier)
 			let editionID = edition.id
@@ -1001,7 +1015,7 @@ contract DapperSport: NonFungibleToken{
 		
 		/// Close an Edition
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeEdition(id: UInt64): UInt64{ 
 			let edition = (&DapperSport.editionByID[id] as &DapperSport.Edition?)!
 			edition.close()
@@ -1011,7 +1025,7 @@ contract DapperSport: NonFungibleToken{
 		/// Mint a single NFT
 		/// The Edition for the given ID must already exist
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @DapperSport.NFT{ 
 			pre{ 
 				// Make sure the edition we are creating this NFT in exists

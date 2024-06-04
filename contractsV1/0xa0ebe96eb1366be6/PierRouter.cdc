@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import PierPair from "../0x609e10301860b683/PierPair.cdc"
 
@@ -52,7 +66,7 @@ contract PierRouter{
 	// @param amountBMin The minimum amount of token B to provide (lower bound)
 	// @param deadline The deadline for this function to be executed
 	// @return An AddLPResult resource containing amounts provided info and the minted LP tokens
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addLiquidity(
 		pool: &PierPair.Pool,
 		vaultA: &{FungibleToken.Vault},
@@ -118,7 +132,7 @@ contract PierRouter{
 	// @param amountBMin The minimum amount of token B to receive
 	// @param deadline The deadline for this function to be executed
 	// @return [amount of token A redeemed, amount of token B redeemed]
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeLiquidity(
 		vaultA: &{FungibleToken.Receiver},
 		vaultB: &{FungibleToken.Receiver},
@@ -167,7 +181,7 @@ contract PierRouter{
 	// @param path The path to follow for this swap. E.g., [A.0x01.TokenA, A.0x02.TokenB, A.0x03.TokenC]
 	// @param deadline The deadline for this swap to execute
 	// @return The actual amount of token B out
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapExactTokensAForTokensB(
 		fromVault: &{FungibleToken.Vault},
 		toVault: &{FungibleToken.Receiver},
@@ -214,7 +228,7 @@ contract PierRouter{
 	// @param path The path to follow for this swap. E.g., [A.0x01.TokenA, A.0x02.TokenB, A.0x03.TokenC]
 	// @param deadline The deadline for this swap to execute
 	// @return The actual amount of token A in
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapTokensAForExactTokensB(
 		fromVault: &{FungibleToken.Vault},
 		toVault: &{FungibleToken.Receiver},

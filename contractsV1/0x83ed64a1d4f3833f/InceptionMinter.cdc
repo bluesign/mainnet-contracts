@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import InceptionAvatar from "./InceptionAvatar.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -48,7 +62,7 @@ contract InceptionMinter{
 	access(self)
 	var flowTipTracker:{ Address: UFix64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tipMintWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -130,7 +144,7 @@ contract InceptionMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tipMintWithFUT(
 		buyer: Address,
 		setID: UInt64,
@@ -217,7 +231,7 @@ contract InceptionMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintInceptionBlackBoxWithInceptionCrystal(
 		buyer: Address,
 		paymentVault: @InceptionCrystal.Collection
@@ -241,7 +255,7 @@ contract InceptionMinter{
 		destroy <-paymentVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun whitelistFreeMint(buyer: Address, setID: UInt64, numberOfTokens: UInt64){ 
 		pre{ 
 			InceptionMinter.whitelistedAccounts[buyer]! >= 1:
@@ -300,7 +314,7 @@ contract InceptionMinter{
 	}
 	
 	// 1 for each outcast
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicFreeMint(buyer: Address, setID: UInt64){ 
 		pre{ 
 			!self.publicMintedAccounts.containsKey(buyer):
@@ -350,7 +364,7 @@ contract InceptionMinter{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhiteListAddress(address: Address, amount: UInt64){ 
 			pre{ 
 				amount <= 10:
@@ -361,7 +375,7 @@ contract InceptionMinter{
 			InceptionMinter.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhiteListAddress(address: Address){ 
 			pre{ 
 				InceptionMinter.whitelistedAccounts[address] != nil:
@@ -370,12 +384,12 @@ contract InceptionMinter{
 			InceptionMinter.whitelistedAccounts.remove(key: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pruneWhitelist(){ 
 			InceptionMinter.whitelistedAccounts ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhiteListAddressAmount(address: Address, amount: UInt64){ 
 			pre{ 
 				InceptionMinter.whitelistedAccounts[address] != nil:
@@ -384,27 +398,27 @@ contract InceptionMinter{
 			InceptionMinter.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTipSalePriceInDUC(price: UFix64){ 
 			InceptionMinter.tipMintPriceInDuc = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTipSalePriceInFlow(price: UFix64){ 
 			InceptionMinter.tipMintPriceInFlow = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDucTipJar():{ Address: UFix64}{ 
 			return InceptionMinter.usdTipTracker
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlowTipJar():{ Address: UFix64}{ 
 			return InceptionMinter.flowTipTracker
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pruneAccount(address: Address){ 
 			if InceptionMinter.tipMintedAccounts.containsKey(address){ 
 				InceptionMinter.tipMintedAccounts.remove(key: address)
@@ -418,27 +432,27 @@ contract InceptionMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistedAccounts():{ Address: UInt64}{ 
 		return InceptionMinter.whitelistedAccounts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistedEntriesByAddress(address: Address): UInt64{ 
 		return InceptionMinter.whitelistedAccounts[address] ?? 0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTipMintAccounts():{ Address: UInt64}{ 
 		return InceptionMinter.tipMintedAccounts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTipMintCountPerAccount(address: Address): UInt64{ 
 		return InceptionMinter.tipMintedAccounts[address] ?? 0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicMintCountPerAccount(address: Address): UInt64{ 
 		return InceptionMinter.publicMintedAccounts[address] ?? 0
 	}

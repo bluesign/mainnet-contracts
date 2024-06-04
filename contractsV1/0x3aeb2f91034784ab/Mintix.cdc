@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract Mintix: NonFungibleToken{ 
@@ -50,16 +64,16 @@ contract Mintix: NonFungibleToken{
 	access(all)
 	resource interface NFTReceiver{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowEntireNFT(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowEntireNFT(id: UInt64): &Mintix.NFT
 	}
 	
 	access(all)
@@ -75,7 +89,7 @@ contract Mintix: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Mintix.NFT
 			emit Deposit(id: token.id, to: self.owner?.address)
 			self.ownedNFTs[token.id] <-! token
@@ -91,7 +105,7 @@ contract Mintix: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? ?? panic("We couldn't borrow this NFT")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &NFT{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &NFT
@@ -119,7 +133,7 @@ contract Mintix: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(eventId: UInt64, supplyId: UInt64): @NFT{ 
 			return <-create NFT(_eventId: eventId, _supplyId: supplyId)
 		}

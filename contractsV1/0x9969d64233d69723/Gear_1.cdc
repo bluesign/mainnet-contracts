@@ -1,4 +1,18 @@
-// Gear.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Gear.cdc
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
@@ -110,13 +124,13 @@ contract Gear_1: NonFungibleToken{
 			self.numberOfPlays = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInfo(newCharge: UInt16, newPlays: UInt16){ 
 			self.charge = newCharge
 			self.numberOfPlays = newPlays
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increasePlays(newPlays: UInt16){ 
 			self.numberOfPlays = self.numberOfPlays + newPlays
 		}
@@ -162,7 +176,7 @@ contract Gear_1: NonFungibleToken{
 		// The upgrade resource can only be created by authorized accounts,
 		// such as an administrator or authorized operators.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upgrade(newMetadata:{ UInt16: String}){ 
 			pre{ 
 				newMetadata != nil:
@@ -175,12 +189,12 @@ contract Gear_1: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseSupply(){ 
 			self.totalSupply = self.totalSupply + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decreaseSupply(){ 
 			self.totalSupply = self.totalSupply - 1 as UInt64
 		}
@@ -191,13 +205,13 @@ contract Gear_1: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(newBaseURI: String){ 
 			Gear_1.baseURI = newBaseURI
 			emit TokenBaseURISet(newBaseURI: newBaseURI)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSKU(metadata:{ UInt16: String}){ 
 			let skuId = Gear_1.totalSKUCount
 			let sku = Gear_1.GearSKU(initID: skuId, metadata: metadata)
@@ -206,7 +220,7 @@ contract Gear_1: NonFungibleToken{
 			emit GearSKUCreated(skuId: skuId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upgradeSKU(skuId: UInt64, metadata:{ UInt16: String}){ 
 			var sku = Gear_1.gearSKUs[skuId] ?? panic("missing Gear SKU")
 			sku.upgrade(newMetadata: metadata)
@@ -217,7 +231,7 @@ contract Gear_1: NonFungibleToken{
 		// updateGearInfo
 		// Updates a Gear NFT with a new charge and number of plays
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGearInfo(recipient: &{Gear_1.GearCollectionPublic}, tokenIds: [UInt64], newCharges: [UInt16], newPlays: [UInt16]){ 
 			pre{ 
 				tokenIds.length == newCharges.length:
@@ -239,7 +253,7 @@ contract Gear_1: NonFungibleToken{
 		// increaseNumberOfPlays
 		// Increases number of plays (add with original one)
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNumberOfPlays(recipient: &{Gear_1.GearCollectionPublic}, tokenIds: [UInt64], newPlays: [UInt16]){ 
 			pre{ 
 				tokenIds.length == newPlays.length:
@@ -266,27 +280,27 @@ contract Gear_1: NonFungibleToken{
 	access(all)
 	resource interface GearCollectionPublic{ 
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(NonFungibleToken.Withdraw)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnGear(tokenId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchBurnGears(tokenIdList: [UInt64])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGear(id: UInt64): &Gear_1.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -321,7 +335,7 @@ contract Gear_1: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let ref <- token as! @Gear_1.NFT
 			let id: UInt64 = ref.id
 			
@@ -334,7 +348,7 @@ contract Gear_1: NonFungibleToken{
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -364,7 +378,7 @@ contract Gear_1: NonFungibleToken{
 		//
 		// Returns: @NonFungibleToken.Collection: The collection of withdrawn tokens
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var collection <- create Collection()
@@ -382,7 +396,7 @@ contract Gear_1: NonFungibleToken{
 		// Burns a Gear NFT
 		// and withdraws it from the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnGear(tokenId: UInt64){ 
 			// withdraw it from the recipient's account using their reference
 			let token <- self.ownedNFTs.remove(key: tokenId) ?? panic("missing NFT")
@@ -399,7 +413,7 @@ contract Gear_1: NonFungibleToken{
 		// Burns multiple Gear NFTs given a list of tokenIds
 		// and withdraws the NFTs from the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchBurnGears(tokenIdList: [UInt64]){ 
 			for tokenId in tokenIdList{ 
 				// withdraw it from the recipient's account using their reference
@@ -421,7 +435,7 @@ contract Gear_1: NonFungibleToken{
 		// exposing all of its fields (including the Gear attributes).
 		// This is safe as there are no functions that can be called on the Gear.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGear(id: UInt64): &Gear_1.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -472,7 +486,7 @@ contract Gear_1: NonFungibleToken{
 		// Mints a new Gear NFT with a new ID
 		// and deposits it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintGear(recipient: &{NonFungibleToken.CollectionPublic}, skuID: UInt64): UInt64{ 
 			let id = Gear_1.totalSupply
 			let sku = Gear_1.gearSKUs[skuID] ?? panic("missing Gear SKU")
@@ -490,7 +504,7 @@ contract Gear_1: NonFungibleToken{
 		// Mints multiple new Gear NFTs given a list of Gear metadata
 		// and deposits the NFTs into the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintGears(recipient: &{NonFungibleToken.CollectionPublic}, skuIDList: [UInt64]): [UInt64]{ 
 			let ids: [UInt64] = []
 			for skuID in skuIDList{ 
@@ -507,7 +521,7 @@ contract Gear_1: NonFungibleToken{
 	// If it has a collection but does not contain the gearId, return nil.
 	// If it has a collection and that collection contains the gearId, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, gearId: UInt64): &Gear_1.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&Gear_1.Collection>(Gear_1.CollectionPublicPath).borrow<&Gear_1.Collection>() ?? panic("Couldn't get collection")
 		// We trust Gear_1.Collection.borowGear to get the correct gearId

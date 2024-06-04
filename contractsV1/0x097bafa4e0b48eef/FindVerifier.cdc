@@ -1,4 +1,18 @@
-import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -15,7 +29,7 @@ contract FindVerifier{
 		access(all)
 		let description: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ param:{ String: AnyStruct}): Bool
 	}
 	
@@ -41,7 +55,7 @@ contract FindVerifier{
 			self.description = desc
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ param:{ String: AnyStruct}): Bool{ 
 			if self.floatEventIds.length == 0{ 
 				return true
@@ -84,7 +98,7 @@ contract FindVerifier{
 			self.description = desc
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ param:{ String: AnyStruct}): Bool{ 
 			if self.floatEventIds.length == 0{ 
 				return true
@@ -131,7 +145,7 @@ contract FindVerifier{
 			self.description = desc
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ param:{ String: AnyStruct}): Bool{ 
 			let user: Address = param["address"]! as! Address
 			return self.addressList.contains(user)
@@ -161,7 +175,7 @@ contract FindVerifier{
 			self.description = desc
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ param:{ String: AnyStruct}): Bool{ 
 			if self.findNames.length == 0{ 
 				return true
@@ -211,7 +225,7 @@ contract FindVerifier{
 			self.description = desc
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ param:{ String: AnyStruct}): Bool{ 
 			if self.threshold == 0{ 
 				return true
@@ -298,7 +312,7 @@ contract FindVerifier{
 			return rI
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ param:{ String: AnyStruct}): Bool{ 
 			if self.rarities.length == 0{ 
 				return true

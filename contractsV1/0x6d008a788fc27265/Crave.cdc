@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 Central Smart Contract for Crave x Niftory Food Culture Collectibles
 
 Heavily based off the Dapper Labs NBA Top Shot contract, with the following modifications:
@@ -359,7 +373,7 @@ contract Crave: NonFungibleToken{
 		// The CollectibleItem needs to be an existing collectibleItem
 		// The Set needs to be not locked
 		// The CollectibleItem can't have already been added to the Set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollectibleItem(collectibleItemID: UInt32){ 
 			pre{ 
 				Crave.collectibleItemDatas[collectibleItemID] != nil:
@@ -385,7 +399,7 @@ contract Crave: NonFungibleToken{
 		//
 		// Parameters: collectibleItemIDs: The IDs of the CollectibleItems that are being added
 		//					  as an array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollectibleItems(collectibleItemIDs: [UInt32]){ 
 			for collectibleItem in collectibleItemIDs{ 
 				self.addCollectibleItem(collectibleItemID: collectibleItem)
@@ -398,7 +412,7 @@ contract Crave: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The CollectibleItem is part of the Set and not retired (available for minting).
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireCollectibleItem(collectibleItemID: UInt32){ 
 			pre{ 
 				self.retired[collectibleItemID] != nil:
@@ -412,7 +426,7 @@ contract Crave: NonFungibleToken{
 		
 		// retireAll retires all the collectibleItems in the Set
 		// Afterwards, none of the retired CollectibleItems will be able to mint new Collectibles
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for collectibleItem in self.collectibleItems{ 
 				self.retireCollectibleItem(collectibleItemID: collectibleItem)
@@ -423,7 +437,7 @@ contract Crave: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -439,7 +453,7 @@ contract Crave: NonFungibleToken{
 		// The CollectibleItem must exist in the Set and be allowed to mint new Collectibles
 		//
 		// Returns: The NFT that was minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCollectible(collectibleItemID: UInt32): @NFT{ 
 			pre{ 
 				self.retired[collectibleItemID] != nil:
@@ -467,7 +481,7 @@ contract Crave: NonFungibleToken{
 		//			 quantity: The quantity of Collectibles to be minted
 		//
 		// Returns: Collection object that contains all the Collectibles that were minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintCollectible(collectibleItemID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -516,7 +530,7 @@ contract Crave: NonFungibleToken{
 		//							   (because we all know Kevin Durant is not 6'9")
 		//
 		// Returns: the ID of the new CollectibleItem object
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollectibleItem(metadata:{ String: String}, featuredArtists: [String]): UInt32{ 
 			// Create the new CollectibleItem
 			var newCollectibleItem = CollectibleItem(metadata: metadata, featuredArtists: featuredArtists)
@@ -531,7 +545,7 @@ contract Crave: NonFungibleToken{
 		// in the sets mapping in the Crave contract
 		//
 		// Parameters: name: The name of the Set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, setIdentityURL: String?, description: String?){ 
 			// Create the new Set
 			var newSet <- create Set(name: name, setIdentityURL: setIdentityURL, description: description)
@@ -548,7 +562,7 @@ contract Crave: NonFungibleToken{
 		//
 		// Returns: A reference to the Set with all of the fields
 		// and methods exposed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				Crave.sets[setID] != nil:
@@ -566,7 +580,7 @@ contract Crave: NonFungibleToken{
 		// all sets and editions in the current series.
 		//
 		// Returns: The new series ID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(name: String?, identityURL: String?): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the Crave series number
@@ -590,7 +604,7 @@ contract Crave: NonFungibleToken{
 		}
 		
 		// createNewAdmin creates a new Admin resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -657,18 +671,18 @@ contract Crave: NonFungibleToken{
 	access(all)
 	resource interface CraveCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &Crave.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -678,8 +692,8 @@ contract Crave: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	// Collection is a resource that every user who owns NFTs 
@@ -718,7 +732,7 @@ contract Crave: NonFungibleToken{
 		//
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn collectibleItems
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -736,7 +750,7 @@ contract Crave: NonFungibleToken{
 		//
 		// Paramters: token: the NFT to be deposited in the collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Crave NFT to make sure
 			// it is the correct type
@@ -760,7 +774,7 @@ contract Crave: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -806,7 +820,7 @@ contract Crave: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &Crave.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -857,7 +871,7 @@ contract Crave: NonFungibleToken{
 	// getAllCollectibleItems returns all the collectibleItems in Crave
 	//
 	// Returns: An array of all the collectibleItems that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCollectibleItems(): [Crave.CollectibleItem]{ 
 		return Crave.collectibleItemDatas.values
 	}
@@ -867,7 +881,7 @@ contract Crave: NonFungibleToken{
 	// Parameters: collectibleItemID: The id of the CollectibleItem that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleItemMetaData(collectibleItemID: UInt32):{ String: String}?{ 
 		return self.collectibleItemDatas[collectibleItemID]?.metadata
 	}
@@ -877,7 +891,7 @@ contract Crave: NonFungibleToken{
 	// Parameters: collectibleItemID: The id of the CollectibleItem that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleItemFeaturedArtists(collectibleItemID: UInt32): [String]?{ 
 		return self.collectibleItemDatas[collectibleItemID]?.featuredArtists
 	}
@@ -891,7 +905,7 @@ contract Crave: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleItemMetaDataByField(collectibleItemID: UInt32, field: String): String?{ 
 		// Don't force a revert if the collectibleItemID or field is invalid
 		if let collectibleItem = Crave.collectibleItemDatas[collectibleItemID]{ 
@@ -906,7 +920,7 @@ contract Crave: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: An array of CollectibleItem IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleItemsInSet(setID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the setID is invalid
 		return Crave.sets[setID]?.collectibleItems
@@ -921,7 +935,7 @@ contract Crave: NonFungibleToken{
 	//			 collectibleItemID: The id of the CollectibleItem that is being searched
 	//
 	// Returns: Boolean indicating if the edition is retired or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setID: UInt32, collectibleItemID: UInt32): Bool?{ 
 		// Don't force a revert if the set or collectibleItem ID is invalid
 		// Remove the set from the dictionary to get its field
@@ -950,7 +964,7 @@ contract Crave: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: Boolean indicating if the Set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt32): Bool?{ 
 		// Don't force a revert if the setID is invalid
 		return Crave.sets[setID]?.locked
@@ -964,7 +978,7 @@ contract Crave: NonFungibleToken{
 	//
 	// Returns: The total number of Collectibles 
 	//		  that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumCollectiblesInEdition(setID: UInt32, collectibleItemID: UInt32): UInt32?{ 
 		// Don't force a revert if the Set or collectibleItem ID is invalid
 		// Remove the Set from the dictionary to get its field

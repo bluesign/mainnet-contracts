@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import SoulMadeComponent from "./SoulMadeComponent.cdc"
 
@@ -66,36 +80,36 @@ contract SoulMadeMarketplace{
 	// that only exposes the methods that are supposed to be public
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseSoulMadeMain(
 			tokenId: UInt64,
 			recipientCap: Capability<&{SoulMadeMain.CollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseSoulMadeComponent(
 			tokenId: UInt64,
 			recipientCap: Capability<&{SoulMadeComponent.CollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeMainPrice(tokenId: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeComponentPrice(tokenId: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeMainIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeComponentIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeMain(tokenId: UInt64): &{SoulMadeMain.MainPublic}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeComponent(tokenId: UInt64): &{SoulMadeComponent.ComponentPublic}
 	}
 	
@@ -133,7 +147,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Gives the owner the opportunity to remove a SoulMadeMain sale from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawSoulMadeMain(tokenId: UInt64): @SoulMadeMain.NFT{ 
 			// remove the price
 			self.SoulMadeMainPrices.remove(key: tokenId)
@@ -145,7 +159,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Gives the owner the opportunity to remove a Component sale from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawSoulMadeComponent(tokenId: UInt64): @SoulMadeComponent.NFT{ 
 			// remove the price
 			self.SoulMadeComponentPrices.remove(key: tokenId)
@@ -157,7 +171,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Lists a SoulMadeMain NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listSoulMadeMainForSale(token: @SoulMadeMain.NFT, price: UFix64){ 
 			let id = token.id
 			
@@ -174,7 +188,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Lists a Component NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listSoulMadeComponentForSale(token: @SoulMadeComponent.NFT, price: UFix64){ 
 			let id = token.id
 			
@@ -191,7 +205,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Changes the price of a SoulMadeMain that is currently for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeSoulMadeMainPrice(tokenId: UInt64, newPrice: UFix64){ 
 			self.SoulMadeMainPrices[tokenId] = newPrice
 			let vaultRef = self.ownerVault.borrow() ?? panic("Could not borrow reference to owner token vault")
@@ -199,7 +213,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Changes the price of a Component that is currently for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeSoulMadeComponentPrice(tokenId: UInt64, newPrice: UFix64){ 
 			self.SoulMadeComponentPrices[tokenId] = newPrice
 			let vaultRef = self.ownerVault.borrow() ?? panic("Could not borrow reference to owner token vault")
@@ -207,7 +221,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Lets a user send tokens to purchase a SoulMadeMain that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseSoulMadeMain(tokenId: UInt64, recipientCap: Capability<&{SoulMadeMain.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.SoulMadeMainForSale[tokenId] != nil && self.SoulMadeMainPrices[tokenId] != nil:
@@ -236,7 +250,7 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Lets a user send tokens to purchase a Component that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseSoulMadeComponent(tokenId: UInt64, recipientCap: Capability<&{SoulMadeComponent.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.SoulMadeComponentForSale[tokenId] != nil && self.SoulMadeComponentPrices[tokenId] != nil:
@@ -265,32 +279,32 @@ contract SoulMadeMarketplace{
 		}
 		
 		// Returns the price of a specific SoulMadeMain in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeMainPrice(tokenId: UInt64): UFix64?{ 
 			return self.SoulMadeMainPrices[tokenId]
 		}
 		
 		// Returns the price of a specific Component in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeComponentPrice(tokenId: UInt64): UFix64?{ 
 			return self.SoulMadeComponentPrices[tokenId]
 		}
 		
 		// Returns an array of SoulMadeMain IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeMainIDs(): [UInt64]{ 
 			return self.SoulMadeMainForSale.keys
 		}
 		
 		// Returns an array of Component IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeComponentIDs(): [UInt64]{ 
 			return self.SoulMadeComponentForSale.keys
 		}
 		
 		// Returns a borrowed reference to a SoulMadeMain Sale
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeMain(tokenId: UInt64): &{SoulMadeMain.MainPublic}{ 
 			pre{ 
 				self.SoulMadeMainForSale[tokenId] != nil:
@@ -302,7 +316,7 @@ contract SoulMadeMarketplace{
 		
 		// Returns a borrowed reference to a Component Sale
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSoulMadeComponent(tokenId: UInt64): &{SoulMadeComponent.ComponentPublic}{ 
 			pre{ 
 				self.SoulMadeComponentForSale[tokenId] != nil:
@@ -332,7 +346,7 @@ contract SoulMadeMarketplace{
 	}
 	
 	// Get a specific SoulMadeMain Sale offers for an account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSoulMadeMainSale(address: Address, id: UInt64): SoulMadeMainSaleData{ 
 		let account = getAccount(address)
 		let saleCollection =
@@ -344,7 +358,7 @@ contract SoulMadeMarketplace{
 	}
 	
 	// Get all the SoulMadeMain Sale offers for a specific account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSoulMadeMainSales(address: Address): [SoulMadeMainSaleData]{ 
 		var saleData: [SoulMadeMainSaleData] = []
 		let account = getAccount(address)
@@ -379,7 +393,7 @@ contract SoulMadeMarketplace{
 	}
 	
 	// Get a specific Component Sale offers for an account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSoulMadeComponentSale(address: Address, id: UInt64): SoulMadeComponentSaleData{ 
 		let account = getAccount(address)
 		let saleCollection =
@@ -395,7 +409,7 @@ contract SoulMadeMarketplace{
 	}
 	
 	// Get all the Component Sale offers for a specific account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSoulMadeComponentSales(address: Address): [SoulMadeComponentSaleData]{ 
 		var saleData: [SoulMadeComponentSaleData] = []
 		let account = getAccount(address)
@@ -442,7 +456,7 @@ contract SoulMadeMarketplace{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSoulMadeSales(address: Address): [SoulMadeSaleData]{ 
 		var saleData: [SoulMadeSaleData] = []
 		let account = getAccount(address)
@@ -462,7 +476,7 @@ contract SoulMadeMarketplace{
 		return saleData
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun convertSoulMadeMainSaleToSoulMadeSale(mainSale: SoulMadeMainSaleData): SoulMadeSaleData{ 
 		return SoulMadeSaleData(
 			id: mainSale.id,
@@ -473,7 +487,7 @@ contract SoulMadeMarketplace{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun convertSoulMadeComponentSaleToSoulMadeSale(
 		componentSale: SoulMadeComponentSaleData
 	): SoulMadeSaleData{ 
@@ -487,13 +501,13 @@ contract SoulMadeMarketplace{
 	}
 	
 	// Returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(ownerVault: Capability<&{FungibleToken.Receiver}>): @SaleCollection{ 
 		emit SoulMadeMarketplaceSaleCollectionCreated()
 		return <-create SaleCollection(ownerVault: ownerVault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	init(){ 
 		self.CollectionPublicPath = /public/SoulMadeMarketplace
 		self.CollectionStoragePath = /storage/SoulMadeMarketplace

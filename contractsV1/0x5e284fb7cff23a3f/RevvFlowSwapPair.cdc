@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import REVV from "../0xd01e482eb680ec9f/REVV.cdc"
 
@@ -119,7 +133,7 @@ contract RevvFlowSwapPair: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @RevvFlowSwapPair.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -164,24 +178,24 @@ contract RevvFlowSwapPair: FungibleToken{
 			self.token2 <- fromToken2
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken1(from: @REVV.Vault){ 
 			self.token1.deposit(from: <-(from as!{ FungibleToken.Vault}))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken2(from: @FlowToken.Vault){ 
 			self.token2.deposit(from: <-(from as!{ FungibleToken.Vault}))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken1(): @REVV.Vault{ 
 			var vault <- REVV.createEmptyVault(vaultType: Type<@REVV.Vault>()) as! @REVV.Vault
 			vault <-> self.token1
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken2(): @FlowToken.Vault{ 
 			var vault <- FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>()) as! @FlowToken.Vault
 			vault <-> self.token2
@@ -191,14 +205,14 @@ contract RevvFlowSwapPair: FungibleToken{
 	
 	// createEmptyBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyTokenBundle(): @RevvFlowSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-(REVV.createEmptyVault(vaultType: Type<@REVV.Vault>()) as! @REVV.Vault), fromToken2: <-(FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>()) as! @FlowToken.Vault))
 	}
 	
 	// createTokenBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenBundle(fromToken1: @REVV.Vault, fromToken2: @FlowToken.Vault): @RevvFlowSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-fromToken1, fromToken2: <-fromToken2)
 	}
@@ -236,17 +250,17 @@ contract RevvFlowSwapPair: FungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			RevvFlowSwapPair.isFrozen = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			RevvFlowSwapPair.isFrozen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addInitialLiquidity(from: @RevvFlowSwapPair.TokenBundle): @RevvFlowSwapPair.Vault{ 
 			pre{ 
 				RevvFlowSwapPair.totalSupply == 0.0:
@@ -264,7 +278,7 @@ contract RevvFlowSwapPair: FungibleToken{
 			return <-RevvFlowSwapPair.mintTokens(amount: 1.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeePercentage(feePercentage: UFix64){ 
 			RevvFlowSwapPair.feePercentage = feePercentage
 			emit FeeUpdated(feePercentage: feePercentage)
@@ -285,19 +299,19 @@ contract RevvFlowSwapPair: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeePercentage(): UFix64{ 
 		return self.feePercentage
 	}
 	
 	// Check current pool amounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolAmounts(): PoolAmounts{ 
 		return PoolAmounts(token1Amount: RevvFlowSwapPair.token1Vault.balance, token2Amount: RevvFlowSwapPair.token2Vault.balance)
 	}
 	
 	// Get quote for Token1 (given) -> Token2
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken1ForToken2(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		
@@ -307,7 +321,7 @@ contract RevvFlowSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token1 -> Token2 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken1ForExactToken2(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		assert(poolAmounts.token2Amount > amount, message: "Not enough Token2 in the pool")
@@ -318,7 +332,7 @@ contract RevvFlowSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 (given) -> Token1
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken2ForToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		
@@ -328,7 +342,7 @@ contract RevvFlowSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 -> Token1 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken2ForExactToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		assert(poolAmounts.token1Amount > amount, message: "Not enough Token1 in the pool")
@@ -339,7 +353,7 @@ contract RevvFlowSwapPair: FungibleToken{
 	}
 	
 	// Swaps Token1 (REVV) -> Token2 (FLOW)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken1ForToken2(from: @REVV.Vault): @FlowToken.Vault{ 
 		pre{ 
 			!RevvFlowSwapPair.isFrozen:
@@ -359,7 +373,7 @@ contract RevvFlowSwapPair: FungibleToken{
 	}
 	
 	// Swap Token2 (FLOW) -> Token1 (REVV)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken2ForToken1(from: @FlowToken.Vault): @REVV.Vault{ 
 		pre{ 
 			!RevvFlowSwapPair.isFrozen:
@@ -379,7 +393,7 @@ contract RevvFlowSwapPair: FungibleToken{
 	}
 	
 	// Used to add liquidity without minting new liquidity token
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun donateLiquidity(from: @RevvFlowSwapPair.TokenBundle){ 
 		let token1Vault <- from.withdrawToken1()
 		let token2Vault <- from.withdrawToken2()
@@ -388,7 +402,7 @@ contract RevvFlowSwapPair: FungibleToken{
 		destroy from
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addLiquidity(from: @RevvFlowSwapPair.TokenBundle): @RevvFlowSwapPair.Vault{ 
 		pre{ 
 			self.totalSupply > 0.0:
@@ -414,7 +428,7 @@ contract RevvFlowSwapPair: FungibleToken{
 		return <-liquidityTokenVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeLiquidity(from: @RevvFlowSwapPair.Vault): @RevvFlowSwapPair.TokenBundle{ 
 		pre{ 
 			from.balance > 0.0:

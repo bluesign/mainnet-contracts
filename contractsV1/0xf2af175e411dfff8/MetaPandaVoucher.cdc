@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -191,7 +205,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 		
 		// borrowViewResolverSafe
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolverSafe(id: UInt64): &{ViewResolver.Resolver}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -230,7 +244,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MetaPandaVoucher.NFT
 			let id: UInt64 = token.id
 			
@@ -295,7 +309,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 		// Mints a new NFT with a new ID and deposits it in the recipients 
 		// collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata: Metadata, file: AnchainUtils.File){ 
 			emit Minted(id: MetaPandaVoucher.totalSupply, metadata: metadata)
 			recipient.deposit(token: <-create MetaPandaVoucher.NFT(id: MetaPandaVoucher.totalSupply, metadata: metadata, file: file))
@@ -305,7 +319,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 		// consume
 		// Consumes a voucher from the redeemed collection by destroying it
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun consume(_ voucherID: UInt64): Address{ 
 			// Obtain a reference to the redeemed collection
 			let redeemedCollection = MetaPandaVoucher.account.storage.borrow<&MetaPandaVoucher.Collection>(from: MetaPandaVoucher.RedeemedCollectionStoragePath)!
@@ -332,7 +346,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 	// The NFTs, aka vouchers, can be 'redeemed' into the RedeemedCollection. The admin
 	// can then consume these in exchange for merchandise.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeem(collection: &MetaPandaVoucher.Collection, voucherID: UInt64){ 
 		// Withdraw the voucher
 		let token <- collection.withdraw(withdrawID: voucherID)
@@ -351,7 +365,7 @@ contract MetaPandaVoucher: NonFungibleToken{
 	// getRedeemers
 	// Return the redeemers dictionary
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRedeemers():{ UInt64: Address}{ 
 		return self.redeemers
 	}

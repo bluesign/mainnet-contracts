@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 //import MetadataViews from 0x8ea44ab931cac762 // Only used for initializing MultiFungibleTokenReceiverPath
 // Supported FungibleTokens
@@ -48,7 +62,7 @@ contract MultiFungibleToken{
 	access(all)
 	resource interface MultiFungibleTokenBalance{ // An interface to get all the balances in storage 
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStorageBalances():{ String: UFix64}
 	}
 	
@@ -63,8 +77,7 @@ contract MultiFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ // deposit takes a Vault and deposits it into the implementing resource type 
-			
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let type = from.getType()
 			let identifier = type.identifier
 			let balance = from.balance
@@ -111,7 +124,7 @@ contract MultiFungibleToken{
 			return <-self.storage.remove(key: identifier)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStorageBalances():{ String: UFix64}{ 
 			var balances:{ String: UFix64} ={} 
 			for coin in self.storage.keys{ 
@@ -134,12 +147,12 @@ contract MultiFungibleToken{
 	}
 	
 	// Contract Functions ---------------------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyMultiFungibleTokenReceiver(): @MultiFungibleTokenManager{ 
 		return <-create MultiFungibleTokenManager()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMissingWalletsAndDeposit(_ owner: AuthAccount, _ mft: &MultiFungibleTokenManager){ 
 		for identifier in mft.storage.keys{ 
 			let ref = mft.storage[identifier] as &{FungibleToken.Vault}?

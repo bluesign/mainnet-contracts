@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -99,10 +113,10 @@ contract RaribleOpenBid{
 	
 	access(all)
 	resource interface BidPublic{ 
-		access(all)
-		fun purchase(item: @{NonFungibleToken.NFT}): @{FungibleToken.Vault}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun purchase(item: @{NonFungibleToken.NFT}): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): BidDetails
 	}
 	
@@ -137,7 +151,7 @@ contract RaribleOpenBid{
 			emit BidAvailable(bidAddress: rewardCapability.address, bidId: self.details.bidId, vaultType: self.details.vaultType, bidPrice: self.details.bidPrice, nftType: self.details.nftType, nftId: self.details.nftId, brutto: self.details.brutto, cuts: cutsInfo)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(item: @{NonFungibleToken.NFT}): @{FungibleToken.Vault}{ 
 			pre{ 
 				!self.details.purchased:
@@ -160,7 +174,7 @@ contract RaribleOpenBid{
 			return <-payment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): BidDetails{ 
 			return self.details
 		}
@@ -168,7 +182,7 @@ contract RaribleOpenBid{
 	
 	access(all)
 	resource interface OpenBidManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBid(
 			vaultRefCapability: Capability<
 				&{FungibleToken.Receiver, FungibleToken.Balance, FungibleToken.Provider}
@@ -178,23 +192,23 @@ contract RaribleOpenBid{
 			nftType: Type,
 			nftId: UInt64,
 			cuts: [
-				Cut
+				RaribleOpenBid.Cut
 			]
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBid(bidId: UInt64)
 	}
 	
 	access(all)
 	resource interface OpenBidPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(bidId: UInt64): &Bid?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(bidId: UInt64)
 	}
 	
@@ -203,7 +217,7 @@ contract RaribleOpenBid{
 		access(self)
 		var bids: @{UInt64: Bid}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBid(vaultRefCapability: Capability<&{FungibleToken.Receiver, FungibleToken.Balance, FungibleToken.Provider}>, offerPrice: UFix64, rewardCapability: Capability<&{NonFungibleToken.CollectionPublic}>, nftType: Type, nftId: UInt64, cuts: [Cut]): UInt64{ 
 			let bid <- create Bid(vaultRefCapability: vaultRefCapability, offerPrice: offerPrice, rewardCapability: rewardCapability, nftType: nftType, nftId: nftId, cuts: cuts)
 			let bidId = bid.uuid
@@ -212,17 +226,17 @@ contract RaribleOpenBid{
 			return bidId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBid(bidId: UInt64){ 
 			destroy (self.bids.remove(key: bidId) ?? panic("missing bid"))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIds(): [UInt64]{ 
 			return self.bids.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(bidId: UInt64): &Bid?{ 
 			if self.bids[bidId] != nil{ 
 				return &self.bids[bidId] as &Bid?
@@ -231,7 +245,7 @@ contract RaribleOpenBid{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(bidId: UInt64){ 
 			pre{ 
 				self.bids[bidId] != nil:
@@ -248,7 +262,7 @@ contract RaribleOpenBid{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createOpenBid(): @OpenBid{ 
 		return <-create OpenBid()
 	}

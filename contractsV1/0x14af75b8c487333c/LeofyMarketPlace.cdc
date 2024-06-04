@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import LeofyNFT from "./LeofyNFT.cdc"
 
@@ -287,7 +301,7 @@ contract LeofyMarketPlace{
 		}
 		
 		//This method should probably use preconditions more 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(cutPercentage: UFix64, cutVault: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				!self.auctionCompleted:
@@ -326,7 +340,7 @@ contract LeofyMarketPlace{
 		}
 		
 		//this can be negative if is expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64{ 
 			let auctionLength = self.auctionLength
 			let startTime = self.auctionStartTime
@@ -335,7 +349,7 @@ contract LeofyMarketPlace{
 			return remaining
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool{ 
 			let timeRemaining = self.timeRemaining()
 			if self.auctionStartTime == UFix64(0.0) || self.auctionLength == UFix64(0.0){ 
@@ -344,7 +358,7 @@ contract LeofyMarketPlace{
 			return timeRemaining < Fix64(0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minNextBid(): UFix64{ 
 			//If there are bids then the next min bid is the current price plus the increment
 			if self.currentPrice != 0.0{ 
@@ -366,7 +380,7 @@ contract LeofyMarketPlace{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address?{ 
 			if let vaultCap = self.recipientVaultCap{ 
 				return ((vaultCap.borrow()!).owner!).address
@@ -374,7 +388,7 @@ contract LeofyMarketPlace{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.bidder() == address{ 
 				return self.bidVault.balance
@@ -382,7 +396,7 @@ contract LeofyMarketPlace{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bidTokens: @{FungibleToken.Vault},
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
@@ -431,7 +445,7 @@ contract LeofyMarketPlace{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placePurchase(
 			payment: @{FungibleToken.Vault},
 			collectionCap: Capability<&{LeofyNFT.LeofyCollectionPublic}>
@@ -474,7 +488,7 @@ contract LeofyMarketPlace{
 			emit Purchased(tokenID: self.marketplaceID, price: self.purchasePrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketplaceStatus(): MarketplaceStatus{ 
 			var leader: Address? = nil
 			if let recipient = self.recipientVaultCap{ 
@@ -504,28 +518,28 @@ contract LeofyMarketPlace{
 	
 	access(all)
 	resource interface MarketplaceCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			id: UInt64,
 			bidTokens: @{FungibleToken.Vault},
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
 			collectionCap: Capability<&{LeofyNFT.LeofyCollectionPublic}>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placePurchase(
 			id: UInt64,
 			payment: @{FungibleToken.Vault},
 			collectionCap: Capability<&{LeofyNFT.LeofyCollectionPublic}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketplaceStatuses():{ UInt64: MarketplaceStatus}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketplaceStatus(_ id: UInt64): MarketplaceStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64)
 	}
 	
@@ -538,7 +552,7 @@ contract LeofyMarketPlace{
 			self.marketplaceItems <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sellItem(token: @LeofyNFT.NFT, auctionStartTime: UFix64, auctionLength: UFix64, startPrice: UFix64, ownerCollectionCap: Capability<&{LeofyNFT.LeofyCollectionPublic}>, ownerVaultCap: Capability<&{FungibleToken.Receiver}>, purchasePrice: UFix64){ 
 			pre{ 
 				purchasePrice == 0.00 && auctionStartTime > 0.00 && auctionLength > 0.00 || purchasePrice > startPrice + LeofyMarketPlace.minimumBidIncrement:
@@ -553,7 +567,7 @@ contract LeofyMarketPlace{
 		}
 		
 		// getAuctionPrices returns a dictionary of available NFT IDs with their current price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketplaceStatuses():{ UInt64: MarketplaceStatus}{ 
 			let priceList:{ UInt64: MarketplaceStatus} ={} 
 			for id in self.marketplaceItems.keys{ 
@@ -563,7 +577,7 @@ contract LeofyMarketPlace{
 			return priceList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketplaceStatus(_ id: UInt64): MarketplaceStatus{ 
 			pre{ 
 				self.marketplaceItems[id] != nil:
@@ -575,7 +589,7 @@ contract LeofyMarketPlace{
 			return itemRef.getMarketplaceStatus()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(_ id: UInt64){ 
 			pre{ 
 				self.marketplaceItems[id] != nil:
@@ -591,7 +605,7 @@ contract LeofyMarketPlace{
 			emit Cancelled(tokenID: tokenID, owner: owner)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(id: UInt64, bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{LeofyNFT.LeofyCollectionPublic}>){ 
 			pre{ 
 				self.marketplaceItems[id] != nil:
@@ -603,7 +617,7 @@ contract LeofyMarketPlace{
 			itemRef.placeBid(bidTokens: <-bidTokens, vaultCap: vaultCap, collectionCap: collectionCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placePurchase(id: UInt64, payment: @{FungibleToken.Vault}, collectionCap: Capability<&{LeofyNFT.LeofyCollectionPublic}>){ 
 			pre{ 
 				self.marketplaceItems[id] != nil:
@@ -619,7 +633,7 @@ contract LeofyMarketPlace{
 		
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64){ 
 			pre{ 
 				self.marketplaceItems[id] != nil:
@@ -633,7 +647,7 @@ contract LeofyMarketPlace{
 	}
 	
 	// public function that anyone can call to create a new empty collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @LeofyMarketPlace.MarketplaceCollection{ 
 		return <-create MarketplaceCollection()
 	}
@@ -641,7 +655,7 @@ contract LeofyMarketPlace{
 	// Only owner of this resource object can call this function
 	access(all)
 	resource LeofyMarketPlaceAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePercentage(_ cutPercentage: UFix64){ 
 			pre{ 
 				cutPercentage >= 0.00 && cutPercentage <= 100.00:
@@ -650,22 +664,22 @@ contract LeofyMarketPlace{
 			LeofyMarketPlace.cutPercentage = cutPercentage
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBidIncrement(_ minimumBidIncrement: UFix64){ 
 			LeofyMarketPlace.minimumBidIncrement = minimumBidIncrement
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeExtendsTime(_ extendsTime: UFix64){ 
 			LeofyMarketPlace.extendsTime = extendsTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeExtendsWhenTimeLowerThan(_ extendsWhenTimeLowerThan: Fix64){ 
 			LeofyMarketPlace.extendsWhenTimeLowerThan = extendsWhenTimeLowerThan
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMarketplaceVault(_ marketplaceVault: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				marketplaceVault.check() == true:

@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import InceptionAvatar from "./InceptionAvatar.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -26,12 +40,12 @@ contract InceptionExchange{
 	access(self)
 	var InceptionAvatarTokenIDToRedemptionTimeInSeconds:{ UInt64: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentBlockTimeInSeconds(): UInt64{ 
 		return UInt64(getCurrentBlock().timestamp)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimInceptionCrystalWithBlackBox(signerAuth: AuthAccount, tokenID: UInt64){ 
 		// Check blackbox collection to ensure ownership
 		let tokenIDs =
@@ -86,7 +100,7 @@ contract InceptionExchange{
 			)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun exchangeCrystalForFlowToken(signerAuth: AuthAccount, amount: UInt64){ 
 		// Check InceptionCrystal balance
 		let tokenIDs =
@@ -118,7 +132,7 @@ contract InceptionExchange{
 		recipientFlowTokenRef.deposit(from: <-selfFlowWithdrawVault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNextInceptionBlackBoxRedemptionTimeInSeconds(tokenID: UInt64): UInt64{ 
 		let lastClaimTime = InceptionExchange.BlackBoxTokenIDToRedemptionTimeInSeconds[tokenID] ?? 0
 		return lastClaimTime + 86400 * 7

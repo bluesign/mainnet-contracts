@@ -1,4 +1,18 @@
-// Digital Art as Fungible Tokens
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Digital Art as Fungible Tokens
 
 // Each piece of artwork on Nanobash has a certain number of "editions".
 // However, instead of these editions being numbered in the way NFTs generally are, they are fungible and interchangeable.
@@ -61,20 +75,20 @@ contract Nanobash{
 		}
 		
 		// Lock the token to prevent additional editions being minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
 		// Creates a vault with a specific quantity of the current token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(quantity: UInt64): @Vault{ 
 			pre{ 
 				!self.locked:
@@ -91,7 +105,7 @@ contract Nanobash{
 	access(all)
 	resource Admin{ 
 		// Allows creation of new token types by the admin
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createToken(metadata:{ String: String}, maxEditions: UInt64): UInt64{ 
 			var newToken <- create Token(metadata: metadata, maxEditions: maxEditions)
 			let newID = newToken.tokenID
@@ -100,7 +114,7 @@ contract Nanobash{
 		}
 		
 		// Allow admins to borrow the token instance for token specific methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowToken(tokenID: UInt64): &Token{ 
 			pre{ 
 				Nanobash.tokens[tokenID] != nil:
@@ -112,8 +126,8 @@ contract Nanobash{
 	
 	access(all)
 	resource interface Provider{ 
-		access(all)
-		fun withdraw(amount: UInt64, tokenID: UInt64): @Vault{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdraw(amount: UInt64, tokenID: UInt64): @Nanobash.Vault{ 
 			post{ 
 				result.getBalance(tokenID: tokenID) == UInt64(amount):
 					"Withdrawal amount must be the same as the balance of the withdrawn Vault"
@@ -123,16 +137,16 @@ contract Nanobash{
 	
 	access(all)
 	resource interface Receiver{ 
-		access(all)
-		fun deposit(from: @Vault)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(from: @Nanobash.Vault): Void
 	}
 	
 	access(all)
 	resource interface Balance{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getBalance(tokenID: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalances():{ UInt64: UInt64}
 	}
 	
@@ -146,17 +160,17 @@ contract Nanobash{
 			self.balances = balances
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalances():{ UInt64: UInt64}{ 
 			return self.balances
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getBalance(tokenID: UInt64): UInt64{ 
 			return self.balances[tokenID] ?? 0 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UInt64, tokenID: UInt64): @Vault{ 
 			pre{ 
 				self.balances[tokenID] != nil:
@@ -170,7 +184,7 @@ contract Nanobash{
 			return <-create Vault(balances:{ tokenID: amount})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @Vault){ 
 			// For each entry in our {tokenID: quantity} map, add tokens in vault to account balances
 			let tokenIDs = from.balances.keys
@@ -186,27 +200,27 @@ contract Nanobash{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @Vault{ 
 		return <-create Vault(balances:{} )
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMinted(tokenID: UInt64): UInt64{ 
 		return self.tokens[tokenID]?.numberMinted ?? 0 as UInt64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxEditions(tokenID: UInt64): UInt64{ 
 		return self.tokens[tokenID]?.maxEditions ?? 0 as UInt64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenMetadata(tokenID: UInt64):{ String: String}{ 
 		return self.tokens[tokenID]?.getMetadata() ??{}  as{ String: String}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isTokenLocked(tokenID: UInt64): Bool{ 
 		return Nanobash.tokens[tokenID]?.locked ?? false
 	}

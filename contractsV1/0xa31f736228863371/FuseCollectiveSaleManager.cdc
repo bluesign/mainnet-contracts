@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -71,7 +85,7 @@ contract FuseCollectiveSaleManager{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Manager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaxQuantityPerMint(_ amount: UInt64){ 
 			FuseCollectiveSaleManager.maxQuantityPerMint = amount
 			emit UpdateSaleInfo(
@@ -81,7 +95,7 @@ contract FuseCollectiveSaleManager{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrice(_ price: UFix64){ 
 			FuseCollectiveSaleManager.salePrice = price
 			emit UpdateSaleInfo(
@@ -91,7 +105,7 @@ contract FuseCollectiveSaleManager{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSaleStartTime(_ saleStartTime: UFix64){ 
 			FuseCollectiveSaleManager.saleStartTime = saleStartTime
 			emit UpdateSaleInfo(
@@ -101,25 +115,25 @@ contract FuseCollectiveSaleManager{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFuseCollectiveCollectionMetadata(metadata:{ String: String}){ 
 			FuseCollective.setCollectionMetadata(metadata: metadata)
 			emit UpdateFuseCollectiveCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFuseCollectiveEditionMetadata(editionNumber: UInt64, metadata:{ String: String}){ 
 			FuseCollective.setEditionMetadata(editionNumber: editionNumber, metadata: metadata)
 			emit UpdateFuseCollectiveEditionMetadata(id: editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPaymentReceiver(paymentReceiver: Capability<&{FungibleToken.Receiver}>){ 
 			FuseCollectiveSaleManager.paymentReceiver = paymentReceiver
 			emit UpdatePaymentReceiver(address: paymentReceiver.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAtEdition(edition: UInt64): @{NonFungibleToken.NFT}{ 
 			emit AdminMint(id: edition)
 			return <-FuseCollectiveSaleManager.mint(edition: edition)
@@ -159,7 +173,7 @@ contract FuseCollectiveSaleManager{
 	// Public Functions
 	// -----------------------------------------------------------------------
 	// Accepts payment for nfts, payment is moved to the `self.paymentReceiver` capability field
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicBatchMintSequential(buyVault: @{FungibleToken.Vault}, quantity: UInt64): @{
 		NonFungibleToken.Collection
 	}{ 

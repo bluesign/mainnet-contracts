@@ -1,4 +1,18 @@
-import BasicBeasts from "./BasicBeasts.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import BasicBeasts from "./BasicBeasts.cdc"
 
 access(all)
 contract HunterScore{ 
@@ -57,7 +71,7 @@ contract HunterScore{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deductPoints(wallet: Address, pointsToDeduct: UInt32){ 
 			pre{ 
 				HunterScore.hunterScores[wallet] != nil:
@@ -71,7 +85,7 @@ contract HunterScore{
 			emit HunterScorePointsDeducted(wallet: wallet, points: pointsToDeduct)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun banAddress(wallet: Address){ 
 			pre{ 
 				!HunterScore.banned.contains(wallet):
@@ -81,7 +95,7 @@ contract HunterScore{
 			emit Banned(wallet: wallet)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unbanAddress(wallet: Address){ 
 			pre{ 
 				HunterScore.banned.contains(wallet):
@@ -98,7 +112,7 @@ contract HunterScore{
 			emit Unbanned(wallet: wallet)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -155,52 +169,52 @@ contract HunterScore{
 		return <-beasts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getHunterScores():{ Address: UInt32}{ 
 		return self.hunterScores
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getHunterScore(wallet: Address): UInt32?{ 
 		return self.hunterScores[wallet]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBeastsCollected():{ Address: [UInt64]}{ 
 		return self.beastsCollected
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBeastsCollected(wallet: Address): [UInt64]?{ 
 		return self.beastsCollected[wallet]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBeastTemplatesCollected():{ Address: [UInt32]}{ 
 		return self.beastTemplatesCollected
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBeastTemplatesCollected(wallet: Address): [UInt32]?{ 
 		return self.beastTemplatesCollected[wallet]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPointTable():{ String: UInt32}{ 
 		return self.pointTable
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPointReward(skinAndStarLevel: String): UInt32?{ 
 		return self.pointTable[skinAndStarLevel]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBanned(): [Address]{ 
 		return self.banned
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAddressBanned(wallet: Address): Bool{ 
 		return self.banned.contains(wallet)
 	}

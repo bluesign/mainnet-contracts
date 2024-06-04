@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Escrow Contract for managing NFTs in a Leaderboard Context.
 	Holds NFTs in Escrow account awaiting transfer or burn.
 
@@ -77,7 +91,7 @@ contract Escrow{
 		var metadata:{ String: AnyStruct}
 		
 		// Adds an NFT entry to the leaderboard.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntryToLeaderboard(
 			nft: @{NonFungibleToken.NFT},
 			ownerAddress: Address,
@@ -183,10 +197,10 @@ contract Escrow{
 	// An interface containing the Collection function that gets leaderboards by name.
 	access(all)
 	resource interface ICollectionPublic{ 
-		access(all)
-		fun getLeaderboardInfo(name: String): LeaderboardInfo?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getLeaderboardInfo(name: String): Escrow.LeaderboardInfo?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntryToLeaderboard(
 			nft: @{NonFungibleToken.NFT},
 			leaderboardName: String,
@@ -199,21 +213,21 @@ contract Escrow{
 	
 	access(all)
 	resource interface ICollectionPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createLeaderboard(
 			name: String,
 			nftType: Type,
 			collection: @{NonFungibleToken.Collection}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferNftToCollection(
 			leaderboardName: String,
 			nftID: UInt64,
 			depositCap: Capability<&{NonFungibleToken.CollectionPublic}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(leaderboardName: String, nftID: UInt64)
 	}
 	
@@ -225,7 +239,7 @@ contract Escrow{
 		var leaderboards: @{String: Leaderboard}
 		
 		// Creates a new leaderboard and stores it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createLeaderboard(name: String, nftType: Type, collection: @{NonFungibleToken.Collection}){ 
 			if self.leaderboards[name] != nil{ 
 				panic("Leaderboard already exists with this name")
@@ -242,7 +256,7 @@ contract Escrow{
 		}
 		
 		// Returns leaderboard info with the given name.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaderboardInfo(name: String): LeaderboardInfo?{ 
 			let leaderboard = &self.leaderboards[name] as &Leaderboard?
 			if leaderboard == nil{ 
@@ -252,7 +266,7 @@ contract Escrow{
 		}
 		
 		// Call addEntry.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntryToLeaderboard(nft: @{NonFungibleToken.NFT}, leaderboardName: String, ownerAddress: Address, metadata:{ String: AnyStruct}){ 
 			let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
 			if leaderboard == nil{ 
@@ -262,7 +276,7 @@ contract Escrow{
 		}
 		
 		// Calls transferNftToCollection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferNftToCollection(leaderboardName: String, nftID: UInt64, depositCap: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
 			if leaderboard == nil{ 
@@ -272,7 +286,7 @@ contract Escrow{
 		}
 		
 		// Calls burn.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(leaderboardName: String, nftID: UInt64){ 
 			let leaderboard = &self.leaderboards[leaderboardName] as &Leaderboard?
 			if leaderboard == nil{ 

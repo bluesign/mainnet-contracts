@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract Vouchers: NonFungibleToken{ 
@@ -113,7 +127,7 @@ contract Vouchers: NonFungibleToken{
 	/// The NFT's, aka Vouchers, can be 'redeemed' into the RedeemedCollection, which
 	/// will ultimately consume them to the tune of an externally agreed-upon reward.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeem(collection: &Vouchers.Collection, voucherID: UInt64){ 
 		// withdraw their voucher
 		let token <- collection.withdraw(withdrawID: voucherID)
@@ -149,7 +163,7 @@ contract Vouchers: NonFungibleToken{
 		
 		// Expose metadata of this Voucher type
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata?{ 
 			return Vouchers.metadata[self.typeID]
 		}
@@ -165,15 +179,15 @@ contract Vouchers: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVoucher(id: UInt64): &Vouchers.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -210,7 +224,7 @@ contract Vouchers: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Vouchers.NFT
 			let id: UInt64 = token.id
 			
@@ -242,7 +256,7 @@ contract Vouchers: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the Vouchers.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowVoucher(id: UInt64): &Vouchers.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -288,7 +302,7 @@ contract Vouchers: NonFungibleToken{
 	// access to the Administrator resource through their receiver, which
 	// they can then borrowSudo() to utilize
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxy(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -297,8 +311,8 @@ contract Vouchers: NonFungibleToken{
 	//
 	access(all)
 	resource interface AdminProxyPublic{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Vouchers.Administrator>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&Vouchers.Administrator>): Void
 	}
 	
 	/// AdminProxy
@@ -319,7 +333,7 @@ contract Vouchers: NonFungibleToken{
 		
 		// must receive capability to take administrator actions
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Vouchers.Administrator>){ 
 			pre{ 
 				cap.check():
@@ -332,7 +346,7 @@ contract Vouchers: NonFungibleToken{
 		
 		// borrow a reference to the Administrator
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSudo(): &Vouchers.Administrator{ 
 			pre{ 
 				self.sudo != nil:
@@ -352,7 +366,7 @@ contract Vouchers: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposits it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64){ 
 			emit Minted(id: Vouchers.totalSupply)
 			
@@ -365,7 +379,7 @@ contract Vouchers: NonFungibleToken{
 		// Mints a batch of new NFTs
 		// and deposits them in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, count: Int){ 
 			var index = 0
 			while index < count{ 
@@ -377,7 +391,7 @@ contract Vouchers: NonFungibleToken{
 		// registerMetadata
 		// Registers metadata for a typeID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerMetadata(typeID: UInt64, metadata: Metadata){ 
 			Vouchers.metadata[typeID] = metadata
 		}
@@ -386,7 +400,7 @@ contract Vouchers: NonFungibleToken{
 		// consumes a Voucher from the Redeemed Collection by destroying it
 		// NOTE: it is expected the consumer also rewards the redeemer their due
 		//		  in the case of this repository, an NFT is included in the consume transaction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun consume(_ voucherID: UInt64): Address{ 
 			// grab the voucher from the redeemed collection
 			let redeemedCollection = Vouchers.account.storage.borrow<&Vouchers.Collection>(from: Vouchers.RedeemedCollectionStoragePath)!
@@ -405,7 +419,7 @@ contract Vouchers: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Vouchers.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&Vouchers.Collection>(Vouchers.CollectionPublicPath).borrow<&Vouchers.Collection>() ?? panic("Couldn't get collection")
 		// We trust Vouchers.Collection.borrowVoucher to get the correct itemID
@@ -416,7 +430,7 @@ contract Vouchers: NonFungibleToken{
 	// getMetadata
 	// Get the metadata for a specific  of Vouchers
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(typeID: UInt64): Metadata?{ 
 		return Vouchers.metadata[typeID]
 	}

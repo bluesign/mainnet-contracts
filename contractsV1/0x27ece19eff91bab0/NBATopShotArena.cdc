@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -64,7 +78,7 @@ contract NBATopShotArena: NonFungibleToken{
 	
 	/// Return the royalty recipients for this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(): [MetadataViews.Royalty]{ 
 		return NBATopShotArena.royalties
 	}
@@ -152,7 +166,7 @@ contract NBATopShotArena: NonFungibleToken{
 		///
 		/// The supply is the number of NFTs minted minus the number burned.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supply(): UInt64{ 
 			return self.size - self.burned
 		}
@@ -204,7 +218,7 @@ contract NBATopShotArena: NonFungibleToken{
 	access(self)
 	let editions:{ UInt64: Edition}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEdition(id: UInt64): Edition?{ 
 		return NBATopShotArena.editions[id]
 	}
@@ -218,7 +232,7 @@ contract NBATopShotArena: NonFungibleToken{
 	access(self)
 	let editionsByMintID:{ String: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionByMintID(mintID: String): UInt64?{ 
 		return NBATopShotArena.editionsByMintID[mintID]
 	}
@@ -242,7 +256,7 @@ contract NBATopShotArena: NonFungibleToken{
 		
 		/// Return the edition that this NFT belongs to.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(): Edition{ 
 			return NBATopShotArena.getEdition(id: self.editionID)!
 		}
@@ -276,44 +290,44 @@ contract NBATopShotArena: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplay(_ metadata: Metadata): MetadataViews.Display{ 
 			return MetadataViews.Display(name: metadata.name, description: metadata.description, thumbnail: FreshmintMetadataViews.ipfsFile(file: metadata.thumbnail))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveExternalURL(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("https://nbatopshot.com")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTView(_ metadata: Metadata): MetadataViews.NFTView{ 
 			return MetadataViews.NFTView(id: self.id, uuid: self.uuid, display: self.resolveDisplay(metadata), externalURL: self.resolveExternalURL(), collectionData: self.resolveNFTCollectionData(), collectionDisplay: self.resolveNFTCollectionDisplay(), royalties: self.resolveRoyalties(), traits: nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			return NBATopShotArena.collectionMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: NBATopShotArena.CollectionStoragePath, publicPath: NBATopShotArena.CollectionPublicPath, publicCollection: Type<&NBATopShotArena.Collection>(), publicLinkedType: Type<&NBATopShotArena.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-NBATopShotArena.createEmptyCollection(nftType: Type<@NBATopShotArena.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveRoyalties(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties(NBATopShotArena.getRoyalties())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveEditionView(_ edition: Edition): MetadataViews.Edition{ 
 			return MetadataViews.Edition(name: "Edition", number: self.serialNumber, max: edition.size)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveSerialView(_ serialNumber: UInt64): MetadataViews.Serial{ 
 			return MetadataViews.Serial(serialNumber)
 		}
@@ -327,15 +341,15 @@ contract NBATopShotArena: NonFungibleToken{
 	access(all)
 	resource interface NBATopShotArenaCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNBATopShotArena(id: UInt64): &NBATopShotArena.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -368,7 +382,7 @@ contract NBATopShotArena: NonFungibleToken{
 		/// Deposit an NFT into this collection.
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NBATopShotArena.NFT
 			let id: UInt64 = token.id
 			
@@ -399,7 +413,7 @@ contract NBATopShotArena: NonFungibleToken{
 		///
 		/// This function returns nil if the NFT does not exist in this collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNBATopShotArena(id: UInt64): &NBATopShotArena.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -453,7 +467,7 @@ contract NBATopShotArena: NonFungibleToken{
 		/// This function does not mint any NFTs. It only creates the
 		/// edition data that will later be associated with minted NFTs.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(mintID: String, limit: UInt64?, name: String, description: String, thumbnail: String, asset: String, assetType: String, eventName: String, eventDate: String, externalURL: String, attributes:{ String: String}): UInt64{ 
 			let metadata = Metadata(name: name, description: description, thumbnail: thumbnail, asset: asset, assetType: assetType, eventName: eventName, eventDate: eventDate, externalURL: externalURL, attributes: attributes)
 			
@@ -476,7 +490,7 @@ contract NBATopShotArena: NonFungibleToken{
 		/// This prevents new NFTs from being minted into the edition.
 		/// An edition cannot be reopened after it is closed.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeEdition(editionID: UInt64){ 
 			let edition = NBATopShotArena.editions[editionID] ?? panic("edition does not exist")
 			
@@ -497,7 +511,7 @@ contract NBATopShotArena: NonFungibleToken{
 		/// This function will panic if the edition has already
 		/// reached its maximum size.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @NBATopShotArena.NFT{ 
 			let edition = NBATopShotArena.editions[editionID] ?? panic("edition does not exist")
 			
@@ -529,28 +543,28 @@ contract NBATopShotArena: NonFungibleToken{
 	
 	/// Return a public path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(suffix: String): PublicPath{ 
 		return PublicPath(identifier: "NBATopShotArena_".concat(suffix))!
 	}
 	
 	/// Return a private path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(suffix: String): PrivatePath{ 
 		return PrivatePath(identifier: "NBATopShotArena_".concat(suffix))!
 	}
 	
 	/// Return a storage path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(suffix: String): StoragePath{ 
 		return StoragePath(identifier: "NBATopShotArena_".concat(suffix))!
 	}
 	
 	/// Return a collection name with an optional bucket suffix.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeCollectionName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Collection_".concat(bucketName)
@@ -560,7 +574,7 @@ contract NBATopShotArena: NonFungibleToken{
 	
 	/// Return a queue name with an optional bucket suffix.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeQueueName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Queue_".concat(bucketName)

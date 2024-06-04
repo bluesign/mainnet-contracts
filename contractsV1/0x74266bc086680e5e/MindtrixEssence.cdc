@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -125,12 +139,12 @@ contract MindtrixEssence{
 		access(account)
 		let verifiers:{ String: [{MindtrixViews.IVerifier}]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMintPrice():{ String: MindtrixViews.FT}?{ 
 			if let mintPrices = self.mintPrices{ 
 				return mintPrices
@@ -138,22 +152,22 @@ contract MindtrixEssence{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers():{ String: [{MindtrixViews.IVerifier}]}{ 
 			return self.verifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEssenceClaimable(): Bool{ 
 			return self.essenceClaimable
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAudioEssence(): MindtrixViews.AudioEssence{ 
 			return MindtrixViews.AudioEssence(
 				startTime: self.metadata["audioStartTime"] ?? "0",
@@ -162,7 +176,7 @@ contract MindtrixEssence{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMintingRecordsByAddress(address: Address?): [MindtrixViews.NFTIdentifier]?{ 
 			if address == nil{ 
 				return nil
@@ -174,7 +188,7 @@ contract MindtrixEssence{
 			return identifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifyMintingConditions(
 			minterAddress: Address?,
 			claimCodeSig: String,
@@ -347,10 +361,10 @@ contract MindtrixEssence{
 		access(account)
 		fun increaseCurrentEditionByOne()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ String: MindtrixViews.FT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -379,12 +393,12 @@ contract MindtrixEssence{
 			self.data.updateEssenceClaimable(claimable: claimable)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEssenceClaimable(): Bool{ 
 			return self.data.getEssenceClaimable()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ String: MindtrixViews.FT}?{ 
 			if let prices = self.data.mintPrices{ 
 				return prices
@@ -459,7 +473,7 @@ contract MindtrixEssence{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialDic():{ String: String}{ 
 			return{ "essenceRealmSerial": self.data.metadata["essenceRealmSerial"] ?? "0", "essenceTypeSerial": self.data.metadata["essenceTypeSerial"] ?? "0", "showSerial": self.data.metadata["showSerial"] ?? "0", "episodeSerial": self.data.metadata["episodeSerial"] ?? "0", // the index from the minted episode																																																																					
 																																																																					"audioEssenceSerial": self.data.metadata["audioEssenceSerial"] ?? "0", "nftEditionSerial": self.data.currentEdition.toString()}
@@ -505,13 +519,13 @@ contract MindtrixEssence{
 	resource EssenceCollection{ 
 		
 		// TODO: creators can own their Essence
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clearEssenceMinters(essenceId: UInt64){ 
 			let essence = &MindtrixEssence.essenceDic[essenceId] as &EssenceRes?
 			(essence!).data.clearMinters()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreateEssence(
 			essenceOffChainIds: [
 				String
@@ -559,7 +573,7 @@ contract MindtrixEssence{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEssence(
 			essenceOffChainId: String,
 			maxEdition: UInt64,
@@ -635,7 +649,7 @@ contract MindtrixEssence{
 		
 		init(){} 
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEssenceIDToList(essenceId: UInt64, showGuid: String, episodeGuid: String){ 
 			var essenceIdDic ={}  as{ UInt64: Bool}
 			essenceIdDic.insert(key: essenceId, true)
@@ -651,7 +665,7 @@ contract MindtrixEssence{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEssences(showGuid: String, episodeGuid: String, essenceUuids: [UInt64]){ 
 			pre{ 
 				showGuid != nil:
@@ -666,7 +680,7 @@ contract MindtrixEssence{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEssence(showGuid: String, episodeGuid: String, essenceUuid: UInt64){ 
 			pre{ 
 				showGuid != nil:
@@ -690,35 +704,35 @@ contract MindtrixEssence{
 	//						 FUNCTION
 	// ========================================================
 	// helper functions
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyEssenceCollection(): @EssenceCollection{ 
 		// TODO: In the future, only creators can create Empty Essence. For now, the essence list controlled by off-chain data
 		return <-create EssenceCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllEssenceIds(): [UInt64]{ 
 		return MindtrixEssence.essenceDic.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEssencesByShowGuid(showGuid: String):{ UInt64: Bool}?{ 
 		return MindtrixEssence.showGuidToEssenceIds[showGuid]
 	}
 	
 	// The creators can destroy an Essence, so it's nullable.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOneEssenceRes(essenceId: UInt64): &EssenceRes?{ 
 		return &MindtrixEssence.essenceDic[essenceId] as &EssenceRes?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOneEssenceStruct(essenceId: UInt64): EssenceStruct?{ 
 		let essence = &MindtrixEssence.essenceDic[essenceId] as &EssenceRes?
 		return *essence?.data ?? nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowEssenceViewResolver(id: UInt64): &{ViewResolver.Resolver}{ 
 		let essence = (&MindtrixEssence.essenceDic[id] as &MindtrixEssence.EssenceRes?)!
 		return essence as &{ViewResolver.Resolver}

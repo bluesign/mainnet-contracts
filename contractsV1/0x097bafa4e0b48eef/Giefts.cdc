@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -66,38 +80,46 @@ contract Giefts{ /**/
 		access(all)
 		let password: [UInt8]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowClaimableNFT(): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimNft(
 			password: String,
 			collection: &{NonFungibleToken.CollectionPublic, ViewResolver.ResolverCollection}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftIDs(): [UInt64]
 	}
 	
 	/// GieftCollection
 	access(all)
 	resource interface GieftCollectionPublic{ 
-		access(all)
-		fun borrowGieft(_ gieft: UInt64): &Gieft?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowGieft(_ gieft: UInt64): &Giefts.Gieft?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGieftIDs(): [UInt64]
 	}
 	
 	access(all)
 	resource interface GieftCollectionPrivate{ 
-		access(all)
-		fun packGieft(name: String, password: [UInt8], nfts: @{UInt64:{ NonFungibleToken.NFT}})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun packGieft(
+			name: String,
+			password: [
+				UInt8
+			],
+			nfts: @{
+				UInt64:{ NonFungibleToken.NFT}
+			}
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNftToGieft(gieft: UInt64, nft: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unpackGieft(gieft: UInt64): @{UInt64:{ NonFungibleToken.NFT}}
 	} /**/
 /////////////////////////////////////////////////////////////
@@ -138,7 +160,7 @@ contract Giefts{ /**/
 		/// borrwClaimableNFT
 		/// get a reference to the first NFT that can be claimed
 		/// @returns the first NFT that can be claimed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowClaimableNFT(): &{NonFungibleToken.NFT}?{ 
 			if self.nfts.length > 0{ 
 				return &self.nfts[self.nfts.keys[0]] as &{NonFungibleToken.NFT}?
@@ -149,7 +171,7 @@ contract Giefts{ /**/
 		
 		/// claim an NFT from the gieft
 		/// @params password: the password to claim the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimNft(password: String, collection: &{NonFungibleToken.CollectionPublic, ViewResolver.ResolverCollection}){ 
 			pre{ 
 				self.password == HashAlgorithm.KECCAK_256.hash(password.utf8):
@@ -178,7 +200,7 @@ contract Giefts{ /**/
 		}
 		
 		/// get all NFT ids
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftIDs(): [UInt64]{ 
 			return self.nfts.keys
 		}
@@ -202,7 +224,7 @@ contract Giefts{ /**/
 		/// create a new gieft
 		/// @params password: the hashed password to claim an NFT from the Gieft
 		/// @params nfts: the NFTs to add to the gieft
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packGieft(name: String, password: [UInt8], nfts: @{UInt64:{ NonFungibleToken.NFT}}){ 
 			let gieft <- create Gieft(name: name, password: password, nfts: <-nfts)
 			let oldGieft <- self.giefts[gieft.uuid] <- gieft
@@ -212,7 +234,7 @@ contract Giefts{ /**/
 		/// add an NFT to a gieft
 		/// @params gieft: the uuid of the gieft to add the NFT to
 		/// @params nft: the NFT to add to the gieft
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNftToGieft(gieft: UInt64, nft: @{NonFungibleToken.NFT}){ 
 			pre{ 
 				self.giefts.keys.contains(gieft):
@@ -223,7 +245,7 @@ contract Giefts{ /**/
 		
 		/// unpack a gieft
 		/// @params gieft: the uuid of the gieft to unpack
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unpackGieft(gieft: UInt64): @{UInt64:{ NonFungibleToken.NFT}}{ 
 			pre{ 
 				self.giefts.keys.contains(gieft):
@@ -242,13 +264,13 @@ contract Giefts{ /**/
 		
 		/// borrow a gieft reference
 		/// @params gieft: the uuid of the gieft to borrow
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGieft(_ gieft: UInt64): &Gieft?{ 
 			return &self.giefts[gieft] as &Gieft?
 		}
 		
 		/// get all gieft ids
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGieftIDs(): [UInt64]{ 
 			return self.giefts.keys
 		}
@@ -263,7 +285,7 @@ contract Giefts{ /**/
 	//						 FUNCTIONS						   //
 	/////////////////////////////////////////////////////////////**/
 	/// create a new gieft collection resource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createGieftCollection(): @GieftCollection{ 
 		return <-create GieftCollection()
 	}

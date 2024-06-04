@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -15,25 +29,25 @@ access(all)
 contract CollecticoStandardViews{ 
 	access(all)
 	resource interface NFTViewResolver{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViewType(): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canResolveView(_ nft: &{NonFungibleToken.NFT}): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ nft: &{NonFungibleToken.NFT}): AnyStruct?
 	}
 	
 	access(all)
 	resource interface ItemViewResolver{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViewType(): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canResolveView(_ item: &{CollecticoStandardNFT.Item}): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ item: &{CollecticoStandardNFT.Item}): AnyStruct?
 	}
 	
@@ -52,7 +66,7 @@ contract CollecticoStandardViews{
 	}
 	
 	// A helper to get ContractInfo in a typesafe way
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getContractInfo(_ viewResolver: &{ViewResolver.Resolver}): ContractInfo?{ 
 		if let view = viewResolver.resolveView(Type<ContractInfo>()){ 
 			if let v = view as? ContractInfo{ 
@@ -152,7 +166,7 @@ contract CollecticoStandardViews{
 	}
 	
 	// A helper to get ItemView in a typesafe way
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemView(_ viewResolver: &{ViewResolver.Resolver}): ItemView?{ 
 		if let view = viewResolver.resolveView(Type<ItemView>()){ 
 			if let v = view as? ItemView{ 
@@ -269,7 +283,7 @@ contract CollecticoStandardViews{
 	}
 	
 	// A helper to get NFTView in a typesafe way
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTView(_ viewResolver: &{ViewResolver.Resolver}): NFTView?{ 
 		if let view = viewResolver.resolveView(Type<NFTView>()){ 
 			if let v = view as? NFTView{ 

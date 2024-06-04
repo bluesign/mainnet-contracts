@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
   Electables.cdc
 
   Description: Central Smart Contract for Electables
@@ -84,12 +98,12 @@ contract Electables: NonFungibleToken{
 			self.data = data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAttributes():{ String: String}{ 
 			return self.attributes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData():{ String: String}{ 
 			return self.data
 		}
@@ -127,10 +141,10 @@ contract Electables: NonFungibleToken{
 	access(all)
 	resource interface ElectablesPublicCollection{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		// borrowNFT will return a NonFungibleToken.NFT which only allows for accessing the id field.
 		access(all)
@@ -138,7 +152,7 @@ contract Electables: NonFungibleToken{
 		
 		// borrowElectable will return a Electables.NFT which exposes the public fields defined in this file on Electables.NFT. Right now
 		// Electables.NFT only has an id field, but will later include the electable attributes as well.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowElectable(id: UInt64): &Electables.NFT?
 	}
 	
@@ -157,7 +171,7 @@ contract Electables: NonFungibleToken{
 		
 		// Receiver and CollectionPublic Interfaces
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -180,7 +194,7 @@ contract Electables: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowElectable(id: UInt64): &Electables.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -194,7 +208,7 @@ contract Electables: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}{ 
 			let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			let electable = nft as! &Electables.NFT
@@ -228,7 +242,7 @@ contract Electables: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, electableType: String, name: String, description: String, thumbnail: String, attributes:{ String: String}, data:{ String: String}){ 
 			emit Minted(id: Electables.totalSupply, timestamp: getCurrentBlock().timestamp)
 			
@@ -237,12 +251,12 @@ contract Electables: NonFungibleToken{
 			Electables.totalSupply = Electables.totalSupply + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun overwriteNFTAttributes(nftReference: &NFT, attributes:{ String: String}){ 
 			nftReference.overwriteAttributes(attributes: attributes)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun overwriteNFTData(nftReference: &NFT, data:{ String: String}){ 
 			nftReference.overwriteData(data: data)
 		}

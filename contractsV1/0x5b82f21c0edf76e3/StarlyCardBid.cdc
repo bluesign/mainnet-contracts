@@ -1,4 +1,18 @@
-import StarlyCard from "./StarlyCard.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import StarlyCard from "./StarlyCard.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -100,7 +114,7 @@ contract StarlyCardBid{
 		access(self)
 		let bidderFungibleReceiver: Capability<&{FungibleToken.Receiver}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(bidderCardCollection: &StarlyCard.Collection, sellerFungibleReceiver: Capability<&{FungibleToken.Receiver}>, sellerCardCollection: Capability<&StarlyCard.Collection>, sellerStakedCardCollection: &StakedStarlyCard.Collection, sellerMarketCollection: &StarlyCardMarket.Collection){ 
 			pre{ 
 				self.bidVault.balance == self.bidPrice:
@@ -164,25 +178,25 @@ contract StarlyCardBid{
 	
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(bid: @StarlyCardBid.Bid)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(bid: @StarlyCardBid.Bid): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(bidID: UInt64): @Bid
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(bidID: UInt64)
 	}
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(bidID: UInt64): &Bid?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(
 			bidID: UInt64,
 			bidderCardCollection: &StarlyCard.Collection,
@@ -192,7 +206,7 @@ contract StarlyCardBid{
 			sellerMarketCollection: &StarlyCardMarket.Collection
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decline(bidID: UInt64)
 	}
 	
@@ -201,12 +215,12 @@ contract StarlyCardBid{
 		access(all)
 		var bids: @{UInt64: Bid}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIDs(): [UInt64]{ 
 			return self.bids.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(bidID: UInt64): &Bid?{ 
 			if self.bids[bidID] == nil{ 
 				return nil
@@ -214,32 +228,32 @@ contract StarlyCardBid{
 			return &self.bids[bidID] as &Bid?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(bid: @StarlyCardBid.Bid){ 
 			let oldBid <- self.bids[bid.id] <- bid
 			destroy oldBid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(bidID: UInt64): @Bid{ 
 			return <-(self.bids.remove(key: bidID) ?? panic("missing bid"))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(bidID: UInt64, bidderCardCollection: &StarlyCard.Collection, sellerFungibleReceiver: Capability<&{FungibleToken.Receiver}>, sellerCardCollection: Capability<&StarlyCard.Collection>, sellerStakedCardCollection: &StakedStarlyCard.Collection, sellerMarketCollection: &StarlyCardMarket.Collection){ 
 			let bid <- self.remove(bidID: bidID)
 			bid.accept(bidderCardCollection: bidderCardCollection, sellerFungibleReceiver: sellerFungibleReceiver, sellerCardCollection: sellerCardCollection, sellerStakedCardCollection: sellerStakedCardCollection, sellerMarketCollection: sellerMarketCollection)
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decline(bidID: UInt64){ 
 			let bid <- self.remove(bidID: bidID)
 			emit StarlyCardBidDeclined(bidID: bidID, nftID: bid.nftID, starlyID: bid.starlyID)
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(bidID: UInt64){ 
 			let bid <- self.remove(bidID: bidID)
 			emit StarlyCardBidCancelled(bidID: bidID, nftID: bid.nftID, starlyID: bid.starlyID)
@@ -251,7 +265,7 @@ contract StarlyCardBid{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createBid(
 		nftID: UInt64,
 		starlyID: String,
@@ -272,7 +286,7 @@ contract StarlyCardBid{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

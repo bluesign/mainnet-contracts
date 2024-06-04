@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for Leofy
 
 	This smart contract contains the core functionality for 
@@ -115,16 +129,16 @@ contract LeofyNFT: NonFungibleToken{
 	//
 	access(all)
 	resource interface ItemCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemsLength(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemMetaDataByField(itemID: UInt64, field: String): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(itemID: UInt64): &Item?
 	}
 	
@@ -137,7 +151,7 @@ contract LeofyNFT: NonFungibleToken{
 			self.items <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(metadata:{ String: String}, price: UFix64): UInt64{ 
 			
 			// Create the new Item
@@ -153,7 +167,7 @@ contract LeofyNFT: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(itemID: UInt64): &Item?{ 
 			pre{ 
 				self.items[itemID] != nil:
@@ -163,14 +177,14 @@ contract LeofyNFT: NonFungibleToken{
 		}
 		
 		// getIDs returns an array of the IDs that are in the Item Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getIDs(): [UInt64]{ 
 			return self.items.keys
 		}
 		
 		// getItemsLength 
 		// Returns: Int length of items created
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemsLength(): Int{ 
 			return self.items.length
 		}
@@ -184,7 +198,7 @@ contract LeofyNFT: NonFungibleToken{
 		//			 field: The field to search for
 		//
 		// Returns: The metadata field as a String Optional
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemMetaDataByField(itemID: UInt64, field: String): String?{ 
 			// Don't force a revert if the itemID or field is invalid
 			let item = (&self.items[itemID] as &Item?)!
@@ -203,13 +217,13 @@ contract LeofyNFT: NonFungibleToken{
 		access(all)
 		var price: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollection(): &LeofyNFT.Collection
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}
 	}
 	
@@ -248,7 +262,7 @@ contract LeofyNFT: NonFungibleToken{
 			self.NFTsCollection <- create Collection()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(){ 
 			// create a new NFT
 			var newNFT <- create NFT(id: LeofyNFT.totalSupply, itemID: self.itemID, serialNumber: self.numberMinted + 1)
@@ -260,12 +274,12 @@ contract LeofyNFT: NonFungibleToken{
 			LeofyNFT.totalSupply = LeofyNFT.totalSupply + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(quantity: UInt64){ 
 			var i: UInt64 = 0
 			while i < quantity{ 
@@ -274,17 +288,17 @@ contract LeofyNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(price: UFix64){ 
 			self.price = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollection(): &LeofyNFT.Collection{ 
 			return &self.NFTsCollection as &Collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.NFTsCollection.getIDs().length > 0:
@@ -351,7 +365,7 @@ contract LeofyNFT: NonFungibleToken{
 			self.serialNumber = serialNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let itemCollection = LeofyNFT.getItemCollectionPublic()
 			return "NFT: '".concat(itemCollection.getItemMetaDataByField(itemID: self.itemID, field: "name") ?? "''").concat("' from Author: '").concat(itemCollection.getItemMetaDataByField(itemID: self.itemID, field: "author") ?? "''").concat("' with serial number ").concat(self.serialNumber.toString())
@@ -383,7 +397,7 @@ contract LeofyNFT: NonFungibleToken{
 	access(all)
 	resource interface LeofyCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
 		view fun getIDs(): [UInt64]
@@ -391,7 +405,7 @@ contract LeofyNFT: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLeofyNFT(id: UInt64): &LeofyNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -422,7 +436,7 @@ contract LeofyNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LeofyNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -445,7 +459,7 @@ contract LeofyNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLeofyNFT(id: UInt64): &LeofyNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -486,12 +500,12 @@ contract LeofyNFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemCollectionPublic(): &{LeofyNFT.ItemCollectionPublic}{ 
 		return self.account.capabilities.get<&{LeofyNFT.ItemCollectionPublic}>(LeofyNFT.ItemPublicPath).borrow<&{LeofyNFT.ItemCollectionPublic}>() ?? panic("Could not borrow capability from public Item Collection")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLeofyCoinVault(): &{FungibleToken.Receiver}{ 
 		return (self.account.capabilities.get<&{FungibleToken.Receiver}>(LeofyCoin.ReceiverPublicPath)!).borrow() ?? panic("Could not borrow receiver reference to the recipient's Vault")
 	}

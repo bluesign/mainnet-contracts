@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract AvatarArtTransactionInfo{ 
@@ -81,8 +95,8 @@ contract AvatarArtTransactionInfo{
 	
 	access(all)
 	resource interface PublicFeeInfo{ 
-		access(all)
-		fun getFee(tokenId: UInt64): FeeInfoItem?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getFee(tokenId: UInt64): AvatarArtTransactionInfo.FeeInfoItem?
 	}
 	
 	access(all)
@@ -91,7 +105,7 @@ contract AvatarArtTransactionInfo{
 		access(all)
 		var fees:{ UInt64: FeeInfoItem}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFee(tokenId: UInt64, affiliate: UFix64, storing: UFix64, insurance: UFix64, contractor: UFix64, platform: UFix64, author: UFix64){ 
 			pre{ 
 				tokenId > 0:
@@ -101,7 +115,7 @@ contract AvatarArtTransactionInfo{
 			emit FeeUpdated(tokenId: tokenId, affiliate: affiliate, storing: storing, insurance: insurance, contractor: contractor, platform: platform, author: author)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFee(tokenId: UInt64): FeeInfoItem?{ 
 			pre{ 
 				tokenId > 0:
@@ -152,8 +166,11 @@ contract AvatarArtTransactionInfo{
 	
 	access(all)
 	resource interface PublicTransactionAddress{ 
-		access(all)
-		fun getAddress(tokenId: UInt64, payType: Type): TransactionRecipientItem?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getAddress(
+			tokenId: UInt64,
+			payType: Type
+		): AvatarArtTransactionInfo.TransactionRecipientItem?
 	}
 	
 	access(all)
@@ -163,7 +180,7 @@ contract AvatarArtTransactionInfo{
 		access(all)
 		var addresses:{ UInt64:{ String: TransactionRecipientItem}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(tokenId: UInt64, payType: Type, storing: Capability<&{FungibleToken.Receiver}>?, insurance: Capability<&{FungibleToken.Receiver}>?, contractor: Capability<&{FungibleToken.Receiver}>?, platform: Capability<&{FungibleToken.Receiver}>?, author: Capability<&{FungibleToken.Receiver}>?){ 
 			pre{ 
 				tokenId > 0:
@@ -175,7 +192,7 @@ contract AvatarArtTransactionInfo{
 			emit TransactionAddressUpdated(tokenId: tokenId, storing: storing?.address, insurance: insurance?.address, contractor: contractor?.address, platform: platform?.address, author: author?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(tokenId: UInt64, payType: Type): TransactionRecipientItem?{ 
 			pre{ 
 				tokenId > 0:
@@ -196,7 +213,7 @@ contract AvatarArtTransactionInfo{
 	// destructor
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAcceptCurrencies(types: [Type]){ 
 			for type in types{ 
 				assert(type.isSubtype(of: Type<@{FungibleToken.Vault}>()), message: "Should be a sub type of FungibleToken.Vault")
@@ -205,12 +222,12 @@ contract AvatarArtTransactionInfo{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAcceptCurrentcies(): [Type]{ 
 		return self.acceptCurrencies
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isCurrencyAccepted(type: Type): Bool{ 
 		return self.acceptCurrencies.contains(type)
 	}

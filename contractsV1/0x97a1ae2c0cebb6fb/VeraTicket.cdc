@@ -1,4 +1,18 @@
-import VeraEvent from "./VeraEvent.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import VeraEvent from "./VeraEvent.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -132,15 +146,15 @@ contract VeraTicket: NonFungibleToken{
 	access(all)
 	resource interface TicketsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: UInt64): &VeraTicket.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -150,7 +164,7 @@ contract VeraTicket: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyTicket(eventID: UInt64, id: UInt64, tier: UInt64, subtier: UInt64)
 	}
 	
@@ -180,7 +194,7 @@ contract VeraTicket: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @VeraTicket.NFT
 			let id: UInt64 = token.id
 			
@@ -212,7 +226,7 @@ contract VeraTicket: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the Ticket.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: UInt64): &VeraTicket.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -223,7 +237,7 @@ contract VeraTicket: NonFungibleToken{
 		}
 		
 		// destructor
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyTicket(eventID: UInt64, id: UInt64, tier: UInt64, subtier: UInt64){ 
 			if self.ownedNFTs[id] != nil{ 
 				let token <- self.ownedNFTs.remove(key: id) ?? panic("missing NFT")
@@ -272,7 +286,7 @@ contract VeraTicket: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}, eventID: UInt64, type: VeraTicket.NFTType, tier: UInt64, subtier: UInt64, tokenURI: String){ 
 			let veraevent: VeraEvent.EventStruct = VeraEvent.getEvent(id: eventID)
 			var eventMaxTickets: UInt64 = veraevent.maxTickets
@@ -303,7 +317,7 @@ contract VeraTicket: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintMultipleNFT(recipient: &{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}, eventID: UInt64, tickets: [VeraTicket.NFTStruct], gatickets: UInt64, astickets: UInt64){ 
 			let eventCollection = VeraTicket.account.storage.borrow<&VeraEvent.EventCollection>(from: VeraEvent.VeraEventStorage)!
 			let veraevent: VeraEvent.EventStruct = VeraEvent.getEvent(id: eventID)
@@ -346,7 +360,7 @@ contract VeraTicket: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintMultipleNFTV2(recipient: &{NonFungibleToken.CollectionPublic, VeraTicket.TicketsCollectionPublic}, eventID: UInt64, tickets: [VeraTicket.NFTStruct], gatickets: UInt64, astickets: UInt64){ 
 			if tickets.length > 100{ 
 				panic("Cannot Mint Tickets more than 100 in one batch")
@@ -367,7 +381,7 @@ contract VeraTicket: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &VeraTicket.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&VeraTicket.Collection>(VeraTicket.VeraTicketPubStorage).borrow<&VeraTicket.Collection>() ?? panic("Couldn't get collection")
 		// We trust Tickets.Collection.borowTicket to get the correct itemID

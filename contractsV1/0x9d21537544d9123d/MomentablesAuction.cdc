@@ -1,4 +1,18 @@
-// This contract allows users to put their NFTs up for sale. Other users
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This contract allows users to put their NFTs up for sale. Other users
 // can purchase these NFTs with fungible tokens.
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -281,7 +295,7 @@ contract MomentablesAuction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun releasePreviousBid(){ 
 			if let vaultCap = self.recipientVaultCap{ 
 				self.sendBidTokens(self.recipientVaultCap!)
@@ -290,7 +304,7 @@ contract MomentablesAuction{
 		}
 		
 		//This method should probably use preconditions more 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(cutPercentage: UFix64, cutVault: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				!self.auctionCompleted:
@@ -328,7 +342,7 @@ contract MomentablesAuction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun returnAuctionItemToOwner(){ 
 			
 			// release the bidder's tokens
@@ -338,13 +352,13 @@ contract MomentablesAuction{
 			self.sendNFT(self.ownerCollectionCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAuctionCompleted(){ 
 			self.auctionCompleted = true
 		}
 		
 		//this can be negative if is expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64{ 
 			let auctionLength = self.auctionLength
 			let startTime = self.auctionStartTime
@@ -353,13 +367,13 @@ contract MomentablesAuction{
 			return remaining
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool{ 
 			let timeRemaining = self.timeRemaining()
 			return timeRemaining < Fix64(0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minNextBid(): UFix64{ 
 			//If there are bids then the next min bid is the current price plus the increment
 			if self.currentPrice != 0.0{ 
@@ -370,12 +384,12 @@ contract MomentablesAuction{
 		}
 		
 		//Extend an auction with a given set of blocks
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendWith(_ amount: UFix64){ 
 			self.auctionLength = self.auctionLength + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address?{ 
 			if let vaultCap = self.recipientVaultCap{ 
 				return vaultCap.address
@@ -383,7 +397,7 @@ contract MomentablesAuction{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.bidder() == address{ 
 				return self.bidVault.balance
@@ -392,7 +406,7 @@ contract MomentablesAuction{
 		}
 		
 		// This method should probably use preconditions more
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bidTokens: @{FungibleToken.Vault},
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
@@ -440,7 +454,7 @@ contract MomentablesAuction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(): AuctionStatus{ 
 			var leader: Address? = nil
 			if let recipient = self.recipientVaultCap{ 
@@ -473,7 +487,7 @@ contract MomentablesAuction{
 		
 		//It could be argued that this method should not be here in the public contract. I guss it could be an interface of its own
 		//That way when you create an auction you chose if this is a curated auction or an auction where everybody can put their pieces up for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(
 			token: @Momentables.NFT,
 			momentableId: String,
@@ -484,18 +498,18 @@ contract MomentablesAuction{
 			startPrice: UFix64,
 			collectionCap: Capability<&{NonFungibleToken.CollectionPublic}>,
 			vaultCap: Capability<&{FungibleToken.Receiver}>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAuctionedMomentable(id: UInt64): &Momentables.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			id: UInt64,
 			bidTokens: @{FungibleToken.Vault},
@@ -525,7 +539,7 @@ contract MomentablesAuction{
 			self.auctionItems <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendAllAuctionsWith(_ amount: UFix64){ 
 			for id in self.auctionItems.keys{ 
 				let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
@@ -533,14 +547,14 @@ contract MomentablesAuction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun keys(): [UInt64]{ 
 			return self.auctionItems.keys
 		}
 		
 		// addTokenToauctionItems adds an NFT to the auction items and sets the meta data
 		// for the auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(token: @Momentables.NFT, momentableId: String, itemID: UInt64, minimumBidIncrement: UFix64, auctionLength: UFix64, auctionStartTime: UFix64, startPrice: UFix64, collectionCap: Capability<&{NonFungibleToken.CollectionPublic}>, vaultCap: Capability<&{FungibleToken.Receiver}>){ 
 			
 			// create a new auction items resource container
@@ -558,7 +572,7 @@ contract MomentablesAuction{
 		}
 		
 		// getAuctionPrices returns a dictionary of available NFT IDs with their current price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AnyStruct}{ 
 			var priceList:{ UInt64: AnyStruct} ={} 
 			for id in self.auctionItems.keys{ 
@@ -571,7 +585,7 @@ contract MomentablesAuction{
 			return priceList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus{ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -585,13 +599,13 @@ contract MomentablesAuction{
 		
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64){ 
 			let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
 			itemRef.settleAuction(cutPercentage: self.cutPercentage, cutVault: self.marketplaceVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(_ id: UInt64){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -605,7 +619,7 @@ contract MomentablesAuction{
 		
 		// placeBid sends the bidder's tokens to the bid vault and updates the
 		// currentPrice of the current auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(id: UInt64, bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -617,7 +631,7 @@ contract MomentablesAuction{
 			itemRef.placeBid(bidTokens: <-bidTokens, vaultCap: vaultCap, collectionCap: collectionCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAuctionedMomentable(id: UInt64): &Momentables.NFT?{ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -635,7 +649,7 @@ contract MomentablesAuction{
 	
 	//this method is used to create a standalone auction that is not part of a collection
 	//we use this to create the unique part of the Versus contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStandaloneAuction(
 		token: @Momentables.NFT,
 		momentableId: String,
@@ -663,7 +677,7 @@ contract MomentablesAuction{
 	}
 	
 	// createAuctionCollection returns a new AuctionCollection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionCollection(
 		marketplaceVault: Capability<&{FungibleToken.Receiver}>,
 		cutPercentage: UFix64

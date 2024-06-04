@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 NiftoryNonFungibleToken
 
 Niftory is a platform to design, manage, and launch NFT experiments and
@@ -74,24 +88,24 @@ contract NiftoryNonFungibleToken{
 		let serial: UInt64
 		
 		// Contract public information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _contract(): &{ManagerPublic}
 		
 		// All Niftory NFTs belong to exactly one set. This function should return
 		// that set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun set(): &MutableMetadataSet.Set
 		
 		// This NFTs metadata as a MutableMetadata object.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): &MutableMetadata.Metadata
 		
 		// From MetadataViews
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
 		// From MetadataViews
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -103,30 +117,30 @@ contract NiftoryNonFungibleToken{
 	resource interface CollectionPublic{ 
 		
 		// Contract public information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _contract(): &{ManagerPublic}
 		
 		// Inherited from NonFungibleToken.Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
 		// Inherited from MetadataViews.Resolver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
 		// An optimized version of deposit for doing bulk NFT deposits into
 		// a collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBulk(tokens: @[{NonFungibleToken.NFT}])
 		
 		// Similar to borrowNFT, but with additional functionality from NFTPublic
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &{NFTPublic}
 	}
 	
@@ -135,12 +149,12 @@ contract NiftoryNonFungibleToken{
 	resource interface CollectionPrivate{ 
 		
 		// Inherited from NonFungibleToken.Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT}
 		
 		// An optimized version of withdraw for doing bulk NFT withdrawals from
 		// a collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBulk(withdrawIDs: [UInt64]): @[{NonFungibleToken.NFT}]
 	}
 	
@@ -154,22 +168,22 @@ contract NiftoryNonFungibleToken{
 	resource interface ManagerPublic{ 
 		
 		// Get arbitrary metadata for this NFT contract, if implemented
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): AnyStruct?
 		
 		// For convenience and transparency, return the MutableSetManager this
 		// contract's NFTs are gettting their metadata from
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetManagerPublic(): &MutableMetadataSetManager.Manager
 		
 		// For convenience and transparency, return the MetadataViewsManager this
 		// contract's NFTs are gettting their metadata from
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataViewsManagerPublic(): &MetadataViewsManager.Manager
 		
 		// In order to expose collection features in an NFT agnostic way
 		// (i.e. without having to import the actual NFT contract explicitly)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData
 	}
 	
@@ -181,11 +195,11 @@ contract NiftoryNonFungibleToken{
 		// ========================================================================
 		
 		// Set arbitrary metadata for this NFT contract, if implemented
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun modifyContractMetadata(): &AnyStruct
 		
 		// Set arbitrary metadata for this NFT contract, if implemented
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceContractMetadata(_ metadata: AnyStruct?)
 		
 		// ========================================================================
@@ -193,88 +207,88 @@ contract NiftoryNonFungibleToken{
 		// ========================================================================
 		// Lock MetadataViewsResolver so that resolvers can be neither added nor
 		// removed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockMetadataViewsManager()
 		
 		// Add the given resolver to the MetadataViewsResolver if not locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataViewsResolver(_ resolver:{ MetadataViewsManager.Resolver})
 		
 		// Remove the given resolver from the MetadataViewsResolver if not locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMetadataViewsResolver(_ type: Type)
 		
 		// ========================================================================
 		// Set Manager
 		// ========================================================================
 		// Set the name of the set manager
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataManagerName(_ name: String)
 		
 		// Set the description of the set manager
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataManagerDescription(_ description: String)
 		
 		// Add a set to the set manager
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSet(_ set: @MutableMetadataSet.Set)
 		
 		// ========================================================================
 		// Set
 		// ========================================================================
 		// Lock the set so new templates cannot be added
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockSet(setId: Int)
 		
 		// Lock the ability to modify the set metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockSetMetadata(setId: Int)
 		
 		// Retrieve a modifiable version of the underyling set metadata, only if the
 		// metadata has not been locked.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun modifySetMetadata(setId: Int): &AnyStruct
 		
 		// Replace the metadata for a set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceSetMetadata(setId: Int, new: AnyStruct)
 		
 		// Add a new template to set setId
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(setId: Int, template: @MutableMetadataTemplate.Template)
 		
 		// ========================================================================
 		// Minting
 		// ========================================================================
 		// Lock the template from minting new NFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(setId: Int, templateId: Int)
 		
 		// Set maximum number of NFTs that can be minted from this template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTemplateMaxMint(setId: Int, templateId: Int, max: UInt64)
 		
 		// Construct an NFT from the given set and template IDs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(setId: Int, templateId: Int): @{NonFungibleToken.NFT}
 		
 		// Same as mint from above, but an optimized version to do bulk mints.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBulk(setId: Int, templateId: Int, numToMint: UInt64): @[{NonFungibleToken.NFT}]
 		
 		// ========================================================================
 		// NFT metadata
 		// ========================================================================
 		// Lock the metadata for a given template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockNFTMetadata(setId: Int, templateId: Int)
 		
 		// Get a mutable reference to the metadata for a given template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun modifyNFTMetadata(setId: Int, templateId: Int): &AnyStruct
 		
 		// Replace the metadata for a given template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceNFTMetadata(setId: Int, templateId: Int, new: AnyStruct)
 	}
 }

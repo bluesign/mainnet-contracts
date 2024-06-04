@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Circle{ 
 	//Circle is the contract; circleNFT is the NFT
 	access(all)
@@ -23,10 +37,10 @@ contract Circle{
 	access(all)
 	resource interface iCollectionPublic{ 
 		//get a list of the ids
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @circleNFT)
 	}
 	
@@ -38,7 +52,7 @@ contract Circle{
 		var ownedNFTs: @{UInt64: circleNFT}
 		
 		//map a id to an NFT (the badge)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @circleNFT){ 
 			/*The force-assignment operator (<-!) assigns a resource-typed 
 						value to an optional-typed variable if the variable is nil.  */
@@ -46,13 +60,13 @@ contract Circle{
 			self.ownedNFTs[token.badge_id] <-! token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: UInt64): @circleNFT{ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("This collection does not contain NFT with that id")
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
@@ -62,14 +76,14 @@ contract Circle{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCircleCollection(): @circleCollection{ 
 		return <-create circleCollection()
 	}
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCircleNFT(): @circleNFT{ 
 			return <-create circleNFT()
 		}
@@ -77,7 +91,7 @@ contract Circle{
 		init(){} 
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCircleNFT(): @circleNFT{ 
 		return <-create circleNFT()
 	}

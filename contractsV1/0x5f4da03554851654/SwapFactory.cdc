@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import SwapError from "./SwapError.cdc"
 
@@ -51,7 +65,7 @@ contract SwapFactory{
 	/// @Param - token0/1Vault: use createEmptyVault() to create init vault types for SwapPair
 	/// @Param - accountCreationFee: fee (0.001 FlowToken) pay for the account creation.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPair(
 		token0Vault: @{FungibleToken.Vault},
 		token1Vault: @{FungibleToken.Vault},
@@ -132,7 +146,7 @@ contract SwapFactory{
 		return pairAddress
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyLpTokenCollection(): @LpTokenCollection{ 
 		return <-create LpTokenCollection()
 	}
@@ -150,7 +164,7 @@ contract SwapFactory{
 			self.lpTokenVaults <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(pairAddr: Address, lpTokenVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				lpTokenVault.balance > 0.0:
@@ -166,7 +180,7 @@ contract SwapFactory{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(pairAddr: Address, amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.lpTokenVaults.containsKey(pairAddr):
@@ -181,12 +195,12 @@ contract SwapFactory{
 			return <-withdrawVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getCollectionLength(): Int{ 
 			return self.lpTokenVaults.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLpTokenBalance(pairAddr: Address): UFix64{ 
 			if self.lpTokenVaults.containsKey(pairAddr){ 
 				let vaultRef = (&self.lpTokenVaults[pairAddr] as &{FungibleToken.Vault}?)!
@@ -195,12 +209,12 @@ contract SwapFactory{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllLPTokens(): [Address]{ 
 			return self.lpTokenVaults.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlicedLPTokens(from: UInt64, to: UInt64): [Address]{ 
 			pre{ 
 				from <= to && from < UInt64(self.getCollectionLength()):
@@ -219,7 +233,7 @@ contract SwapFactory{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPairAddress(token0Key: String, token1Key: String): Address?{ 
 		let pairExist0To1 =
 			self.pairMap.containsKey(token0Key) && (self.pairMap[token0Key]!).containsKey(token1Key)
@@ -232,7 +246,7 @@ contract SwapFactory{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPairInfo(token0Key: String, token1Key: String): AnyStruct?{ 
 		var pairAddr = self.getPairAddress(token0Key: token0Key, token1Key: token1Key)
 		if pairAddr == nil{ 
@@ -245,13 +259,13 @@ contract SwapFactory{
 		).getPairInfo()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPairsLength(): Int{ 
 		return self.pairs.length
 	}
 	
 	/// Get sliced array of pair addresses (inclusive for both indexes)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSlicedPairs(from: UInt64, to: UInt64): [Address]{ 
 		pre{ 
 			from <= to && from < UInt64(self.pairs.length):
@@ -270,7 +284,7 @@ contract SwapFactory{
 	}
 	
 	/// Get sliced array of PairInfos (inclusive for both indexes)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSlicedPairInfos(from: UInt64, to: UInt64): [AnyStruct]{ 
 		let pairSlice: [Address] = self.getSlicedPairs(from: from, to: to)
 		var i = 0
@@ -286,7 +300,7 @@ contract SwapFactory{
 	///
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPairContractTemplateAddress(newAddr: Address){ 
 			emit PairTemplateAddressChanged(
 				oldTemplate: SwapFactory.pairContractTemplateAddress,
@@ -295,13 +309,13 @@ contract SwapFactory{
 			SwapFactory.pairContractTemplateAddress = newAddr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeTo(feeToAddr: Address){ 
 			emit FeeToAddressChanged(oldFeeTo: SwapFactory.feeTo, newFeeTo: feeToAddr)
 			SwapFactory.feeTo = feeToAddr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPairAccountPublicKey(publicKey: String?){ 
 			emit PairAccountPublicKeyChanged(
 				oldPublicKey: SwapFactory.pairAccountPublicKey,

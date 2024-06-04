@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -128,14 +142,14 @@ contract Necryptolis: NonFungibleToken{
 	
 	// We split Necryptolis surface into square blocks of 1000 pixels
 	// this helper function returns a section for a given x or y coordinate
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSection(position: Int32): Int32{ 
 		return position / 1000
 	}
 	
 	// further away the cemetery plot is created the price drops
 	// this helper method returns the factor by which the price needs to be reduced
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPlotDistanceFactor(left: Int32, top: Int32): UFix64{ 
 		var valueA = left
 		var valueB = top
@@ -172,7 +186,7 @@ contract Necryptolis: NonFungibleToken{
 	}
 	
 	//check if it's colliding in all the neighbour sections
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isPlotColliding(xSection: Int32, ySection: Int32, left: Int32, top: Int32, width: UInt16, height: UInt16): Bool{ 
 		if Necryptolis.isPlotCollidingInSection(xSection: xSection, ySection: ySection, left: left, top: top, width: width, height: height){ 
 			return true
@@ -205,7 +219,7 @@ contract Necryptolis: NonFungibleToken{
 	}
 	
 	// returns the price of the plot
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPlotPrice(width: UInt16, height: UInt16, left: Int32, top: Int32): UFix64{ 
 		return Necryptolis.plotSalesInfo.squarePixelPrice * UFix64(height) * UFix64(width) * UFix64(Necryptolis.getPlotDistanceFactor(left: left, top: top))
 	}
@@ -327,7 +341,7 @@ contract Necryptolis: NonFungibleToken{
 		// fromDate: Starting date displayed on the grave
 		// toDate: Ending date displayed on the grave
 		// metadata: Additional details like grave shape, color, font etc.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addGravestone(name: String, fromDate: String, toDate: String, metadata:{ String: String}){ 
 			pre{ 
 				self.isGraveSet == false:
@@ -350,7 +364,7 @@ contract Necryptolis: NonFungibleToken{
 		//
 		// Parameters: 
 		// toDate: Ending date displayed on the grave
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setToDate(toDate: String){ 
 			pre{ 
 				self.isGraveSet == true:
@@ -370,7 +384,7 @@ contract Necryptolis: NonFungibleToken{
 		// Parameters: 
 		// buyerPayment: payment vault of the buyer
 		// buyerAddress: the address of user buying the candle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lightCandle(buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address){ 
 			pre{ 
 				buyerPayment.balance == Necryptolis.plotSalesInfo.candlePrice:
@@ -385,7 +399,7 @@ contract Necryptolis: NonFungibleToken{
 		//
 		// Parameters: 
 		// buyerPayment: payment vault of the buyer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun trim(buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerPayment.balance == Necryptolis.plotSalesInfo.trimPrice:
@@ -400,7 +414,7 @@ contract Necryptolis: NonFungibleToken{
 		//
 		// Parameters: 
 		// buyerPayment: payment vault of the buyer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bury(nft: @{NonFungibleToken.INFT}, nftType: Type){ 
 			pre{ 
 				self.buriedNFT == nil:
@@ -417,7 +431,7 @@ contract Necryptolis: NonFungibleToken{
 		}
 		
 		// returns the name of NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			if self.isGraveSet{ 
 				return "Id: ".concat(self.id.toString()).concat(" - ").concat(self.graveData.name)
@@ -427,7 +441,7 @@ contract Necryptolis: NonFungibleToken{
 		}
 		
 		// returns additional details about NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			if self.isGraveSet{ 
 				return "Id: ".concat(self.id.toString()).concat(" Title: ").concat(self.graveData.name).concat(" From: ").concat(self.graveData.fromDate).concat(" To: ").concat(self.graveData.toDate)
@@ -437,7 +451,7 @@ contract Necryptolis: NonFungibleToken{
 		}
 		
 		// imageURL returns the public URL of a picture of this NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun imageURL(): String{ 
 			return Necryptolis.imagesBaseURL.concat(self.id.toString()).concat(".png")
 		}
@@ -470,7 +484,7 @@ contract Necryptolis: NonFungibleToken{
 		// width: The width of the plot
 		// height: The height of the plot
 		// buyerPayment: payment vault of the buyer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCemeteryPlot(left: Int32, top: Int32, width: UInt16, height: UInt16, buyerPayment: @{FungibleToken.Vault}): @NFT{ 
 			pre{ 
 				!Necryptolis.isPlotColliding(xSection: Necryptolis.getSection(position: left), ySection: Necryptolis.getSection(position: top), left: left, top: top, width: width, height: height):
@@ -527,7 +541,7 @@ contract Necryptolis: NonFungibleToken{
 		// Restrictions:
 		// prices and minimum values must be positive numbers
 		// maximum values must be greater than minimum values
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePlotSalesInfo(squarePixelPrice: UFix64, candlePrice: UFix64, trimPrice: UFix64, maxPlotHeight: UInt16, maxPlotWidth: UInt16, minPlotHeight: UInt16, minPlotWidth: UInt16, vault: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				squarePixelPrice > 0.0:
@@ -564,7 +578,7 @@ contract Necryptolis: NonFungibleToken{
 		// top: distance from the center to the top
 		// width: The width of the plot
 		// height: The height of the plot
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCemeteryPlot(left: Int32, top: Int32, width: UInt16, height: UInt16): @NFT{ 
 			pre{ 
 				!Necryptolis.isPlotColliding(xSection: Necryptolis.getSection(position: left), ySection: Necryptolis.getSection(position: top), left: left, top: top, width: width, height: height):
@@ -593,23 +607,23 @@ contract Necryptolis: NonFungibleToken{
 		//
 		// Parameters: 
 		// baseUrl: the url which will be used to append the id and extension of NFT image (${imagesBaseURL}/1.png	
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeImagesBaseUrl(baseUrl: String){ 
 			Necryptolis.imagesBaseURL = baseUrl
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPlotMinter(): @PlotMinter{ 
 		return <-create PlotMinter()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createGravestoneManager(): @GravestoneManager{ 
 		return <-create GravestoneManager()
 	}
@@ -620,15 +634,15 @@ contract Necryptolis: NonFungibleToken{
 	access(all)
 	resource interface NecryptolisCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCemeteryPlot(id: UInt64): &Necryptolis.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -636,10 +650,10 @@ contract Necryptolis: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lightCandle(cemeteryPlotId: UInt64, buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun trimCemeteryPlot(cemeteryPlotId: UInt64, buyerPayment: @{FungibleToken.Vault})
 	}
 	
@@ -664,7 +678,7 @@ contract Necryptolis: NonFungibleToken{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Necryptolis.NFT
 			let id: UInt64 = token.id
 			let left: Int32 = token.plotData.left
@@ -686,7 +700,7 @@ contract Necryptolis: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCemeteryPlot(id: UInt64): &Necryptolis.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -709,7 +723,7 @@ contract Necryptolis: NonFungibleToken{
 		// cemeteryPlotId: id of the NFT
 		// buyerPayment: payment vault of the buyer
 		// buyerAddress: the address of user buying the candle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lightCandle(cemeteryPlotId: UInt64, buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address){ 
 			pre{ 
 				self.ownedNFTs[cemeteryPlotId] != nil:
@@ -725,7 +739,7 @@ contract Necryptolis: NonFungibleToken{
 		// cemeteryPlotId: id of the NFT
 		// buyerPayment: payment vault of the buyer
 		// buyerAddress: the address of user buying the candle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun trimCemeteryPlot(cemeteryPlotId: UInt64, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.ownedNFTs[cemeteryPlotId] != nil:
@@ -766,16 +780,16 @@ contract Necryptolis: NonFungibleToken{
 	access(all)
 	resource interface GravestoneCreator{ 
 		// Allows the Cemetery plot owner to create a gravestone
-		access(all)
-		fun createGravestone(necryptolisProviderCapability: Capability<&Necryptolis.Collection>, nftID: UInt64, graveData: GraveData)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createGravestone(necryptolisProviderCapability: Capability<&Necryptolis.Collection>, nftID: UInt64, graveData: Necryptolis.GraveData): Void
 	}
 	
 	access(all)
 	resource interface BurialProvider{ 
 		// Allows the Cemetery plot owner to bury an NFT
 		//
-		access(all)
-		fun buryNFT(necryptolisProviderCapability: Capability<&Necryptolis.Collection>, plotID: UInt64, nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun buryNFT(necryptolisProviderCapability: Capability<&Necryptolis.Collection>, plotID: UInt64, nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64): Void
 	}
 	
 	// A resource which a user who wishes to add gravestones or 
@@ -788,7 +802,7 @@ contract Necryptolis: NonFungibleToken{
 		// necryptolisProviderCapability: provider capability for the nfts
 		// nftID: id of the NFT for which the gravestone is being created
 		// graveData: the basic data and metadata of the grave
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createGravestone(necryptolisProviderCapability: Capability<&Necryptolis.Collection>, nftID: UInt64, graveData: GraveData){ 
 			let provider = necryptolisProviderCapability.borrow()
 			assert(provider != nil, message: "cannot borrow necryptolisProviderCapability")
@@ -806,7 +820,7 @@ contract Necryptolis: NonFungibleToken{
 		// nftId: the id of the nft being buried
 		//
 		// restrictions: nft mustn't be Necryptolis NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buryNFT(necryptolisProviderCapability: Capability<&Necryptolis.Collection>, plotID: UInt64, nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64){ 
 			pre{ 
 				nftType != Necryptolis.NFT.getType()

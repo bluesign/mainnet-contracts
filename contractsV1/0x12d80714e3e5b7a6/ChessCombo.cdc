@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for ChessCombo
 	
 	Based on NBA Top Shot Smart Contract: https://github.com/dapperlabs/nba-smart-contracts
@@ -272,7 +286,7 @@ contract ChessCombo: NonFungibleToken{
 		// The Compilation must not be locked
 		// The Combination must not already exist in the Compilation
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCombination(combinationId: UInt32){ 
 			pre{ 
 				ChessCombo.combinationDatas[combinationId] != nil:
@@ -296,7 +310,7 @@ contract ChessCombo: NonFungibleToken{
 		
 		// addCombinations adds multiple Combinations to the Compilation
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCombinations(combinationIds: [UInt32]){ 
 			for combination in combinationIds{ 
 				self.addCombination(combinationId: combination)
@@ -308,7 +322,7 @@ contract ChessCombo: NonFungibleToken{
 		// Pre-Conditions:
 		// The Combination is part of the Compilation and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireCombination(combinationId: UInt32){ 
 			pre{ 
 				self.retired[combinationId] != nil:
@@ -323,7 +337,7 @@ contract ChessCombo: NonFungibleToken{
 		// retireAll retires all the Combinations in the Compilation
 		// Afterwards, none of the retired Combinations will be able to mint new Combos
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for id in self.combinationIds{ 
 				self.retireCombination(combinationId: id)
@@ -334,7 +348,7 @@ contract ChessCombo: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Compilation should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -349,7 +363,7 @@ contract ChessCombo: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCombo(combinationId: UInt32): @NFT{ 
 			pre{ 
 				self.retired[combinationId] != nil:
@@ -378,7 +392,7 @@ contract ChessCombo: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Combos that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintCombos(combinationId: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -458,7 +472,7 @@ contract ChessCombo: NonFungibleToken{
 		//
 		// Returns: the ID of the new Combination object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCombination(metadata:{ String: String}): UInt32{ 
 			// Create the new Combination
 			var newCombination = CombinationData(metadata: metadata)
@@ -474,7 +488,7 @@ contract ChessCombo: NonFungibleToken{
 		//
 		// Parameters: name: The name of the Compilation
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCompilation(name: String): UInt32{ 
 			// Create the new Compilation
 			var newCompilation <- create Compilation(name: name)
@@ -493,7 +507,7 @@ contract ChessCombo: NonFungibleToken{
 		// Returns: A reference to the Compilation with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCompilation(compilationId: UInt32): &Compilation{ 
 			pre{ 
 				ChessCombo.compilations[compilationId] != nil:
@@ -508,7 +522,7 @@ contract ChessCombo: NonFungibleToken{
 		//
 		// Returns: The new series number
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the ChessCombo series number
@@ -519,7 +533,7 @@ contract ChessCombo: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -531,18 +545,18 @@ contract ChessCombo: NonFungibleToken{
 	access(all)
 	resource interface ComboCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCombo(id: UInt64): &ChessCombo.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -591,7 +605,7 @@ contract ChessCombo: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn combos
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -610,7 +624,7 @@ contract ChessCombo: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a ChessCombo NFT to make sure
 			// it is the correct type
@@ -634,7 +648,7 @@ contract ChessCombo: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -681,7 +695,7 @@ contract ChessCombo: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCombo(id: UInt64): &ChessCombo.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -727,7 +741,7 @@ contract ChessCombo: NonFungibleToken{
 	// getAllCombinations returns all the Combinations in ChessCombo
 	//
 	// Returns: An array of all the CombinationDatas that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCombinations(): [ChessCombo.CombinationData]{ 
 		return ChessCombo.combinationDatas.values
 	}
@@ -737,7 +751,7 @@ contract ChessCombo: NonFungibleToken{
 	// Parameters: combinationId: The id of the Combination that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCombinationMetaData(combinationId: UInt32):{ String: String}?{ 
 		return self.combinationDatas[combinationId]?.metadata
 	}
@@ -751,7 +765,7 @@ contract ChessCombo: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCombinationMetaDataByField(combinationId: UInt32, field: String): String?{ 
 		if let combinationData = ChessCombo.combinationDatas[combinationId]{ 
 			return combinationData.metadata[field]
@@ -766,7 +780,7 @@ contract ChessCombo: NonFungibleToken{
 	// Parameters: compilationId: The id of the Compilation that is being searched
 	//
 	// Returns: The name of the Compilation
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCompilationName(compilationId: UInt32): String?{ 
 		return ChessCombo.compilationDatas[compilationId]?.name
 	}
@@ -777,7 +791,7 @@ contract ChessCombo: NonFungibleToken{
 	// Parameters: compilationId: The id of the Compilation that is being searched
 	//
 	// Returns: The series that the Compilation belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCompilationSeries(compilationId: UInt32): UInt32?{ 
 		return ChessCombo.compilationDatas[compilationId]?.series
 	}
@@ -788,7 +802,7 @@ contract ChessCombo: NonFungibleToken{
 	// Parameters: compilationName: The name of the Compilation that is being searched
 	//
 	// Returns: An array of the Ids of the Compilation if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCompilationIdsByName(compilationName: String): [UInt32]?{ 
 		var compilationIds: [UInt32] = []
 		
@@ -813,7 +827,7 @@ contract ChessCombo: NonFungibleToken{
 	// Parameters: compilationId: The id of the Compilation that is being searched
 	//
 	// Returns: An array of Combination Ids
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCombinationsInCompilation(compilationId: UInt32): [UInt32]?{ 
 		return ChessCombo.compilations[compilationId]?.combinationIds
 	}
@@ -827,7 +841,7 @@ contract ChessCombo: NonFungibleToken{
 	//			 combinationId: The id of the Combination that is being searched
 	//
 	// Returns: Boolean indicating if the edition is retired or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(compilationId: UInt32, combinationId: UInt32): Bool?{ 
 		// Remove the compilation from the dictionary to get its field
 		if let compilationToRead <- ChessCombo.compilations.remove(key: compilationId){ 
@@ -853,7 +867,7 @@ contract ChessCombo: NonFungibleToken{
 	// Parameters: compilationId: The id of the Compilation that is being searched
 	//
 	// Returns: Boolean indicating if the Compilation is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isCompilationLocked(compilationId: UInt32): Bool?{ 
 		return ChessCombo.compilations[compilationId]?.locked
 	}
@@ -863,7 +877,7 @@ contract ChessCombo: NonFungibleToken{
 	//
 	// Returns: The total number of Combos 
 	//		  that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumCombosInEdition(compilationId: UInt32, combinationId: UInt32): UInt32?{ 
 		
 		// Remove the Compilation from the dictionary to get its field

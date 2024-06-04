@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -49,7 +63,7 @@ contract LCubePack: NonFungibleToken{
 	access(all)
 	event Destroy(id: UInt64)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createGameMinter(creator: Address, metadata:{ String: String}): @PackMinter{ 
 		assert(metadata.containsKey("gameName"), message: "gameName property is required for LCubePack!")
 		assert(metadata.containsKey("thumbnail"), message: "thumbnail property is required for LCubePack!")
@@ -154,12 +168,12 @@ contract LCubePack: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
@@ -173,15 +187,15 @@ contract LCubePack: NonFungibleToken{
 	access(all)
 	resource interface LCubePackCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubePack(id: UInt64): &LCubePack.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -212,7 +226,7 @@ contract LCubePack: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LCubePack.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -220,7 +234,7 @@ contract LCubePack: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(id: UInt64, receiverAccount: AuthAccount){ 
 			let recipient = getAccount(receiverAccount.address)
 			let recipientCap = recipient.capabilities.get<&{LCubeComponent.LCubeComponentCollectionPublic}>(LCubeComponent.CollectionPublicPath)
@@ -265,21 +279,21 @@ contract LCubePack: NonFungibleToken{
 			return packNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let packNFT = nft as! &LCubePack.NFT
 			return packNFT.getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubePack(id: UInt64): &LCubePack.NFT?{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let packNFT = nft as! &LCubePack.NFT
 			return packNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: UInt64): [MetadataViews.Royalty]{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let packNFT = nft as! &LCubePack.NFT
@@ -307,7 +321,7 @@ contract LCubePack: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPacks(address: Address): [UInt64]?{ 
 		let account = getAccount(address)
 		if let packCollection = account.capabilities.get<&{LCubePack.LCubePackCollectionPublic}>(self.CollectionPublicPath).borrow<&{LCubePack.LCubePackCollectionPublic}>(){ 
@@ -316,7 +330,7 @@ contract LCubePack: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun minter(): Capability<&PackMinter>{ 
 		return self.account.capabilities.get<&PackMinter>(self.MinterPublicPath)!
 	}
@@ -342,7 +356,7 @@ contract LCubePack: NonFungibleToken{
 			return <-newPack
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreatePacks(creator: Capability<&{NonFungibleToken.Receiver}>, startOfUse: UFix64, metadata:{ String: String}, royalties: [MetadataViews.Royalty], itemCount: UInt8, quantity: UInt8): @Collection{ 
 			assert(metadata.containsKey("name"), message: "name property is required for LCubePack!")
 			assert(metadata.containsKey("description"), message: "description property is required for LCubePack!")

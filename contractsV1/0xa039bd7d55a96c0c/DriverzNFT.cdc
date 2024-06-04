@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -67,22 +81,22 @@ contract DriverzNFT: NonFungibleToken{
 	access(all)
 	var totalSupply: UInt64
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun externalURL(): MetadataViews.ExternalURL{ 
 		return MetadataViews.ExternalURL("https://driverz.world")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun royaltyAddress(): Address{ 
 		return 0xa039bd7d55a96c0c
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun squareImageCID(): String{ 
 		return "QmV4FsnFiU7QY8ybwd5uuXwogVo9wcRExQLwedh7HU1mrU"
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun bannerImageCID(): String{ 
 		return "QmYn6vg1pCuKb6jWT3SDHuyX4NDyJB4wvcYarmsyppoGDS"
 	}
@@ -102,15 +116,15 @@ contract DriverzNFT: NonFungibleToken{
 	struct interface TemplateMetadata{ 
 		
 		// Hash representation of implementing structs.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hash(): [UInt8]
 		
 		// Representative Display
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun display(): MetadataViews.Display
 		
 		// Representative {string: string} serialization
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repr():{ String: String}
 	}
 	
@@ -122,22 +136,22 @@ contract DriverzNFT: NonFungibleToken{
 		access(self)
 		let _metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hash(): [UInt8]{ 
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun display(): MetadataViews.Display{ 
 			return self._display
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repr():{ String: String}{ 
 			return self.metadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata():{ String: String}{ 
 			return self._metadata
 		}
@@ -172,7 +186,7 @@ contract DriverzNFT: NonFungibleToken{
 		let creator: Address
 		
 		// Fetch the metadata Template represented by this NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun template():{ NFTTemplate}{ 
 			return DriverzNFT.getTemplate(setID: self.setID, templateID: self.templateID)
 		}
@@ -242,16 +256,16 @@ contract DriverzNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowDriverzNFT(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowDriverzNFT(id: UInt64): &DriverzNFT.NFT
 	}
 	
 	access(all)
@@ -263,7 +277,7 @@ contract DriverzNFT: NonFungibleToken{
 		
 		// Deposit a DriverzNFT into the collection. Safe to assume id's are unique.
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Required to ensure this is a DriverzNFT
 			let token <- token as! @DriverzNFT.NFT
 			let id: UInt64 = token.id
@@ -304,7 +318,7 @@ contract DriverzNFT: NonFungibleToken{
 		
 		// Borrow a reference to the specified NFT as a DriverzNFT.
 		// Panics if NFT does not exist in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDriverzNFT(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -377,7 +391,7 @@ contract DriverzNFT: NonFungibleToken{
 		var minted: UInt64
 		
 		// Add a new Template to the Set, only if the Set is Open
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(template: Template){ 
 			pre{ 
 				!self.isLocked:
@@ -391,7 +405,7 @@ contract DriverzNFT: NonFungibleToken{
 		
 		// Lock the Set if it is Open. This signals that this Set
 		// will mint NFTs based only on the Templates configured in this Set.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				!self.isLocked:
@@ -405,7 +419,7 @@ contract DriverzNFT: NonFungibleToken{
 		
 		// Mint numToMint NFTs with the supplied creator attribute. The NFT will
 		// be minted into the provided receiver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(templateID: UInt64, creator: Address): @NFT{ 
 			pre{ 
 				templateID < UInt64(self.templates.length):
@@ -420,7 +434,7 @@ contract DriverzNFT: NonFungibleToken{
 		}
 		
 		// Reveal a specified Template in a Set.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealTemplate(templateID: UInt64, metadata:{ TemplateMetadata}, salt: [UInt8]){ 
 			pre{ 
 				templateID < UInt64(self.templates.length):
@@ -455,7 +469,7 @@ contract DriverzNFT: NonFungibleToken{
 	}
 	
 	// Number of sets created by contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setsCount(): UInt64{ 
 		return DriverzNFT.totalSets
 	}
@@ -507,7 +521,7 @@ contract DriverzNFT: NonFungibleToken{
 	}
 	
 	// Generate a SetReport for informational purposes (to be used with scripts)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateSetReport(setID: UInt64): SetReport{ 
 		let setRef = (&self.sets[setID] as &Set?)!
 		return SetReport(id: setID, isLocked: setRef.isLocked, metadata: *setRef.metadata, numTemplates: setRef.templates.length, numMinted: setRef.minted)
@@ -538,13 +552,13 @@ contract DriverzNFT: NonFungibleToken{
 		access(all)
 		var mintID: UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checksum(): [UInt8]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun salt(): [UInt8]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun revealed(): Bool
 	}
 	
@@ -573,7 +587,7 @@ contract DriverzNFT: NonFungibleToken{
 		
 		// Helper function to check if a proposed metadata and salt reveal would
 		// produce the configured checksum in a Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun validate(metadata:{ TemplateMetadata}, salt: [UInt8]): Bool{ 
 			let hash = String.encodeHex(HashAlgorithm.SHA3_256.hash(salt.concat(metadata.hash())))
 			let checksum = String.encodeHex(self.checksum())
@@ -582,7 +596,7 @@ contract DriverzNFT: NonFungibleToken{
 		
 		// Reveal template metadata and salt. validate() is called as a precondition
 		// so collector can be assured metadata was not changed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(metadata:{ TemplateMetadata}, salt: [UInt8]){ 
 			pre{ 
 				self.mintID != nil:
@@ -596,24 +610,24 @@ contract DriverzNFT: NonFungibleToken{
 			self._salt = salt
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checksum(): [UInt8]{ 
 			return self._checksum
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun salt(): [UInt8]?{ 
 			return self._salt
 		}
 		
 		// Check to see if metadata has been revealed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun revealed(): Bool{ 
 			return self.metadata != nil
 		}
 		
 		// Mark the NFT as minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markMinted(nftID: UInt64){ 
 			self.mintID = nftID
 		}
@@ -628,7 +642,7 @@ contract DriverzNFT: NonFungibleToken{
 	}
 	
 	// Public helper function to be able to inspect any Template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplate(setID: UInt64, templateID: UInt64):{ NFTTemplate}{ 
 		let setRef = (&self.sets[setID] as &Set?)!
 		return setRef.templates[templateID]
@@ -643,7 +657,7 @@ contract DriverzNFT: NonFungibleToken{
 			self.setID = setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(templateID: UInt64, creator: Address): @NFT{ 
 			let set = (&DriverzNFT.sets[self.setID] as &Set?)!
 			return <-set.mint(templateID: templateID, creator: creator)
@@ -658,17 +672,17 @@ contract DriverzNFT: NonFungibleToken{
 	resource Admin{ 
 		
 		// Create a set with the provided SetMetadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(metadata: SetMetadata): UInt64{ 
 			return DriverzNFT.createSet(metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			return (&DriverzNFT.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSetMinter(setID: UInt64): @SetMinter{ 
 			return <-create SetMinter(setID: setID)
 		}

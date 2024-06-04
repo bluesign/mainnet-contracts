@@ -1,4 +1,18 @@
-// DAAM.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// DAAM.cdc
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -294,7 +308,7 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMID(): UInt64{ 
 			return self.mid
 		} // return Metadata ID
@@ -361,7 +375,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// If both parties agree (Creator & Admin) return true
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValid(): Bool{ 
 			return self.agreement[0] && self.agreement[1]
 		}
@@ -379,7 +393,7 @@ contract DAAM: NonFungibleToken{
 			self.grantee = grantee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRequest(mid: UInt64, royalty: MetadataViews.Royalties){ 
 			pre{ 
 				!DAAM.request.containsKey(mid):
@@ -397,7 +411,7 @@ contract DAAM: NonFungibleToken{
 		
 		// Accept the default Request. No Neogoation is required.
 		// Percentages are between 10% - 30%
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptDefault(mid: UInt64, metadataGen: &MetadataGenerator, royalties: MetadataViews.Royalties){ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -595,12 +609,12 @@ contract DAAM: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHolder(): MetadataHolder{ 
 			return MetadataHolder(creator: self.creatorInfo, mid: self.mid, edition: self.edition, categories: self.category, description: self.description, misc: self.misc, thumbnail: self.thumbnail)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display{ 
 			return MetadataViews.Display(name: self.edition.name!, description: self.description, thumbnail: self.thumbnail[self.thumbnail.keys[0]]!)
 		}
@@ -611,35 +625,35 @@ contract DAAM: NonFungibleToken{
 	resource interface MetadataGeneratorMint{ 
 		// Used to generate a Metadata either new or one with an incremented counter
 		// Requires a Minters Key to generate MinterAccess
-		access(all)
-		fun generateMetadata(minter: @MinterAccess): @Metadata
+		access(TMP_ENTITLEMENT_OWNER)
+		fun generateMetadata(minter: @DAAM.MinterAccess): @DAAM.Metadata
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewMetadata(mid: UInt64): MetadataHolder?
 	}
 	
 	/************************************************************************/
 	access(all)
 	resource interface MetadataGeneratorPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewMetadata(mid: UInt64): MetadataHolder?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewMetadatas(): [MetadataHolder]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewDisplay(mid: UInt64): MetadataViews.Display?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewDisplays(): [MetadataViews.Display]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun returnMetadata(metadata: @Metadata)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFile(mid: UInt64):{ String: MetadataViews.Media}
 	}
 	
@@ -669,7 +683,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// addMetadata: Used to add a new Metadata. This sets up the Metadata to be approved by the Admin. Returns the new mid.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMetadata(name: String, max: UInt64?, categories: [Categories.Category], description: String, misc: String, thumbnail:{ String:{ MetadataViews.File}}, file:{ String: MetadataViews.Media}, interact: AnyStruct?): UInt64{ 
 			pre{ 
 				self.grantee == (self.owner!).address:
@@ -704,7 +718,7 @@ contract DAAM: NonFungibleToken{
 		
 		// RemoveMetadata uses clearMetadata to delete the Metadata.
 		// But when deleting a submission the request must also be deleted.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMetadata(mid: UInt64){ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -746,7 +760,7 @@ contract DAAM: NonFungibleToken{
 		
 		// Remove Metadata as Resource. Metadata + Request = NFT.
 		// The Metadata will be destroyed along with a matching Request (same MID) in order to create the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateMetadata(minter: @MinterAccess): @Metadata{ 
 			pre{ 
 				self.grantee == (self.owner!).address:
@@ -802,7 +816,7 @@ contract DAAM: NonFungibleToken{
 			return <-orig_metadata!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun returnMetadata(metadata: @Metadata){ 
 			pre{ 
 				metadata.creatorInfo.creator == self.grantee:
@@ -821,12 +835,12 @@ contract DAAM: NonFungibleToken{
 			(ref!).append(<-metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMIDs(): [UInt64]{ 
 			return self.metadata.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewMetadata(mid: UInt64): MetadataHolder?{ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -840,7 +854,7 @@ contract DAAM: NonFungibleToken{
 			return data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewMetadatas(): [MetadataHolder]{ 
 			var list: [MetadataHolder] = []
 			for m in self.metadata.keys{ 
@@ -850,7 +864,7 @@ contract DAAM: NonFungibleToken{
 			return list
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewDisplay(mid: UInt64): MetadataViews.Display?{ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -862,7 +876,7 @@ contract DAAM: NonFungibleToken{
 			return (mRef!).getDisplay()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewDisplays(): [MetadataViews.Display]{ 
 			var list: [MetadataViews.Display] = []
 			for m in self.metadata.keys{ 
@@ -872,7 +886,7 @@ contract DAAM: NonFungibleToken{
 			return list
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFile(mid: UInt64):{ String: MetadataViews.Media}{ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -945,7 +959,7 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCopyright(): CopyrightStatus{ // Get current NFT Copyright status 
 			
 			return DAAM.copyright[self.id]! // return copyright status
@@ -993,14 +1007,14 @@ contract DAAM: NonFungibleToken{
 	// Wallet Public standards. For Public access only
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDAAM(id: UInt64): &DAAM.NFT // Get NFT as DAAM.NFT
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollection():{ String: NFTCollectionDisplay}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositByAgent(token: @{NonFungibleToken.NFT}, name: String, feature: Bool, permission: &Admin)
 	}
 	
@@ -1039,7 +1053,7 @@ contract DAAM: NonFungibleToken{
 			self.id ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMID(creator: &Creator, mid: UInt64, feature: Bool){ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -1058,7 +1072,7 @@ contract DAAM: NonFungibleToken{
 			self.mid.insert(key: mid, feature)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTokenID(id: UInt64, feature: Bool){ 
 			pre{ 
 				!self.id.containsKey(id):
@@ -1071,7 +1085,7 @@ contract DAAM: NonFungibleToken{
 			self.id.insert(key: id, feature)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMID(creator: &Creator, mid: UInt64){ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -1090,7 +1104,7 @@ contract DAAM: NonFungibleToken{
 			self.mid.remove(key: mid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTokenID(id: UInt64){ // change to &NFT // TODO 
 			
 			pre{ 
@@ -1104,7 +1118,7 @@ contract DAAM: NonFungibleToken{
 			self.id.remove(key: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adjustFeatureByMID(creator: &Creator, mid: UInt64, feature: Bool){ 
 			pre{ 
 				self.mid.containsKey(mid):
@@ -1117,7 +1131,7 @@ contract DAAM: NonFungibleToken{
 			self.mid[mid] = feature
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adjustFeatureByID(id: UInt64, feature: Bool){ 
 			pre{ 
 				self.id.containsKey(id):
@@ -1145,17 +1159,17 @@ contract DAAM: NonFungibleToken{
 			self.collections ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollection(name: String, description: String, externalURL: MetadataViews.ExternalURL, squareImage: MetadataViews.Media, bannerImage: MetadataViews.Media, socials:{ String: MetadataViews.ExternalURL}){ 
 			self.collections.insert(key: name, NFTCollectionDisplay(name: name, description: description, externalURL: externalURL, squareImage: squareImage, bannerImage: bannerImage, socials: socials))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollection():{ String: NFTCollectionDisplay}{ 
 			return self.collections
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCollection(name: String){ 
 			pre{ 
 				self.collections.containsKey(name):
@@ -1212,7 +1226,7 @@ contract DAAM: NonFungibleToken{
 		
 		// deposit takes a NFT and adds it to the collections dictionary and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DAAM.NFT // Get NFT as DAAM.GFT
 			
 			let id = token.id // Save Token ID
@@ -1225,7 +1239,7 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositByAgent(token: @{NonFungibleToken.NFT}, name: String, feature: Bool, permission: &Admin){ 
 			pre{ 
 				(DAAM.getAgentCreators(agent: permission.grantee)!).contains(self.owner?.address!):
@@ -1253,7 +1267,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// borrowDAAM gets a reference to an DAAM.NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDAAM(id: UInt64): &DAAM.NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1292,34 +1306,34 @@ contract DAAM: NonFungibleToken{
 		access(all)
 		let grantee: Address
 		
-		access(all)
-		fun inviteCreator(_ creator: Address, agentCut: UFix64) // Admin invites a new creator	   
+		access(TMP_ENTITLEMENT_OWNER)
+		fun inviteCreator(_ creator: Address, agentCut: UFix64): Void // Admin invites a new creator	   
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeCreatorStatus(creator: Address, status: Bool) // Admin or Agent change Creator status		
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeCopyright(creator: Address, mid: UInt64, copyright: CopyrightStatus) // Admin or Agenct can change MID copyright status
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMetadataStatus(creator: Address, mid: UInt64, status: Bool) // Admin or Agent can change Metadata Status
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCreator(creator: Address) // Admin or Agent can remove CAmiRajpal@hotmail.cometadata Status
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun newRequestGenerator(): @RequestGenerator // Create Request Generator
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bargin(creator: Address, mid: UInt64, percentage: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMetadata(creator: Address, name: String, max: UInt64?, categories: [Categories.Category], description: String, misc: String, thumbnail:{ String:{ MetadataViews.File}}, file:{ String: MetadataViews.Media}, interact: AnyStruct?): @Metadata
 	}
 	
@@ -1341,7 +1355,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// Used only when genreating a new Admin. Creates a Resource Generator for Negoiations.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun newRequestGenerator(): @RequestGenerator{ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1356,7 +1370,7 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteAdmin(_ admin: Address){ // Admin invite a new Admin 
 			
 			pre{ 
@@ -1385,7 +1399,7 @@ contract DAAM: NonFungibleToken{
 			emit AdminInvited(admin: admin)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteAgent(_ agent: Address){ // Admin ivites new Agent 
 			
 			pre{ 
@@ -1418,7 +1432,7 @@ contract DAAM: NonFungibleToken{
 			emit AgentInvited(agent: agent)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteCreator(_ creator: Address, agentCut: UFix64){ // Admin or Agent invite a new creator, agentCut = nil no agent 
 			
 			pre{ 
@@ -1449,7 +1463,7 @@ contract DAAM: NonFungibleToken{
 			emit CreatorInvited(creator: creator)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteMinter(_ minter: Address){ // Admin invites a new Minter (Key) 
 			
 			pre{ 
@@ -1470,7 +1484,7 @@ contract DAAM: NonFungibleToken{
 			emit MinterSetup(minter: minter)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAdmin(admin: Address){ // Two Admin to Remove Admin 
 			
 			pre{ 
@@ -1517,7 +1531,7 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAgent(agent: Address){ // Admin removes selected Agent by Address 
 			
 			pre{ 
@@ -1545,7 +1559,7 @@ contract DAAM: NonFungibleToken{
 			emit AgentRemoved(agent: agent)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCreator(creator: Address){ // Admin removes selected Creator by Address 
 			
 			pre{ 
@@ -1574,7 +1588,7 @@ contract DAAM: NonFungibleToken{
 			emit CreatorRemoved(creator: creator)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMinter(minter: Address){ // Admin removes selected Agent by Address 
 			
 			pre{ 
@@ -1599,7 +1613,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// Admin can Change Agent status 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeAgentStatus(agent: Address, status: Bool){ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1625,7 +1639,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// Admin or Agent can Change Creator status 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeCreatorStatus(creator: Address, status: Bool){ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1654,7 +1668,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// Admin can Change Minter status 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMinterStatus(minter: Address, status: Bool){ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1680,7 +1694,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// Admin or Agent can change a Metadata status.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMetadataStatus(creator: Address, mid: UInt64, status: Bool){ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -1704,7 +1718,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// Admin or Agent can change a MIDs copyright status.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeCopyright(creator: Address, mid: UInt64, copyright: CopyrightStatus){ 
 			pre{ 
 				mid != 0 && mid <= DAAM.metadataCounterID:
@@ -1734,7 +1748,7 @@ contract DAAM: NonFungibleToken{
 			emit ChangedCopyright(metadataID: mid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCategory(name: String){ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1747,7 +1761,7 @@ contract DAAM: NonFungibleToken{
 			Categories.addCategory(name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCategory(name: String){ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1760,7 +1774,7 @@ contract DAAM: NonFungibleToken{
 			Categories.removeCategory(name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMetadata(creator: Address, name: String, max: UInt64?, categories: [Categories.Category], description: String, misc: String, thumbnail:{ String:{ MetadataViews.File}}, file:{ String: MetadataViews.Media}, interact: AnyStruct?): @Metadata{ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1788,7 +1802,7 @@ contract DAAM: NonFungibleToken{
 			return <-metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bargin(creator: Address, mid: UInt64, percentage: UFix64){ 
 			pre{ 
 				DAAM.admins[(self.owner!).address] == true:
@@ -1856,7 +1870,7 @@ contract DAAM: NonFungibleToken{
 		
 		
 		// Used to create a Metadata Generator when initalizing Creator Storge
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun newMetadataGenerator(): @MetadataGenerator{ 
 			pre{ 
 				self.grantee == (self.owner!).address:
@@ -1871,7 +1885,7 @@ contract DAAM: NonFungibleToken{
 		}
 		
 		// Used to create a Request Generator when initalizing Creator Storge
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun newRequestGenerator(): @RequestGenerator{ 
 			pre{ 
 				self.grantee == (self.owner!).address:
@@ -1885,7 +1899,7 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bargin(mid: UInt64, percentage: UFix64){ 
 			// Verify is Creator
 			pre{ 
@@ -1922,7 +1936,7 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(metadata: @Metadata): @DAAM.NFT{ 
 			pre{ 
 				DAAM.isCreator(metadata.creatorInfo.creator) == true:
@@ -1955,13 +1969,13 @@ contract DAAM: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMinterAccess(mid: UInt64): @MinterAccess{ 
 			return <-create MinterAccess(self.grantee, mid: mid)
 		}
 		
 		// Removes token from 'new' list. 'new' is defines as newly Mited. Age is not a consideration.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun notNew(tokenID: UInt64){ 
 			pre{ 
 				self.grantee == (self.owner!).address:
@@ -2021,7 +2035,7 @@ contract DAAM: NonFungibleToken{
 			self.mid = mid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun validate(creator: Address): Bool{ 
 			pre{ 
 				DAAM.isMinter(self.minter) == true:
@@ -2050,7 +2064,7 @@ contract DAAM: NonFungibleToken{
 	// True : invitation is accepted and invitation setting reset
 	// False: invitation is declined and invitation setting reset
 	// The Admin potential can accept (True) or deny (False)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun answerAdminInvite(newAdmin: AuthAccount, submit: Bool): @Admin?{ 
 		pre{ 
 			self.isAgent(newAdmin.address) == nil:
@@ -2079,7 +2093,7 @@ contract DAAM: NonFungibleToken{
 	}
 	
 	// // The Agent potential can accept (True) or deny (False)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun answerAgentInvite(newAgent: AuthAccount, submit: Bool): @Admin?{ 
 		pre{ 
 			self.isAdmin(newAgent.address) == nil:
@@ -2115,7 +2129,7 @@ contract DAAM: NonFungibleToken{
 	}
 	
 	// // The Creator potential can accept (True) or deny (False)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun answerCreatorInvite(newCreator: AuthAccount, submit: Bool): @Creator?{ 
 		pre{ 
 			self.isAdmin(newCreator.address) == nil:
@@ -2152,7 +2166,7 @@ contract DAAM: NonFungibleToken{
 	
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun answerMinterInvite(newMinter: AuthAccount, submit: Bool): @Minter?{ 
 		pre{ 
 			self.isMinter(newMinter.address) == false:
@@ -2185,7 +2199,7 @@ contract DAAM: NonFungibleToken{
 	}
 	
 	// Return list of Agents
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAgents():{ Address: [CreatorInfo]}{ 
 		var list:{ Address: [CreatorInfo]} ={} 
 		for agent in self.agentHistory.keys{ 
@@ -2202,7 +2216,7 @@ contract DAAM: NonFungibleToken{
 	}
 	
 	// Return list of Creators
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCreators():{ Address: CreatorInfo}{ 
 		let creators = self.creators.keys
 		var list = self.creators
@@ -2214,18 +2228,18 @@ contract DAAM: NonFungibleToken{
 		return list
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getAgentCreators(agent: Address): [Address]?{ 
 		return self.agentHistory[agent]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getCreatorMIDs(creator: Address): [UInt64]?{ 
 		return self.creatorHistory[creator]
 	}
 	
 	// Return Copyright Status. nil = non-existent MID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCopyright(mid: UInt64): CopyrightStatus?{ 
 		pre{ 
 			mid != 0 && mid <= DAAM.metadataCounterID:
@@ -2234,7 +2248,7 @@ contract DAAM: NonFungibleToken{
 		return self.copyright[mid]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(mid: UInt64): MetadataViews.Royalties{ 
 		pre{ 
 			mid != 0 && mid <= DAAM.metadataCounterID:
@@ -2247,7 +2261,7 @@ contract DAAM: NonFungibleToken{
 		return *royalty
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getRequestValidity(mid: UInt64): Bool{ 
 		pre{ 
 			self.request.containsKey(mid)
@@ -2255,19 +2269,19 @@ contract DAAM: NonFungibleToken{
 		return self.request[mid]?.isValid() == true ? true : false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRequestMIDs(): [UInt64]{ 
 		return self.request.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isNFTNew(id: UInt64): Bool{ // Return True if new 
 		
 		return self.newNFTs.contains(id) // Note: 'New' is defined a newly minted. Age is not a consideration. 
 	
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isAdmin(_ admin: Address): Bool?{ 
 		if self.admins[admin] == nil{ 
 			return nil
@@ -2275,17 +2289,17 @@ contract DAAM: NonFungibleToken{
 		return self.agents[admin] == nil ? self.admins[admin]! : nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isAgent(_ agent: Address): Bool?{ 
 		return self.agents[agent]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isMinter(_ minter: Address): Bool?{ 
 		return self.minters[minter]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isCreator(_ creator: Address): Bool?{ 
 		return DAAM.creators[creator]?.status
 	}

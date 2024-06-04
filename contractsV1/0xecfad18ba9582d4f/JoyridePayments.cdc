@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import JoyrideMultiToken from "./JoyrideMultiToken.cdc"
 
@@ -78,7 +92,7 @@ contract JoyridePayments{
 	}
 	
 	//Pretty sure this is safe to be public, since a valid Capability<&JRXToken.AdminVault.{JRXToken.ConvertsRewards}> can only be created by the JRXToken contract account.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun linkAccountsCapability(
 		accountsCapability: Capability<&JoyrideAccounts.JoyrideAccountsAdmin>
 	){ 
@@ -89,7 +103,7 @@ contract JoyridePayments{
 	}
 	
 	//Pretty sure this is safe to be public, since a valid Capability<&JRXToken.AdminVault.{JRXToken.ConvertsRewards}> can only be created by the JRXToken contract account.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun linkTreasuryCapability(treasuryCapability: Capability<&JoyrideMultiToken.PlatformAdmin>){ 
 		if !treasuryCapability.check(){ 
 			panic("Capability from Invalid Source")
@@ -97,7 +111,7 @@ contract JoyridePayments{
 		self.treasuryCapability = treasuryCapability
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlay2EarnCapabilities(account: AuthAccount): Capability<&PaymentsAdmin>{ 
 		if account.address == self.account.address
 		|| self.authorizedBackendAccounts.containsKey(account.address){ 
@@ -108,7 +122,7 @@ contract JoyridePayments{
 	
 	access(all)
 	resource interface WalletAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun PlayerTransaction(
 			playerID: String,
 			tokenContext: String,
@@ -119,14 +133,14 @@ contract JoyridePayments{
 			notes: String
 		): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun FinalizeTransactionWithDevPercentage(
 			txID: String,
 			profit: UFix64,
 			devPercentage: UFix64
 		): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun RefundTransaction(txID: String): Bool
 	}
 	
@@ -158,7 +172,7 @@ contract JoyridePayments{
 			self.creationTime = getCurrentBlock().timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Refund(txID: String): Bool{ 
 			if JoyridePayments.accountsCapability == nil{ 
 				emit TxFailed_ByTxTypeAndTxID(txID: txID, txType: "RefundTX", notes: txID.concat(": JoyrideAccountsAdmin Accounts Capability Null"))
@@ -205,7 +219,7 @@ contract JoyridePayments{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Finalize(txID: String, profit: UFix64, devPercentage: UFix64): Bool{ 
 			if JoyridePayments.accountsCapability == nil{ 
 				emit TxFailed_ByTxTypeAndTxID(txID: txID, txType: "FinalizeTX", notes: txID.concat(": JoyrideAccountsAdmin Accounts Capability Null"))
@@ -282,17 +296,17 @@ contract JoyridePayments{
 			self.pendingTransactions <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AuthorizeBackendAccount(authorizedAddress: Address){ 
 			JoyridePayments.authorizedBackendAccounts[authorizedAddress] = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun DeAuthorizeBackendAccount(deauthorizedAddress: Address){ 
 			JoyridePayments.authorizedBackendAccounts.remove(key: deauthorizedAddress)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun PlayerTransaction(playerID: String, tokenContext: String, amount: Fix64, gameID: String, txID: String, reward: Bool, notes: String): Bool{ 
 			if self.pendingTransactions.containsKey(txID) || JoyridePayments.transactionStore.containsKey(playerID) && (JoyridePayments.transactionStore[playerID]!)[txID] != nil{ 
 				emit TxFailed_DuplicateTxID(txID: txID, notes: notes)
@@ -345,12 +359,12 @@ contract JoyridePayments{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun FinalizeTransaction(txID: String, profit: UFix64): Bool{ 
 			return self.FinalizeTransactionWithDevPercentage(txID: txID, profit: profit, devPercentage: 0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun FinalizeTransactionWithDevPercentage(txID: String, profit: UFix64, devPercentage: UFix64): Bool{ 
 			let tx <- self.pendingTransactions.remove(key: txID)
 			if tx == nil{ 
@@ -369,7 +383,7 @@ contract JoyridePayments{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun RefundTransaction(txID: String): Bool{ 
 			let tx <- self.pendingTransactions.remove(key: txID)
 			if tx == nil{ 

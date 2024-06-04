@@ -1,4 +1,18 @@
-// Description: Smart Contract for Live Nation Virtual Commemorative Tickets
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Description: Smart Contract for Live Nation Virtual Commemorative Tickets
 // SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -236,15 +250,15 @@ contract LNVCT: NonFungibleToken{
 	access(all)
 	resource interface LNVCTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLNVCT(id: UInt64): &LNVCT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -270,7 +284,7 @@ contract LNVCT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LNVCT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -295,7 +309,7 @@ contract LNVCT: NonFungibleToken{
 			return exampleNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLNVCT(id: UInt64): &LNVCT.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -335,7 +349,7 @@ contract LNVCT: NonFungibleToken{
 			self.minterID = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(glink: String, gbatch: UInt32, glimit: UInt16, gsequence: UInt16, name: String, description: String, thumbnail: String, editionNumber: UInt64, metadata:{ String: String}): @NFT{ 
 			let tokenID = UInt64(gbatch) << 32 | UInt64(glimit) << 16 | UInt64(gsequence)
 			var newNFT <- create NFT(initID: tokenID, initlink: glink, initbatch: gbatch, initsequence: gsequence, initlimit: glimit, name: name, description: description, thumbnail: thumbnail, editionNumber: editionNumber, metadata: metadata)
@@ -350,7 +364,7 @@ contract LNVCT: NonFungibleToken{
 		access(all)
 		var ModifierID: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAttendance(currentNFT: &LNVCT.NFT?, attendance: String): String{ 
 			let ref2 = currentNFT!
 			ref2.markAttendanceHelper(attendance: attendance)
@@ -359,7 +373,7 @@ contract LNVCT: NonFungibleToken{
 			return ref2.attendance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setURLMetadata(currentNFT: &LNVCT.NFT?, newURL: String, newThumbnail: String): String{ 
 			let ref2 = currentNFT!
 			ref2.setURLMetadataHelper(newURL: newURL, newThumbnail: newThumbnail)
@@ -368,27 +382,27 @@ contract LNVCT: NonFungibleToken{
 			return newURL
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRarity(currentNFT: &LNVCT.NFT?, rarity: UFix64, rarityName: String, rarityValue: String){ 
 			let ref2 = currentNFT!
 			ref2.setRarityHelper(rarity: rarity, rarityName: rarityName, rarityValue: rarityValue)
 			log("Rarity metadata is updated")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEdition(currentNFT: &LNVCT.NFT?, editionNumber: UInt64, maxEdition: UInt64){ 
 			let ref2 = currentNFT!
 			ref2.setEditionHelper(editionNumber: editionNumber, maxEdition: maxEdition)
 			log("Edition metadata is updated")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxEditionForShow(description: String, maxEdition: UInt64){ 
 			LNVCT.maxEditionNumbersForShows.insert(key: description, maxEdition)
 			log("Max Edition metadata for the Show is updated")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(currentNFT: &LNVCT.NFT?, metadata_name: String, metadata_value: String){ 
 			let ref2 = currentNFT!
 			ref2.setMetadataHelper(metadata_name: metadata_name, metadata_value: metadata_value)

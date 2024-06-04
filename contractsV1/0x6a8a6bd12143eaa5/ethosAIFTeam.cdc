@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for AIF Team
 	
 	This smart contract contains the core functionality for 
@@ -141,15 +155,15 @@ contract ethosAIFTeam: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &ethosAIFTeam.NFT?
 	}
 	
@@ -177,7 +191,7 @@ contract ethosAIFTeam: NonFungibleToken{
 		// Takes a NFT and adds it to the collections dictionary
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let myToken <- token as! @ethosAIFTeam.NFT
 			emit Deposit(id: myToken.id, to: self.owner?.address)
 			self.ownedNFTs[myToken.id] <-! myToken
@@ -207,7 +221,7 @@ contract ethosAIFTeam: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &ethosAIFTeam.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let reference = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -247,7 +261,7 @@ contract ethosAIFTeam: NonFungibleToken{
 		// Mints an new NFT
 		// and deposits it in the Admins collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintethosAIFTeamNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			// create a new NFT 
 			var newNFT <- create NFT(_metadata: metadata)
@@ -260,7 +274,7 @@ contract ethosAIFTeam: NonFungibleToken{
 		// Batch mints ethosAIFTeamNFTs
 		// and deposits in the Admins collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintethosAIFTeamNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadataArray: [{String: String}]){ 
 			var i: Int = 0
 			while i < metadataArray.length{ 
@@ -269,7 +283,7 @@ contract ethosAIFTeam: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

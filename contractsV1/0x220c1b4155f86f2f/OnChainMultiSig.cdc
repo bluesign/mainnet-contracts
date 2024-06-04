@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -15,46 +29,46 @@ contract OnChainMultiSig{
 	// ------- Interfaces ------- 
 	access(all)
 	resource interface PublicSigner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewPayload(payload: @PayloadDetails, publicKey: String, sig: [UInt8])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPayloadSignature(txIndex: UInt64, publicKey: String, sig: [UInt8])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun executeTx(txIndex: UInt64): @AnyResource?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun UUID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTxIndex(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSignerKeys(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSignerKeyAttr(publicKey: String): PubKeyAttr?
 	}
 	
 	access(all)
 	resource interface KeyManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addKeys(multiSigPubKeys: [String], multiSigKeyWeights: [UFix64], multiSigAlgos: [UInt8])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeKeys(multiSigPubKeys: [String])
 	}
 	
 	access(all)
 	resource interface SignatureManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSignerKeys(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSignerKeyAttr(publicKey: String): PubKeyAttr?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewPayload(
 			resourceId: UInt64,
 			payload: @PayloadDetails,
@@ -64,7 +78,7 @@ contract OnChainMultiSig{
 			]
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPayloadSignature(
 			resourceId: UInt64,
 			txIndex: UInt64,
@@ -74,13 +88,13 @@ contract OnChainMultiSig{
 			]
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun readyForExecution(txIndex: UInt64): @PayloadDetails?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configureKeys(pks: [String], kws: [UFix64], sa: [UInt8])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeKeys(pks: [String])
 	}
 	
@@ -120,13 +134,13 @@ contract OnChainMultiSig{
 		access(contract)
 		let pubKeys: [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArg(i: UInt): AnyStruct?{ 
 			return self.args[i]
 		}
 		
 		// Calculate the bytes of a payload
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSignableData(): [UInt8]{ 
 			var s = self.txIndex.toBigEndianBytes()
 			s = s.concat(self.method.utf8)
@@ -169,7 +183,7 @@ contract OnChainMultiSig{
 		}
 		
 		// Verify the signature and return the total weight of valid signatures, if any.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifySigners(
 			pks: [
 				String
@@ -218,7 +232,7 @@ contract OnChainMultiSig{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSignature(sig: [UInt8], publicKey: String){ 
 			self.signatures.append(sig)
 			self.pubKeys.append(publicKey)
@@ -256,23 +270,23 @@ contract OnChainMultiSig{
 		access(self)
 		let payloads: @{UInt64: PayloadDetails}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSignerKeys(): [String]{ 
 			return self.keyList.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSignerKeyAttr(publicKey: String): PubKeyAttr?{ 
 			return self.keyList[publicKey]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePayload(txIndex: UInt64): @PayloadDetails{ 
 			assert(self.payloads.containsKey(txIndex), message: "no payload at txIndex")
 			return <-self.payloads.remove(key: txIndex)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configureKeys(pks: [String], kws: [UFix64], sa: [UInt8]){ 
 			var i: Int = 0
 			while i < pks.length{ 
@@ -282,7 +296,7 @@ contract OnChainMultiSig{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeKeys(pks: [String]){ 
 			var i: Int = 0
 			while i < pks.length{ 
@@ -291,7 +305,7 @@ contract OnChainMultiSig{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewPayload(resourceId: UInt64, payload: @PayloadDetails, publicKey: String, sig: [UInt8]){ 
 			
 			// Reject the tx if the provided key is not in the keyList
@@ -316,7 +330,7 @@ contract OnChainMultiSig{
 			emit NewPayloadAdded(resourceId: resourceId, txIndex: txIndex)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPayloadSignature(resourceId: UInt64, txIndex: UInt64, publicKey: String, sig: [UInt8]){ 
 			assert(self.payloads.containsKey(txIndex), message: "Payload has not been added")
 			assert(self.keyList.containsKey(publicKey), message: "Public key is not a registered signer")
@@ -346,7 +360,7 @@ contract OnChainMultiSig{
 		}
 		
 		// Ensure the total weights of the tx signers is sufficient to execute the tx
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun readyForExecution(txIndex: UInt64): @PayloadDetails?{ 
 			assert(self.payloads.containsKey(txIndex), message: "No payload for such index")
 			let p <- self.payloads.remove(key: txIndex)!
@@ -372,12 +386,12 @@ contract OnChainMultiSig{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMultiSigManager(publicKeys: [String], pubKeyAttrs: [PubKeyAttr]): @Manager{ 
 		return <-create Manager(publicKeys: publicKeys, pubKeyAttrs: pubKeyAttrs)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPayload(
 		txIndex: UInt64,
 		method: String,

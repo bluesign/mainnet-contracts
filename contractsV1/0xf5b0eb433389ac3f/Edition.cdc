@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 // Common information for all copies of the same item
 access(all)
@@ -83,7 +97,7 @@ contract Edition{
 		}
 		
 		// Get status of edition		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(): EditionStatus{ 
 			return EditionStatus(
 				royalty: self.royalty,
@@ -93,14 +107,14 @@ contract Edition{
 		}
 		
 		// Change commision
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeCommission(royalty:{ Address: CommissionStructure}){ 
 			self.royalty = royalty
 			emit ChangeCommision(editionId: self.editionId)
 		}
 		
 		// Change count of copies. This is used for Open Edition, because the eventual amount of copies are known only after finish of sale	   
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMaxEdition(maxEdition: UInt64){ 
 			pre{ 
 				// Possible change this number only once after Open Edition would be completed
@@ -116,8 +130,8 @@ contract Edition{
 	// retreiving the edition's information
 	access(all)
 	resource interface EditionCollectionPublic{ 
-		access(all)
-		fun getEdition(_ id: UInt64): EditionStatus?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getEdition(_ id: UInt64): Edition.EditionStatus?
 	}
 	
 	//EditionCollection contains a dictionary EditionItems and provides
@@ -157,7 +171,7 @@ contract Edition{
 		}
 		
 		// Create edition (common information for all copies of the same item)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(royalty:{ Address: CommissionStructure}, maxEdition: UInt64): UInt64{ 
 			self.validateRoyalty(royalty: royalty)
 			let item <- create EditionItem(royalty: royalty, maxEdition: maxEdition)
@@ -170,7 +184,7 @@ contract Edition{
 			return id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(_ id: UInt64): EditionStatus?{ 
 			if self.editionItems[id] == nil{ 
 				return nil
@@ -182,7 +196,7 @@ contract Edition{
 		}
 		
 		//Change commission
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeCommission(id: UInt64, royalty:{ Address: CommissionStructure}){ 
 			pre{ 
 				self.editionItems[id] != nil:
@@ -194,7 +208,7 @@ contract Edition{
 		}
 		
 		// Change count of copies. This is used for Open Edition, because the eventual amount of copies are unknown 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMaxEdition(id: UInt64, maxEdition: UInt64){ 
 			pre{ 
 				self.editionItems[id] != nil:

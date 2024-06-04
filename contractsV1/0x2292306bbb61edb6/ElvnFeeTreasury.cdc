@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Apache License 2.0
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Apache License 2.0
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import Elvn from "../0x3084a96e617d3b0a/Elvn.cdc"
@@ -19,7 +33,7 @@ contract ElvnFeeTreasury{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				amount > 0.0:
@@ -34,7 +48,7 @@ contract ElvnFeeTreasury{
 			return <-vault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawAllAmount(): @{FungibleToken.Vault}{ 
 			let vault = ElvnFeeTreasury.getVault()
 			let vaultAmount = vault.balance
@@ -46,7 +60,7 @@ contract ElvnFeeTreasury{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deposit(vault: @{FungibleToken.Vault}){ 
 		pre{ 
 			vault.balance > 0.0:
@@ -64,13 +78,13 @@ contract ElvnFeeTreasury{
 		?? panic("failed borrow elvn vault")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalance(): UFix64{ 
 		let vault = ElvnFeeTreasury.getVault()
 		return vault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReceiver(): Capability<&Elvn.Vault>{ 
 		return self.account.capabilities.get<&Elvn.Vault>(/public/elvnReceiver)!
 	}

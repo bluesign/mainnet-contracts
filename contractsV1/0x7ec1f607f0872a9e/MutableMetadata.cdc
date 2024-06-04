@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 MutableMetadata
 
 This contract serves as a container for metadata that can be modified after it
@@ -23,11 +37,11 @@ contract MutableMetadata{
 	resource interface Public{ 
 		
 		// Is this metadata locked for modification?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool
 		
 		// Get a copy of the underlying metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get(): AnyStruct
 	}
 	
@@ -35,17 +49,17 @@ contract MutableMetadata{
 	resource interface Private{ 
 		
 		// Lock this metadata, preventing further modification.
-		access(all)
-		fun lock()
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lock(): Void
 		
 		// Retrieve a modifiable version of the underlying metadata, only if the
 		// metadata has not been locked.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMutable(): &AnyStruct
 		
 		// Replace the metadata entirely with a new underlying metadata AnyStruct,
 		// only if the metadata has not been locked.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replace(_ new: AnyStruct)
 	}
 	
@@ -67,12 +81,12 @@ contract MutableMetadata{
 		// ========================================================================
 		// Public
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool{ 
 			return self._locked
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get(): AnyStruct{ 
 			// It's important that a copy is returned and not a reference.
 			return self._metadata
@@ -81,12 +95,12 @@ contract MutableMetadata{
 		// ========================================================================
 		// Private
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			self._locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMutable(): &AnyStruct{ 
 			pre{ 
 				!self._locked:
@@ -95,7 +109,7 @@ contract MutableMetadata{
 			return &self._metadata as &AnyStruct
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replace(_ new: AnyStruct){ 
 			pre{ 
 				!self._locked:
@@ -117,7 +131,7 @@ contract MutableMetadata{
 	// Contract functions
 	// ========================================================================
 	// Create a new Metadata resource with the given generic AnyStruct metadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(metadata: AnyStruct): @Metadata{ 
 		return <-create Metadata(metadata: metadata)
 	}

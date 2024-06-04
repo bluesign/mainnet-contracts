@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -80,15 +94,15 @@ contract SturdyTokens: NonFungibleToken{
 	access(all)
 	resource interface SturdyTokensCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSturdyToken(id: UInt64): &SturdyTokens.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -117,17 +131,17 @@ contract SturdyTokens: NonFungibleToken{
 		access(self)
 		var metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(){ 
 			self.locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -136,7 +150,7 @@ contract SturdyTokens: NonFungibleToken{
 			self.metadata = newMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAddedToSet(setID: UInt64){ 
 			self.addedToSet = setID
 		}
@@ -230,12 +244,12 @@ contract SturdyTokens: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata():{ String: String}{ 
 			return (SturdyTokens.sturdyTokensTemplates[self.templateID]!).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetID(): UInt64{ 
 			return (SturdyTokens.sturdyTokensTemplates[self.templateID]!).addedToSet
 		}
@@ -265,7 +279,7 @@ contract SturdyTokens: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SturdyTokens.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -273,7 +287,7 @@ contract SturdyTokens: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -292,7 +306,7 @@ contract SturdyTokens: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSturdyToken(id: UInt64): &SturdyTokens.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -309,7 +323,7 @@ contract SturdyTokens: NonFungibleToken{
 			return exampleNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(burnID: UInt64){ 
 			let token <- self.withdraw(withdrawID: burnID) as! @SturdyTokens.NFT
 			let templateID = token.templateID
@@ -387,27 +401,27 @@ contract SturdyTokens: NonFungibleToken{
 			emit SetCreated(setID: self.setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableTemplateIDs(): [UInt64]{ 
 			return self.availableTemplateIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPublic(){ 
 			self.isPublic = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPrivate(){ 
 			self.isPublic = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addArtistRoyalty(royalty: Royalty){ 
 			self.artistRoyalties.append(royalty)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(templateID: UInt64, available: Bool){ 
 			pre{ 
 				SturdyTokens.sturdyTokensTemplates[templateID] != nil:
@@ -428,14 +442,14 @@ contract SturdyTokens: NonFungibleToken{
 			emit TemplateAddedToSet(setID: self.setID, templateID: templateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplates(templateIDs: [UInt64], available: Bool){ 
 			for template in templateIDs{ 
 				self.addTemplate(templateID: template, available: available)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(templateID: UInt64){ 
 			pre{ 
 				self.lockedTemplates[templateID] != nil:
@@ -449,14 +463,14 @@ contract SturdyTokens: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockAllTemplates(){ 
 			for template in self.templateIDs{ 
 				self.lockTemplate(templateID: template)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -464,7 +478,7 @@ contract SturdyTokens: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(){ 
 			if self.locked{ 
 				self.locked = false
@@ -472,7 +486,7 @@ contract SturdyTokens: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			let templateID = self.availableTemplateIDs[0]
 			if (SturdyTokens.sturdyTokensTemplates[templateID]!).locked{ 
@@ -487,7 +501,7 @@ contract SturdyTokens: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTByTemplateID(templateID: UInt64): @NFT{ 
 			let newNFT: @NFT <- create SturdyTokens.NFT(initID: templateID, initTemplateID: templateID, serialNumber: self.nextSetSerialNumber)
 			SturdyTokens.totalSupply = SturdyTokens.totalSupply + 1
@@ -497,7 +511,7 @@ contract SturdyTokens: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(templateID: UInt64, newMetadata:{ String: String}): SturdyTokensTemplate{ 
 			pre{ 
 				SturdyTokens.sturdyTokensTemplates[templateID] != nil:
@@ -511,7 +525,7 @@ contract SturdyTokens: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt64): String{ 
 		pre{ 
 			SturdyTokens.sets[setID] != nil:
@@ -521,7 +535,7 @@ contract SturdyTokens: NonFungibleToken{
 		return set.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetRoyalties(setID: UInt64): [Royalty]{ 
 		pre{ 
 			SturdyTokens.sets[setID] != nil:
@@ -539,7 +553,7 @@ contract SturdyTokens: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setID: UInt64){ 
 			let set = self.borrowSet(setID: setID)
 			if (set.getAvailableTemplateIDs()!).length == 0{ 
@@ -551,7 +565,7 @@ contract SturdyTokens: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFT())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAndMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, templateID: UInt64, setID: UInt64, name: String, description: String, metadata:{ String: String}){ 
 			if SturdyTokens.sturdyTokensTemplates[templateID] != nil{ 
 				panic("Template already exists")
@@ -562,13 +576,13 @@ contract SturdyTokens: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFTByTemplateID(templateID: templateID))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSturdyTokensTemplate(name: String, description: String, metadata:{ String: String}){ 
 			SturdyTokens.sturdyTokensTemplates[SturdyTokens.nextTemplateID] = SturdyTokensTemplate(templateID: SturdyTokens.nextTemplateID, name: name, description: description, metadata: metadata)
 			SturdyTokens.nextTemplateID = SturdyTokens.nextTemplateID + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, sturdyRoyaltyAddress: Address, sturdyRoyaltySecondaryCut: UFix64): UInt64{ 
 			var newSet <- create Set(name: name, sturdyRoyaltyAddress: sturdyRoyaltyAddress, sturdyRoyaltySecondaryCut: sturdyRoyaltySecondaryCut)
 			let setID = newSet.setID
@@ -576,7 +590,7 @@ contract SturdyTokens: NonFungibleToken{
 			return setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			pre{ 
 				SturdyTokens.sets[setID] != nil:
@@ -585,7 +599,7 @@ contract SturdyTokens: NonFungibleToken{
 			return (&SturdyTokens.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSturdyTokensTemplate(templateID: UInt64, newMetadata:{ String: String}){ 
 			pre{ 
 				SturdyTokens.sturdyTokensTemplates.containsKey(templateID) != nil:
@@ -594,7 +608,7 @@ contract SturdyTokens: NonFungibleToken{
 			(SturdyTokens.sturdyTokensTemplates[templateID]!).updateMetadata(newMetadata: newMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInitialNFTID(initialNFTID: UInt64){ 
 			pre{ 
 				SturdyTokens.initialNFTID == 0:
@@ -606,17 +620,17 @@ contract SturdyTokens: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSturdyTokensTemplateByID(templateID: UInt64): SturdyTokens.SturdyTokensTemplate{ 
 		return SturdyTokens.sturdyTokensTemplates[templateID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSturdyTokensTemplates():{ UInt64: SturdyTokens.SturdyTokensTemplate}{ 
 		return SturdyTokens.sturdyTokensTemplates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableTemplateIDsInSet(setID: UInt64): [UInt64]{ 
 		pre{ 
 			SturdyTokens.sets[setID] != nil:

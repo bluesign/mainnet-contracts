@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -71,7 +85,7 @@ contract TobiraNeko: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -84,8 +98,8 @@ contract TobiraNeko: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
-		fun borrow(id: UInt64): &NFT?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrow(id: UInt64): &TobiraNeko.NFT?
 	}
 	
 	access(all)
@@ -105,7 +119,7 @@ contract TobiraNeko: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @TobiraNeko.NFT
 			let id: UInt64 = token.id
 			let dummy <- self.ownedNFTs[id] <- token
@@ -130,13 +144,13 @@ contract TobiraNeko: NonFungibleToken{
 			return ref as! &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &NFT?{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (ref as! &TobiraNeko.NFT).getMetadata()
@@ -165,7 +179,7 @@ contract TobiraNeko: NonFungibleToken{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTo(creator: Capability<&{NonFungibleToken.Receiver}>, metadata:{ String: String}): &{NonFungibleToken.NFT}{ 
 			let token <- create NFT(id: TobiraNeko.totalSupply, creator: creator.address, metadata: metadata)
 			TobiraNeko.totalSupply = TobiraNeko.totalSupply + 1
@@ -175,7 +189,7 @@ contract TobiraNeko: NonFungibleToken{
 			return tokenRef
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintTo(creator: Capability<&{NonFungibleToken.Receiver}>, quantity: UInt64): UInt64{ 
 			var i: UInt64 = 0
 			while i < quantity{ 

@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -52,12 +66,12 @@ contract FlowtyListingCallback{
 		// There are no specific metadata views yet, and we cannot extend interfaces until
 		// Crescendo goes live, so for now we are making an interface that fills the same need
 		// as MetdataViews until we can extend them in the future.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			return nil
 		}
@@ -72,10 +86,10 @@ contract FlowtyListingCallback{
 	
 	access(all)
 	resource interface Handler{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun handle(stage: Stage, listing: &{Listing}, nft: &{NonFungibleToken.NFT}?): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun validateListing(listing: &{Listing}, nft: &{NonFungibleToken.NFT}?): Bool
 	}
 	
@@ -104,7 +118,7 @@ contract FlowtyListingCallback{
 		access(all)
 		let resources: @{String: AnyResource}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun register(type: Type, handler: @{Handler}){ 
 			pre{ 
 				type.isSubtype(of: Type<@{NonFungibleToken.NFT}>()):
@@ -113,7 +127,7 @@ contract FlowtyListingCallback{
 			destroy self.nftTypeHandlers.insert(key: type, <-handler)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun handle(stage: Stage, listing: &{Listing}, nft: &{NonFungibleToken.NFT}?): Bool{ 
 			let nftType = nft != nil ? (nft!).getType() : nft.getType()
 			var res = true
@@ -130,7 +144,7 @@ contract FlowtyListingCallback{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun validateListing(
 			listing: &{FlowtyListingCallback.Listing},
 			nft: &{NonFungibleToken.NFT}?
@@ -149,12 +163,12 @@ contract FlowtyListingCallback{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addDefaultHandler(h: @{Handler}){ 
 			self.defaultHandlers.append(<-h)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeDefaultHandlerAt(index: Int): @{Handler}?{ 
 			if index >= self.defaultHandlers.length{ 
 				return nil
@@ -170,7 +184,7 @@ contract FlowtyListingCallback{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createContainer(defaultHandler: @{Handler}): @Container{ 
 		return <-create Container(defaultHandler: <-defaultHandler)
 	}

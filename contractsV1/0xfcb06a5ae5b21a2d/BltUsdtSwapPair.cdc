@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import BloctoToken from "../0x0f9df91c9121c460/BloctoToken.cdc"
 
@@ -119,7 +133,7 @@ contract BltUsdtSwapPair: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @BltUsdtSwapPair.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -164,24 +178,24 @@ contract BltUsdtSwapPair: FungibleToken{
 			self.token2 <- fromToken2
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken1(from: @BloctoToken.Vault){ 
 			self.token1.deposit(from: <-(from as!{ FungibleToken.Vault}))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken2(from: @TeleportedTetherToken.Vault){ 
 			self.token2.deposit(from: <-(from as!{ FungibleToken.Vault}))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken1(): @BloctoToken.Vault{ 
 			var vault <- BloctoToken.createEmptyVault(vaultType: Type<@BloctoToken.Vault>()) as! @BloctoToken.Vault
 			vault <-> self.token1
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken2(): @TeleportedTetherToken.Vault{ 
 			var vault <- TeleportedTetherToken.createEmptyVault(vaultType: Type<@TeleportedTetherToken.Vault>()) as! @TeleportedTetherToken.Vault
 			vault <-> self.token2
@@ -191,14 +205,14 @@ contract BltUsdtSwapPair: FungibleToken{
 	
 	// createEmptyBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyTokenBundle(): @BltUsdtSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-(BloctoToken.createEmptyVault(vaultType: Type<@BloctoToken.Vault>()) as! @BloctoToken.Vault), fromToken2: <-(TeleportedTetherToken.createEmptyVault(vaultType: Type<@TeleportedTetherToken.Vault>()) as! @TeleportedTetherToken.Vault))
 	}
 	
 	// createTokenBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenBundle(fromToken1: @BloctoToken.Vault, fromToken2: @TeleportedTetherToken.Vault): @BltUsdtSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-fromToken1, fromToken2: <-fromToken2)
 	}
@@ -236,22 +250,22 @@ contract BltUsdtSwapPair: FungibleToken{
 	
 	access(all)
 	resource SwapProxy{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swapToken1ForToken2(from: @BloctoToken.Vault): @TeleportedTetherToken.Vault{ 
 			return <-BltUsdtSwapPair._swapToken1ForToken2(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swapToken2ForToken1(from: @TeleportedTetherToken.Vault): @BloctoToken.Vault{ 
 			return <-BltUsdtSwapPair._swapToken2ForToken1(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLiquidity(from: @BltUsdtSwapPair.TokenBundle): @BltUsdtSwapPair.Vault{ 
 			return <-BltUsdtSwapPair._addLiquidity(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeLiquidity(from: @BltUsdtSwapPair.Vault): @BltUsdtSwapPair.TokenBundle{ 
 			return <-BltUsdtSwapPair._removeLiquidity(from: <-from)
 		}
@@ -259,23 +273,23 @@ contract BltUsdtSwapPair: FungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			BltUsdtSwapPair.isFrozen = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			BltUsdtSwapPair.isFrozen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setProxyOnly(proxyOnly: Bool){ 
 			BltUsdtSwapPair.account.storage.load<Bool>(from: /storage/proxyOnly)
 			BltUsdtSwapPair.account.storage.save(proxyOnly, to: /storage/proxyOnly)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addInitialLiquidity(from: @BltUsdtSwapPair.TokenBundle): @BltUsdtSwapPair.Vault{ 
 			pre{ 
 				BltUsdtSwapPair.totalSupply == UFix64(0):
@@ -293,13 +307,13 @@ contract BltUsdtSwapPair: FungibleToken{
 			return <-BltUsdtSwapPair.mintTokens(amount: 1.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeePercentage(feePercentage: UFix64){ 
 			BltUsdtSwapPair.feePercentage = feePercentage
 			emit FeeUpdated(feePercentage: feePercentage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSwapProxy(): @BltUsdtSwapPair.SwapProxy{ 
 			return <-create BltUsdtSwapPair.SwapProxy()
 		}
@@ -319,24 +333,24 @@ contract BltUsdtSwapPair: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun proxyOnly(): Bool{ 
 		return self.account.storage.copy<Bool>(from: /storage/proxyOnly) ?? false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeePercentage(): UFix64{ 
 		return self.feePercentage
 	}
 	
 	// Check current pool amounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolAmounts(): PoolAmounts{ 
 		return PoolAmounts(token1Amount: BltUsdtSwapPair.token1Vault.balance, token2Amount: BltUsdtSwapPair.token2Vault.balance)
 	}
 	
 	// Get quote for Token1 (given) -> Token2
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken1ForToken2(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		
@@ -346,7 +360,7 @@ contract BltUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token1 -> Token2 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken1ForExactToken2(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		assert(poolAmounts.token2Amount > amount, message: "Not enough Token2 in the pool")
@@ -357,7 +371,7 @@ contract BltUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 (given) -> Token1
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken2ForToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		
@@ -367,7 +381,7 @@ contract BltUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 -> Token1 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken2ForExactToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		assert(poolAmounts.token1Amount > amount, message: "Not enough Token1 in the pool")
@@ -397,7 +411,7 @@ contract BltUsdtSwapPair: FungibleToken{
 		return <-(self.token2Vault.withdraw(amount: token2Amount) as! @TeleportedTetherToken.Vault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken1ForToken2(from: @BloctoToken.Vault): @TeleportedTetherToken.Vault{ 
 		pre{ 
 			!BltUsdtSwapPair.proxyOnly():
@@ -426,7 +440,7 @@ contract BltUsdtSwapPair: FungibleToken{
 		return <-(self.token1Vault.withdraw(amount: token1Amount) as! @BloctoToken.Vault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken2ForToken1(from: @TeleportedTetherToken.Vault): @BloctoToken.Vault{ 
 		pre{ 
 			!BltUsdtSwapPair.proxyOnly():
@@ -436,7 +450,7 @@ contract BltUsdtSwapPair: FungibleToken{
 	}
 	
 	// Used to add liquidity without minting new liquidity token
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun donateLiquidity(from: @BltUsdtSwapPair.TokenBundle){ 
 		let token1Vault <- from.withdrawToken1()
 		let token2Vault <- from.withdrawToken2()
@@ -471,7 +485,7 @@ contract BltUsdtSwapPair: FungibleToken{
 		return <-liquidityTokenVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addLiquidity(from: @BltUsdtSwapPair.TokenBundle): @BltUsdtSwapPair.Vault{ 
 		pre{ 
 			!BltUsdtSwapPair.proxyOnly():
@@ -501,7 +515,7 @@ contract BltUsdtSwapPair: FungibleToken{
 		return <-tokenBundle
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeLiquidity(from: @BltUsdtSwapPair.Vault): @BltUsdtSwapPair.TokenBundle{ 
 		pre{ 
 			!BltUsdtSwapPair.proxyOnly():

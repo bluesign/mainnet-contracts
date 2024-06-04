@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -176,7 +190,7 @@ contract TransactionGenerationUtils{
 			We do not yet have a FT catalog, so FTs must be hardcoded for now.
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFtSchema(vaultIdentifier: String): FTSchemaV2?{ 
 		switch vaultIdentifier{ 
 			case "flow":
@@ -220,7 +234,7 @@ contract TransactionGenerationUtils{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftSchema(collectionIdentifier: String): NFTSchema?{ 
 		let catalogEntry = NFTCatalog.getCatalogEntry(collectionIdentifier: collectionIdentifier)
 		if catalogEntry == nil{ 
@@ -245,7 +259,7 @@ contract TransactionGenerationUtils{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createImports(imports: [Type]): String{ 
 		var duplicates:{ String: Bool} ={} 
 		var res: [String] = []
@@ -283,13 +297,13 @@ contract TransactionGenerationUtils{
 		return StringUtils.join(res, "\n")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressFromType(_ type: Type): String{ 
 		let typeStr = type.identifier
 		return "0x".concat(StringUtils.split(typeStr, ".")[1])
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStaticTypeFromType(_ type: Type): String{ 
 		// A type identifier may come in like the following:
 		// &A.01cf0e2f2f715450.ExampleNFT.Collection{A.01cf0e2f2f715450.ExampleNFT.ExampleNFTCollectionPublic}

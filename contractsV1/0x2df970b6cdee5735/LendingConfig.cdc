@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Common lending config
 
@@ -54,7 +68,7 @@ contract LendingConfig{
 	
 	/// Utility function to convert a UFix64 number to its scaled equivalent in UInt256 format
 	/// e.g. 184467440737.09551615 (UFix64.max) => 184467440737095516150000000000
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun UFix64ToScaledUInt256(_ f: UFix64): UInt256{ 
 		let integral = UInt256(f)
 		let fractional = f % 1.0
@@ -65,7 +79,7 @@ contract LendingConfig{
 	
 	/// Utility function to convert a fixed point number in form of scaled UInt256 back to UFix64 format
 	/// e.g. 184467440737095516150000000000 => 184467440737.09551615
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ScaledUInt256ToUFix64(_ scaled: UInt256): UFix64{ 
 		let integral = scaled / self.scaleFactor
 		let ufixScaledFractional =

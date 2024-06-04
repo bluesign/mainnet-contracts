@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -146,22 +160,22 @@ contract NftReality: NonFungibleToken{
 			self.additionalInfo = additionalInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return self.metadata.company.concat(" - ").concat(self.metadata.role)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return self.metadata.description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun imageCID(): String{ 
 			return self.metadata.artwork
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAdditionalInfo():{ String: String}{ 
 			return self.additionalInfo
 		}
@@ -192,15 +206,15 @@ contract NftReality: NonFungibleToken{
 	access(all)
 	resource interface NftRealityCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftReality(id: UInt64): &NftReality.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -223,7 +237,7 @@ contract NftReality: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NftReality.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -241,7 +255,7 @@ contract NftReality: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftReality(id: UInt64): &NftReality.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -280,14 +294,14 @@ contract NftReality: NonFungibleToken{
 	// Resource that an admin can use to mint new nfts
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(itemUuid: String, recipient: &{NonFungibleToken.CollectionPublic}, unit: UInt64, totalUnits: UInt64, metadata: Metadata, additionalInfo:{ String: String}){ 
 			emit Minted(id: NftReality.totalSupply, itemUuid: itemUuid, unit: unit, totalUnits: totalUnits, metadata: metadata, additionalInfo: additionalInfo)
 			recipient.deposit(token: <-create NftReality.NFT(ID: NftReality.totalSupply, itemUuid: itemUuid, unit: unit, totalUnits: totalUnits, metadata: metadata, additionalInfo: additionalInfo))
 			NftReality.totalSupply = NftReality.totalSupply + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(itemUuid: String, recipient: &{NonFungibleToken.CollectionPublic}, totalUnits: UInt64, startingUnit: UInt64, quantity: UInt64, metadata: Metadata, additionalInfo:{ String: String}){ 
 			var i: UInt64 = 0
 			var unit: UInt64 = startingUnit - 1

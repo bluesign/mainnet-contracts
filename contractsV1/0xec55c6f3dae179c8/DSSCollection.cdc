@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	DSSCollection contains collection group & completion functionality for DSS.
 	Author: Jeremy Ahrens jer.ahrens@dapperlabs.com
 */
@@ -315,7 +329,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// Mint a DSSCollection NFT in this group
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(completionAddress: String, level: UInt8): @DSSCollection.NFT{ 
 			pre{ 
 				!self.active:
@@ -353,7 +367,7 @@ contract DSSCollection: NonFungibleToken{
 	
 	// Get the publicly available data for a CollectionGroup by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionGroupData(id: UInt64): DSSCollection.CollectionGroupData{ 
 		pre{ 
 			DSSCollection.collectionGroupByID[id] != nil:
@@ -364,7 +378,7 @@ contract DSSCollection: NonFungibleToken{
 	
 	// Get the publicly available data for a Slot by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSlotData(id: UInt64): DSSCollection.SlotData{ 
 		pre{ 
 			DSSCollection.slotByID[id] != nil:
@@ -375,7 +389,7 @@ contract DSSCollection: NonFungibleToken{
 	
 	// Validate time range of collection group
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateTimeBound(endTime: UFix64?): Bool{ 
 		if endTime == nil{ 
 			return true
@@ -388,7 +402,7 @@ contract DSSCollection: NonFungibleToken{
 	
 	// Validate logical operator of slot
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateLogicalOperator(logicalOperator: String): Bool{ 
 		if logicalOperator == "OR" || logicalOperator == "AND"{ 
 			return true
@@ -398,7 +412,7 @@ contract DSSCollection: NonFungibleToken{
 	
 	// Validate comparator of item
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateComparator(comparator: String): Bool{ 
 		if comparator == ">" || comparator == "<" || comparator == "="{ 
 			return true
@@ -408,7 +422,7 @@ contract DSSCollection: NonFungibleToken{
 	
 	// Get the nftIds for each completed collection for a given address
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCompletedCollectionIDs(address: Address): [CollectionCompletedWith]?{ 
 		return DSSCollection.completedCollections[address]
 	}
@@ -439,14 +453,14 @@ contract DSSCollection: NonFungibleToken{
 		access(all)
 		let extensionData:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let collectionGroupData: DSSCollection.CollectionGroupData = DSSCollection.getCollectionGroupData(id: self.collectionGroupID)
 			let level: String = self.level.toString()
 			return collectionGroupData.name.concat(" Level ").concat(level).concat(" Completion Token")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let serialNumber: String = self.serialNumber.toString()
 			let completionDate: String = self.completionDate.toString()
@@ -489,18 +503,18 @@ contract DSSCollection: NonFungibleToken{
 	access(all)
 	resource interface DSSCollectionNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDSSCollectionNFT(id: UInt64): &DSSCollection.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -534,7 +548,7 @@ contract DSSCollection: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DSSCollection.NFT
 			let id: UInt64 = token.id
 			
@@ -547,7 +561,7 @@ contract DSSCollection: NonFungibleToken{
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -576,7 +590,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// borrowDSSCollectionNFT gets a reference to an NFT in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDSSCollectionNFT(id: UInt64): &DSSCollection.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				if let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?{ 
@@ -626,7 +640,7 @@ contract DSSCollection: NonFungibleToken{
 	//
 	access(all)
 	resource interface NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(collectionGroupID: UInt64, completionAddress: String, level: UInt8): @DSSCollection.NFT
 	}
 	
@@ -636,7 +650,7 @@ contract DSSCollection: NonFungibleToken{
 	resource Admin: NFTMinter{ 
 		// Record the nftIds that were used to complete a CollectionGroup
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completedCollectionGroup(collectionGroupID: UInt64, userAddress: Address, nftIDs: [UInt64]){ 
 			let collection = CollectionCompletedWith(collectionGroupID: collectionGroupID, nftIDs: nftIDs)
 			if DSSCollection.completedCollections[userAddress] == nil{ 
@@ -649,7 +663,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// Borrow a Collection Group
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectionGroup(id: UInt64): &DSSCollection.CollectionGroup{ 
 			pre{ 
 				DSSCollection.collectionGroupByID[id] != nil:
@@ -660,7 +674,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// Borrow a Slot
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSlot(id: UInt64): &DSSCollection.Slot{ 
 			pre{ 
 				DSSCollection.slotByID[id] != nil:
@@ -671,7 +685,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// Create a Collection Group
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollectionGroup(name: String, description: String, productName: String, endTime: UFix64?, metadata:{ String: String}): UInt64{ 
 			let collectionGroup <- create DSSCollection.CollectionGroup(name: name, description: description, productName: productName, endTime: endTime, metadata: metadata)
 			let collectionGroupID = collectionGroup.id
@@ -681,7 +695,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// Close a Collection Group
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeCollectionGroup(id: UInt64): UInt64{ 
 			if let collectionGroup = &DSSCollection.collectionGroupByID[id] as &DSSCollection.CollectionGroup?{ 
 				collectionGroup.close()
@@ -692,7 +706,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// Create a Slot
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSlot(collectionGroupID: UInt64, logicalOperator: String, required: Bool, typeName: Type, metadata:{ String: String}): UInt64{ 
 			let slot <- create DSSCollection.Slot(collectionGroupID: collectionGroupID, logicalOperator: logicalOperator, required: required, typeName: typeName, metadata: metadata)
 			let slotID = slot.id
@@ -702,7 +716,7 @@ contract DSSCollection: NonFungibleToken{
 		
 		// Create an Item in slot
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItemInSlot(itemID: String, points: UInt64, itemType: String, comparator: String, slotID: UInt64){ 
 			if let slot = &DSSCollection.slotByID[slotID] as &DSSCollection.Slot?{ 
 				slot.createItemInSlot(itemID: itemID, points: points, itemType: itemType, comparator: comparator)
@@ -714,7 +728,7 @@ contract DSSCollection: NonFungibleToken{
 		// Mint a single NFT
 		// The CollectionGroup for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(collectionGroupID: UInt64, completionAddress: String, level: UInt8): @DSSCollection.NFT{ 
 			pre{ 
 				// Make sure the collection group exists

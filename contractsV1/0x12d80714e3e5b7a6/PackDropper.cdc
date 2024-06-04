@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	PackSeller.cdc
 
 	Description: Contract for pack buying and adding new packs  
@@ -69,13 +83,17 @@ contract PackDropper{
 	// An interface to allow purchasing packs
 	access(all)
 	resource interface PackPurchaser{ 
-		access(all)
-		fun buyPack(packId: UInt32, buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun buyPack(
+			packId: UInt32,
+			buyerPayment: @{FungibleToken.Vault},
+			buyerAddress: Address
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPackPrice(packId: UInt32): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPackBuyers(packId: UInt32): [Address]
 	}
 	
@@ -83,7 +101,7 @@ contract PackDropper{
 	// An interface to allow checking information about packs in the account
 	access(all)
 	resource interface PacksInfo{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt32]
 	}
 	
@@ -94,7 +112,7 @@ contract PackDropper{
 		access(self)
 		var packStats:{ UInt32: PackData}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPack(name: String, size: Int, price: UFix64, availableFrom: UFix64){ 
 			pre{ 
 				name.length > 0:
@@ -109,12 +127,12 @@ contract PackDropper{
 			emit PackAdded(id: pack.id, name: name, size: size, price: price, availableFrom: availableFrom)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt32]{ 
 			return self.packStats.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPackPrice(packId: UInt32): UFix64{ 
 			pre{ 
 				self.packStats[packId] != nil:
@@ -123,7 +141,7 @@ contract PackDropper{
 			return (self.packStats[packId]!).price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPackBuyers(packId: UInt32): [Address]{ 
 			pre{ 
 				self.packStats[packId] != nil:
@@ -132,7 +150,7 @@ contract PackDropper{
 			return (self.packStats[packId]!).buyers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyPack(packId: UInt32, buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address){ 
 			pre{ 
 				self.packStats[packId] != nil:

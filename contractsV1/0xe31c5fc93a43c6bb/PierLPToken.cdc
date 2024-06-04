@@ -1,4 +1,18 @@
-import MultiFungibleToken from "../0x3620aa78dc6c5b54/MultiFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MultiFungibleToken from "../0x3620aa78dc6c5b54/MultiFungibleToken.cdc"
 
 /**
 
@@ -75,7 +89,7 @@ contract PierLPToken: MultiFungibleToken{
 		//
 		// @param amount The amount of tokens to withdraw
 		// @return A new Vault (of the same token id) that contains the requested amount of tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @PierLPToken.Vault{ 
 			self.balance = self.balance - amount
 			emit TokensWithdrawn(tokenId: self.tokenId, amount: amount, from: self.owner?.address)
@@ -86,7 +100,7 @@ contract PierLPToken: MultiFungibleToken{
 		// balance to the balance of this Vault
 		//
 		// @param from A Vault that is ready to have its balance added to this Vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{MultiFungibleToken.Vault}){ 
 			let vault <- from as! @Vault
 			self.balance = self.balance + vault.balance
@@ -112,7 +126,7 @@ contract PierLPToken: MultiFungibleToken{
 		// @param tokenId The token id (pool id) of the Vault from which to withdraw
 		// @param amount The amount of tokens to withdraw
 		// @return A new Vault (of the same token id) that contains the requested amount of tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenId: UInt64, amount: UFix64): @PierLPToken.Vault{ 
 			if !self.vaults.containsKey(tokenId){ 
 				self.vaults[tokenId] <-! PierLPToken.createEmptyVault(tokenId: tokenId)
@@ -128,7 +142,7 @@ contract PierLPToken: MultiFungibleToken{
 		//  contain the given LP token.
 		//
 		// @param from The LP token Vault to deposit into the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{MultiFungibleToken.Vault}){ 
 			if from.balance == 0.0{ 
 				// ignore zero-balance vaults to prevent spamming
@@ -147,7 +161,7 @@ contract PierLPToken: MultiFungibleToken{
 		// empty ones.
 		//
 		// @return An array of the token ids of all vaults stored in the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenIds(): [UInt64]{ 
 			return self.vaults.keys
 		}
@@ -156,7 +170,7 @@ contract PierLPToken: MultiFungibleToken{
 		// 
 		// @return `true` iff the internal `vaults` contains a Vault of the
 		//  requested token id ()
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasToken(tokenId: UInt64): Bool{ 
 			return self.vaults.containsKey(tokenId)
 		}
@@ -168,7 +182,7 @@ contract PierLPToken: MultiFungibleToken{
 		// @param tokenId The token id (pool id) of the Vault to query
 		// @return A Vault reference of the requested token id, which exposes only
 		//  the Receiver and View
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicVault(tokenId: UInt64): &PierLPToken.Vault{ 
 			return (&self.vaults[tokenId] as &PierLPToken.Vault?)!
 		}
@@ -195,7 +209,7 @@ contract PierLPToken: MultiFungibleToken{
 		// @param amount The amount of tokens to mint and return
 		// @return A Vault that contains the requested amount of LP
 		//  tokens (of the predefined token id)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @PierLPToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -211,7 +225,7 @@ contract PierLPToken: MultiFungibleToken{
 		//
 		// @param vault The LP token Vault to burn (must have the 
 		//  expected token id)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(vault: @PierLPToken.Vault){ 
 			pre{ 
 				self.tokenId == vault.tokenId:
@@ -241,7 +255,7 @@ contract PierLPToken: MultiFungibleToken{
 		// @param tokenId The id of the new LP token
 		// @return A TokenMaster for the new LP token (implied by 
 		//  token id)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun initNewLPToken(tokenId: UInt64): @TokenMaster{ 
 			pre{ 
 				!PierLPToken.totalSupply.containsKey(tokenId):
@@ -257,7 +271,7 @@ contract PierLPToken: MultiFungibleToken{
 	// Creates an empty collection
 	//
 	// @return A new empty Collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @PierLPToken.Collection{ 
 		return <-create Collection()
 	}
@@ -267,7 +281,7 @@ contract PierLPToken: MultiFungibleToken{
 	//
 	// @param tokenId The token id (pool id) the new Vault is associate with
 	// @return A new empty Vault of the requested token id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(tokenId: UInt64): @PierLPToken.Vault{ 
 		return <-create Vault(tokenId: tokenId, balance: 0.0)
 	}
@@ -278,7 +292,7 @@ contract PierLPToken: MultiFungibleToken{
 	// @param tokenId The token id (pool id) to query
 	// @return The total supply of the requested token id, or nil if the
 	//  token doesn't exist
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(tokenId: UInt64): UFix64?{ 
 		return self.totalSupply[tokenId]
 	}

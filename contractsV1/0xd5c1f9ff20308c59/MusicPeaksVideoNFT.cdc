@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Unlicense
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Unlicense
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -128,7 +142,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 			emit ProofCreated(id: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEdition(editionID: String){ 
 			if !self.editions.contains(editionID){ 
 				// Add the Edition to the array of Editions
@@ -225,28 +239,28 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 			emit Minted(id: self.id, nodeID: self.nodeID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNodeID(): String{ 
 			return self.nodeID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCanonicalNodeID(): String{ 
 			return self.canonicalNodeID
 		}
 		
 		// Keep the old way of getting metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData():{ String: String}{ 
 			return (self.metadata!)["collection"]! as?{ String: String} ??{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			// Trim string > 100 chars due to Dapper limitation
 			if self.name.length > 100{ 
@@ -255,7 +269,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			// Prepend full name before description
 			return self.name.concat(": ").concat(self.description)
@@ -266,33 +280,33 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.Editions>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.Serial>(), Type<MetadataViews.Traits>(), Type<MusicPeaksVideoNFTMetadataView>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCanonicalUrl(): String{ 
 			return self.metadata["canonicalUrl"] as! String? ?? "https://marketplace.musicpeaks.com"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionID(): String{ 
 			return (self.metadata!)["editionID"] as! String? ?? "0"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionID(): String{ 
 			return (self.metadata!)["collectionID"] as! String? ?? "0"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProofID(): String{ 
 			return (self.metadata!)["proofID"] as! String? ?? "0"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketplaceRoyaltyRate(): UFix64{ 
 			// Marketplace (Dapp) royalty, 5% by default.
 			return (self.metadata!)["marketplaceRoyaltyRate"] as! UFix64? ?? 0.05
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOngoingRoyaltyRate(): UFix64{ 
 			// Ongoing royalty rate, usually in range 0%..10%, 10% by default.
 			return (self.metadata!)["ongoingRoyaltyRate"] as! UFix64? ?? 0.1
@@ -351,15 +365,15 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 	access(all)
 	resource interface MusicPeaksVideoNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMusicPeaksVideoNFT(id: UInt64): &MusicPeaksVideoNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -390,7 +404,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MusicPeaksVideoNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -413,7 +427,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMusicPeaksVideoNFT(id: UInt64): &MusicPeaksVideoNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -460,7 +474,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, nodeID: String, canonicalNodeID: String, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty], nodeMetadata:{ String: AnyStruct}){ 
 			let metadata:{ String: AnyStruct} ={} 
 			let editionMetaData:{ String: AnyStruct} ={} 
@@ -563,7 +577,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 	}
 	
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionMetaDataByField(id: String, field: String): String?{ 
 		// Don't force a revert if the collection ID or field is invalid
 		if let collection = &MusicPeaksVideoNFT.collectionByID[id] as &MusicPeaksVideoNFT.CollectionNode?{ 
@@ -574,7 +588,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 	}
 	
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionMetaDataByField(id: String, field: String): String?{ 
 		// Don't force a revert if the edition ID or field is invalid
 		if let edition = &MusicPeaksVideoNFT.editionByID[id] as &MusicPeaksVideoNFT.EditionNode?{ 
@@ -585,7 +599,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 	}
 	
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNodeMetaDataByField(id: String, field: String): String?{ 
 		// Don't force a revert if the node ID or field is invalid
 		if let node = &MusicPeaksVideoNFT.nodeByID[id] as &MusicPeaksVideoNFT.Node?{ 
@@ -596,7 +610,7 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 	}
 	
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProofMetaDataByField(id: String, field: String): String?{ 
 		// Don't force a revert if the proof node ID or field is invalid
 		if let proof = &MusicPeaksVideoNFT.proofByID[id] as &MusicPeaksVideoNFT.ProofNode?{ 
@@ -607,25 +621,25 @@ contract MusicPeaksVideoNFT: NonFungibleToken{
 	}
 	
 	// Returns: The metadata as a String to AnyStruct mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionNodeMetaData(id: String):{ String: AnyStruct}?{ 
 		return self.collectionByID[id]?.metadata
 	}
 	
 	// Returns: The metadata as a String to AnyStruct mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionNodeMetaData(id: String):{ String: AnyStruct}?{ 
 		return self.editionByID[id]?.metadata
 	}
 	
 	// Returns: The metadata as a String to AnyStruct mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNodeMetaData(id: String):{ String: AnyStruct}?{ 
 		return self.nodeByID[id]?.metadata
 	}
 	
 	// Returns: The metadata as a String to AnyStruct mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProofMetaData(id: String):{ String: AnyStruct}?{ 
 		return self.proofByID[id]?.metadata
 	}

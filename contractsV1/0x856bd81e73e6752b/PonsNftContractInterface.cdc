@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import PonsCertificationContract from "./PonsCertificationContract.cdc"
 
@@ -12,7 +26,7 @@ import PonsCertificationContract from "./PonsCertificationContract.cdc"
 	As a contract interface, this cannot be merged with the concrete PonsNft contract implementations.
 */
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface PonsNftContractInterface{ 
 	/*
 		PonsNft resource interface definition
@@ -23,7 +37,7 @@ contract interface PonsNftContractInterface{
 		Usage of the nftId is encouraged, as 1) it is much more difficult to unintentionally specify a nftId, and 2) the nftId is integrated with the Pons App system.
 	*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface PonsNft{ 
 		access(all)
 		ponsCertification: @PonsCertificationContract.PonsCertification
@@ -40,14 +54,14 @@ contract interface PonsNftContractInterface{
 		Methods are provided for withdraw, deposit, borrow, and viewing the available NFTs, using the nftId as opposed to the id from NonFungibleToken.
 	*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface PonsCollection{ 
 		/* Proof of certification from Pons */
 		access(all)
 		ponsCertification: @PonsCertificationContract.PonsCertification
 		
 		/* Withdraw a NFT from the PonsCollection, given its nftId */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNft(nftId: String): @{PonsNftContractInterface.NFT}{ 
 			post{ 
 				result.nftId == nftId:
@@ -56,15 +70,15 @@ contract interface PonsNftContractInterface{
 		}
 		
 		/* Deposit a NFT to the PonsCollection */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNft(_ ponsNft: @{PonsNftContractInterface.NFT}): Void
 		
 		/* Get a list of nftIds stored in the PonsCollection */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftIds(): [String]
 		
 		/* Borrow a reference to a NFT in the PonsCollection */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNft(nftId: String): &{PonsNftContractInterface.NFT}{ 
 			post{ 
 				result.nftId == nftId:
@@ -81,23 +95,23 @@ contract interface PonsNftContractInterface{
 		Methods are provided for withdraw, deposit, borrow, and viewing the available NFTs, using the nftId as opposed to the id from NonFungibleToken.
 	*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface PonsNftReceiver{ 
 		/* Proof of certification from Pons */
 		access(account)
 		ponsCertification: @PonsCertificationContract.PonsCertification
 		
 		/* Deposit a NFT to the PonsCollection */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNft(_ ponsNft: @{PonsNftContractInterface.NFT}): Void
 	}
 	
 	/* All implementing contracts must implement the NFT resource, fulfilling requirements of PonsNft and the requirements from the NonFungibleToken contract */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface NFT: PonsNft, NonFungibleToken.NFT{} 
 	
 	/* All implementing contracts must implement the Collection resource, fulfilling requirements of PonsCollection and the requirements from the NonFungibleToken contract */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Collection:
 		PonsCollection,
 		PonsNftReceiver,

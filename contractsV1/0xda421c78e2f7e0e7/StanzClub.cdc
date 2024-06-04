@@ -1,4 +1,18 @@
-// Description: Smart Contract for Stanz.club
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Description: Smart Contract for Stanz.club
 // SPDX-License-Identifier: UNLICENSED
 // Testnet accounts
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -378,18 +392,18 @@ contract StanzClub: NonFungibleToken{
 	resource interface StanzClubCollectionPublic{ 
 		/// Interface template for depositing an @NonFungibleToken.NFT into a collection.
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		/// Interface template for getting a collection's NFT IDs.
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		/// Interface template for borrowing a @NonFungibleToken.NFT reference.
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
 		/// Interface template for borrowing a @StanzClub.NFT reference.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStanzClub(id: UInt64): &StanzClub.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -447,7 +461,7 @@ contract StanzClub: NonFungibleToken{
 				*/
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StanzClub.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -504,7 +518,7 @@ contract StanzClub: NonFungibleToken{
 				   @return returns a @NonFungibleToken.NFT resource from the account's collection.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStanzClub(id: UInt64): &StanzClub.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -562,7 +576,7 @@ contract StanzClub: NonFungibleToken{
 				   @return returns minted NFT of type @StanzClub.NFT
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(glink: String, gbatch: UInt32, glimit: UInt16, gsequence: UInt16, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty], editionNumber: UInt64, metadata:{ String: String}): @NFT{ 
 			let tokenID = UInt64(gbatch) << 32 | UInt64(glimit) << 16 | UInt64(gsequence)
 			var newNFT <- create NFT(initID: tokenID, initlink: glink, initbatch: gbatch, initsequence: gsequence, initlimit: glimit, name: name, description: description, thumbnail: thumbnail, royalties: royalties, editionNumber: editionNumber, metadata: metadata)
@@ -586,7 +600,7 @@ contract StanzClub: NonFungibleToken{
 				   @return returns the new, updated URL link.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setURLMetadata(currentNFT: &StanzClub.NFT?, newURL: String, newThumbnail: String): String{ 
 			let ref2 = currentNFT!
 			ref2.setURLMetadataHelper(newURL: newURL, newThumbnail: newThumbnail)
@@ -604,7 +618,7 @@ contract StanzClub: NonFungibleToken{
 				   @param rarityValue: String storing the rarity parts name to change to.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRarity(currentNFT: &StanzClub.NFT?, rarity: UFix64, rarityName: String, rarityValue: String){ 
 			let ref2 = currentNFT!
 			ref2.setRarityHelper(rarity: rarity, rarityName: rarityName, rarityValue: rarityValue)
@@ -617,7 +631,7 @@ contract StanzClub: NonFungibleToken{
 				   @param editionNumber: Unsigned integer storing the NFT edition number to change to.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEdition(currentNFT: &StanzClub.NFT?, editionNumber: UInt64){ 
 			let ref2 = currentNFT!
 			ref2.setEditionHelper(editionNumber: editionNumber)
@@ -633,7 +647,7 @@ contract StanzClub: NonFungibleToken{
 				   `metadata_name` to.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(currentNFT: &StanzClub.NFT?, metadata_name: String, metadata_value: String){ 
 			let ref2 = currentNFT!
 			ref2.setMetadataHelper(metadata_name: metadata_name, metadata_value: metadata_value)

@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 Contract to register transactions that have been executed from admin accounts.
 
 Old functionality is kept in this contract for backwards compatibility,
@@ -29,12 +43,12 @@ contract TransactionsRegistry{
 	access(self)
 	let extra:{ String: AnyStruct}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isRegistered(name: String, args: [String]): Bool{ 
 		return self.getRegistryValue(name: name, args: args) != nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRegistryValue(name: String, args: [String]): String?{ 
 		let key: String = self.getKey(name: name, args: args)
 		return self.registry[key]
@@ -61,7 +75,7 @@ contract TransactionsRegistry{
 	
 	// Only for backwards compatibility. Use the generic methods for new transactions.
 	// Teleporter from Ethereum Doodles Drops to Wearables Mint
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRegistryDoodlesDropsWearablesMint(packTypeId: UInt64, packId: UInt64): String?{ 
 		return self.getRegistryValue(
 			name: "doodles-drops-wearables-mint",
@@ -83,7 +97,7 @@ contract TransactionsRegistry{
 	}
 	
 	// Teleporter from Ethereum Doodles Drops to Redeemables Mint
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRegistryDoodlesDropsRedeemablesMint(packTypeId: UInt64, packId: UInt64): String?{ 
 		return self.getRegistryValue(
 			name: "doodles-drops-redeemables-mint",

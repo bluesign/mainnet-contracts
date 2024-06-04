@@ -1,4 +1,18 @@
-import AFLNFT from "./AFLNFT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import AFLNFT from "./AFLNFT.cdc"
 
 import AFLPack from "./AFLPack.cdc"
 
@@ -21,43 +35,43 @@ contract AFLAdmin{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(maxSupply: UInt64, immutableData:{ String: AnyStruct}): UInt64{ 
 			return AFLNFT.createTemplate(maxSupply: maxSupply, immutableData: immutableData)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateImmutableData(templateID: UInt64, immutableData:{ String: AnyStruct}){ 
 			let templateRef = &AFLNFT.allTemplates[templateID] as &AFLNFT.Template?
 			templateRef?.updateImmutableData(immutableData) ?? panic("Template does not exist")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRestrictedPack(id: UInt64){ 
 			PackRestrictions.addPackId(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRestrictedPack(id: UInt64){ 
 			PackRestrictions.removePackId(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(templateInfo:{ String: UInt64}, account: Address){ 
 			AFLNFT.mintNFT(templateInfo: templateInfo, account: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateInfo:{ String: UInt64}): @{NonFungibleToken.NFT}{ 
 			return <-AFLNFT.mintAndReturnNFT(templateInfo: templateInfo)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTokenForExchange(nftId: UInt64, token: @{NonFungibleToken.NFT}){ 
 			AFLBurnExchange.addTokenForExchange(nftId: nftId, token: <-token)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawTokenFromBurnExchange(nftId: UInt64): @{NonFungibleToken.NFT}{ 
 			return <-AFLBurnExchange.withdrawToken(nftId: nftId)
 		}
@@ -66,7 +80,7 @@ contract AFLAdmin{
 		// only an admin can ever create
 		// a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Admin{ 
 			return <-create Admin()
 		}

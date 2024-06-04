@@ -1,4 +1,18 @@
-import BloomlyNFT from "./BloomlyNFT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import BloomlyNFT from "./BloomlyNFT.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -146,7 +160,7 @@ contract BloomlyDrop{
 		}
 		
 		// functiont to get extra data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: AnyStruct}{ 
 			return self.extra
 		}
@@ -222,18 +236,18 @@ contract BloomlyDrop{
 		}
 		
 		// function to get drop metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDropMetadata(): DropMetadata?{ 
 			return self.dropMetadata
 		}
 		
 		// function to get asset data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAsset():{ UInt64: Asset}{ 
 			return self.assets
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDrop(
 			startTime: UFix64,
 			endTime: UFix64?,
@@ -335,12 +349,12 @@ contract BloomlyDrop{
 		}
 		
 		// function to get immutable data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}?{ 
 			return self.immutableData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMutableData():{ String: AnyStruct}?{ 
 			return self.mutableData
 		}
@@ -371,7 +385,7 @@ contract BloomlyDrop{
 			self.limit = limit
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementSupply(supply: UInt64){ 
 			pre{ 
 				self.supply! - supply >= 0:
@@ -392,7 +406,7 @@ contract BloomlyDrop{
 				This method create new drop
 			**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(
 			dropId: UInt64,
 			brandId: UInt64,
@@ -465,7 +479,7 @@ contract BloomlyDrop{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDrop(
 			dropId: UInt64,
 			brandId: UInt64,
@@ -530,7 +544,7 @@ contract BloomlyDrop{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteDrop(dropId: UInt64, brandId: UInt64){ 
 			let brand = BloomlyNFT.getBrandById(brandId: brandId)
 			let BloomlyBrand = BloomlyDrop.dropList[brandId] ??{} 
@@ -628,7 +642,7 @@ contract BloomlyDrop{
 	access(all)
 	resource SuperAdmin{ 
 		//method to create Admin resource 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdminResource(adminAddress: Address): @Admin{ 
 			let allAdmins = BloomlyNFT.getAllAdmins()
 			assert(
@@ -649,7 +663,7 @@ contract BloomlyDrop{
 			  This method create new drop resource
 			**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createClientResource(): @BloomlyDrop.Client{ 
 			let allAdmins = BloomlyNFT.getAllAdmins()
 			assert(
@@ -663,7 +677,7 @@ contract BloomlyDrop{
 				This method purchase a asset with supply for uset that is available for sale in certain drop
 			**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun offRampPurchase(
 			dropId: UInt64,
 			brandId: UInt64,
@@ -706,7 +720,7 @@ contract BloomlyDrop{
 			  This method purchase a asset with supply for uset that is available for sale in certain drop
 			**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun flowPurchase(
 			dropId: UInt64,
 			brandId: UInt64,
@@ -795,7 +809,7 @@ contract BloomlyDrop{
 			  This method claim a asset with supply for uset that is available for sale in certain drop
 			**/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimAirdrop(
 			dropId: UInt64,
 			brandId: UInt64,
@@ -834,7 +848,7 @@ contract BloomlyDrop{
 			This method return the list of drops 
 	  **/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDropsByBrandId(brandId: UInt64):{ UInt64: Drop}{ 
 		return self.dropList[brandId] ??{} 
 	}
@@ -843,13 +857,13 @@ contract BloomlyDrop{
 			This method return specific drop against dropId
 	  **/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDropById(dropId: UInt64, brandId: UInt64): Drop?{ 
 		let drops = self.dropList[brandId] ??{} 
 		return drops[dropId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressClaimed(user: Address):{ UInt64:{ UInt64: UInt64}}{ 
 		return self.userClaimedDrop[user] ??{} 
 	}

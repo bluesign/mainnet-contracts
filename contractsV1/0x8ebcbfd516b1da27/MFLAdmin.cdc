@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
   This contract contains the MFL Admin logic.The idea is that any account can create an adminProxy,
   but only an AdminRoot in possession of Claims can share them with that admin proxy (using private capabilities).
 **/
@@ -24,7 +38,7 @@ contract MFLAdmin{
 	let AdminProxyPublicPath: PublicPath
 	
 	// MFL Royalty Address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun royaltyAddress(): Address{ 
 		return 0xa654669bd96b2014
 	}
@@ -48,7 +62,7 @@ contract MFLAdmin{
 			self.claimsCapabilities[name] = capability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimCapability(name: String): Capability?{ 
 			return self.claimsCapabilities[name]
 		}
@@ -60,7 +74,7 @@ contract MFLAdmin{
 	
 	// Anyone can create an AdminProxy, but can't do anything without Claims capabilities,
 	// and only an AdminRoot can provide that.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxy(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -71,14 +85,14 @@ contract MFLAdmin{
 		
 		// Create a new AdminRoot resource and returns it
 		// Only if really needed ! One AdminRoot should be enough for all the logic in MFL
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdminRoot(): @AdminRoot{ 
 			emit AdminRootCreated(by: self.owner?.address)
 			return <-create AdminRoot()
 		}
 		
 		// Set a Claim capabability for a given AdminProxy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAdminProxyClaimCapability(
 			name: String,
 			adminProxyRef: &{MFLAdmin.AdminProxyPublic},

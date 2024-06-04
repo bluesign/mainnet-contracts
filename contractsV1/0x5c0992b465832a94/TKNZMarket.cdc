@@ -1,4 +1,18 @@
-// Deployed for TKNZ Ltd. - https://tknz.gg
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Deployed for TKNZ Ltd. - https://tknz.gg
 /*
 
 	TKNZMarket.cdc
@@ -79,7 +93,7 @@ contract TKNZMarket{
 		access(all)
 		var cutPercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @TKNZToken.Vault): @TKNZ.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -87,13 +101,13 @@ contract TKNZMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTReference(id: UInt64): &TKNZ.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -178,7 +192,7 @@ contract TKNZMarket{
 		//
 		// Parameters: tokenID: The id of the NFT to be put up for sale
 		//			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenID: UInt64, price: UFix64){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowNFTReference(id: tokenID) != nil:
@@ -194,7 +208,7 @@ contract TKNZMarket{
 		//
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64){ 
 			if self.prices[tokenID] != nil{ 
 				// Remove the price from the prices dictionary
@@ -215,7 +229,7 @@ contract TKNZMarket{
 		//			 butTokens: the fungible tokens that are used to buy the NFT
 		//
 		// Returns: @TKNZ.NFT: the purchased NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @TKNZToken.Vault): @TKNZ.NFT{ 
 			if self.prices[tokenID] != nil{ 
 				assert(buyTokens.balance == self.prices[tokenID]!, message: "Not enough tokens to buy the NFT!")
@@ -247,7 +261,7 @@ contract TKNZMarket{
 		//
 		// Parameters: tokenID: The ID of the NFT's price that is changing
 		//			 newPrice: The new price for the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -261,7 +275,7 @@ contract TKNZMarket{
 		// changePercentage changes the cut percentage of the tokens that are for sale
 		//
 		// Parameters: newPercent: The new cut percentage for the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePercentage(_ newPercent: UFix64){ 
 			pre{ 
 				newPercent <= 1.0:
@@ -275,7 +289,7 @@ contract TKNZMarket{
 		//
 		// Parameters: newOwnerCapability: The new fungible token capability for the account
 		//								 who received tokens for purchases
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(_ newOwnerCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newOwnerCapability.borrow() != nil:
@@ -288,7 +302,7 @@ contract TKNZMarket{
 		//
 		// Parameters: newBeneficiaryCapability the new capability for the beneficiary of the cut of the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(_ newBeneficiaryCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newBeneficiaryCapability.borrow() != nil:
@@ -302,13 +316,13 @@ contract TKNZMarket{
 		// Parameters: tokenID: The ID of the NFT whose price to get
 		//
 		// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.prices.keys
 		}
@@ -321,7 +335,7 @@ contract TKNZMarket{
 		// Returns: &TKNZ.NFT? Optional reference to a NFT for sale
 		//						so that the caller can read its data
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTReference(id: UInt64): &TKNZ.NFT?{ 
 			let ref = (self.ownerCollection.borrow()!).borrowNFTReference(id: id)
 			return ref
@@ -329,7 +343,7 @@ contract TKNZMarket{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&TKNZ.Collection>,
 		ownerCapability: Capability<&{FungibleToken.Receiver}>,

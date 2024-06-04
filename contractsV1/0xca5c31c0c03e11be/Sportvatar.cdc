@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -143,7 +157,7 @@ contract Sportvatar: NonFungibleToken{
 		access(self)
 		let uuid: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(uuid: UInt64, field: String, minValue: UInt64, maxValue: UInt64){ 
 			self.uuid = uuid
 			self.field = field
@@ -152,7 +166,7 @@ contract Sportvatar: NonFungibleToken{
 			self.value = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValue(): UInt64{ 
 			if let value = self.value{ 
 				return value
@@ -214,34 +228,34 @@ contract Sportvatar: NonFungibleToken{
 		access(all)
 		let schema: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStats():{ String: UInt32}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayers():{ UInt32: UInt64?}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessories(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSeries(): SportvatarTemplate.SeriesData?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarBackground(): UInt64?
 	}
 	
@@ -249,25 +263,25 @@ contract Sportvatar: NonFungibleToken{
 	//for the Sportvatar and is accessible only to the owner of the NFT
 	access(all)
 	resource interface Private{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStory(text: String): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPosition(latitude: Fix64, longitude: Fix64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSportbit(layer: UInt32, sportbit: @Sportbit.NFT): @Sportbit.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(layer: UInt32): @Sportbit.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFlovatarBackground(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFlovatarBackground(): @FlovatarComponent.NFT?
 	}
 	
@@ -352,44 +366,44 @@ contract Sportvatar: NonFungibleToken{
 			self.background <- nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStats():{ String: UInt32}{ 
 			return self.createdAtBlock < getCurrentBlock().height ? self.stats :{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties{ 
 			return self.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}{ 
 			return self.bio
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSeries(): SportvatarTemplate.SeriesData?{ 
 			return SportvatarTemplate.getSeries(id: self.series)
 		}
 		
 		// This will allow to change the Name of the Sportvatar only once.
 		// It checks for the current name is empty, otherwise it will throw an error.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String): String{ 
 			pre{ 
 				// TODO: Make sure that the text of the name is sanitized
@@ -421,7 +435,7 @@ contract Sportvatar: NonFungibleToken{
 		// This will allow to add a text Story to the Sportvatar Bio.
 		// The String will be concatenated each time.
 		// There is a limit of 300 characters per story but there is no limit in the full concatenated story length
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStory(text: String): String{ 
 			pre{ 
 				// TODO: Make sure that the text of the name is sanitized
@@ -447,7 +461,7 @@ contract Sportvatar: NonFungibleToken{
 		
 		// This will allow to set the GPS location of a Sportvatar
 		// It can be run multiple times and each time it will override the previous state
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPosition(latitude: Fix64, longitude: Fix64): String{ 
 			pre{ 
 				latitude >= -90.0:
@@ -472,12 +486,12 @@ contract Sportvatar: NonFungibleToken{
 			return ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayers():{ UInt32: UInt64?}{ 
 			return self.layers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessories(): [UInt64]{ 
 			let accessoriesIds: [UInt64] = []
 			for k in self.accessories.keys{ 
@@ -491,7 +505,7 @@ contract Sportvatar: NonFungibleToken{
 		
 		// This will allow to change the Accessory of the Sportvatar any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSportbit(layer: UInt32, sportbit: @Sportbit.NFT): @Sportbit.NFT?{ 
 			pre{ 
 				sportbit.getSeries() == self.series:
@@ -507,7 +521,7 @@ contract Sportvatar: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Accessory of the Sportvatar any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(layer: UInt32): @Sportbit.NFT?{ 
 			if SportvatarTemplate.isCollectibleLayerAccessory(layer: layer, series: self.series){ 
 				emit Updated(id: self.id)
@@ -518,14 +532,14 @@ contract Sportvatar: NonFungibleToken{
 			panic("The Layer is out of range or it's not an accessory")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarBackground(): UInt64?{ 
 			return self.background?.templateId
 		}
 		
 		// This will allow to change the Background of the Flobot any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFlovatarBackground(component: @FlovatarComponent.NFT): @FlovatarComponent.NFT?{ 
 			pre{ 
 				component.getCategory() == "background":
@@ -537,7 +551,7 @@ contract Sportvatar: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Background of the Flobot any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFlovatarBackground(): @FlovatarComponent.NFT?{ 
 			emit Updated(id: self.id)
 			let compNFT <- self.background <- nil
@@ -548,7 +562,7 @@ contract Sportvatar: NonFungibleToken{
 		// optional Background and the other Sportbit components from their
 		// original Template resources, while all the other unmutable components are
 		// taken from the Metadata directly.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			let series = SportvatarTemplate.getSeries(id: self.series)
 			let layersArr: [String] = []
@@ -593,7 +607,7 @@ contract Sportvatar: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				return MetadataViews.ExternalURL("https://sportvatar.com/collectible/".concat(self.id.toString()))
 			}
@@ -663,15 +677,15 @@ contract Sportvatar: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSportvatar(id: UInt64): &Sportvatar.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -705,7 +719,7 @@ contract Sportvatar: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Sportvatar.NFT
 			let id: UInt64 = token.id
 			
@@ -730,7 +744,7 @@ contract Sportvatar: NonFungibleToken{
 		
 		// borrowSportvatar returns a borrowed reference to a Sportvatar
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSportvatar(id: UInt64): &Sportvatar.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -743,7 +757,7 @@ contract Sportvatar: NonFungibleToken{
 		
 		// borrowSportvatarPrivate returns a borrowed reference to a Sportvatar using the Private interface
 		// so that the caller can read data and call methods from it, like setting the optional components.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSportvatarPrivate(id: UInt64): &{Sportvatar.Private}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -843,7 +857,7 @@ contract Sportvatar: NonFungibleToken{
 	}
 	
 	// This function will look for a specific Sportvatar on a user account and return a SportvatarData if found
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSportvatar(address: Address, sportvatarId: UInt64): SportvatarData?{ 
 		let account = getAccount(address)
 		if let collectibleCollection = account.capabilities.get<&Sportvatar.Collection>(self.CollectionPublicPath).borrow<&Sportvatar.Collection>(){ 
@@ -855,7 +869,7 @@ contract Sportvatar: NonFungibleToken{
 	}
 	
 	// This function will return all Sportvatars on a user account and return an array of SportvatarData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSportvatars(address: Address): [SportvatarData]{ 
 		var sportvatarData: [SportvatarData] = []
 		let account = getAccount(address)
@@ -870,13 +884,13 @@ contract Sportvatar: NonFungibleToken{
 	}
 	
 	// This returns all the previously minted combinations, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedCombinations(): [String]{ 
 		return Sportvatar.mintedCombinations.keys
 	}
 	
 	// This returns all the previously minted names, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedNames(): [String]{ 
 		return Sportvatar.mintedNames.keys
 	}
@@ -893,7 +907,7 @@ contract Sportvatar: NonFungibleToken{
 		Sportvatar.mintedNames.insert(key: name, true)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCoreLayers(series: UInt64, layers:{ UInt32: UInt64?}):{ UInt32: UInt64}{ 
 		let coreLayers:{ UInt32: UInt64} ={} 
 		for k in layers.keys{ 
@@ -915,7 +929,7 @@ contract Sportvatar: NonFungibleToken{
 	// This helper function will generate a string from a list of components,
 	// to be used as a sort of barcode to keep the inventory of the minted
 	// Sportvatars and to avoid duplicates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCombinationString(series: UInt64, layers:{ UInt32: UInt64}): String{ 
 		var combination: String = "S".concat(series.toString())
 		var i: UInt32 = UInt32(2)
@@ -929,7 +943,7 @@ contract Sportvatar: NonFungibleToken{
 	
 	// This function will get a list of component IDs and will check if the
 	// generated string is unique or if someone already used it before.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkCombinationAvailable(series: UInt64, layers:{ UInt32: UInt64}): Bool{ 
 		let combinationString = Sportvatar.getCombinationString(series: series, layers: layers)
 		return !Sportvatar.mintedCombinations.containsKey(combinationString)
@@ -937,7 +951,7 @@ contract Sportvatar: NonFungibleToken{
 	
 	// This will check if a specific Name has already been taken
 	// and assigned to some Sportvatar
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkNameAvailable(name: String): Bool{ 
 		return name.length > 2 && name.length < 20 && !Sportvatar.mintedNames.containsKey(name)
 	}
@@ -949,7 +963,7 @@ contract Sportvatar: NonFungibleToken{
 	// The Flame NFT will entitle to use any common basic component (body, hair, etc.)
 	// In order to use special rare components a boost of the same rarity will be needed
 	// for each component used
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSportvatar(sportflame: @Sportbit.NFT, series: UInt64, layers: [UInt32], templateIds: [UInt64?], sportbits: @[Sportbit.NFT?], address: Address): @Sportvatar.NFT{ 
 		let seriesData = SportvatarTemplate.getSeries(id: series)
 		if seriesData == nil{ 
@@ -1132,12 +1146,12 @@ contract Sportvatar: NonFungibleToken{
 	
 	// These functions will return the current Royalty cuts for
 	// both the Creator and the Marketplace.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyCut(): UFix64{ 
 		return self.royaltyCut
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketplaceCut(): UFix64{ 
 		return self.marketplaceCut
 	}
@@ -1163,7 +1177,7 @@ contract Sportvatar: NonFungibleToken{
 		// contains all the SVG and basic informations to represent
 		// a specific part of the Sportvatar (body, hair, eyes, mouth, etc.)
 		// More info in the SportvatarTemplate.cdc file
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSeries(name: String, description: String, svgPrefix: String, svgSuffix: String, layers:{ UInt32: SportvatarTemplate.Layer}, colors:{ UInt32: String}, metadata:{ String: String}, maxMintable: UInt64): @SportvatarTemplate.Series{ 
 			return <-SportvatarTemplate.createSeries(name: name, description: description, svgPrefix: svgPrefix, svgSuffix: svgSuffix, layers: layers, colors: colors, metadata: metadata, maxMintable: maxMintable)
 		}
@@ -1172,19 +1186,19 @@ contract Sportvatar: NonFungibleToken{
 		// contains all the SVG and basic informations to represent
 		// a specific part of the Sportvatar (body, hair, eyes, mouth, etc.)
 		// More info in the SportvatarTemplate.cdc file
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(name: String, description: String, series: UInt64, layer: UInt32, metadata:{ String: String}, rarity: String, sport: String, svg: String, maxMintableComponents: UInt64): @SportvatarTemplate.Template{ 
 			return <-SportvatarTemplate.createTemplate(name: name, description: description, series: series, layer: layer, metadata: metadata, rarity: rarity, sport: sport, svg: svg, maxMintableComponents: maxMintableComponents)
 		}
 		
 		//This will mint a new Component based from a selected Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSportbit(templateId: UInt64): @Sportbit.NFT{ 
 			return <-Sportbit.createSportbit(templateId: templateId)
 		}
 		
 		//This will mint Components in batch and return a Collection instead of the single NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreateSportbits(templateId: UInt64, quantity: UInt64): @Sportbit.Collection{ 
 			return <-Sportbit.batchCreateSportbits(templateId: templateId, quantity: quantity)
 		}
@@ -1193,26 +1207,26 @@ contract Sportvatar: NonFungibleToken{
 		// A random string is passed to manage permissions for the
 		// purchase of it (more info on SportvatarPack.cdc).
 		// Finally the sale price is set as well.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPack(components: @[Sportbit.NFT], randomString: String, price: UFix64, flameCount: UInt32, series: UInt32, name: String): @SportvatarPack.Pack{ 
 			return <-SportvatarPack.createPack(components: <-components, randomString: randomString, price: price, flameCount: flameCount, series: series, name: name)
 		}
 		
 		// With this function you can generate a new Admin resource
 		// and pass it to another user if needed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Helper functions to update the Royalty cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyCut(value: UFix64){ 
 			Sportvatar.setRoyaltyCut(value: value)
 		}
 		
 		// Helper functions to update the Marketplace cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketplaceCut(value: UFix64){ 
 			Sportvatar.setMarketplaceCut(value: value)
 		}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import StarlyToken from "../0x142fa6570b62fd97/StarlyToken.cdc"
 
@@ -119,7 +133,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @StarlyUsdtSwapPair.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -164,24 +178,24 @@ contract StarlyUsdtSwapPair: FungibleToken{
 			self.token2 <- fromToken2
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken1(from: @StarlyToken.Vault){ 
 			self.token1.deposit(from: <-(from as!{ FungibleToken.Vault}))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken2(from: @TeleportedTetherToken.Vault){ 
 			self.token2.deposit(from: <-(from as!{ FungibleToken.Vault}))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken1(): @StarlyToken.Vault{ 
 			var vault <- StarlyToken.createEmptyVault(vaultType: Type<@StarlyToken.Vault>()) as! @StarlyToken.Vault
 			vault <-> self.token1
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken2(): @TeleportedTetherToken.Vault{ 
 			var vault <- TeleportedTetherToken.createEmptyVault(vaultType: Type<@TeleportedTetherToken.Vault>()) as! @TeleportedTetherToken.Vault
 			vault <-> self.token2
@@ -191,14 +205,14 @@ contract StarlyUsdtSwapPair: FungibleToken{
 	
 	// createEmptyBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyTokenBundle(): @StarlyUsdtSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-(StarlyToken.createEmptyVault(vaultType: Type<@StarlyToken.Vault>()) as! @StarlyToken.Vault), fromToken2: <-(TeleportedTetherToken.createEmptyVault(vaultType: Type<@TeleportedTetherToken.Vault>()) as! @TeleportedTetherToken.Vault))
 	}
 	
 	// createTokenBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenBundle(fromToken1: @StarlyToken.Vault, fromToken2: @TeleportedTetherToken.Vault): @StarlyUsdtSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-fromToken1, fromToken2: <-fromToken2)
 	}
@@ -236,17 +250,17 @@ contract StarlyUsdtSwapPair: FungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			StarlyUsdtSwapPair.isFrozen = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			StarlyUsdtSwapPair.isFrozen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addInitialLiquidity(from: @StarlyUsdtSwapPair.TokenBundle): @StarlyUsdtSwapPair.Vault{ 
 			pre{ 
 				StarlyUsdtSwapPair.totalSupply == 0.0:
@@ -264,7 +278,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 			return <-StarlyUsdtSwapPair.mintTokens(amount: 1.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeePercentage(feePercentage: UFix64){ 
 			StarlyUsdtSwapPair.feePercentage = feePercentage
 			emit FeeUpdated(feePercentage: feePercentage)
@@ -285,19 +299,19 @@ contract StarlyUsdtSwapPair: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeePercentage(): UFix64{ 
 		return self.feePercentage
 	}
 	
 	// Check current pool amounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolAmounts(): PoolAmounts{ 
 		return PoolAmounts(token1Amount: StarlyUsdtSwapPair.token1Vault.balance, token2Amount: StarlyUsdtSwapPair.token2Vault.balance)
 	}
 	
 	// Get quote for Token1 (given) -> Token2
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken1ForToken2(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		
@@ -307,7 +321,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token1 -> Token2 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken1ForExactToken2(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		assert(poolAmounts.token2Amount > amount, message: "Not enough Token2 in the pool")
@@ -318,7 +332,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 (given) -> Token1
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken2ForToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		
@@ -328,7 +342,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 -> Token1 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken2ForExactToken1(amount: UFix64): UFix64{ 
 		let poolAmounts = self.getPoolAmounts()
 		assert(poolAmounts.token1Amount > amount, message: "Not enough Token1 in the pool")
@@ -358,7 +372,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 		return <-(self.token2Vault.withdraw(amount: token2Amount) as! @TeleportedTetherToken.Vault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken1ForToken2(from: @StarlyToken.Vault): @TeleportedTetherToken.Vault{ 
 		return <-StarlyUsdtSwapPair._swapToken1ForToken2(from: <-from)
 	}
@@ -383,13 +397,13 @@ contract StarlyUsdtSwapPair: FungibleToken{
 		return <-(self.token1Vault.withdraw(amount: token1Amount) as! @StarlyToken.Vault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken2ForToken1(from: @TeleportedTetherToken.Vault): @StarlyToken.Vault{ 
 		return <-StarlyUsdtSwapPair._swapToken2ForToken1(from: <-from)
 	}
 	
 	// Used to add liquidity without minting new liquidity token
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun donateLiquidity(from: @StarlyUsdtSwapPair.TokenBundle){ 
 		let token1Vault <- from.withdrawToken1()
 		let token2Vault <- from.withdrawToken2()
@@ -424,7 +438,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 		return <-liquidityTokenVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addLiquidity(from: @StarlyUsdtSwapPair.TokenBundle): @StarlyUsdtSwapPair.Vault{ 
 		return <-StarlyUsdtSwapPair._addLiquidity(from: <-from)
 	}
@@ -450,7 +464,7 @@ contract StarlyUsdtSwapPair: FungibleToken{
 		return <-tokenBundle
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeLiquidity(from: @StarlyUsdtSwapPair.Vault): @StarlyUsdtSwapPair.TokenBundle{ 
 		return <-StarlyUsdtSwapPair._removeLiquidity(from: <-from)
 	}

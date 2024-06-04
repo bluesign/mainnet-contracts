@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract SwapConfig{ 
 	access(all)
 	var PairPublicPath: PublicPath
@@ -30,7 +44,7 @@ contract SwapConfig{
 	/// Utility function to convert a UFix64 number to its scaled equivalent in UInt256 format
 	/// e.g. 184467440737.09551615 (UFix64.max) => 184467440737095516150000000000
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun UFix64ToScaledUInt256(_ f: UFix64): UInt256{ 
 		let integral = UInt256(f)
 		let fractional = f % 1.0
@@ -42,7 +56,7 @@ contract SwapConfig{
 	/// Utility function to convert a fixed point number in form of scaled UInt256 back to UFix64 format
 	/// e.g. 184467440737095516150000000000 => 184467440737.09551615
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ScaledUInt256ToUFix64(_ scaled: UInt256): UFix64{ 
 		let integral = scaled / self.scaleFactor
 		let ufixScaledFractional =
@@ -55,7 +69,7 @@ contract SwapConfig{
 	/// @Param vaultTypeIdentifier - eg. A.f8d6e0586b0a20c7.FlowToken.Vault
 	/// @Return tokenTypeIdentifier - eg. A.f8d6e0586b0a20c7.FlowToken
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun SliceTokenTypeIdentifierFromVaultType(vaultTypeIdentifier: String): String{ 
 		return vaultTypeIdentifier.slice(from: 0, upTo: vaultTypeIdentifier.length - 6)
 	}
@@ -64,7 +78,7 @@ contract SwapConfig{
 	/// Compute √x using Newton's method.
 	/// @Param - x: Scaled UFix64 number in cadence. e.g. UFix64ToScaledUInt256( 16.0 )
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sqrt(_ x: UInt256): UInt256{ 
 		var res: UInt256 = 0
 		var one: UInt256 = self.scaleFactor
@@ -85,7 +99,7 @@ contract SwapConfig{
 	/// Helper function:
 	/// Given pair reserves and the exact input amount of an asset, returns the maximum output amount of the other asset
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountOut(amountIn: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		pre{ 
 			amountIn > 0.0:
@@ -106,7 +120,7 @@ contract SwapConfig{
 	/// Helper function:
 	/// Given pair reserves and the exact output amount of an asset wanted, returns the required (minimum) input amount of the other asset
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountIn(amountOut: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		pre{ 
 			amountOut < reserveOut:
@@ -127,7 +141,7 @@ contract SwapConfig{
 	/// Helper function:
 	/// Given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quote(amountA: UFix64, reserveA: UFix64, reserveB: UFix64): UFix64{ 
 		pre{ 
 			amountA > 0.0:

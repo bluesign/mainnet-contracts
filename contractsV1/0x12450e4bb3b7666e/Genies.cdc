@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -200,7 +214,7 @@ contract Genies: NonFungibleToken{
 		
 		// Deactivate this series
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deactivate(){ 
 			pre{ 
 				self.active == true:
@@ -215,7 +229,7 @@ contract Genies: NonFungibleToken{
 		// Create and add a collection to the series.
 		// You can only do so via this function, which updates the relevant fields.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollection(collectionName: String, collectionMetadata:{ String: String}): UInt32{ 
 			pre{ 
 				self.active == true:
@@ -231,7 +245,7 @@ contract Genies: NonFungibleToken{
 		
 		// Close a collection, and update the relevant fields
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeGeniesCollection(collectionID: UInt32){ 
 			pre{ 
 				Genies.collectionByID[collectionID] != nil:
@@ -250,7 +264,7 @@ contract Genies: NonFungibleToken{
 		// and all the editions in each are retired,
 		// allowing advanceSeries to proceed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeAllGeniesCollections(){ 
 			for collectionID in self.collectionIDs{ 
 				let collection = (&Genies.collectionByID[collectionID] as &Genies.GeniesCollection?)!
@@ -282,7 +296,7 @@ contract Genies: NonFungibleToken{
 	
 	// Get the publicly available data for a Series by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesData(id: UInt32): Genies.SeriesData{ 
 		pre{ 
 			Genies.seriesByID[id] != nil:
@@ -293,7 +307,7 @@ contract Genies: NonFungibleToken{
 	
 	// Get the publicly available data for a Series by name
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesDataByName(name: String): Genies.SeriesData{ 
 		pre{ 
 			Genies.seriesIDByName[name] != nil:
@@ -305,14 +319,14 @@ contract Genies: NonFungibleToken{
 	
 	// Get all series names (this will be *long*)
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeriesNames(): [String]{ 
 		return Genies.seriesIDByName.keys
 	}
 	
 	// Get series id for name
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesIDByName(name: String): UInt32?{ 
 		return Genies.seriesIDByName[name]
 	}
@@ -391,7 +405,7 @@ contract Genies: NonFungibleToken{
 		// Create and add an Edition to the collection.
 		// You can only do so via this function, which updates the relevant fields.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEdition(editionName: String, editionMetadata:{ String: String}): UInt32{ 
 			pre{ 
 				self.open == true:
@@ -407,7 +421,7 @@ contract Genies: NonFungibleToken{
 		
 		// Update metadata field of an Edition to the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEdition(editionID: UInt32, editionMetadata:{ String: String}){ 
 			pre{ 
 				Genies.editionByID[editionID] != nil:
@@ -426,7 +440,7 @@ contract Genies: NonFungibleToken{
 		
 		// Close an Edition, and update the relevant fields
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireEdition(editionID: UInt32){ 
 			pre{ 
 				Genies.editionByID[editionID] != nil:
@@ -439,7 +453,7 @@ contract Genies: NonFungibleToken{
 		
 		// Retire all of the Editions, allowing this collection to be closed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAllEditions(){ 
 			for editionID in self.editionIDs{ 
 				self.retireEdition(editionID: editionID)
@@ -483,7 +497,7 @@ contract Genies: NonFungibleToken{
 	// Get the publicly available data for a GeniesCollection
 	// Not an NFT Collection!
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGeniesCollectionData(id: UInt32): Genies.GeniesCollectionData{ 
 		pre{ 
 			Genies.collectionByID[id] != nil:
@@ -567,7 +581,7 @@ contract Genies: NonFungibleToken{
 			emit EditionRetired(id: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(key: String, value: String){ 
 			self.metadata[key] = value
 		}
@@ -575,7 +589,7 @@ contract Genies: NonFungibleToken{
 		// Mint a Genies NFT in this edition, with the given minting mintingDate.
 		// Note that this will panic if this edition is retired.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(): @Genies.NFT{ 
 			pre{ 
 				self.open:
@@ -612,7 +626,7 @@ contract Genies: NonFungibleToken{
 	
 	// Get the publicly available data for an Edition
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionData(id: UInt32): EditionData{ 
 		pre{ 
 			Genies.editionByID[id] != nil:
@@ -659,7 +673,7 @@ contract Genies: NonFungibleToken{
 			emit NFTMinted(id: self.id, editionID: self.editionID, serialNumber: self.serialNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWearableSKU(): String{ 
 			let edition = Genies.getEditionData(id: self.editionID)
 			if edition.metadata["avatarWearableSKU"] != nil{ 
@@ -723,18 +737,18 @@ contract Genies: NonFungibleToken{
 	access(all)
 	resource interface GeniesNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGeniesNFT(id: UInt64): &Genies.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -768,7 +782,7 @@ contract Genies: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Genies.NFT
 			let id: UInt64 = token.id
 			
@@ -781,7 +795,7 @@ contract Genies: NonFungibleToken{
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -811,7 +825,7 @@ contract Genies: NonFungibleToken{
 		
 		// borrowGeniesNFT gets a reference to an NFT in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGeniesNFT(id: UInt64): &Genies.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &Genies.NFT
@@ -872,7 +886,7 @@ contract Genies: NonFungibleToken{
 		// Mint a single NFT
 		// The Edition for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt32): @Genies.NFT
 	}
 	
@@ -883,7 +897,7 @@ contract Genies: NonFungibleToken{
 		// Create a new series and set it to be the current one, deactivating the previous one if needed.
 		// You probably want to call closeAllCollections() on the current series before this.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun advanceSeries(nextSeriesName: String, nextSeriesMetadata:{ String: String}): UInt32{ 
 			pre{ 
 				Genies.seriesByID[Genies.currentSeriesID] == nil || ((&Genies.seriesByID[Genies.currentSeriesID] as &Genies.Series?)!).collectionsOpen == 0:
@@ -919,7 +933,7 @@ contract Genies: NonFungibleToken{
 		
 		// Borrow a Series
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(id: UInt32): &Genies.Series{ 
 			pre{ 
 				Genies.seriesByID[id] != nil:
@@ -930,7 +944,7 @@ contract Genies: NonFungibleToken{
 		
 		// Borrow a Genies Collection. Not an NFT Collection!
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGeniesCollection(id: UInt32): &Genies.GeniesCollection{ 
 			pre{ 
 				Genies.collectionByID[id] != nil:
@@ -941,7 +955,7 @@ contract Genies: NonFungibleToken{
 		
 		// Borrow an Edition
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEdition(id: UInt32): &Genies.Edition{ 
 			pre{ 
 				Genies.editionByID[id] != nil:
@@ -953,7 +967,7 @@ contract Genies: NonFungibleToken{
 		// Mint a single NFT
 		// The Edition for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt32): @Genies.NFT{ 
 			pre{ 
 				// Make sure the edition we are creating this NFT in exists

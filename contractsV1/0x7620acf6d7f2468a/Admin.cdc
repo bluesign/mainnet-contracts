@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -40,7 +54,7 @@ contract Admin{
 	// Admin things
 	/// ===================================================================================
 	//Admin client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxyClient(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -48,8 +62,8 @@ contract Admin{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface AdminProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Server>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&Admin.Server>): Void
 	}
 	
 	//admin proxy with capability receiver 
@@ -58,7 +72,7 @@ contract Admin{
 		access(self)
 		var capability: Capability<&Server>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Server>){ 
 			pre{ 
 				cap.check():
@@ -69,7 +83,7 @@ contract Admin{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerTrait(_ trait: Bl0x.Trait){ 
 			pre{ 
 				self.capability != nil:
@@ -78,7 +92,7 @@ contract Admin{
 			Bl0x.addTrait(trait)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBl0x(recipient: &{NonFungibleToken.Receiver}, serial: UInt64, rootHash: String, season: UInt64, traits:{ String: UInt64}){ 
 			pre{ 
 				self.capability != nil:
@@ -87,7 +101,7 @@ contract Admin{
 			Bl0x.mintNFT(recipient: recipient, serial: serial, rootHash: rootHash, season: season, traits: traits)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun advanceClock(_ time: UFix64){ 
 			pre{ 
 				self.capability != nil:
@@ -98,7 +112,7 @@ contract Admin{
 			Clock.tick(time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun debug(_ value: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -107,7 +121,7 @@ contract Admin{
 			Debug.enable(value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerPackMetadata(typeId: UInt64, metadata: Bl0xPack.Metadata){ 
 			pre{ 
 				self.capability != nil:
@@ -116,7 +130,7 @@ contract Admin{
 			Bl0xPack.registerMetadata(typeId: typeId, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintPacks(typeId: UInt64, hashes: [String]){ 
 			pre{ 
 				self.capability != nil:
@@ -128,7 +142,7 @@ contract Admin{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requeue(packId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -138,7 +152,7 @@ contract Admin{
 			cap.requeue(packId: packId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfill(packId: UInt64, rewardIds: [UInt64], salt: String){ 
 			pre{ 
 				self.capability != nil:
@@ -148,7 +162,7 @@ contract Admin{
 		}
 		
 		//THis cap here could be the server really in this case
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProviderCap(): Capability<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>{ 
 			pre{ 
 				self.capability != nil:
@@ -157,7 +171,7 @@ contract Admin{
 			return Admin.account.capabilities.get<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>(Bl0x.CollectionPrivatePath)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRoyaltycut(_ cutInfo: MetadataViews.Royalty){ 
 			Bl0x.addRoyaltycut(cutInfo)
 		}

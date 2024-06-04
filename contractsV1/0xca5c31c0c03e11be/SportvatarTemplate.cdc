@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
  This contract defines the Sportvatar Templates and the Collection to manage them.
  Sportvatar Templates are the building blocks (lego bricks) of the final Sportvatar,
@@ -97,13 +111,13 @@ contract SportvatarTemplate{
 		access(all)
 		let maxMintable: UInt64
 		
-		access(all)
-		fun getLayers():{ UInt32: Layer}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getLayers():{ UInt32: SportvatarTemplate.Layer}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getColors():{ UInt32: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 	}
 	
@@ -137,17 +151,17 @@ contract SportvatarTemplate{
 		access(all)
 		let maxMintable: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayers():{ UInt32: Layer}{ 
 			return self.layers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getColors():{ UInt32: String}{ 
 			return self.colors
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -201,7 +215,7 @@ contract SportvatarTemplate{
 		access(all)
 		let maxMintableComponents: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -260,16 +274,16 @@ contract SportvatarTemplate{
 	// Standard CollectionPublic interface that can also borrow Component Templates
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeriesIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTemplate(id: UInt64): &{SportvatarTemplate.Public}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(id: UInt64): &{SportvatarTemplate.PublicSeries}?
 	}
 	
@@ -290,7 +304,7 @@ contract SportvatarTemplate{
 		
 		// deposit takes a Component Template and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(template: @SportvatarTemplate.Template){ 
 			let id: UInt64 = template.id
 			
@@ -301,7 +315,7 @@ contract SportvatarTemplate{
 		
 		// deposit takes a Series and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositSeries(series: @SportvatarTemplate.Series){ 
 			let id: UInt64 = series.id
 			
@@ -311,20 +325,20 @@ contract SportvatarTemplate{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedTemplates.keys
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeriesIDs(): [UInt64]{ 
 			return self.ownedSeries.keys
 		}
 		
 		// borrowTemplate returns a borrowed reference to a Component Template
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTemplate(id: UInt64): &{SportvatarTemplate.Public}?{ 
 			if self.ownedTemplates[id] != nil{ 
 				let ref = (&self.ownedTemplates[id] as &SportvatarTemplate.Template?)!
@@ -336,7 +350,7 @@ contract SportvatarTemplate{
 		
 		// borrowTemplate returns a borrowed reference to a Component Template
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(id: UInt64): &{SportvatarTemplate.PublicSeries}?{ 
 			if self.ownedSeries[id] != nil{ 
 				let ref = (&self.ownedSeries[id] as &SportvatarTemplate.Series?)!
@@ -490,7 +504,7 @@ contract SportvatarTemplate{
 	
 	// Get all the Component Templates from the account. 
 	// We hide the SVG field because it might be too big to execute in a script
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplates(): [TemplateData]{ 
 		var templateData: [TemplateData] = []
 		if let templateCollection =
@@ -507,7 +521,7 @@ contract SportvatarTemplate{
 	
 	// Get all the Series from the account.
 	// We hide the SVG field because it might be too big to execute in a script
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesAll(): [SeriesData]{ 
 		var seriesData: [SeriesData] = []
 		if let templateCollection =
@@ -523,7 +537,7 @@ contract SportvatarTemplate{
 	}
 	
 	// Gets a specific Template from its ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplate(id: UInt64): TemplateData?{ 
 		if let templateCollection =
 			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
@@ -537,7 +551,7 @@ contract SportvatarTemplate{
 	}
 	
 	// Gets the SVG of a specific Template from its ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateSvg(id: UInt64): String?{ 
 		if let templateCollection =
 			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
@@ -551,7 +565,7 @@ contract SportvatarTemplate{
 	}
 	
 	// Gets a specific Series from its ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeries(id: UInt64): SeriesData?{ 
 		if let templateCollection =
 			self.account.capabilities.get<&{SportvatarTemplate.CollectionPublic}>(
@@ -564,7 +578,7 @@ contract SportvatarTemplate{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isCollectibleLayerAccessory(layer: UInt32, series: UInt64): Bool{ 
 		let series = SportvatarTemplate.getSeries(id: series)!
 		if let layer = series.layers[layer]{ 
@@ -576,19 +590,19 @@ contract SportvatarTemplate{
 	}
 	
 	// Returns the amount of minted Components for a specific Template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalMintedComponents(id: UInt64): UInt64?{ 
 		return SportvatarTemplate.totalMintedComponents[id]
 	}
 	
 	// Returns the amount of minted Collectibles for a specific Series
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalMintedCollectibles(series: UInt64): UInt64?{ 
 		return SportvatarTemplate.totalMintedCollectibles[series]
 	}
 	
 	// Returns the timestamp of the last time a Component for a specific Template was minted
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLastComponentMintedAt(id: UInt64): UFix64?{ 
 		return SportvatarTemplate.lastComponentMintedAt[id]
 	}

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -240,7 +254,7 @@ contract ItemNFT: NonFungibleToken{
 		}
 		
 		// get a reference to the garment that item stores
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGarment(): &GarmentNFT.NFT?{ 
 			let garmentOptional <- self.garment <- nil
 			let garment <- garmentOptional!
@@ -250,7 +264,7 @@ contract ItemNFT: NonFungibleToken{
 		}
 		
 		// get a reference to the material that item stores
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMaterial(): &MaterialNFT.NFT?{ 
 			let materialOptional <- self.material <- nil
 			let material <- materialOptional!
@@ -266,7 +280,7 @@ contract ItemNFT: NonFungibleToken{
 	}
 	
 	//destroy item if it is considered dead
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun cleanDeadItems(item: @ItemNFT.NFT){ 
 		pre{ 
 			item.isDead:
@@ -277,7 +291,7 @@ contract ItemNFT: NonFungibleToken{
 	
 	// mint the NFT, combining a garment and boot. 
 	// The itemData that is used to mint the Item is based on the garment and material' garmentDataID and materialDataID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(name: String, royaltyVault: Capability<&FBRC.Vault>, garment: @GarmentNFT.NFT, material: @MaterialNFT.NFT): @NFT{ 
 		pre{ 
 			royaltyVault.check():
@@ -306,18 +320,18 @@ contract ItemNFT: NonFungibleToken{
 	access(all)
 	resource interface ItemCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &ItemNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -342,7 +356,7 @@ contract ItemNFT: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun split(id: UInt64, garmentCap: Capability<&{GarmentNFT.GarmentCollectionPublic}>, materialCap: Capability<&{MaterialNFT.MaterialCollectionPublic}>){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("Cannot withdraw: Item does not exist in the collection")
 			let item <- token as! @ItemNFT.NFT
@@ -373,7 +387,7 @@ contract ItemNFT: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Items
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -392,7 +406,7 @@ contract ItemNFT: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			//todo: someFunction that transfers royalty
 			// Cast the deposited token as  NFT to make sure
 			// it is the correct type
@@ -416,7 +430,7 @@ contract ItemNFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -455,7 +469,7 @@ contract ItemNFT: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &ItemNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -493,7 +507,7 @@ contract ItemNFT: NonFungibleToken{
 	resource Admin{ 
 		
 		// create itemdataid allocation from the garmentdataid and materialdataid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItemDataAllocation(garmentDataID: UInt32, materialDataID: UInt32){ 
 			if ItemNFT.itemDataAllocation[garmentDataID] != nil{ 
 				if (ItemNFT.itemDataAllocation[garmentDataID]!)[materialDataID] != nil{ 
@@ -512,7 +526,7 @@ contract ItemNFT: NonFungibleToken{
 			ItemNFT.nextItemDataAllocation = ItemNFT.nextItemDataAllocation + 1 as UInt32
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItemData(mainImage: String, images: [String]): UInt32{ 
 			// Create the new Item
 			var newItem = ItemData(mainImage: mainImage, images: images)
@@ -526,34 +540,34 @@ contract ItemNFT: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyPercentage(newRoyaltyPercentage: UFix64){ 
 			ItemNFT.royaltyPercentage = newRoyaltyPercentage
 			emit RoyaltyPercentageChanged(newRoyaltyPercentage: newRoyaltyPercentage)
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSplittable(){ 
 			ItemNFT.isSplittable = true
 			emit ItemNFTNowSplittable()
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeItemDataNumberMintable(number: UInt32){ 
 			ItemNFT.numberItemDataMintable = number
 			emit numberItemDataMintableChanged(number: number)
 		}
 		
 		// Retire itemData so that it cannot be used to mint anymore
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireItemData(itemDataID: UInt32){ 
 			pre{ 
 				ItemNFT.isItemDataRetired[itemDataID] != nil:
@@ -580,34 +594,34 @@ contract ItemNFT: NonFungibleToken{
 	}
 	
 	// get dictionary of numberMintedPerItem
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerItem():{ UInt32: UInt32}{ 
 		return ItemNFT.numberMintedPerItem
 	}
 	
 	// get how many Items with itemDataID are minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemNumberMinted(id: UInt32): UInt32{ 
 		let numberMinted = ItemNFT.numberMintedPerItem[id] ?? panic("itemDataID not found")
 		return numberMinted
 	}
 	
 	// get the ItemData of a specific id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemData(id: UInt32): ItemData{ 
 		let itemData = ItemNFT.itemDatas[id] ?? panic("itemDataID not found")
 		return itemData
 	}
 	
 	// get the map of item data allocations
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDataAllocations():{ UInt32:{ UInt32: UInt32}}{ 
 		let itemDataAllocation = ItemNFT.itemDataAllocation
 		return itemDataAllocation
 	}
 	
 	// get the itemData allocation from the garment and material dataID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDataAllocation(garmentDataID: UInt32, materialDataID: UInt32): UInt32{ 
 		let isValidGarmentMaterialPair = ItemNFT.itemDataAllocation[garmentDataID] ?? panic("garment and material dataID pair not allocated")
 		
@@ -617,19 +631,19 @@ contract ItemNFT: NonFungibleToken{
 	}
 	
 	// get all ItemDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDatas():{ UInt32: ItemData}{ 
 		return ItemNFT.itemDatas
 	}
 	
 	// get dictionary of itemdataids and whether they are retired
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDatasRetired():{ UInt32: Bool}{ 
 		return ItemNFT.isItemDataRetired
 	}
 	
 	// get bool of if itemdataid is retired
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDataRetired(itemDataID: UInt32): Bool?{ 
 		return ItemNFT.isItemDataRetired[itemDataID]!
 	}

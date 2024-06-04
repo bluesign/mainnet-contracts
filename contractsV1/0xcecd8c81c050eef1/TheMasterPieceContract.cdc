@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract TheMasterPieceContract{ 
 	
 	// Named Paths
@@ -31,7 +45,7 @@ contract TheMasterPieceContract{
 		theOwnersRef.setWalletSize(sectorId: sectorId, address: address, size: size)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddress(): Address{ 
 		return self.account.address
 	}
@@ -50,12 +64,12 @@ contract TheMasterPieceContract{
 			self.walletSize = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleSize(saleSize: UInt16){ 
 			self.saleSize = saleSize
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWalletSize(walletSize: UInt16){ 
 			self.walletSize = walletSize
 		}
@@ -100,12 +114,12 @@ contract TheMasterPieceContract{
 			self.removeOwner(address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwners():{ Address: TMPOwner}{ 
 			return self.owners
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwner(address: Address): TMPOwner?{ 
 			return self.owners[address]
 		}
@@ -114,13 +128,13 @@ contract TheMasterPieceContract{
 	// ########################################################################################
 	access(all)
 	resource interface TMPOwnersInterface{ 
-		access(all)
-		fun getOwners(sectorId: UInt16):{ Address: TMPOwner}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getOwners(sectorId: UInt16):{ Address: TheMasterPieceContract.TMPOwner}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwner(sectorId: UInt16, address: Address): TMPOwner?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listSectors(): [UInt16]
 	}
 	
@@ -146,7 +160,7 @@ contract TheMasterPieceContract{
 			self.sectors[sectorId]?.setSaleSize(address: address, size: size)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwners(sectorId: UInt16):{ Address: TMPOwner}{ 
 			if self.sectors[sectorId] == nil{ 
 				return{} 
@@ -155,12 +169,12 @@ contract TheMasterPieceContract{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwner(sectorId: UInt16, address: Address): TMPOwner?{ 
 			return self.sectors[sectorId]?.getOwner(address: address)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listSectors(): [UInt16]{ 
 			return self.sectors.keys
 		}

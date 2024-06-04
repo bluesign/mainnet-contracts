@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -111,19 +125,19 @@ contract TopShotEscrowV2{
 		access(all)
 		var redeemed: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasBeenRedeemed(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isRedeemable(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEscrowDetails(): EscrowDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(NFTIds: [UInt64])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTs(NFTCollection: @TopShot.Collection)
 	}
 	
@@ -175,17 +189,17 @@ contract TopShotEscrowV2{
 			destroy _NFTCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isRedeemable(): Bool{ 
 			return getCurrentBlock().timestamp > self.startTime + self.duration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasBeenRedeemed(): Bool{ 
 			return self.redeemed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(NFTIds: [UInt64]){ 
 			pre{ 
 				!self.lock:
@@ -226,12 +240,12 @@ contract TopShotEscrowV2{
 			self.lock = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEscrowDetails(): EscrowDetails{ 
 			return EscrowDetails(_owner: self.receiverCap.address, _escrowID: self.escrowID, _NFTIds: self.NFTCollection, _startTime: self.startTime, _duration: self.duration, _isRedeemable: self.isRedeemable())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEscrowDuration(_ newDuration: UFix64){ 
 			post{ 
 				newDuration < self.duration:
@@ -240,7 +254,7 @@ contract TopShotEscrowV2{
 			self.duration = newDuration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelEscrow(NFTIds: [UInt64]){ 
 			pre{ 
 				!self.hasBeenRedeemed():
@@ -270,7 +284,7 @@ contract TopShotEscrowV2{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTs(NFTCollection: @TopShot.Collection){ 
 			pre{ 
 				!self.hasBeenRedeemed():
@@ -292,17 +306,17 @@ contract TopShotEscrowV2{
 	// An interface to interact publicly with the Escrow Collection
 	access(all)
 	resource interface EscrowCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEscrow(
 			NFTCollection: @TopShot.Collection,
 			duration: UFix64,
 			receiverCap: Capability<&{NonFungibleToken.Receiver}>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEscrow(escrowID: UInt64): &EscrowItem?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEscrowIDs(): [UInt64]
 	}
 	
@@ -317,7 +331,7 @@ contract TopShotEscrowV2{
 		
 		// withdraw
 		// Removes an escrow from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(escrowID: UInt64): @TopShotEscrowV2.EscrowItem{ 
 			let escrow <- self.escrowItems.remove(key: escrowID) ?? panic("missing NFT")
 			emit EscrowWithdraw(id: escrow.escrowID, from: self.owner?.address)
@@ -328,12 +342,12 @@ contract TopShotEscrowV2{
 			self.escrowItems <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEscrowIDs(): [UInt64]{ 
 			return self.escrowItems.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEscrow(NFTCollection: @TopShot.Collection, duration: UFix64, receiverCap: Capability<&{NonFungibleToken.Receiver}>){ 
 			let TopShotIds = NFTCollection.getIDs()
 			assert(receiverCap.check(), message: "Non Valid Receiver Capability")
@@ -349,7 +363,7 @@ contract TopShotEscrowV2{
 			emit Escrowed(id: escrowID, owner: owner, NFTIds: TopShotIds, duration: duration, startTime: startTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEscrow(escrowID: UInt64): &EscrowItem?{ 
 			// Get the escrow item resources
 			if let escrowRef = &self.escrowItems[escrowID] as &EscrowItem?{ 
@@ -358,7 +372,7 @@ contract TopShotEscrowV2{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEscrowRef(escrowID: UInt64): &EscrowItem{ 
 			// Get the escrow item resources
 			let escrowRef = (&self.escrowItems[escrowID] as &EscrowItem?)!
@@ -370,14 +384,14 @@ contract TopShotEscrowV2{
 	// TopShotEscrowV2 contract-level function definitions
 	// -----------------------------------------------------------------------
 	// createEscrowCollection returns a new EscrowCollection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEscrowCollection(): @EscrowCollection{ 
 		let escrowCollection <- create EscrowCollection()
 		return <-escrowCollection
 	}
 	
 	// createEscrow
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEscrow(
 		_ NFTCollection: @TopShot.Collection,
 		_ duration: UFix64,
@@ -396,7 +410,7 @@ contract TopShotEscrowV2{
 	}
 	
 	// redeem tokens
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeem(_ escrowID: UInt64, _ NFTIds: [UInt64]){ 
 		let escrowCollectionRef =
 			self.account.storage.borrow<&TopShotEscrowV2.EscrowCollection>(
@@ -411,7 +425,7 @@ contract TopShotEscrowV2{
 	}
 	
 	// batch redeem tokens
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun batchRedeem(_ escrowIDs: [UInt64]){ 
 		for escrowID in escrowIDs{ 
 			let escrowCollectionRef = self.account.storage.borrow<&TopShotEscrowV2.EscrowCollection>(from: self.escrowStoragePath) ?? panic("Couldn't borrow escrow collection")

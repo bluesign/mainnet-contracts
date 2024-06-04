@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -72,7 +86,7 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 	
 	access(all)
 	resource PackNFTOperator: IPackNFT.IOperator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(distId: UInt64, commitHash: String, issuer: Address): @NFT{ 
 			let nft <- create NFT(commitHash: commitHash, issuer: issuer)
 			PackNFT.totalSupply = PackNFT.totalSupply + 1
@@ -82,14 +96,14 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(id: UInt64, nfts: [{IPackNFT.Collectible}], salt: String){ 
 			let p <- PackNFT.packs.remove(key: id) ?? panic("no such pack")
 			p.reveal(id: id, nfts: nfts, salt: salt)
 			PackNFT.packs[id] <-! p
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(id: UInt64, nfts: [{IPackNFT.Collectible}]){ 
 			let p <- PackNFT.packs.remove(key: id) ?? panic("no such pack")
 			p.open(id: id, nfts: nfts)
@@ -113,7 +127,7 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 		access(all)
 		var salt: [UInt8]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(nftString: String): Bool{ 
 			assert(self.status != PackNFT.Status.Sealed, message: "Pack not revealed yet")
 			var hashString = String.encodeHex(self.salt!)
@@ -175,12 +189,12 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 		access(all)
 		let issuer: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(openRequest: Bool){ 
 			PackNFT.revealRequest(id: self.id, openRequest: openRequest)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(){ 
 			PackNFT.openRequest(id: self.id)
 		}
@@ -219,7 +233,7 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @PackNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -242,7 +256,7 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPackNFT(id: UInt64): &{IPackNFT.NFT}?{ 
 			let nft <- self.ownedNFTs.remove(key: id) ?? panic("missing NFT")
 			let token <- nft as! @PackNFT.NFT
@@ -281,13 +295,13 @@ contract PackNFT: NonFungibleToken, IPackNFT{
 		emit OpenRequest(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicReveal(id: UInt64, nfts: [{IPackNFT.Collectible}], salt: String){ 
 		let p = PackNFT.borrowPackRepresentation(id: id) ?? panic("No such pack")
 		p.reveal(id: id, nfts: nfts, salt: salt)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowPackRepresentation(id: UInt64): &Pack?{ 
 		return (&self.packs[id] as &Pack?)!
 	}

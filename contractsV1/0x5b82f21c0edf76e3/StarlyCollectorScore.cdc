@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract StarlyCollectorScore{ 
 	access(all)
 	struct Config{ 
@@ -34,7 +48,7 @@ contract StarlyCollectorScore{
 	access(all)
 	let EditorProxyPublicPath: PublicPath
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectorScore(
 		collectionID: String,
 		rarity: String,
@@ -64,13 +78,18 @@ contract StarlyCollectorScore{
 	
 	access(all)
 	resource interface IEditor{ 
-		access(all)
-		fun addCollectionConfig(collectionID: String, config:{ String: Config})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCollectionConfig(
+			collectionID: String,
+			config:{ 
+				String: StarlyCollectorScore.Config
+			}
+		): Void
 	}
 	
 	access(all)
 	resource Editor: IEditor{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollectionConfig(collectionID: String, config:{ String: Config}){ 
 			StarlyCollectorScore.configs[collectionID] = config
 		}
@@ -78,8 +97,8 @@ contract StarlyCollectorScore{
 	
 	access(all)
 	resource interface EditorProxyPublic{ 
-		access(all)
-		fun setEditorCapability(cap: Capability<&Editor>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setEditorCapability(cap: Capability<&StarlyCollectorScore.Editor>): Void
 	}
 	
 	access(all)
@@ -87,12 +106,12 @@ contract StarlyCollectorScore{
 		access(self)
 		var editorCapability: Capability<&Editor>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEditorCapability(cap: Capability<&Editor>){ 
 			self.editorCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollectionConfig(collectionID: String, config:{ String: Config}){ 
 			((self.editorCapability!).borrow()!).addCollectionConfig(collectionID: collectionID, config: config)
 		}
@@ -102,14 +121,14 @@ contract StarlyCollectorScore{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEditorProxy(): @EditorProxy{ 
 		return <-create EditorProxy()
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewEditor(): @Editor{ 
 			return <-create Editor()
 		}

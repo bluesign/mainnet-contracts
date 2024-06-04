@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import PierLPToken from "./PierLPToken.cdc"
 
@@ -66,7 +80,7 @@ contract PierSwapFactory{
 	}
 	
 	// Returns the number of liquidity pools created so far
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolsSize(): Int{ 
 		return self.pools.length
 	}
@@ -77,7 +91,7 @@ contract PierSwapFactory{
 	// @param index The index of the stored liquidity pool
 	// @return The pool id representing the pool owner's address
 	//  (in UInt64)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolIdByIndex(index: UInt64): UInt64{ 
 		return self.pools[index]
 	}
@@ -87,7 +101,7 @@ contract PierSwapFactory{
 	//
 	// @param poolId The pool id representing the pool owner's address
 	// @return The resource reference of the requested liquidity pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolById(poolId: UInt64): &PierPair.Pool{ 
 		let address = Address(poolId)
 		return getAccount(address).capabilities.get<&PierPair.Pool>(self.SwapPoolPublicPath)
@@ -100,7 +114,7 @@ contract PierSwapFactory{
 	//
 	// @param index The index of the stored liquidity pool
 	// @return The resource reference of the requested liquidity pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolByIndex(index: UInt64): &PierPair.Pool{ 
 		return self.getPoolById(poolId: self.pools[index])
 	}
@@ -112,7 +126,7 @@ contract PierSwapFactory{
 	// @param tokenBType The type of token B's vault
 	// @return The resource reference of the requested liquidity pool, or nil
 	//  if there's no liquidity pool for the token pair
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolByTypes(tokenAType: Type, tokenBType: Type): &PierPair.Pool?{ 
 		let pairHash =
 			self.getPairHash(
@@ -132,7 +146,7 @@ contract PierSwapFactory{
 	// @param tokenBTypeIdentifier The type identifier of token B's vault
 	// @return The resource reference of the requested liquidity pool, or nil
 	//  if there's no liquidity pool for the token pair
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolByTypeIdentifiers(
 		tokenATypeIdentifier: String,
 		tokenBTypeIdentifier: String
@@ -155,7 +169,7 @@ contract PierSwapFactory{
 	// @param tokenBTypeIdentifier The type identifier of token B's vault
 	// @return The pool id of the requested liquidity pool, or nil if
 	//  there's no liquidity pool for the token pair
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolIdByTypeIdentifiers(
 		tokenATypeIdentifier: String,
 		tokenBTypeIdentifier: String
@@ -178,7 +192,7 @@ contract PierSwapFactory{
 	// @param vaultB An empty vault of token B in the pair
 	// @param fees A vault that contains the minimum amount of Flow token for account creation
 	// @return The pool id of the new liquidity pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPoolForPair(
 		vaultA: @{FungibleToken.Vault},
 		vaultB: @{FungibleToken.Vault},

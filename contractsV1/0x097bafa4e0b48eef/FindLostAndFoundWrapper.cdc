@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -89,7 +103,7 @@ contract FindLostAndFoundWrapper{
 	let storagePaymentVaults: @{UInt64:{ FungibleToken.Vault}}
 	
 	// Deposit 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositNFT(
 		receiver: Address,
 		collectionPublicPath: PublicPath,
@@ -204,7 +218,7 @@ contract FindLostAndFoundWrapper{
 	}
 	
 	// Redeem 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeemNFT(
 		type: Type,
 		ticketID: UInt64,
@@ -284,7 +298,7 @@ contract FindLostAndFoundWrapper{
 	}
 	
 	// Check 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTickets(user: Address, specificType: Type?):{ String: [LostAndFoundHelper.Ticket]}{ 
 		let allTickets:{ String: [LostAndFoundHelper.Ticket]} ={} 
 		let ticketTypes = LostAndFound.getRedeemableTypes(user)
@@ -308,7 +322,7 @@ contract FindLostAndFoundWrapper{
 		return allTickets
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketIDs(user: Address, specificType: Type?):{ String: [UInt64]}{ 
 		let allTickets:{ String: [UInt64]} ={} 
 		let ticketTypes = LostAndFound.getRedeemableTypes(user)
@@ -329,7 +343,7 @@ contract FindLostAndFoundWrapper{
 	}
 	
 	// Check for all types that are in Lost and found which are NFTs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSpecificRedeemableTypes(user: Address, specificType: Type?): [Type]{ 
 		let allTypes: [Type] = []
 		if specificType != nil{ 

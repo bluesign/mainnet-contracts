@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import Crypto
 
@@ -32,7 +46,7 @@ contract Toucans{
 	
 	access(all)
 	resource interface Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @{FungibleToken.Vault}{ 
 			post{ 
 				result.balance == amount:
@@ -43,7 +57,7 @@ contract Toucans{
 	
 	access(all)
 	resource DummyMinter: Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-FlowToken.createEmptyVault(vaultType: Type<@FlowToken.Vault>())
 		}
@@ -382,14 +396,14 @@ contract Toucans{
 		
 		// Setters
 		// Some proposals we think make sense to be public initially
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeWithdraw(
 			vaultType: Type,
 			recipientVault: Capability<&{FungibleToken.Receiver}>,
 			amount: UFix64
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeBatchWithdraw(
 			vaultType: Type,
 			recipientVaults:{ 
@@ -400,7 +414,7 @@ contract Toucans{
 			}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeWithdrawNFTs(
 			collectionType: Type,
 			recipientCollection: Capability<&{NonFungibleToken.Receiver}>,
@@ -411,10 +425,10 @@ contract Toucans{
 			_ recipientCollectionBackup: Capability<&{NonFungibleToken.CollectionPublic}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeMint(recipientVault: Capability<&{FungibleToken.Receiver}>, amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeBatchMint(
 			recipientVaults:{ 
 				Address: Capability<&{FungibleToken.Receiver}>
@@ -424,22 +438,22 @@ contract Toucans{
 			}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeMintToTreasury(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeBurn(tokenType: Type, amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeAddSigner(signer: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeRemoveSigner(signer: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeUpdateThreshold(threshold: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeLockTokens(
 			recipient: Address,
 			tokenType: Type,
@@ -447,99 +461,99 @@ contract Toucans{
 			unlockTime: UFix64
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeStakeFlow(flowAmount: UFix64, stFlowAmountOutMin: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeUnstakeFlow(stFlowAmount: UFix64, flowAmountOutMin: UFix64)
 		
 		// If the action is ready to execute, then allow anyone to do it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun finalizeAction(actionUUID: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun donateToTreasury(vault: @{FungibleToken.Vault}, payer: Address, message: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun donateNFTToTreasury(
 			collection: @{NonFungibleToken.Collection},
 			sender: Address,
 			message: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferProjectTokenToTreasury(
 			vault: @{FungibleToken.Vault},
 			payer: Address,
 			message: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			paymentTokens: @{FungibleToken.Vault},
 			projectTokenReceiver: &{FungibleToken.Receiver},
 			message: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimOverflow(tokenVault: @{FungibleToken.Vault}, receiver: &{FungibleToken.Receiver})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimLockedTokens(lockedVaultUuid: UInt64, recipientVault: &{FungibleToken.Receiver})
 		
 		// Getters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentIssuanceRate(): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentFundingCycle(): FundingCycle?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentFundingCycleId(): UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundingCycle(cycleIndex: UInt64): FundingCycle
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundingCycles(): [FundingCycle]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultTypesInTreasury(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultBalanceInTreasury(vaultType: Type): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCompletedActionIds():{ UInt64: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFunders():{ Address: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOverflowBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowManagerPublic(): &Manager
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLockTokensManagerPublic(): &ToucansLockTokens.Manager?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasTokenContract(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionTypesInTreasury(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTRefs(collectionType: Type): [&{NonFungibleToken.NFT}]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTRefsByIDs(collectionType: Type, ids: [UInt64]): [&{NonFungibleToken.NFT}]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTIDs(collectionType: Type): [UInt64]
 	}
 	
@@ -626,21 +640,21 @@ contract Toucans{
 		// |_|  |_|\__,_|_|\__|_| |_____/|_|\__, |_| |_|
 		//								   __/ |	  
 		//								  |___/	   
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeWithdraw(vaultType: Type, recipientVault: Capability<&{FungibleToken.Receiver}>, amount: UFix64){ 
 			let tokenInfo = self.getTokenInfo(inputVaultType: vaultType) ?? panic("Unsupported token type for withdrawing.")
 			let action = ToucansActions.WithdrawToken(vaultType, recipientVault, amount, tokenInfo.symbol)
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeBatchWithdraw(vaultType: Type, recipientVaults:{ Address: Capability<&{FungibleToken.Receiver}>}, amounts:{ Address: UFix64}){ 
 			let tokenInfo = self.getTokenInfo(inputVaultType: vaultType) ?? panic("Unsupported token type for withdrawing.")
 			let action = ToucansActions.BatchWithdrawToken(vaultType, recipientVaults, amounts, tokenInfo.symbol)
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeWithdrawNFTs(collectionType: Type, recipientCollection: Capability<&{NonFungibleToken.Receiver}>, nftIDs: [UInt64], message: String, _ recipientCollectionBackup: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			let specificNFTTreasury = self.borrowSpecificNFTTreasuryCollection(type: collectionType) ?? panic("This collection type does not exist in the NFT Treasury.")
 			let existingIDs: [UInt64] = specificNFTTreasury.getIDs()
@@ -651,7 +665,7 @@ contract Toucans{
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeMint(recipientVault: Capability<&{FungibleToken.Receiver}>, amount: UFix64){ 
 			pre{ 
 				(recipientVault.borrow()!).getType() == self.projectTokenInfo.tokenType:
@@ -665,14 +679,14 @@ contract Toucans{
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeBurn(tokenType: Type, amount: UFix64){ 
 			let tokenInfo = self.getTokenInfo(inputVaultType: tokenType) ?? panic("Unsupported token type for burning.")
 			let action = ToucansActions.BurnTokens(amount, tokenInfo.symbol)
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeBatchMint(recipientVaults:{ Address: Capability<&{FungibleToken.Receiver}>}, amounts:{ Address: UFix64}){ 
 			pre{ 
 				self.minting:
@@ -684,7 +698,7 @@ contract Toucans{
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeMintToTreasury(amount: UFix64){ 
 			pre{ 
 				self.minting:
@@ -696,7 +710,7 @@ contract Toucans{
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeAddSigner(signer: Address){ 
 			pre{ 
 				!self.multiSignManager.getSigners().contains(signer):
@@ -706,7 +720,7 @@ contract Toucans{
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeRemoveSigner(signer: Address){ 
 			pre{ 
 				self.multiSignManager.getSigners().length > 1:
@@ -718,7 +732,7 @@ contract Toucans{
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeUpdateThreshold(threshold: UInt64){ 
 			pre{ 
 				self.multiSignManager.getSigners().length >= Int(threshold):
@@ -730,26 +744,26 @@ contract Toucans{
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeLockTokens(recipient: Address, tokenType: Type, amount: UFix64, unlockTime: UFix64){ 
 			let tokenInfo = self.getTokenInfo(inputVaultType: tokenType) ?? panic("Unsupported token type for locking tokens.")
 			let action = ToucansActions.LockTokens(recipient, amount, tokenInfo.symbol, unlockTime)
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeStakeFlow(flowAmount: UFix64, stFlowAmountOutMin: UFix64){ 
 			let action = ToucansActions.StakeFlow(flowAmount, stFlowAmountOutMin)
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proposeUnstakeFlow(stFlowAmount: UFix64, flowAmountOutMin: UFix64){ 
 			let action = ToucansActions.UnstakeFlow(stFlowAmount, flowAmountOutMin)
 			self.multiSignManager.createMultiSign(action: action)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun finalizeAction(actionUUID: UInt64){ 
 			let actionState: ActionState = self.multiSignManager.getActionState(actionUUID: actionUUID)
 			assert(actionState == ActionState.ACCEPTED || actionState == ActionState.DECLINED, message: "Cannot finalize this action yet.")
@@ -838,7 +852,7 @@ contract Toucans{
 		// NOTES:
 		// If `fundingTarget` is nil, that means this is an on-going funding round,
 		// and there is no limit. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configureFundingCycle(fundingTarget: UFix64?, issuanceRate: UFix64, reserveRate: UFix64, timeframe: CycleTimeFrame, payouts: [Payout], allowOverflow: Bool, allowedAddresses: [Address]?, catalogCollectionIdentifier: String?, extra:{ String: AnyStruct}){ 
 			pre{ 
 				getCurrentBlock().timestamp + self.editDelay <= timeframe.startTime:
@@ -877,7 +891,7 @@ contract Toucans{
 		}
 		
 		// Allows you to edit a cycle that has not happened yet
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun editUpcomingCycle(cycleIndex: UInt64, details: FundingCycleDetails){ 
 			let fundingCycle: &FundingCycle = self.borrowFundingCycleRef(cycleIndex: cycleIndex)
 			let currentTime: UFix64 = getCurrentBlock().timestamp
@@ -900,12 +914,12 @@ contract Toucans{
 			fundingCycle.details = details
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun togglePurchasing(){ 
 			self.purchasing = !self.purchasing
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(paymentTokens: @{FungibleToken.Vault}, projectTokenReceiver: &{FungibleToken.Receiver}, message: String){ 
 			pre{ 
 				paymentTokens.getType() == self.paymentTokenInfo.tokenType:
@@ -1014,7 +1028,7 @@ contract Toucans{
 			return &self.multiSignManager as &Manager
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTokenInfo(inputVaultType: Type): ToucansTokens.TokenInfo?{ 
 			if inputVaultType == self.projectTokenInfo.tokenType{ 
 				return self.projectTokenInfo
@@ -1046,7 +1060,7 @@ contract Toucans{
 			emit BatchWithdraw(projectId: self.projectId, projectOwner: (self.owner!).address, currentCycle: self.getCurrentFundingCycleId(), tokenSymbol: tokenSymbol, amounts: amounts, amount: totalAmount, failed: failed)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun donateToTreasury(vault: @{FungibleToken.Vault}, payer: Address, message: String){ 
 			let tokenInfo = self.getTokenInfo(inputVaultType: vault.getType()) ?? panic("Unsupported token type for donating.")
 			
@@ -1064,7 +1078,7 @@ contract Toucans{
 			self.depositToTreasury(vault: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferProjectTokenToTreasury(vault: @{FungibleToken.Vault}, payer: Address, message: String){ 
 			pre{ 
 				vault.getType() == self.projectTokenInfo.tokenType:
@@ -1084,7 +1098,7 @@ contract Toucans{
 			(self.extra["completedActionIds"]! as!{ UInt64: Bool}).insert(key: actionUUID, mark)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAllowedNFTCollections(collectionIdentifiers: [String]){ 
 			if self.extra["allowedNFTCollections"] == nil{ 
 				self.extra["allowedNFTCollections"] ={}  as{ String: Bool}
@@ -1094,7 +1108,7 @@ contract Toucans{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAllowedNFTCollections(collectionIdentifiers: [String]){ 
 			for collectionIdentifier in collectionIdentifiers{ 
 				(self.extra["allowedNFTCollections"]! as!{ String: Bool}).remove(key: collectionIdentifier)
@@ -1151,7 +1165,7 @@ contract Toucans{
 		//  | . ` |  __|	| |   
 		//  | |\  | |	   | |   
 		//  |_| \_|_|	   |_|   
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun donateNFTToTreasury(collection: @{NonFungibleToken.Collection}, sender: Address, message: String){ 
 			// make sure this DAO accepts this nft type
 			let nftCatalogCollectionIdentifier = ToucansUtils.getNFTCatalogCollectionIdentifierFromCollectionIdentifier(collectionIdentifier: collection.getType().identifier)
@@ -1195,7 +1209,7 @@ contract Toucans{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllowedNFTCollections(): [String]{ 
 			if let allowedNFTCollections = self.extra["allowedNFTCollections"]{ 
 				return (allowedNFTCollections as!{ String: Bool}).keys
@@ -1220,7 +1234,7 @@ contract Toucans{
 			emit LockTokens(projectId: self.projectId, by: (self.owner!).address, to: recipient, currentCycle: self.getCurrentFundingCycleId(), tokenSymbol: tokenInfo.symbol, amount: amount, unlockTime: unlockTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimLockedTokens(lockedVaultUuid: UInt64, recipientVault: &{FungibleToken.Receiver}){ 
 			if self.additions["lockedTokensManager"] == nil{ 
 				self.additions["lockedTokensManager"] <-! ToucansLockTokens.createManager()
@@ -1279,7 +1293,7 @@ contract Toucans{
 		//  | |__| |\ V /  __/ |  | | | | (_) \ V  V / 
 		//   \____/  \_/ \___|_|  |_| |_|\___/ \_/\_/  
 		// can only be called if amount does not put us over the funding target
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferOverflowToCurrentRound(amount: UFix64){ 
 			let cycle = self.borrowCurrentFundingCycleRef() ?? panic("There must be an active funding cycle in order to do this.")
 			let overflow <- self.overflow.withdraw(amount: amount)
@@ -1289,7 +1303,7 @@ contract Toucans{
 			assert(cycle.details.fundingTarget == nil || cycle.raisedTowardsGoal <= cycle.details.fundingTarget!, message: "Transferred Overflow cannot put the current funding round over its goal.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimOverflow(tokenVault: @{FungibleToken.Vault}, receiver: &{FungibleToken.Receiver}){ 
 			pre{ 
 				tokenVault.getType() == self.projectTokenInfo.tokenType:
@@ -1310,23 +1324,23 @@ contract Toucans{
 		//  | | |_ |/ _ \ __| __/ _ \ '__/ __|
 		//  | |__| |  __/ |_| ||  __/ |  \__ \
 		//   \_____|\___|\__|\__\___|_|  |___/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultTypesInTreasury(): [Type]{ 
 			return self.treasury.keys
 		}
 		
 		// Returns nil if the requested type doesn't exist in the treasury
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultBalanceInTreasury(vaultType: Type): UFix64?{ 
 			return self.treasury[vaultType]?.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionTypesInTreasury(): [Type]{ 
 			return self.borrowNFTTreasury()?.keys ?? []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTRefs(collectionType: Type): [&{NonFungibleToken.NFT}]{ 
 			let ans: [&{NonFungibleToken.NFT}] = []
 			if let nftTreasury = self.borrowSpecificNFTTreasuryCollection(type: collectionType){ 
@@ -1337,7 +1351,7 @@ contract Toucans{
 			return ans
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTRefsByIDs(collectionType: Type, ids: [UInt64]): [&{NonFungibleToken.NFT}]{ 
 			let ans: [&{NonFungibleToken.NFT}] = []
 			if let nftTreasury = self.borrowSpecificNFTTreasuryCollection(type: collectionType){ 
@@ -1348,7 +1362,7 @@ contract Toucans{
 			return ans
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTIDs(collectionType: Type): [UInt64]{ 
 			if let nftTreasury = self.borrowSpecificNFTTreasuryCollection(type: collectionType){ 
 				return nftTreasury.getIDs()
@@ -1356,7 +1370,7 @@ contract Toucans{
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentFundingCycleIndex(): Int?{ 
 			var i: Int = self.fundingCycles.length - 1
 			let timestamp: UFix64 = getCurrentBlock().timestamp
@@ -1379,7 +1393,7 @@ contract Toucans{
 		}
 		
 		// Returns nil if there is no current round
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentFundingCycle(): FundingCycle?{ 
 			let index: Int? = self.getCurrentFundingCycleIndex()
 			if index == nil{ 
@@ -1388,34 +1402,34 @@ contract Toucans{
 			return self.fundingCycles[index!]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentFundingCycleId(): UInt64?{ 
 			let currentCycle = self.getCurrentFundingCycle()
 			return currentCycle?.details?.cycleId
 		}
 		
 		// Returns nil if there is no current round
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentIssuanceRate(): UFix64?{ 
 			return self.getCurrentFundingCycle()?.details?.issuanceRate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundingCycle(cycleIndex: UInt64): FundingCycle{ 
 			return self.fundingCycles[cycleIndex]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundingCycles(): [FundingCycle]{ 
 			return self.fundingCycles
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: AnyStruct}{ 
 			return self.extra
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCompletedActionIds():{ UInt64: Bool}{ 
 			if self.extra["completedActionIds"] == nil{ 
 				return{} 
@@ -1423,17 +1437,17 @@ contract Toucans{
 			return self.extra["completedActionIds"]! as!{ UInt64: Bool}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFunders():{ Address: UFix64}{ 
 			return self.funders
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOverflowBalance(): UFix64{ 
 			return self.overflow.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasTokenContract(): Bool{ 
 			return self.minter.getType() != Type<@DummyMinter>()
 		}
@@ -1458,7 +1472,7 @@ contract Toucans{
 			return &self.fundingCycles[index!] as &FundingCycle
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowManagerPublic(): &Manager{ 
 			return &self.multiSignManager as &Manager
 		}
@@ -1471,7 +1485,7 @@ contract Toucans{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLockTokensManagerPublic(): &ToucansLockTokens.Manager?{ 
 			if let lockTokensManager = &self.additions["lockedTokensManager"] as &AnyResource?{ 
 				return lockTokensManager as! &ToucansLockTokens.Manager
@@ -1536,10 +1550,10 @@ contract Toucans{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectIds(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProjectPublic(projectId: String): &Project?
 	}
 	
@@ -1548,7 +1562,7 @@ contract Toucans{
 		access(all)
 		let projects: @{String: Project}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProjectNoToken(projectId: String, paymentTokenInfo: ToucansTokens.TokenInfo, initialAllowedNFTCollections: [String], extra:{ String: AnyStruct}){ 
 			let project: @Project <- create Project(projectId: projectId, projectTokenInfo: paymentTokenInfo, // use the payment token, or "preferred currency", for this																											   
 																											  paymentTokenInfo: paymentTokenInfo, minter: <-create DummyMinter(), editDelay: 0.0, initialSigners: [(self.owner!).address], initialThreshold: 1, minting: false, initialTreasurySupply: 0.0, initialAllowedNFTCollections: initialAllowedNFTCollections, extra: extra)
@@ -1556,7 +1570,7 @@ contract Toucans{
 			emit ProjectCreated(projectId: projectId, tokenTypeIdentifier: nil, by: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProject(projectTokenInfo: ToucansTokens.TokenInfo, paymentTokenInfo: ToucansTokens.TokenInfo, minter: @{Minter}, editDelay: UFix64, minting: Bool, initialTreasurySupply: UFix64, extra:{ String: AnyStruct}){ 
 			var initialAllowedNFTCollections: [String] = []
 			if let ianc = extra["initialAllowedNFTCollections"]{ 
@@ -1568,23 +1582,23 @@ contract Toucans{
 			emit ProjectCreated(projectId: projectId, tokenTypeIdentifier: projectTokenInfo.tokenType.identifier, by: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProject(projectId: String): &Project?{ 
 			return &self.projects[projectId] as &Project?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectIds(): [String]{ 
 			return self.projects.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProjectPublic(projectId: String): &Project?{ 
 			return &self.projects[projectId] as &Project?
 		}
 		
 		// use this function to vote on other projects proposals
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun voteOnProjectAction(projectOwner: Address, projectId: String, actionUUID: UInt64, vote: Bool){ 
 			let collection: &Collection = getAccount(projectOwner).capabilities.get<&Toucans.Collection>(Toucans.CollectionPublicPath).borrow<&Toucans.Collection>() ?? panic("A DAOTreasury doesn't exist here.")
 			let project: &Project = collection.borrowProjectPublic(projectId: projectId) ?? panic("Project does not exist.")
@@ -1596,7 +1610,7 @@ contract Toucans{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteProject(projectId: String){ 
 			destroy self.projects.remove(key: projectId)
 		}
@@ -1649,18 +1663,18 @@ contract Toucans{
 			self.votes[acctAddress] = vote
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSigners(): [Address]{ 
 			return self.signers
 		}
 		
 		// Only returns people who have actually voted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotes():{ Address: Bool}{ 
 			return self.votes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccepted(): UInt64{ 
 			var count: UInt64 = 0
 			for voter in self.votes.keys{ 
@@ -1671,7 +1685,7 @@ contract Toucans{
 			return count
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDeclined(): UInt64{ 
 			var count: UInt64 = 0
 			for voter in self.votes.keys{ 
@@ -1682,7 +1696,7 @@ contract Toucans{
 			return count
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActionState(): ActionState{ 
 			// If this action is to add a signer,
 			// and the person being added declined it,
@@ -1715,19 +1729,19 @@ contract Toucans{
 		access(all)
 		var threshold: UInt64
 		
-		access(all)
-		fun borrowAction(actionUUID: UInt64): &MultiSignAction
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowAction(actionUUID: UInt64): &Toucans.MultiSignAction
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActionState(actionUUID: UInt64): ActionState
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun readyToFinalize(actionUUID: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSigners(): [Address]
 	}
 	
@@ -1763,13 +1777,13 @@ contract Toucans{
 			self.actions[newAction.uuid] <-! newAction
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActionState(actionUUID: UInt64): ActionState{ 
 			let actionRef: &MultiSignAction = (&self.actions[actionUUID] as &MultiSignAction?)!
 			return actionRef.getActionState()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun readyToFinalize(actionUUID: UInt64): Bool{ 
 			let actionState: ActionState = self.getActionState(actionUUID: actionUUID)
 			return actionState != ActionState.PENDING
@@ -1817,22 +1831,22 @@ contract Toucans{
 			self.assertValidTreasury()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAction(actionUUID: UInt64): &MultiSignAction{ 
 			return (&self.actions[actionUUID] as &MultiSignAction?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.actions.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSigners(): [Address]{ 
 			return self.signers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun assertValidTreasury(){ 
 			assert(self.threshold > 0, message: "Threshold must be greater than 0.")
 			assert(self.signers.length > 0, message: "Number of signers must be greater than 0.")
@@ -1847,17 +1861,17 @@ contract Toucans{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMultiSigManager(signers: [Address], threshold: UInt64): @Manager{ 
 		return <-create Manager(_initialSigners: signers, _initialThreshold: threshold)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCollection(): @Collection{ 
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertNonConflictingCycles(
 		earlierCycle: FundingCycleDetails,
 		laterCycle: FundingCycleDetails

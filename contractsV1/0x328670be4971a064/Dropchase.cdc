@@ -1,4 +1,18 @@
-//SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier: UNLICENSED
 /*
 	Description: Central Smart Contract for Dropchase
 	Copied from the smart contract of NBA Top Shot except some modifications
@@ -269,7 +283,7 @@ contract Dropchase: NonFungibleToken{
 		// The Set needs to be not locked
 		// The Stat can't have already been added to the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStat(statID: UInt32){ 
 			pre{ 
 				Dropchase.statDatas[statID] != nil:
@@ -296,7 +310,7 @@ contract Dropchase: NonFungibleToken{
 		// Parameters: statIDs: The IDs of the Stats that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStats(statIDs: [UInt32]){ 
 			for stat in statIDs{ 
 				self.addStat(statID: stat)
@@ -310,7 +324,7 @@ contract Dropchase: NonFungibleToken{
 		// Pre-Conditions:
 		// The Stat is part of the Set and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireStat(statID: UInt32){ 
 			pre{ 
 				self.retired[statID] != nil:
@@ -325,7 +339,7 @@ contract Dropchase: NonFungibleToken{
 		// retireAll retires all the stats in the Set
 		// Afterwards, none of the retired Stats will be able to mint new Items
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for stat in self.stats{ 
 				self.retireStat(statID: stat)
@@ -336,7 +350,7 @@ contract Dropchase: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -353,7 +367,7 @@ contract Dropchase: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintItem(statID: UInt32): @NFT{ 
 			pre{ 
 				self.retired[statID] != nil:
@@ -382,7 +396,7 @@ contract Dropchase: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Items that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintItem(statID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -393,17 +407,17 @@ contract Dropchase: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStats(): [UInt32]{ 
 			return self.stats
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerStat():{ UInt32: UInt32}{ 
 			return self.numberMintedPerStat
 		}
@@ -452,17 +466,17 @@ contract Dropchase: NonFungibleToken{
 			self.numberMintedPerStat = set.numberMintedPerStat
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStats(): [UInt32]{ 
 			return self.stats
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMintedPerStat():{ UInt32: UInt32}{ 
 			return self.numberMintedPerStat
 		}
@@ -537,7 +551,7 @@ contract Dropchase: NonFungibleToken{
 		//
 		// Returns: the ID of the new Stat object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStat(metadata:{ String: String}): UInt32{ 
 			// Create the new Stat
 			var newStat = Stat(metadata: metadata)
@@ -558,7 +572,7 @@ contract Dropchase: NonFungibleToken{
 		// Parameters: name: The name of the Set
 		//
 		// Returns: The ID of the created set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String): UInt32{ 
 			
 			// Create the new Set
@@ -583,7 +597,7 @@ contract Dropchase: NonFungibleToken{
 		// Returns: A reference to the Set with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				Dropchase.sets[setID] != nil:
@@ -601,7 +615,7 @@ contract Dropchase: NonFungibleToken{
 		//
 		// Returns: The new series number
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the Dropchase series number
@@ -612,7 +626,7 @@ contract Dropchase: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -624,18 +638,18 @@ contract Dropchase: NonFungibleToken{
 	access(all)
 	resource interface ItemCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &Dropchase.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -684,7 +698,7 @@ contract Dropchase: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Items
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -703,7 +717,7 @@ contract Dropchase: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Dropchase NFT to make sure
 			// it is the correct type
@@ -727,7 +741,7 @@ contract Dropchase: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -774,7 +788,7 @@ contract Dropchase: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &Dropchase.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -784,7 +798,7 @@ contract Dropchase: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnItem(withdrawID: UInt64){ 
 			
 			// Remove the nft from the Collection
@@ -831,7 +845,7 @@ contract Dropchase: NonFungibleToken{
 	// getAllStats returns all the stats in Dropchase
 	//
 	// Returns: An array of all the stats that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllStats(): [Dropchase.Stat]{ 
 		return Dropchase.statDatas.values
 	}
@@ -841,7 +855,7 @@ contract Dropchase: NonFungibleToken{
 	// Parameters: statID: The id of the Stat that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStatMetaData(statID: UInt32):{ String: String}?{ 
 		return self.statDatas[statID]?.metadata
 	}
@@ -853,7 +867,7 @@ contract Dropchase: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStatMetaDataByField(statID: UInt32, field: String): String?{ 
 		// Don't force a revert if the statID or field is invalid
 		if let stat = Dropchase.statDatas[statID]{ 
@@ -869,7 +883,7 @@ contract Dropchase: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The QuerySetData struct that has all the important information about the set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(setID: UInt32): QuerySetData?{ 
 		if Dropchase.sets[setID] == nil{ 
 			return nil
@@ -884,7 +898,7 @@ contract Dropchase: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt32): String?{ 
 		// Don't force a revert if the setID is invalid
 		return Dropchase.sets[setID]?.name
@@ -896,7 +910,7 @@ contract Dropchase: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The series that the Set belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeries(setID: UInt32): UInt32?{ 
 		// Don't force a revert if the setID is invalid
 		return Dropchase.sets[setID]?.series
@@ -934,7 +948,7 @@ contract Dropchase: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: An array of Stat IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStatsInSet(setID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the setID is invalid
 		return Dropchase.sets[setID]?.stats
@@ -949,7 +963,7 @@ contract Dropchase: NonFungibleToken{
 	//			 statID: The id of the Stat that is being searched
 	//
 	// Returns: Boolean indicating if the edition is retired or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setID: UInt32, statID: UInt32): Bool?{ 
 		if let setdata = self.getSetData(setID: setID){ 
 			
@@ -973,7 +987,7 @@ contract Dropchase: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: Boolean indicating if the Set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt32): Bool?{ 
 		// Don't force a revert if the setID is invalid
 		return Dropchase.sets[setID]?.locked
@@ -987,7 +1001,7 @@ contract Dropchase: NonFungibleToken{
 	//
 	// Returns: The total number of Items 
 	//		  that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumItemsInEdition(setID: UInt32, statID: UInt32): UInt32?{ 
 		if let setdata = self.getSetData(setID: setID){ 
 			

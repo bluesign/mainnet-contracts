@@ -1,4 +1,18 @@
-import FUSD from "./../../standardsV1/FUSD.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FUSD from "./../../standardsV1/FUSD.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -24,7 +38,7 @@ contract FlowtyUtils{
 	resource FlowtyUtilsAdmin{ 
 		// addSupportedTokenType
 		// add a supported token type that can be used in Flowty loans
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSupportedTokenType(type: Type){ 
 			var supportedTokens = FlowtyUtils.Attributes["supportedTokens"]
 			if supportedTokens == nil{ 
@@ -37,7 +51,7 @@ contract FlowtyUtils{
 			FlowtyUtils.Attributes["supportedTokens"] = tokens
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSupportedToken(type: Type){ 
 			var supportedTokens = FlowtyUtils.Attributes["supportedTokens"]
 			if supportedTokens == nil{ 
@@ -56,7 +70,7 @@ contract FlowtyUtils{
 			FlowtyUtils.Attributes["supportedTokens"] = tokens
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBalancePath(key: String, path: PublicPath): Bool{ 
 			if FlowtyUtils.Attributes["balancePaths"] == nil{ 
 				FlowtyUtils.Attributes["balancePaths"] = BalancePaths()
@@ -67,7 +81,7 @@ contract FlowtyUtils{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyOverride(key: String, value: Bool){ 
 			if FlowtyUtils.Attributes["royaltyOverrides"] == nil{ 
 				FlowtyUtils.Attributes["royaltyOverrides"] ={}  as{ String: Bool}
@@ -78,12 +92,12 @@ contract FlowtyUtils{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyOverrides():{ String: Bool}?{ 
 		return FlowtyUtils.Attributes["royaltyOverrides"]! as?{ String: Bool}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyOverride(_ t: Type): Bool{ 
 		var overrides = FlowtyUtils.Attributes["royaltyOverrides"]
 		if overrides == nil{ 
@@ -93,7 +107,7 @@ contract FlowtyUtils{
 		return converted[t.identifier] != nil ? converted[t.identifier]! : false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSupported(_ nft: &{NonFungibleToken.NFT}): Bool{ 
 		let collections =
 			NFTCatalog.getCollectionsForType(nftTypeIdentifier: nft.getType().identifier)
@@ -108,7 +122,7 @@ contract FlowtyUtils{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyRate(_ nft: &{NonFungibleToken.NFT}): UFix64{ 
 		// check for overrides first
 		if FlowtyUtils.getRoyaltyOverride(nft.getType()){ 
@@ -128,7 +142,7 @@ contract FlowtyUtils{
 		return total
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun distributeRoyalties(
 		v: @{FungibleToken.Vault},
 		cuts: [
@@ -160,7 +174,7 @@ contract FlowtyUtils{
 		destroy v
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSupportedTokens(): AnyStruct{ 
 		return self.Attributes["supportedTokens"]!
 	}
@@ -168,7 +182,7 @@ contract FlowtyUtils{
 	// getAllowedTokens
 	// return an array of types that are able to be used as the payment type
 	// for loans
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllowedTokens(): [Type]{ 
 		var supportedTokens = self.Attributes["supportedTokens"]
 		return supportedTokens != nil ? supportedTokens! as! [Type] : [Type<@FUSD.Vault>()]
@@ -176,7 +190,7 @@ contract FlowtyUtils{
 	
 	// isTokenSupported
 	// check if the given type is able to be used as payment
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isTokenSupported(type: Type): Bool{ 
 		for t in FlowtyUtils.getAllowedTokens(){ 
 			if t == type{ 
@@ -258,7 +272,7 @@ contract FlowtyUtils{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun balancePaths(): BalancePaths{ 
 		if self.Attributes["balancePaths"] == nil{ 
 			self.Attributes["balancePaths"] = BalancePaths()
@@ -266,7 +280,7 @@ contract FlowtyUtils{
 		return self.Attributes["balancePaths"]! as! BalancePaths
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenBalance(address: Address, vaultType: Type): UFix64{ 
 		// get the account for the address we want the balance for
 		let user = getAccount(address)

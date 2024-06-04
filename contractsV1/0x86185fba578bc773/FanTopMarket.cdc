@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -107,17 +121,17 @@ contract FanTopMarket{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFanTopToken(): &FanTopToken.NFT{ 
 			return (self.capability.borrow()!).borrowFanTopToken(id: self.nftId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun check(): Bool{ 
 			if let collection = self.capability.borrow(){ 
 				if !collection.getIDs().contains(self.nftId){ 
@@ -129,7 +143,7 @@ contract FanTopMarket{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwner(): &Account{ 
 			return getAccount(self.capability.address)
 		}
@@ -389,17 +403,17 @@ contract FanTopMarket{
 	}
 	
 	// Public
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCapacity(): Int{ 
 		return self.sellOrderLists.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCountOfOrders(index: Int): Int{ 
 		return self.sellOrderLists[index].count()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalCountOfOrders(): Int{ 
 		var count = 0
 		for container in self.sellOrderLists{ 
@@ -408,12 +422,12 @@ contract FanTopMarket{
 		return count
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun containsOrder(_ orderId: String): Bool{ 
 		return self.getSellOrderIndex(orderId) >= 0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun containsRefId(_ refId: String): Bool{ 
 		var index = 0
 		while index < self.sellOrderLists.length{ 
@@ -425,7 +439,7 @@ contract FanTopMarket{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun containsNFTId(_ nftId: UInt64): Bool{ 
 		var index = 0
 		while index < self.sellOrderLists.length{ 
@@ -437,7 +451,7 @@ contract FanTopMarket{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSellOrderIds(): [String]{ 
 		let ids: [String] = []
 		for orderMap in self.sellOrderLists{ 
@@ -446,7 +460,7 @@ contract FanTopMarket{
 		return ids
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSellOrder(_ orderId: String): SellOrder?{ 
 		let index = self.getSellOrderIndex(orderId)
 		if index == -1{ 

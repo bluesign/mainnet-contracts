@@ -1,4 +1,18 @@
-import FlowToken from "./../../standardsV1/FlowToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -221,7 +235,7 @@ contract Tickets{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintDispenser(dispenser_id: UInt32, address: Address): @Dispenser{ 
 			pre{ 
 				Tickets.dispenserOwners[dispenser_id] != nil:
@@ -247,7 +261,7 @@ contract Tickets{
 	access(all)
 	resource AdminPublic{ 
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDispenserRequesters(): [DispenserStruct]{ 
 			var dispenserArr: [DispenserStruct] = []
 			for data in Tickets.dispenserOwners.values{ 
@@ -259,7 +273,7 @@ contract Tickets{
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllDispensers(): [DispenserStruct]{ 
 			var dispenserArr: [DispenserStruct] = []
 			for data in Tickets.dispenserOwners.values{ 
@@ -271,7 +285,7 @@ contract Tickets{
 		init(){} 
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketRequesters(dispenser_id: UInt32):{ UInt32: RequestStruct}?{ 
 			return Tickets.ticketRequesters[dispenser_id]
 		}
@@ -283,8 +297,8 @@ contract Tickets{
 	
 	access(all)
 	resource interface IProxyCapabilityReceiverPublic{ 
-		access(all)
-		fun deposit(cap: Capability<&Admin>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(cap: Capability<&Tickets.Admin>): Void
 	}
 	
 	/*
@@ -299,7 +313,7 @@ contract Tickets{
 		var proxyCapabilityReceiver: Capability<&Admin>?
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(cap: Capability<&Admin>){ 
 			pre{ 
 				Tickets.adminCapabilityHolder == false:
@@ -320,7 +334,7 @@ contract Tickets{
 	  ** [create vault] createCapabilityReceiverVault
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCapabilityReceiverVault(): @CapabilityReceiverVault{ 
 		return <-create CapabilityReceiverVault()
 	}
@@ -334,12 +348,12 @@ contract Tickets{
 		access(self)
 		var last_token_id: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLatestMintedTokenId(): UInt64{ 
 			return self.last_token_id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTicket(secret_code: String, dispenser_id: UInt32, user_id: UInt32): @Ticket{ 
 			let token <- create Ticket(secret_code: secret_code, dispenser_id: dispenser_id)
 			if Tickets.ticketRequesters.containsKey(dispenser_id){ 
@@ -352,7 +366,7 @@ contract Tickets{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTicketInfo(
 			dispenser_id: UInt32,
 			type: UInt8,
@@ -379,7 +393,7 @@ contract Tickets{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTicketInfo(
 			index: UInt32,
 			dispenser_id: UInt32,
@@ -425,7 +439,7 @@ contract Tickets{
 		access(all)
 		var dispenser_id: UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTicketInfo(
 			type: UInt8,
 			name: String,
@@ -433,9 +447,9 @@ contract Tickets{
 			when_to_use: String,
 			price: UFix64,
 			flow_vault_receiver: Capability<&FlowToken.Vault>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTicketInfo(
 			index: UInt32,
 			type: UInt8,
@@ -452,19 +466,19 @@ contract Tickets{
 	
 	access(all)
 	resource interface IDispenserPublic{ 
-		access(all)
-		fun deposit(minter: @Dispenser)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(minter: @Tickets.Dispenser): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasDispenser(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getId(): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketRequesters():{ UInt32: RequestStruct}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLatestMintedTokenId(): UInt64?
 	}
 	
@@ -484,7 +498,7 @@ contract Tickets{
 		var dispenser_id: UInt32
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(minter: @Dispenser){ 
 			if self.ownedDispenser == nil{ 
 				self.ownedDispenser <-! minter
@@ -494,7 +508,7 @@ contract Tickets{
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasDispenser(): Bool{ 
 			if self.ownedDispenser != nil{ 
 				return true
@@ -504,43 +518,43 @@ contract Tickets{
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getId(): UInt32{ 
 			return self.dispenser_id
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketRequesters():{ UInt32: RequestStruct}?{ 
 			return Tickets.ticketRequesters[self.dispenser_id]
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLatestMintedTokenId(): UInt64?{ 
 			return self.ownedDispenser?.getLatestMintedTokenId()
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTicketInfo(type: UInt8, name: String, where_to_use: String, when_to_use: String, price: UFix64, flow_vault_receiver: Capability<&FlowToken.Vault>){ 
 			self.ownedDispenser?.addTicketInfo(dispenser_id: self.dispenser_id, type: type, name: name, where_to_use: where_to_use, when_to_use: when_to_use, price: price, flow_vault_receiver: flow_vault_receiver)
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTicketInfo(index: UInt32, type: UInt8, name: String, where_to_use: String, when_to_use: String, price: UFix64){ 
 			self.ownedDispenser?.updateTicketInfo(index: index, dispenser_id: self.dispenser_id, type: type, name: name, where_to_use: where_to_use, when_to_use: when_to_use, price: price)
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTicket(secret_code: String, user_id: UInt32): @Ticket?{ 
 			return <-self.ownedDispenser?.mintTicket(secret_code: secret_code, dispenser_id: self.dispenser_id, user_id: user_id)
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refund(dispenser_id: UInt32, address: Address, user_id: UInt32, repayment: @FlowToken.Vault){ 
 			pre{ 
 				repayment.balance > 0.0:
@@ -582,7 +596,7 @@ contract Tickets{
 	  ** [create vault] createDispenserVault
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDispenserVault(
 		address: Address,
 		domain: String,
@@ -625,27 +639,27 @@ contract Tickets{
 		access(self)
 		var created_time: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getId(): UInt64{ 
 			return self.token_id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCode(): String{ 
 			return self.readable_code
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUsedTime(): UFix64?{ 
 			return self.used_time
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreatedTime(): UFix64{ 
 			return self.created_time
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useTicket(price: UFix64){ 
 			pre{ 
 				self.readable_code == "":
@@ -656,7 +670,7 @@ contract Tickets{
 			self.used_time = getCurrentBlock().timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useCrowdfundingTicket(){ 
 			pre{ 
 				self.readable_code == "":
@@ -692,10 +706,10 @@ contract Tickets{
 		access(contract)
 		var ownedTicket: @{UInt64: Ticket}
 		
-		access(all)
-		fun requestTicket(dispenser_id: UInt32, address: Address)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun requestTicket(dispenser_id: UInt32, address: Address): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useTicket(
 			dispenser_id: UInt32,
 			token_id: UInt64,
@@ -704,10 +718,10 @@ contract Tickets{
 			fee: @FlowToken.Vault
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun prepareCrowdfund(dispenser_id: UInt32, address: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun crowdfunding(
 			dispenser_id: UInt32,
 			address: Address,
@@ -722,19 +736,19 @@ contract Tickets{
 	
 	access(all)
 	resource interface ITicketPublic{ 
-		access(all)
-		fun deposit(token: @Ticket)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @Tickets.Ticket): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getId(): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCode(dispenser_id: UInt32):{ UInt64: String}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUsedTime(dispenser_id: UInt32):{ UInt64: UFix64??}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreatedTime(dispenser_id: UInt32):{ UInt64: UFix64?}?
 	}
 	
@@ -754,7 +768,7 @@ contract Tickets{
 		var contribution: [UInt32]
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @Ticket){ 
 			pre{ 
 				self.ownedTicket[token.getId()] == nil:
@@ -764,13 +778,13 @@ contract Tickets{
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getId(): UInt32{ 
 			return self.user_id
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCode(dispenser_id: UInt32):{ UInt64: String}?{ 
 			if Tickets.ticketRequesters.containsKey(dispenser_id){ 
 				if let data = (Tickets.ticketRequesters[dispenser_id]!)[self.user_id]{ 
@@ -785,7 +799,7 @@ contract Tickets{
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUsedTime(dispenser_id: UInt32):{ UInt64: UFix64??}?{ 
 			if Tickets.ticketRequesters.containsKey(dispenser_id){ 
 				if let data = (Tickets.ticketRequesters[dispenser_id]!)[self.user_id]{ 
@@ -800,7 +814,7 @@ contract Tickets{
 		}
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreatedTime(dispenser_id: UInt32):{ UInt64: UFix64?}?{ 
 			if Tickets.ticketRequesters.containsKey(dispenser_id){ 
 				if let data = (Tickets.ticketRequesters[dispenser_id]!)[self.user_id]{ 
@@ -815,7 +829,7 @@ contract Tickets{
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestTicket(dispenser_id: UInt32, address: Address){ 
 			let time = getCurrentBlock().timestamp
 			if Tickets.ticketRequesters.containsKey(dispenser_id){ 
@@ -839,7 +853,7 @@ contract Tickets{
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useTicket(dispenser_id: UInt32, token_id: UInt64, address: Address, payment: @FlowToken.Vault, fee: @FlowToken.Vault){ 
 			pre{ 
 				fee.balance > (fee.balance + payment.balance) * 0.024:
@@ -865,7 +879,7 @@ contract Tickets{
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun prepareCrowdfund(dispenser_id: UInt32, address: Address){ 
 			let time = getCurrentBlock().timestamp
 			if !Tickets.ticketRequesters.containsKey(dispenser_id){ 
@@ -881,7 +895,7 @@ contract Tickets{
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun crowdfunding(dispenser_id: UInt32, address: Address, payment: @FlowToken.Vault, fee: @FlowToken.Vault){ 
 			pre{ 
 				fee.balance > (fee.balance + payment.balance) * 0.024:
@@ -906,7 +920,7 @@ contract Tickets{
 			self.contribution.append(dispenser_id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRefundVault(flow_vault_receiver: Capability<&FlowToken.Vault>){ 
 			pre{ 
 				Tickets.UserFlowTokenVault[self.user_id] == nil:
@@ -918,7 +932,7 @@ contract Tickets{
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useCrowdfundingTicket(dispenser_id: UInt32, token_id: UInt64, address: Address){ 
 			pre{ 
 				Tickets.DispenserFlowTokenVault[dispenser_id] != nil:
@@ -956,7 +970,7 @@ contract Tickets{
 	  ** [create vault] createTicketVault
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTicketVault(
 		dispenser_id: UInt32,
 		address: Address,
@@ -969,7 +983,7 @@ contract Tickets{
 	  ** [Public Function] getDispenserDomains
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDispenserDomains(): [String]{ 
 		var dispenserArr: [String] = []
 		for data in Tickets.dispenserOwners.values{ 
@@ -982,7 +996,7 @@ contract Tickets{
 	  ** [Public Function] getDispenserInfo
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDispenserInfo(address: Address):{ UInt32: String}?{ 
 		var dispenserArr: [DispenserStruct] = []
 		for data in Tickets.dispenserOwners.values{ 
@@ -997,7 +1011,7 @@ contract Tickets{
 	  ** [Public Function] getTickets
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTickets(): [TicketStruct]{ 
 		return Tickets.ticketInfo
 	}
@@ -1006,7 +1020,7 @@ contract Tickets{
 	  ** [Public Function] getTicketRequestStatus
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketRequestStatus(dispenser_id: UInt32, user_id: UInt32): RequestStruct?{ 
 		return (Tickets.ticketRequesters[dispenser_id]!)[user_id]
 	}
@@ -1015,7 +1029,7 @@ contract Tickets{
 	  ** [Public Function] isSetRefundVault
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetRefundVault(user_id: UInt32): Bool{ 
 		return Tickets.UserFlowTokenVault[user_id] != nil
 	}

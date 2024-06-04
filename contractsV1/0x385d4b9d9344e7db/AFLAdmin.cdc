@@ -1,4 +1,18 @@
-import AFLNFT from "./AFLNFT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import AFLNFT from "./AFLNFT.cdc"
 
 import AFLPack from "./AFLPack.cdc"
 
@@ -15,12 +29,12 @@ contract AFLAdmin{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(maxSupply: UInt64, immutableData:{ String: AnyStruct}){ 
 			AFLNFT.createTemplate(maxSupply: maxSupply, immutableData: immutableData)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(templateId: UInt64, account: Address){ 
 			AFLNFT.mintNFT(templateId: templateId, account: account)
 		}
@@ -29,7 +43,7 @@ contract AFLAdmin{
 		// only an admin can ever create
 		// a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Admin{ 
 			return <-create Admin()
 		}

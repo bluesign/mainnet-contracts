@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract YDYProfile{ 
 	access(all)
 	let publicPath: PublicPath
@@ -11,13 +25,13 @@ contract YDYProfile{
 	
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserData():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWorkoutIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWorkoutData(id: String):{ String: String}
 		
 		access(contract)
@@ -43,17 +57,17 @@ contract YDYProfile{
 			self.workoutData ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserData():{ String: String}{ 
 			return self.userData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWorkoutIDs(): [String]{ 
 			return self.workoutData.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWorkoutData(id: String):{ String: String}{ 
 			return self.workoutData[id] ?? panic("No workout with this ID exists for user")
 		}
@@ -76,14 +90,14 @@ contract YDYProfile{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createUser(): @User{ 
 		return <-create User()
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDataOfUser(
 			receiverCollectionCapability: Capability<&YDYProfile.User>,
 			key: String,
@@ -93,7 +107,7 @@ contract YDYProfile{
 			receiver.updateUserData(key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWorkoutDataToUser(
 			receiverCollectionCapability: Capability<&YDYProfile.User>,
 			data:{ 
@@ -104,7 +118,7 @@ contract YDYProfile{
 			receiver.addWorkoutData(workout: data)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWorkoutDataOfUser(
 			receiverCollectionCapability: Capability<&YDYProfile.User>,
 			id: String,
@@ -115,7 +129,7 @@ contract YDYProfile{
 			receiver.updateWorkoutData(id: id, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun superFunction(receiverAddress: Address, nft_id: UInt64){} 
 	}
 	

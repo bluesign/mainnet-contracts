@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -85,12 +99,12 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			self.bucket <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): Display{ 
 			var image = ""
 			var video = ""
@@ -107,7 +121,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			return Cryptoys.Display(image: image, video: video)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [Royalty]{ 
 			var nftRoyalties: [Royalty] = []
 			for royalty in self.royalties{ 
@@ -127,7 +141,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToBucket(_ key: String, _ nft: @{ICryptoys.INFT}){ 
 			let nftUuid: UInt64 = nft.uuid
 			let resources = self.borrowBucketResourcesByKey(key)
@@ -141,28 +155,28 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			emit AddedToBucket(owner: (self.owner!).address, key: key, id: self.id, uuid: nftUuid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucketResourcesByKey(_ key: String): &{UInt64:{ ICryptoys.INFT}}?{ 
 			return &self.bucket[key] as &{UInt64:{ ICryptoys.INFT}}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucket(): &{String:{ UInt64:{ ICryptoys.INFT}}}{ 
 			return &self.bucket as &{String:{ UInt64:{ ICryptoys.INFT}}}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBucketKeys(): [String]{ 
 			return *self.borrowBucket().keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBucketResourceIdsByKey(_ key: String): [UInt64]{ 
 			let resources = self.borrowBucketResourcesByKey(key) ?? panic("getBucketResourceIdsByKey() failed to find resources by key: ".concat(key))
 			return *resources.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucketItem(_ key: String, _ itemUuid: UInt64): &{ICryptoys.INFT}{ 
 			let resources = self.borrowBucketResourcesByKey(key) ?? panic("borrowBucketItem() failed to find resources by key: ".concat(key))
 			let bucketItem = resources[itemUuid] as &{ICryptoys.INFT}? ?? panic("borrowBucketItem() failed to borrow resource with id: ".concat(itemUuid.toString()))
@@ -218,7 +232,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Cryptoys.NFT
 			let id: UInt64 = token.id
 			
@@ -245,7 +259,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCryptoy(id: UInt64): &{ICryptoys.INFT}{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -255,7 +269,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBucketItem(_ id: UInt64, _ key: String, _ itemUuid: UInt64): &{ICryptoys.INFT}{ 
 			if self.ownedNFTs[id] == nil{ 
 				return panic("borrowBucketItem() failed: parent cryptoy not found with id: ".concat(id.toString()))
@@ -272,13 +286,13 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			return cryptoyNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: UInt64): [Royalty]{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (ref as! &NFT).getRoyalties()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBucketItem(parentId: UInt64, key: String, itemUuid: UInt64): @{ICryptoys.INFT}{ 
 			if self.ownedNFTs[parentId] == nil{ 
 				panic("withdrawBucketItem() failed: parent cryptoy not found with id: ".concat(parentId.toString()))
@@ -373,7 +387,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: Capability<&{NonFungibleToken.CollectionPublic}>, metadata:{ String: String}, royaltyNames: [String]?): UInt64{ 
 			var nftRoyalties: [Royalty] = []
 			if royaltyNames != nil{ 
@@ -395,13 +409,13 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			return nftId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertRoyalty(royalty: Royalty){ 
 			Cryptoys.royalties[royalty.name] = royalty
 			emit RoyaltyUpserted(name: royalty.name, royalty: royalty)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDisplay(cryptoy: &{ICryptoys.INFT}, display: Display?){ 
 			if display != nil{ 
 				Cryptoys.display.insert(key: cryptoy.id, display!)
@@ -412,7 +426,7 @@ contract Cryptoys: NonFungibleToken, ICryptoys{
 			emit DisplayUpdated(id: cryptoy.id, image: display.image, video: display.video)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties():{ String: Royalty}{ 
 			return Cryptoys.royalties
 		}

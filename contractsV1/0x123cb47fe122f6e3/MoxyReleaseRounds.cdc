@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import LockedMoxyToken from "./LockedMoxyToken.cdc"
 
@@ -205,7 +219,7 @@ contract MoxyReleaseRounds{
 		access(all)
 		var isAmountAfterLockPaid: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundReleaseInfo(): RoundReleaseInfo{ 
 			var i = 0
 			while i < self.linearReleases.length{ 
@@ -218,12 +232,12 @@ contract MoxyReleaseRounds{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllocationRemaining(): UFix64{ 
 			return self.amount - self.amountReleased
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalToAllocateNow(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -234,7 +248,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payLinearReleases(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -248,28 +262,28 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLinearRelease(linearRelease: LinearRelease.LinearSchedule){ 
 			self.linearReleases.append(linearRelease)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmount(): UFix64{ 
 			return self.amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseAmount(amount: UFix64){ 
 			self.amount = self.amount + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mergeWith(amount: UFix64, linearRelease: LinearRelease.LinearSchedule){ 
 			self.amount = self.amount + amount
 			self.addLinearRelease(linearRelease: linearRelease)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartDate(timestamp: UFix64){ 
 			self.lastReleaseDate = timestamp
 			var i = 0
@@ -279,7 +293,7 @@ contract MoxyReleaseRounds{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAtTGEToPay(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -290,7 +304,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAtTGE(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -301,7 +315,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAtTGEFor(amount: UFix64): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -314,7 +328,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAfterUnlockToPay(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -325,7 +339,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAfterUnlock(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -336,7 +350,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountAfterUnlockFor(amount: UFix64): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -349,7 +363,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAmountToPay(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -360,7 +374,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAmount(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -371,7 +385,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalDailyAmount(): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -382,7 +396,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalDailyAmountFor(amount: UFix64): UFix64{ 
 			var total = 0.0
 			var i = 0
@@ -395,7 +409,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstLinearRelease(): LinearRelease.LinearSchedule{ 
 			return self.linearReleases.removeFirst()
 		}
@@ -421,7 +435,7 @@ contract MoxyReleaseRounds{
 		access(all)
 		let lockedMVVault: Capability<&LockedMoxyVaultToken.LockedVault>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(roundId: String, roundRelease: @RoundRelease){ 
 			if self.releases[roundId] == nil{ 
 				// Add to round
@@ -439,21 +453,21 @@ contract MoxyReleaseRounds{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartDate(timestamp: UFix64){ 
 			for roundId in self.releases.keys{ 
 				self.releases[roundId]?.setStartDate(timestamp: timestamp)!
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payLinearRelease(roundId: String): UFix64{ 
 			let amount = self.releases[roundId]?.payLinearReleases()!
 			return amount
 		}
 		
 		// RoundReleases
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allocateDailyReleaseToNow(feeRemaining: UFix64): @{FungibleToken.Vault}{ 
 			// Unlock MOXY tokens
 			let lockedMOXYVault = self.lockedMOXYVault.borrow()!
@@ -479,27 +493,27 @@ contract MoxyReleaseRounds{
 			return <-vaultFee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundReleaseInfo(roundId: String): RoundReleaseInfo{ 
 			return self.releases[roundId]?.getRoundReleaseInfo()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountFor(roundId: String): UFix64{ 
 			return self.releases[roundId]?.amount!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountReleasedFor(roundId: String): UFix64{ 
 			return self.releases[roundId]?.amountReleased!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalToAllocateNowFor(roundId: String): UFix64{ 
 			return self.releases[roundId]?.getTotalToAllocateNow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountsDictFor(roundId: String, amount: UFix64):{ String: UFix64}{ 
 			let amounts ={ "atTGE": self.releases[roundId]?.getAmountAtTGEFor(amount: amount)!, "afterUnlock": self.releases[roundId]?.getAmountAfterUnlockFor(amount: amount)!, "daily": self.releases[roundId]?.getTotalDailyAmountFor(amount: amount)!}
 			return amounts
@@ -562,7 +576,7 @@ contract MoxyReleaseRounds{
 		access(all)
 		var allocationQueue: @MoxyProcessQueue.Queue
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundInfo(): RoundInfo{ 
 			return RoundInfo(
 				id: self.id,
@@ -584,7 +598,7 @@ contract MoxyReleaseRounds{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundReleaseInfo(_ address: Address): RoundReleaseInfo?{ 
 			if self.accounts[address] == nil{ 
 				return nil
@@ -592,7 +606,7 @@ contract MoxyReleaseRounds{
 			return ((self.accounts[address]!).borrow()!).getRoundReleaseInfo(roundId: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountFor(address: Address): UFix64{ 
 			if self.accounts[address] == nil{ 
 				log("(amount) Address not found: ".concat(address.toString()).concat(" round: ").concat(self.id))
@@ -601,7 +615,7 @@ contract MoxyReleaseRounds{
 			return ((self.accounts[address]!).borrow()!).getAmountFor(roundId: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountReleasedFor(address: Address): UFix64{ 
 			if self.accounts[address] == nil{ 
 				log("(amount released) Address not found: ".concat(address.toString()))
@@ -610,12 +624,12 @@ contract MoxyReleaseRounds{
 			return ((self.accounts[address]!).borrow()!).getAmountReleasedFor(roundId: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalToAllocateNowFor(address: Address): UFix64{ 
 			return ((self.accounts[address]!).borrow()!).getTotalToAllocateNowFor(roundId: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountsDictFor(address: Address, amount: UFix64):{ String: UFix64}{ 
 			return ((self.accounts[address]!).borrow()!).getAmountsDictFor(
 				roundId: self.id,
@@ -623,7 +637,7 @@ contract MoxyReleaseRounds{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccounts():{ Address: ParticipantRoundInfo}{ 
 			let accounts:{ Address: ParticipantRoundInfo} ={} 
 			for address in self.accounts.keys{ 
@@ -634,17 +648,17 @@ contract MoxyReleaseRounds{
 			return accounts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundAddresses(): [Address]{ 
 			return self.accounts.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllocationRemaining(): UFix64{ 
 			return self.initialRelease + self.totalIncorporated - self.totalAllocated
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isReadyToStartRelease(): Bool{ 
 			if self.allocateBeforeTGE == false{ 
 				// Can start because is not required full allocation before TGE (i.e presale round)
@@ -653,17 +667,17 @@ contract MoxyReleaseRounds{
 			return self.getAllocationRemaining() <= 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRoundStarted(): Bool{ 
 			return self.isReleaseStarted
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canAllocateAfterTGE(): Bool{ 
 			return !self.allocateBeforeTGE
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isInitialAllocationFinished(): Bool{ 
 			return self.hasQueueFinished()
 			|| self.canAllocateAfterTGE() && self.allocationQueue.isEmptyQueue()
@@ -717,13 +731,13 @@ contract MoxyReleaseRounds{
 			self.totalIncorporated = self.totalIncorporated + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAddressInRound(address: Address): Bool{ 
 			return self.accounts.containsKey(address)
 		}
 		
 		// Round
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allocateDailyReleaseToNow(address: Address){ 
 			// Get the amount from the last release to a given date
 			let now = getCurrentBlock().timestamp
@@ -748,7 +762,7 @@ contract MoxyReleaseRounds{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseRatioFor(address: Address): UFix64{ 
 			if self.totalAllocated <= 0.0{ 
 				panic("Round does not have allocations yet. Release ratio could not be calculated")
@@ -757,12 +771,12 @@ contract MoxyReleaseRounds{
 			return amount / self.totalAllocated
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalToAllocateNowTo(address: Address): UFix64{ 
 			return self.getTotalToAllocateNowFor(address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAllocationsFrom(from: UFix64, to: UFix64): [UFix64]{ 
 			let from0000 = MoxyData.getTimestampTo0000(timestamp: from)
 			let to0000 = MoxyData.getTimestampTo0000(timestamp: to)
@@ -771,7 +785,7 @@ contract MoxyReleaseRounds{
 			return [from0000, to0000, UFix64(days), amount, self.tgeDate, self.getEndDate()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAllocationsFromToAddress(address: Address, from: UFix64, to: UFix64): [
 			UFix64
 		]?{ 
@@ -783,14 +797,14 @@ contract MoxyReleaseRounds{
 			return allocationInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDaysFromTo(from: UFix64, to: UFix64): UInt64{ 
 			let from0000 = MoxyData.getTimestampTo0000(timestamp: from)
 			let to0000 = MoxyData.getTimestampTo0000(timestamp: to)
 			return UInt64((to0000 - from0000) / 86400.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startReleaseAddress(address: Address, initialVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				!self.isReleaseStarted:
@@ -831,12 +845,12 @@ contract MoxyReleaseRounds{
 			emit MOXYLockedTokensReleasedTo(round: self.id, address: address, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allocateAfterTGE(vault: @{FungibleToken.Vault}, address: Address){ 
 			self.allocateOn(timestamp: self.tgeDate, vault: <-vault, address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allocateOn(timestamp: UFix64, vault: @{FungibleToken.Vault}, address: Address){ 
 			let amountsDict = self.getAmountsDictFor(address: address, amount: vault.balance)!
 			let amount = vault.balance
@@ -869,24 +883,24 @@ contract MoxyReleaseRounds{
 			emit MOXYLockedTokensReleasedTo(round: self.id, address: address, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnlockDate(): UFix64{ 
 			return self.getUnlockDateStartingOn(timestamp: self.tgeDate)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnlockDateStartingOn(timestamp: UFix64): UFix64{ 
 			return timestamp + UFix64(self.lockTime) * 86400.0
 		}
 		
 		// Generate a dictionary with the release schedule
 		// for an specified amount
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateScheduleFor(amount: UFix64): LinearRelease.LinearSchedule{ 
 			return self.generateScheduleForDate(timestamp: self.tgeDate, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateScheduleForDate(
 			timestamp: UFix64,
 			amount: UFix64
@@ -910,7 +924,7 @@ contract MoxyReleaseRounds{
 			return newLinearRelease
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDaysFrom(months: Int): UFix64{ 
 			// Dictionary represents the months in the left
 			// and the days in the right
@@ -922,12 +936,12 @@ contract MoxyReleaseRounds{
 			return UFix64(dictionary[months]!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDays(): UFix64{ 
 			return self.getDaysFrom(months: self.months)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndDate(): UFix64{ 
 			if !self.isTGESet(){ 
 				return 0.0
@@ -935,27 +949,27 @@ contract MoxyReleaseRounds{
 			return self.getUnlockDate() + self.getDays() * 86400.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isTGESet(): Bool{ 
 			return self.tgeDate > 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isReleaseProcesStarted(): Bool{ 
 			return self.totalReleased != 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedTokenTime(): UFix64{ 
 			return UFix64(self.lockTime) * 86400.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isInLockedPeriod(): Bool{ 
 			return getCurrentBlock().timestamp < self.tgeDate + UFix64(self.lockTime) * 86400.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun dailyAllocationAmount(): UFix64{ 
 			if self.months == 0{ 
 				return self.initialRelease
@@ -967,7 +981,7 @@ contract MoxyReleaseRounds{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddress(address: Address){ 
 			if self.isReleaseProcesStarted(){ 
 				return
@@ -977,7 +991,7 @@ contract MoxyReleaseRounds{
 			self.accounts.remove(key: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartDate(timestamp: UFix64){ 
 			self.tgeDate = timestamp
 			for address in self.accounts.keys{ 
@@ -986,22 +1000,22 @@ contract MoxyReleaseRounds{
 		}
 		
 		// Returns the number of accounts that this round will process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountsToProcess(): Int{ 
 			return self.accounts.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isQueueAtBegining(): Bool{ 
 			return self.allocationQueue.isAtBeginning()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasQueueFinished(): Bool{ 
 			return self.allocationQueue.isEmptyQueue() || self.allocationQueue.hasFinished()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQueueNextAddresses(quantity: Int): @MoxyProcessQueue.Run{ 
 			let run <- self.allocationQueue.lockRunWith(quantity: quantity)
 			if run == nil{ 
@@ -1010,12 +1024,12 @@ contract MoxyReleaseRounds{
 			return <-run!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeNextAddresses(run: @MoxyProcessQueue.Run){ 
 			self.allocationQueue.completeNextAddresses(run: <-run)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccount(address: Address){ 
 			if self.accounts[address] == nil{ 
 				return log("Can't remove. Address is not a rounds participant.")
@@ -1070,13 +1084,13 @@ contract MoxyReleaseRounds{
 		access(all)
 		var tgeDate: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTGEDate(timestamp: UFix64){ 
 			self.tgeDate = MoxyData.getTimestampTo0000(timestamp: timestamp)
 		}
 		
 		// Check if allocatin is complete on all release rounds
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isReadyToStartRelease(): Bool{ 
 			for roundId in self.rounds.keys{ 
 				let isReady = self.rounds[roundId]?.isReadyToStartRelease()!
@@ -1087,7 +1101,7 @@ contract MoxyReleaseRounds{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountsToProcess(): Int{ 
 			var quantity = 0
 			for roundId in self.rounds.keys{ 
@@ -1096,14 +1110,14 @@ contract MoxyReleaseRounds{
 			return quantity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeNextAddresses(roundId: String, run: @MoxyProcessQueue.Run){ 
 			let round: @MoxyReleaseRounds.Round <-! self.rounds.remove(key: roundId)!
 			round.completeNextAddresses(run: <-run)
 			self.rounds[roundId] <-! round
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allocateAfterTGE(roundId: String, vault: @{FungibleToken.Vault}, address: Address){ 
 			let round <- self.rounds.remove(key: roundId)!
 			round.allocateAfterTGE(vault: <-vault, address: address)
@@ -1111,7 +1125,7 @@ contract MoxyReleaseRounds{
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allocateOn(timestamp: UFix64, roundId: String, vault: @{FungibleToken.Vault}, address: Address){ 
 			let round <- self.rounds.remove(key: roundId)!
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: timestamp)
@@ -1120,17 +1134,17 @@ contract MoxyReleaseRounds{
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountFor(roundId: String, address: Address): UFix64{ 
 			return self.rounds[roundId]?.getAmountFor(address: address)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isReadyToStartReleaseTo(roundId: String): Bool{ 
 			return self.rounds[roundId]?.isReadyToStartRelease()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun haveAllRoundsStarted(): Bool{ 
 			for roundId in self.rounds.keys{ 
 				let isStarted = self.rounds[roundId]?.isReleaseStarted!
@@ -1141,7 +1155,7 @@ contract MoxyReleaseRounds{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isQueueAtBegining(): Bool{ 
 			for roundId in self.rounds.keys{ 
 				let isAtBegining = self.rounds[roundId]?.isQueueAtBegining()!
@@ -1152,7 +1166,7 @@ contract MoxyReleaseRounds{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun haveAllQueuesFinished(): Bool{ 
 			for roundId in self.rounds.keys{ 
 				let isFinished = self.rounds[roundId]?.hasQueueFinished()!
@@ -1163,7 +1177,7 @@ contract MoxyReleaseRounds{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun initialAllocationFinished(): Bool{ 
 			// Check if all queues are finished but not in the cases
 			// that the releasee can start after TGE 
@@ -1176,44 +1190,44 @@ contract MoxyReleaseRounds{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundsNames(): [String]{ 
 			return self.rounds.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasQueueFinished(roundId: String): Bool{ 
 			return self.rounds[roundId]?.hasQueueFinished()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQueueNextAddresses(roundId: String, quantity: Int): @MoxyProcessQueue.Run{ 
 			return <-self.rounds[roundId]?.getQueueNextAddresses(quantity: quantity)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundsLength(): Int{ 
 			return self.rounds.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartDate(timestamp: UFix64){ 
 			for roundId in self.rounds.keys{ 
 				self.rounds[roundId]?.setStartDate(timestamp: timestamp)!
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddresses(): [Address]{ 
 			return self.releases.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundAddresses(roundId: String): [Address]{ 
 			return self.rounds[roundId]?.getRoundAddresses()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRound(_ id: String, type: String, name: String, initialRelease: UFix64, lockTime: Int, months: Int, unlockPercentageAtTGE: UFix64, unlockPercentageAfterLockTime: UFix64, allocateBeforeTGE: Bool){ 
 			let round <- create Round(id: id, type: type, name: name, initialRelease: initialRelease, lockTime: lockTime, months: months, unlockPercentageAtTGE: unlockPercentageAtTGE, unlockPercentageAfterLockTime: unlockPercentageAfterLockTime, allocateBeforeTGE: allocateBeforeTGE)
 			round.setStartDate(timestamp: self.tgeDate)
@@ -1222,12 +1236,12 @@ contract MoxyReleaseRounds{
 			emit MoxyReleaseRounds.RoundAdded(name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRoundReleases(lockedMOXYVault: Capability<&LockedMoxyToken.LockedVault>, lockedMVVault: Capability<&LockedMoxyVaultToken.LockedVault>): @RoundReleases{ 
 			return <-create RoundReleases(lockedMOXYVault: lockedMOXYVault, lockedMVVault: lockedMVVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptRounds(address: Address, releasesRef: Capability<&MoxyReleaseRounds.RoundReleases>){ 
 			pre{ 
 				address == (releasesRef.borrow()!).lockedMOXYVault.address:
@@ -1247,7 +1261,7 @@ contract MoxyReleaseRounds{
 			emit AccountAcceptedRoundsParticipation(address: address, timestamp: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFromRounds(address: Address){ 
 			if self.releases[address] == nil{ 
 				return log("Can't remove. Address is not a rounds participant.")
@@ -1258,19 +1272,19 @@ contract MoxyReleaseRounds{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addressHasAcceptedRounds(address: Address): Bool{ 
 			return self.releases[address] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fullAllocateTo(roundId: String, address: Address){ 
 			let amount = self.rounds[roundId]?.getAllocationRemaining()!
 			self.setAddress(roundId: roundId, address: address, amount: amount)
 		}
 		
 		//Rounds.setAddress
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(roundId: String, address: Address, amount: UFix64){ 
 			if self.releases[address] == nil{ 
 				panic("Required accept consent from address: ".concat(address.toString()))
@@ -1294,7 +1308,7 @@ contract MoxyReleaseRounds{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incorporateAddress(roundId: String, address: Address, amount: UFix64, startTime: UFix64){ 
 			if self.releases[address] == nil{ 
 				panic("Required accept consent from address: ".concat(address.toString()))
@@ -1304,7 +1318,7 @@ contract MoxyReleaseRounds{
 		}
 		
 		// Rounds
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startReleaseRound(roundId: String, address: Address, initialVault: @{FungibleToken.Vault}){ 
 			let round <- self.rounds.remove(key: roundId)!
 			let amount = round.totalAllocated
@@ -1313,13 +1327,13 @@ contract MoxyReleaseRounds{
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasRoundRelease(address: Address): Bool{ 
 			return self.releases[address] != nil
 		}
 		
 		//Rounds
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allocateDailyReleaseNowToAddress(address: Address, feeRemaining: UFix64): @{FungibleToken.Vault}{ 
 			let roundReleases = (self.releases[address]!).borrow()!
 			let feeVault <- roundReleases.allocateDailyReleaseToNow(feeRemaining: feeRemaining)
@@ -1331,43 +1345,43 @@ contract MoxyReleaseRounds{
 			return <-feeVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddress(roundId: String, address: Address){ 
 			self.rounds[roundId]?.removeAddress(address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllocationRemaining(_ id: String): UFix64?{ 
 			return self.rounds[id]?.getAllocationRemaining()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAllocationsFrom(roundId: String, from: UFix64, to: UFix64): [UFix64]?{ 
 			return self.rounds[roundId]?.getDailyAllocationsFrom(from: from, to: to)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAllocationsFromToAddress(roundId: String, address: Address, from: UFix64, to: UFix64): [UFix64]??{ 
 			return self.rounds[roundId]?.getDailyAllocationsFromToAddress(address: address, from: from, to: to)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountReleasedFor(roundId: String, address: Address): UFix64{ 
 			return self.rounds[roundId]?.getAmountReleasedFor(address: address)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundReleaseInfo(_ id: String, address: Address): RoundReleaseInfo?{ 
 			let roundInfo = self.rounds[id]?.getRoundReleaseInfo(address)!
 			return roundInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccounts(_ id: String):{ Address: ParticipantRoundInfo}?{ 
 			return self.rounds[id]?.getAccounts()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundsForAddress(address: Address):{ String: ParticipantRoundInfo}{ 
 			let rounds:{ String: ParticipantRoundInfo} ={} 
 			for roundId in self.rounds.keys{ 
@@ -1380,7 +1394,7 @@ contract MoxyReleaseRounds{
 			return rounds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundInfo(roundId: String): RoundInfo{ 
 			return self.rounds[roundId]?.getRoundInfo()!
 		}
@@ -1399,7 +1413,7 @@ contract MoxyReleaseRounds{
 			.borrow<&MoxyReleaseRounds.Rounds>()!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRounds(): [String]{ 
 		let roundsManager = self.getRoundsCapability()
 		return *roundsManager.rounds.keys
@@ -1410,16 +1424,16 @@ contract MoxyReleaseRounds{
 	
 	access(all)
 	resource interface MoxyRoundsInfo{ 
-		access(all)
-		fun getRoundsForAddress(address: Address):{ String: ParticipantRoundInfo}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getRoundsForAddress(address: Address):{ String: MoxyReleaseRounds.ParticipantRoundInfo}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllocationRemaining(_ id: String): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAllocationsFrom(roundId: String, from: UFix64, to: UFix64): [UFix64]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyAllocationsFromToAddress(
 			roundId: String,
 			address: Address,
@@ -1429,40 +1443,40 @@ contract MoxyReleaseRounds{
 			UFix64
 		]??
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccounts(_ id: String):{ Address: ParticipantRoundInfo}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addressHasAcceptedRounds(address: Address): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddresses(): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundAddresses(roundId: String): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundReleaseInfo(_ id: String, address: Address): RoundReleaseInfo?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun haveAllQueuesFinished(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun initialAllocationFinished(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundInfo(roundId: String): RoundInfo
 	}
 	
 	access(all)
 	resource interface MoxyRoundsCreator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRoundReleases(
 			lockedMOXYVault: Capability<&LockedMoxyToken.LockedVault>,
 			lockedMVVault: Capability<&LockedMoxyVaultToken.LockedVault>
-		): @RoundReleases
+		): @MoxyReleaseRounds.RoundReleases
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptRounds(
 			address: Address,
 			releasesRef: Capability<&MoxyReleaseRounds.RoundReleases>

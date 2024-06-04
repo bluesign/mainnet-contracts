@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import JoyrideMultiToken from "./JoyrideMultiToken.cdc"
 
@@ -55,7 +69,7 @@ contract JoyrideAccounts{
 	}
 	
 	//Pretty sure this is safe to be public, since a valid Capability<&{JRXToken.Treasury}> can only be created by the JRXToken contract account.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun linkTreasuryCapability(treasuryCapability: Capability<&JoyrideMultiToken.PlatformAdmin>){ 
 		if !treasuryCapability.check(){ 
 			panic("Capability from Invalid Source")
@@ -63,7 +77,7 @@ contract JoyrideAccounts{
 		self.treasuryCapability = treasuryCapability
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun PlayerRegisterCapability(capability: Capability<&JoyrideMultiToken.Vault>){ 
 		let playerID =
 			JoyrideAccounts.playerIdByAddress[capability.address]
@@ -75,7 +89,7 @@ contract JoyrideAccounts{
 		destroy JoyrideAccounts.playerAccounts.insert(key: playerID, <-playerAccount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayerAccount(playerID: String): &Account{ 
 		if self.playerIDToPlayer[playerID] == nil{ 
 			panic("Player not found for playerID: ".concat(playerID))
@@ -178,7 +192,7 @@ contract JoyrideAccounts{
 	//
 	access(all)
 	resource interface GrantsTokenRewards{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GrantTokenRewards(
 			playerID: String,
 			amount: UFix64,
@@ -189,14 +203,14 @@ contract JoyrideAccounts{
 	
 	access(all)
 	resource interface SharesProfits{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ShareProfits(
 			profits: @{FungibleToken.Vault},
 			inGameID: String,
 			fromPlayerID: String
 		): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ShareProfitsWithDevPercentage(
 			profits: @{FungibleToken.Vault},
 			inGameID: String,
@@ -207,27 +221,27 @@ contract JoyrideAccounts{
 	
 	access(all)
 	resource interface PlayerAccounts{ 
-		access(all)
-		fun GetPlayerJRXAccount(playerID: String): &PlayerAccount?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun GetPlayerJRXAccount(playerID: String): &JoyrideAccounts.PlayerAccount?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AddPlayerAccount(playerID: String, referralID: String?, account: &Account)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun EscrowWithdraw(playerID: String, amount: UFix64, tokenContext: String): @{
 			FungibleToken.Vault
 		}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun PlayerDeposit(playerID: String, vault: @{FungibleToken.Vault}): @{FungibleToken.Vault}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AddDeveloperAccount(address: Address, gameID: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun TransferPlayerAccount(playerID: String, to: &Account)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun EscrowWithdrawWithTnxId(
 			playerID: String,
 			txID: String,
@@ -238,7 +252,7 @@ contract JoyrideAccounts{
 	
 	access(all)
 	resource JoyrideAccountsAdmin: GrantsTokenRewards, SharesProfits, PlayerAccounts{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GrantTokenRewards(playerID: String, amount: UFix64, tokenContext: String, rewardID: String): Bool{ 
 			let playerAccount <- JoyrideAccounts.playerAccounts.remove(key: playerID)
 			if playerAccount == nil{ 
@@ -251,7 +265,7 @@ contract JoyrideAccounts{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AddPlayerAccount(playerID: String, referralID: String?, account: &Account){ 
 			var checkAccount <- JoyrideAccounts.playerAccounts.remove(key: playerID)
 			if checkAccount == nil{ 
@@ -267,20 +281,20 @@ contract JoyrideAccounts{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AddDeveloperAccount(address: Address, gameID: String){ 
 			JoyrideAccounts.gameToDeveloperAccount[gameID] = address
 			emit LinkDeveloperAccount(accountAddress: address, gameID: gameID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun TransferPlayerAccount(playerID: String, to: &Account){ 
 			let checkAccount <- JoyrideAccounts.playerAccounts.remove(key: playerID) ?? panic("PlayerID not found!")
 			checkAccount.AssociatePaymentAddress(address: to.address)
 			destroy JoyrideAccounts.playerAccounts.insert(key: playerID, <-checkAccount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetPlayerJRXAccount(playerID: String): &PlayerAccount?{ 
 			if JoyrideAccounts.playerAccounts.containsKey(playerID){ 
 				let playerAccount <- JoyrideAccounts.playerAccounts.remove(key: playerID)!
@@ -291,12 +305,12 @@ contract JoyrideAccounts{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ShareProfits(profits: @{FungibleToken.Vault}, inGameID: String, fromPlayerID: String): @{FungibleToken.Vault}{ 
 			return <-self.ShareProfitsWithDevPercentage(profits: <-profits, inGameID: inGameID, fromPlayerID: fromPlayerID, devPercentage: 0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ShareProfitsWithDevPercentage(profits: @{FungibleToken.Vault}, inGameID: String, fromPlayerID: String, devPercentage: UFix64): @{FungibleToken.Vault}{ 
 			let playerAddress = JoyrideAccounts.playerIDToPlayer[fromPlayerID]
 			let playerAccount = self.GetPlayerJRXAccount(playerID: fromPlayerID)
@@ -315,7 +329,7 @@ contract JoyrideAccounts{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun EscrowWithdraw(playerID: String, amount: UFix64, tokenContext: String): @{FungibleToken.Vault}?{ 
 			let playerAccount = self.GetPlayerJRXAccount(playerID: playerID)
 			if playerAccount == nil{ 
@@ -324,7 +338,7 @@ contract JoyrideAccounts{
 			return <-(playerAccount!).WithdrawTokensForPayment(playerID: playerID, txID: "", amount: amount, tokenContext: tokenContext)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun EscrowWithdrawWithTnxId(playerID: String, txID: String, amount: UFix64, tokenContext: String): @{FungibleToken.Vault}?{ 
 			let playerAccount = self.GetPlayerJRXAccount(playerID: playerID)
 			if playerAccount == nil{ 
@@ -333,7 +347,7 @@ contract JoyrideAccounts{
 			return <-(playerAccount!).WithdrawTokensForPayment(playerID: playerID, txID: txID, amount: amount, tokenContext: tokenContext)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun PlayerDeposit(playerID: String, vault: @{FungibleToken.Vault}): @{FungibleToken.Vault}?{ 
 			let playerAccount = self.GetPlayerJRXAccount(playerID: playerID)
 			if playerAccount != nil{ 

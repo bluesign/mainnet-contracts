@@ -1,4 +1,18 @@
-/// CapabilityDelegator is a contract used to share Capabiltities to other accounts. It is used by the
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/// CapabilityDelegator is a contract used to share Capabiltities to other accounts. It is used by the
 /// HybridCustody contract to allow more flexible sharing of Capabilities when an app wants to share things
 /// that aren't the NFT-standard interface types.
 /// 
@@ -32,7 +46,7 @@ contract CapabilityDelegator{
 	///
 	access(all)
 	resource interface GetterPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrivateCapability(_ type: Type): Capability?{ 
 			post{ 
 				result == nil || type.isSubtype(of: result.getType()):
@@ -40,10 +54,10 @@ contract CapabilityDelegator{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun findFirstPrivateType(_ type: Type): Type?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllPrivate(): [Capability]
 	}
 	
@@ -51,7 +65,7 @@ contract CapabilityDelegator{
 	///
 	access(all)
 	resource interface GetterPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicCapability(_ type: Type): Capability?{ 
 			post{ 
 				result == nil || type.isSubtype(of: result.getType()):
@@ -59,10 +73,10 @@ contract CapabilityDelegator{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun findFirstPublicType(_ type: Type): Type?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllPublic(): [Capability]
 	}
 	
@@ -81,7 +95,7 @@ contract CapabilityDelegator{
 		//
 		/// Returns the public Capability of the given Type if it exists
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicCapability(_ type: Type): Capability?{ 
 			return self.publicCapabilities[type]
 		}
@@ -92,7 +106,7 @@ contract CapabilityDelegator{
 		/// @param type: Type of the Capability to retrieve
 		/// @return Capability of the given Type if it exists, nil otherwise
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrivateCapability(_ type: Type): Capability?{ 
 			return self.privateCapabilities[type]
 		}
@@ -101,7 +115,7 @@ contract CapabilityDelegator{
 		///
 		/// @return List of all public Capabilities
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllPublic(): [Capability]{ 
 			return self.publicCapabilities.values
 		}
@@ -110,7 +124,7 @@ contract CapabilityDelegator{
 		///
 		/// @return List of all private Capabilities
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllPrivate(): [Capability]{ 
 			return self.privateCapabilities.values
 		}
@@ -120,7 +134,7 @@ contract CapabilityDelegator{
 		/// @param type: Type to check for subtypes
 		/// @return First public Type that is a subtype of the given Type, nil otherwise
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun findFirstPublicType(_ type: Type): Type?{ 
 			for t in self.publicCapabilities.keys{ 
 				if t.isSubtype(of: type){ 
@@ -135,7 +149,7 @@ contract CapabilityDelegator{
 		/// @param type: Type to check for subtypes
 		/// @return First private Type that is a subtype of the given Type, nil otherwise
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun findFirstPrivateType(_ type: Type): Type?{ 
 			for t in self.privateCapabilities.keys{ 
 				if t.isSubtype(of: type){ 
@@ -151,7 +165,7 @@ contract CapabilityDelegator{
 		/// @param cap: Capability to add
 		/// @param isPublic: Whether the Capability should be public or private
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(cap: Capability, isPublic: Bool){ 
 			pre{ 
 				cap.check<&AnyResource>():
@@ -169,7 +183,7 @@ contract CapabilityDelegator{
 		///
 		/// @param cap: Capability to remove
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCapability(cap: Capability){ 
 			if let removedPublic = self.publicCapabilities.remove(key: cap.getType()){ 
 				emit DelegatorUpdated(id: self.uuid, capabilityType: cap.getType(), isPublic: true, active: false)
@@ -189,7 +203,7 @@ contract CapabilityDelegator{
 	/// 
 	/// @return Newly created Delegator
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDelegator(): @Delegator{ 
 		let delegator <- create Delegator()
 		emit DelegatorCreated(id: delegator.uuid)

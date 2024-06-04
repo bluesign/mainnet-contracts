@@ -1,8 +1,22 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface IPackNFT{ 
 	/// StoragePath for Collection Resource
 	///
@@ -61,17 +75,17 @@ contract interface IPackNFT{
 	
 	access(all)
 	enum Status: UInt8{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		case Sealed
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		case Revealed
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		case Opened
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface Collectible{ 
 		access(all)
 		let address: Address
@@ -82,13 +96,13 @@ contract interface IPackNFT{
 		access(all)
 		let id: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hashString(): String
 		
 		init(address: Address, contractName: String, id: UInt64)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IPack{ 
 		access(all)
 		let commitHash: String
@@ -102,7 +116,7 @@ contract interface IPackNFT{
 		access(all)
 		var salt: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(nftString: String): Bool
 		
 		access(contract)
@@ -114,31 +128,31 @@ contract interface IPackNFT{
 		init(commitHash: String, issuer: Address)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IOperator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(distId: UInt64, commitHash: String, issuer: Address): @{IPackNFT.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(id: UInt64, nfts: [{Collectible}], salt: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(id: UInt64, nfts: [{IPackNFT.Collectible}])
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface PackNFTOperator: IOperator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(distId: UInt64, commitHash: String, issuer: Address): @{IPackNFT.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(id: UInt64, nfts: [{Collectible}], salt: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(id: UInt64, nfts: [{IPackNFT.Collectible}])
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IPackNFTToken{ 
 		access(all)
 		let id: UInt64
@@ -150,7 +164,7 @@ contract interface IPackNFT{
 		let issuer: Address
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface NFT: NonFungibleToken.NFT, IPackNFTToken, IPackNFTOwnerOperator{ 
 		access(all)
 		let id: UInt64
@@ -161,34 +175,34 @@ contract interface IPackNFT{
 		access(all)
 		let issuer: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(openRequest: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IPackNFTOwnerOperator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(openRequest: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IPackNFTCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPackNFT(id: UInt64): &{IPackNFT.NFT}?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -205,6 +219,6 @@ contract interface IPackNFT{
 	access(contract)
 	fun openRequest(id: UInt64)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicReveal(id: UInt64, nfts: [{IPackNFT.Collectible}], salt: String)
 }

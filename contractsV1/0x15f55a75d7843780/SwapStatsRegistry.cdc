@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract SwapStatsRegistry{ 
 	access(self)
 	var accountSwapStats:{ String: [AccountStats]}
@@ -50,7 +64,7 @@ contract SwapStatsRegistry{
 		access(all)
 		var metadata:{ String: AnyStruct}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateData(id: String, _ data: AccountSwapData){ 
 			self.totalTradeVolumeReceived = self.totalTradeVolumeReceived
 				+ Int(data.totalTradeVolumeReceived)
@@ -66,7 +80,7 @@ contract SwapStatsRegistry{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clearData(){ 
 			self.totalTradeVolumeReceived = 0
 			self.totalTradeVolumeSent = 0
@@ -76,7 +90,7 @@ contract SwapStatsRegistry{
 			self.rank = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(_ metadata:{ String: AnyStruct}?){ 
 			self.metadata = metadata
 		}

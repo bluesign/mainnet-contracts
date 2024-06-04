@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MoxyToken from "./MoxyToken.cdc"
 
@@ -25,54 +39,54 @@ contract PlayAndEarn{
 		access(contract)
 		var events: @{String: PlayAndEarnEvent}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMOXYBalanceFor(eventCode: String): UFix64{ 
 			return self.events[eventCode]?.getMOXYBalance()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeeAmountFor(eventCode: String): UFix64{ 
 			return self.events[eventCode]?.getFeeAmount()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipantsFor(eventCode: String): [Address]{ 
 			return self.events[eventCode]?.getParticipants()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentsFor(eventCode: String):{ Address: UFix64}{ 
 			return self.events[eventCode]?.getPayments()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreatedAt(eventCode: String): UFix64{ 
 			return self.events[eventCode]?.getCreatedAt()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEvents(): [String]{ 
 			return self.events.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addParticipantTo(eventCode: String, address: Address, feeVault: @{FungibleToken.Vault}){ 
 			self.events[eventCode]?.addParticipant(address: address, feeVault: <-feeVault.withdraw(amount: feeVault.balance))
 			destroy feeVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositTo(eventCode: String, vault: @{FungibleToken.Vault}){ 
 			self.events[eventCode]?.deposit(vault: <-vault.withdraw(amount: vault.balance))
 			destroy vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payToAddressFor(eventCode: String, address: Address, amount: UFix64){ 
 			self.events[eventCode]?.payToAddress(address: address, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEvent(code: String, feeAmount: UFix64){ 
 			if self.events[code] != nil{ 
 				panic("Event already exists")
@@ -106,37 +120,37 @@ contract PlayAndEarn{
 		access(all)
 		var createdAt: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeeAmount(): UFix64{ 
 			return self.fee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMOXYBalance(): UFix64{ 
 			return self.vault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipants(): [Address]{ 
 			return self.participants.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPayments():{ Address: UFix64}{ 
 			return self.payments
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreatedAt(): UFix64{ 
 			return self.createdAt
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasParticipant(address: Address): Bool{ 
 			return self.participants[address] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addParticipant(address: Address, feeVault: @{FungibleToken.Vault}){ 
 			let feePaid = feeVault.balance
 			self.participants[address] = feePaid
@@ -148,14 +162,14 @@ contract PlayAndEarn{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(vault: @{FungibleToken.Vault}){ 
 			let amount = vault.balance
 			self.vault.deposit(from: <-vault)
 			emit PlayAndEarnEventTokensDeposited(eventCode: self.code, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payToAddress(address: Address, amount: UFix64){ 
 			// Get the amount from the event vault
 			let vault <- self.vault.withdraw(amount: amount)
@@ -196,7 +210,7 @@ contract PlayAndEarn{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayAndEarnEcosystemPublicCapability(): &PlayAndEarnEcosystem{ 
 		return self.account.capabilities.get<&PlayAndEarn.PlayAndEarnEcosystem>(
 			PlayAndEarn.playAndEarnEcosystemPublic
@@ -205,25 +219,25 @@ contract PlayAndEarn{
 	
 	access(all)
 	resource interface PlayAndEarnEcosystemInfoInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMOXYBalanceFor(eventCode: String): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeeAmountFor(eventCode: String): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipantsFor(eventCode: String): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentsFor(eventCode: String):{ Address: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreatedAt(eventCode: String): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEvents(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositTo(eventCode: String, vault: @{FungibleToken.Vault})
 	}
 	

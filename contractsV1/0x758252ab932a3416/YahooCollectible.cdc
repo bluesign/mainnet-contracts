@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -84,7 +98,7 @@ contract YahooCollectible: NonFungibleToken{
 			self.itemCount = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAdditional():{ String: String}{ 
 			return self.additional
 		}
@@ -121,12 +135,12 @@ contract YahooCollectible: NonFungibleToken{
 		}
 		
 		// Expose metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata?{ 
 			return YahooCollectible.itemMetadata[self.itemID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			var royalties: [MetadataViews.Royalty] = []
 			let receiver = getAccount(0xfcf3a236f4cd7dbc).capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)
@@ -134,7 +148,7 @@ contract YahooCollectible: NonFungibleToken{
 			return MetadataViews.Royalties(royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): MetadataViews.Editions{ 
 			let metadata = self.getMetadata() ?? panic("missing metadata")
 			let editionInfo = MetadataViews.Edition(name: metadata.name, number: self.editionNumber, max: metadata.itemCount)
@@ -142,32 +156,32 @@ contract YahooCollectible: NonFungibleToken{
 			return MetadataViews.Editions(editionList)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalURL(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("https://bay.blocto.app/flow/yahoo/".concat(self.id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: YahooCollectible.CollectionStoragePath, publicPath: YahooCollectible.CollectionPublicPath, publicCollection: Type<&YahooCollectible.Collection>(), publicLinkedType: Type<&YahooCollectible.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-YahooCollectible.createEmptyCollection(nftType: Type<@YahooCollectible.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let squareImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://raw.githubusercontent.com/portto/assets/main/nft/flow/yahoo/logo.png"), mediaType: "image/png")
 			let bannerImager = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://raw.githubusercontent.com/portto/assets/main/nft/flow/yahoo/banner.png"), mediaType: "image/png")
 			return MetadataViews.NFTCollectionDisplay(name: "Yahoo", description: "NFT collection of Yahoo Taiwan", externalURL: MetadataViews.ExternalURL("https://bay.blocto.app/market?collections=yahoo"), squareImage: squareImage, bannerImage: bannerImager, socials:{ "twitter": MetadataViews.ExternalURL("https://twitter.com/Yahoo")})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits{ 
 			let metadata = self.getMetadata() ?? panic("missing metadata")
 			return MetadataViews.dictToTraits(dict: metadata.getAdditional(), excludedNames: [])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias{ 
 			let metadata = self.getMetadata() ?? panic("missing metadata")
 			let file = MetadataViews.IPFSFile(cid: metadata.mediaHash, path: nil)
@@ -216,15 +230,15 @@ contract YahooCollectible: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYahooCollectible(id: UInt64): &YahooCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -261,7 +275,7 @@ contract YahooCollectible: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @YahooCollectible.NFT
 			let id: UInt64 = token.id
 			
@@ -293,7 +307,7 @@ contract YahooCollectible: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the YahooCollectible.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYahooCollectible(id: UInt64): &YahooCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -356,7 +370,7 @@ contract YahooCollectible: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, itemID: UInt64, codeHash: String?){ 
 			pre{ 
 				codeHash == nil || !YahooCollectible.checkCodeHashUsed(codeHash: codeHash!):
@@ -380,7 +394,7 @@ contract YahooCollectible: NonFungibleToken{
 		// Mints a batch of new NFTs
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, itemID: UInt64, count: Int){ 
 			var index = 0
 			while index < count{ 
@@ -392,7 +406,7 @@ contract YahooCollectible: NonFungibleToken{
 		// registerMetadata
 		// Registers metadata for a itemID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerMetadata(itemID: UInt64, metadata: Metadata){ 
 			pre{ 
 				YahooCollectible.itemMetadata[itemID] == nil:
@@ -404,7 +418,7 @@ contract YahooCollectible: NonFungibleToken{
 		// updateMetadata
 		// Registers metadata for a itemID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(itemID: UInt64, metadata: Metadata){ 
 			pre{ 
 				YahooCollectible.itemMetadata[itemID] != nil:
@@ -423,7 +437,7 @@ contract YahooCollectible: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &YahooCollectible.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&YahooCollectible.Collection>(YahooCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust YahooCollectible.Collection.borowYahooCollectible to get the correct itemID
@@ -434,7 +448,7 @@ contract YahooCollectible: NonFungibleToken{
 	// getMetadata
 	// Get the metadata for a specific type of YahooCollectible
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(itemID: UInt64): Metadata?{ 
 		return YahooCollectible.itemMetadata[itemID]
 	}
@@ -442,7 +456,7 @@ contract YahooCollectible: NonFungibleToken{
 	// checkCodeHashUsed
 	// Check if a codeHash has been registered
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun checkCodeHashUsed(codeHash: String): Bool{ 
 		var redeemedCodes = YahooCollectible.account.storage.copy<{String: Bool}>(from: /storage/redeemedCodes)!
 		return redeemedCodes[codeHash] ?? false

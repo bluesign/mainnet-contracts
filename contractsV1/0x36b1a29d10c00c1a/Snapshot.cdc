@@ -1,4 +1,18 @@
-//	 _____						__		  __ 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//	 _____						__		  __ 
 //	/ ___/____  ____ _____  _____/ /_  ____  / /_
 //	\__ \/ __ \/ __ `/ __ \/ ___/ __ \/ __ \/ __/
 //   ___/ / / / / /_/ / /_/ (__  ) / / / /_/ / /_  
@@ -74,7 +88,7 @@ contract Snapshot{
 	//  While anyone can define this implementation, it must be approved by the `Admin` to be used.
 	access(all)
 	struct interface ILogic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwnedNFTs(address: Address):{ String:{ UInt64: NFTInfo}}
 	}
 	
@@ -83,7 +97,7 @@ contract Snapshot{
 	//  Anybody can create this implementation, and it doesn't require permission to use.
 	access(all)
 	struct interface IViewer{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getView(snap: &Snap): AnyStruct
 	}
 	
@@ -127,7 +141,7 @@ contract Snapshot{
 		access(all)
 		var snaps: @{UFix64: Snap}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proofOfOwnership(
 			startTime: UFix64,
 			endTime: UFix64,
@@ -135,9 +149,9 @@ contract Snapshot{
 			nftType: Type,
 			nftID: UInt64,
 			ownerAddress: Address
-		): &Snap?
+		): &Snapshot.Snap?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun view(time: UFix64, viewer:{ IViewer}): AnyStruct
 	}
 	
@@ -152,7 +166,7 @@ contract Snapshot{
 		
 		// Function to capture a snapshot.
 		// The arguments include the address and the desired logic struct. The logic must be authorized.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun snapshot(address: Address, logic:{ ILogic}){ 
 			pre{ 
 				Snapshot.allowedLogicTypes.contains(logic.getType()):
@@ -165,7 +179,7 @@ contract Snapshot{
 		// This function enables you to verify if a specific address owned a particular NFT
 		// within a specified start and end time range.
 		// If a provable snapshot exists, it will be returned. Otherwise, nil is returned.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun proofOfOwnership(startTime: UFix64, endTime: UFix64, collectionPublicPath: String, nftType: Type, nftID: UInt64, ownerAddress: Address): &Snap?{ 
 			for time in self.snaps.keys{ 
 				if startTime > time || time > endTime{ 
@@ -181,21 +195,21 @@ contract Snapshot{
 		
 		// Function to display the contents of a snapshot.
 		// For instance, it can be used to generate something akin to a family photo.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun view(time: UFix64, viewer:{ IViewer}): AnyStruct{ 
 			let snap = &self.snaps[time] as &Snap?
 			return viewer.getView(snap: snap!)
 		}
 		
 		// Function to import a snapshot.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _import(snap: @Snap){ 
 			let time = snap.time
 			self.snaps[time] <-! snap
 		}
 		
 		// Function to export a snapshot.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _export(time: UFix64): @Snap{ 
 			return <-self.snaps.remove(key: time)!
 		}
@@ -208,7 +222,7 @@ contract Snapshot{
 	// `Admin` is a resource held by the administrator of this contract. It is used for maintaining logic.
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLogic(logic:{ ILogic}){ 
 			pre{ 
 				!Snapshot.allowedLogicTypes.contains(logic.getType()):
@@ -217,18 +231,18 @@ contract Snapshot{
 			Snapshot.allowedLogicTypes.append(logic.getType())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeLogic(index: Int){ 
 			Snapshot.allowedLogicTypes.remove(at: index)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyAlbum(): @Album{ 
 		return <-create Album()
 	}

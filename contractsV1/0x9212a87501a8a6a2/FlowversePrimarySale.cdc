@@ -1,4 +1,18 @@
-// MAINNET
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// MAINNET
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -108,7 +122,7 @@ contract FlowversePrimarySale{
 	
 	access(all)
 	resource interface IMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(entityID: UInt64, minterAddress: Address): @{NonFungibleToken.NFT}
 	}
 	
@@ -131,7 +145,7 @@ contract FlowversePrimarySale{
 			self.expiration = expiration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun toString(): String{ 
 			return self.primarySaleID.toString().concat("-").concat(
 				self.purchaserAddress.toString()
@@ -262,16 +276,16 @@ contract FlowversePrimarySale{
 	
 	access(all)
 	resource interface PrimarySalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupply(pool: String?): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ String: PriceData}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseRandomNFTs(
 			payment: @{FungibleToken.Vault},
 			data: PurchaseDataRandom,
@@ -279,7 +293,7 @@ contract FlowversePrimarySale{
 			signature: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseNFTs(
 			payment: @{FungibleToken.Vault},
 			data: PurchaseData,
@@ -287,7 +301,7 @@ contract FlowversePrimarySale{
 			signature: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimTreasures(
 			primarySaleID: UInt64,
 			pool: String?,
@@ -297,40 +311,40 @@ contract FlowversePrimarySale{
 			signature: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedByUser(userAddress: Address, priceType: String): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerUser():{ String:{ Address: UInt64}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllAvailableEntities(pool: String?):{ UInt64: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableEntities():{ UInt64: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPooledEntities():{ String:{ UInt64: UInt64}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchDate(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndDate(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPooled(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContractName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContractAddress(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetID(): UInt64
 	}
 	
@@ -402,7 +416,7 @@ contract FlowversePrimarySale{
 			emit PrimarySaleCreated(primarySaleID: self.primarySaleID, contractName: contractName, contractAddress: contractAddress, setID: setID, prices: prices, launchDate: launchDate, endDate: endDate, pooled: pooled)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String{ 
 			if self.status == PrimarySaleStatus.PAUSED{ 
 				return "PAUSED"
@@ -415,7 +429,7 @@ contract FlowversePrimarySale{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(priceData: PriceData){ 
 			self.prices[priceData.priceType] = priceData
 			if !self.numMintedPerUser.containsKey(priceData.priceType){ 
@@ -424,12 +438,12 @@ contract FlowversePrimarySale{
 			emit PriceSet(primarySaleID: self.primarySaleID, type: priceData.priceType, price: priceData.price, eligibleAddresses: priceData.eligibleAddresses, maxMintsPerUser: priceData.maxMintsPerUser)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ String: PriceData}{ 
 			return self.prices
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupply(pool: String?): UInt64{ 
 			var supply = UInt64(0)
 			if self.pooled{ 
@@ -449,17 +463,17 @@ contract FlowversePrimarySale{
 			return supply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchDate(): String{ 
 			return self.launchDate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEndDate(): String{ 
 			return self.endDate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentReceiverAddress(): Address?{ 
 			let receiver = self.paymentReceiverCap.borrow()!
 			if receiver.owner != nil{ 
@@ -468,44 +482,44 @@ contract FlowversePrimarySale{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPooled(): Bool{ 
 			return self.pooled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerUser():{ String:{ Address: UInt64}}{ 
 			return self.numMintedPerUser
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedByUser(userAddress: Address, priceType: String): UInt64{ 
 			assert(self.numMintedPerUser.containsKey(priceType), message: "invalid priceType")
 			let numMintedDict = self.numMintedPerUser[priceType]!
 			return numMintedDict[userAddress] ?? 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContractName(): String{ 
 			return self.contractName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContractAddress(): Address{ 
 			return self.contractAddress
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.primarySaleID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetID(): UInt64{ 
 			return self.setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntity(entityID: UInt64, pool: String?, quantity: UInt64){ 
 			if self.pooled{ 
 				assert(pool != nil, message: "must specify pool")
@@ -521,7 +535,7 @@ contract FlowversePrimarySale{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEntity(entityID: UInt64, pool: String?){ 
 			if self.pooled{ 
 				assert(pool != nil, message: "must specify pool")
@@ -540,20 +554,20 @@ contract FlowversePrimarySale{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntities(entityIDs: [UInt64], pool: String?){ 
 			for id in entityIDs{ 
 				self.addEntity(entityID: id, pool: pool, quantity: 1)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pause(){ 
 			self.status = PrimarySaleStatus.PAUSED
 			emit PrimarySaleStatusChanged(primarySaleID: self.primarySaleID, status: self.getStatus())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(){ 
 			pre{ 
 				self.status != PrimarySaleStatus.OPEN:
@@ -565,7 +579,7 @@ contract FlowversePrimarySale{
 			emit PrimarySaleStatusChanged(primarySaleID: self.primarySaleID, status: self.getStatus())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			self.status = PrimarySaleStatus.CLOSED
 			emit PrimarySaleStatusChanged(primarySaleID: self.primarySaleID, status: self.getStatus())
@@ -579,7 +593,7 @@ contract FlowversePrimarySale{
 			return publicKey.verify(signature: signature.decodeHex(), signedData: signedPayloadData.toString().utf8, domainSeparationTag: "FLOW-V0.0-user", hashAlgorithm: HashAlgorithm.SHA3_256)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseRandomNFTs(payment: @{FungibleToken.Vault}, data: PurchaseDataRandom, adminSignedPayload: AdminSignedPayload, signature: String){ 
 			pre{ 
 				self.primarySaleID == data.primarySaleID:
@@ -622,7 +636,7 @@ contract FlowversePrimarySale{
 			self.purchase(payment: <-payment, data: purchaseData)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseNFTs(payment: @{FungibleToken.Vault}, data: PurchaseData, adminSignedPayload: AdminSignedPayload, signature: String){ 
 			pre{ 
 				self.primarySaleID == data.primarySaleID:
@@ -643,7 +657,7 @@ contract FlowversePrimarySale{
 			self.purchase(payment: <-payment, data: data)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimTreasures(primarySaleID: UInt64, pool: String?, claimerAddress: Address, claimerCollectionRef: &{NonFungibleToken.Receiver}, adminSignedPayload: AdminSignedPayload, signature: String){ 
 			pre{ 
 				self.primarySaleID == primarySaleID:
@@ -783,7 +797,7 @@ contract FlowversePrimarySale{
 			 self.numMintedPerUser[data.priceType]!).insert(key: data.purchaserAddress, numMintedByUser + totalQuantity)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllAvailableEntities(pool: String?):{ UInt64: UInt64}{ 
 			var availableEntities:{ UInt64: UInt64} ={} 
 			if pool != nil{ 
@@ -800,29 +814,29 @@ contract FlowversePrimarySale{
 			return availableEntities
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableEntities():{ UInt64: UInt64}{ 
 			return self.availableEntities
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPooledEntities():{ String:{ UInt64: UInt64}}{ 
 			return self.pooledEntities
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLaunchDate(date: String){ 
 			self.launchDate = date
 			emit PrimarySaleDateUpdated(primarySaleID: self.primarySaleID, date: date, isLaunch: true)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEndDate(date: String){ 
 			self.endDate = date
 			emit PrimarySaleDateUpdated(primarySaleID: self.primarySaleID, date: date, isLaunch: false)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePaymentReceiver(paymentReceiverCap: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				paymentReceiverCap.borrow() != nil:
@@ -837,7 +851,7 @@ contract FlowversePrimarySale{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPrimarySale(
 			contractName: String,
 			contractAddress: Address,
@@ -880,7 +894,7 @@ contract FlowversePrimarySale{
 			FlowversePrimarySale.primarySales[primarySaleID] <-! primarySale
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrimarySale(primarySaleID: UInt64): &PrimarySale?{ 
 			if FlowversePrimarySale.primarySales.containsKey(primarySaleID){ 
 				return (&FlowversePrimarySale.primarySales[primarySaleID] as &PrimarySale?)!
@@ -888,7 +902,7 @@ contract FlowversePrimarySale{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -978,7 +992,7 @@ contract FlowversePrimarySale{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrimarySaleData(primarySaleID: UInt64): PrimarySaleData{ 
 		pre{ 
 			FlowversePrimarySale.primarySales.containsKey(primarySaleID):
@@ -1002,7 +1016,7 @@ contract FlowversePrimarySale{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPaymentReceiverAddress(primarySaleID: UInt64): Address?{ 
 		pre{ 
 			FlowversePrimarySale.primarySales.containsKey(primarySaleID):
@@ -1012,7 +1026,7 @@ contract FlowversePrimarySale{
 		return primarySale.getPaymentReceiverAddress()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrice(primarySaleID: UInt64, type: String): UFix64{ 
 		pre{ 
 			FlowversePrimarySale.primarySales.containsKey(primarySaleID):
@@ -1024,7 +1038,7 @@ contract FlowversePrimarySale{
 		return (prices[type]!).price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchaseRandomNFTs(
 		payment: @{FungibleToken.Vault},
 		data: PurchaseDataRandom,
@@ -1044,7 +1058,7 @@ contract FlowversePrimarySale{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchaseNFTs(
 		payment: @{FungibleToken.Vault},
 		data: PurchaseData,
@@ -1064,7 +1078,7 @@ contract FlowversePrimarySale{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimTreasures(
 		primarySaleID: UInt64,
 		pool: String?,
@@ -1088,7 +1102,7 @@ contract FlowversePrimarySale{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getID(contractName: String, contractAddress: Address, setID: UInt64): UInt64{ 
 		let key = contractName.concat(contractAddress.toString().concat(setID.toString()))
 		assert(

@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # The Comptroller contract of LendingPools.
 
@@ -114,21 +128,21 @@ contract LendingComptroller{
 		access(self)
 		let _reservedFields:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketStatus(isOpen: Bool){ 
 			if self.isOpen != isOpen{ 
 				self.isOpen = isOpen
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMiningStatus(isMining: Bool){ 
 			if self.isMining != isMining{ 
 				self.isMining = isMining
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLiquidationPenalty(newLiquidationPenalty: UFix64){ 
 			pre{ 
 				newLiquidationPenalty <= 1.0:
@@ -141,7 +155,7 @@ contract LendingComptroller{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollateralFactor(newCollateralFactor: UFix64){ 
 			pre{ 
 				newCollateralFactor <= 1.0:
@@ -153,7 +167,7 @@ contract LendingComptroller{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBorrowCap(newBorrowCap: UFix64){ 
 			let scaledNewBorrowCap = LendingConfig.UFix64ToScaledUInt256(newBorrowCap)
 			if self.scaledBorrowCap != scaledNewBorrowCap{ 
@@ -161,7 +175,7 @@ contract LendingComptroller{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSupplyCap(newSupplyCap: UFix64){ 
 			let scaledNewSupplyCap = LendingConfig.UFix64ToScaledUInt256(newSupplyCap)
 			if self.scaledSupplyCap != scaledNewSupplyCap{ 
@@ -206,7 +220,7 @@ contract LendingComptroller{
 	
 	/// Anyone can apply for a user certificate
 	/// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun IssueUserCertificate(): @UserCertificate{ 
 		return <-create UserCertificate()
 	}
@@ -243,7 +257,7 @@ contract LendingComptroller{
 		/// @Param supplyUnderlyingAmountScaled - Supply amount scaled by 1e18
 		/// @Return error code
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supplyAllowed(poolCertificate: @{LendingInterfaces.IdentityCertificate}, poolAddress: Address, supplierAddress: Address, supplyUnderlyingAmountScaled: UInt256): String?{ 
 			let err = self.callerAllowed(callerCertificate: <-poolCertificate, callerAddress: poolAddress)
 			if err != nil{ 
@@ -280,7 +294,7 @@ contract LendingComptroller{
 		///
 		/// Since borrower would decrease his overall collateral ratio across all markets, safety check is important.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeemAllowed(poolCertificate: @{LendingInterfaces.IdentityCertificate}, poolAddress: Address, redeemerAddress: Address, redeemLpTokenAmountScaled: UInt256): String?{ 
 			let err = self.callerAllowed(callerCertificate: <-poolCertificate, callerAddress: poolAddress)
 			if err != nil{ 
@@ -309,7 +323,7 @@ contract LendingComptroller{
 		/// @Param borrowUnderlyingAmountScaled - Borrow amount scaled by 1e18
 		/// @Return error code
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAllowed(poolCertificate: @{LendingInterfaces.IdentityCertificate}, poolAddress: Address, borrowerAddress: Address, borrowUnderlyingAmountScaled: UInt256): String?{ 
 			let err = self.callerAllowed(callerCertificate: <-poolCertificate, callerAddress: poolAddress)
 			if err != nil{ 
@@ -351,7 +365,7 @@ contract LendingComptroller{
 		/// @Param repayUnderlyingAmountScaled - Repay amount scaled by 1e18
 		/// @Return error code
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repayAllowed(poolCertificate: @{LendingInterfaces.IdentityCertificate}, poolAddress: Address, borrowerAddress: Address, repayUnderlyingAmountScaled: UInt256): String?{ 
 			let err = self.callerAllowed(callerCertificate: <-poolCertificate, callerAddress: poolAddress)
 			if err != nil{ 
@@ -372,7 +386,7 @@ contract LendingComptroller{
 		/// @Param repayUnderlyingAmountScaled - The amount repaid on behalf of the liquidator.
 		/// @Return error code
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun liquidateAllowed(poolCertificate: @{LendingInterfaces.IdentityCertificate}, poolBorrowed: Address, poolCollateralized: Address, borrower: Address, repayUnderlyingAmountScaled: UInt256): String?{ 
 			pre{ 
 				self.markets[poolCollateralized]?.isOpen == true:
@@ -409,7 +423,7 @@ contract LendingComptroller{
 		/// @Param seizeCollateralPoolLpTokenAmountScaled - The amount of Lptoken that the borrower will be liquidated.
 		/// @Return error code
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun seizeAllowed(poolCertificate: @{LendingInterfaces.IdentityCertificate}, borrowPool: Address, collateralPool: Address, liquidator: Address, borrower: Address, seizeCollateralPoolLpTokenAmountScaled: UInt256): String?{ 
 			pre{ 
 				self.markets[collateralPool]?.isOpen == true:
@@ -435,7 +449,7 @@ contract LendingComptroller{
 		/// Given actualRepaidBorrowAmount underlying of borrowPool, calculate seized number of lpTokens of collateralPool
 		/// Called in LendingPool.liquidate()
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateCollateralPoolLpTokenToSeize(borrower: Address, borrowPool: Address, collateralPool: Address, actualRepaidBorrowAmountScaled: UInt256): UInt256{ 
 			let borrowPoolUnderlyingPriceUSD = ((self.oracleCap!).borrow()!).getUnderlyingPrice(pool: borrowPool)
 			assert(borrowPoolUnderlyingPriceUSD != 0.0, message: LendingError.ErrorEncode(msg: "Price feed not available for market ".concat(borrowPool.toString()), err: LendingError.ErrorCode.UNKNOWN_MARKET))
@@ -460,12 +474,12 @@ contract LendingComptroller{
 			return scaledCollateralLpTokenSeizedAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserCertificateType(): Type{ 
 			return Type<@LendingComptroller.UserCertificate>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun callerAllowed(callerCertificate: @{LendingInterfaces.IdentityCertificate}, callerAddress: Address): String?{ 
 			if self.markets[callerAddress]?.isOpen != true{ 
 				destroy callerCertificate
@@ -621,7 +635,7 @@ contract LendingComptroller{
 			emit NewCloseFactor(oldCloseFactor, newCloseFactor)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoolPublicRef(poolAddr: Address): &{LendingInterfaces.PoolPublic}{ 
 			pre{ 
 				self.markets.containsKey(poolAddr):
@@ -630,12 +644,12 @@ contract LendingComptroller{
 			return (self.markets[poolAddr]!).poolPublicCap.borrow() ?? panic(LendingError.ErrorEncode(msg: "Cannot borrow reference to PoolPublic", err: LendingError.ErrorCode.CANNOT_ACCESS_POOL_PUBLIC_CAPABILITY))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllMarkets(): [Address]{ 
 			return self.markets.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketInfo(poolAddr: Address):{ String: AnyStruct}{ 
 			pre{ 
 				self.markets.containsKey(poolAddr):
@@ -651,7 +665,7 @@ contract LendingComptroller{
 			return{ "isOpen": market.isOpen, "isMining": market.isMining, "marketAddress": poolAddr, "marketType": poolRef.getUnderlyingTypeString(), "marketSupplyScaled": (poolRef.getPoolCash() + accrueInterestRealtimeRes[2]).toString(), "marketBorrowScaled": accrueInterestRealtimeRes[2].toString(), "marketReserveScaled": poolRef.getPoolTotalReservesScaled().toString(), "marketSupplyApr": poolRef.getPoolSupplyAprScaled().toString(), "marketBorrowApr": poolRef.getPoolBorrowAprScaled().toString(), "marketLiquidationPenalty": market.scaledLiquidationPenalty.toString(), "marketCollateralFactor": market.scaledCollateralFactor.toString(), "marketBorrowCap": market.scaledBorrowCap.toString(), "marketSupplyCap": market.scaledSupplyCap.toString(), "marketOraclePriceUsd": LendingConfig.UFix64ToScaledUInt256(oraclePrice).toString(), "marketSupplierCount": poolRef.getPoolSupplierCount().toString(), "marketBorrowerCount": poolRef.getPoolBorrowerCount().toString(), "marketReserveFactor": poolRef.getPoolReserveFactorScaled().toString()}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserMarkets(userAddr: Address): [Address]{ 
 			if self.accountMarketsIn.containsKey(userAddr) == false{ 
 				return []
@@ -662,13 +676,13 @@ contract LendingComptroller{
 		/// Return the current account cross-market liquidity snapshot:
 		/// [cross-market account collateral value in usd, cross-market account borrows in usd, cross-market account supplies in usd]
 		/// Used in liquidation allowance check, or LTV (loan-to-value) ratio calculation
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserCrossMarketLiquidity(userAddr: Address): [String; 3]{ 
 			let scaledLiquidity = self.getHypotheticalAccountLiquidity(account: userAddr, poolToModify: 0x0, scaledAmountLPTokenToRedeem: 0, scaledAmountUnderlyingToBorrow: 0)
 			return [scaledLiquidity[0].toString(), scaledLiquidity[1].toString(), scaledLiquidity[2].toString()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserMarketInfo(userAddr: Address, poolAddr: Address):{ String: AnyStruct}{ 
 			pre{ 
 				self.markets.containsKey(poolAddr):
@@ -699,7 +713,7 @@ contract LendingComptroller{
 	resource Admin{ 
 		/// Admin function to list a new asset pool to the lending market
 		/// Note: Do not list a new asset pool before the oracle feed is ready
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMarket(poolAddress: Address, liquidationPenalty: UFix64, collateralFactor: UFix64){ 
 			let comptrollerRef =
 				LendingComptroller.account.storage.borrow<&Comptroller>(
@@ -714,7 +728,7 @@ contract LendingComptroller{
 		}
 		
 		/// Admin function to config parameters of a listed-market
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configMarket(
 			pool: Address,
 			isOpen: Bool?,
@@ -741,7 +755,7 @@ contract LendingComptroller{
 		}
 		
 		/// Admin function to set a new oracle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configOracle(oracleAddress: Address){ 
 			let comptrollerRef =
 				LendingComptroller.account.storage.borrow<&Comptroller>(
@@ -752,7 +766,7 @@ contract LendingComptroller{
 		}
 		
 		/// Admin function to set closeFactor
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCloseFactor(closeFactor: UFix64){ 
 			let comptrollerRef =
 				LendingComptroller.account.storage.borrow<&Comptroller>(

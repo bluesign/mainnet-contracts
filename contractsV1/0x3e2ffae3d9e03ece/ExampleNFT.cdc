@@ -1,4 +1,18 @@
-// ExampleNFT.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// ExampleNFT.cdc
 //
 // This is a complete version of the ExampleNFT contract
 // that includes withdraw and deposit functionality, as well as a
@@ -40,13 +54,13 @@ contract ExampleNFT{
 	// and idExists fields in their Collection
 	access(all)
 	resource interface NFTReceiver{ 
-		access(all)
-		fun deposit(token: @NFT)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @ExampleNFT.NFT): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 	}
 	
@@ -68,7 +82,7 @@ contract ExampleNFT{
 		//
 		// Function that removes an NFT from the collection 
 		// and moves it to the calling context
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @NFT{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token <- self.ownedNFTs.remove(key: withdrawID)!
@@ -79,7 +93,7 @@ contract ExampleNFT{
 		//
 		// Function that takes a NFT as an argument and 
 		// adds it to the collections dictionary
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @NFT){ 
 			// add the new token to the dictionary with a force assignment
 			// if there is already a value at that key, it will fail and revert
@@ -88,20 +102,20 @@ contract ExampleNFT{
 		
 		// idExists checks to see if a NFT 
 		// with the given ID exists in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
 	}
 	
 	// creates a new empty Collection resource and returns it 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}
@@ -127,7 +141,7 @@ contract ExampleNFT{
 		//
 		// Function that mints a new NFT with a new ID
 		// and returns it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			// create a new NFT
 			var newNFT <- create NFT(initID: self.idCount)

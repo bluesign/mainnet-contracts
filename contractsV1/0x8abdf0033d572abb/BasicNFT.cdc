@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract BasicNFT{ 
 	access(all)
 	var totalSupply: UInt64
@@ -9,10 +23,10 @@ contract BasicNFT{
 	
 	access(all)
 	resource interface NFTPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getURL(): String
 	}
 	
@@ -30,18 +44,18 @@ contract BasicNFT{
 			BasicNFT.totalSupply = BasicNFT.totalSupply + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getURL(): String{ 
 			return self.metadata["URL"]!
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNFT(url: String): @NFT{ 
 		return <-create NFT(initURL: url)
 	}

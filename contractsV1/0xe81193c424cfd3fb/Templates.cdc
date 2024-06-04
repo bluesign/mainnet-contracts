@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -13,7 +27,7 @@ contract Templates{
 	access(contract)
 	let features:{ String: Bool}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCounter(_ name: String): UInt64{ 
 		return Templates.counters[name] ?? 0
 	}
@@ -40,18 +54,18 @@ contract Templates{
 	
 	access(all)
 	struct interface Editionable{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getCounterSuffix(): String
 		
 		// e.g. set , position
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getClassifier(): String
 		
 		// e.g. character, wearable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getContract(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounter(): String{ 
 			return self.getContract().concat("_").concat(self.getClassifier()).concat("_").concat(
 				self.getCounterSuffix()
@@ -67,7 +81,7 @@ contract Templates{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentCount(): UInt64{ 
 			return Templates.counters[self.getCounter()] ?? 0
 		}
@@ -78,13 +92,13 @@ contract Templates{
 		access(all)
 		var active: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getCounterSuffix(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getClassifier(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getContract(): String
 		
 		access(account)
@@ -102,7 +116,7 @@ contract Templates{
 		access(all)
 		let royalties: [Templates.Royalty]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			let royalty: [MetadataViews.Royalty] = []
 			for r in self.royalties{ 
@@ -129,12 +143,12 @@ contract Templates{
 			self.number = number
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupply(): UInt64{ 
 			return Templates.counters[self.counter] ?? 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAsMetadataEdition(_ active: Bool): MetadataViews.Edition{ 
 			var max: UInt64? = nil
 			if !active{ 
@@ -143,7 +157,7 @@ contract Templates{
 			return MetadataViews.Edition(name: self.name, number: self.number, max: max)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMaxEdition(): UInt64{ 
 			return Templates.counters[self.counter]!
 		}
@@ -174,12 +188,12 @@ contract Templates{
 			self.publicPath = publicPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicPath(): PublicPath{ 
 			return PublicPath(identifier: self.publicPath)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(): MetadataViews.Royalty{ 
 			let cap =
 				getAccount(self.address).capabilities.get<&{FungibleToken.Receiver}>(
@@ -189,12 +203,12 @@ contract Templates{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun featureEnabled(_ action: String): Bool{ 
 		return self.features[action] ?? false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertFeatureEnabled(_ action: String){ 
 		if !Templates.featureEnabled(action){ 
 			panic("Action cannot be taken, feature is not enabled : ".concat(action))

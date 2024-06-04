@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -282,40 +296,40 @@ contract Domains: NonFungibleToken{
 		access(all)
 		let createdAt: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getText(key: String): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(chainType: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTexts():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllAddresses():{ UInt64: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDomainName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): DomainDetail
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSubdomainsDetail(): [SubdomainDetail]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSubdomainDetail(nameHash: String): SubdomainDetail
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositVault(from: @{FungibleToken.Vault}, senderRef: &{FungibleToken.Receiver}?)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollection(collection: @{NonFungibleToken.Collection})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkCollection(key: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNFT(key: String, token: @{NonFungibleToken.NFT}, senderRef: &{NonFungibleToken.CollectionPublic}?)
 	}
 	
@@ -336,83 +350,83 @@ contract Domains: NonFungibleToken{
 		access(all)
 		let createdAt: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getText(key: String): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(chainType: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTexts():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllAddresses():{ UInt64: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDomainName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): SubdomainDetail
 	}
 	
 	access(all)
 	resource interface SubdomainPrivate{ 
-		access(all)
-		fun setText(key: String, value: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setText(key: String, value: String): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(chainType: UInt64, address: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeText(key: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddress(chainType: UInt64)
 	}
 	
 	// Domain private for Domain resource owner manage domain and subdomain
 	access(all)
 	resource interface DomainPrivate{ 
-		access(all)
-		fun setText(key: String, value: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setText(key: String, value: String): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(chainType: UInt64, address: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setETHAddress(address: String, publicKey: [UInt8], signature: [UInt8])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeText(key: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddress(chainType: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSubDomain(name: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSubDomain(nameHash: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSubdomainText(nameHash: String, key: String, value: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSubdomainAddress(nameHash: String, chainType: UInt64, address: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSubdomainText(nameHash: String, key: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSubdomainAddress(nameHash: String, chainType: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawVault(key: String, amount: UFix64): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNFT(key: String, itemId: UInt64): @{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReceivable(_ flag: Bool)
 	}
 	
@@ -455,45 +469,45 @@ contract Domains: NonFungibleToken{
 		}
 		
 		// Get subdomain full name with parent name
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDomainName(): String{ 
 			let domainName = ""
 			return domainName.concat(self.name).concat(".").concat(self.parent)
 		}
 		
 		// Get subdomain property
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getText(key: String): String?{ 
 			return self.texts[key]
 		}
 		
 		// Get address of subdomain
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(chainType: UInt64): String?{ 
 			return self.addresses[chainType]!
 		}
 		
 		// get all texts
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTexts():{ String: String}{ 
 			return self.texts
 		}
 		
 		// get all texts
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllAddresses():{ UInt64: String}{ 
 			return self.addresses
 		}
 		
 		// get subdomain detail
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): SubdomainDetail{ 
 			let owner = Domains.getRecords(self.parentNameHash)!
 			let detail = SubdomainDetail(id: self.id, owner: owner, name: self.getDomainName(), nameHash: self.nameHash, addresses: self.getAllAddresses(), texts: self.getAllTexts(), parentName: self.parent, createdAt: self.createdAt)
 			return detail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setText(key: String, value: String){ 
 			pre{ 
 				!Domains.isExpired(self.parentNameHash):
@@ -503,7 +517,7 @@ contract Domains: NonFungibleToken{
 			emit SubdmoainTextChanged(nameHash: self.nameHash, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(chainType: UInt64, address: String){ 
 			pre{ 
 				!Domains.isExpired(self.parentNameHash):
@@ -513,7 +527,7 @@ contract Domains: NonFungibleToken{
 			emit SubdmoainAddressChanged(nameHash: self.nameHash, chainType: chainType, address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeText(key: String){ 
 			pre{ 
 				!Domains.isExpired(self.parentNameHash):
@@ -523,7 +537,7 @@ contract Domains: NonFungibleToken{
 			emit SubdmoainTextRemoved(nameHash: self.nameHash, key: key)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddress(chainType: UInt64){ 
 			pre{ 
 				!Domains.isExpired(self.parentNameHash):
@@ -634,32 +648,32 @@ contract Domains: NonFungibleToken{
 		}
 		
 		// get domain full name with root domain
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDomainName(): String{ 
 			return self.name.concat(".").concat(self.parent)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getText(key: String): String?{ 
 			return self.texts[key]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(chainType: UInt64): String?{ 
 			return self.addresses[chainType]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTexts():{ String: String}{ 
 			return self.texts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllAddresses():{ UInt64: String}{ 
 			return self.addresses
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setText(key: String, value: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -673,7 +687,7 @@ contract Domains: NonFungibleToken{
 			emit DmoainTextChanged(nameHash: self.nameHash, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(chainType: UInt64, address: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -694,7 +708,7 @@ contract Domains: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setETHAddress(address: String, publicKey: [UInt8], signature: [UInt8]){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -718,7 +732,7 @@ contract Domains: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeText(key: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -730,7 +744,7 @@ contract Domains: NonFungibleToken{
 			emit DmoainTextRemoved(nameHash: self.nameHash, key: key)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddress(chainType: UInt64){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -742,7 +756,7 @@ contract Domains: NonFungibleToken{
 			emit DmoainAddressRemoved(nameHash: self.nameHash, chainType: chainType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSubdomainText(nameHash: String, key: String, value: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -756,7 +770,7 @@ contract Domains: NonFungibleToken{
 			subdomain.setText(key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSubdomainAddress(nameHash: String, chainType: UInt64, address: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -770,7 +784,7 @@ contract Domains: NonFungibleToken{
 			subdomain.setAddress(chainType: chainType, address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSubdomainText(nameHash: String, key: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -784,7 +798,7 @@ contract Domains: NonFungibleToken{
 			subdomain.removeText(key: key)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSubdomainAddress(nameHash: String, chainType: UInt64){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -798,7 +812,7 @@ contract Domains: NonFungibleToken{
 			subdomain.removeAddress(chainType: chainType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): DomainDetail{ 
 			let owner = Domains.getRecords(self.nameHash) ?? panic("Cannot get owner")
 			let expired = Domains.getExpiredTime(self.nameHash) ?? panic("Cannot get expired time")
@@ -827,13 +841,13 @@ contract Domains: NonFungibleToken{
 			return detail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSubdomainDetail(nameHash: String): SubdomainDetail{ 
 			let subdomainRef = (&self.subdomains[nameHash] as &Subdomain?)!
 			return subdomainRef.getDetail()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSubdomainsDetail(): [SubdomainDetail]{ 
 			let ids = self.subdomains.keys
 			var subdomains: [SubdomainDetail] = []
@@ -846,7 +860,7 @@ contract Domains: NonFungibleToken{
 		}
 		
 		// create subdomain with domain
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSubDomain(name: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -873,7 +887,7 @@ contract Domains: NonFungibleToken{
 			destroy oldSubdomain
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSubDomain(nameHash: String){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -887,7 +901,7 @@ contract Domains: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositVault(from: @{FungibleToken.Vault}, senderRef: &{FungibleToken.Receiver}?){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -911,7 +925,7 @@ contract Domains: NonFungibleToken{
 			emit DomainVaultDeposited(nameHash: self.nameHash, vaultType: typeKey, amount: amount, from: senderRef?.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawVault(key: String, amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.vaults[key] != nil:
@@ -927,7 +941,7 @@ contract Domains: NonFungibleToken{
 			return <-vaultRef.withdraw(amount: withdrawAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollection(collection: @{NonFungibleToken.Collection}){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -954,12 +968,12 @@ contract Domains: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkCollection(key: String): Bool{ 
 			return self.collections[key] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNFT(key: String, token: @{NonFungibleToken.NFT}, senderRef: &{NonFungibleToken.CollectionPublic}?){ 
 			pre{ 
 				self.collections[key] != nil:
@@ -975,7 +989,7 @@ contract Domains: NonFungibleToken{
 			collectionRef.deposit(token: <-token)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNFT(key: String, itemId: UInt64): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.collections[key] != nil:
@@ -986,7 +1000,7 @@ contract Domains: NonFungibleToken{
 			return <-collectionRef.withdraw(withdrawID: itemId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReceivable(_ flag: Bool){ 
 			pre{ 
 				!Domains.isExpired(self.nameHash):
@@ -1011,19 +1025,19 @@ contract Domains: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDomain(id: UInt64): &{Domains.DomainPublic}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	// return the content for this NFT
@@ -1032,7 +1046,7 @@ contract Domains: NonFungibleToken{
 		access(account)
 		fun mintDomain(name: String, nameHash: String, parentName: String, expiredAt: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDomainPrivate(_ id: UInt64): &Domains.NFT
 	}
 	
@@ -1055,7 +1069,7 @@ contract Domains: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Domains.NFT
 			let id: UInt64 = token.id
 			let nameHash = token.nameHash
@@ -1086,7 +1100,7 @@ contract Domains: NonFungibleToken{
 		}
 		
 		// Borrow domain for public use
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDomain(id: UInt64): &{Domains.DomainPublic}{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1097,7 +1111,7 @@ contract Domains: NonFungibleToken{
 		}
 		
 		// Borrow domain for domain owner 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDomainPrivate(_ id: UInt64): &Domains.NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1163,13 +1177,13 @@ contract Domains: NonFungibleToken{
 	}
 	
 	// Get domain's expired time in timestamp 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExpiredTime(_ nameHash: String): UFix64?{ 
 		return self.expired[nameHash]
 	}
 	
 	// Get domain's expired status
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isExpired(_ nameHash: String): Bool{ 
 		let currentTimestamp = getCurrentBlock().timestamp
 		let expiredTime = self.expired[nameHash]
@@ -1179,52 +1193,52 @@ contract Domains: NonFungibleToken{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isDeprecated(nameHash: String, domainId: UInt64): Bool{ 
 		let deprecatedRecords = self.deprecated[nameHash] ??{} 
 		return deprecatedRecords[domainId] != nil
 	}
 	
 	// Get domain's owner address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRecords(_ nameHash: String): Address?{ 
 		let address = self.records[nameHash]
 		return address
 	}
 	
 	// Get domain's id by namehash
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDomainId(_ nameHash: String): UInt64?{ 
 		let id = self.idMap[nameHash]
 		return id
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDeprecatedRecords(_ nameHash: String):{ UInt64: DomainDeprecatedInfo}?{ 
 		return self.deprecated[nameHash]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllRecords():{ String: Address}{ 
 		return self.records
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllExpiredRecords():{ String: UFix64}{ 
 		return self.expired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllDeprecatedRecords():{ String:{ UInt64: DomainDeprecatedInfo}}{ 
 		return self.deprecated
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIdMap():{ String: UInt64}{ 
 		return self.idMap
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun verifySignature(message: String, messagePrefix: String?, hashTag: String?, hashAlgorithm: HashAlgorithm, publicKey: [UInt8], signatureAlgorithm: SignatureAlgorithm, signature: [UInt8]): Bool{ 
 		let messageToVerify = (messagePrefix ?? "").concat(message)
 		let keyToVerify = PublicKey(publicKey: publicKey, signatureAlgorithm: signatureAlgorithm)
@@ -1235,7 +1249,7 @@ contract Domains: NonFungibleToken{
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ethPublicKeyToAddress(publicKey: [UInt8]): String{ 
 		pre{ 
 			publicKey.length > 0:

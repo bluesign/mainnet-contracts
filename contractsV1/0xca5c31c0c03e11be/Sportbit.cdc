@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -58,28 +72,28 @@ contract Sportbit: NonFungibleToken{
 		access(all)
 		let mint: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): SportvatarTemplate.TemplateData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeries(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSport(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayer(): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalMinted(): UInt64
 		
 		//these three are added because I think they will be in the standard. At least Dieter thinks it will be needed
@@ -130,51 +144,51 @@ contract Sportbit: NonFungibleToken{
 			SportvatarTemplate.setLastComponentMintedAt(id: templateId, value: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
 		// Returns the Template associated to the current Component
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): SportvatarTemplate.TemplateData{ 
 			return SportvatarTemplate.getTemplate(id: self.templateId)!
 		}
 		
 		// Gets the SVG from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			return self.getTemplate().svg!
 		}
 		
 		// Gets the series number from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeries(): UInt64{ 
 			return self.getTemplate().series
 		}
 		
 		// Gets the rarity from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String{ 
 			return self.getTemplate().rarity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.getTemplate().metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayer(): UInt32{ 
 			return self.getTemplate().layer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSport(): String{ 
 			return self.getTemplate().sport
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalMinted(): UInt64{ 
 			return self.getTemplate().totalMintedComponents
 		}
@@ -197,7 +211,7 @@ contract Sportbit: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				return MetadataViews.ExternalURL("https://sportvatar.com")
 			}
@@ -256,15 +270,15 @@ contract Sportbit: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAccessory(id: UInt64): &Sportbit.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -274,7 +288,7 @@ contract Sportbit: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSportvatar(id: UInt64): &Sportbit.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -308,7 +322,7 @@ contract Sportbit: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Sportbit.NFT
 			let id: UInt64 = token.id
 			
@@ -333,7 +347,7 @@ contract Sportbit: NonFungibleToken{
 		
 		// borrowAccessory returns a borrowed reference to a Sportbit
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAccessory(id: UInt64): &Sportbit.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -343,7 +357,7 @@ contract Sportbit: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSportvatar(id: UInt64): &Sportbit.NFT?{ 
 			return self.borrowAccessory(id: id)
 		}
@@ -431,7 +445,7 @@ contract Sportbit: NonFungibleToken{
 	}
 	
 	// Get the SVG of a specific Sportbit from an account and the ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSvgForSportbit(address: Address, id: UInt64): String?{ 
 		let account = getAccount(address)
 		if let componentCollection = account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath).borrow<&Sportbit.Collection>(){ 
@@ -441,7 +455,7 @@ contract Sportbit: NonFungibleToken{
 	}
 	
 	// Get a specific Component from an account and the ID as AccessoryData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSportbit(address: Address, componentId: UInt64): AccessoryData?{ 
 		let account = getAccount(address)
 		if let componentCollection = account.capabilities.get<&Sportbit.Collection>(self.CollectionPublicPath).borrow<&Sportbit.Collection>(){ 
@@ -453,7 +467,7 @@ contract Sportbit: NonFungibleToken{
 	}
 	
 	// Get an array of all the components in a specific account as AccessoryData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSportbits(address: Address): [AccessoryData]{ 
 		var componentData: [AccessoryData] = []
 		let account = getAccount(address)

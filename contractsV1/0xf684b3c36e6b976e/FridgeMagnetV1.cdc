@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Smart contract for FridgeMagnetV1
 
 	This smart contract is the main and has the core functionality for 
@@ -121,7 +135,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -151,7 +165,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		// mintNFT is a function to mint a new NFT on the specific Set
 		// Param: setID -> ID of the Set 
 		// Return: A minted NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			// Get the number of NFT that already minted in this Set
 			let numNFTInSet = self.numberNFTMintedPerSet
@@ -165,7 +179,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		}
 		
 		// Batch minter
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(quantity: UInt64): @Collection{ 
 			let newNFTCollection <- create Collection()
 			var i: UInt64 = 0
@@ -176,7 +190,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 			return <-newNFTCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberNFTMintedPerSet(): UInt32{ 
 			return self.numberNFTMintedPerSet
 		}
@@ -212,7 +226,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 			self.numberNFTMintedPerSet = set.numberNFTMintedPerSet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberNFTMintedPerSet(): UInt32{ 
 			return self.numberNFTMintedPerSet
 		}
@@ -307,26 +321,26 @@ contract FridgeMagnetV1: NonFungibleToken{
 		}
 		
 		// Functions for resolveView function
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let name: String = FridgeMagnetV1.getSetName(setID: self.data.setID) ?? ""
 			return name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let description: String = FridgeMagnetV1.getSetDescription(setID: self.data.setID) ?? ""
 			let number: String = self.data.serialNumber.toString()
 			return description.concat(" #").concat(number)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun image(): String{ 
 			let image: String = FridgeMagnetV1.getSetImage(setID: self.data.setID) ?? ""
 			return image
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetMetadataByField(field: String): AnyStruct?{ 
 			if let set = FridgeMagnetV1.setDatas[self.data.setID]{ 
 				return set.getMetadata()[field]
@@ -366,7 +380,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		// This func creates (mints) a new Set with new ID in this contract storage
 		// Param: name -> name of the Set
 		// Return: ID of the created Set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, description: String, image: String, metadata:{ String: AnyStruct}): UInt32{ 
 			// Create new Set
 			var newSet <- create Set(name: name, description: description, image: image, metadata: metadata)
@@ -383,7 +397,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		// For Admin to call it and mint NFT on the borrowed Set (transaction)
 		// Param: setID -> ID of the Set we want to call
 		// Return: A reference to the Set (w/all fields & methods)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				FridgeMagnetV1.sets[setID] != nil:
@@ -393,7 +407,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		}
 		
 		// This func creates new Admin resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -403,15 +417,15 @@ contract FridgeMagnetV1: NonFungibleToken{
 	access(all)
 	resource interface NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFridgeMagnetV1NFT(id: UInt64): &FridgeMagnetV1.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -447,7 +461,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		// the Collection dictionary
 		// Param: token -> the NFT that will be deposited to the Collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Make sure that the token has the correct type (as our @FridgeMagnetV1.NFT)
 			let token <- token as! @FridgeMagnetV1.NFT
 			// Get the token's ID
@@ -480,7 +494,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 		// Return: A reference to the NFT
 		// Caller can read data and call methods
 		// setID, serialNumber, or use it to call getSetData(setID)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFridgeMagnetV1NFT(id: UInt64): &FridgeMagnetV1.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -525,7 +539,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 	
 	// getAllSets returns all Set and values
 	// Return: An array of all created Sets
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets(): [FridgeMagnetV1.SetData]{ 
 		return FridgeMagnetV1.setDatas.values
 	}
@@ -533,7 +547,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 	// getTotalNFTinSet returns the number of NFTs that has been minted in a Set
 	// Param: setID -> ID of the Set we are searching
 	// Return: Total number of NFTs minted in a Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalNFTInSet(setID: UInt32): UInt32?{ 
 		if let setdata = self.getSetData(setID: setID){ 
 			let total = setdata.getNumberNFTMintedPerSet()
@@ -546,7 +560,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 	// getSetData returns data of the Set
 	// Param: setID -> ID of the Set we are searching
 	// Return: QuerySetData struct
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(setID: UInt32): QuerySetData?{ 
 		if FridgeMagnetV1.sets[setID] == nil{ 
 			return nil
@@ -558,7 +572,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 	// getSetName returns name of the Set
 	// Param: setID -> ID of the Set we are searching
 	// Return: Name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt32): String?{ 
 		return FridgeMagnetV1.setDatas[setID]?.name
 	}
@@ -566,7 +580,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 	// getSetDescription returns description of the Set
 	// Param: setID -> ID of the Set we are searching
 	// Return: Description of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetDescription(setID: UInt32): String?{ 
 		return FridgeMagnetV1.setDatas[setID]?.description
 	}
@@ -574,7 +588,7 @@ contract FridgeMagnetV1: NonFungibleToken{
 	// getSetImage returns image of the Set
 	// Param: setID -> ID of the Set we are searching
 	// Return: An image of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetImage(setID: UInt32): String?{ 
 		return FridgeMagnetV1.setDatas[setID]?.image
 	}

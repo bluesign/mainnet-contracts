@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import FlovatarComponentTemplate from "./FlovatarComponentTemplate.cdc"
@@ -164,7 +178,7 @@ contract FlovatarPack{
 			self.randomString = randomString
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeComponent(at: Int): @FlovatarComponent.NFT{ 
 			return <-self.components.remove(at: at)
 		}
@@ -173,13 +187,13 @@ contract FlovatarPack{
 	//Pack CollectionPublic interface that allows users to purchase a Pack
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @FlovatarPack.Pack)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenId: UInt64,
 			recipientCap: Capability<&{FlovatarPack.CollectionPublic}>,
@@ -187,7 +201,7 @@ contract FlovatarPack{
 			signature: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithDust(
 			tokenId: UInt64,
 			recipientCap: Capability<&{FlovatarPack.CollectionPublic}>,
@@ -195,7 +209,7 @@ contract FlovatarPack{
 			signature: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseDapper(
 			tokenId: UInt64,
 			recipientCap: Capability<&{FlovatarPack.CollectionPublic}>,
@@ -224,14 +238,14 @@ contract FlovatarPack{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedPacks.keys
 		}
 		
 		// deposit takes a Pack and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @FlovatarPack.Pack){ 
 			let id: UInt64 = token.id
 			
@@ -242,7 +256,7 @@ contract FlovatarPack{
 		}
 		
 		// withdraw removes a Pack from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @FlovatarPack.Pack{ 
 			let token <- self.ownedPacks.remove(key: withdrawID) ?? panic("Missing Pack")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -252,7 +266,7 @@ contract FlovatarPack{
 		// This function allows any Pack owner to open the pack and receive its content
 		// into the owner's Component Collection.
 		// The pack is destroyed after the Components are delivered.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(id: UInt64){ 
 			
 			// Gets the Component Collection Public capability to be able to
@@ -303,7 +317,7 @@ contract FlovatarPack{
 		// This will guarantee that the contract owner will be able to decide which user can buy a pack, by
 		// providing them the correct signature.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenId: UInt64, recipientCap: Capability<&{FlovatarPack.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}, signature: String){ 
 			
 			// Checks that the pack is still available and that the FLOW tokens are sufficient
@@ -356,7 +370,7 @@ contract FlovatarPack{
 		}
 		
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseDapper(tokenId: UInt64, recipientCap: Capability<&{FlovatarPack.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}, signature: String, expectedPrice: UFix64){ 
 			
 			// Checks that the pack is still available and that the FLOW tokens are sufficient
@@ -411,7 +425,7 @@ contract FlovatarPack{
 			emit Purchased(id: packId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithDust(tokenId: UInt64, recipientCap: Capability<&{FlovatarPack.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}, signature: String){ 
 			
 			// Checks that the pack is still available and that the FLOW tokens are sufficient
@@ -467,7 +481,7 @@ contract FlovatarPack{
 	}
 	
 	// public function that anyone can call to create a new empty collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(
 		ownerVault: Capability<&{FungibleToken.Receiver}>
 	): @FlovatarPack.Collection{ 
@@ -475,7 +489,7 @@ contract FlovatarPack{
 	}
 	
 	// Get all the packs from a specific account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPacks(address: Address): [UInt64]?{ 
 		let account = getAccount(address)
 		if let packCollection =

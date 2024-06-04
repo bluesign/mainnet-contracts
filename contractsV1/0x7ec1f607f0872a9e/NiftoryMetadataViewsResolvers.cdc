@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 NiftoryMetadataViewsResolvers
 
 Below are implementations of resolvers that will be common amongst Niftory NFTs.
@@ -26,7 +40,7 @@ contract NiftoryMetadataViewsResolvers{
 	// ========================================================================
 	
 	// All URIs are expected to have one of these prefixes.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun DEFAULT_ALLOWED_URI_PREFIXES(): [String]{ 
 		return ["https://", "http://", "ipfs://"]
 	}
@@ -46,7 +60,7 @@ contract NiftoryMetadataViewsResolvers{
 		let royalties: MetadataViews.Royalties
 		
 		// Royalties are stored directly as a value in this resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			return self.royalties
 		}
@@ -69,7 +83,7 @@ contract NiftoryMetadataViewsResolvers{
 		
 		// All Niftory NFTs should have an NFTPublic interface, which points to
 		// its contracts NFTCollectionData info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let nft = nftRef as! &{NiftoryNonFungibleToken.NFTPublic}
 			return nft._contract().getNFTCollectionData()
@@ -120,7 +134,7 @@ contract NiftoryMetadataViewsResolvers{
 		// image. In this case, the resolver will try to fill those fields in
 		// based on the provided field keys, or use a default value if that key
 		// does not exist in the NFT metadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let metadata = NiftoryMetadataViewsResolvers._extractMetadata(nftRef: nftRef)
 			
@@ -189,7 +203,7 @@ contract NiftoryMetadataViewsResolvers{
 		// image. In this case, the resolver will try to fill those fields in
 		// based on the provided field keys, or use a default value if that key
 		// does not exist in the NFT metadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let metadata = NiftoryMetadataViewsResolvers._extractMetadata(nftRef: nftRef)
 			
@@ -294,7 +308,7 @@ contract NiftoryMetadataViewsResolvers{
 		// image. In this case, the resolver will try to fill those fields in
 		// based on the provided field keys, or use a default value if that key
 		// does not exist in the NFT metadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let metadata = NiftoryMetadataViewsResolvers._extractMetadata(nftRef: nftRef)
 			
@@ -423,7 +437,7 @@ contract NiftoryMetadataViewsResolvers{
 		// image. In this case, the resolver will try to fill those fields in
 		// based on the provided field keys, or use a default value if that key
 		// does not exist in the NFT metadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let metadata = NiftoryMetadataViewsResolvers._extractMetadata(nftRef: nftRef)
 			
@@ -504,7 +518,7 @@ contract NiftoryMetadataViewsResolvers{
 		// image. In this case, the resolver will try to fill those fields in
 		// based on the provided field keys, or use a default value if that key
 		// does not exist in the NFT metadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let metadata = NiftoryMetadataViewsResolvers._extractMetadata(nftRef: nftRef)
 			
@@ -552,7 +566,7 @@ contract NiftoryMetadataViewsResolvers{
 		// A very simple Traits implementation that assumes the NFT metadata is
 		// implemented as a {String: String} map. Along with a trait key, it's
 		// possible to provide a rarity key.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let metadata = NiftoryMetadataViewsResolvers._extractMetadata(nftRef: nftRef)
 			return NiftoryMetadataViewsResolvers._parseTraits(metadata: metadata, accessors: self.accessors)
@@ -580,7 +594,7 @@ contract NiftoryMetadataViewsResolvers{
 		// image. In this case, the resolver will try to fill those fields in
 		// based on the provided field keys, or use a default value if that key
 		// does not exist in the NFT metadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolve(_ nftRef: AnyStruct): AnyStruct?{ 
 			let nft = nftRef as! &{NiftoryNonFungibleToken.NFTPublic}
 			
@@ -625,7 +639,7 @@ contract NiftoryMetadataViewsResolvers{
 	
 	// Prefix a uri with a default prefix if it does not start with any of the
 	// allowed prefixes
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _prefixUri(allowedPrefixes: [String], _default: String, uri: String): String{ 
 		for allowedPrefix in allowedPrefixes{ 
 			if self._startsWith(string: uri, substring: allowedPrefix){ 
@@ -636,7 +650,7 @@ contract NiftoryMetadataViewsResolvers{
 	}
 	
 	// Use the provided IPFS gateway if the uri starts with the IPFS prefix
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _useIpfsGateway(ipfsGateway: String, uri: String): String{ 
 		if self._startsWith(string: uri, substring: "ipfs://"){ 
 			return ipfsGateway.concat(uri.slice(from: 7, upTo: uri.length))

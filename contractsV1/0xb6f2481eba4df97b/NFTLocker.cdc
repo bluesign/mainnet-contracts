@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 /// A contract to lock NFT for a given duration
 /// Locked NFT are stored in a user owned collection
@@ -92,14 +106,14 @@ contract NFTLocker{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTLockerDetails(id: UInt64, nftType: Type): NFTLocker.LockedData?{ 
 		return (NFTLocker.lockedTokens[nftType]!)[id]
 	}
 	
 	/// Determine if NFT can be unlocked
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun canUnlockToken(id: UInt64, nftType: Type): Bool{ 
 		if let lockedToken = (NFTLocker.lockedTokens[nftType]!)[id]{ 
 			if lockedToken.lockedUntil < UInt64(getCurrentBlock().timestamp){ 
@@ -114,7 +128,7 @@ contract NFTLocker{
 	///
 	access(all)
 	resource interface LockedCollection{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(nftType: Type): [UInt64]?
 	}
 	
@@ -122,10 +136,10 @@ contract NFTLocker{
 	///
 	access(all)
 	resource interface LockProvider{ 
-		access(all)
-		fun lock(token: @{NonFungibleToken.NFT}, duration: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lock(token: @{NonFungibleToken.NFT}, duration: UInt64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(id: UInt64, nftType: Type): @{NonFungibleToken.NFT}
 	}
 	
@@ -138,7 +152,7 @@ contract NFTLocker{
 		
 		/// Unlock an NFT of a given type
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(id: UInt64, nftType: Type): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				NFTLocker.canUnlockToken(id: id, nftType: nftType) == true:
@@ -156,7 +170,7 @@ contract NFTLocker{
 		
 		/// Lock an NFT of a given type
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(token: @{NonFungibleToken.NFT}, duration: UInt64){ 
 			let id: UInt64 = token.id
 			let nftType: Type = token.getType()
@@ -177,7 +191,7 @@ contract NFTLocker{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(nftType: Type): [UInt64]?{ 
 			return self.lockedNFTs[nftType]?.keys
 		}
@@ -187,7 +201,7 @@ contract NFTLocker{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

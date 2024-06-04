@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract FanfareNFTContract: NonFungibleToken{ 
@@ -64,15 +78,15 @@ contract FanfareNFTContract: NonFungibleToken{
 	access(all)
 	resource interface FanfareNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTMetadata(id: UInt64): &FanfareNFTContract.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -105,7 +119,7 @@ contract FanfareNFTContract: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FanfareNFTContract.NFT
 			let id: UInt64 = token.id
 			
@@ -130,7 +144,7 @@ contract FanfareNFTContract: NonFungibleToken{
 		
 		// borrowNFTMetadata gets a reference to an NFT in the collection
 		// so that the caller can read its id and metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTMetadata(id: UInt64): &FanfareNFTContract.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -171,7 +185,7 @@ contract FanfareNFTContract: NonFungibleToken{
 			self.idCount = 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(creatorAddress: Address, recipient: Address, templateID: UInt64, metadata: String): UInt64{ 
 			let token: @NFT <- create NFT(initID: self.idCount, templateID: templateID, creatorAddress: creatorAddress, metadata: metadata)
 			let id: UInt64 = self.idCount

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract NowggNFT: NonFungibleToken{ 
@@ -60,7 +74,7 @@ contract NowggNFT: NonFungibleToken{
 		access(all)
 		let maxCount: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCount(count: UInt64){ 
 			self.currentCount = count
 		}
@@ -106,7 +120,7 @@ contract NowggNFT: NonFungibleToken{
 		}
 		
 		// getter for metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -118,15 +132,15 @@ contract NowggNFT: NonFungibleToken{
 	access(all)
 	resource interface NowggNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNowggNFT(id: UInt64): &NowggNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -141,15 +155,15 @@ contract NowggNFT: NonFungibleToken{
 	// by providing the IDs for them
 	access(all)
 	resource interface NftTypeHelperPublic{ 
-		access(all)
-		fun borrowActiveNFTtype(id: String): NftType?{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowActiveNFTtype(id: String): NowggNFT.NftType?{ 
 			post{ 
 				result == nil || result?.typeId == id:
 					"Cannot borrow NftType reference: The ID of the returned reference is incorrect"
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHistoricNFTtype(id: String): NftType?{ 
 			post{ 
 				result == nil || result?.typeId == id:
@@ -180,7 +194,7 @@ contract NowggNFT: NonFungibleToken{
 		// Takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NowggNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -209,7 +223,7 @@ contract NowggNFT: NonFungibleToken{
 		// Gets a reference to an NFT in the collection as a NowggItem,
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the NowggItem.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNowggNFT(id: UInt64): &NowggNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -253,7 +267,7 @@ contract NowggNFT: NonFungibleToken{
 	access(all)
 	resource NftTypeHelper: NftTypeHelperPublic{ 
 		// public function to borrow details of NFTtype
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowActiveNFTtype(id: String): NftType?{ 
 			if NowggNFT.activeNftTypes[id] != nil{ 
 				let ref = NowggNFT.activeNftTypes[id]
@@ -263,7 +277,7 @@ contract NowggNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHistoricNFTtype(id: String): NftType?{ 
 			if NowggNFT.historicNftTypes[id] != nil{ 
 				let ref = NowggNFT.historicNftTypes[id]
@@ -282,7 +296,7 @@ contract NowggNFT: NonFungibleToken{
 		// mintNFT
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeId: String, metaData:{ String: AnyStruct}){ 
 			if !NowggNFT.activeNftTypes.keys.contains(typeId){ 
 				panic("Invalid typeId")
@@ -318,7 +332,7 @@ contract NowggNFT: NonFungibleToken{
 			NowggNFT.totalSupply = NowggNFT.totalSupply + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerType(typeId: String, maxCount: UInt64){ 
 			let nftType = NftType(typeId: typeId, maxCount: maxCount)
 			NowggNFT.activeNftTypes[typeId] = nftType
@@ -331,7 +345,7 @@ contract NowggNFT: NonFungibleToken{
 	// If an account does not have a NowggNFT.Collection, panic.
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowNFT(from: Address, itemID: UInt64): &NowggNFT.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&NowggNFT.Collection>(NowggNFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust NowggNFT.Collection.borrowNowggNFT to get the correct itemID

@@ -1,4 +1,18 @@
-// Based on Verses Profile. Needed a Profile without a Wallet Solution. Using MultiFungible Token Instead 0x229e7617283d5085 for a Wallet Solution.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Based on Verses Profile. Needed a Profile without a Wallet Solution. Using MultiFungible Token Instead 0x229e7617283d5085 for a Wallet Solution.
 // A Basic Profile. web: DAAM.Agency
 // Ami Rajpal: ami@daam.agency
 // DAAM Agency (web: daam.agency)
@@ -60,8 +74,8 @@ contract DAAM_Profile{
 	// Public
 	access(all)
 	resource interface Public{ 
-		access(all)
-		fun getProfile(): UserHandler
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getProfile(): DAAM_Profile.UserHandler
 	}
 	
 	/******************************************************************************************/
@@ -195,7 +209,7 @@ contract DAAM_Profile{
 		}
 		
 		// Set Functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEmail(name: String?, at: String?, dot: String?){ 
 			pre{ 
 				name == nil && at == nil && dot == nil || name != nil && at != nil && dot != nil:
@@ -209,32 +223,32 @@ contract DAAM_Profile{
 			emit UpdateEmail(email: self.email)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAbout(_ about: String?){ 
 			self.about = about
 			emit UpdateAbout(about: about)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(_ desc: String?){ 
 			self.description = desc
 			emit UpdateDescription(description: desc)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAvatar(_ avatar:{ MetadataViews.File}?){ 
 			self.avatar = avatar
 			emit UpdateAvatar()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setHeroImage(_ hero:{ MetadataViews.File}?){ 
 			self.heroImage = hero
 			emit UpdateHeroImage()
 		}
 		
 		// Add Functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWeb(_ web: String){ 
 			for w in self.web{ 
 				assert(w.url != web, message: web.concat(" has already been added."))
@@ -243,7 +257,7 @@ contract DAAM_Profile{
 			emit UpdateWeb(web: web)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSocial(_ social:{ String: String}){ 
 			for s in social.keys{ 
 				self.social[s] = social[s]
@@ -251,7 +265,7 @@ contract DAAM_Profile{
 			emit UpdateSocial(social: social)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNotes(_ notes:{ String: String}){ 
 			for n in notes.keys{ 
 				self.notes[n] = notes[n]
@@ -260,7 +274,7 @@ contract DAAM_Profile{
 		}
 		
 		// Remove Functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWeb(_ web: String){ 
 			var counter = 0
 			for w in self.web{ 
@@ -274,7 +288,7 @@ contract DAAM_Profile{
 			panic("Could not remove Website. Doesn not exist in list in list.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSocial(_ social: String){ 
 			pre{ 
 				self.social.containsKey(social):
@@ -284,7 +298,7 @@ contract DAAM_Profile{
 			emit RemoveSocial(social: social)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNotes(_ note: String){ 
 			pre{ 
 				self.notes.containsKey(note):
@@ -295,7 +309,7 @@ contract DAAM_Profile{
 		}
 		
 		// Resource Public Functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProfile(): UserHandler{ 
 			return UserHandler(&self as &User)
 		}
@@ -304,7 +318,7 @@ contract DAAM_Profile{
 	
 	/******************************************************************************************/
 	// Contract Public Functions:
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createProfile(
 		name: String,
 		about: String?,
@@ -331,7 +345,7 @@ contract DAAM_Profile{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun check(_ address: Address): Bool{ 
 		let ref = getAccount(address).capabilities.get<&User>(self.publicPath).borrow() as &User?
 		return ref != nil

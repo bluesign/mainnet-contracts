@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -70,7 +84,7 @@ contract MetaBear: NonFungibleToken{
 			return <-create Collection()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -89,15 +103,15 @@ contract MetaBear: NonFungibleToken{
 	access(all)
 	resource interface MetaBearCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMetaBear(id: UInt64): &MetaBear.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -134,7 +148,7 @@ contract MetaBear: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MetaBear.NFT
 			let id: UInt64 = token.id
 			
@@ -166,7 +180,7 @@ contract MetaBear: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the MetaBear.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMetaBear(id: UInt64): &MetaBear.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -231,7 +245,7 @@ contract MetaBear: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, communityFeeVault: @{FungibleToken.Vault}, creatorFeeVault: @{FungibleToken.Vault}, platformFeeVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				MetaBear.totalSupply < self.maxSupply:
@@ -293,7 +307,7 @@ contract MetaBear: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &MetaBear.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&MetaBear.Collection>(MetaBear.CollectionPublicPath).borrow<&MetaBear.Collection>() ?? panic("Couldn't get collection")
 		// We trust MetaBear.Collection.borrowMetaBear to get the correct itemID
@@ -303,10 +317,10 @@ contract MetaBear: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionDataPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionImageURL(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionSetting(_ setting: String): AnyStruct
 	}
 	
@@ -322,24 +336,24 @@ contract MetaBear: NonFungibleToken{
 		access(self)
 		var settings:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionImageURL(id: UInt64): String{ 
 			let data = self.metadata[id]
 			return data["imageUrl"] != nil ? data["imageUrl"]! : ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionSetting(_ setting: String): AnyStruct{ 
 			let attribute = self.settings[setting]!
 			return attribute
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionMetadata(metadata: [{String: String}]){ 
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionSettings(settings:{ String: AnyStruct}){ 
 			self.settings = settings
 		}

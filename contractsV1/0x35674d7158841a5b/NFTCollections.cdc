@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract NFTCollections{ 
@@ -23,61 +37,61 @@ contract NFTCollections{
 		emit ContractInitialized()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): UInt32{ 
 		return self.version
 	}
 	
 	access(all)
 	resource interface WrappedNFT{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContractName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionPath(): PublicPath
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}
 	}
 	
 	access(all)
 	resource interface Provider{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(address: Address, withdrawID: UInt64): @{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawWrapper(address: Address, withdrawID: UInt64): @NFTWrapper
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(address: Address, batch: [UInt64], into: &{NonFungibleToken.Collection})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdrawWrappers(address: Address, batch: [UInt64]): @Collection
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWrapper(address: Address, id: UInt64): &NFTWrapper
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(address: Address, id: UInt64): &{NonFungibleToken.NFT}
 	}
 	
 	access(all)
 	resource interface Receiver{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(
 			contractName: String,
 			address: Address,
 			collectionPath: PublicPath,
 			token: @{NonFungibleToken.NFT}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositWrapper(wrapper: @NFTWrapper)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(
 			contractName: String,
 			address: Address,
@@ -85,19 +99,19 @@ contract NFTCollections{
 			batch: @{NonFungibleToken.Collection}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDepositWrapper(batch: @Collection)
 	}
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
-		fun borrowWrapper(address: Address, id: UInt64): &NFTWrapper
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowWrapper(address: Address, id: UInt64): &NFTCollections.NFTWrapper
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(address: Address, id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(
 			contractName: String,
 			address: Address,
@@ -105,10 +119,10 @@ contract NFTCollections{
 			token: @{NonFungibleToken.NFT}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositWrapper(wrapper: @NFTWrapper)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(
 			contractName: String,
 			address: Address,
@@ -116,10 +130,10 @@ contract NFTCollections{
 			batch: @{NonFungibleToken.Collection}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDepositWrapper(batch: @Collection)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs():{ Address: [UInt64]}
 	}
 	
@@ -134,12 +148,12 @@ contract NFTCollections{
 			self.collections <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionNames(): [String]{ 
 			return self.collections.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOrBorrowCollection(_ namespace: String): &Collection{ 
 			if self.collections[namespace] == nil{ 
 				return self.createCollection(namespace)
@@ -148,7 +162,7 @@ contract NFTCollections{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollection(_ namespace: String): &Collection{ 
 			pre{ 
 				self.collections[namespace] == nil:
@@ -159,7 +173,7 @@ contract NFTCollections{
 			return &self.collections[namespace] as &NFTCollections.Collection?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollection(_ namespace: String): &Collection{ 
 			pre{ 
 				self.collections[namespace] != nil:
@@ -172,7 +186,7 @@ contract NFTCollections{
 	// Creates and returns a new NFTCollectionManager resource for managing many
 	// different Collections
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewNFTCollectionManager(): @NFTCollectionManager{ 
 		return <-create NFTCollectionManager()
 	}
@@ -200,22 +214,22 @@ contract NFTCollections{
 			self.nft <- token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContractName(): String{ 
 			return self.contractName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(): Address{ 
 			return self.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionPath(): PublicPath{ 
 			return self.collectionPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.nft != nil:
@@ -249,7 +263,7 @@ contract NFTCollections{
 			self.collections <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(contractName: String, address: Address, collectionPath: PublicPath, token: @{NonFungibleToken.NFT}){ 
 			let wrapper <- create NFTWrapper(contractName: contractName, address: address, collectionPath: collectionPath, token: <-token)
 			if self.collections[address] == nil{ 
@@ -260,7 +274,7 @@ contract NFTCollections{
 			self.collections[address] <-! collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositWrapper(wrapper: @NFTWrapper){ 
 			let address = wrapper.getAddress()
 			if self.collections[address] == nil{ 
@@ -271,7 +285,7 @@ contract NFTCollections{
 			self.collections[address] <-! collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(contractName: String, address: Address, collectionPath: PublicPath, batch: @{NonFungibleToken.Collection}){ 
 			let keys = batch.getIDs()
 			for key in keys{ 
@@ -280,7 +294,7 @@ contract NFTCollections{
 			destroy batch
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDepositWrapper(batch: @Collection){ 
 			var addressMap = batch.getIDs()
 			for address in addressMap.keys{ 
@@ -292,7 +306,7 @@ contract NFTCollections{
 			destroy batch
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(address: Address, withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			if self.collections[address] == nil{ 
 				panic("No NFT with that Address exists")
@@ -305,7 +319,7 @@ contract NFTCollections{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawWrapper(address: Address, withdrawID: UInt64): @NFTWrapper{ 
 			if self.collections[address] == nil{ 
 				panic("No NFT with that Address exists")
@@ -316,14 +330,14 @@ contract NFTCollections{
 			return <-wrapper
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(address: Address, batch: [UInt64], into: &{NonFungibleToken.Collection}){ 
 			for id in batch{ 
 				into.deposit(token: <-self.withdraw(address: address, withdrawID: id))
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdrawWrappers(address: Address, batch: [UInt64]): @Collection{ 
 			var into <- NFTCollections.createEmptyCollection()
 			for id in batch{ 
@@ -332,7 +346,7 @@ contract NFTCollections{
 			return <-into
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs():{ Address: [UInt64]}{ 
 			var ids:{ Address: [UInt64]} ={} 
 			for key in self.collections.keys{ 
@@ -344,12 +358,12 @@ contract NFTCollections{
 			return ids
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(address: Address, id: UInt64): &{NonFungibleToken.NFT}{ 
 			return (self.borrowWrapper(address: address, id: id)!).borrowNFT()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWrapper(address: Address, id: UInt64): &NFTWrapper{ 
 			if self.collections[address] == nil{ 
 				panic("No NFT with that Address exists")
@@ -359,7 +373,7 @@ contract NFTCollections{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create NFTCollections.Collection()
 	}
@@ -382,7 +396,7 @@ contract NFTCollections{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(wrapper: @NFTWrapper){ 
 			let bucket = wrapper.borrowNFT().id % self.numBuckets
 			let collection <- self.collections.remove(key: bucket)!
@@ -390,7 +404,7 @@ contract NFTCollections{
 			self.collections[bucket] <-! collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(batch: @ShardedNFTWrapperCollection){ 
 			let keys = batch.getIDs()
 			for key in keys{ 
@@ -399,14 +413,14 @@ contract NFTCollections{
 			destroy batch
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @NFTWrapper{ 
 			let bucket = withdrawID % self.numBuckets
 			let wrapper <- self.collections[bucket]?.withdraw(withdrawID: withdrawID)!
 			return <-wrapper
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(batch: [UInt64]): @ShardedNFTWrapperCollection{ 
 			var batchCollection <- NFTCollections.createEmptyShardedNFTWrapperCollection()
 			for id in batch{ 
@@ -415,7 +429,7 @@ contract NFTCollections{
 			return <-batchCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			var ids: [UInt64] = []
 			for key in self.collections.keys{ 
@@ -426,14 +440,14 @@ contract NFTCollections{
 			return ids
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWrapper(id: UInt64): &NFTWrapper{ 
 			let bucket = id % self.numBuckets
 			return self.collections[bucket]?.borrowWrapper(id: id)!
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyShardedNFTWrapperCollection(): @ShardedNFTWrapperCollection{ 
 		return <-create NFTCollections.ShardedNFTWrapperCollection(numBuckets: 32)
 	}
@@ -449,7 +463,7 @@ contract NFTCollections{
 			self.wrappers <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(wrapper: @NFTWrapper){ 
 			let address = wrapper.getAddress()
 			let id = wrapper.borrowNFT().id
@@ -461,7 +475,7 @@ contract NFTCollections{
 			destroy oldWrapper
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(batch: @NFTWrapperCollection){ 
 			let keys = batch.getIDs()
 			for key in keys{ 
@@ -470,7 +484,7 @@ contract NFTCollections{
 			destroy batch
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @NFTWrapper{ 
 			let wrapper <-
 				self.wrappers.remove(key: withdrawID)
@@ -479,7 +493,7 @@ contract NFTCollections{
 			return <-wrapper
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(batch: [UInt64]): @NFTWrapperCollection{ 
 			var batchCollection <- create NFTWrapperCollection()
 			for id in batch{ 
@@ -488,18 +502,18 @@ contract NFTCollections{
 			return <-batchCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.wrappers.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowWrapper(id: UInt64): &NFTWrapper{ 
 			return &self.wrappers[id] as &NFTCollections.NFTWrapper?
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyNFTWrapperCollection(): @NFTWrapperCollection{ 
 		return <-create NFTCollections.NFTWrapperCollection()
 	}

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	A contract that manages the creation and sale of Goated Goat and pack vouchers
 
 	A manager resource exists to allow modifications to the parameters of the public
@@ -129,7 +143,7 @@ contract VouchersSaleManager{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Manager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGoatVoucherSaleInfo(quantityPerMint: UInt64, price: UFix64, startTime: UFix64){ 
 			VouchersSaleManagerHelper.updateGoatVoucherSale(
 				quantityPerMint: quantityPerMint,
@@ -143,7 +157,7 @@ contract VouchersSaleManager{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePackVoucherSaleInfo(quantityPerMint: UInt64, price: UFix64, startTime: UFix64){ 
 			VouchersSaleManagerHelper.updatePackVoucherSale(
 				quantityPerMint: quantityPerMint,
@@ -157,43 +171,43 @@ contract VouchersSaleManager{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGoatedGoatsCollectionMetadata(metadata:{ String: String}){ 
 			GoatedGoatsVouchers.setCollectionMetadata(metadata: metadata)
 			emit UpdateGoatedGoatsVoucherCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateGoatedGoatsEditionMetadata(editionNumber: UInt64, metadata:{ String: String}){ 
 			GoatedGoatsVouchers.setEditionMetadata(editionNumber: editionNumber, metadata: metadata)
 			emit UpdateGoatedGoatsVoucherEditionMetadata(id: editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraitPacksCollectionMetadata(metadata:{ String: String}){ 
 			TraitPacksVouchers.setCollectionMetadata(metadata: metadata)
 			emit UpdateTraitPacksVoucherCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraitsPacksEditionMetadata(editionNumber: UInt64, metadata:{ String: String}){ 
 			TraitPacksVouchers.setEditionMetadata(editionNumber: editionNumber, metadata: metadata)
 			emit UpdateTraitPacksVoucherEditionMetadata(id: editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPaymentReceiver(paymentReceiver: Capability<&{FungibleToken.Receiver}>){ 
 			VouchersSaleManager.paymentReceiver = paymentReceiver
 			emit UpdatePaymentReceiver(address: paymentReceiver.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintGoatVoucherAtEdition(edition: UInt64): @{NonFungibleToken.NFT}{ 
 			emit AdminGoatVoucherMint(id: edition)
 			return <-VouchersSaleManager.mintGoatVoucher(edition: edition)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPackVoucherAtEdition(edition: UInt64): @{NonFungibleToken.NFT}{ 
 			emit AdminPackVoucherMint(id: edition)
 			return <-VouchersSaleManager.mintPackVoucher(edition: edition)
@@ -203,7 +217,7 @@ contract VouchersSaleManager{
 		// Deprecated Functions
 		// -----------------------------------------------------------------------
 		// DEPRECATED - Use voucher specific updates instead
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaxQuantityPerMint(_ amount: UInt64){ 
 			VouchersSaleManager.maxQuantityPerMint = amount
 			emit UpdateSaleInfo(
@@ -214,7 +228,7 @@ contract VouchersSaleManager{
 		}
 		
 		// DEPRECATED - Use voucher specific updates instead
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrice(_ price: UFix64){ 
 			VouchersSaleManager.salePrice = price
 			emit UpdateSaleInfo(
@@ -225,7 +239,7 @@ contract VouchersSaleManager{
 		}
 		
 		// DEPRECATED - Use voucher specific updates instead
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSaleStartTime(_ saleStartTime: UFix64){ 
 			VouchersSaleManager.saleStartTime = saleStartTime
 			emit UpdateSaleInfo(
@@ -236,7 +250,7 @@ contract VouchersSaleManager{
 		}
 		
 		// DEPRECATED - Use voucher specific updates instead
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintVoucherAtEdition(edition: UInt64): @[{NonFungibleToken.NFT}]{ 
 			emit AdminMint(id: edition)
 			return <-VouchersSaleManager.mintVouchers(edition: edition)
@@ -307,7 +321,7 @@ contract VouchersSaleManager{
 	// Public Functions
 	// -----------------------------------------------------------------------
 	// Accepts payment for vouchers, payment is moved to the `self.paymentReceiver` capability field
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicBatchMintSequentialGoatVouchers(
 		buyVault: @{FungibleToken.Vault},
 		quantity: UInt64
@@ -356,7 +370,7 @@ contract VouchersSaleManager{
 	}
 	
 	// Accepts payment for vouchers, payment is moved to the `self.paymentReceiver` capability field
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicBatchMintSequentialPackVouchers(
 		buyVault: @{FungibleToken.Vault},
 		quantity: UInt64
@@ -445,7 +459,7 @@ contract VouchersSaleManager{
 	// Accepts payment for vouchers, payment is moved to the `self.paymentReceiver` capability field
 	// 
 	// DEPRECATED - use publicBatchMintSequential for specific voucher types from functions below
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicBatchMintSequentialVouchers(buyVault: @{FungibleToken.Vault}, quantity: UInt64): @[{
 		NonFungibleToken.Collection}
 	]{ 

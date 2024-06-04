@@ -1,4 +1,18 @@
-import GameEngine from "../0x9d041d36947924c0/GameEngine.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import GameEngine from "../0x9d041d36947924c0/GameEngine.cdc"
 
 import TraditionalTetrisPieces from "./TraditionalTetrisPieces.cdc"
 
@@ -62,7 +76,7 @@ contract TetrisObjects{
 		
 		// This gives the FE a way to represent the object on the board
 		// as well s giving it a way to pass the state back into the SC
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toMap():{ String: String}{ 
 			var doesTick = "false"
 			if self.doesTick{ 
@@ -72,7 +86,7 @@ contract TetrisObjects{
 		}
 		
 		// This gives the SC a way to create an object from the FE's representation
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fromMap(_ map:{ String: String}){ 
 			self.id = UInt64.fromString(map["id"]!)!
 			self.type = map["type"]!
@@ -88,7 +102,7 @@ contract TetrisObjects{
 			self.lastDropTick = UInt64.fromString(map["lastDropTick"]!)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tick(tickCount: UInt64, events: [GameEngine.PlayerEvent], level:{ GameEngine.Level}, callbacks:{ String: fun (AnyStruct?): AnyStruct?}){ 
 			var prevTetrimone = self
 			var needsRedraw = false
@@ -173,27 +187,27 @@ contract TetrisObjects{
 		access(all)
 		var color: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setColor(_ color: String){ 
 			self.color = color
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setID(_ id: UInt64){ 
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRelativePositions(_ pos: [[Int]]){ 
 			self.relativePositions = pos
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReferencePoint(_ point: [Int]){ 
 			self.referencePoint = point
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toMap():{ String: String}{ 
 			var doesTick = "false"
 			if self.doesTick{ 
@@ -202,7 +216,7 @@ contract TetrisObjects{
 			return{ "id": self.id.toString(), "type": self.type, "doesTick": doesTick, "x": (self.referencePoint[0]!).toString(), "y": (self.referencePoint[1]!).toString(), "relativePositions": GameBoardUtils.convertRelativePositionsToString(self.relativePositions), "color": self.color}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun expand(_ object:{ GameEngine.GameObject}){ 
 			var i = 0
 			while i < object.relativePositions.length{ 
@@ -223,7 +237,7 @@ contract TetrisObjects{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fromMap(_ map:{ String: String}){ 
 			self.id = UInt64.fromString(map["id"]!)!
 			self.type = map["type"]!
@@ -235,7 +249,7 @@ contract TetrisObjects{
 			self.color = map["color"]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tick(tickCount: UInt64, events: [GameEngine.PlayerEvent], level:{ GameEngine.Level}, callbacks:{ String: fun (AnyStruct?): AnyStruct?}){} 
 		
 		// do nothing

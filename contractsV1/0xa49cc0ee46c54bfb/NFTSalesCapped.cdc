@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import REVV from "../0xd01e482eb680ec9f/REVV.cdc"
 
@@ -22,7 +36,7 @@ import Pausable from "../0xb223b2bfe4b8ffb5/Pausable.cdc"
 
 access(all)
 contract NFTSalesCapped: ContractVersion{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.8"
 	}
@@ -242,12 +256,12 @@ contract NFTSalesCapped: ContractVersion{
 			self.price = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSHRDPerGrade():{ String: UFix64}{ 
 			return self.shrdPerGrade
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpen(): Bool{ 
 			if self.salesOpenOverride == SalesOpenOverride.ForceOpen.rawValue{ 
 				return true
@@ -259,7 +273,7 @@ contract NFTSalesCapped: ContractVersion{
 			return self.startTime <= ts && self.endTime >= ts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPacksWithCreditCardPayment(signature: String, orderId: String, address: Address, quantity: UInt64, hashAlgorithm: HashAlgorithm): @OpenedPack{ 
 			pre{ 
 				!(self.pausableCap.borrow()!).isPaused():
@@ -278,7 +292,7 @@ contract NFTSalesCapped: ContractVersion{
 			return <-res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPacksWithVaultPayment(signature: String, revvVault: @REVV.Vault, address: Address, quantity: UInt64, hashAlgorithm: HashAlgorithm): @OpenedPack{ 
 			pre{ 
 				!(self.pausableCap.borrow()!).isPaused():
@@ -337,7 +351,7 @@ contract NFTSalesCapped: ContractVersion{
 			return <-create OpenedPack(collection_: <-collection, vault_: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNonce(address: Address): UInt64{ 
 			return self.nonces[address] ?? 0 as UInt64
 		}
@@ -403,13 +417,13 @@ contract NFTSalesCapped: ContractVersion{
 	
 	access(all)
 	resource interface SalesCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSales(salesID: UInt64): &Sales
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCardCount(salesID: UInt64): UInt64
 	}
 	
@@ -418,7 +432,7 @@ contract NFTSalesCapped: ContractVersion{
 		access(all)
 		var salesMap: @{UInt64: Sales}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSales(sales: @Sales){ 
 			pre{ 
 				NFTSalesCapped.isPaymentReceiverCapSet() == true:
@@ -430,94 +444,94 @@ contract NFTSalesCapped: ContractVersion{
 			destroy oldItem
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSales(salesID: UInt64): @Sales{ 
 			let sales <- self.salesMap.remove(key: salesID) ?? panic("missing Sales")
 			// TODO: Add event
 			return <-sales
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSalesOpenOverride(salesID: UInt64, state: NFTSalesCapped.SalesOpenOverride){ 
 			self.borrowSales(salesID: salesID).setSalesOpenOverride(state: state)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTotalSupply(salesID: UInt64, totalSupply: UInt64){ 
 			self.borrowSales(salesID: salesID).setTotalSupply(totalSupply: totalSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxSHRD(salesID: UInt64, maxSHRD: UFix64){ 
 			self.borrowSales(salesID: salesID).setMaxSHRD(maxSHRD: maxSHRD)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPublicKey(salesID: UInt64, publicKey: String, signatureAlgorithm: SignatureAlgorithm){ 
 			self.borrowSales(salesID: salesID).setPublicKey(publicKey: publicKey, signatureAlgorithm: signatureAlgorithm)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxPerWallet(salesID: UInt64, maxPerWallet: UInt64){ 
 			self.borrowSales(salesID: salesID).setMaxPerWallet(maxPerWallet: maxPerWallet)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCardPerPack(salesID: UInt64, cardsPerPack: UInt64){ 
 			self.borrowSales(salesID: salesID).setCardsPerPack(cardsPerPack: cardsPerPack)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartTime(salesID: UInt64, startTime: UFix64){ 
 			self.borrowSales(salesID: salesID).setStartTime(startTime: startTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEndTime(salesID: UInt64, endTime: UFix64){ 
 			self.borrowSales(salesID: salesID).setEndTime(endTime: endTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCardTypeWeights(salesID: UInt64, cardTypeWeights: [UInt32], cardTypes: [UInt64]){ 
 			self.borrowSales(salesID: salesID).addCardTypeWeights(cardTypeWeights: cardTypeWeights, cardTypes: cardTypes)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSHRDPerGrade(salesID: UInt64, shrdPerGrade:{ String: UFix64}){ 
 			self.borrowSales(salesID: salesID).setSHRDPerGrade(shrdPerGrade: shrdPerGrade)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(salesID: UInt64, price: UFix64){ 
 			self.borrowSales(salesID: salesID).setPrice(price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCardTypeWeights(salesID: UInt64, at index: UInt64){ 
 			self.borrowSales(salesID: salesID).removeCardTypeWeights(at: index)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clearCardTypeWeights(salesID: UInt64){ 
 			self.borrowSales(salesID: salesID).clearCardTypeWeights()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCardCount(salesID: UInt64): UInt64{ 
 			return self.borrowSales(salesID: salesID).sold
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNonceForSales(salesID: UInt64, address: Address): UInt64{ 
 			return self.borrowSales(salesID: salesID).getNonce(address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.salesMap.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSales(salesID: UInt64): &Sales{ 
 			return (&self.salesMap[salesID] as &Sales?)!
 		}
@@ -527,32 +541,32 @@ contract NFTSalesCapped: ContractVersion{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSHRDMintProxyCapSet(): Bool{ 
 		return self.shrdMintProxyCap != nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isCardMintProxyCapSet(): Bool{ 
 		return self.cardMintProxyCap != nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isPaymentReceiverCapSet(): Bool{ 
 		return self.paymentReceiverCap != nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isOrderIdUsed(orderId: String): Bool{ 
 		return NFTSalesCapped.orderIds[orderId] != nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBlockHeightForOrderId(orderId: String): UInt64?{ 
 		return NFTSalesCapped.orderIds[orderId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSales(adminRef: &MotoGPAdmin.Admin, name: String, totalSupply: UInt64, maxSHRD: UFix64, shrdPerGrade:{ String: UFix64}, cardsPerPack: UInt64, price: UFix64, startTime: UFix64, endTime: UFix64, maxPerWallet: UInt64, cardTypeWeights: [[UInt32]], cardTypes: [[UInt64]], pausableCap: Capability<&{Pausable.PausableExternal}>): @Sales{ 
 		pre{ 
 			adminRef != nil:
@@ -561,7 +575,7 @@ contract NFTSalesCapped: ContractVersion{
 		return <-create Sales(name: name, totalSupply: totalSupply, maxSHRD: maxSHRD, shrdPerGrade: shrdPerGrade, cardsPerPack: cardsPerPack, price: price, startTime: startTime, endTime: endTime, maxPerWallet: maxPerWallet, cardTypeWeights: cardTypeWeights, cardTypes: cardTypes, pausableCap: pausableCap)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSalesCollection(adminRef: &MotoGPAdmin.Admin): @SalesCollection{ 
 		pre{ 
 			adminRef != nil:
@@ -570,7 +584,7 @@ contract NFTSalesCapped: ContractVersion{
 		return <-create SalesCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setCardMintProxyCapability(adminRef: &MotoGPAdmin.Admin, capability: Capability<&CardMintAccess.MintProxy>){ 
 		pre{ 
 			adminRef != nil:
@@ -583,7 +597,7 @@ contract NFTSalesCapped: ContractVersion{
 		self.cardMintProxyCap = capability
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setSHRDMintProxyCapability(adminRef: &MotoGPAdmin.Admin, capability: Capability<&SHRDMintAccess.MintProxy>){ 
 		pre{ 
 			adminRef != nil:
@@ -596,7 +610,7 @@ contract NFTSalesCapped: ContractVersion{
 		self.shrdMintProxyCap = capability
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setPaymentReceiverCapability(adminRef: &MotoGPAdmin.Admin, capability: Capability<&{FungibleToken.Receiver}>){ 
 		pre{ 
 			adminRef != nil:

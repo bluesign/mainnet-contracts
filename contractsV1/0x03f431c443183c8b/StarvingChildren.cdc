@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Unlicense
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Unlicense
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
@@ -200,7 +214,7 @@ contract StarvingChildren: NonFungibleToken{
 		// Parameters: metadata: The metadata to save inside Template 
 		//
 		// returns: @NFT the token that was created
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(metadata:{ String: String}, templateId: UInt64, buyer: Bool): @NFT{ 
 			if buyer == true{ 
 				StarvingChildren.numberMintedByTemplate[templateId] = StarvingChildren.numberMintedByTemplate[templateId]! + 1
@@ -220,7 +234,7 @@ contract StarvingChildren: NonFungibleToken{
 		// Parameters: creationDate: The creation date of the template
 		//
 		// returns: UInt64 the new template ID 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(metadataBuyer:{ String: String}, metadataCharity:{ String: String}, price: UFix64, maxEditions: UInt64, creationDate: UInt64): UInt64{ 
 			var newTemplate = Template(metadataBuyer: metadataBuyer, metadataCharity: metadataCharity, price: price, maxEditions: maxEditions, creationDate: creationDate)
 			StarvingChildren.numberMintedByTemplate[newTemplate.templateId] = 0
@@ -236,12 +250,12 @@ contract StarvingChildren: NonFungibleToken{
 	access(all)
 	resource interface StarvingChildrenCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &StarvingChildren.NFT?
 	}
 	
@@ -279,7 +293,7 @@ contract StarvingChildren: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StarvingChildren.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -307,7 +321,7 @@ contract StarvingChildren: NonFungibleToken{
 		//
 		// Returns: A reference to the NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &StarvingChildren.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -369,7 +383,7 @@ contract StarvingChildren: NonFungibleToken{
 	// createProfile creates a new profile a user can store it in their 
 	// account storage.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createProfile(name: String, termsAcceptedAt: UInt64): @Profile{ 
 		let profile <- create Profile(name: name, termsAcceptedAt: termsAcceptedAt)
 		return <-profile
@@ -385,7 +399,7 @@ contract StarvingChildren: NonFungibleToken{
 	
 	// createAdmin save admin address on contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdmin(acc: AuthAccount){ 
 		pre{ 
 			StarvingChildren.adminAddress == nil:
@@ -400,28 +414,28 @@ contract StarvingChildren: NonFungibleToken{
 	
 	// getMetadatas get all metadatas stored in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatas():{ UInt64: Template}{ 
 		return StarvingChildren.templateDatas
 	}
 	
 	// getAllTemplates get all templates stored in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates(): [Template]{ 
 		return StarvingChildren.templateDatas.values
 	}
 	
 	// getAdminAddress get admin wallet address stored in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAdminAddress(): Address?{ 
 		return StarvingChildren.adminAddress
 	}
 	
 	// getNumberMintedByTemplate get number nft minted by template
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedByTemplate(templateId: UInt64): UInt64?{ 
 		return StarvingChildren.numberMintedByTemplate[templateId]
 	}

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -102,7 +116,7 @@ contract LampionsNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
@@ -135,7 +149,7 @@ contract LampionsNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			//TODO: add nounce and emit better event the first time it is moved.
@@ -259,7 +273,7 @@ contract LampionsNFT: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): [MetadataViews.Trait]{ 
 			var winner = "tie"
 			if self.homeScore > self.awayScore{ 
@@ -283,12 +297,12 @@ contract LampionsNFT: NonFungibleToken{
 		self.games[game.id] = game
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGames():{ UInt64: Game}{ 
 		return self.games
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGame(_ id: UInt64): Game?{ 
 		return self.games[id]
 	}
@@ -319,12 +333,12 @@ contract LampionsNFT: NonFungibleToken{
 		self.licenses[player.id] = player
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLicenses():{ UInt64: License}{ 
 		return self.licenses
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLicense(_ id: UInt64): License?{ 
 		return self.licenses[id]
 	}
@@ -395,7 +409,7 @@ contract LampionsNFT: NonFungibleToken{
 			self.awayScore = awayScore
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): [MetadataViews.Trait]{ 
 			let traits = [MetadataViews.Trait(name: "PlayHalf", value: self.half, displayType: "String", rarity: nil), MetadataViews.Trait(name: "PlayTime", value: self.time, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "PlayHomeScore", value: self.homeScore, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "PlayAwayScore", value: self.awayScore, displayType: "Number", rarity: nil), MetadataViews.Trait(name: "PlayScore", value: self.homeScore.toString().concat("-").concat(self.awayScore.toString()), displayType: "String", rarity: nil)]
 			traits.appendAll((LampionsNFT.getGame(self.gameID)!).getTraits())
@@ -410,25 +424,25 @@ contract LampionsNFT: NonFungibleToken{
 			return traits
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias{ 
 			let imageFile = MetadataViews.IPFSFile(cid: self.imageIpfsHash, path: "thumbnail.png")
 			return MetadataViews.Medias([self.getVideo(), MetadataViews.Media(file: imageFile, mediaType: "image/png")])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun asDisplay(): MetadataViews.Display{ 
 			let imageFile = MetadataViews.IPFSFile(cid: self.imageIpfsHash, path: "thumbnail.png")
 			return MetadataViews.Display(name: self.title, description: self.description, thumbnail: imageFile)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideo(): MetadataViews.Media{ 
 			let file = MetadataViews.IPFSFile(cid: self.videoIpfsHash, path: "video.mp4")
 			return MetadataViews.Media(file: file, mediaType: self.getVideoMediaType())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideoMediaType(): String{ 
 			let videoMediaType = self.metadata["videoMediaType"]
 			return videoMediaType ?? "video/mp4"
@@ -443,12 +457,12 @@ contract LampionsNFT: NonFungibleToken{
 		self.plays[play.id] = play
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlays():{ UInt64: Play}{ 
 		return self.plays
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlay(_ id: UInt64): Play?{ 
 		return self.plays[id]
 	}
@@ -488,7 +502,7 @@ contract LampionsNFT: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(_ prefix: String): [MetadataViews.Trait]{ 
 			return [MetadataViews.Trait(name: prefix.concat("PlayerJersey"), value: self.jerseyname, displayType: "String", rarity: nil), MetadataViews.Trait(name: prefix.concat("PlayerPosition"), value: self.position, displayType: "String", rarity: nil), MetadataViews.Trait(name: prefix.concat("PlayerNumber"), value: self.number, displayType: "Number", rarity: nil), MetadataViews.Trait(name: prefix.concat("PlayerNationality"), value: self.nationality, displayType: "String", rarity: nil), MetadataViews.Trait(name: prefix.concat("PlayerBirthday"), value: self.birthday, displayType: "String", rarity: nil)]
 		}
@@ -502,12 +516,12 @@ contract LampionsNFT: NonFungibleToken{
 		self.players[player.id] = player
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayers():{ UInt64: Player}{ 
 		return self.players
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayer(_ id: UInt64): Player?{ 
 		return self.players[id]
 	}

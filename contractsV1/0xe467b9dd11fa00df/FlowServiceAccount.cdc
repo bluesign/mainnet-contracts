@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -36,7 +50,7 @@ contract FlowServiceAccount{
 	var accountCreators:{ Address: Bool}
 	
 	/// Initialize an account with a FlowToken Vault and publish capabilities.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun initDefaultToken(_ acct: AuthAccount){ 
 		// Create a new FlowToken Vault and save it in storage
 		acct.save(
@@ -56,7 +70,7 @@ contract FlowServiceAccount{
 	/// Get the default token balance on an account
 	///
 	/// Returns 0 if the account has no default balance
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun defaultTokenBalance(_ acct: &Account): UFix64{ 
 		var balance = 0.0
 		if let balanceRef =
@@ -69,7 +83,7 @@ contract FlowServiceAccount{
 	}
 	
 	/// Return a reference to the default token vault on an account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun defaultTokenVault(_ acct: AuthAccount): &FlowToken.Vault{ 
 		return acct.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)
 		?? panic("Unable to borrow reference to the default token vault")
@@ -79,7 +93,7 @@ contract FlowServiceAccount{
 	///
 	/// Called when a transaction is submitted to deduct the fee
 	/// from the AuthAccount that submitted it
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deductTransactionFee(_ acct: AuthAccount){ 
 		if self.transactionFee == UFix64(0){ 
 			return
@@ -96,7 +110,7 @@ contract FlowServiceAccount{
 	/// - Deducts the account creation fee from a payer account.
 	/// - Inits the default token.
 	/// - Inits account storage capacity.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupNewAccount(newAccount: AuthAccount, payer: AuthAccount){ 
 		if !FlowServiceAccount.isAccountCreator(payer.address){ 
 			panic("Account not authorized to create accounts")
@@ -117,7 +131,7 @@ contract FlowServiceAccount{
 	}
 	
 	/// Returns true if the given address is permitted to create accounts, false otherwise
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAccountCreator(_ address: Address): Bool{ 
 		// If account creation is not restricted, then anyone can create an account
 		if !self.isAccountCreationRestricted(){ 
@@ -127,34 +141,34 @@ contract FlowServiceAccount{
 	}
 	
 	/// Is true if new acconts can only be created by approved accounts `self.accountCreators`
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAccountCreationRestricted(): Bool{ 
 		return self.account.storage.copy<Bool>(from: /storage/isAccountCreationRestricted) ?? false
 	}
 	
 	// Authorization resource to change the fields of the contract
 	/// Returns all addresses permitted to create accounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccountCreators(): [Address]{ 
 		return self.accountCreators.keys
 	}
 	
 	// Gets Execution Effort Weights from the service account's storage 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExecutionEffortWeights():{ UInt64: UInt64}{ 
 		return self.account.storage.copy<{UInt64: UInt64}>(from: /storage/executionEffortWeights)
 		?? panic("execution effort weights not set yet")
 	}
 	
 	// Gets Execution Memory Weights from the service account's storage 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExecutionMemoryWeights():{ UInt64: UInt64}{ 
 		return self.account.storage.copy<{UInt64: UInt64}>(from: /storage/executionMemoryWeights)
 		?? panic("execution memory weights not set yet")
 	}
 	
 	// Gets Execution Memory Limit from the service account's storage
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExecutionMemoryLimit(): UInt64{ 
 		return self.account.storage.copy<UInt64>(from: /storage/executionMemoryLimit)
 		?? panic("execution memory limit not set yet")
@@ -165,7 +179,7 @@ contract FlowServiceAccount{
 	resource Administrator{ 
 		
 		/// Sets the transaction fee
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTransactionFee(_ newFee: UFix64){ 
 			if newFee != FlowServiceAccount.transactionFee{ 
 				emit TransactionFeeUpdated(newFee: newFee)
@@ -174,7 +188,7 @@ contract FlowServiceAccount{
 		}
 		
 		/// Sets the account creation fee
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccountCreationFee(_ newFee: UFix64){ 
 			if newFee != FlowServiceAccount.accountCreationFee{ 
 				emit AccountCreationFeeUpdated(newFee: newFee)
@@ -183,7 +197,7 @@ contract FlowServiceAccount{
 		}
 		
 		/// Adds an account address as an authorized account creator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccountCreator(_ accountCreator: Address){ 
 			if FlowServiceAccount.accountCreators[accountCreator] == nil{ 
 				emit AccountCreatorAdded(accountCreator: accountCreator)
@@ -192,7 +206,7 @@ contract FlowServiceAccount{
 		}
 		
 		/// Removes an account address as an authorized account creator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccountCreator(_ accountCreator: Address){ 
 			if FlowServiceAccount.accountCreators[accountCreator] != nil{ 
 				emit AccountCreatorRemoved(accountCreator: accountCreator)
@@ -200,7 +214,7 @@ contract FlowServiceAccount{
 			FlowServiceAccount.accountCreators.remove(key: accountCreator)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIsAccountCreationRestricted(_ enabled: Bool){ 
 			let path = /storage/isAccountCreationRestricted
 			let oldValue = FlowServiceAccount.account.storage.load<Bool>(from: path)

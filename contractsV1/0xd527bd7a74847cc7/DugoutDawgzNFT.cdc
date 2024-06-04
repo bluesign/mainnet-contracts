@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -81,22 +95,22 @@ contract DugoutDawgzNFT: NonFungibleToken{
 	struct interface TemplateMetadata{ 
 		
 		// Hash representation of implementing structs.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hash(): [UInt8]
 		
 		// Representative Display
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun display(): MetadataViews.Display
 		
 		// Representative {string: string} serialization
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repr():{ String: String}
 		
 		// MetadataViews compliant
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -108,22 +122,22 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		access(self)
 		let _metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hash(): [UInt8]{ 
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun display(): MetadataViews.Display{ 
 			return self._display
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getViews(): [Type]{ 
 			return [Type<MetadataViews.Display>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			switch view{ 
 				case Type<MetadataViews.Display>():
@@ -132,12 +146,12 @@ contract DugoutDawgzNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repr():{ String: String}{ 
 			return self.metadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata():{ String: String}{ 
 			return self._metadata
 		}
@@ -172,7 +186,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		let creator: Address
 		
 		// Fetch the metadata Template represented by this NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun template():{ NFTTemplate}{ 
 			return DugoutDawgzNFT.getTemplate(setID: self.setID, templateID: self.templateID)
 		}
@@ -219,16 +233,16 @@ contract DugoutDawgzNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowDugoutDawgzNFT(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowDugoutDawgzNFT(id: UInt64): &DugoutDawgzNFT.NFT
 	}
 	
 	access(all)
@@ -240,7 +254,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		
 		// Deposit a DugoutDawgzNFT into the collection. Safe to assume id's are unique.
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Required to ensure this is a DugoutDawgzNFT
 			let token <- token as! @DugoutDawgzNFT.NFT
 			let id: UInt64 = token.id
@@ -281,7 +295,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		
 		// Borrow a reference to the specified NFT as a DugoutDawgzNFT.
 		// Panics if NFT does not exist in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDugoutDawgzNFT(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -354,7 +368,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		var minted: UInt64
 		
 		// Add a new Template to the Set, only if the Set is Open
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(template: Template){ 
 			pre{ 
 				!self.isLocked:
@@ -368,7 +382,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		
 		// Lock the Set if it is Open. This signals that this Set
 		// will mint NFTs based only on the Templates configured in this Set.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				!self.isLocked:
@@ -382,7 +396,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		
 		// Mint numToMint NFTs with the supplied creator attribute. The NFT will
 		// be minted into the provided receiver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(templateID: UInt64, creator: Address): @NFT{ 
 			pre{ 
 				templateID < UInt64(self.templates.length):
@@ -397,7 +411,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		}
 		
 		// Reveal a specified Template in a Set.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealTemplate(templateID: UInt64, metadata:{ TemplateMetadata}, salt: [UInt8]){ 
 			pre{ 
 				templateID < UInt64(self.templates.length):
@@ -432,7 +446,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 	}
 	
 	// Number of sets created by contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setsCount(): UInt64{ 
 		return DugoutDawgzNFT.totalSets
 	}
@@ -484,7 +498,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 	}
 	
 	// Generate a SetReport for informational purposes (to be used with scripts)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateSetReport(setID: UInt64): SetReport{ 
 		let setRef = (&self.sets[setID] as &Set?)!
 		return SetReport(id: setID, isLocked: setRef.isLocked, metadata: *setRef.metadata, numTemplates: setRef.templates.length, numMinted: setRef.minted)
@@ -515,19 +529,19 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		access(all)
 		var mintID: UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checksum(): [UInt8]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun salt(): [UInt8]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun revealed(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -556,7 +570,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		
 		// Helper function to check if a proposed metadata and salt reveal would
 		// produce the configured checksum in a Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun validate(metadata:{ TemplateMetadata}, salt: [UInt8]): Bool{ 
 			let hash = String.encodeHex(HashAlgorithm.SHA3_256.hash(salt.concat(metadata.hash())))
 			let checksum = String.encodeHex(self.checksum())
@@ -565,7 +579,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		
 		// Reveal template metadata and salt. validate() is called as a precondition
 		// so collector can be assured metadata was not changed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(metadata:{ TemplateMetadata}, salt: [UInt8]){ 
 			pre{ 
 				self.mintID != nil:
@@ -579,30 +593,30 @@ contract DugoutDawgzNFT: NonFungibleToken{
 			self._salt = salt
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checksum(): [UInt8]{ 
 			return self._checksum
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun salt(): [UInt8]?{ 
 			return self._salt
 		}
 		
 		// Check to see if metadata has been revealed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun revealed(): Bool{ 
 			return self.metadata != nil
 		}
 		
 		// Mark the NFT as minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markMinted(nftID: UInt64){ 
 			self.mintID = nftID
 		}
 		
 		// Implements MetadataResolver.getViews
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getViews(): [Type]{ 
 			if !self.revealed(){ 
 				return [Type<MetadataViews.Display>()]
@@ -611,7 +625,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 		}
 		
 		// Implements MetadataResolver.resolveView
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			if !self.revealed(){ 
 				if view != Type<MetadataViews.Display>(){ 
@@ -632,7 +646,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 	}
 	
 	// Public helper function to be able to inspect any Template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTemplate(setID: UInt64, templateID: UInt64):{ NFTTemplate}{ 
 		let setRef = (&self.sets[setID] as &Set?)!
 		return setRef.templates[templateID]
@@ -647,7 +661,7 @@ contract DugoutDawgzNFT: NonFungibleToken{
 			self.setID = setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(templateID: UInt64, creator: Address): @NFT{ 
 			let set = (&DugoutDawgzNFT.sets[self.setID] as &Set?)!
 			return <-set.mint(templateID: templateID, creator: creator)
@@ -662,17 +676,17 @@ contract DugoutDawgzNFT: NonFungibleToken{
 	resource Admin{ 
 		
 		// Create a set with the provided SetMetadata.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(metadata: SetMetadata): UInt64{ 
 			return DugoutDawgzNFT.createSet(metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			return (&DugoutDawgzNFT.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSetMinter(setID: UInt64): @SetMinter{ 
 			return <-create SetMinter(setID: setID)
 		}

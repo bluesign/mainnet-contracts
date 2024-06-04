@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -53,7 +67,7 @@ contract HelixAuto: NonFungibleToken{
 		case hacker
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun vehicleTypeToString(_ type: VehicleType): String{ 
 		switch type{ 
 			case VehicleType.hero:
@@ -70,7 +84,7 @@ contract HelixAuto: NonFungibleToken{
 		return ""
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun vehicleVinType(_ type: VehicleType): String{ 
 		switch type{ 
 			case VehicleType.hero:
@@ -87,7 +101,7 @@ contract HelixAuto: NonFungibleToken{
 		return ""
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun vehicleDescriptionType(_ type: VehicleType): String{ 
 		switch type{ 
 			case VehicleType.hero:
@@ -130,14 +144,14 @@ contract HelixAuto: NonFungibleToken{
 		
 		// pub function to send back the NFT name
 		// used in the metadata resolver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return "Helix ".concat(HelixAuto.vehicleTypeToString(self.vehicle_type)).concat(" ").concat(HelixAuto.vehicleVinType(self.vehicle_type)).concat(self.id.toString())
 		}
 		
 		// pub function to send back the NFT description
 		// used in the metadata resolver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return HelixAuto.vehicleDescriptionType(self.vehicle_type)
 		}
@@ -196,15 +210,15 @@ contract HelixAuto: NonFungibleToken{
 	access(all)
 	resource interface HelixAutoCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &HelixAuto.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -224,7 +238,7 @@ contract HelixAuto: NonFungibleToken{
 		
 		// Deposit
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Security to make sure we are depositing an NFT fom this collection
 			let ourNft <- token as! @NFT
 			emit Deposit(id: ourNft.id, to: self.owner?.address)
@@ -260,7 +274,7 @@ contract HelixAuto: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &HelixAuto.NFT?{ 
 			// If account owns an NFT
 			if self.ownedNFTs[id] != nil{ 
@@ -302,7 +316,7 @@ contract HelixAuto: NonFungibleToken{
 	// NFT Minter
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, _traits:{ String: AnyStruct}, _vehicle_type: VehicleType, _glbCID: String, _imageCID: String, royalties: [MetadataViews.Royalty]){ 
 			recipient.deposit(token: <-create HelixAuto.NFT(_traits: _traits, _glbCID: _glbCID, _imageCID: _imageCID, _vehicle_type: _vehicle_type, royalties: royalties))
 			emit Minted(id: HelixAuto.totalSupply, vehicle_type: HelixAuto.vehicleTypeToString(_vehicle_type))
@@ -314,7 +328,7 @@ contract HelixAuto: NonFungibleToken{
 	// If an account does not have a collection, panic
 	// If it has a collection, but does not contain the itemID, return nil
 	// If it has a collection and it contains the itemID, return a reference to that
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &HelixAuto.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&HelixAuto.Collection>(HelixAuto.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust that HelixAuto.collection.borrowEntireNFT to get the correct itemID

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MoxyData from "./MoxyData.cdc"
 
@@ -91,27 +105,27 @@ contract MoxyVaultToken: FungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceFor(timestamp: UFix64): UFix64?{ 
 			return self.dailyBalances.getValueOrMostRecentFor(timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalancesChangesUpTo(timestamp: UFix64):{ UFix64: UFix64}{ 
 			return self.dailyBalances.getValueChangesUpTo(timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceChange(timestamp: UFix64): Fix64{ 
 			return self.dailyBalances.getValueChange(timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastTimestampAdded(): UFix64?{ 
 			return self.dailyBalances.getLastKeyAdded()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstTimestampAdded(): UFix64?{ 
 			return self.dailyBalances.getFirstKeyAdded()
 		}
@@ -147,7 +161,7 @@ contract MoxyVaultToken: FungibleToken{
 		/// been consumed and therefore can be destroyed.
 		///
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			panic("MV tokens can't be directly deposited.")
 		}
 		
@@ -206,7 +220,7 @@ contract MoxyVaultToken: FungibleToken{
 			self.balance = self.balance + balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMVConverter(privateVaultRef: Capability<&MoxyVaultToken.Vault>, allowedAmount: UFix64): @MVConverter{ 
 			return <-create MVConverter(privateVaultRef: privateVaultRef, allowedAmount: allowedAmount, address: (self.owner!).address)
 		}
@@ -290,13 +304,13 @@ contract MoxyVaultToken: FungibleToken{
 		/// Function that mints new tokens, adds them to the total supply,
 		/// and returns them to the calling context.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @MoxyVaultToken.Vault{ 
 			let timestamp = getCurrentBlock().timestamp
 			return <-self.mintTokensFor(amount: amount, timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokensFor(amount: UFix64, timestamp: UFix64): @MoxyVaultToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -334,7 +348,7 @@ contract MoxyVaultToken: FungibleToken{
 		/// Note: the burned tokens are automatically subtracted from the
 		/// total supply in the Vault destructor.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @MoxyVaultToken.Vault
 			let amount = vault.balance
@@ -354,7 +368,7 @@ contract MoxyVaultToken: FungibleToken{
 		access(all)
 		var address: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyVault(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				amount > 0.0:
@@ -376,19 +390,19 @@ contract MoxyVaultToken: FungibleToken{
 	
 	access(all)
 	resource interface DailyBalancesInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceFor(timestamp: UFix64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceChange(timestamp: UFix64): Fix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastTimestampAdded(): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstTimestampAdded(): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalancesChangesUpTo(timestamp: UFix64):{ UFix64: UFix64}
 	}
 	
@@ -403,21 +417,21 @@ contract MoxyVaultToken: FungibleToken{
 	
 	access(all)
 	resource interface Converter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyVault(amount: UFix64): @{FungibleToken.Vault}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLastTotalSupplyTimestampAdded(): UFix64?{ 
 		return self.totalSupplies.getLastKeyAdded()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupplyFor(timestamp: UFix64): UFix64{ 
 		return self.totalSupplies.getValueOrMostRecentFor(timestamp: timestamp)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDailyChangeTo(timestamp: UFix64): Fix64{ 
 		return self.totalSupplies.getValueChange(timestamp: timestamp)
 	}

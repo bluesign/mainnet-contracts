@@ -1,4 +1,18 @@
-// Compound interest, periodic compounding with 1 second period.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Compound interest, periodic compounding with 1 second period.
 //
 // This contract mostly reinvents the wheel -- waiting for https://github.com/onflow/cadence/issues/1151
 // This all will be one-liner with exponentiaion that support fractions.
@@ -302,13 +316,13 @@ contract CompoundInterest{
 		self.k2000 = 0.41899461
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getK(_ i: UInt8): UFix64{ 
 		return self.ks[i]
 	}
 	
 	// Exponentiation with base 10
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun pow10(_ x: UFix64): UFix64{ 
 		pre{ 
 			// log10(184467440737.09551615) = 11.26591972249479
@@ -353,7 +367,7 @@ contract CompoundInterest{
 	// k = log10(1+r) * 10^7, where r is per-second interest ratio, e.g for 3% r = 0.000000000936681155,
 	// since those numbers are very tiny for Cadence UFix64 precision, we use scaling factor of 10^7 to compensate it.
 	// Use CompoundInterest.ks for precomputed values, e.k ks[1] = 1% APY, ks[8] = 8% APY.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generatedCompoundInterest(seconds: UFix64, k: UFix64): UFix64{ 
 		// Applying same inverse scaling factor 10^7 for seconds, in the end those scaling factors will cancel out.
 		let seconds_scaled = seconds / 10000000.0

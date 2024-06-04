@@ -1,4 +1,18 @@
-//这是根据官方NFT接口实现的NftEggs项目的NFT合约
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//这是根据官方NFT接口实现的NftEggs项目的NFT合约
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -157,18 +171,18 @@ contract NftEggsNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftEggsNFT(id: UInt64): &NftEggsNFT.NFT?{ 
 			//如果结果不是nil，则返回的引用的id应与函数的参数相同
 			post{ 
@@ -199,7 +213,7 @@ contract NftEggsNFT: NonFungibleToken{
 		
 		// 存储NFT
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NftEggsNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -212,7 +226,7 @@ contract NftEggsNFT: NonFungibleToken{
 		}
 		
 		// 一次性存入多个NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -235,7 +249,7 @@ contract NftEggsNFT: NonFungibleToken{
 		}
 		
 		// 返回对NFT的引用，调用者可以读取 metadata,
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftEggsNFT(id: UInt64): &NftEggsNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -281,7 +295,7 @@ contract NftEggsNFT: NonFungibleToken{
 		}
 		
 		// 使用相同的元数据创建指定个数的NFT，并使用收件人的集合引用将其存放在收件人集合中
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NftEggsNFT.CollectionPublic}, metadata:{ String: String}, quantity: UInt64, rate: UFix64){ 
 			let creator = (recipient.owner!).address
 			var newItem = Item(metadata: metadata, quantity: quantity, royalty: rate, creator: creator)
@@ -301,37 +315,37 @@ contract NftEggsNFT: NonFungibleToken{
 	}
 	
 	// 返回所有Items
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllItems(): [NftEggsNFT.Item]{ 
 		return NftEggsNFT.itemDatas.values
 	}
 	
 	// 返回指定Item的元数据
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemMetadata(itemId: UInt64):{ String: String}?{ 
 		return self.itemDatas[itemId]?.metadata
 	}
 	
 	// 返回指定Item的版权费率
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemRoyalty(itemId: UInt64): UFix64?{ 
 		return self.itemDatas[itemId]?.royalty
 	}
 	
 	// 返回指定Item的创建人
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemCreator(itemId: UInt64): Address?{ 
 		return self.itemDatas[itemId]?.creator
 	}
 	
 	// 返回指定Item铸造NFT总数
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemQuantity(itemId: UInt64): UInt64?{ 
 		return self.itemDatas[itemId]?.quantity
 	}
 	
 	// 返回指定Item的元数据的指定字段
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemMetadataByField(itemId: UInt64, field: String): String?{ 
 		if let item = NftEggsNFT.itemDatas[itemId]{ 
 			return item.metadata[field]

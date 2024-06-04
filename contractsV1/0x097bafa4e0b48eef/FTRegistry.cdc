@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract FTRegistry{ 
 	/* Event */
 	access(all)
@@ -91,12 +105,12 @@ contract FTRegistry{
 	}
 	
 	/* getters */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTInfoByTypeIdentifier(_ typeIdentifier: String): FTInfo?{ 
 		return FTRegistry.fungibleTokenList[typeIdentifier]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTInfoByAlias(_ alias: String): FTInfo?{ 
 		if let identifier = FTRegistry.aliasMap[alias]{ 
 			return FTRegistry.fungibleTokenList[identifier]
@@ -104,7 +118,7 @@ contract FTRegistry{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTInfo(_ input: String): FTInfo?{ 
 		if let info = self.getFTInfoByAlias(input){ 
 			return info
@@ -115,22 +129,22 @@ contract FTRegistry{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTypeIdentifier(_ alias: String): String?{ 
 		return FTRegistry.aliasMap[alias]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFTInfoAll():{ String: FTInfo}{ 
 		return FTRegistry.fungibleTokenList
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSupportedFTAlias(): [String]{ 
 		return FTRegistry.aliasMap.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSupportedFTTypeIdentifier(): [String]{ 
 		return FTRegistry.aliasMap.values
 	}

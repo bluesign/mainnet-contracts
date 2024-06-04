@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FanTopSerial from "./FanTopSerial.cdc"
 
@@ -101,27 +115,27 @@ contract FanTopToken: NonFungibleToken{
 			return self.mintedCount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData(): ItemData{ 
 			return self.versions[self.version]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVersions():{ UInt32: ItemData}{ 
 			return self.versions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isVersionLocked(): Bool{ 
 			return self.mintedCount >= (self.versions[self.version]!).originSerialNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLimitLocked(): Bool{ 
 			return self.mintedCount > 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isFulfilled(): Bool{ 
 			return self.mintedCount >= self.limit
 		}
@@ -144,7 +158,7 @@ contract FanTopToken: NonFungibleToken{
 			self.originSerialNumber = originSerialNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -174,7 +188,7 @@ contract FanTopToken: NonFungibleToken{
 			emit FanTopToken.TokenCreated(id: self.id, refId: refId, serialNumber: data.serialNumber, itemId: data.itemId, itemVersion: data.itemVersion, minter: minter)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData(): NFTData{ 
 			return self.data
 		}
@@ -201,7 +215,7 @@ contract FanTopToken: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -215,18 +229,18 @@ contract FanTopToken: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFanTopToken(id: UInt64): &FanTopToken.NFT{ 
 			post{ 
 				result.id == id:
@@ -255,7 +269,7 @@ contract FanTopToken: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -265,7 +279,7 @@ contract FanTopToken: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			pre{ 
 				!self.ownedNFTs.containsKey(token.id):
 					"That id already exists"
@@ -276,7 +290,7 @@ contract FanTopToken: NonFungibleToken{
 			emit Deposit(id: id, to: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -295,7 +309,7 @@ contract FanTopToken: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFanTopToken(id: UInt64): &FanTopToken.NFT{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (ref as! &FanTopToken.NFT)!
@@ -424,12 +438,12 @@ contract FanTopToken: NonFungibleToken{
 	let items:{ String: Item}
 	
 	// Public
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemIds(): [String]{ 
 		return self.items.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItem(_ itemId: String): Item?{ 
 		return self.items[itemId]
 	}

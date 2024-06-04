@@ -1,4 +1,18 @@
-import Offers from "./Offers.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Offers from "./Offers.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -42,25 +56,25 @@ contract DapperOffers{
 		// getOfferIds
 		// Get a list of Offer ids created by the resource.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferIds(): [UInt64]
 		
 		// borrowOffer
 		// Borrow an Offer to either accept the Offer or get details on the Offer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOffer(offerId: UInt64): &Offers.Offer?
 		
 		// cleanup
 		// Remove an Offer
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(offerId: UInt64)
 		
 		// addProxyCapability
 		// Assign proxy capabilities (DapperOfferProxyManager) to an DapperOffer resource.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addProxyCapability(account: Address, cap: Capability<&DapperOffer>)
 	}
 	
@@ -72,7 +86,7 @@ contract DapperOffers{
 		// createOffer
 		// Allows the DapperOffer owner to create Offers.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOffer(
 			vaultRefCapability: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>,
 			nftReceiverCapability: Capability<&{NonFungibleToken.CollectionPublic}>,
@@ -87,7 +101,7 @@ contract DapperOffers{
 		// removeOffer
 		// Allows the DapperOffer owner to remove offers
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(offerId: UInt64)
 	}
 	
@@ -99,13 +113,13 @@ contract DapperOffers{
 		// removeOffer
 		// Allows the DapperOffer owner to remove offers
 		//
-		access(all)
-		fun removeOffer(offerId: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun removeOffer(offerId: UInt64): Void
 		
 		// removeOfferFromProxy
 		// Allows the DapperOffer proxy owner to remove offers
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOfferFromProxy(account: Address, offerId: UInt64)
 	}
 	
@@ -126,7 +140,7 @@ contract DapperOffers{
 		// addProxyCapability
 		// Assign proxy capabilities (DapperOfferProxyManager) to an DapperOffer resource.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addProxyCapability(account: Address, cap: Capability<&DapperOffer>){ 
 			pre{ 
 				cap.borrow() != nil:
@@ -138,7 +152,7 @@ contract DapperOffers{
 		// removeOfferFromProxy
 		// Allows the DapperOffer proxy owner to remove offers
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOfferFromProxy(account: Address, offerId: UInt64){ 
 			pre{ 
 				self.removeOfferCapability[account] != nil:
@@ -151,7 +165,7 @@ contract DapperOffers{
 		// createOffer
 		// Allows the DapperOffer owner to create Offers.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOffer(vaultRefCapability: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>, nftReceiverCapability: Capability<&{NonFungibleToken.CollectionPublic}>, nftType: Type, nftId: UInt64, amount: UFix64, royalties: [Offers.Royalty]): UInt64{ 
 			let offer <- Offers.makeOffer(vaultRefCapability: vaultRefCapability, nftReceiverCapability: nftReceiverCapability, nftType: nftType, nftId: nftId, amount: amount, royalties: royalties)
 			let offerId = offer.uuid
@@ -163,7 +177,7 @@ contract DapperOffers{
 		// removeOffer
 		// Remove an Offer that has not yet been accepted from the collection and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(offerId: UInt64){ 
 			destroy (self.offers.remove(key: offerId) ?? panic("missing offer"))
 		}
@@ -171,7 +185,7 @@ contract DapperOffers{
 		// getOfferIds
 		// Returns an array of the Offer resource IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferIds(): [UInt64]{ 
 			return self.offers.keys
 		}
@@ -179,7 +193,7 @@ contract DapperOffers{
 		// borrowOffer
 		// Returns a read-only view of the Offer for the given OfferID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOffer(offerId: UInt64): &Offers.Offer?{ 
 			if self.offers[offerId] != nil{ 
 				return (&self.offers[offerId] as &Offers.Offer?)!
@@ -193,7 +207,7 @@ contract DapperOffers{
 		// Anyone can call, but at present it only benefits the account owner to do so.
 		// Kind purchasers can however call it if they like.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(offerId: UInt64){ 
 			pre{ 
 				self.offers[offerId] != nil:
@@ -220,7 +234,7 @@ contract DapperOffers{
 	// createDapperOffer
 	// Make creating an DapperOffer publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDapperOffer(): @DapperOffer{ 
 		return <-create DapperOffer()
 	}

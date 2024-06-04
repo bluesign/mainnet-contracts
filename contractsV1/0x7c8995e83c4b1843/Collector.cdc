@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -129,7 +143,7 @@ contract Collector: NonFungibleToken{
 			emit TemplateCreated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateName(newName: String){ 
 			pre{ 
 				self.locked == false:
@@ -139,7 +153,7 @@ contract Collector: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDescription(newDescription: String){ 
 			pre{ 
 				self.locked == false:
@@ -149,7 +163,7 @@ contract Collector: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateImage(newImage: String){ 
 			pre{ 
 				self.locked == false:
@@ -159,7 +173,7 @@ contract Collector: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: AnyStruct}){ 
 			pre{ 
 				self.locked == false:
@@ -171,7 +185,7 @@ contract Collector: NonFungibleToken{
 			emit TemplateUpdated(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAddedToSet(setID: UInt64){ 
 			pre{ 
 				self.addedToSet == 0:
@@ -182,7 +196,7 @@ contract Collector: NonFungibleToken{
 			emit TemplateAddedToSet(id: self.id, name: self.name, setID: setID, setName: setName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				self.locked == false:
@@ -192,7 +206,7 @@ contract Collector: NonFungibleToken{
 			emit TemplateLocked(id: self.id, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -228,7 +242,7 @@ contract Collector: NonFungibleToken{
 			self.maxSize = maxSize
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -463,17 +477,17 @@ contract Collector: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetData(): SetData{ 
 			return Collector.SetsData[self.setID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTemplate(): Template{ 
 			return Collector.Templates[self.templateID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return (Collector.Templates[self.templateID]!).getMetadata()
 		}
@@ -487,15 +501,15 @@ contract Collector: NonFungibleToken{
 	access(all)
 	resource interface NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollector(id: UInt64): &Collector.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -517,7 +531,7 @@ contract Collector: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Collector.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -525,7 +539,7 @@ contract Collector: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -545,7 +559,7 @@ contract Collector: NonFungibleToken{
 			return ref!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollector(id: UInt64): &Collector.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -625,7 +639,7 @@ contract Collector: NonFungibleToken{
 			emit SetCreated(id: self.id, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateImage(newImage: String){ 
 			pre{ 
 				self.locked == false:
@@ -636,7 +650,7 @@ contract Collector: NonFungibleToken{
 			emit SetUpdated(id: self.id, name: oldData.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: AnyStruct}){ 
 			pre{ 
 				self.locked == false:
@@ -649,7 +663,7 @@ contract Collector: NonFungibleToken{
 			emit SetUpdated(id: self.id, name: oldData.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makePublic(){ 
 			pre{ 
 				self.isPublic == false:
@@ -658,7 +672,7 @@ contract Collector: NonFungibleToken{
 			self.isPublic = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makePrivate(){ 
 			pre{ 
 				self.isPublic == true:
@@ -667,7 +681,7 @@ contract Collector: NonFungibleToken{
 			self.isPublic = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(id: UInt64){ 
 			pre{ 
 				Collector.Templates[id] != nil:
@@ -691,14 +705,14 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).markAddedToSet(setID: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplates(templateIDs: [UInt64]){ 
 			for templateID in templateIDs{ 
 				self.addTemplate(id: templateID)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				self.locked == false:
@@ -708,7 +722,7 @@ contract Collector: NonFungibleToken{
 			emit SetLocked(id: self.id, name: (Collector.SetsData[self.id]!).name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(){ 
 			pre{ 
 				self.locked == true:
@@ -718,7 +732,7 @@ contract Collector: NonFungibleToken{
 			emit SetUnlocked(id: self.id, name: (Collector.SetsData[self.id]!).name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			let templateID = self.availableTemplateIDs[0]
 			let newNFT: @NFT <- create Collector.NFT(id: Collector.totalSupply + 1, templateID: templateID, serialNumber: self.nextSerialNumber)
@@ -729,7 +743,7 @@ contract Collector: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateName(id: UInt64, newName: String){ 
 			pre{ 
 				Collector.Templates[id] != nil:
@@ -744,7 +758,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateName(newName: newName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateDescription(id: UInt64, newDescription: String){ 
 			pre{ 
 				Collector.Templates[id] != nil:
@@ -759,7 +773,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateDescription(newDescription: newDescription)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateImage(id: UInt64, newImage: String){ 
 			pre{ 
 				Collector.Templates[id] != nil:
@@ -774,7 +788,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateImage(newImage: newImage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(id: UInt64, newMetadata:{ String: AnyStruct}){ 
 			pre{ 
 				Collector.Templates[id] != nil:
@@ -789,7 +803,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateMetadata(newMetadata: newMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(id: UInt64){ 
 			pre{ 
 				Collector.Templates[id] != nil:
@@ -804,12 +818,12 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).lock()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return (Collector.SetsData[self.id]!).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableTemplateIDs(): [UInt64]{ 
 			return self.availableTemplateIDs
 		}
@@ -817,7 +831,7 @@ contract Collector: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setID: UInt64){ 
 			let set = self.borrowSet(id: setID)
 			if set.getAvailableTemplateIDs().length == 0{ 
@@ -826,7 +840,7 @@ contract Collector: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFT())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(name: String, description: String, image: String, metadata:{ String: AnyStruct}): UInt64{ 
 			let templateID = Collector.nextTemplateID
 			
@@ -835,7 +849,7 @@ contract Collector: NonFungibleToken{
 			return templateID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateName(id: UInt64, newName: String){ 
 			pre{ 
 				Collector.Templates.containsKey(id) != nil:
@@ -846,7 +860,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateName(newName: newName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateDescription(id: UInt64, newDescription: String){ 
 			pre{ 
 				Collector.Templates.containsKey(id) != nil:
@@ -857,7 +871,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateDescription(newDescription: newDescription)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateImage(id: UInt64, newImage: String){ 
 			pre{ 
 				Collector.Templates.containsKey(id) != nil:
@@ -868,7 +882,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateImage(newImage: newImage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(id: UInt64, newMetadata:{ String: String}){ 
 			pre{ 
 				Collector.Templates.containsKey(id) != nil:
@@ -879,7 +893,7 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).updateMetadata(newMetadata: newMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(id: UInt64){ 
 			pre{ 
 				Collector.Templates.containsKey(id) != nil:
@@ -890,13 +904,13 @@ contract Collector: NonFungibleToken{
 			 Collector.Templates[id]!).lock()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, description: String, image: String, metadata:{ String: String}, maxSize: UInt64?){ 
 			var newSet <- create Set(name: name, description: description, image: image, metadata: metadata, maxSize: maxSize)
 			Collector.sets[newSet.id] <-! newSet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(id: UInt64): &Set{ 
 			pre{ 
 				Collector.sets[id] != nil:
@@ -906,45 +920,45 @@ contract Collector: NonFungibleToken{
 			return ref!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetImage(id: UInt64, newImage: String){ 
 			let set = self.borrowSet(id: id)
 			set.updateImage(newImage: newImage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetMetadata(id: UInt64, newMetadata:{ String: AnyStruct}){ 
 			let set = self.borrowSet(id: id)
 			set.updateMetadata(newMetadata: newMetadata)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTemplate(id: UInt64): Collector.Template?{ 
 		return self.Templates[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplates():{ UInt64: Collector.Template}{ 
 		return self.Templates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDs(): [UInt64]{ 
 		return self.sets.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(id: UInt64): Collector.SetData?{ 
 		return Collector.SetsData[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetsData():{ UInt64: Collector.SetData}{ 
 		return self.SetsData
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSize(id: UInt64): UInt64{ 
 		pre{ 
 			self.sets[id] != nil:
@@ -954,7 +968,7 @@ contract Collector: NonFungibleToken{
 		return (set!).nextSerialNumber - 1
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableTemplateIDsInSet(id: UInt64): [UInt64]{ 
 		pre{ 
 			self.sets[id] != nil:

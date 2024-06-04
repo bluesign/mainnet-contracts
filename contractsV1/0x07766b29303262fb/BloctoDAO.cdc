@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -31,7 +45,7 @@ contract BloctoDAO{
 	// Admin resourse holder can create Proposers
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProposer(): @BloctoDAO.Proposer{ 
 			return <-create Proposer()
 		}
@@ -40,7 +54,7 @@ contract BloctoDAO{
 	// Proposer resource holder can propose new topics
 	access(all)
 	resource Proposer{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTopic(
 			title: String,
 			description: String,
@@ -64,7 +78,7 @@ contract BloctoDAO{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTopic(
 			id: Int,
 			title: String?,
@@ -94,7 +108,7 @@ contract BloctoDAO{
 		access(self)
 		var records:{ UInt64: Int}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun vote(topicId: UInt64, optionIndex: Int){ 
 			pre{ 
 				self.records[topicId] == nil:
@@ -109,7 +123,7 @@ contract BloctoDAO{
 			self.records[topicId] = optionIndex
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotedOption(topicId: UInt64): Int?{ 
 			return self.records[topicId]
 		}
@@ -219,7 +233,7 @@ contract BloctoDAO{
 			self.voided = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(
 			title: String?,
 			description: String?,
@@ -245,7 +259,7 @@ contract BloctoDAO{
 			self.updatedAt = getCurrentBlock().timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun vote(voterAddr: Address, optionIndex: Int){ 
 			pre{ 
 				self.isStarted():
@@ -261,7 +275,7 @@ contract BloctoDAO{
 		}
 		
 		// return if count ended
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun count(size: Int): CountStatus{ 
 			if self.isEnded() == false{ 
 				return CountStatus.invalid
@@ -285,17 +299,17 @@ contract BloctoDAO{
 			return CountStatus.success
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isEnded(): Bool{ 
 			return getCurrentBlock().timestamp >= self.endAt
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isStarted(): Bool{ 
 			return getCurrentBlock().timestamp >= self.startAt
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotes(page: Int, pageSize: Int?): [VoteRecord]{ 
 			var records: [VoteRecord] = []
 			let size = pageSize != nil ? pageSize! : 100
@@ -315,13 +329,13 @@ contract BloctoDAO{
 			return records
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalVoted(): Int{ 
 			return self.voted.keys.length
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakedBLT(address: Address): UFix64{ 
 		let collectionRef =
 			getAccount(address).capabilities.get<
@@ -340,27 +354,27 @@ contract BloctoDAO{
 		return amount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTopics(): [Topic]{ 
 		return self.topics
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTopicsLength(): Int{ 
 		return self.topics.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTopic(id: UInt64): Topic{ 
 		return self.topics[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun count(topicId: UInt64, maxSize: Int): CountStatus{ 
 		return self.topics[topicId].count(size: maxSize)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun initVoter(): @BloctoDAO.Voter{ 
 		return <-create Voter()
 	}

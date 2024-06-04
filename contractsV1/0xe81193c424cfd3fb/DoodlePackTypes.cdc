@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 access(all)
 contract DoodlePackTypes{ 
@@ -218,12 +232,12 @@ contract DoodlePackTypes{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackType(id: UInt64): DoodlePackTypes.PackType?{ 
 		return self.packTypes[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackTypes(): [DoodlePackTypes.PackType]{ 
 		return self.packTypes.values
 	}
@@ -302,12 +316,12 @@ contract DoodlePackTypes{
 		DoodlePackTypes.templateDistributionsMintedCount[typeId] = templateDistributionsMintedCount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackTypesMintedCount(typeId: UInt64): UInt64{ 
 		return DoodlePackTypes.packTypesMintedCount[typeId] ?? 0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateDistributionMintedCount(typeId: UInt64, templateDistributionId: UInt64): UInt64{ 
 		let templateDistributionsMintedCount =
 			DoodlePackTypes.templateDistributionsMintedCount[typeId] ??{} 

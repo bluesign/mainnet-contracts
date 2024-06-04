@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -203,7 +217,7 @@ contract AeraRewards: NonFungibleToken{
 			self.rarity = rarity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlayer(): AeraNFT.Player?{ 
 			if let p = self.detail_id["player_id"]{ 
 				return AeraNFT.getPlayer(p)
@@ -211,7 +225,7 @@ contract AeraRewards: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLicense(): AeraNFT.License?{ 
 			if let id = self.detail_id["license_id"]{ 
 				return AeraNFT.getLicense(id)
@@ -219,7 +233,7 @@ contract AeraRewards: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFiles(): [MetadataViews.Media]{ 
 			var m: [MetadataViews.Media] = []
 			for f in self.files{ 
@@ -228,7 +242,7 @@ contract AeraRewards: NonFungibleToken{
 			return m
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFileAsTraits(): [MetadataViews.Trait]{ 
 			var t: [MetadataViews.Trait] = []
 			for f in self.files{ 
@@ -237,7 +251,7 @@ contract AeraRewards: NonFungibleToken{
 			return t
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideoAsFile():{ MetadataViews.File}{ 
 			if self.video_hash != ""{ 
 				return MetadataViews.IPFSFile(cid: self.video_hash, path: nil)
@@ -253,7 +267,7 @@ contract AeraRewards: NonFungibleToken{
 		emit RewardMetadataRegistered(reward_template_id: reward.reward_template_id, reward_name: reward.reward_name, thumbnail: "ipfs://".concat(reward.thumbnail_hash), video: reward.getVideoAsFile().uri(), max_quantity: maxQuantity)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReward(_ id: UInt64): RewardTemplate{ 
 		return (AeraRewards.rewardTemplates[id]!).reward_template
 	}
@@ -291,12 +305,12 @@ contract AeraRewards: NonFungibleToken{
 			self.extra ={ "mintedAt": Clock.time()}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReward(): AeraRewards.RewardTemplate{ 
 			return (AeraRewards.rewardTemplates[self.reward_template_id]!).reward_template
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMintedAt(): UFix64?{ 
 			if let minted = self.extra["mintedAt"]{ 
 				let res = minted as! UFix64
@@ -405,7 +419,7 @@ contract AeraRewards: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
@@ -427,7 +441,7 @@ contract AeraRewards: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasNFT(_ id: UInt64): Bool{ 
 			return self.ownedNFTs.containsKey(id)
 		}
@@ -444,7 +458,7 @@ contract AeraRewards: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			token.increaseNounce()
@@ -471,7 +485,7 @@ contract AeraRewards: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRewardNFT(id: UInt64): &AeraRewards.NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):

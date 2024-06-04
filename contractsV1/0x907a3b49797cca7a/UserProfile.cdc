@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 ## The contract of user profile on Flow Quest
 
 > Author: Bohao Tang<tech@btang.cn>
@@ -125,7 +139,7 @@ contract UserProfile{
 			self.results[idx] = result
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValid(): Bool{ 
 			var valid: Bool = false
 			for key in self.results.keys{ 
@@ -160,7 +174,7 @@ contract UserProfile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLatestIndex(): Int{ 
 			return Int(self.timesCompleted)
 		}
@@ -204,10 +218,10 @@ contract UserProfile{
 	// Profile writable
 	access(all)
 	resource interface ProfilePrivate{ 
-		access(all)
-		fun registerForNewSeason(seasonId: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun registerForNewSeason(seasonId: UInt64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertIdentity(platform: String, identity: Interfaces.LinkedIdentity)
 	}
 	
@@ -248,42 +262,42 @@ contract UserProfile{
 		}
 		
 		// ---- readonly methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferredFrom(): Address?{ 
 			return self.referredFromAddress
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralCode(): String?{ 
 			return self.referralCode
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentities(): [Interfaces.LinkedIdentity]{ 
 			return self.linkedIdentities.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentity(platform: String): Interfaces.LinkedIdentity{ 
 			return self.linkedIdentities[platform] ?? panic("Platform not found.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRegistered(seasonId: UInt64): Bool{ 
 			return self.seasonScores[seasonId] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeasonsJoined(): [UInt64]{ 
 			return self.seasonScores.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeasonPoints(seasonId: UInt64): UInt64{ 
 			if let seasonRef = self.borrowSeasonRecordRef(seasonId){ 
 				return seasonRef.points
@@ -292,7 +306,7 @@ contract UserProfile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProfilePoints(): UInt64{ 
 			if let seasonRef = self.borrowSeasonRecordRef(0){ 
 				return seasonRef.points
@@ -301,7 +315,7 @@ contract UserProfile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionStatus(missionKey: String): Interfaces.MissionStatus{ 
 			let score = self.getMissionScore(missionKey: missionKey)
 			let steps: [Bool] = []
@@ -312,30 +326,30 @@ contract UserProfile{
 		}
 		
 		// get mission score keys
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionsParticipanted(): [String]{ 
 			return self.missionScores.keys
 		}
 		
 		// get a copy of bountiesCompleted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountiesCompleted():{ UInt64: UFix64}{ 
 			return self.bountiesCompleted
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isBountyCompleted(bountyId: UInt64): Bool{ 
 			return self.bountiesCompleted[bountyId] != nil
 		}
 		
 		// get a copy of mission score
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionScore(missionKey: String): MissionRecord{ 
 			return self.missionScores[missionKey] ?? panic("Missing mission record")
 		}
 		
 		// ---- writable methods ----
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerForNewSeason(seasonId: UInt64){ 
 			let profileAddr = self.owner?.address ?? panic("Owner not exist")
 			let serviceRef = self.campetitionServiceCap.borrow() ?? panic("Failed to get service capability.")
@@ -349,7 +363,7 @@ contract UserProfile{
 			emit ProfileSeasonNewSeason(profile: profileAddr, seasonId: seasonId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertIdentity(platform: String, identity: Interfaces.LinkedIdentity){ 
 			let profileAddr = self.owner?.address ?? panic("Owner not exist")
 			let uid = platform.concat("#").concat(identity.uid)
@@ -447,7 +461,7 @@ contract UserProfile{
 	}
 	
 	// ---- public methods ----
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createUserProfile(
 		serviceCap: Capability<&{Interfaces.CompetitionServicePublic}>,
 		_ referredFrom: Address?
@@ -455,13 +469,13 @@ contract UserProfile{
 		return <-create Profile(cap: serviceCap, referredFrom: referredFrom)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowUserProfilePublic(_ acct: Address): &Profile{ 
 		return getAccount(acct).capabilities.get<&Profile>(UserProfile.ProfilePublicPath).borrow()
 		?? panic("Failed to borrow user profile: ".concat(acct.toString()))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlatformLinkedAddress(platform: String, uid: String): Address?{ 
 		let uid = platform.concat("#").concat(uid)
 		return UserProfile.platformMapping[uid]

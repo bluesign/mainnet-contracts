@@ -1,4 +1,18 @@
-// MADE BY: Emerald City, Jacob Tucker
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// MADE BY: Emerald City, Jacob Tucker
 // This contract is for FLOAT, a proof of participation platform
 // on Flow. It is similar to POAP, but a lot, lot cooler. ;)
 // The main idea is that FLOATs are simply NFTs. They are minted from
@@ -172,7 +186,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		
 		// Helper function to get the metadata of the event 
 		// this FLOAT is from.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getEventRef(): &FLOATEvent?{ 
 			if let events: &FLOATEvents = self.eventsCap.borrow(){ 
 				return events.borrowPublicEventRef(eventId: self.eventId)
@@ -180,7 +194,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getExtraMetadata():{ String: AnyStruct}{ 
 			if let _event: &FLOATEvent = self.getEventRef(){ 
 				return _event.getExtraFloatMetadata(serial: self.serial)
@@ -188,12 +202,12 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 			return{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSpecificExtraMetadata(key: String): AnyStruct?{ 
 			return self.getExtraMetadata()[key]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImage(): String{ 
 			if let extraEventMetadata:{ String: AnyStruct} = self.getEventRef()?.getExtraMetadata(){ 
 				if FLOAT.extraMetadataToStrOpt(extraEventMetadata, "visibilityMode") == "picture"{ 
@@ -303,22 +317,22 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		view fun borrowFLOAT(id: UInt64): &NFT?
+		access(TMP_ENTITLEMENT_OWNER)
+		view fun borrowFLOAT(id: UInt64): &FLOAT.NFT?
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedIdsFromEvent(eventId: UInt64): [UInt64]
 	}
 	
@@ -339,7 +353,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		
 		// Deposits a FLOAT to the collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let nft <- token as! @NFT
 			let id = nft.id
 			let eventId = nft.eventId
@@ -374,7 +388,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delete(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("You do not own this FLOAT in your collection")
 			let nft <- token as! @NFT
@@ -399,7 +413,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		}
 		
 		// Returns all the FLOATs ids
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
@@ -412,7 +426,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// from `ownedNFTs` (not possible after June 2022 spork), 
 		// but this makes sure the returned
 		// ids are all actually owned by this account.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedIdsFromEvent(eventId: UInt64): [UInt64]{ 
 			let answer: [UInt64] = []
 			if let idsInEvent = self.events[eventId]?.keys{ 
@@ -430,7 +444,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowFLOAT(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -514,40 +528,40 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		access(all)
 		let url: String
 		
-		access(all)
-		fun claim(recipient: &Collection, params:{ String: AnyStruct})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun claim(recipient: &FLOAT.Collection, params:{ String: AnyStruct}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(recipient: &Collection, params:{ String: AnyStruct}, payment: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getExtraMetadata():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSpecificExtraMetadata(key: String): AnyStruct?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers():{ String: [{IVerifier}]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getPrices():{ String: TokenInfo}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getExtraFloatMetadata(serial: UInt64):{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSpecificExtraFloatMetadata(serial: UInt64, key: String): AnyStruct?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaims():{ UInt64: TokenIdentifier}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSerialsUserClaimed(address: Address): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun userHasClaimed(address: Address): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun userCanMint(address: Address): Bool
 	}
 	
@@ -624,21 +638,21 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		var groups:{ String: Bool}
 		
 		// Type: Admin Toggle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleClaimable(): Bool{ 
 			self.claimable = !self.claimable
 			return self.claimable
 		}
 		
 		// Type: Admin Toggle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleTransferrable(): Bool{ 
 			self.transferrable = !self.transferrable
 			return self.transferrable
 		}
 		
 		// Type: Admin Toggle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleVisibilityMode(){ 
 			if let currentVisibilityMode: String = FLOAT.extraMetadataToStrOpt(self.getExtraMetadata(), "visibilityMode"){ 
 				if currentVisibilityMode == "certificate"{ 
@@ -698,7 +712,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		
 		// Type: Getter
 		// Description: Get extra metadata on a specific FLOAT from this event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getExtraFloatMetadata(serial: UInt64):{ String: AnyStruct}{ 
 			if self.extraMetadata["extraFloatMetadatas"] != nil{ 
 				if let e:{ UInt64: AnyStruct} = self.extraMetadata["extraFloatMetadatas"]! as?{ UInt64: AnyStruct}{ 
@@ -714,14 +728,14 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		
 		// Type: Getter
 		// Description: Get specific extra metadata on a specific FLOAT from this event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSpecificExtraFloatMetadata(serial: UInt64, key: String): AnyStruct?{ 
 			return self.getExtraFloatMetadata(serial: serial)[key]
 		}
 		
 		// Type: Getter
 		// Description: Returns claim info of all the serials
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaims():{ UInt64: TokenIdentifier}{ 
 			return self.currentHolders
 		}
@@ -730,7 +744,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// Description: Will return an array of all the serials a user claimed.  
 		// Most of the time this will be a maximum length of 1 because most 
 		// events only allow 1 claim per user.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSerialsUserClaimed(address: Address): [UInt64]{ 
 			var serials: [UInt64] = []
 			if let userClaims:{ Address: [UInt64]} = self.getSpecificExtraMetadata(key: "userClaims") as!{ Address: [UInt64]}?{ 
@@ -745,28 +759,28 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// Type: Getter
 		// Description: Returns true if the user has either claimed
 		// or been minted at least one float from this event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun userHasClaimed(address: Address): Bool{ 
 			return self.getSerialsUserClaimed(address: address).length >= 1
 		}
 		
 		// Type: Getter
 		// Description: Get extra metadata on this event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getExtraMetadata():{ String: AnyStruct}{ 
 			return self.extraMetadata
 		}
 		
 		// Type: Getter
 		// Description: Get specific extra metadata on this event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSpecificExtraMetadata(key: String): AnyStruct?{ 
 			return self.extraMetadata[key]
 		}
 		
 		// Type: Getter
 		// Description: Checks if a user can mint a new FLOAT from this event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun userCanMint(address: Address): Bool{ 
 			if let allows: Bool = self.getSpecificExtraMetadata(key: "allowMultipleClaim") as! Bool?{ 
 				if allows || self.getSerialsUserClaimed(address: address).length == 0{ 
@@ -779,7 +793,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// Type: Getter
 		// Description: Gets all the verifiers that will be used
 		// for claiming
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers():{ String: [{IVerifier}]}{ 
 			return self.verifiers
 		}
@@ -788,7 +802,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// Description: Returns a dictionary whose key is a token identifier
 		// and value is the path to that token and price of the FLOAT in that
 		// currency
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getPrices():{ String: TokenInfo}?{ 
 			return self.extraMetadata["prices"] as!{ String: TokenInfo}?
 		}
@@ -816,7 +830,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// If the event owner directly mints to a user, it does not
 		// run the verifiers on the user. It bypasses all of them.
 		// Return the id of the FLOAT it minted.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &Collection, optExtraFloatMetadata:{ String: AnyStruct}?): UInt64{ 
 			pre{ 
 				self.userCanMint(address: (recipient.owner!).address):
@@ -874,7 +888,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// For example, the FLOAT platform allows event hosts
 		// to specify a secret phrase. That secret phrase will 
 		// be passed in the `params`.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(recipient: &Collection, params:{ String: AnyStruct}){ 
 			pre{ 
 				self.getPrices() == nil:
@@ -885,7 +899,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 			self.verifyAndMint(recipient: recipient, params: params)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(recipient: &Collection, params:{ String: AnyStruct}, payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.getPrices() != nil:
@@ -966,17 +980,17 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface FLOATEventsPublic{ 
 		// Public Getters
-		access(all)
-		view fun borrowPublicEventRef(eventId: UInt64): &FLOATEvent?
+		access(TMP_ENTITLEMENT_OWNER)
+		view fun borrowPublicEventRef(eventId: UInt64): &FLOAT.FLOATEvent?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEvents():{ UInt64: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	// A "Collection" of FLOAT Events
@@ -1010,7 +1024,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		// certificateImage: Must either be nil or a String type
 		// backImage: The IPFS CID of what will display on the back of your FLOAT. Must either be nil or a String type
 		// eventType: Must either be nil or a String type
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEvent(claimable: Bool, description: String, image: String, name: String, transferrable: Bool, url: String, verifiers: [{IVerifier}], allowMultipleClaim: Bool, certificateType: String, visibilityMode: String, extraMetadata:{ String: AnyStruct}): UInt64{ 
 			pre{ 
 				certificateType == "ticket" || certificateType == "medal" || certificateType == "certificate":
@@ -1047,20 +1061,20 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		}
 		
 		// Deletes an event.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteEvent(eventId: UInt64){ 
 			let eventRef = self.borrowEventRef(eventId: eventId) ?? panic("This FLOAT does not exist.")
 			destroy self.events.remove(key: eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEventRef(eventId: UInt64): &FLOATEvent?{ 
 			return &self.events[eventId] as &FLOATEvent?
 		}
 		
 		// Get a public reference to the FLOATEvent
 		// so you can call some helpful getters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowPublicEventRef(eventId: UInt64): &FLOATEvent?{ 
 			return &self.events[eventId] as &FLOATEvent?
 		}
@@ -1072,7 +1086,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		
 		// Maps the eventId to the name of that
 		// event. Just a kind helper.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEvents():{ UInt64: String}{ 
 			let answer:{ UInt64: String} ={} 
 			for id in self.events.keys{ 
@@ -1098,14 +1112,14 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyFLOATEventCollection(): @FLOATEvents{ 
 		return <-create FLOATEvents()
 	}
 	
 	// A function to validate expected FLOAT metadata that must be in a 
 	// certain format as to not cause aborts during expected casting
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun validateExtraFloatMetadata(data:{ String: AnyStruct}): Bool{ 
 		if data.containsKey("medalType"){ 
 			let medalType: String? = FLOAT.extraMetadataToStrOpt(data, "medalType")
@@ -1127,7 +1141,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 	// So we force unwrap due to the dictionary, then unwrap the value within.
 	// It will never abort because we have checked for nil above, which checks 
 	// for both types of nil.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun extraMetadataToStrOpt(_ dict:{ String: AnyStruct}, _ key: String): String?{ 
 		// `dict[key] == nil` means:
 		//	1. the key doesn't exist
@@ -1143,7 +1157,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}
@@ -1153,7 +1167,7 @@ contract FLOAT: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -139,7 +153,7 @@ contract MFLClub: NonFungibleToken{
 		}
 		
 		// Getter for metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -152,7 +166,7 @@ contract MFLClub: NonFungibleToken{
 		}
 		
 		// Getter for competitionsMemberships
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCompetitionsMemberships():{ UInt64: AnyStruct}{ 
 			return self.competitionsMemberships
 		}
@@ -183,7 +197,7 @@ contract MFLClub: NonFungibleToken{
 		}
 		
 		// Getter for status
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): SquadStatus{ 
 			return self.status
 		}
@@ -255,7 +269,7 @@ contract MFLClub: NonFungibleToken{
 		}
 		
 		// Getter for status
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): ClubStatus{ 
 			return self.status
 		}
@@ -268,7 +282,7 @@ contract MFLClub: NonFungibleToken{
 		}
 		
 		// Getter for squadsIDs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSquadIDs(): [UInt64]{ 
 			return self.squadsIDs
 		}
@@ -281,7 +295,7 @@ contract MFLClub: NonFungibleToken{
 		}
 		
 		// Getter for metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -427,7 +441,7 @@ contract MFLClub: NonFungibleToken{
 		}
 		
 		// Withdraws multiple Clubs and returns them as a Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			
@@ -440,7 +454,7 @@ contract MFLClub: NonFungibleToken{
 		
 		// Takes a NFT and adds it to the collections dictionary and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MFLClub.NFT
 			let id: UInt64 = token.id
 			
@@ -475,7 +489,7 @@ contract MFLClub: NonFungibleToken{
 			return ref as! &MFLClub.NFT?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun foundClub(id: UInt64, name: String, description: String){ 
 			let clubRef = self.borrowClubRef(id: id) ?? panic("Club not found")
 			let clubData = MFLClub.getClubData(id: id) ?? panic("Club data not found")
@@ -500,7 +514,7 @@ contract MFLClub: NonFungibleToken{
 			emit ClubFounded(id: id, from: self.owner?.address, name: name, description: description, foundationDate: foundationDate, foundationLicenseSerialNumber: foundationLicenseSerialNumber, foundationLicenseCity: foundationLicenseCity, foundationLicenseCountry: foundationLicenseCountry, foundationLicenseSeason: foundationLicenseSeason)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestClubInfoUpdate(id: UInt64, info:{ String: String}){ 
 			pre{ 
 				self.getIDs().contains(id) == true:
@@ -538,13 +552,13 @@ contract MFLClub: NonFungibleToken{
 	}
 	
 	// Get data for a specific club ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getClubData(id: UInt64): ClubData?{ 
 		return self.clubsDatas[id]
 	}
 	
 	// Get data for a specific squad ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSquadData(id: UInt64): SquadData?{ 
 		return self.squadsDatas[id]
 	}
@@ -555,16 +569,16 @@ contract MFLClub: NonFungibleToken{
 		access(all)
 		let name: String
 		
-		access(all)
-		fun mintClub(id: UInt64, squads: @[Squad], nftMetadata:{ String: AnyStruct}, metadata:{ String: AnyStruct}): @MFLClub.NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintClub(id: UInt64, squads: @[MFLClub.Squad], nftMetadata:{ String: AnyStruct}, metadata:{ String: AnyStruct}): @MFLClub.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateClubStatus(id: UInt64, status: ClubStatus)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateClubMetadata(id: UInt64, metadata:{ String: AnyStruct})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateClubSquadsIDs(id: UInt64, squadsIDs: [UInt64])
 	}
 	
@@ -577,13 +591,13 @@ contract MFLClub: NonFungibleToken{
 			self.name = "ClubAdminClaim"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintClub(id: UInt64, squads: @[Squad], nftMetadata:{ String: AnyStruct}, metadata:{ String: AnyStruct}): @MFLClub.NFT{ 
 			let club <- create MFLClub.NFT(id: id, squads: <-squads, nftMetadata: nftMetadata, metadata: metadata)
 			return <-club
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateClubStatus(id: UInt64, status: ClubStatus){ 
 			pre{ 
 				MFLClub.getClubData(id: id) != nil:
@@ -592,7 +606,7 @@ contract MFLClub: NonFungibleToken{
 			(MFLClub.clubsDatas[id]!).setStatus(status: status)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateClubMetadata(id: UInt64, metadata:{ String: AnyStruct}){ 
 			pre{ 
 				MFLClub.getClubData(id: id) != nil:
@@ -601,7 +615,7 @@ contract MFLClub: NonFungibleToken{
 			(MFLClub.clubsDatas[id]!).setMetadata(metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateClubSquadsIDs(id: UInt64, squadsIDs: [UInt64]){ 
 			pre{ 
 				MFLClub.getClubData(id: id) != nil:
@@ -610,7 +624,7 @@ contract MFLClub: NonFungibleToken{
 			(MFLClub.clubsDatas[id]!).setSquadsIDs(squadsIDs: squadsIDs)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createClubAdmin(): @ClubAdmin{ 
 			return <-create ClubAdmin()
 		}
@@ -622,19 +636,19 @@ contract MFLClub: NonFungibleToken{
 		access(all)
 		let name: String
 		
-		access(all)
-		fun mintSquad(id: UInt64, clubID: UInt64, type: String, nftMetadata:{ String: AnyStruct}, metadata:{ String: AnyStruct}, competitionsMemberships:{ UInt64: AnyStruct}): @Squad
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintSquad(id: UInt64, clubID: UInt64, type: String, nftMetadata:{ String: AnyStruct}, metadata:{ String: AnyStruct}, competitionsMemberships:{ UInt64: AnyStruct}): @MFLClub.Squad
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSquadMetadata(id: UInt64, metadata:{ String: AnyStruct})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSquadCompetitionMembership(id: UInt64, competitionID: UInt64)
 	}
 	
@@ -647,13 +661,13 @@ contract MFLClub: NonFungibleToken{
 			self.name = "SquadAdminClaim"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSquad(id: UInt64, clubID: UInt64, type: String, nftMetadata:{ String: AnyStruct}, metadata:{ String: AnyStruct}, competitionsMemberships:{ UInt64: AnyStruct}): @Squad{ 
 			let squad <- create Squad(id: id, clubID: clubID, type: type, nftMetadata: nftMetadata, metadata: metadata, competitionsMemberships: competitionsMemberships)
 			return <-squad
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSquadMetadata(id: UInt64, metadata:{ String: AnyStruct}){ 
 			pre{ 
 				MFLClub.getSquadData(id: id) != nil:
@@ -662,7 +676,7 @@ contract MFLClub: NonFungibleToken{
 			(MFLClub.squadsDatas[id]!).setMetadata(metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct){ 
 			pre{ 
 				MFLClub.getSquadData(id: id) != nil:
@@ -671,7 +685,7 @@ contract MFLClub: NonFungibleToken{
 			(MFLClub.squadsDatas[id]!).addCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionMembershipData)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSquadCompetitionMembership(id: UInt64, competitionID: UInt64, competitionMembershipData: AnyStruct){ 
 			pre{ 
 				MFLClub.getSquadData(id: id) != nil:
@@ -680,7 +694,7 @@ contract MFLClub: NonFungibleToken{
 			(MFLClub.squadsDatas[id]!).updateCompetitionMembership(competitionID: competitionID, competitionMembershipData: competitionMembershipData)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSquadCompetitionMembership(id: UInt64, competitionID: UInt64){ 
 			pre{ 
 				MFLClub.getSquadData(id: id) != nil:
@@ -689,7 +703,7 @@ contract MFLClub: NonFungibleToken{
 			(MFLClub.squadsDatas[id]!).removeCompetitionMembership(competitionID: competitionID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSquadAdmin(): @SquadAdmin{ 
 			return <-create SquadAdmin()
 		}

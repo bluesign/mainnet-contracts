@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import REVV from "../0x50b286b60012753/REVV.cdc"
 
@@ -97,7 +111,7 @@ contract REVVVaultAccess{
 		// withdraws REVV tokens from the VaultGuard's internal vault reference
 		// Will fail if vault reference is nil / revoked, or amount + previously withdrawn exceeds max
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				amount + self.total <= self.max:
@@ -130,7 +144,7 @@ contract REVVVaultAccess{
 	// @param guardStoragePath - the storage path in the REVVVaultAccess contract owner account
 	// @param guardPrivatePath - the private path linked to the guardStoragePath
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createVaultGuard(
 		adminRef: &Admin,
 		vaultProxyAddress: Address,
@@ -163,7 +177,7 @@ contract REVVVaultAccess{
 	// getVaultGuardPaths returns storage path and private path for a VaultGuard
 	// @param account address of VaultProxy using the VaultGuard
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultGuardPaths(vaultProxyAddress: Address): VaultGuardPaths?{ 
 		return self.proxyToGuardMap[vaultProxyAddress]
 	}
@@ -171,28 +185,28 @@ contract REVVVaultAccess{
 	// getVaultProxyAddress returns an address of a VaultProxy
 	// @param the storage path of the VaultGuard used by the VaultProxy
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultProxyAddress(guardStoragePath: StoragePath): Address?{ 
 		return self.guardToProxyMap[guardStoragePath]
 	}
 	
 	// returns all VaultProxy addresses
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllVaultProxyAddresses(): [Address]{ 
 		return self.proxyToGuardMap.keys
 	}
 	
 	// returns all storage paths for VaultGuards
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllVaultGuardStoragePaths(): [StoragePath]{ 
 		return self.guardToProxyMap.keys
 	}
 	
 	// returns max authorized amount of withdrawal for an account address
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxAmountForAccount(vaultProxyAddress: Address): UFix64{ 
 		let paths = self.proxyToGuardMap[vaultProxyAddress]!
 		let capability =
@@ -203,7 +217,7 @@ contract REVVVaultAccess{
 	
 	// returns total withdrawn amount for an account address
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalAmountForAccount(vaultProxyAddress: Address): UFix64{ 
 		let paths = self.proxyToGuardMap[vaultProxyAddress]!
 		let capability =
@@ -214,7 +228,7 @@ contract REVVVaultAccess{
 	
 	// revokes withdrawal capability for an account
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun revokeVaultGuard(adminRef: &Admin, vaultProxyAddress: Address){ 
 		pre{ 
 			adminRef != nil:
@@ -238,8 +252,8 @@ contract REVVVaultAccess{
 	//
 	access(all)
 	resource interface VaultProxyPublic{ 
-		access(all)
-		fun setCapability(cap: Capability<&REVVVaultAccess.VaultGuard>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setCapability(cap: Capability<&REVVVaultAccess.VaultGuard>): Void
 	}
 	
 	// VaultProxy is a resource to allow designated other accounts to retrieve REVV from the REVV contract's REVV vault.
@@ -254,7 +268,7 @@ contract REVVVaultAccess{
 		// withdraw REVV. ***MUST** be kept private / non-publicly accessible after setCapability has been called
 		// Will fail unless REVV contract account has set a capability using setCapability
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				(self.vaultGuardCap!).check() == true:
@@ -267,7 +281,7 @@ contract REVVVaultAccess{
 		// set a REVV.VaultGuard capability, to allow withdrawal.
 		// Only the REVV contract account can create a VaultGuard so the method can be publicly accessible.
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCapability(cap: Capability<&REVVVaultAccess.VaultGuard>){ 
 			pre{ 
 				cap.check() == true:
@@ -286,7 +300,7 @@ contract REVVVaultAccess{
 	// Anyone can create a VaultProxy but it's useless until the Vault Guard capability is set on it.
 	// Only the REVVVaultAccess owner can create and set a VaultGuard capability
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createVaultProxy(): @REVVVaultAccess.VaultProxy{ 
 		return <-create VaultProxy()
 	}

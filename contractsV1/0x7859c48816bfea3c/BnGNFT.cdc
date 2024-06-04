@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 // BnGNFT.cdc
 access(all)
@@ -29,15 +43,15 @@ contract BnGNFT: NonFungibleToken{
 	access(all)
 	resource interface BnGNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBnGNFT(id: UInt64): &BnGNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -74,7 +88,7 @@ contract BnGNFT: NonFungibleToken{
 		
 		// deposit 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Add the new token to the dictionary with a force assignment
 			// If there is already a value at that key, it will fail and revert
 			let token <- token as! @BnGNFT.NFT
@@ -97,7 +111,7 @@ contract BnGNFT: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBnGNFT(id: UInt64): &BnGNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -140,7 +154,7 @@ contract BnGNFT: NonFungibleToken{
 		//
 		// Function that mints a new NFT with a new ID
 		// and returns it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(metadata:{ String: String}): @BnGNFT.NFT{ 
 			
 			// create a new NFT

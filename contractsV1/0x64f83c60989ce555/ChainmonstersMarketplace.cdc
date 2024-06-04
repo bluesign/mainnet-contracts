@@ -1,4 +1,18 @@
-import FUSD from "./../../standardsV1/FUSD.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FUSD from "./../../standardsV1/FUSD.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -111,7 +125,7 @@ contract ChainmonstersMarketplace{
 		// If they send the correct payment in FUSD, and if the item is still available,
 		// the ChainmonstersRewards NFT will be placed in their ChainmonstersRewards.Collection .
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &ChainmonstersRewards.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerPayment.balance == self.salePrice:
@@ -160,7 +174,7 @@ contract ChainmonstersMarketplace{
 	// createSaleOffer
 	// Make creating a SaleOffer publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleOffer(
 		sellerItemProvider: Capability<&ChainmonstersRewards.Collection>,
 		saleItemID: UInt64,
@@ -183,10 +197,10 @@ contract ChainmonstersMarketplace{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(offer: @ChainmonstersMarketplace.SaleOffer)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(offer: @ChainmonstersMarketplace.SaleOffer): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(saleItemID: UInt64): @SaleOffer
 	}
 	
@@ -197,12 +211,12 @@ contract ChainmonstersMarketplace{
 	//
 	access(all)
 	resource interface CollectionPurchaser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			saleItemID: UInt64,
 			buyerCollection: &ChainmonstersRewards.Collection,
 			buyerPayment: @{FungibleToken.Vault}
-		)
+		): Void
 	}
 	
 	// CollectionPublic
@@ -210,13 +224,13 @@ contract ChainmonstersMarketplace{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(saleItemID: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			saleItemID: UInt64,
 			buyerCollection: &ChainmonstersRewards.Collection,
@@ -235,7 +249,7 @@ contract ChainmonstersMarketplace{
 		// insert
 		// Insert a SaleOffer into the collection, replacing one with the same saleItemID if present.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @ChainmonstersMarketplace.SaleOffer){ 
 			let id: UInt64 = offer.saleItemID
 			// add the new offer to the dictionary which removes the old one
@@ -246,7 +260,7 @@ contract ChainmonstersMarketplace{
 		
 		// remove
 		// Remove and return a SaleOffer from the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(saleItemID: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(saleItemID: saleItemID, saleItemCollection: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: saleItemID) ?? panic("missing SaleOffer"))
@@ -264,7 +278,7 @@ contract ChainmonstersMarketplace{
 		//   3. ChainmonstersRewards.Deposit
 		//   4. SaleOffer.SaleOfferFinished
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(saleItemID: UInt64, buyerCollection: &ChainmonstersRewards.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleOffers[saleItemID] != nil:
@@ -279,7 +293,7 @@ contract ChainmonstersMarketplace{
 		// getSaleOfferIDs
 		// Returns an array of the IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
@@ -288,7 +302,7 @@ contract ChainmonstersMarketplace{
 		// Returns an Optional read-only view of the SaleItem for the given saleItemID if it is contained by this collection.
 		// The optional will be nil if the provided saleItemID is not present in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(saleItemID: UInt64): &SaleOffer?{ 
 			if self.saleOffers[saleItemID] == nil{ 
 				return nil
@@ -309,7 +323,7 @@ contract ChainmonstersMarketplace{
 	// createEmptyCollection
 	// Make creating a Collection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

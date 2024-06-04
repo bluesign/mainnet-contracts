@@ -1,4 +1,18 @@
-// BasicToken.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// BasicToken.cdc
 //
 // The BasicToken contract is a sample implementation of a fungible token on Flow.
 //
@@ -44,7 +58,7 @@ contract BasicToken{
 		// created Vault to the context that called so it can be deposited
 		// elsewhere.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @Vault{ 
 			self.balance = self.balance - amount
 			return <-create Vault(balance: amount)
@@ -58,7 +72,7 @@ contract BasicToken{
 		// It is allowed to destroy the sent Vault because the Vault
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @Vault){ 
 			self.balance = self.balance + from.balance
 			destroy from
@@ -72,7 +86,7 @@ contract BasicToken{
 	// and store the returned Vault in their storage in order to allow their
 	// account to be able to receive deposits of this token type.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createVault(): @Vault{ 
 		return <-create Vault(balance: 30.0)
 	}

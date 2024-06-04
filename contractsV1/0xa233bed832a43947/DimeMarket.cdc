@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -94,7 +108,7 @@ contract DimeMarket{
 		// Called by a purchaser to accept the sale offer.
 		// As of now, there is no transfer of FTs for payment. Instead,
 		// we handle the transfer of non-token currency prior to calling accept.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &DimeCollectible.Collection){ 
 			pre{ 
 				self.saleCompleted == false:
@@ -125,7 +139,7 @@ contract DimeMarket{
 	}
 	
 	// Make creating a SaleOffer publicly accessible
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleOffer(
 		sellerItemProvider: Capability<&DimeCollectible.Collection>,
 		itemId: UInt64,
@@ -146,10 +160,10 @@ contract DimeMarket{
 	// use by the collection's owner
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(offer: @DimeMarket.SaleOffer)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(offer: @DimeMarket.SaleOffer): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemId: UInt64): @SaleOffer
 	}
 	
@@ -158,20 +172,20 @@ contract DimeMarket{
 	// more fine-grained access to the collection for as yet unspecified future use cases
 	access(all)
 	resource interface CollectionPurchaser{ 
-		access(all)
-		fun purchase(itemId: UInt64, buyerCollection: &DimeCollectible.Collection)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun purchase(itemId: UInt64, buyerCollection: &DimeCollectible.Collection): Void
 	}
 	
 	// An interface to allow listing and borrowing SaleOffers, and purchasing items via SaleOffers in a collection
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemId: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemId: UInt64, buyerCollection: &DimeCollectible.Collection)
 	}
 	
@@ -182,7 +196,7 @@ contract DimeMarket{
 		var saleOffers: @{UInt64: SaleOffer}
 		
 		// Insert a SaleOffer into the collection, replacing one with the same itemId if present
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @DimeMarket.SaleOffer){ 
 			let itemId: UInt64 = offer.itemId
 			let creator: Address = offer.creator
@@ -196,7 +210,7 @@ contract DimeMarket{
 		}
 		
 		// Remove and return a SaleOffer from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemId: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(itemId: itemId, owner: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: itemId) ?? panic("missing SaleOffer"))
@@ -210,7 +224,7 @@ contract DimeMarket{
 		//   2. DimeCollectible.Withdraw
 		//   3. DimeCollectible.Deposit
 		//   4. SaleOffer.SaleOfferFinished
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemId: UInt64, buyerCollection: &DimeCollectible.Collection){ 
 			pre{ 
 				self.saleOffers[itemId] != nil:
@@ -223,14 +237,14 @@ contract DimeMarket{
 		}
 		
 		// Returns an array of the Ids that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIds(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
 		
 		// Returns an Optional read-only view of the SaleItem for the given itemId if it is contained by this collection.
 		// The optional will be nil if the provided itemId is not present in the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemId: UInt64): &SaleOffer?{ 
 			if self.saleOffers[itemId] == nil{ 
 				return nil
@@ -245,7 +259,7 @@ contract DimeMarket{
 	}
 	
 	// Make creating a Collection publicly accessible.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

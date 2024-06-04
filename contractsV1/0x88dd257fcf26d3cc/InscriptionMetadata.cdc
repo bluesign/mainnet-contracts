@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -11,10 +25,10 @@ contract InscriptionMetadata{
 	///
 	access(all)
 	resource interface Resolver{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -22,7 +36,7 @@ contract InscriptionMetadata{
 	///
 	access(all)
 	resource interface ResolverCollection{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
@@ -54,7 +68,7 @@ contract InscriptionMetadata{
 	/// @param viewResolver: A reference to the resolver resource
 	/// @return A InscriptionView struct
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getInscriptionView(id: UInt64, viewResolver: &{Resolver}): InscriptionView{ 
 		let inscriptionView = viewResolver.resolveView(Type<InscriptionView>())
 		if inscriptionView != nil{ 

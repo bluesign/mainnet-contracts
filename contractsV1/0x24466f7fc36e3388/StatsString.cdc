@@ -1,4 +1,18 @@
-import FlowToken from "./../../standardsV1/FlowToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -130,7 +144,7 @@ contract StatsString{
 		access(all)
 		var user_id: UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStats(
 			addr: Address,
 			nickname: String,
@@ -147,9 +161,9 @@ contract StatsString{
 			value4: String,
 			value5: String,
 			value6: String
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStats(
 			addr: Address,
 			index: UInt32,
@@ -182,13 +196,13 @@ contract StatsString{
 		var user_id: UInt32
 		
 		// [public access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt32{ 
 			return self.user_id
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStats(addr: Address, nickname: String, title: String, answer1: String, answer2: String, answer3: String, answer4: String, answer5: String, answer6: String, value1: String, value2: String, value3: String, value4: String, value5: String, value6: String){ 
 			let time = getCurrentBlock().timestamp
 			let stat = StatsStruct(nickname: nickname, time: time, title: title, answer1: answer1, answer2: answer2, answer3: answer3, answer4: answer4, answer5: answer5, answer6: answer6, value1: value1, value2: value2, value3: value3, value4: value4, value5: value5, value6: value6, update_count: 0)
@@ -199,7 +213,7 @@ contract StatsString{
 		}
 		
 		// [private access]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStats(addr: Address, index: UInt32, nickname: String, title: String, answer1: String, answer2: String, answer3: String, answer4: String, answer5: String, answer6: String, value1: String, value2: String, value3: String, value4: String, value5: String, value6: String){ 
 			let existStat = (StatsString.stats[addr]!).remove(at: index)
 			let stat = StatsStruct(nickname: nickname, time: existStat.time, title: title, answer1: answer1, answer2: answer2, answer3: answer3, answer4: answer4, answer5: answer5, answer6: answer6, value1: value1, value2: value2, value3: value3, value4: value4, value5: value5, value6: value6, update_count: existStat.update_count + 1)
@@ -233,7 +247,7 @@ contract StatsString{
 	  ** [create vault] createStatsVault
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStatsVault(
 		addr: Address,
 		nickname: String,
@@ -280,7 +294,7 @@ contract StatsString{
 	  ** [create StatsPublic] createStatsPublic
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStatsPublic(): @StatsPublic{ 
 		return <-create StatsPublic()
 	}
@@ -289,7 +303,7 @@ contract StatsString{
 	  ** tipping
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tipping(addr: Address, payment: @FlowToken.Vault, fee: @FlowToken.Vault){ 
 		pre{ 
 			payment.balance <= 1.0:

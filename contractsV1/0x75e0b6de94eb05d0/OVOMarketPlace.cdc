@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NyatheesOVO from "./NyatheesOVO.cdc"
 
@@ -128,13 +142,13 @@ contract OVOMarketPlace{
 		// buyerTokenVault: the vault from the buyer to buy NFTs
 		// this function will transfer NFT from onSellNFTList to the buyer
 		// transfer fees to admin, deposit price to seller and set order statue to sold
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyNFT(
 			orderId: UInt64,
 			buyerAddr: Address,
 			tokenName: String,
 			buyerTokenVault: @{FungibleToken.Vault}
-		)
+		): Void
 		
 		// @dev
 		// sellerAddr: as it means
@@ -143,7 +157,7 @@ contract OVOMarketPlace{
 		// sellerNFT: the NFT seller want to sell
 		// this function will create an order, move NFT resource to onSellNFTList
 		// and set order statue to onSell
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sellNFT(
 			sellerAddr: Address,
 			tokenName: String,
@@ -156,35 +170,35 @@ contract OVOMarketPlace{
 		// orderId: the order to cancel
 		// sellerAddr: only the seller can cancel it`s own order
 		// this will set order statue to canceled and return the NFT to the seller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOrder(orderId: UInt64, sellerAddr: Address)
 		
 		// @dev
 		// this function will return order list
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketOrderList(): [orderData]
 		
 		// @dev
 		// this function will return an order data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketOrder(orderId: UInt64): orderData?
 		
 		// @dev
 		// this function will return transaction fee
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransactionFee(tokenName: String): UFix64?
 	}
 	
 	// private functions for admin to set some args
 	access(all)
 	resource interface MarketController{ 
-		access(all)
-		fun setTransactionFee(tokenName: String, fee_percentage: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setTransactionFee(tokenName: String, fee_percentage: UFix64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTransactionFeeReceiver(receiverAddr: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransactionFeeReceiver(): Address?
 	}
 	
@@ -214,7 +228,7 @@ contract OVOMarketPlace{
 		var transactionFeeReceiverAddr: Address?
 		
 		// public functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyNFT(orderId: UInt64, buyerAddr: Address, tokenName: String, buyerTokenVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerAddr != nil:
@@ -279,7 +293,7 @@ contract OVOMarketPlace{
 			emit BuyNFT(buyerAddr: buyerAddr, orderId: orderId, tokenId: (orderData!).tokenId, totalPrice: totalPrice, buyerFee: buyerFee, sellerFee: sellerFee, createTime: (orderData!).createTime, soldTime: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sellNFT(sellerAddr: Address, tokenName: String, totalPrice: UFix64, tokenId: UInt64, sellerNFTProvider: &NyatheesOVO.Collection){ 
 			pre{ 
 				tokenName != "":
@@ -318,7 +332,7 @@ contract OVOMarketPlace{
 			self.orderId = self.orderId + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOrder(orderId: UInt64, sellerAddr: Address){ 
 			pre{ 
 				sellerAddr != nil:
@@ -344,33 +358,33 @@ contract OVOMarketPlace{
 			emit CancelOrder(orderId: orderId, sellerAddr: sellerAddr, cancelTime: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketOrderList(): [orderData]{ 
 			return self.orderList.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMarketOrder(orderId: UInt64): orderData?{ 
 			return self.orderList[orderId]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransactionFee(tokenName: String): UFix64?{ 
 			return self.transactionFeeList[tokenName]
 		}
 		
 		// private functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTransactionFee(tokenName: String, fee_percentage: UFix64){ 
 			self.transactionFeeList[tokenName] = fee_percentage
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTransactionFeeReceiver(receiverAddr: Address){ 
 			self.transactionFeeReceiverAddr = receiverAddr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransactionFeeReceiver(): Address?{ 
 			return self.transactionFeeReceiverAddr
 		}

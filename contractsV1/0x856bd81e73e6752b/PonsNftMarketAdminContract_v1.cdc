@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import PonsNftContractInterface from "./PonsNftContractInterface.cdc"
 
@@ -42,25 +56,25 @@ contract PonsNftMarketAdminContract_v1{
 	access(all)
 	resource NftMarketAdmin_v1{ 
 		/* Updates the royalty of the Pons NFT */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePonsNftRoyalty(nftId: String, royalty: PonsUtils.Ratio): Void{ 
 			PonsNftContract_v1.insertRoyalty(nftId: nftId, royalty: royalty)
 		}
 		
 		/* Updates the edition label of the Pons NFT */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePonsEditionLabel(nftId: String, editionLabel: String): Void{ 
 			PonsNftContract_v1.insertEditionLabel(nftId: nftId, editionLabel: editionLabel)
 		}
 		
 		/* Updates the metadata of the Pons NFT */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePonsNftMetadata(nftId: String, metadata:{ String: String}): Void{ 
 			PonsNftContract_v1.insertMetadata(nftId: nftId, metadata: metadata)
 		}
 		
 		/* Updates the price of the Pons NFT on the marketplace */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSalePrice(nftId: String, price: PonsUtils.FlowUnits): Void{ 
 			let ponsNftMarketRef =
 				&PonsNftMarketContract.ponsMarket as &{PonsNftMarketContract.PonsNftMarket}
@@ -69,7 +83,7 @@ contract PonsNftMarketAdminContract_v1{
 		}
 		
 		/* Borrows the NFT collection of the marketplace */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollection(): &PonsNftContract_v1.Collection{ 
 			let ponsNftMarketRef =
 				&PonsNftMarketContract.ponsMarket as &{PonsNftMarketContract.PonsNftMarket}

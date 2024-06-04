@@ -1,4 +1,18 @@
-import DigitalNativeArt from "../0xa19cf4dba5941530/DigitalNativeArt.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import DigitalNativeArt from "../0xa19cf4dba5941530/DigitalNativeArt.cdc"
 
 access(all)
 contract Atelier{ 
@@ -55,7 +69,7 @@ contract Atelier{
 	access(account)
 	var records: [Record]
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createArt(): UInt64{ 
 		let art <- DigitalNativeArt.create()
 		let uuid = art.uuid
@@ -74,7 +88,7 @@ contract Atelier{
 		return uuid
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun destroyArt(uuid: UInt64){ 
 		let art <- Atelier.arts.remove(key: uuid)!
 		destroy art
@@ -91,17 +105,17 @@ contract Atelier{
 		Atelier.records.insert(at: 0, record)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawArt(uuid: UInt64): @DigitalNativeArt.Art{ 
 		return <-Atelier.arts.remove(key: uuid)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUUIDs(): [UInt64]{ 
 		return Atelier.arts.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRecords(from: Int, upTo: Int): [Record]{ 
 		if from >= Atelier.records.length{ 
 			return []

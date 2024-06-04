@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import NyatheesOVO from "./NyatheesOVO.cdc"
 
@@ -178,34 +192,34 @@ contract MysteryBox{
 		
 		// functions for admin account
 		// set Mystery Box types and stocks
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMysteryBoxTypeToList(
 			typeId: UInt64,
 			describe: String,
 			stock: UInt64,
 			unitPrice: UFix64
-		)
+		): Void
 		
 		// set prize pool
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrizePool(tokenName: String, amount: UFix64)
 		
 		// add totalsupply of mystery box
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTotalSupply(amount: UInt64)
 		
 		// set NFT provider of Mystery Box, all NTFs in mystery Box
 		// are from here
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMysteryBoxNFTPrividerCap(prividerCap: Capability<&NyatheesOVO.NFTMinter>)
 		
 		// fusd receiver of admin
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMainFusdReceiver(mainFusdReceiverAddr: Address)
 		
 		// send commission to referrer and referrer`s referrer
 		// return the buyerTokenVault, which will be deposited to fusd receiver of admin
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sendCommission(
 			buyerAddr: Address,
 			buyerTokenVault: @{FungibleToken.Vault},
@@ -214,12 +228,12 @@ contract MysteryBox{
 		): @{FungibleToken.Vault}
 		
 		// check invite relationship between users
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkInviteRelationAndSaveIt(buyerAddr: Address, referrerAddr: Address)
 		
 		// send NFTs to the buyer, which represent mystery boxs were opened
 		// return tokenIds of the NFTs which send to the buyer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkStockAndSendNFTToBuyer(
 			buyerAddr: Address,
 			mysteryBoxTypeId: UInt64,
@@ -235,7 +249,7 @@ contract MysteryBox{
 		//e.g.
 		//my address is 0x01, addresses[0] = 0x01
 		//my reward is 7FUSD, amounts[0] = 7
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun awardToTop50(
 			round: UInt64,
 			addresses: [
@@ -259,7 +273,7 @@ contract MysteryBox{
 		// and call sendCommission to send commission to the referrer and referrer`s referrer
 		// and call checkStockAndSendNFTToBuyer to send NFTs to buyer
 		// then deposit the fusd which user pay
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyMysteryBox(
 			mysteryBoxTypeId: UInt64,
 			buyerAddr: Address,
@@ -267,20 +281,20 @@ contract MysteryBox{
 			tokenName: String,
 			mysteryBoxAmount: UInt64,
 			buyerTokenVault: @{FungibleToken.Vault}
-		)
+		): Void
 		
 		//return how much mystery box were sold now
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalSupply(): UInt64
 		
 		//get account detail info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountItem(address: Address): MysteryBox.accountItem?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrizePoolBalance(tokenName: String): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMysteryBoxTypeItem(typeId: UInt64): MysteryBox.MysteryBoxType?
 	}
 	
@@ -300,7 +314,7 @@ contract MysteryBox{
 		access(self)
 		var nftProviderCap: Capability<&NyatheesOVO.NFTMinter>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyMysteryBox(mysteryBoxTypeId: UInt64, buyerAddr: Address, referrerAddr: Address, tokenName: String, mysteryBoxAmount: UInt64, buyerTokenVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				mysteryBoxAmount > 0 && mysteryBoxAmount <= MysteryBox.maxMysteryBoxToBuy:
@@ -337,7 +351,7 @@ contract MysteryBox{
 		// emit UpdatePrizePool(tokenName: tokenName, amount: totalPrice * 50000000.0 / 1000000000.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sendCommission(buyerAddr: Address, buyerTokenVault: @{FungibleToken.Vault}, tokenName: String, totalPrice: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				MysteryBox.accountList.containsKey(buyerAddr):
@@ -423,7 +437,7 @@ contract MysteryBox{
 			return <-buyerTokenVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkInviteRelationAndSaveIt(buyerAddr: Address, referrerAddr: Address){ 
 			pre{ 
 				MysteryBox.accountList.containsKey(buyerAddr):
@@ -447,7 +461,7 @@ contract MysteryBox{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkStockAndSendNFTToBuyer(buyerAddr: Address, mysteryBoxTypeId: UInt64, mysteryBoxAmount: UInt64): [UInt64]{ 
 			pre{ 
 				mysteryBoxAmount > 0 && mysteryBoxAmount <= MysteryBox.maxMysteryBoxToBuy:
@@ -480,7 +494,7 @@ contract MysteryBox{
 			return saledTokenIds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun awardToTop50(round: UInt64, addresses: [Address], tokenName: String, amounts: [UFix64], total: UFix64, paymentVault: @{FungibleToken.Vault}, payer: Address){ 
 			pre{ 
 				MysteryBox.prizePool[tokenName]! >= total:
@@ -506,7 +520,7 @@ contract MysteryBox{
 			payerCap.deposit(from: <-paymentVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMysteryBoxTypeToList(typeId: UInt64, describe: String, stock: UInt64, unitPrice: UFix64){ 
 			pre{ 
 				typeId > 0:
@@ -521,7 +535,7 @@ contract MysteryBox{
 			MysteryBox.mysteryBoxTypeList[typeId] = MysteryBoxType(typeId: typeId, describe: describe, stock: stock, unitPrice: unitPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTotalSupply(amount: UInt64){ 
 			pre{ 
 				amount >= 0:
@@ -530,7 +544,7 @@ contract MysteryBox{
 			MysteryBox.totalSupply = MysteryBox.totalSupply + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrizePool(tokenName: String, amount: UFix64){ 
 			pre{ 
 				tokenName != "":
@@ -542,38 +556,38 @@ contract MysteryBox{
 			emit UpdatePrizePool(tokenName: tokenName, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMainFusdReceiver(mainFusdReceiverAddr: Address){ 
 			self.mainFusdReceiverAddr = mainFusdReceiverAddr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMysteryBoxNFTPrividerCap(prividerCap: Capability<&NyatheesOVO.NFTMinter>){ 
 			self.nftProviderCap = prividerCap
 		}
 		
 		//public methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalSupply(): UInt64{ 
 			return MysteryBox.totalSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountItem(address: Address): accountItem?{ 
 			return MysteryBox.accountList[address]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrizePoolBalance(tokenName: String): UFix64{ 
 			return MysteryBox.prizePool[tokenName]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountInfo(address: Address): accountItem?{ 
 			return MysteryBox.accountList[address]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMysteryBoxTypeItem(typeId: UInt64): MysteryBox.MysteryBoxType?{ 
 			return MysteryBox.mysteryBoxTypeList[typeId]
 		}

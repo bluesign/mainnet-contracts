@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowStorageFees from "../0xe467b9dd11fa00df/FlowStorageFees.cdc"
 
@@ -62,7 +76,7 @@ contract LostAndFound{
 	// Placeholder receiver so that any resource can be supported, not just FT and NFT Receivers
 	access(all)
 	resource interface AnyResourceReceiver{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(_resource: @AnyResource)
 	}
 	
@@ -79,7 +93,7 @@ contract LostAndFound{
 			self.storageFee = storageFee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(): @AnyResource{ 
 			let _resource <- self.item <- nil
 			return <-_resource!
@@ -137,24 +151,24 @@ contract LostAndFound{
 			self.flowTokenRepayment = flowTokenRepayment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun itemType(): Type{ 
 			return self.type
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkItem(): Bool{ 
 			return self.item != nil
 		}
 		
 		// A function to get depositor address / flow Repayment address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlowRepaymentAddress(): Address?{ 
 			return self.flowTokenRepayment?.address
 		}
 		
 		// If this is an instance of NFT, return the id , otherwise return nil
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNonFungibleTokenID(): UInt64?{ 
 			if self.type.isSubtype(of: Type<@{NonFungibleToken.NFT}>()){ 
 				let ref = (&self.item as &AnyResource?)!
@@ -165,7 +179,7 @@ contract LostAndFound{
 		}
 		
 		// If this is an instance of FT, return the vault balance , otherwise return nil
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFungibleTokenBalance(): UFix64?{ 
 			if self.type.isSubtype(of: Type<@{FungibleToken.Vault}>()){ 
 				let ref = (&self.item as &AnyResource?)!
@@ -175,7 +189,7 @@ contract LostAndFound{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(receiver: Capability){ 
 			pre{ 
 				receiver.address == self.redeemer:
@@ -241,12 +255,12 @@ contract LostAndFound{
 			self.flowTokenRepayment = flowTokenRepayment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: UInt64): &LostAndFound.Ticket?{ 
 			return &self.tickets[id] as &LostAndFound.Ticket?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAllTicketsByType(): [&LostAndFound.Ticket]{ 
 			let tickets: [&LostAndFound.Ticket] = []
 			let ids = self.tickets.keys
@@ -285,7 +299,7 @@ contract LostAndFound{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketIDs(): [UInt64]{ 
 			return self.tickets.keys
 		}
@@ -321,12 +335,12 @@ contract LostAndFound{
 			self.flowTokenRepayment = flowTokenRepayment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwner(): Address{ 
 			return (self.owner!).address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRedeemableTypes(): [Type]{ 
 			let types: [Type] = []
 			for k in self.bins.keys{ 
@@ -338,12 +352,12 @@ contract LostAndFound{
 			return types
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasType(type: Type): Bool{ 
 			return self.bins[type.identifier] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBin(type: Type): &LostAndFound.Bin?{ 
 			return &self.bins[type.identifier] as &LostAndFound.Bin?
 		}
@@ -381,7 +395,7 @@ contract LostAndFound{
 		// Only one of the three receiver options can be specified, and an optional maximum number of tickets
 		// to redeem can be picked to prevent gas issues in case there are large numbers of tickets to be
 		// redeemed at once.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeemAll(type: Type, max: Int?, receiver: Capability){ 
 			pre{ 
 				receiver.address == self.redeemer:
@@ -401,7 +415,7 @@ contract LostAndFound{
 		}
 		
 		// Redeem a specific ticket instead of all of a certain type.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(type: Type, ticketID: UInt64, receiver: Capability){ 
 			pre{ 
 				receiver.address == self.redeemer:
@@ -466,7 +480,7 @@ contract LostAndFound{
 			return (&self.shelves[addr] as &LostAndFound.Shelf?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(
 			redeemer: Address,
 			item: @AnyResource,
@@ -517,7 +531,7 @@ contract LostAndFound{
 			return uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowShelf(redeemer: Address): &LostAndFound.Shelf?{ 
 			return &self.shelves[redeemer] as &LostAndFound.Shelf?
 		}
@@ -525,7 +539,7 @@ contract LostAndFound{
 		// deleteShelf
 		//
 		// delete a shelf if it has no redeemable types
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteShelf(_ addr: Address){ 
 			let storageBefore = LostAndFound.account.storage.used
 			assert(self.shelves.containsKey(addr), message: "shelf does not exist")
@@ -550,10 +564,10 @@ contract LostAndFound{
 	
 	access(all)
 	resource interface DepositorPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFlowTokens(vault: @FlowToken.Vault)
 	}
 	
@@ -577,17 +591,17 @@ contract LostAndFound{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLowBalanceThreshold(threshold: UFix64?){ 
 			self.lowBalanceThreshold = threshold
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLowBalanceThreshold(): UFix64?{ 
 			return self.lowBalanceThreshold
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(redeemer: Address, item: @AnyResource, memo: String?, display: MetadataViews.Display?): UInt64{ 
 			let receiver = LostAndFound.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver).borrow()!
 			let storageBeforeShelf = LostAndFound.account.storage.used
@@ -613,7 +627,7 @@ contract LostAndFound{
 			return uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun trySendResource(item: @AnyResource, cap: Capability, memo: String?, display: MetadataViews.Display?){ 
 			if cap.check<&{NonFungibleToken.CollectionPublic}>(){ 
 				let nft <- item as! @{NonFungibleToken.NFT}
@@ -629,7 +643,7 @@ contract LostAndFound{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			let tokens <- self.flowTokenVault.withdraw(amount: amount)
 			emit DepositorTokensWithdrawn(uuid: self.uuid, tokens: amount, balance: self.flowTokenVault.balance)
@@ -637,7 +651,7 @@ contract LostAndFound{
 			return <-tokens
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFlowTokens(vault: @FlowToken.Vault){ 
 			let tokensAdded = vault.balance
 			self.flowTokenVault.deposit(from: <-vault)
@@ -645,7 +659,7 @@ contract LostAndFound{
 			self.checkForLowBalance()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balance(): UFix64{ 
 			return self.flowTokenVault.balance
 		}
@@ -658,7 +672,7 @@ contract LostAndFound{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDepositor(
 		_ flowTokenRepayment: Capability<&FlowToken.Vault>,
 		lowBalanceThreshold: UFix64?
@@ -669,14 +683,14 @@ contract LostAndFound{
 		return <-depositor
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowShelfManager(): &LostAndFound.ShelfManager{ 
 		return self.account.capabilities.get<&LostAndFound.ShelfManager>(
 			LostAndFound.LostAndFoundPublicPath
 		).borrow()!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowAllTicketsByType(addr: Address, type: Type): [&LostAndFound.Ticket]{ 
 		let manager = LostAndFound.borrowShelfManager()
 		let shelf = manager.borrowShelf(redeemer: addr)
@@ -690,7 +704,7 @@ contract LostAndFound{
 		return (bin!).borrowAllTicketsByType()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowAllTickets(addr: Address): [&LostAndFound.Ticket]{ 
 		let manager = LostAndFound.borrowShelfManager()
 		let shelf = manager.borrowShelf(redeemer: addr)
@@ -706,7 +720,7 @@ contract LostAndFound{
 		return allTickets
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun redeemAll(type: Type, max: Int?, receiver: Capability){ 
 		let manager = LostAndFound.borrowShelfManager()
 		let shelf = manager.borrowShelf(redeemer: receiver.address)
@@ -718,7 +732,7 @@ contract LostAndFound{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun estimateDeposit(
 		redeemer: Address,
 		item: @AnyResource,
@@ -762,7 +776,7 @@ contract LostAndFound{
 		return <-estimate
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRedeemableTypes(_ addr: Address): [Type]{ 
 		let manager = LostAndFound.borrowShelfManager()
 		let shelf = manager.borrowShelf(redeemer: addr)
@@ -772,7 +786,7 @@ contract LostAndFound{
 		return (shelf!).getRedeemableTypes()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deposit(
 		redeemer: Address,
 		item: @AnyResource,
@@ -798,7 +812,7 @@ contract LostAndFound{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun trySendResource(
 		_resource: @AnyResource,
 		cap: Capability,
@@ -821,7 +835,7 @@ contract LostAndFound{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddress(): Address{ 
 		return self.account.address
 	}

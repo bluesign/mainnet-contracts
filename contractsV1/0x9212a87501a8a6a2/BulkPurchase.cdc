@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	BulkPurchase.cdc
 
 	The contract enables the bulk purchasing of NFTs from multiple storefronts in a single transaction
@@ -135,38 +149,38 @@ contract BulkPurchase{
 			self.failureReason = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun complete(){ 
 			self.completed = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fail(_ reason: String){ 
 			self.completed = false
 			self.failureReason = reason
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSalePrice(_ salePrice: UFix64){ 
 			self.salePrice = salePrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSalePaymentVaultType(_ salePaymentVaultType: Type){ 
 			self.salePaymentVaultType = salePaymentVaultType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNFTID(_ nftID: UInt64){ 
 			self.nftID = nftID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNFTType(_ nftType: Type){ 
 			self.nftType = nftType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPurchaserAddress(_ purchaserAddress: Address){ 
 			self.purchaserAddress = purchaserAddress
 		}

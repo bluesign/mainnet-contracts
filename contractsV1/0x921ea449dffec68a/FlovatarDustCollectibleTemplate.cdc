@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
  This contract defines the Dust Collectible Templates and the Collection to manage them.
  Dust Collectible Templates are the building blocks (lego bricks) of the final Dust Collectible,
@@ -103,13 +117,13 @@ contract FlovatarDustCollectibleTemplate{
 		access(all)
 		let maxMintable: UInt64
 		
-		access(all)
-		fun getLayers():{ UInt32: Layer}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getLayers():{ UInt32: FlovatarDustCollectibleTemplate.Layer}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getColors():{ UInt32: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 	}
 	
@@ -146,17 +160,17 @@ contract FlovatarDustCollectibleTemplate{
 		access(all)
 		let maxMintable: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayers():{ UInt32: Layer}{ 
 			return self.layers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getColors():{ UInt32: String}{ 
 			return self.colors
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -211,7 +225,7 @@ contract FlovatarDustCollectibleTemplate{
 		access(all)
 		let maxMintableComponents: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -270,16 +284,16 @@ contract FlovatarDustCollectibleTemplate{
 	// Standard CollectionPublic interface that can also borrow Component Templates
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeriesIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectibleTemplate(id: UInt64): &{FlovatarDustCollectibleTemplate.Public}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectibleSeries(id: UInt64): &{FlovatarDustCollectibleTemplate.PublicSeries}?
 	}
 	
@@ -300,7 +314,7 @@ contract FlovatarDustCollectibleTemplate{
 		
 		// deposit takes a Component Template and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(collectibleTemplate: @FlovatarDustCollectibleTemplate.CollectibleTemplate){ 
 			let id: UInt64 = collectibleTemplate.id
 			
@@ -311,7 +325,7 @@ contract FlovatarDustCollectibleTemplate{
 		
 		// deposit takes a Series and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositSeries(collectibleSeries: @FlovatarDustCollectibleTemplate.CollectibleSeries){ 
 			let id: UInt64 = collectibleSeries.id
 			
@@ -321,20 +335,20 @@ contract FlovatarDustCollectibleTemplate{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedCollectibleTemplates.keys
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeriesIDs(): [UInt64]{ 
 			return self.ownedCollectibleSeries.keys
 		}
 		
 		// borrowCollectibleTemplate returns a borrowed reference to a Component Template
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectibleTemplate(id: UInt64): &{FlovatarDustCollectibleTemplate.Public}?{ 
 			if self.ownedCollectibleTemplates[id] != nil{ 
 				let ref = (&self.ownedCollectibleTemplates[id] as &FlovatarDustCollectibleTemplate.CollectibleTemplate?)!
@@ -346,7 +360,7 @@ contract FlovatarDustCollectibleTemplate{
 		
 		// borrowCollectibleTemplate returns a borrowed reference to a Component Template
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectibleSeries(id: UInt64): &{FlovatarDustCollectibleTemplate.PublicSeries}?{ 
 			if self.ownedCollectibleSeries[id] != nil{ 
 				let ref = (&self.ownedCollectibleSeries[id] as &FlovatarDustCollectibleTemplate.CollectibleSeries?)!
@@ -512,7 +526,7 @@ contract FlovatarDustCollectibleTemplate{
 	
 	// Get all the Component Templates from the account. 
 	// We hide the SVG field because it might be too big to execute in a script
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleTemplates(): [CollectibleTemplateData]{ 
 		var collectibleTemplateData: [CollectibleTemplateData] = []
 		if let collectibleTemplateCollection =
@@ -529,7 +543,7 @@ contract FlovatarDustCollectibleTemplate{
 	
 	// Get all the Series from the account.
 	// We hide the SVG field because it might be too big to execute in a script
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleSeriesAll(): [CollectibleSeriesData]{ 
 		var collectibleSeriesData: [CollectibleSeriesData] = []
 		if let collectibleTemplateCollection =
@@ -545,7 +559,7 @@ contract FlovatarDustCollectibleTemplate{
 	}
 	
 	// Gets a specific Template from its ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleTemplate(id: UInt64): CollectibleTemplateData?{ 
 		if let collectibleTemplateCollection =
 			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
@@ -571,7 +585,7 @@ contract FlovatarDustCollectibleTemplate{
 	}
 	
 	// Gets the SVG of a specific Template from its ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleTemplateSvg(id: UInt64): String?{ 
 		if let collectibleTemplateCollection =
 			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
@@ -586,7 +600,7 @@ contract FlovatarDustCollectibleTemplate{
 	}
 	
 	// Gets a specific Series from its ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibleSeries(id: UInt64): CollectibleSeriesData?{ 
 		if let collectibleTemplateCollection =
 			self.account.capabilities.get<&{FlovatarDustCollectibleTemplate.CollectionPublic}>(
@@ -611,7 +625,7 @@ contract FlovatarDustCollectibleTemplate{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isCollectibleLayerAccessory(layer: UInt32, series: UInt64): Bool{ 
 		let series = FlovatarDustCollectibleTemplate.getCollectibleSeries(id: series)!
 		if let layer = series.layers[layer]{ 
@@ -623,25 +637,25 @@ contract FlovatarDustCollectibleTemplate{
 	}
 	
 	// Returns the amount of minted Components for a specific Template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalMintedComponents(id: UInt64): UInt64?{ 
 		return FlovatarDustCollectibleTemplate.totalMintedComponents[id]
 	}
 	
 	// Returns the amount of minted Collectibles for a specific Series
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalMintedCollectibles(series: UInt64): UInt64?{ 
 		return FlovatarDustCollectibleTemplate.totalMintedCollectibles[series]
 	}
 	
 	// Returns the current price for a specific Template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateCurrentPrice(id: UInt64): UFix64?{ 
 		return FlovatarDustCollectibleTemplate.templatesCurrentPrice[id]
 	}
 	
 	// Returns the timestamp of the last time a Component for a specific Template was minted
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLastComponentMintedAt(id: UInt64): UFix64?{ 
 		return FlovatarDustCollectibleTemplate.lastComponentMintedAt[id]
 	}

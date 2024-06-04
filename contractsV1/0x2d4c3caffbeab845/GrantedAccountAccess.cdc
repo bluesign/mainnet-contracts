@@ -1,4 +1,18 @@
-// MADE BY: Emerald City, Jacob Tucker
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// MADE BY: Emerald City, Jacob Tucker
 
 // This is a very simple contract that lets users add addresses
 // to an "Info" resource signifying they want them to share their account.  
@@ -20,10 +34,10 @@ contract GrantedAccountAccess{
 	
 	access(all)
 	resource interface InfoPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllowed(): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAllowed(account: Address): Bool
 	}
 	
@@ -35,22 +49,22 @@ contract GrantedAccountAccess{
 		var allowed:{ Address: Bool}
 		
 		// Allow someone to share your account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccount(account: Address){ 
 			self.allowed[account] = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccount(account: Address){ 
 			self.allowed.remove(key: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllowed(): [Address]{ 
 			return self.allowed.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAllowed(account: Address): Bool{ 
 			return self.allowed.containsKey(account)
 		}
@@ -60,7 +74,7 @@ contract GrantedAccountAccess{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createInfo(): @Info{ 
 		return <-create Info()
 	}

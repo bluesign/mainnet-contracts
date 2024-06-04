@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract GameEscrowMarker: FungibleToken{ 
@@ -56,7 +70,7 @@ contract GameEscrowMarker: FungibleToken{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let gameEscrowVault: @GameEscrowMarker.Vault <- from as! @GameEscrowMarker.Vault
 			if self.tokenIdentifier == nil{ 
 				self.tokenIdentifier = gameEscrowVault.tokenIdentifier
@@ -75,7 +89,7 @@ contract GameEscrowMarker: FungibleToken{
 			return capability.borrow() ?? panic("Invalid Capability")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToEscrowVault(gameID: String, vault: @{FungibleToken.Vault}){ 
 			if self.tokenIdentifier == nil{ 
 				self.tokenIdentifier = vault.getType().identifier
@@ -87,7 +101,7 @@ contract GameEscrowMarker: FungibleToken{
 			self.getVault().deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFromEscrowVault(amount: UFix64): @{FungibleToken.Vault}{ 
 			if self.balance > amount{ 
 				panic("Not Enough")
@@ -114,7 +128,7 @@ contract GameEscrowMarker: FungibleToken{
 	
 	access(all)
 	resource GameEscrowAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun RegisterGameEscrowVault(gameID: String, capability: Capability<&{FungibleToken.Vault}>){ 
 			let gameCapabilities = GameEscrowMarker.GameEscrowVaults[gameID] ??{} 
 			let vault = capability.borrow()!

@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -51,7 +65,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 	
 	access(all)
 	resource FantastecPackNFTOperator: IFantastecPackNFT.IOperator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(packId: UInt64, productId: UInt64): @NFT{ 
 			let packNFT <- create NFT(packId: packId, productId: productId)
 			FantastecPackNFT.totalSupply = FantastecPackNFT.totalSupply + 1
@@ -61,14 +75,14 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 			return <-packNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(id: UInt64, recipient: Address){ 
 			let pack <- FantastecPackNFT.packs.remove(key: id) ?? panic("cannot find pack with ID ".concat(id.toString()))
 			pack.open(recipient: recipient)
 			FantastecPackNFT.packs[id] <-! pack
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFantastecNFT(id: UInt64, nft: @FantastecNFT.NFT){ 
 			let pack <- FantastecPackNFT.packs.remove(key: id) ?? panic("cannot find pack with ID ".concat(id.toString()))
 			pack.addFantastecNFT(nft: <-nft)
@@ -83,7 +97,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 		access(all)
 		var ownedNFTs: @{UInt64: FantastecNFT.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(recipient: Address){ 
 			let receiver = getAccount(recipient).capabilities.get<&{NonFungibleToken.CollectionPublic}>(FantastecNFT.CollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection - ".concat(recipient.toString()))
 			for key in self.ownedNFTs.keys{ 
@@ -92,7 +106,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFantastecNFT(nft: @FantastecNFT.NFT){ 
 			let id = nft.id
 			self.ownedNFTs[id] <-! nft
@@ -139,7 +153,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnailPath(): String{ 
 			return "path/to/thumbnail/".concat(self.id.toString())
 		}
@@ -172,7 +186,7 @@ contract FantastecPackNFT: NonFungibleToken, IFantastecPackNFT{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FantastecPackNFT.NFT
 			let id: UInt64 = token.id
 			

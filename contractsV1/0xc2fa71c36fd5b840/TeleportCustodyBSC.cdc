@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import StarlyToken from "../0x142fa6570b62fd97/StarlyToken.cdc"
 
@@ -55,23 +69,23 @@ contract TeleportCustodyBSC{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewTeleportAdmin(allowedAmount: UFix64): @TeleportAdmin{ 
 			emit TeleportAdminCreated(allowedAmount: allowedAmount)
 			return <-create TeleportAdmin(allowedAmount: allowedAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			TeleportCustodyBSC.isFrozen = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			TeleportCustodyBSC.isFrozen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAllowance(allowedAmount: UFix64): @Allowance{ 
 			return <-create Allowance(balance: allowedAmount)
 		}
@@ -88,25 +102,25 @@ contract TeleportCustodyBSC{
 		access(all)
 		var allowedAmount: UFix64
 		
-		access(all)
-		fun lock(from: @{FungibleToken.Vault}, to: [UInt8])
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lock(from: @{FungibleToken.Vault}, to: [UInt8]): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositAllowance(from: @Allowance)
 	}
 	
 	access(all)
 	resource interface TeleportControl{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(amount: UFix64, from: [UInt8], txHash: String): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFee(amount: UFix64): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLockFee(fee: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateUnlockFee(fee: UFix64)
 	}
 	
@@ -124,7 +138,7 @@ contract TeleportCustodyBSC{
 		access(all)
 		let feeCollector: @StarlyToken.Vault
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(from: @{FungibleToken.Vault}, to: [UInt8]){ 
 			pre{ 
 				!TeleportCustodyBSC.isFrozen:
@@ -141,7 +155,7 @@ contract TeleportCustodyBSC{
 			emit FeeCollected(amount: self.lockFee, type: 0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(amount: UFix64, from: [UInt8], txHash: String): @{FungibleToken.Vault}{ 
 			pre{ 
 				!TeleportCustodyBSC.isFrozen:
@@ -167,27 +181,27 @@ contract TeleportCustodyBSC{
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFee(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-self.feeCollector.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLockFee(fee: UFix64){ 
 			self.lockFee = fee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateUnlockFee(fee: UFix64){ 
 			self.unlockFee = fee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeeAmount(): UFix64{ 
 			return self.feeCollector.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositAllowance(from: @Allowance){ 
 			self.allowedAmount = self.allowedAmount + from.balance
 			destroy from
@@ -201,7 +215,7 @@ contract TeleportCustodyBSC{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLockVaultBalance(): UFix64{ 
 		return TeleportCustodyBSC.lockVault.balance
 	}

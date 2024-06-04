@@ -1,4 +1,18 @@
-//SPDX-License-Identifier : CC-BY-NC-4.0
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier : CC-BY-NC-4.0
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -111,13 +125,13 @@ contract Metaverse: NonFungibleToken{
 		}
 		
 		// get complete metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
 		// get metadata field by key
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataField(key: String): String?{ 
 			if let value = self.metadata[key]{ 
 				return value
@@ -140,18 +154,18 @@ contract Metaverse: NonFungibleToken{
 	access(all)
 	resource interface MetaverseCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTs(): &{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMetaverse(id: UInt64): &Metaverse.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -188,7 +202,7 @@ contract Metaverse: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Metaverse.NFT
 			let id: UInt64 = token.id
 			
@@ -206,7 +220,7 @@ contract Metaverse: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTs(): &{UInt64:{ NonFungibleToken.NFT}}{ 
 			return &self.ownedNFTs as &{UInt64:{ NonFungibleToken.NFT}}
 		}
@@ -225,7 +239,7 @@ contract Metaverse: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the Metaverse.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMetaverse(id: UInt64): &Metaverse.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -235,7 +249,7 @@ contract Metaverse: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: UInt64): &NFT?{ 
 			post{ 
 				result == nil || (result!).id == id:
@@ -293,7 +307,7 @@ contract Metaverse: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, metadata:{ String: String}){ 
 			emit Minted(id: Metaverse.totalSupply, typeID: typeID, metadata: metadata)
 			
@@ -306,7 +320,7 @@ contract Metaverse: NonFungibleToken{
 		// Mints a batch of NFTs
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: [UInt64], metadata:{ String: String}){ 
 			let idsTab: [UInt64] = []
 			let quantity = UInt64(typeID.length)
@@ -329,7 +343,7 @@ contract Metaverse: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Metaverse.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&Metaverse.Collection>(Metaverse.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Metaverse.Collection.borowMetaverse to get the correct itemID
@@ -337,7 +351,7 @@ contract Metaverse: NonFungibleToken{
 		return collection.borrowMetaverse(id: itemID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllNftsFromAccount(_ from: Address): &{UInt64:{ NonFungibleToken.NFT}}?{ 
 		let collection = (getAccount(from).capabilities.get<&Metaverse.Collection>(Metaverse.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.getNFTs()

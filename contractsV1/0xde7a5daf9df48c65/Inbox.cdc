@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import Pack from "./Pack.cdc"
 
@@ -36,19 +50,19 @@ contract Inbox{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddresses(): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(wallet: Address): [UInt64]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(wallet: Address, id: UInt64): &Pack.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimMail(recipient: &{NonFungibleToken.Receiver}, id: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMailsLength(): Int
 	}
 	
@@ -61,12 +75,12 @@ contract Inbox{
 			self.mails <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddresses(): [Address]{ 
 			return self.mails.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(wallet: Address): [UInt64]?{ 
 			if self.mails[wallet] != nil{ 
 				let collectionRef = (&self.mails[wallet] as &Pack.Collection?)!
@@ -76,13 +90,13 @@ contract Inbox{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(wallet: Address, id: UInt64): &Pack.NFT?{ 
 			let collectionRef = (&self.mails[wallet] as &Pack.Collection?)!
 			return collectionRef.borrowPack(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimMail(recipient: &{NonFungibleToken.Receiver}, id: UInt64){ 
 			let wallet = (recipient.owner!).address
 			if self.mails[wallet] != nil{ 
@@ -92,12 +106,12 @@ contract Inbox{
 			emit MailClaimed(address: wallet, packID: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMailsLength(): Int{ 
 			return self.mails.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPackMail(wallet: Address, packs: @Pack.Collection){ 
 			let IDs = packs.getIDs()
 			if self.mails[wallet] == nil{ 
@@ -111,7 +125,7 @@ contract Inbox{
 			emit PackMailCreated(address: wallet, packIDs: IDs)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminClaimMail(wallet: Address, recipient: &{NonFungibleToken.Receiver}, id: UInt64){ 
 			if self.mails[wallet] != nil{ 
 				let collectionRef = (&self.mails[wallet] as &Pack.Collection?)!
@@ -120,7 +134,7 @@ contract Inbox{
 			emit MailAdminClaimed(wallet: wallet, packID: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewCentralizedInbox(): @CentralizedInbox{ 
 			return <-create CentralizedInbox()
 		}

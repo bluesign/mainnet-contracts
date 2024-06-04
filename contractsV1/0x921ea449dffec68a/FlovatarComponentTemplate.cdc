@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
  This contract defines the Flovatar Component Templates and the Collection to manage them.
  While Components are the building blocks (lego bricks) of the final Flovatar, 
@@ -130,10 +144,10 @@ contract FlovatarComponentTemplate{
 	// Standard CollectionPublic interface that can also borrow Component Templates
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowComponentTemplate(id: UInt64): &{FlovatarComponentTemplate.Public}?
 	}
 	
@@ -150,7 +164,7 @@ contract FlovatarComponentTemplate{
 		
 		// deposit takes a Component Template and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(componentTemplate: @FlovatarComponentTemplate.ComponentTemplate){ 
 			let id: UInt64 = componentTemplate.id
 			
@@ -160,14 +174,14 @@ contract FlovatarComponentTemplate{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedComponentTemplates.keys
 		}
 		
 		// borrowComponentTemplate returns a borrowed reference to a Component Template
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowComponentTemplate(id: UInt64): &{FlovatarComponentTemplate.Public}?{ 
 			if self.ownedComponentTemplates[id] != nil{ 
 				let ref = (&self.ownedComponentTemplates[id] as &FlovatarComponentTemplate.ComponentTemplate?)!
@@ -248,7 +262,7 @@ contract FlovatarComponentTemplate{
 	
 	// Get all the Component Templates from the account. 
 	// We hide the SVG field because it might be too big to execute in a script
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getComponentTemplates(): [ComponentTemplateData]{ 
 		var componentTemplateData: [ComponentTemplateData] = []
 		if let componentTemplateCollection =
@@ -264,7 +278,7 @@ contract FlovatarComponentTemplate{
 	}
 	
 	// Gets a specific Template from its ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getComponentTemplate(id: UInt64): ComponentTemplateData?{ 
 		if let componentTemplateCollection =
 			self.account.capabilities.get<&{FlovatarComponentTemplate.CollectionPublic}>(
@@ -278,13 +292,13 @@ contract FlovatarComponentTemplate{
 	}
 	
 	// Returns the amount of minted Components for a specific Template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalMintedComponents(id: UInt64): UInt64?{ 
 		return FlovatarComponentTemplate.totalMintedComponents[id]
 	}
 	
 	// Returns the timestamp of the last time a Component for a specific Template was minted
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLastComponentMintedAt(id: UInt64): UFix64?{ 
 		return FlovatarComponentTemplate.lastComponentMintedAt[id]
 	}

@@ -1,4 +1,18 @@
-import MoxyToken from "./MoxyToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MoxyToken from "./MoxyToken.cdc"
 
 import LinearRelease from "./LinearRelease.cdc"
 
@@ -26,12 +40,12 @@ contract LockedMoxyToken{
 		access(all)
 		var remaining: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getBalanceRemaining(): UFix64{ 
 			return self.remaining
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockAmounts(): UFix64{ 
 			if self.remaining == 0.0{ 
 				return 0.0
@@ -52,7 +66,7 @@ contract LockedMoxyToken{
 			return amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun splitWith(amount: UFix64): LinearRelease.LinearSchedule{ 
 			pre{ 
 				amount < self.remaining:
@@ -93,22 +107,22 @@ contract LockedMoxyToken{
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSchedule():{ UFix64: UFix64}{ 
 			return self.schedule
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFixedSchedules(): [FixedBalance]{ 
 			return self.fixedSchedules
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFixedAmount(): UFix64{ 
 			return self.fixedAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.vault.balance
 		}
@@ -143,12 +157,12 @@ contract LockedMoxyToken{
 		access(contract)
 		var vault: @MoxyToken.Vault
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.vault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValutBalanceOk(): Bool{ 
 			var locked = 0.0
 			var lockedFixed = 0.0
@@ -159,12 +173,12 @@ contract LockedMoxyToken{
 			return self.vault.balance == total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @MoxyToken.Vault){ 
 			self.depositFor(from: <-from, time: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFor(from: @MoxyToken.Vault, time: UFix64){ 
 			post{ 
 				self.isValutBalanceOk():
@@ -179,7 +193,7 @@ contract LockedMoxyToken{
 			LockedMoxyToken.totalSupply = LockedMoxyToken.totalSupply + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFromFixedSchedule(from: @MoxyToken.Vault, schedule: LinearRelease.LinearSchedule){ 
 			post{ 
 				self.isValutBalanceOk():
@@ -193,7 +207,7 @@ contract LockedMoxyToken{
 			LockedMoxyToken.totalSupply = LockedMoxyToken.totalSupply + total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFromSchedule(from: @MoxyToken.Vault, schedule:{ UFix64: UFix64}){ 
 			post{ 
 				self.isValutBalanceOk():
@@ -213,7 +227,7 @@ contract LockedMoxyToken{
 			LockedMoxyToken.totalSupply = LockedMoxyToken.totalSupply + total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun sumLockedBalances(): UFix64{ 
 			var total = 0.0
 			for value in self.lockedBalances.values{ 
@@ -222,7 +236,7 @@ contract LockedMoxyToken{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun sumLockedFixedBalances(): UFix64{ 
 			var total = 0.0
 			for fixed in self.lockedFixedBalances{ 
@@ -231,7 +245,7 @@ contract LockedMoxyToken{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createConversionRequest(amount: UFix64): @ConversionRequest{ 
 			pre{ 
 				amount <= self.vault.balance:
@@ -301,7 +315,7 @@ contract LockedMoxyToken{
 		}
 		
 		// Withdraws the tokens that are available to unlock
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnlocked(): @MoxyToken.Vault{ 
 			post{ 
 				self.isValutBalanceOk():
@@ -346,12 +360,12 @@ contract LockedMoxyToken{
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalLockedBalance(): UFix64{ 
 			return self.vault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalToUnlockBalanceFor(days: UFix64): UFix64{ 
 			// Returns the amount that will be unlocked in the next few days
 			var total = 0.0
@@ -365,7 +379,7 @@ contract LockedMoxyToken{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnlockBalancesFor(days: UFix64):{ UFix64: UFix64}{ 
 			// Returns a dictionary with the amounts that will be unlocked in the next few days
 			var dict:{ UFix64: UFix64} ={} 
@@ -389,16 +403,16 @@ contract LockedMoxyToken{
 	resource interface Receiver{ 
 		/// deposit takes a Vault and deposits it into the implementing resource type
 		///
-		access(all)
-		fun deposit(from: @MoxyToken.Vault)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(from: @MoxyToken.Vault): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFor(from: @MoxyToken.Vault, time: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFromSchedule(from: @MoxyToken.Vault, schedule:{ UFix64: UFix64})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFromFixedSchedule(from: @MoxyToken.Vault, schedule: LinearRelease.LinearSchedule)
 	}
 	
@@ -407,17 +421,17 @@ contract LockedMoxyToken{
 		
 		/// The total balance of a vault
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalToUnlockBalanceFor(days: UFix64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalLockedBalance(): UFix64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLockedVault(vault: @MoxyToken.Vault): @LockedVault{ 
 		return <-create LockedVault(vault: <-vault)
 	}

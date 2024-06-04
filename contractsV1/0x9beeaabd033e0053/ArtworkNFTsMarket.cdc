@@ -1,4 +1,18 @@
-import PigCoin from "./PigCoin.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import PigCoin from "./PigCoin.cdc"
 
 import ArtworkNFTs from "./ArtworkNFTs.cdc"
 
@@ -125,7 +139,7 @@ contract ArtworkNFTsMarket{
 		// If they send the correct payment in PigCoin, and if the item is still available,
 		// the ArtworkNFTs NFT will be placed in their ArtworkNFTs.Collection .
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &ArtworkNFTs.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerPayment.balance == self.price:
@@ -167,7 +181,7 @@ contract ArtworkNFTsMarket{
 	// createSaleOffer
 	// Make creating a SaleOffer publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleOffer(
 		sellerItemProvider: Capability<&ArtworkNFTs.Collection>,
 		itemID: UInt64,
@@ -192,10 +206,10 @@ contract ArtworkNFTsMarket{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(offer: @ArtworkNFTsMarket.SaleOffer)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(offer: @ArtworkNFTsMarket.SaleOffer): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer
 	}
 	
@@ -206,12 +220,12 @@ contract ArtworkNFTsMarket{
 	//
 	access(all)
 	resource interface CollectionPurchaser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			itemID: UInt64,
 			buyerCollection: &ArtworkNFTs.Collection,
 			buyerPayment: @{FungibleToken.Vault}
-		)
+		): Void
 	}
 	
 	// CollectionPublic
@@ -219,13 +233,13 @@ contract ArtworkNFTsMarket{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			itemID: UInt64,
 			buyerCollection: &ArtworkNFTs.Collection,
@@ -244,7 +258,7 @@ contract ArtworkNFTsMarket{
 		// insert
 		// Insert a SaleOffer into the collection, replacing one with the same itemID if present.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @ArtworkNFTsMarket.SaleOffer){ 
 			let itemID: UInt64 = offer.itemID
 			let typeID: UInt64 = offer.typeID
@@ -259,7 +273,7 @@ contract ArtworkNFTsMarket{
 		
 		// remove
 		// Remove and return a SaleOffer from the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(itemID: itemID, owner: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: itemID) ?? panic("missing SaleOffer"))
@@ -277,7 +291,7 @@ contract ArtworkNFTsMarket{
 		//   3. ArtworkNFTs.Deposit
 		//   4. SaleOffer.SaleOfferFinished
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemID: UInt64, buyerCollection: &ArtworkNFTs.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleOffers[itemID] != nil:
@@ -292,7 +306,7 @@ contract ArtworkNFTsMarket{
 		// getSaleOfferIDs
 		// Returns an array of the IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
@@ -301,7 +315,7 @@ contract ArtworkNFTsMarket{
 		// Returns an Optional read-only view of the SaleItem for the given itemID if it is contained by this collection.
 		// The optional will be nil if the provided itemID is not present in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?{ 
 			if self.saleOffers[itemID] == nil{ 
 				return nil
@@ -322,7 +336,7 @@ contract ArtworkNFTsMarket{
 	// createEmptyCollection
 	// Make creating a Collection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Staking delegators management for liquid staking
 
@@ -252,17 +266,17 @@ contract DelegatorManager{
 		}
 		
 		/// Delegator count that has been collected
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectedDelegatorCount(): Int{ 
 			return self.delegatorCollected.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isDelegatorCollected(uuid: UInt64): Bool{ 
 			return self.delegatorCollected.containsKey(uuid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDelegatorInfo(
 			nodeID: String,
 			delegatorID: UInt32
@@ -275,12 +289,12 @@ contract DelegatorManager{
 			&FlowIDTableStaking.DelegatorInfo?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNodeIDList(): [String]{ 
 			return self.delegatorInfoDict.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDelegatorIDListOnNode(nodeID: String): [UInt32]{ 
 			return self.delegatorInfoDict[nodeID] == nil
 				? []
@@ -598,7 +612,7 @@ contract DelegatorManager{
 	///
 	/// This function is made public so anyone can call to keep the protocol moving
 	/// This function should be implemented as idempotent
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun collectDelegatorsOnEpochStart(startIndex: Int, endIndex: Int, ifAdvanceEpoch: Bool){ 
 		pre{ 
 			FlowEpoch.currentEpochCounter > self.quoteEpochCounter:
@@ -844,7 +858,7 @@ contract DelegatorManager{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositToProtocolFees(flowVault: @{FungibleToken.Vault}, purpose: String){ 
 		emit DepositProtocolFees(amount: flowVault.balance, purpose: purpose)
 		self.protocolFeeVault.deposit(from: <-flowVault)
@@ -852,7 +866,7 @@ contract DelegatorManager{
 	
 	/// Contribute additional $flow to rewardedVault for whatever reason (e.g. partnership nodes' node-cut reimbursement, donation, etc.).
 	/// This will boost $stFlow price (and also liquid staking apr) in the next epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addReward(rewardedVault: @FlowToken.Vault){ 
 		pre{ 
 			FlowEpoch.currentEpochCounter == DelegatorManager.quoteEpochCounter:
@@ -863,7 +877,7 @@ contract DelegatorManager{
 	}
 	
 	/// Amount of flowTokens the liquid staking protocol is fully backed by
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalValidStakingAmount(): UFix64{ 
 		let currentEpochSnapshot = self.borrowCurrentQuoteEpochSnapshot()
 		let totalValidStakingAmount =
@@ -877,23 +891,23 @@ contract DelegatorManager{
 		return totalValidStakingAmount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowEpochSnapshot(at: UInt64): &EpochSnapshot{ 
 		return &self.epochSnapshotHistory[at] as &EpochSnapshot?
 		?? panic("EpochSnapshot index out of range")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCurrentChainEpochSnapshot(): &EpochSnapshot{ 
 		return self.borrowEpochSnapshot(at: FlowEpoch.currentEpochCounter)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCurrentQuoteEpochSnapshot(): &EpochSnapshot{ 
 		return self.borrowEpochSnapshot(at: self.quoteEpochCounter)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDelegatorUUIDByID(nodeID: String, delegatorID: UInt32): UInt64?{ 
 		if self.migratedDelegatorIDs.containsKey(nodeID){ 
 			if (self.migratedDelegatorIDs[nodeID]!).containsKey(delegatorID){ 
@@ -908,31 +922,31 @@ contract DelegatorManager{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getApprovedNodeList():{ String: UFix64}{ 
 		return self.approvedNodeIDList
 	}
 	
 	/// Get all approved delegator uuids keyed by nodeID
 	/// Up to 400 nodes, do not worry about the gas-limit
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getApprovedDelegatorIDs():{ String: UInt64}{ 
 		return self.approvedDelegatorIDs
 	}
 	
 	/// NodeID list that involves with migrated delegators
 	/// Up to 400 nodes, do not worry about the gas-limit
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMigratedNodeIDList(): [String]{ 
 		return self.migratedDelegatorIDs.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMigratedDelegatorLength(nodeID: String): Int{ 
 		return (self.migratedDelegatorIDs[nodeID]!).length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSlicedMigratedDelegatorIDList(nodeID: String, from: Int, to: Int): [UInt32]{ 
 		var upTo = to
 		if upTo > (self.migratedDelegatorIDs[nodeID]!).length{ 
@@ -941,12 +955,12 @@ contract DelegatorManager{
 		return (self.migratedDelegatorIDs[nodeID]!).keys.slice(from: from, upTo: upTo)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProtocolFeeBalance(): UFix64{ 
 		return self.protocolFeeVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDelegatorInfoByUUID(delegatorUUID: UInt64): FlowIDTableStaking.DelegatorInfo{ 
 		let delegator =
 			self.borrowManagedDelegator(uuid: delegatorUUID)
@@ -956,7 +970,7 @@ contract DelegatorManager{
 		return FlowIDTableStaking.DelegatorInfo(nodeID: nodeID, delegatorID: delegatorID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getApprovedDelegatorInfoByNodeID(nodeID: String): FlowIDTableStaking.DelegatorInfo{ 
 		let delegator =
 			self.borrowApprovedDelegatorFromNode(nodeID)
@@ -967,7 +981,7 @@ contract DelegatorManager{
 	}
 	
 	/// [from, to)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSlicedDelegatorUUIDList(from: Int, to: Int): [UInt64]{ 
 		let UUIDs = self.allDelegators.keys
 		var upTo = to
@@ -977,12 +991,12 @@ contract DelegatorManager{
 		return UUIDs.slice(from: from, upTo: upTo)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalUnstakedVaultBalance(): UFix64{ 
 		return self.totalUnstakedVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDelegatorsLength(): Int{ 
 		return self.allDelegators.length
 	}
@@ -994,7 +1008,7 @@ contract DelegatorManager{
 		/// Transfer committed tokens among delegators.
 		/// Utilized by strategy bots to redistribute newly staked $flow to different nodes for the sake of protocol decentralization,
 		/// and also to get rid of single point of failure.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferCommittedTokens(fromNodeID: String, toNodeID: String, amount: UFix64){ 
 			pre{ 
 				FlowEpoch.currentEpochCounter == DelegatorManager.quoteEpochCounter:
@@ -1039,7 +1053,7 @@ contract DelegatorManager{
 		/// Flow chain's underlying requestUnstaking() will first unstake from committed tokens, if any.
 		/// Unlike requestUnstaking(), this function will first unstake as many as possible from staked tokens instead of committed tokens
 		/// It's used by off-chain bots to implement different unstaking strategies.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun processUnstakeRequest(requestUnstakeAmount: UFix64, delegatorUUID: UInt64){ 
 			pre{ 
 				FlowEpoch.currentEpochCounter == DelegatorManager.quoteEpochCounter:
@@ -1104,7 +1118,7 @@ contract DelegatorManager{
 		}
 		
 		/// Clean empty migrated delegator and outdated approved delegator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanDelegators(delegatorUUID: UInt64){ 
 			pre{ 
 				FlowEpoch.currentEpochCounter == DelegatorManager.quoteEpochCounter:
@@ -1151,7 +1165,7 @@ contract DelegatorManager{
 		}
 		
 		// Compound rewards collected in previous protocol epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun compoundRewards(){ 
 			pre{ 
 				FlowEpoch.currentEpochCounter == DelegatorManager.quoteEpochCounter:
@@ -1166,7 +1180,7 @@ contract DelegatorManager{
 	resource Admin{ 
 		
 		/// Initialize approved staking node list
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun initApprovedNodeIDList(nodeIDs:{ String: UFix64}, defaultNodeIDToStake: String){ 
 			pre{ 
 				nodeIDs.containsKey(defaultNodeIDToStake):
@@ -1181,13 +1195,13 @@ contract DelegatorManager{
 			emit SetApprovedNodeList(nodeIDs: nodeIDs, defaultNodeIDToStake: defaultNodeIDToStake)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upsertApprovedNodeID(nodeID: String, weight: UFix64){ 
 			let oldWeight = DelegatorManager.approvedNodeIDList.insert(key: nodeID, weight)
 			emit UpsertApprovedNode(nodeID: nodeID, oldWeight: oldWeight, newWeight: weight)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeApprovedNodeID(nodeID: String){ 
 			DelegatorManager.removeApprovedNodeID(nodeID: nodeID)
 			emit ApprovedNodeRemoved(nodeID: nodeID)
@@ -1195,7 +1209,7 @@ contract DelegatorManager{
 		
 		/// Select a node among approved node list to be the default staking node
 		/// Delegation strategy will distribute its commited tokens to other staking nodes
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultNodeIDToStake(nodeID: String){ 
 			pre{ 
 				DelegatorManager.approvedNodeIDList.containsKey(nodeID):
@@ -1208,7 +1222,7 @@ contract DelegatorManager{
 		}
 		
 		/// Create Strategy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStrategy(): @DelegationStrategy{ 
 			return <-create DelegationStrategy()
 		}
@@ -1216,7 +1230,7 @@ contract DelegatorManager{
 		/// Redelegate @amount of staked $Flow, @amount doesn't include committed $Flow. Due to flowchain's underlying staking mechanism:
 		///  - committed tokens can be immediately canceled and restaked
 		///  - staked $Flow will be in unstaking mode in the next chain epoch and become unstaked (and available for restake) in next+1 chain epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redelegate(nodeID: String, delegatorID: UInt32, amount: UFix64){ 
 			pre{ 
 				FlowEpoch.currentEpochCounter == DelegatorManager.quoteEpochCounter:
@@ -1254,13 +1268,13 @@ contract DelegatorManager{
 		}
 		
 		/// Protocol fee vault control
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProtocolFeeVault(): &FlowToken.Vault{ 
 			return &DelegatorManager.protocolFeeVault as &FlowToken.Vault
 		}
 		
 		/// Manually register a new delegator resource on the given approved node
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerApprovedDelegator(nodeID: String, initialCommit: @{FungibleToken.Vault}){ 
 			DelegatorManager.registerApprovedDelegator(nodeID, <-initialCommit)
 		}

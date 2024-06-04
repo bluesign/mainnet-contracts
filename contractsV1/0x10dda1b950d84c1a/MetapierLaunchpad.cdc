@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MetapierLaunchpadPass from "./MetapierLaunchpadPass.cdc"
 
@@ -120,48 +134,48 @@ contract MetapierLaunchpad{
 		let poolId: String
 		
 		// type of the funds token vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundsType(): Type
 		
 		// current balance of the funds token vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundsBalance(): UFix64
 		
 		// type of the launch token vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLaunchTokenType(): Type
 		
 		// current balance of the launch token vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchTokenBalance(): UFix64
 		
 		// price is number of launch token per funds token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(): UFix64
 		
 		// the max amount of funds one participant can deposit
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPersonalCap(): UFix64
 		
 		// the total amount of funds that the launch project wants to target
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTotalCap(): UFix64
 		
 		// a list of all participants of the pool
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipants(): [Address]
 		
 		// a list of all participant info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllParticipantInfo(): [ParticipantInfo]
 		
 		// searches for the participant info of a specific address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getParticipantInfo(address: Address): ParticipantInfo?
 		
 		// Checks whether the given account address is whitelisted for the pool,
 		// and it always returns true if whitelisting is not required.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isWhitelisted(address: Address): Bool
 		
 		// The following three timestamps define the timeline of the pool.
@@ -172,22 +186,22 @@ contract MetapierLaunchpad{
 		//  1. Deposit funds between the funding start time and the funding end time.
 		//  2. Withdraw funds between the funding start time and (the funding end time - fundsDepositOnlyPeriod).
 		//  3. Withdraw launch token after the claiming start time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundingStartTime(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundingEndTime(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getClaimingStartTime(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundsDepositOnlyPeriod(): UFix64
 		
 		// A participant can call this function to deposit funds.
 		// It will withdraw the amount of funds token from the private pass
 		// and deposit them into the pool.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFunds(privatePass: &MetapierLaunchpadPass.NFT, amount: UFix64){ 
 			pre{ 
 				amount > 0.0:
@@ -211,7 +225,7 @@ contract MetapierLaunchpad{
 		// It require a private pass to prevent someone from withdrawing others'
 		// funds. It will try withdrawing the requested amount of funds token
 		// and deposit them into the pass.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFunds(privatePass: &MetapierLaunchpadPass.NFT, amount: UFix64){ 
 			pre{ 
 				amount > 0.0:
@@ -228,7 +242,7 @@ contract MetapierLaunchpad{
 		// Anyone can call this function to claim the launch token for a 
 		// participant. The launch token will be deposited into the 
 		// participant's pass directly.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimLaunchToken(address: Address){ 
 			pre{ 
 				self.getClaimingStartTime() <= getCurrentBlock().timestamp:
@@ -246,7 +260,7 @@ contract MetapierLaunchpad{
 		
 		// The launch token/project owner should use this function to
 		// deposit tokens to be claimed by participants.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositLaunchToken(vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				vault.balance > 0.0:
@@ -256,7 +270,7 @@ contract MetapierLaunchpad{
 		
 		// The launch token/project owner can use this function to
 		// withdraw funds raised after funding period is finished.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownerWithdrawFunds(ownerPass: &MetapierLaunchpadOwnerPass.NFT, amount: UFix64): @{
 			FungibleToken.Vault
 		}{ 
@@ -312,57 +326,57 @@ contract MetapierLaunchpad{
 		access(contract)
 		let launchTokenVault: @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundsType(): Type{ 
 			return self.fundsVault.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundsBalance(): UFix64{ 
 			return self.fundsVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLaunchTokenType(): Type{ 
 			return self.launchTokenVault.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchTokenBalance(): UFix64{ 
 			return self.launchTokenVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(): UFix64{ 
 			return self.price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPersonalCap(): UFix64{ 
 			return self.personalCap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTotalCap(): UFix64{ 
 			return self.totalCap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipants(): [Address]{ 
 			return self.participations.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllParticipantInfo(): [ParticipantInfo]{ 
 			return self.participations.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getParticipantInfo(address: Address): ParticipantInfo?{ 
 			return self.participations[address]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isWhitelisted(address: Address): Bool{ 
 			if self.whitelist == nil{ 
 				return true
@@ -370,22 +384,22 @@ contract MetapierLaunchpad{
 			return (self.whitelist!).containsKey(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundingStartTime(): UFix64{ 
 			return self.fundingStartTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundingEndTime(): UFix64{ 
 			return self.fundingEndTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getClaimingStartTime(): UFix64{ 
 			return self.claimingStartTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getFundsDepositOnlyPeriod(): UFix64{ 
 			return self.fundsDepositOnlyPeriod
 		}
@@ -396,7 +410,7 @@ contract MetapierLaunchpad{
 			return getAccount(address).capabilities.get<&MetapierLaunchpadPass.Collection>(MetapierLaunchpadPass.CollectionPublicPath).borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFunds(privatePass: &MetapierLaunchpadPass.NFT, amount: UFix64){ 
 			post{ 
 				self.fundsVault.balance == before(self.fundsVault.balance) + amount:
@@ -424,7 +438,7 @@ contract MetapierLaunchpad{
 			emit UserDepositedFunds(poolId: self.poolId, address: address, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFunds(privatePass: &MetapierLaunchpadPass.NFT, amount: UFix64){ 
 			let address = privatePass.originalOwner
 			let participantInfo = &self.participations[address]! as &ParticipantInfo
@@ -436,7 +450,7 @@ contract MetapierLaunchpad{
 			emit UserWithdrewFunds(poolId: self.poolId, address: address, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimLaunchToken(address: Address){ 
 			let participantInfo = &self.participations[address]! as &ParticipantInfo
 			participantInfo.setClaimed()
@@ -446,14 +460,14 @@ contract MetapierLaunchpad{
 			emit UserClaimedLaunchToken(poolId: self.poolId, address: address, amount: tokenAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositLaunchToken(vault: @{FungibleToken.Vault}){ 
 			let amount = vault.balance
 			self.launchTokenVault.deposit(from: <-vault)
 			emit LaunchTokenDeposited(poolId: self.poolId, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownerWithdrawFunds(ownerPass: &MetapierLaunchpadOwnerPass.NFT, amount: UFix64): @{FungibleToken.Vault}{ 
 			let tempVault <- self.fundsVault.withdraw(amount: amount)
 			emit ProjectOwnerWithdrewFunds(poolId: self.poolId, amount: amount)
@@ -489,13 +503,13 @@ contract MetapierLaunchpad{
 	}
 	
 	// returns all the available launchpad pools stored in this contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolIds(): [String]{ 
 		return self.pools.keys
 	}
 	
 	// gets a reference to the public portion of a launch pool by its id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicLaunchPoolById(poolId: String): &{MetapierLaunchpad.PublicLaunchPool}?{ 
 		if self.pools.containsKey(poolId){ 
 			let poolRef = &self.pools[poolId] as &MetapierLaunchpad.LaunchPool?
@@ -508,7 +522,7 @@ contract MetapierLaunchpad{
 	resource Admin{ 
 		
 		// creates a new launch pool resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPool(
 			poolId: String,
 			fundsVault: @{FungibleToken.Vault},
@@ -540,7 +554,7 @@ contract MetapierLaunchpad{
 		}
 		
 		// stores the given pool into this contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPool(pool: @MetapierLaunchpad.LaunchPool){ 
 			pre{ 
 				!MetapierLaunchpad.pools.containsKey(pool.poolId):
@@ -557,7 +571,7 @@ contract MetapierLaunchpad{
 		// 
 		// If an argument is nil, it means the corresponding timestamp shouldn't
 		// change.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTimeline(
 			poolId: String,
 			fundingStartTime: UFix64?,
@@ -575,35 +589,35 @@ contract MetapierLaunchpad{
 			emit TimelineUpdated(poolId: poolId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrice(poolId: String, price: UFix64){ 
 			let poolRef = &MetapierLaunchpad.pools[poolId] as &MetapierLaunchpad.LaunchPool?
 			poolRef.price = price
 			emit PriceUpdated(poolId: poolId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePersonalCap(poolId: String, personalCap: UFix64){ 
 			let poolRef = &MetapierLaunchpad.pools[poolId] as &MetapierLaunchpad.LaunchPool?
 			poolRef.personalCap = personalCap
 			emit PersonalCapUpdated(poolId: poolId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTotalCap(poolId: String, totalCap: UFix64){ 
 			let poolRef = &MetapierLaunchpad.pools[poolId] as &MetapierLaunchpad.LaunchPool?
 			poolRef.totalCap = totalCap
 			emit TotalCapUpdated(poolId: poolId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhitelist(poolId: String, whitelist:{ Address: Bool}?){ 
 			let poolRef = &MetapierLaunchpad.pools[poolId] as &MetapierLaunchpad.LaunchPool?
 			poolRef.whitelist = whitelist
 			emit WhitelistUpdated(poolId: poolId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhitelist(poolId: String, addresses: [Address]){ 
 			pre{ 
 				addresses.length > 0:
@@ -619,7 +633,7 @@ contract MetapierLaunchpad{
 			emit WhitelistUpdated(poolId: poolId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhitelist(poolId: String, addresses: [Address]){ 
 			pre{ 
 				addresses.length > 0:
@@ -633,7 +647,7 @@ contract MetapierLaunchpad{
 			emit WhitelistUpdated(poolId: poolId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFunds(poolId: String, amount: UFix64): @{FungibleToken.Vault}{ 
 			let poolRef = &MetapierLaunchpad.pools[poolId] as &MetapierLaunchpad.LaunchPool?
 			let tempVault <- poolRef.fundsVault.withdraw(amount: amount)
@@ -641,7 +655,7 @@ contract MetapierLaunchpad{
 			return <-tempVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFunds(poolId: String, vault: @{FungibleToken.Vault}){ 
 			let amount = vault.balance
 			let poolRef = &MetapierLaunchpad.pools[poolId] as &MetapierLaunchpad.LaunchPool?
@@ -649,7 +663,7 @@ contract MetapierLaunchpad{
 			emit AdminDepositedFunds(poolId: poolId, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawLaunchToken(poolId: String, amount: UFix64): @{FungibleToken.Vault}{ 
 			let poolRef = &MetapierLaunchpad.pools[poolId] as &MetapierLaunchpad.LaunchPool?
 			let tempVault <- poolRef.launchTokenVault.withdraw(amount: amount)

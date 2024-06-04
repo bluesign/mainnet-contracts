@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract AllCodeNFTContract{ 
 	access(all)
 	resource NFT{ 
@@ -12,16 +26,16 @@ contract AllCodeNFTContract{
 	
 	access(all)
 	resource interface NFTReceiver{ 
-		access(all)
-		fun deposit(token: @NFT, metadata:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @AllCodeNFTContract.NFT, metadata:{ String: String}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}
 	}
 	
@@ -38,40 +52,40 @@ contract AllCodeNFTContract{
 			self.metadataObjs ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @NFT{ 
 			let token <- self.ownedNFTs.remove(key: withdrawID)!
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @NFT, metadata:{ String: String}){ 
 			self.metadataObjs[token.id] = metadata
 			self.ownedNFTs[token.id] <-! token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(id: UInt64, metadata:{ String: String}){ 
 			self.metadataObjs[id] = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			return self.metadataObjs[id]!
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}
@@ -85,7 +99,7 @@ contract AllCodeNFTContract{
 			self.idCount = 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			var newNFT <- create NFT(initID: self.idCount)
 			self.idCount = self.idCount + 1 as UInt64

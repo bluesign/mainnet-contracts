@@ -1,4 +1,18 @@
-// MADE BY: Emerald City, Jacob Tucker
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// MADE BY: Emerald City, Jacob Tucker
 
 // This contract is probably the most confusing element of the FLOAT
 // platform. Listed here is a bunch of Structs which all implement
@@ -49,7 +63,7 @@ contract FLOATVerifiers{
 		access(all)
 		let dateEnding: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			assert(getCurrentBlock().timestamp >= self.dateStart, message: "This FLOAT Event has not started yet.")
 			assert(getCurrentBlock().timestamp <= self.dateEnding, message: "Sorry! The time has run out to mint this FLOAT.")
@@ -72,7 +86,7 @@ contract FLOATVerifiers{
 		access(self)
 		let secretPhrase: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let secretPhrase = params["secretPhrase"]! as! String
 			assert(self.secretPhrase == secretPhrase, message: "You did not input the correct secret phrase.")
@@ -95,7 +109,7 @@ contract FLOATVerifiers{
 		access(all)
 		var capacity: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let _event = params["event"]! as! &FLOAT.FLOATEvent
 			let currentCapacity = _event.totalSupply
@@ -118,7 +132,7 @@ contract FLOATVerifiers{
 		access(self)
 		let secrets:{ String: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let secretPhrase = params["secretPhrase"]! as! String
 			assert(self.secrets[secretPhrase] != nil, message: "You did not input a correct secret phrase.")
@@ -142,7 +156,7 @@ contract FLOATVerifiers{
 		access(all)
 		let publicKey: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let data: [UInt8] = (params["claimee"]! as! Address).toString().utf8
 			let sig: [UInt8] = (params["secretSig"]! as! String).decodeHex()
@@ -166,7 +180,7 @@ contract FLOATVerifiers{
 		access(all)
 		let amount: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let claimee: Address = params["claimee"]! as! Address
 			let flowVault = getAccount(claimee).capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<&FlowToken.Vault>() ?? panic("Could not borrow the Flow Token Vault")
@@ -191,7 +205,7 @@ contract FLOATVerifiers{
 		access(all)
 		let challengeThresholdPoints: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let claimee: Address = params["claimee"]! as! Address
 			if let achievementBoard = getAccount(claimee).capabilities.get<&FLOATEventSeries.AchievementBoard>(FLOATEventSeries.FLOATAchievementBoardPublicPath).borrow<&FLOATEventSeries.AchievementBoard>(){ 
@@ -224,7 +238,7 @@ contract FLOATVerifiers{
 		access(all)
 		let publicKey: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let _event = params["event"]! as! &FLOAT.FLOATEvent
 			let claimeeAddressAsString: String = (params["claimee"]! as! Address).toString()

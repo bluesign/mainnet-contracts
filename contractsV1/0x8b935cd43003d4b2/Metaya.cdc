@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 	Description: Central Smart Contract for Metaya
 	This smart contract contains the core functionality for Metaya.
 
@@ -192,17 +206,17 @@ contract Metaya: NonFungibleToken{
 			self.numberMintedPerPlay = setRef.numberMintedPerPlay
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlays(): [UInt32]{ 
 			return self.plays
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMintedPerPlay():{ UInt32: UInt32}{ 
 			return self.numberMintedPerPlay
 		}
@@ -299,7 +313,7 @@ contract Metaya: NonFungibleToken{
 		/// The Set needs to be not locked
 		/// The Play can't have already been added to the Set
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlay(playID: UInt32){ 
 			pre{ 
 				Metaya.playDatas[playID] != nil:
@@ -325,7 +339,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Parameters: playIDs: The IDs of the Plays that are being added as an array
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlays(playIDs: [UInt32]){ 
 			for play in playIDs{ 
 				self.addPlay(playID: play)
@@ -339,7 +353,7 @@ contract Metaya: NonFungibleToken{
 		/// Pre-Conditions:
 		/// The Play is part of the Set and not retired (available for minting).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retirePlay(playID: UInt32){ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -354,7 +368,7 @@ contract Metaya: NonFungibleToken{
 		/// retireAll retires all the plays in the Set
 		/// Afterwards, none of the retired Plays will be able to mint new Moments
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for play in self.plays{ 
 				self.retirePlay(playID: play)
@@ -365,7 +379,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Pre-Conditions: The Set should not be locked
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -382,7 +396,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Returns: The NFT that was minted
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintMoment(playID: UInt32, soundlinksDID: @SoundlinksDID.NFT): @NFT{ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -412,7 +426,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Returns: Collection object that contains all the Moments that were minted
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintMoment(playID: UInt32, quantity: UInt32, soundlinksDIDCollection: @SoundlinksDID.Collection): @Collection{ 
 			pre{ 
 				quantity == UInt32(soundlinksDIDCollection.getIDs().length):
@@ -430,17 +444,17 @@ contract Metaya: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlays(): [UInt32]{ 
 			return self.plays
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerPlay():{ UInt32: UInt32}{ 
 			return self.numberMintedPerPlay
 		}
@@ -520,7 +534,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Returns: the ID of the new Play object
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPlay(metadata:{ String: String}): UInt32{ 
 			// Create the new Play
 			var newPlay = Play(metadata: metadata)
@@ -542,7 +556,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Returns: The ID of the created Set
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String): UInt32{ 
 			// Create the new Set
 			var newSet <- create Set(name: name)
@@ -566,7 +580,7 @@ contract Metaya: NonFungibleToken{
 		/// Returns: A reference to the Set with all of the fields
 		/// and methods exposed
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				Metaya.sets[setID] != nil:
@@ -584,7 +598,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Returns: The new series number
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the Metaya series number
@@ -595,7 +609,7 @@ contract Metaya: NonFungibleToken{
 		
 		/// createNewAdmin creates a new Admin resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -608,18 +622,18 @@ contract Metaya: NonFungibleToken{
 	access(all)
 	resource interface MomentCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &Metaya.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -669,7 +683,7 @@ contract Metaya: NonFungibleToken{
 		/// Returns: @NonFungibleToken.Collection: A collection that contains
 		///										the withdrawn moments
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			
 			// Create a new empty Collection
@@ -689,7 +703,7 @@ contract Metaya: NonFungibleToken{
 		/// Paramters: token: the NFT to be deposited in the collection
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Metaya NFT to make sure
 			// it is the correct type
@@ -714,7 +728,7 @@ contract Metaya: NonFungibleToken{
 		/// batchDeposit takes a Collection object as an argument
 		/// and deposits each contained NFT into this Collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -763,7 +777,7 @@ contract Metaya: NonFungibleToken{
 		///
 		/// Returns: A reference to the NFT
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &Metaya.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -812,7 +826,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: An array of all the plays that have been created
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPlays(): [Metaya.Play]{ 
 		return Metaya.playDatas.values
 	}
@@ -823,7 +837,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: The metadata as a String to String mapping optional
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaData(playID: UInt32):{ String: String}?{ 
 		return self.playDatas[playID]?.metadata
 	}
@@ -836,7 +850,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: The metadata field as a String Optional
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaDataByField(playID: UInt32, field: String): String?{ 
 		// Don't force a revert if the playID or field is invalid
 		if let play = Metaya.playDatas[playID]{ 
@@ -853,7 +867,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: The QuerySetData struct that has all the important information about the Set
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(setID: UInt32): QuerySetData?{ 
 		if Metaya.sets[setID] == nil{ 
 			return nil
@@ -869,7 +883,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: The name of the Set
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt32): String?{ 
 		// Don't force a revert if the setID is invalid
 		return Metaya.sets[setID]?.name
@@ -882,7 +896,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: The series that the Set belongs to
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeries(setID: UInt32): UInt32?{ 
 		// Don't force a revert if the setID is invalid
 		return Metaya.sets[setID]?.series
@@ -895,7 +909,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: An array of the IDs of the Set if it exists, or nil if doesn't
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDsByName(setName: String): [UInt32]?{ 
 		var setIDs: [UInt32] = []
 		
@@ -922,7 +936,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: An array of Play IDs
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlaysInSet(setID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the setID is invalid
 		return Metaya.sets[setID]?.plays
@@ -938,7 +952,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: Boolean indicating if the edition is retired or not
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setID: UInt32, playID: UInt32): Bool?{ 
 		if let setdata = self.getSetData(setID: setID){ 
 			
@@ -963,7 +977,7 @@ contract Metaya: NonFungibleToken{
 	///
 	/// Returns: Boolean indicating if the Set is locked or not
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt32): Bool?{ 
 		// Don't force a revert if the setID is invalid
 		return Metaya.sets[setID]?.locked
@@ -978,7 +992,7 @@ contract Metaya: NonFungibleToken{
 	/// Returns: The total number of Moments
 	///		  that have been minted from an edition
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumMomentsInEdition(setID: UInt32, playID: UInt32): UInt32?{ 
 		if let setdata = self.getSetData(setID: setID){ 
 			

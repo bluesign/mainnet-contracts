@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Handle lending's oracle price readers. Prices come from a multi-node oracle.
 
@@ -50,7 +64,7 @@ contract LendingOracle{
 		
 		/// Return underlying asset price of the pool, denominated in USD.
 		/// Return 0.0 means price feed for the given pool is not available.  
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnderlyingPrice(pool: Address): UFix64{ 
 			if !self.feeds.contains(pool){ 
 				return 0.0
@@ -59,7 +73,7 @@ contract LendingOracle{
 		}
 		
 		/// Return pool's latest data point in form of (timestamp, data)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun latestResult(pool: Address): [UFix64; 2]{ 
 			var oracleAddr = self.oracleAddrDict[pool]!
 			let oraclePublicInterface_ReaderRef = getAccount(oracleAddr).capabilities.get<&{OracleInterface.OraclePublicInterface_Reader}>(OracleConfig.OraclePublicInterface_ReaderPath).borrow() ?? panic("Lost oracle public capability at ".concat(oracleAddr.toString()))
@@ -69,7 +83,7 @@ contract LendingOracle{
 			return [getCurrentBlock().timestamp, price]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupportedFeeds(): [Address]{ 
 			return self.feeds
 		}
@@ -129,17 +143,17 @@ contract LendingOracle{
 	access(all)
 	resource Admin{ 
 		/// Creating an Oracle resource which holds @maxCapacity data points at most.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOracleResource(): @OracleReaders{ 
 			return <-create OracleReaders()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPriceFeed(oracleRef: &OracleReaders, pool: Address, oracleAddr: Address){ 
 			oracleRef.addPriceFeed(_for: pool, oracleAddr: oracleAddr)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePriceFeed(oracleRef: &OracleReaders, pool: Address){ 
 			oracleRef.removePriceFeed(pool: pool)
 		}

@@ -1,4 +1,18 @@
-//  SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//  SPDX-License-Identifier: UNLICENSED
 //
 //  Description: Attack On Titan Legacy
 //  This is NonFungibleToken and Anique NFT.
@@ -246,7 +260,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		// The Item needs to be an existing Item
 		// The Item can't have already been added to the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItem(itemID: UInt32){ 
 			pre{ 
 				AttackOnTitanLegacy.itemDatas[itemID] != nil:
@@ -268,7 +282,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		// Parameters: itemIDs: The IDs of the Items that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItems(itemIDs: [UInt32]){ 
 			for itemID in itemIDs{ 
 				self.addItem(itemID: itemID)
@@ -284,7 +298,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		//
 		// Returns: The NFT that was minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCollectible(itemID: UInt32): @NFT{ 
 			// get the number of Collectibles that have been minted for this Item
 			// to use as this Collectible's serial number
@@ -306,7 +320,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		//
 		// Returns: Collection object that contains all the Collectibles that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintCollectible(itemID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -318,14 +332,14 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		}
 		
 		// Returns: Array of Items that are a part of this Set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItems(): [UInt32]{ 
 			return self.items
 		}
 		
 		// Returns: the number of Collectibles
 		// that have been minted per Item in this Set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMintedPerItem():{ UInt32: UInt32}{ 
 			return self.numberMintedPerItem
 		}
@@ -390,24 +404,24 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
 		// deposit multi tokens
-		access(all)
-		fun batchDeposit(tokens: @{Anique.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{Anique.Collection}): Void
 		
 		// contains NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(id: UInt64): Bool
 		
 		// borrow NFT as AttackOnTitanLegacy token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAttackOnTitanLegacyCollectible(id: UInt64): &NFT
 	}
 	
@@ -449,7 +463,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn collectibles
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(collectibleIds: [UInt64]): @{Anique.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -468,7 +482,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as an AttackOnTitanLegacy NFT to make sure
 			// it is the correct type
@@ -492,7 +506,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{Anique.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -514,7 +528,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		}
 		
 		// contains returns whether ID is in the Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -535,7 +549,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAniqueNFT(id: UInt64): &{Anique.NFT}{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return nft as! &{Anique.NFT}
@@ -543,7 +557,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		
 		// borrowAttackOnTitanLegacyCollectible returns a borrowed reference
 		// to an AttackOnTitanLegacy Collectible
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAttackOnTitanLegacyCollectible(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -588,7 +602,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		//
 		// Returns: the ID of the new Item object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(metadata:{ String: String}): UInt32{ 
 			// Create the new Item
 			var newItem = Item(metadata: metadata)
@@ -608,7 +622,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		//
 		// Parameters: name: The name of the set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String): UInt32{ 
 			// Create the new Set
 			var newSet <- create Set(name: name)
@@ -626,7 +640,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		// Returns: A reference to the Set with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				AttackOnTitanLegacy.sets[setID] != nil:
@@ -637,7 +651,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -659,7 +673,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 	// getAllItems returns all the Items in AttackOnTitanLegacy
 	//
 	// Returns: An array of all the Items that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllItems(): [AttackOnTitanLegacy.Item]{ 
 		return AttackOnTitanLegacy.itemDatas.values
 	}
@@ -669,7 +683,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 	// Parameters: itemID: The id of the Item that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemMetaData(itemID: UInt32):{ String: String}?{ 
 		return self.itemDatas[itemID]?.metadata
 	}
@@ -680,7 +694,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 	// Parameters: setName: The name of the set that is being searched
 	//
 	// Returns: An array of the IDs of the set if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDsByName(setName: String): [UInt32]?{ 
 		var setIDs: [UInt32] = []
 		
@@ -710,7 +724,7 @@ contract AttackOnTitanLegacy: NonFungibleToken, Anique{
 	//
 	// Returns: The total number of Collectibles
 	//		  that have been minted from a Set/Item
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumCollectiblesInSetItem(setID: UInt32, itemID: UInt32): UInt32?{ 
 		// Don't force a revert if the set or item ID is invalid
 		// remove the Set from the dictionary to get its field

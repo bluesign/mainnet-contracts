@@ -1,4 +1,18 @@
-// Author: Morgan Wilde
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Author: Morgan Wilde
 // Author's website: flowdeveloper.com
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -84,7 +98,7 @@ contract SongVest: NonFungibleToken{
 	
 	access(all)
 	resource interface SongCollection{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSong(id: UInt64): &SongVest.NFT
 	}
 	
@@ -109,7 +123,7 @@ contract SongVest: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SongVest.NFT
 			let id = token.id
 			let existingToken <- self.ownedNFTs[id] <- token
@@ -127,7 +141,7 @@ contract SongVest: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSong(id: UInt64): &SongVest.NFT{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &SongVest.NFT
@@ -167,7 +181,7 @@ contract SongVest: NonFungibleToken{
 			self.seriesNumber = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSong(seriesNumber: UInt, title: String, writers: String, artist: String, description: String, creator: String, supply: UInt): @Collection{ 
 			var collection <- create Collection()
 			if self.seriesNumber >= seriesNumber{ 

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -56,17 +70,17 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return "POTM #".concat(self.id.toString())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return "Thrust into a strange future by tragedy and twist of fate, Ethero Caspain must rally a crew of degen pirates to help him locate the most coveted treasure in all the metaverse: a key rumored to unlock inter-dimensional travel.\n\nPirates of the Metaverse\u{2122} by Drip Studios is a collection of 10,000 digitally unique NFTs about to embark on an uncharted journey across blockchains."
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun imageCID(): String{ 
 			return self.imageUrl
 		}
@@ -112,15 +126,15 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 	access(all)
 	resource interface PiratesOfTheMetaverseCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPirate(id: UInt64): &PiratesOfTheMetaverse.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -156,7 +170,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @PiratesOfTheMetaverse.NFT
 			let id: UInt64 = token.id
 			
@@ -188,7 +202,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 		// exposing all of its fields (including the typeID & rarityID).
 		// This is safe as there are no functions that can be called on the pirate.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPirate(id: UInt64): &PiratesOfTheMetaverse.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -242,7 +256,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 	//
 	access(all)
 	resource interface HasClaims{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasBeenClaimed(id: UInt64): Bool
 	}
 	
@@ -259,7 +273,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, id: UInt64, imageUrl: String, metadata:{ String: String}){ 
 			if self.mintedAlready.containsKey(id){ 
 				panic("Id has already been claimed!")
@@ -270,7 +284,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 			emit Minted(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasBeenClaimed(id: UInt64): Bool{ 
 			return self.mintedAlready.containsKey(id)
 		}
@@ -282,7 +296,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &PiratesOfTheMetaverse.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&PiratesOfTheMetaverse.Collection>(PiratesOfTheMetaverse.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust pirate.Collection.borowPirate to get the correct itemID
@@ -290,7 +304,7 @@ contract PiratesOfTheMetaverse: NonFungibleToken{
 		return collection.borrowPirate(id: itemID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasBeenClaimed(id: UInt64): Bool{ 
 		let claimedPirates = self.account.capabilities.get<&{HasClaims}>(self.ClaimedPiratesPath)
 		let claimedPiratesRef = claimedPirates.borrow()!

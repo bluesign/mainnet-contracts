@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # This contract provides public oracle data sourced from the multi-node PriceOracle contracts of Increment.
 
@@ -41,7 +55,7 @@ contract PublicPriceOracle{
 	///   2. A fixed window of time has passed (by default 2000 blocks)
 	/// Note: It is recommended to check the updated block height of this data with getLatestBlockHeight(), and handle the extreme condition if this data is too old.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLatestPrice(oracleAddr: Address): UFix64{ 
 		let oraclePublicInterface_ReaderRef =
 			getAccount(oracleAddr).capabilities.get<
@@ -60,7 +74,7 @@ contract PublicPriceOracle{
 	
 	/// Get the block height at the time of the latest update.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLatestBlockHeight(oracleAddr: Address): UInt64{ 
 		let oraclePublicInterface_ReaderRef =
 			getAccount(oracleAddr).capabilities.get<
@@ -77,14 +91,14 @@ contract PublicPriceOracle{
 		return medianBlockHeight
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSupportedOracles():{ Address: String}{ 
 		return self.oracleAddrToPriceIdentifier
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addOracle(oracleAddr: Address){ 
 			if !PublicPriceOracle.oracleAddrToPriceIdentifier.containsKey(oracleAddr){ 
 				/// Mint oracle reader
@@ -100,7 +114,7 @@ contract PublicPriceOracle{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOracle(oracleAddr: Address){ 
 			PublicPriceOracle.oracleAddrToPriceIdentifier.remove(key: oracleAddr)
 			/// Remove local oracle reader resource

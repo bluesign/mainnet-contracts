@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -79,7 +93,7 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 		}
 		
 		/// Function to update the Lilaiputia field
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLilaiputia(newLilaiputiaData: String){ 
 			self.lilaiputia = newLilaiputiaData
 			emit LilaiputiaUpdated(id: self.id, updater: self.owner?.address, newLilaiputiaData: newLilaiputiaData)
@@ -146,15 +160,15 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface beta2LilaiNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowbeta2LilaiNFT(id: UInt64): &beta2LilaiNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -184,7 +198,7 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @beta2LilaiNFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -202,7 +216,7 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowbeta2LilaiNFT(id: UInt64): &beta2LilaiNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -242,8 +256,8 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 	// Interface for public access to NFTMinter
 	access(all)
 	resource interface NFTMinterPublic{ 
-		access(all)
-		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty], lilaiputiaData: String) // Note: No return type specified
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty], lilaiputiaData: String): Void // Note: No return type specified
 	
 	}
 	
@@ -254,7 +268,7 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 	access(all)
 	resource NFTMinter: NFTMinterPublic{ 
 		// Implement the mintNFT function as per the new interface
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty], lilaiputiaData: String){ 
 			let metadata:{ String: AnyStruct} ={} 
 			let currentBlock = getCurrentBlock()
@@ -271,7 +285,7 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -285,7 +299,7 @@ contract beta2LilaiNFT: NonFungibleToken, ViewResolver{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}

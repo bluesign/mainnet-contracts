@@ -1,4 +1,18 @@
-// Created by Emerald City DAO for Touchstone (https://touchstone.city/)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Created by Emerald City DAO for Touchstone (https://touchstone.city/)
 access(all)
 contract TouchstoneContracts{ 
 	access(all)
@@ -30,7 +44,7 @@ contract TouchstoneContracts{
 	
 	access(all)
 	resource interface ContractsBookPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContracts(): [String]
 	}
 	
@@ -39,7 +53,7 @@ contract TouchstoneContracts{
 		access(all)
 		let contractNames:{ String: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addContract(contractName: String){ 
 			pre{ 
 				self.contractNames[contractName] == nil:
@@ -52,12 +66,12 @@ contract TouchstoneContracts{
 			globalContractsBook.reserve(contractName: contractName, user: me)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeContract(contractName: String){ 
 			self.contractNames.remove(key: contractName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContracts(): [String]{ 
 			return self.contractNames.keys
 		}
@@ -69,16 +83,16 @@ contract TouchstoneContracts{
 	
 	access(all)
 	resource interface GlobalContractsBookPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllUsers(): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllReservations():{ String: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressFromContractName(contractName: String): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getReservationStatus(contractName: String): ReservationStatus
 	}
 	
@@ -90,12 +104,12 @@ contract TouchstoneContracts{
 		access(all)
 		let reservedContractNames:{ String: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addUser(address: Address){ 
 			self.allUsers[address] = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reserve(contractName: String, user: Address){ 
 			pre{ 
 				self.getReservationStatus(contractName: contractName) != ReservationStatus.active:
@@ -104,22 +118,22 @@ contract TouchstoneContracts{
 			self.reservedContractNames[contractName] = user
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeReservation(contractName: String){ 
 			self.reservedContractNames.remove(key: contractName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllUsers(): [Address]{ 
 			return self.allUsers.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllReservations():{ String: Address}{ 
 			return self.reservedContractNames
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getReservationStatus(contractName: String): ReservationStatus{ 
 			if let reservedBy = self.reservedContractNames[contractName]{ 
 				return ReservationStatus.active
@@ -127,7 +141,7 @@ contract TouchstoneContracts{
 			return ReservationStatus.notFound
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressFromContractName(contractName: String): Address?{ 
 			if self.getReservationStatus(contractName: contractName) == ReservationStatus.active{ 
 				return self.reservedContractNames[contractName]
@@ -141,12 +155,12 @@ contract TouchstoneContracts{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createContractsBook(): @ContractsBook{ 
 		return <-create ContractsBook()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUserTouchstoneCollections(user: Address): [String]{ 
 		let collections =
 			getAccount(user).capabilities.get<&ContractsBook>(
@@ -156,7 +170,7 @@ contract TouchstoneContracts{
 		return collections.getContracts()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGlobalContractsBook(): &GlobalContractsBook{ 
 		return self.account.capabilities.get<&GlobalContractsBook>(
 			TouchstoneContracts.GlobalContractsBookPublicPath

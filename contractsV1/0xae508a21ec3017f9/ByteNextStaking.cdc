@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import BNU from "../0xae508a21ec3017f9;/BNU.cdc"
 
@@ -81,22 +95,22 @@ contract ByteNextStaking{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stopReward(){ 
 			ByteNextStaking.endBlock = getCurrentBlock().height
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToRewardPool(vault: @BNU.Vault){ 
 			ByteNextStaking.rewardVault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardPool(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-ByteNextStaking.rewardVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRewardPerBlock(_ newValue: UFix64){ 
 			pre{ 
 				getCurrentBlock().height < ByteNextStaking.startBlock:
@@ -105,7 +119,7 @@ contract ByteNextStaking{
 			ByteNextStaking.rewardPerBlock = newValue
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStartAndEndBlock(start: UInt64, end: UInt64){ 
 			pre{ 
 				getCurrentBlock().height < ByteNextStaking.startBlock:
@@ -123,7 +137,7 @@ contract ByteNextStaking{
 	
 	access(all)
 	resource StakingProxy{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(vault: @BNU.Vault): @{FungibleToken.Vault}?{ 
 			pre{ 
 				self.owner?.address != nil:
@@ -132,7 +146,7 @@ contract ByteNextStaking{
 			return <-ByteNextStaking.deposit(user: (self.owner!).address, vault: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.owner?.address != nil:
@@ -141,7 +155,7 @@ contract ByteNextStaking{
 			return <-ByteNextStaking.withdraw(user: (self.owner!).address, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emergencyWithdraw(user: Address): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.owner?.address != nil:
@@ -151,17 +165,17 @@ contract ByteNextStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStakingProxy(): @StakingProxy{ 
 		return <-create StakingProxy()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun totalStaked(): UFix64{ 
 		return self.lpVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalances():{ String: UFix64}{ 
 		return{ 
 			"rewardVault": ByteNextStaking.rewardVault.balance,
@@ -169,17 +183,17 @@ contract ByteNextStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakingUsers(): [Address]{ 
 		return self.userInfo.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakingAmount(user: Address): UFix64{ 
 		return self.userInfo[user]?.amount ?? 0.0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun pendingRewards(user: Address): UFix64{ 
 		let lpSupply = self.lpVault.balance
 		if lpSupply == 0.0{ 

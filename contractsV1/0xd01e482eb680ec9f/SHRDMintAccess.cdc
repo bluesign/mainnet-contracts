@@ -1,8 +1,22 @@
-import SHRD from "./SHRD.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import SHRD from "./SHRD.cdc"
 
 access(all)
 contract SHRDMintAccess{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.0"
 	}
@@ -11,13 +25,13 @@ contract SHRDMintAccess{
 	//
 	access(all)
 	resource interface MintProxyPublic{ 
-		access(all)
-		fun setCapability(mintCapability: Capability<&MintGuard>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setCapability(mintCapability: Capability<&SHRDMintAccess.MintGuard>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UFix64
 	}
 	
@@ -25,7 +39,7 @@ contract SHRDMintAccess{
 	//
 	access(all)
 	resource interface MintProxyPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @SHRD.Vault
 	}
 	
@@ -34,18 +48,18 @@ contract SHRDMintAccess{
 		access(all)
 		var mintCapability: Capability<&MintGuard>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UFix64{ 
 			return ((self.mintCapability!).borrow()!).max
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UFix64{ 
 			return ((self.mintCapability!).borrow()!).total
 		}
 		
 		// Can be called successfully only by a MintGuard owner, since the Capability type is based on a private link
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCapability(mintCapability: Capability<&MintGuard>){ 
 			pre{ 
 				mintCapability.check() == true:
@@ -54,7 +68,7 @@ contract SHRDMintAccess{
 			self.mintCapability = mintCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @SHRD.Vault{ 
 			return <-((self.mintCapability!).borrow()!).mint(amount: amount)
 		}
@@ -69,7 +83,7 @@ contract SHRDMintAccess{
 	//
 	access(all)
 	resource interface MintGuardPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @SHRD.Vault
 		
 		access(all)
@@ -81,10 +95,10 @@ contract SHRDMintAccess{
 	
 	access(all)
 	resource interface MintGuardPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UFix64
 	}
 	
@@ -108,19 +122,19 @@ contract SHRDMintAccess{
 		access(self)
 		let mintCapability: Capability<&SHRD.SHRDMinter>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotal(): UFix64{ 
 			return self.total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMax(): UFix64{ 
 			return self.max
 		}
 		
 		// mint - part of private interface. Should never be exposed publicly
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @SHRD.Vault{ 
 			// check authoried amount
 			pre{ 
@@ -133,7 +147,7 @@ contract SHRDMintAccess{
 		
 		// Setter using a SHRDMintAccess.Admin lock to set the max for a mint guard
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMax(adminRef: &Admin, max: UFix64){ 
 			self.max = max
 		}
@@ -198,7 +212,7 @@ contract SHRDMintAccess{
 	access(all)
 	let mintProxyPathPrefix: String
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMintGuard(
 		adminRef: &Admin,
 		privateMintCapability: Capability<&SHRD.SHRDMinter>,
@@ -229,7 +243,7 @@ contract SHRDMintAccess{
 		self.whitelisted[targetAddress] = true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMintProxy(authAccount: AuthAccount){ 
 		pre{ 
 			self.whitelisted[authAccount.address] == true:
@@ -249,7 +263,7 @@ contract SHRDMintAccess{
 	
 	// Getter function to get storage MintGuard or MintProxy path for address
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(address: Address, objectType: MintObjectType): StoragePath{ 
 		let index = self.addressToPathIndexMap[address]!
 		let identifier =
@@ -261,7 +275,7 @@ contract SHRDMintAccess{
 	
 	// Getter function to get private MintGuard or MintProxy path for address
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(address: Address, objectType: MintObjectType): PrivatePath{ 
 		let index = self.addressToPathIndexMap[address]!
 		let identifier =
@@ -274,13 +288,13 @@ contract SHRDMintAccess{
 	// Getter function to get public MintProxy path for address (mapped to index)
 	// Always returns the Proxy path, since VaultGuards don't have a public path
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicProxyPath(address: Address): PublicPath{ 
 		let index = self.addressToPathIndexMap[address]!
 		return PublicPath(identifier: self.mintProxyPathPrefix.concat(index.toString()))!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(address: Address, objectType: MintObjectType): PublicPath{ 
 		let index = self.addressToPathIndexMap[address]!
 		let identifier =

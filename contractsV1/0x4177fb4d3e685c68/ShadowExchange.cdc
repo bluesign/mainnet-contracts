@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -6,13 +20,13 @@ access(all)
 contract ShadowExchange{ 
 	
 	// Fee amount
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun Fee(): UFix64{ 
 		return 0.0
 	}
 	
 	// Fee receiver address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun FeeAddress(): Address{ 
 		return 0x902092dad89d1736
 	}
@@ -194,20 +208,20 @@ contract ShadowExchange{
 	// An interface providing a public interface to an Order.
 	access(all)
 	resource interface OrderPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}?
 		
 		// Get the token in exchange of the currency vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fill(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}
 		
 		// Get the details of an Order
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): OrderDetails
 		
 		// For a sell Order, checks whether the NFT is present in provided capability
 		// `false` means the NFT was transfered out of the account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValid(): Bool
 	}
 	
@@ -225,7 +239,7 @@ contract ShadowExchange{
 		
 		// Return the reference of the NFT that is for sale.
 		// If the NFT is absent, it will return nil.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}?{ 
 			// Sell orders require the NFT type and ID
 			let ref = (self.nftProviderCapability.borrow()!).borrowNFT(self.details.nftID)
@@ -236,14 +250,14 @@ contract ShadowExchange{
 		}
 		
 		// Get the details of an order.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): OrderDetails{ 
 			return self.details
 		}
 		
 		// For a sell Order, checks whether the NFT is present in provided capability
 		// `false` means the NFT was transfered out of the account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValid(): Bool{ 
 			if let providerRef = self.nftProviderCapability.borrow(){ 
 				let availableIDs = providerRef.getIDs()
@@ -254,7 +268,7 @@ contract ShadowExchange{
 		
 		// Fill the order
 		// Send payments and returns the token to the buyer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fill(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.details.filled == false:
@@ -350,7 +364,7 @@ contract ShadowExchange{
 	resource interface PortfolioManager{ 
 		
 		// Allows the portfolio owner to create a sell order
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSellOrder(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -359,35 +373,35 @@ contract ShadowExchange{
 			nftID: UInt64,
 			currency: Type,
 			payments: [
-				Payment
+				ShadowExchange.Payment
 			],
 			royalties: [
-				Payment
+				ShadowExchange.Payment
 			],
 			fees: [
-				Payment
+				ShadowExchange.Payment
 			],
 			expiry: UInt64
 		): UInt64
 		
 		// Allows the portfolio owner to cancel any orders, filled or not
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOrder(orderID: UInt64)
 	}
 	
 	// An interface to allow order filling
 	access(all)
 	resource interface PortfolioPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOrderIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellOrderIDs(nftType: Type, nftID: UInt64): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowOrder(orderID: UInt64): &Order?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clean(orderID: UInt64)
 	}
 	
@@ -405,7 +419,7 @@ contract ShadowExchange{
 		var sellOrders:{ String:{ UInt64: UInt64}}
 		
 		// Create and publish a sell order for an NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSellOrder(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64, currency: Type, payments: [Payment], royalties: [Payment], fees: [Payment], expiry: UInt64): UInt64{ 
 			
 			// Check that the seller does indeed hold the NFT
@@ -469,7 +483,7 @@ contract ShadowExchange{
 		
 		// Remove an order that has not yet been filled and destroy it.
 		// It can only be executed by the PortfolioManager resource owner.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOrder(orderID: UInt64){ 
 			let order <- self.orders.remove(key: orderID) ?? panic("missing Order")
 			let details = order.getDetails()
@@ -480,13 +494,13 @@ contract ShadowExchange{
 		}
 		
 		// Returns an array of all the orderIDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOrderIDs(): [UInt64]{ 
 			return self.orders.keys
 		}
 		
 		// Returns the sell orderID of the given `nftType` and `nftID`
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellOrderIDs(nftType: Type, nftID: UInt64): [UInt64]{ 
 			if self.sellOrders.containsKey(nftType.identifier){ 
 				if (self.sellOrders[nftType.identifier]!).containsKey(nftID){ 
@@ -497,7 +511,7 @@ contract ShadowExchange{
 		}
 		
 		// Allows anyone to clean filled or invalid orders
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clean(orderID: UInt64){ 
 			pre{ 
 				self.orders[orderID] != nil:
@@ -525,7 +539,7 @@ contract ShadowExchange{
 		}
 		
 		// Returns a read-only view of the order
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowOrder(orderID: UInt64): &Order?{ 
 			if self.orders[orderID] != nil{ 
 				return &self.orders[orderID] as &Order?
@@ -541,7 +555,7 @@ contract ShadowExchange{
 	}
 	
 	// Make creating a Portfolio publicly accessible
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPortfolio(): @Portfolio{ 
 		return <-create Portfolio()
 	}

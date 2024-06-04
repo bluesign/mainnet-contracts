@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Administrative Contract for SomePlace NFT Collectibles
 	
 	Exposes all functionality for an administrator of SomePlace to
@@ -51,14 +65,14 @@ contract SomePlaceManager{
 	
 	access(all)
 	resource interface ManagerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFUSD(
 			setID: UInt64,
 			quantity: UInt32,
 			vault: @{FungibleToken.Vault}
 		): @SomePlaceCollectible.Collection
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFLOW(
 			setID: UInt64,
 			quantity: UInt32,
@@ -72,7 +86,7 @@ contract SomePlaceManager{
 					Set creation
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTSet(maxNumberOfEditions: UInt64, metadata:{ String: String}): UInt64{ 
 			let setID = SomePlaceCollectible.addNFTSet(maxNumberOfEditions: maxNumberOfEditions, metadata: metadata)
 			return setID
@@ -82,44 +96,44 @@ contract SomePlaceManager{
 					Modification of properties and metadata for a set
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetMetadata(setID: UInt64, metadata:{ String: String}){ 
 			SomePlaceCollectible.updateSetMetadata(setID: setID, metadata: metadata)
 			emit SetMetadataUpdated(setID: setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEditionMetadata(setID: UInt64, editionNumber: UInt64, metadata:{ String: String}){ 
 			SomePlaceCollectible.updateEditionMetadata(setID: setID, editionNumber: editionNumber, metadata: metadata)
 			emit EditionMetadataUpdated(setID: setID, editionNumber: editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEditionTraits(setID: UInt64, editionNumber: UInt64, traits:{ String: String}){ 
 			SomePlaceCollectible.updateEditionTraits(setID: setID, editionNumber: editionNumber, traits: traits)
 			emit EditionTraitsUpdated(setID: setID, editionNumber: editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFLOWPublicSalePrice(setID: UInt64, price: UFix64?){ 
 			SomePlaceCollectible.updateFLOWPublicSalePrice(setID: setID, price: price)
 			emit PublicSalePriceUpdated(setID: setID, fungibleTokenType: "FLOW", price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFUSDPublicSalePrice(setID: UInt64, price: UFix64?){ 
 			SomePlaceCollectible.updateFUSDPublicSalePrice(setID: setID, price: price)
 			emit PublicSalePriceUpdated(setID: setID, fungibleTokenType: "FUSD", price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSaleStartTime(setID: UInt64, startTime: UFix64?){ 
 			SomePlaceCollectible.updatePublicSaleStartTime(setID: setID, startTime: startTime)
 			let setMetadata = SomePlaceCollectible.getMetadataForSetID(setID: setID)!
 			emit PublicSaleTimeUpdated(setID: setID, startTime: setMetadata.getPublicSaleStartTime(), endTime: setMetadata.getPublicSaleEndTime())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSaleEndTime(setID: UInt64, endTime: UFix64?){ 
 			SomePlaceCollectible.updatePublicSaleEndTime(setID: setID, endTime: endTime)
 			let setMetadata = SomePlaceCollectible.getMetadataForSetID(setID: setID)!
@@ -131,7 +145,7 @@ contract SomePlaceManager{
 				*/
 		
 		// fungibleTokenType is expected to be 'FLOW' or 'FUSD'
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAdminPaymentReceiver(fungibleTokenType: String, paymentReceiver: Capability<&{FungibleToken.Receiver}>){ 
 			SomePlaceManager.setAdminPaymentReceiver(fungibleTokenType: fungibleTokenType, paymentReceiver: paymentReceiver)
 		}
@@ -144,7 +158,7 @@ contract SomePlaceManager{
 		}
 		
 		// Mint many editions of NFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintSequentialEditionNFTs(setID: UInt64, quantity: UInt32): @SomePlaceCollectible.Collection{ 
 			pre{ 
 				quantity >= 1 && quantity <= 10:
@@ -160,7 +174,7 @@ contract SomePlaceManager{
 		}
 		
 		// Mint a specific edition of an NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(setID: UInt64, editionNumber: UInt64): @SomePlaceCollectible.NFT{ 
 			return <-SomePlaceCollectible.mintNFT(setID: setID, editionNumber: editionNumber)
 		}
@@ -204,7 +218,7 @@ contract SomePlaceManager{
 				*/
 		
 		// Ensure that the passed in vault is FUSD, and pass the expected FUSD sale price for this set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFUSD(setID: UInt64, quantity: UInt32, vault: @{FungibleToken.Vault}): @SomePlaceCollectible.Collection{ 
 			pre{ 
 				(SomePlaceCollectible.getMetadataForSetID(setID: setID)!).getFUSDPublicSalePrice() != nil:
@@ -217,7 +231,7 @@ contract SomePlaceManager{
 		}
 		
 		// Ensure that the passed in vault is a FLOW vault, and pass the expected FLOW sale price for this set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFLOW(setID: UInt64, quantity: UInt32, vault: @{FungibleToken.Vault}): @SomePlaceCollectible.Collection{ 
 			pre{ 
 				(SomePlaceCollectible.getMetadataForSetID(setID: setID)!).getFLOWPublicSalePrice() != nil:
@@ -250,7 +264,7 @@ contract SomePlaceManager{
 	}
 	
 	/* Public Functions */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getManagerPublic(): Capability<&SomePlaceManager.Manager>{ 
 		return self.account.capabilities.get<&SomePlaceManager.Manager>(self.ManagerPublicPath)!
 	}

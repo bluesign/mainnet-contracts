@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -194,7 +208,7 @@ contract Flowns{
 		}
 		
 		// Set CollectionPrivate to RootDomain resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Domains.Collection>){ 
 			pre{ 
 				cap.check():
@@ -207,7 +221,7 @@ contract Flowns{
 		}
 		
 		// Query root domain info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRootDomainInfo(): RootDomainInfo{ 
 			return RootDomainInfo(
 				id: self.id,
@@ -222,7 +236,7 @@ contract Flowns{
 		}
 		
 		// Query root domain vault balance
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultBalance(): UFix64{ 
 			pre{ 
 				self.domainVault != nil:
@@ -231,7 +245,7 @@ contract Flowns{
 			return self.domainVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ Int: UFix64}{ 
 			return self.prices
 		}
@@ -260,7 +274,7 @@ contract Flowns{
 		}
 		
 		// Set domain rent fee
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrices(key: Int, price: UFix64){ 
 			self.prices[key] = price
 			emit RootDomainPriceChanged(name: self.name, key: key, price: price)
@@ -292,7 +306,7 @@ contract Flowns{
 		}
 		
 		// Renew domain
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun renewDomain(domain: &Domains.NFT, duration: UFix64, feeTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				!Domains.isDeprecated(nameHash: domain.nameHash, domainId: domain.id):
@@ -337,7 +351,7 @@ contract Flowns{
 		}
 		
 		// Register domain
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDomain(
 			name: String,
 			duration: UFix64,
@@ -432,13 +446,13 @@ contract Flowns{
 	// Root domain public interface for fns user
 	access(all)
 	resource interface RootDomainCollectionPublic{ 
-		access(all)
-		fun getDomainInfo(domainId: UInt64): RootDomainInfo
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getDomainInfo(domainId: UInt64): Flowns.RootDomainInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllDomains():{ UInt64: RootDomainInfo}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun renewDomain(
 			domainId: UInt64,
 			domain: &Domains.NFT,
@@ -446,7 +460,7 @@ contract Flowns{
 			feeTokens: @{FungibleToken.Vault}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDomain(
 			domainId: UInt64,
 			name: String,
@@ -456,10 +470,10 @@ contract Flowns{
 			refer: Address?
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices(domainId: UInt64):{ Int: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultBalance(domainId: UInt64): UFix64
 	}
 	
@@ -523,7 +537,7 @@ contract Flowns{
 			destroy oldDomain
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun renewDomain(domainId: UInt64, domain: &Domains.NFT, duration: UFix64, feeTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.domains[domainId] != nil:
@@ -533,7 +547,7 @@ contract Flowns{
 			root.renewDomain(domain: domain, duration: duration, feeTokens: <-feeTokens)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDomain(domainId: UInt64, name: String, duration: UFix64, feeTokens: @{FungibleToken.Vault}, receiver: Capability<&{NonFungibleToken.Receiver}>, refer: Address?){ 
 			pre{ 
 				self.domains[domainId] != nil:
@@ -543,7 +557,7 @@ contract Flowns{
 			root.registerDomain(name: name, duration: duration, feeTokens: <-feeTokens, receiver: receiver, refer: refer)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultBalance(domainId: UInt64): UFix64{ 
 			pre{ 
 				self.domains[domainId] != nil:
@@ -582,7 +596,7 @@ contract Flowns{
 		}
 		
 		// Get all root domains
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllDomains():{ UInt64: RootDomainInfo}{ 
 			var domainInfos:{ UInt64: RootDomainInfo} ={} 
 			for id in self.domains.keys{ 
@@ -635,13 +649,13 @@ contract Flowns{
 		}
 		
 		// get Root domain info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDomainInfo(domainId: UInt64): RootDomainInfo{ 
 			return self.getRootDomain(domainId).getRootDomainInfo()
 		}
 		
 		// Query root domain's rent price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices(domainId: UInt64):{ Int: UFix64}{ 
 			return self.getRootDomain(domainId).getPrices()
 		}
@@ -650,29 +664,29 @@ contract Flowns{
 	// Admin interface resource
 	access(all)
 	resource interface AdminPrivate{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRootDomainCapability(domainId: UInt64, cap: Capability<&Domains.Collection>)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRootDomain(name: String, vault: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRentPrice(domainId: UInt64, len: Int, price: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawVault(
 			domainId: UInt64,
 			receiver: Capability<&{FungibleToken.Receiver}>,
 			amount: UFix64
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRootDomainVault(domainId: UInt64, vault: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintDomain(
 			domainId: UInt64,
 			name: String,
@@ -680,19 +694,19 @@ contract Flowns{
 			receiver: Capability<&{NonFungibleToken.Receiver}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinRentDuration(domainId: UInt64, duration: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxDomainLength(domainId: UInt64, length: Int)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCommissionRate(domainId: UInt64, rate: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDomainForbidChars(_ chars: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(_ flag: Bool)
 	}
 	
@@ -707,7 +721,7 @@ contract Flowns{
 		}
 		
 		// init RootDomainCollection for admin
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Flowns.RootDomainCollection>){ 
 			pre{ 
 				cap.check():
@@ -719,7 +733,7 @@ contract Flowns{
 		}
 		
 		// init Root domain's Domains collection to create collection for domain register 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRootDomainCapability(domainId: UInt64, cap: Capability<&Domains.Collection>){ 
 			pre{ 
 				cap.check():
@@ -729,7 +743,7 @@ contract Flowns{
 		}
 		
 		// Create root domain with admin
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRootDomain(name: String, vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.server != nil:
@@ -739,7 +753,7 @@ contract Flowns{
 		}
 		
 		// Set rent price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRentPrice(domainId: UInt64, len: Int, price: UFix64){ 
 			pre{ 
 				self.server != nil:
@@ -748,7 +762,7 @@ contract Flowns{
 			((self.server!).borrow()!).setPrices(domainId: domainId, len: len, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinRentDuration(domainId: UInt64, duration: UFix64){ 
 			pre{ 
 				self.server != nil:
@@ -757,7 +771,7 @@ contract Flowns{
 			((self.server!).borrow()!).setMinRentDuration(domainId: domainId, duration: duration)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxDomainLength(domainId: UInt64, length: Int){ 
 			pre{ 
 				self.server != nil:
@@ -766,7 +780,7 @@ contract Flowns{
 			((self.server!).borrow()!).setMaxDomainLength(domainId: domainId, length: length)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCommissionRate(domainId: UInt64, rate: UFix64){ 
 			pre{ 
 				self.server != nil:
@@ -776,7 +790,7 @@ contract Flowns{
 		}
 		
 		// Withdraw vault 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawVault(domainId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64){ 
 			pre{ 
 				self.server != nil:
@@ -786,7 +800,7 @@ contract Flowns{
 		}
 		
 		// Withdraw vault 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRootDomainVault(domainId: UInt64, vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.server != nil:
@@ -796,7 +810,7 @@ contract Flowns{
 		}
 		
 		// Mint domain with root domain
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintDomain(domainId: UInt64, name: String, duration: UFix64, receiver: Capability<&{NonFungibleToken.Receiver}>){ 
 			pre{ 
 				self.server != nil:
@@ -805,7 +819,7 @@ contract Flowns{
 			((self.server!).borrow()!).mintDomain(domainId: domainId, name: name, duration: duration, receiver: receiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(_ flag: Bool){ 
 			pre{ 
 				Flowns.isPause != flag:
@@ -819,7 +833,7 @@ contract Flowns{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDomainForbidChars(_ chars: String){ 
 			let oldChars = Flowns.forbidChars
 			Flowns.forbidChars = chars
@@ -834,7 +848,7 @@ contract Flowns{
 		return <-create Admin()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDomainNameHash(name: String, parentNameHash: String): String{ 
 		let prefix = "0x"
 		let forbidenChars: [UInt8] = Flowns.forbidChars.utf8
@@ -849,7 +863,7 @@ contract Flowns{
 	}
 	
 	// calc hash with node and lable
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hash(node: String, lable: String): String{ 
 		var prefixNode = node
 		if node.length == 0{ 
@@ -861,7 +875,7 @@ contract Flowns{
 	}
 	
 	// Query root domain
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRootDomainInfo(domainId: UInt64): RootDomainInfo?{ 
 		let account = Flowns.account
 		let rootCollectionCap =
@@ -875,7 +889,7 @@ contract Flowns{
 	}
 	
 	// Query all root domain
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllRootDomains():{ UInt64: RootDomainInfo}?{ 
 		let account = Flowns.account
 		let rootCollectionCap =
@@ -889,7 +903,7 @@ contract Flowns{
 	}
 	
 	// Check domain available 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun available(nameHash: String): Bool{ 
 		if Domains.getRecords(nameHash) == nil{ 
 			return true
@@ -897,7 +911,7 @@ contract Flowns{
 		return Domains.isExpired(nameHash)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRentPrices(domainId: UInt64):{ Int: UFix64}{ 
 		let account = Flowns.account
 		let rootCollectionCap =
@@ -910,7 +924,7 @@ contract Flowns{
 		return{} 
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRootVaultBalance(domainId: UInt64): UFix64{ 
 		let account = Flowns.account
 		let rootCollectionCap =
@@ -922,7 +936,7 @@ contract Flowns{
 		return balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun registerDomain(
 		domainId: UInt64,
 		name: String,
@@ -951,7 +965,7 @@ contract Flowns{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun renewDomain(
 		domainId: UInt64,
 		domain: &Domains.NFT,

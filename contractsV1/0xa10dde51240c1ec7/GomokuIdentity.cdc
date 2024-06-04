@@ -1,4 +1,18 @@
-import GomokuType from "./GomokuType.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import GomokuType from "./GomokuType.cdc"
 
 access(all)
 contract GomokuIdentity{ 
@@ -129,23 +143,23 @@ contract GomokuIdentity{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt32]{ 
 			return self.ownedIdentityTokenMap.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): Int{ 
 			return self.ownedIdentityTokenMap.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt32): &IdentityToken?{ 
 			return &self.ownedIdentityTokenMap[id] as &IdentityToken?
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @IdentityCollection{ 
 		emit CollectionCreated()
 		return <-create IdentityCollection()

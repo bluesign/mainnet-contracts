@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FBRC from "../0xfc91de5e6566cc7c/FBRC.cdc"
 
@@ -41,7 +55,7 @@ contract TheFabricantFBRCAirdrop{
 			self.hasClaimed = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setToHasClaimed(){ 
 			pre{ 
 				self.hasClaimed == false:
@@ -55,7 +69,7 @@ contract TheFabricantFBRCAirdrop{
 	resource Admin{ 
 		
 		//add claim to address map
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addClaim(address: Address, claimName: String, claimAmount: UFix64){ 
 			let claimStruct = ClaimStruct(claimAmount: claimAmount)
 			//case1: address not in mapping
@@ -77,7 +91,7 @@ contract TheFabricantFBRCAirdrop{
 		}
 		
 		// change contract royalty address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFBRCMinterCap(fbrcMinterCap: Capability<&FBRC.Administrator>){ 
 			pre{ 
 				fbrcMinterCap.borrow() != nil:
@@ -87,7 +101,7 @@ contract TheFabricantFBRCAirdrop{
 			emit MinterChanged(address: fbrcMinterCap.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -97,7 +111,7 @@ contract TheFabricantFBRCAirdrop{
 	resource Claimer{ 
 		
 		//users can claim FBRC if they have minted an item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimFBRC(claimName: String, fbrcCap: Capability<&FBRC.Vault>){ 
 			
 			//Make sure the address has a claimable amount of FBRC
@@ -149,13 +163,13 @@ contract TheFabricantFBRCAirdrop{
 		init(){} 
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewClaimer(): @Claimer{ 
 		return <-create Claimer()
 	}
 	
 	// getter function for addressClaim
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressClaim():{ Address:{ String: ClaimStruct}}{ 
 		return TheFabricantFBRCAirdrop.addressClaim
 	}

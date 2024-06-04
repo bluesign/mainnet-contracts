@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	ListenAuction 
 	Author: Flowstarter
 	Auction Resource represents an Auction and is always held internally by the contract
@@ -193,7 +207,7 @@ contract ListenAuction{
 		// checking an auction has a bidder
 		// for preventing admin deleting the NFT that is in a started auction
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasBids(): Bool{ 
 			return self.bid.ftReceiverCap != nil
 		}
@@ -201,7 +215,7 @@ contract ListenAuction{
 		// auctionHasStarted
 		// checking status of an auction has started?
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun auctionHasStarted(): Bool{ 
 			return ListenAuction.now() >= self.startTime
 		}
@@ -209,7 +223,7 @@ contract ListenAuction{
 		// getAuctionState
 		// check and return the status of auction
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionState(): AuctionState{ 
 			let currentTime = ListenAuction.now()
 			if currentTime < self.startTime{ 
@@ -319,7 +333,7 @@ contract ListenAuction{
 		// The function allows to create an auction with specific parameters 
 		// such as: NFT, time, reserve price and bid step
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(
 			startTime: UFix64,
 			duration: UFix64,
@@ -354,7 +368,7 @@ contract ListenAuction{
 		// removeAuction
 		// The function will delete an auction with the input parameter is auctionId
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAuction(auctionID: UInt64){ 
 			let auctionRef =
 				ListenAuction.borrowAuction(id: auctionID) ?? panic("Auction ID does not exist")
@@ -374,7 +388,7 @@ contract ListenAuction{
 		// updatePosition
 		// The function will update position of the auction with the input parameter is auctionId and position
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePosition(auctionID: UInt64, position: UInt64){ 
 			let auctionRef =
 				ListenAuction.borrowAuction(id: auctionID) ?? panic("Auction ID does not exist")
@@ -388,7 +402,7 @@ contract ListenAuction{
 		// if there is a user participating in the auction
 		// then time will update to 30 minute
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateExtensionTime(duration: UFix64){ 
 			pre{ 
 				ListenAuction.auctions.keys.length == 0:
@@ -401,7 +415,7 @@ contract ListenAuction{
 		// the function processes the auction results,
 		// sends the NFT to the winning bidder
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(auctionID: UInt64){ 
 			let auctionRef = ListenAuction.borrowAuction(id: auctionID)!
 			let bidRef = auctionRef.bid as &ListenAuction.Bid
@@ -534,7 +548,7 @@ contract ListenAuction{
 	// now
 	// Get current time of an auction
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun now(): UFix64{ 
 		return getCurrentBlock().timestamp
 	}
@@ -542,7 +556,7 @@ contract ListenAuction{
 	// stateToString
 	// Convert from state of an auction to string
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stateToString(_ auctionState: AuctionState): String{ 
 		switch auctionState{ 
 			case AuctionState.Open:
@@ -573,7 +587,7 @@ contract ListenAuction{
 	// getAuctionMeta
 	// Returns metadata of an auction by ID
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAuctionMeta(auctionID: UInt64): AuctionMeta{ 
 		let auctionRef =
 			ListenAuction.borrowAuction(id: auctionID) ?? panic("No Auction with that ID exists")
@@ -608,7 +622,7 @@ contract ListenAuction{
 	// User have to deposit amount of ListenUSD
 	// That amount will be kept in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun placeBid(
 		auctionID: UInt64,
 		funds: @ListenUSD.Vault,
@@ -660,7 +674,7 @@ contract ListenAuction{
 	// getAuctionIDs
 	// The function returns the ID array of the auctions
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAuctionIDs(): [UInt64]{ 
 		return self.auctions.keys
 	}

@@ -1,4 +1,18 @@
-// This smart contract does not implement the NonFungibleToken interface.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This smart contract does not implement the NonFungibleToken interface.
 // The planarias are just that, as they are.
 access(all)
 contract Planarias{ 
@@ -33,13 +47,13 @@ contract Planarias{
 	// Planarias' meiosis algorithm is open to change. Anyone can evolve them.
 	access(all)
 	struct interface IMeiosisAlgorithm{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun divide(genes: Planarias.Genes): UInt256
 	}
 	
 	access(all)
 	struct MeiosisAlgorithm: IMeiosisAlgorithm{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun divide(genes: Planarias.Genes): UInt256{ 
 			let randomChiasmaMask = fun (): UInt256{ 
 					var mask: UInt256 = 0
@@ -136,7 +150,7 @@ contract Planarias{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reproduceAsexually(): @Planaria{ 
 			return <-create Planaria(
 				genes: self.genes,
@@ -147,7 +161,7 @@ contract Planarias{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reproduceSexually(): @Planaria{ 
 			pre{ 
 				self.copulatoryPouch.length > 0:
@@ -167,13 +181,13 @@ contract Planarias{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun copulate(father: &Planaria){ 
 			let fatherGene = father.meiosisAlgorithm.divide(genes: *father.genes)
 			self.copulatoryPouch.insert(key: father.name, fatherGene)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inject(meiosisAlgorithm:{ IMeiosisAlgorithm}){ 
 			self.meiosisAlgorithm = meiosisAlgorithm
 		}
@@ -188,37 +202,37 @@ contract Planarias{
 			self.planarias <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun out(name: UInt64): @Planaria{ 
 			let planaria <- self.planarias.remove(key: name) ?? panic("Missing Planaria")
 			emit Out(name: planaria.name, from: self.owner?.address)
 			return <-planaria
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _in(planaria: @Planaria){ 
 			let name: UInt64 = planaria.name
 			self.planarias[name] <-! planaria
 			emit In(name: name, to: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNames(): [UInt64]{ 
 			return self.planarias.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPlanaria(name: UInt64): &Planaria?{ 
 			return &self.planarias[name] as &Planaria?
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createHabitat(): @Habitat{ 
 		return <-create Habitat()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generate(): @Planaria{ 
 		let newGene = fun (): UInt256{ 
 				return UInt256(revertibleRandom<UInt64>()) + (UInt256(revertibleRandom<UInt64>()) << 64) + (UInt256(revertibleRandom<UInt64>()) << 128) + (UInt256(revertibleRandom<UInt64>()) << 192)

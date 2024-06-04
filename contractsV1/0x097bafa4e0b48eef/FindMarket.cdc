@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -176,7 +190,7 @@ contract FindMarket{
 	}
 	
 	// ========================================
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(_ type: Type, name: String): PublicPath{ 
 		let pathPrefix = self.pathMap[type.identifier]!
 		let path = pathPrefix.concat("_").concat(name)
@@ -184,7 +198,7 @@ contract FindMarket{
 		?? panic("Cannot find public path for type ".concat(type.identifier))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(_ type: Type, name: String): StoragePath{ 
 		let pathPrefix = self.pathMap[type.identifier]!
 		let path = pathPrefix.concat("_").concat(name)
@@ -192,29 +206,29 @@ contract FindMarket{
 		?? panic("Cannot find public path for type ".concat(type.identifier))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFindTenantAddress(): Address{ 
 		return FindMarket.account.address
 	}
 	
 	/* Get Tenant */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTenant(_ tenant: Address): &FindMarket.Tenant{ 
 		return (FindMarket.getTenantCapability(tenant)!).borrow()!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemTypes(): [Type]{ 
 		return self.saleItemTypes
 	}
 	
 	/* Get SaleItemCollections */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCollectionTypes(): [Type]{ 
 		return self.saleItemCollectionTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCollectionCapabilities(tenantRef: &FindMarket.Tenant, address: Address): [
 		Capability<&{FindMarket.SaleItemCollectionPublic}>
 	]{ 
@@ -230,7 +244,7 @@ contract FindMarket{
 		return caps
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCollectionCapability(
 		tenantRef: &FindMarket.Tenant,
 		marketOption: String,
@@ -246,7 +260,7 @@ contract FindMarket{
 	}
 	
 	/* Get Sale Reports and Sale Item */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertOperationValid(
 		tenant: Address,
 		address: Address,
@@ -273,7 +287,7 @@ contract FindMarket{
 	}
 	
 	// Get Royalties Changed Items
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltiesChangedIds(tenant: Address, address: Address):{ String: [UInt64]}{ 
 		let tenantRef = self.getTenant(tenant)
 		var report:{ String: [UInt64]} ={} 
@@ -290,7 +304,7 @@ contract FindMarket{
 		return report
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltiesChangedItems(tenant: Address, address: Address):{ 
 		String: FindMarket.SaleItemCollectionReport
 	}{ 
@@ -307,7 +321,7 @@ contract FindMarket{
 	}
 	
 	/* Get Sale Reports and Sale Item */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleInformation(
 		tenant: Address,
 		address: Address,
@@ -332,7 +346,7 @@ contract FindMarket{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemReport(tenant: Address, address: Address, getNFTInfo: Bool):{ 
 		String: FindMarket.SaleItemCollectionReport
 	}{ 
@@ -348,7 +362,7 @@ contract FindMarket{
 		return report
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItems(tenant: Address, address: Address, id: UInt64, getNFTInfo: Bool):{ 
 		String: FindMarket.SaleItemCollectionReport
 	}{ 
@@ -364,7 +378,7 @@ contract FindMarket{
 		return report
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTListing(tenant: Address, address: Address, id: UInt64, getNFTInfo: Bool):{ 
 		String: FindMarket.SaleItemInformation
 	}{ 
@@ -461,17 +475,17 @@ contract FindMarket{
 	}
 	
 	/* Get Bid Collections */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidTypes(): [Type]{ 
 		return self.marketBidTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidCollectionTypes(): [Type]{ 
 		return self.marketBidCollectionTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidCollectionCapabilities(tenantRef: &FindMarket.Tenant, address: Address): [
 		Capability<&{FindMarket.MarketBidCollectionPublic}>
 	]{ 
@@ -485,7 +499,7 @@ contract FindMarket{
 		return caps
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidCollectionCapability(
 		tenantRef: &FindMarket.Tenant,
 		marketOption: String,
@@ -500,7 +514,7 @@ contract FindMarket{
 		panic("Cannot find market option : ".concat(marketOption))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBid(
 		tenant: Address,
 		address: Address,
@@ -524,7 +538,7 @@ contract FindMarket{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBidsReport(tenant: Address, address: Address, getNFTInfo: Bool):{ 
 		String: FindMarket.BidItemCollectionReport
 	}{ 
@@ -587,7 +601,7 @@ contract FindMarket{
 		return FindMarket.BidItemCollectionReport(items: info, ghosts: ghost)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertBidOperationValid(
 		tenant: Address,
 		address: Address,
@@ -626,12 +640,12 @@ contract FindMarket{
 	}
 	
 	/* Helper Function */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketOptionFromType(_ type: Type): String{ 
 		return self.listingName[type.identifier]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun typeToListingName(_ type: Type): String{ 
 		let identifier = type.identifier
 		var dots = 0
@@ -746,7 +760,7 @@ contract FindMarket{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun typeToPathIdentifier(_ type: Type): String{ 
 		let identifier = type.identifier
 		var i = 0
@@ -822,7 +836,7 @@ contract FindMarket{
 			self.allow = allow
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(_ relevantType: Type): Bool{ 
 			let contains = self.types.contains(relevantType)
 			if self.allow && contains{ 
@@ -890,13 +904,13 @@ contract FindMarket{
 	
 	access(all)
 	resource interface TenantPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStoragePath(_ type: Type): StoragePath
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicPath(_ type: Type): PublicPath
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowedAction(
 			listingType: Type,
 			nftType: Type,
@@ -906,15 +920,15 @@ contract FindMarket{
 			buyer: Address?
 		): FindRulesCache.ActionResult
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCuts(name: String, listingType: Type, nftType: Type, ftType: Type):{ 
 			String: FindMarketCutStruct.Cuts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllowedListings(nftType: Type, marketType: Type): AllowedListing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBlockedNFT(marketType: Type): [Type]
 		
 		access(all)
@@ -1001,7 +1015,7 @@ contract FindMarket{
 			FindMarketCut.setTenantCuts(tenant: self.name, types: types, category: category, cuts: cuts)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCuts(name: String, listingType: Type, nftType: Type, ftType: Type):{ String: FindMarketCutStruct.Cuts}{ 
 			let cuts = FindMarketCut.getCuts(tenant: self.name, listingType: listingType, nftType: nftType, ftType: ftType)
 			cuts["find"] = self.getFindCut(name: name, listingType: listingType, nftType: nftType, ftType: ftType)
@@ -1009,7 +1023,7 @@ contract FindMarket{
 			return cuts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFindCut(name: String, listingType: Type, nftType: Type, ftType: Type): FindMarketCutStruct.Cuts?{ 
 			let ruleId = FindMarketCut.getRuleId(listingType: listingType, nftType: nftType, ftType: ftType)
 			let findRuleId = ruleId.concat("-find")
@@ -1037,7 +1051,7 @@ contract FindMarket{
 			return returningCut
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTenantCut(name: String, listingType: Type, nftType: Type, ftType: Type): FindMarketCutStruct.Cuts?{ 
 			let ruleId = FindMarketCut.getRuleId(listingType: listingType, nftType: nftType, ftType: ftType)
 			let tenantRuleId = ruleId.concat("-tenant")
@@ -1157,7 +1171,7 @@ contract FindMarket{
 			panic("Panic executing emitRulesEvent, Must be nft/ft/listing")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowedAction(listingType: Type, nftType: Type, ftType: Type, action: MarketAction, seller: Address?, buyer: Address?): FindRulesCache.ActionResult{ 
 			/* Check for Honour Banning */
 			let profile = getAccount(FindMarket.tenantNameAddress[self.name]!).capabilities.get<&Profile.User>(Profile.publicPath).borrow() ?? panic("Cannot get reference to Profile to check honour banning. Tenant Name : ".concat(self.name))
@@ -1230,17 +1244,17 @@ contract FindMarket{
 			return tenantRulesCache!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicPath(_ type: Type): PublicPath{ 
 			return FindMarket.getPublicPath(type, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStoragePath(_ type: Type): StoragePath{ 
 			return FindMarket.getStoragePath(type, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllowedListings(nftType: Type, marketType: Type): AllowedListing?{ 
 			
 			// Find Rules have to be deny rules
@@ -1293,7 +1307,7 @@ contract FindMarket{
 			return AllowedListing(listingType: marketType, ftTypes: returningFTTypes, status: "active")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBlockedNFT(marketType: Type): [Type]{ 
 			// Find Rules have to be deny rules
 			let list: [Type] = []
@@ -1350,7 +1364,7 @@ contract FindMarket{
 	
 	// Tenant admin stuff
 	//Admin client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTenantClient(): @TenantClient{ 
 		return <-create TenantClient()
 	}
@@ -1358,8 +1372,8 @@ contract FindMarket{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface TenantClientPublic{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Tenant>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&FindMarket.Tenant>): Void
 	}
 	
 	/*
@@ -1375,7 +1389,7 @@ contract FindMarket{
 		access(self)
 		var capability: Capability<&Tenant>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Tenant>){ 
 			if !cap.check(){ 
 				panic("Invalid tenant")
@@ -1390,37 +1404,37 @@ contract FindMarket{
 			self.capability = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketOption(saleItem: TenantSaleItem){ 
 			let tenant = self.getTenantRef()
 			tenant.addSaleItem(saleItem, type: "tenant")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMarketOption(name: String){ 
 			let tenant = self.getTenantRef()
 			tenant.removeSaleItem(name, type: "tenant")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun enableMarketOption(_ name: String){ 
 			let tenant = self.getTenantRef()
 			tenant.alterMarketOption(name: name, status: "active")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deprecateMarketOption(_ name: String){ 
 			let tenant = self.getTenantRef()
 			tenant.alterMarketOption(name: name, status: "deprecated")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stopMarketOption(_ name: String){ 
 			let tenant = self.getTenantRef()
 			tenant.alterMarketOption(name: name, status: "stopped")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTenantRef(): &Tenant{ 
 			if self.capability == nil{ 
 				panic("TenantClient is not present")
@@ -1431,7 +1445,7 @@ contract FindMarket{
 			return (self.capability!).borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExtraCut(types: [Type], category: String, cuts: FindMarketCutStruct.Cuts){ 
 			let tenant = self.getTenantRef()
 			tenant.setExtraCut(types: types, category: category, cuts: cuts)
@@ -1486,7 +1500,7 @@ contract FindMarket{
 		return account.capabilities.get<&Tenant>(pp)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTenantPathForName(_ name: String): String{ 
 		if !self.tenantNameAddress.containsKey(name){ 
 			panic("tenant is not registered in registry")
@@ -1494,7 +1508,7 @@ contract FindMarket{
 		return self.tenantPathPrefix.concat("_").concat(name)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTenantPathForAddress(_ address: Address): String{ 
 		if !self.tenantAddressName.containsKey(address){ 
 			panic("tenant is not registered in registry")
@@ -1502,7 +1516,7 @@ contract FindMarket{
 		return self.getTenantPathForName(self.tenantAddressName[address]!)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTenantCapability(_ marketplace: Address): Capability<&Tenant>?{ 
 		if !self.tenantAddressName.containsKey(marketplace){ 
 			"tenant is not registered in registry"
@@ -1873,19 +1887,19 @@ contract FindMarket{
 	
 	access(all)
 	resource interface SaleItemCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyChangedIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsId(_ id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(_ id: UInt64): &{SaleItem}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type
 	}
 	
@@ -1905,13 +1919,13 @@ contract FindMarket{
 	
 	access(all)
 	resource interface MarketBidCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsId(_ id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidType(): Type
 		
 		access(account)
@@ -1934,13 +1948,13 @@ contract FindMarket{
 	
 	access(all)
 	resource interface Bid{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerAddress(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidExtraField():{ String: AnyStruct}
 	}
 	
@@ -1948,76 +1962,76 @@ contract FindMarket{
 	resource interface SaleItem{ 
 		
 		//this is the type of sale this is, auction, direct offer etc
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleType(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingTypeIdentifier(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeller(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyer(): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerName(): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyerName(): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toNFTInfo(_ detail: Bool): FindMarket.NFTInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkPointer(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkSoulBound(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type
 		
 		// pub fun getFtAlias(): String
 		//the Type of the item for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type
 		
 		//The id of the nft for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemID(): UInt64
 		
 		//The id of this sale item, ie the UUID of the item listed for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuction(): AuctionItem?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFtType(): Type //The type of FT used for this sale item
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValidUntil(): UFix64? //A timestamp that says when this item is valid until
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleItemExtraField():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalRoyalties(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun validateRoyalties(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData
 	}
 	
@@ -2134,7 +2148,7 @@ contract FindMarket{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTenantAddress(_ name: String): Address?{ 
 		return FindMarket.tenantNameAddress[name]
 	}

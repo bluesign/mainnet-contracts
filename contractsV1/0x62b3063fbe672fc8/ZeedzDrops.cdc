@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract ZeedzDrops{ 
@@ -159,7 +173,7 @@ contract ZeedzDrops{
 			self.prices = prices
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ String: UFix64}{ 
 			return self.prices
 		}
@@ -170,8 +184,8 @@ contract ZeedzDrops{
 	//
 	access(all)
 	resource interface ProductPublic{ 
-		access(all)
-		fun getDetails(): ProductDetails
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getDetails(): ZeedzDrops.ProductDetails
 	}
 	
 	//   
@@ -179,22 +193,22 @@ contract ZeedzDrops{
 	//
 	access(all)
 	resource interface ProductsManager{ 
-		access(all)
-		fun setSaleEnabledStatus(productID: UInt64, status: Bool)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setSaleEnabledStatus(productID: UInt64, status: Bool): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartTime(productID: UInt64, startTime: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEndTime(productID: UInt64, endTime: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reserve(productID: UInt64, amount: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeProduct(productID: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			productID: UInt64,
 			payment: @{FungibleToken.Vault},
@@ -202,7 +216,7 @@ contract ZeedzDrops{
 			userID: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithDiscount(
 			productID: UInt64,
 			payment: @{FungibleToken.Vault},
@@ -211,7 +225,7 @@ contract ZeedzDrops{
 			userID: String
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addProduct(
 			name: String,
 			description: String,
@@ -225,7 +239,7 @@ contract ZeedzDrops{
 			}
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrices(productID: UInt64, prices:{ String: UFix64})
 	}
 	
@@ -234,8 +248,13 @@ contract ZeedzDrops{
 	//
 	access(all)
 	resource interface DropsManager{ 
-		access(all)
-		fun updateSaleCutRequirement(requirements: [SaleCutRequirement], vaultType: Type)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun updateSaleCutRequirement(
+			requirements: [
+				ZeedzDrops.SaleCutRequirement
+			],
+			vaultType: Type
+		): Void
 	}
 	
 	//   
@@ -247,7 +266,7 @@ contract ZeedzDrops{
 		access(contract)
 		let details: ProductDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ProductDetails{ 
 			return self.details
 		}
@@ -343,7 +362,7 @@ contract ZeedzDrops{
 	//
 	access(all)
 	resource DropsAdmin: ProductsManager, DropsManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addProduct(name: String, description: String, id: String, total: UInt64, saleEnabled: Bool, timeStart: UFix64, timeEnd: UFix64, prices:{ String: UFix64}): UInt64{ 
 			let product <- create Product(name: name, description: description, id: id, total: total, saleEnabled: saleEnabled, timeStart: timeStart, timeEnd: timeEnd, prices: prices)
 			let productID = product.uuid
@@ -355,7 +374,7 @@ contract ZeedzDrops{
 			return productID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reserve(productID: UInt64, amount: UInt64){ 
 			let product = ZeedzDrops.borrowProduct(id: productID) ?? panic("not able to borrow specified product")
 			assert(product.details.total - product.details.sold >= amount, message: "reserve amount can't be higher than available pack amount")
@@ -363,7 +382,7 @@ contract ZeedzDrops{
 			emit ProductUpdated(productID: productID, details: product.getDetails(), field: "reserved")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeProduct(productID: UInt64){ 
 			pre{ 
 				ZeedzDrops.products[productID] != nil:
@@ -373,40 +392,40 @@ contract ZeedzDrops{
 			destroy product
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleEnabledStatus(productID: UInt64, status: Bool){ 
 			let product = ZeedzDrops.borrowProduct(id: productID) ?? panic("not able to borrow specified product")
 			product.details.setSaleEnabledStatus(status: status)
 			emit ProductUpdated(productID: productID, details: product.getDetails(), field: "saleEnabled")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartTime(productID: UInt64, startTime: UFix64){ 
 			let product = ZeedzDrops.borrowProduct(id: productID) ?? panic("not able to borrow specified product")
 			product.details.setStartTime(startTime: startTime)
 			emit ProductUpdated(productID: productID, details: product.getDetails(), field: "startTime")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEndTime(productID: UInt64, endTime: UFix64){ 
 			let product = ZeedzDrops.borrowProduct(id: productID) ?? panic("not able to borrow specified product")
 			product.details.setEndTime(endTime: endTime)
 			emit ProductUpdated(productID: productID, details: product.getDetails(), field: "endTime")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(productID: UInt64, payment: @{FungibleToken.Vault}, vaultType: Type, userID: String){ 
 			let product = ZeedzDrops.borrowProduct(id: productID) ?? panic("not able to borrow specified product")
 			product.purchase(payment: <-payment, vaultType: vaultType, userID: userID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithDiscount(productID: UInt64, payment: @{FungibleToken.Vault}, discount: UFix64, vaultType: Type, userID: String){ 
 			let product = ZeedzDrops.borrowProduct(id: productID) ?? panic("not able to borrow specified product")
 			product.purchaseWithDiscount(payment: <-payment, discount: discount, productID: productID, vaultType: vaultType, userID: userID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSaleCutRequirement(requirements: [SaleCutRequirement], vaultType: Type){ 
 			var totalRatio: UFix64 = 0.0
 			for requirement in requirements{ 
@@ -416,7 +435,7 @@ contract ZeedzDrops{
 			ZeedzDrops.saleCutRequirements[vaultType.identifier] = requirements
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrices(productID: UInt64, prices:{ String: UFix64}){ 
 			let product = ZeedzDrops.borrowProduct(id: productID) ?? panic("not able to borrow specified product")
 			product.details.setPrices(prices: prices)
@@ -427,7 +446,7 @@ contract ZeedzDrops{
 	//
 	// Returns the current sale cut requirements
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSaleCutRequirements():{ String: [SaleCutRequirement]}{ 
 		return self.saleCutRequirements
 	}
@@ -435,7 +454,7 @@ contract ZeedzDrops{
 	//
 	// Returns all of the current product ids
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllProductIDs(): [UInt64]?{ 
 		return self.products.keys
 	}
@@ -443,7 +462,7 @@ contract ZeedzDrops{
 	//
 	// Returns a reference to a product which can be used to access the product's details
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowProduct(id: UInt64): &ZeedzDrops.Product?{ 
 		return (&self.products[id] as &ZeedzDrops.Product?)!
 	}

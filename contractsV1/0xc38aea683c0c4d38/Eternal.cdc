@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	This contract is mostly copied from the "TopShot" contract except with
 	names changed.
 */
@@ -269,7 +283,7 @@ contract Eternal: NonFungibleToken{
 		// The Set needs to be not locked
 		// The Play can't have already been added to the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlay(playID: UInt32){ 
 			pre{ 
 				Eternal.playDatas[playID] != nil:
@@ -296,7 +310,7 @@ contract Eternal: NonFungibleToken{
 		// Parameters: playIDs: The IDs of the Plays that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlays(playIDs: [UInt32]){ 
 			for play in playIDs{ 
 				self.addPlay(playID: play)
@@ -310,7 +324,7 @@ contract Eternal: NonFungibleToken{
 		// Pre-Conditions:
 		// The Play is part of the Set and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retirePlay(playID: UInt32){ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -325,7 +339,7 @@ contract Eternal: NonFungibleToken{
 		// retireAll retires all the plays in the Set
 		// Afterwards, none of the retired Plays will be able to mint new Moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for play in self.plays{ 
 				self.retirePlay(playID: play)
@@ -336,7 +350,7 @@ contract Eternal: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -353,7 +367,7 @@ contract Eternal: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintMoment(playID: UInt32): @NFT{ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -382,7 +396,7 @@ contract Eternal: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Moments that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintMoment(playID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -442,7 +456,7 @@ contract Eternal: NonFungibleToken{
 		
 		// If the Moment is destroyed, emit an event to indicate 
 		// to outside ovbservers that it has been destroyed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let influencer: String = Eternal.getPlayMetaDataByField(playID: self.data.playID, field: "Influencer") ?? ""
 			let title: String = Eternal.getPlayMetaDataByField(playID: self.data.playID, field: "Title") ?? ""
@@ -450,7 +464,7 @@ contract Eternal: NonFungibleToken{
 			return influencer.concat(" - ").concat(game).concat(" - ").concat(title)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let influencer: String = Eternal.getPlayMetaDataByField(playID: self.data.playID, field: "Influencer") ?? ""
 			let title: String = Eternal.getPlayMetaDataByField(playID: self.data.playID, field: "Title") ?? ""
@@ -502,7 +516,7 @@ contract Eternal: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mapPlayData(dict:{ String: AnyStruct}):{ String: AnyStruct}{ 
 			let playMetadata = Eternal.getPlayMetaData(playID: self.data.playID) ??{} 
 			for name in playMetadata.keys{ 
@@ -514,12 +528,12 @@ contract Eternal: NonFungibleToken{
 			return dict
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun thumbnail(): String{ 
 			return "https://eternal-zelos.s3.us-west-2.amazonaws.com/moment-thumbnails/".concat(self.id.toString()).concat(".png")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMomentURL(): String{ 
 			return "https://eternal.gg/moments/".concat(self.id.toString())
 		}
@@ -546,7 +560,7 @@ contract Eternal: NonFungibleToken{
 		//
 		// Returns: the ID of the new Play object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPlay(metadata:{ String: String}): UInt32{ 
 			// Create the new Play
 			var newPlay = Play(metadata: metadata)
@@ -562,7 +576,7 @@ contract Eternal: NonFungibleToken{
 		//
 		// Parameters: name: The name of the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String){ 
 			// Create the new Set
 			var newSet <- create Set(name: name)
@@ -580,7 +594,7 @@ contract Eternal: NonFungibleToken{
 		// Returns: A reference to the Set with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				Eternal.sets[setID] != nil:
@@ -598,7 +612,7 @@ contract Eternal: NonFungibleToken{
 		//
 		// Returns: The new series number
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the Eternal series number
@@ -609,7 +623,7 @@ contract Eternal: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -621,18 +635,18 @@ contract Eternal: NonFungibleToken{
 	access(all)
 	resource interface MomentCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &Eternal.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -681,7 +695,7 @@ contract Eternal: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -700,7 +714,7 @@ contract Eternal: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Eternal NFT to make sure
 			// it is the correct type
@@ -724,7 +738,7 @@ contract Eternal: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -771,7 +785,7 @@ contract Eternal: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &Eternal.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -826,7 +840,7 @@ contract Eternal: NonFungibleToken{
 	// getAllPlays returns all the plays in Eternal
 	//
 	// Returns: An array of all the plays that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPlays(): [Eternal.Play]{ 
 		return Eternal.playDatas.values
 	}
@@ -836,7 +850,7 @@ contract Eternal: NonFungibleToken{
 	// Parameters: playID: The id of the Play that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaData(playID: UInt32):{ String: String}?{ 
 		return self.playDatas[playID]?.metadata
 	}
@@ -850,7 +864,7 @@ contract Eternal: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaDataByField(playID: UInt32, field: String): String?{ 
 		// Don't force a revert if the playID or field is invalid
 		if let play = Eternal.playDatas[playID]{ 
@@ -866,7 +880,7 @@ contract Eternal: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt32): String?{ 
 		// Don't force a revert if the setID is invalid
 		return Eternal.setDatas[setID]?.name
@@ -878,7 +892,7 @@ contract Eternal: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The series that the Set belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeries(setID: UInt32): UInt32?{ 
 		// Don't force a revert if the setID is invalid
 		return Eternal.setDatas[setID]?.series
@@ -890,7 +904,7 @@ contract Eternal: NonFungibleToken{
 	// Parameters: setName: The name of the Set that is being searched
 	//
 	// Returns: An array of the IDs of the Set if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDsByName(setName: String): [UInt32]?{ 
 		var setIDs: [UInt32] = []
 		
@@ -916,7 +930,7 @@ contract Eternal: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: An array of Play IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlaysInSet(setID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the setID is invalid
 		return Eternal.sets[setID]?.plays
@@ -931,7 +945,7 @@ contract Eternal: NonFungibleToken{
 	//			 playID: The id of the Play that is being searched
 	//
 	// Returns: Boolean indicating if the edition is retired or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setID: UInt32, playID: UInt32): Bool?{ 
 		// Don't force a revert if the set or play ID is invalid
 		// Remove the set from the dictionary to get its field
@@ -960,7 +974,7 @@ contract Eternal: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: Boolean indicating if the Set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt32): Bool?{ 
 		// Don't force a revert if the setID is invalid
 		return Eternal.sets[setID]?.locked
@@ -974,7 +988,7 @@ contract Eternal: NonFungibleToken{
 	//
 	// Returns: The total number of Moments 
 	//		  that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumMomentsInEdition(setID: UInt32, playID: UInt32): UInt32?{ 
 		// Don't force a revert if the Set or play ID is invalid
 		// Remove the Set from the dictionary to get its field

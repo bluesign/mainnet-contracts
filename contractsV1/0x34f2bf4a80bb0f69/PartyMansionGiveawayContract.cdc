@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 *  SPDX-License-Identifier: GPL-3.0-only
 */
 
@@ -19,7 +33,7 @@ contract PartyMansionGiveawayContract{
 	access(all)
 	resource Admin{ 
 		// offerFreeDrinks
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addGiveawayCode(giveawayKey: String){ 
 			if PartyMansionGiveawayContract.giveaways.containsKey(giveawayKey){ 
 				panic("Giveaway code already known.")
@@ -29,7 +43,7 @@ contract PartyMansionGiveawayContract{
 	}
 	
 	// checkGiveawayCode
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkGiveawayCode(giveawayCode: String): Bool{ 
 		// Hash giveawayCode
 		let digest = HashAlgorithm.SHA3_256.hash(giveawayCode.decodeHex())
@@ -41,7 +55,7 @@ contract PartyMansionGiveawayContract{
 	}
 	
 	// removeGiveawayCode
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeGiveawayCode(giveawayCode: String){ 
 		// Hash giveawayCode
 		let digest = HashAlgorithm.SHA3_256.hash(giveawayCode.decodeHex())

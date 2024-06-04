@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import Clock from "./Clock.cdc"
 
@@ -118,7 +132,7 @@ contract Teleport{
 	// Teleport things
 	/// ===================================================================================
 	//Teleport client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTeleportProxyClient(): @TeleportProxy{ 
 		return <-create TeleportProxy()
 	}
@@ -126,8 +140,8 @@ contract Teleport{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface TeleportProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Server>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&Teleport.Server>): Void
 	}
 	
 	//admin proxy with capability receiver
@@ -136,7 +150,7 @@ contract Teleport{
 		access(self)
 		var capability: Capability<&Server>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Server>){ 
 			pre{ 
 				cap.check():
@@ -147,7 +161,7 @@ contract Teleport{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun teleport(_ data: Data){ 
 			pre{ 
 				self.capability != nil:
@@ -202,7 +216,7 @@ contract Teleport{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openBox(_ data: GenesisBoxRegistry.Data){ 
 			pre{ 
 				self.capability != nil:
@@ -261,12 +275,12 @@ contract Teleport{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRemoteStatus(_ id: UInt64): Data?{ 
 		return self.registryRemote[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTeleporterStatus(_ id: UInt64): Data?{ 
 		if let remoteId = self.registryTeleporter[id]{ 
 			return self.getRemoteStatus(remoteId)
@@ -274,12 +288,12 @@ contract Teleport{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGenesisBoxStatus(_ id: UInt64): GenesisBoxRegistry.Data?{ 
 		return GenesisBoxRegistry.getGenesisBoxStatus(id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isValid(remoteId: UInt64, teleporterId: UInt64): Bool{ 
 		if let checkRemoteId = self.registryTeleporter[teleporterId]{ 
 			return remoteId == checkRemoteId
@@ -369,17 +383,17 @@ contract Teleport{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAllowed(remoteId: UInt64, teleporterId: UInt64): AllowedStatus{ 
 		return AllowedStatus(remoteId: remoteId, teleporterId: teleporterId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isTrusted(flow: Address, ethereum: String): TrustStatus{ 
 		return TrustStatus(flow: flow, ethereum: ethereum)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isGenesisBoxAllowed(_ genesisBoxId: UInt64): GenesisBoxRegistry.AllowedStatus{ 
 		return GenesisBoxRegistry.AllowedStatus(genesisBoxId)
 	}

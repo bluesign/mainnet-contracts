@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Contract for Pinnacle NFTs and metadata
 	Author: Loic Lesavre loic.lesavre@dapperlabs.com
 */
@@ -377,7 +391,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	///
 	/// The ID is an incrementing integer equal to the length of the series array.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getLatestSeriesID(): Int{ 
 		return Pinnacle.series.length
 	}
@@ -385,7 +399,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	/// Return a Series struct containing the data of the Series with the given ID, if it exists in the
 	/// contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSeries(id: Int): Series?{ 
 		pre{ 
 			id > 0:
@@ -396,7 +410,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return all Series in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeries(): [Series]{ 
 		return Pinnacle.series
 	}
@@ -404,7 +418,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	/// Return a Series struct containing the data of the Series with the given name, if it exists in the
 	/// contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesByName(_ name: String): Series?{ 
 		if let id = Pinnacle.seriesIDsByName[name]{ 
 			return Pinnacle.getSeries(id: id)
@@ -414,21 +428,21 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return the ID of the Series with the given name, if it exists in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesIDByName(_ name: String): Int?{ 
 		return Pinnacle.seriesIDsByName[name]
 	}
 	
 	/// Allow iterating over Series names in the contract without allocating an array
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun forEachSeriesName(_ function: fun (String): Bool){ 
 		Pinnacle.seriesIDsByName.forEachKey(function)
 	}
 	
 	/// Return the contract's seriesIDsByName dictionary
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeriesIDsByNames():{ String: Int}{ 
 		return Pinnacle.seriesIDsByName
 	}
@@ -558,7 +572,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return this Set's shapeNames dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getShapeNames():{ String: Bool}{ 
 			return self.shapeNames
 		}
@@ -568,14 +582,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	///
 	/// The ID is an incrementing integer equal to the length of the sets array.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getLatestSetID(): Int{ 
 		return Pinnacle.sets.length
 	}
 	
 	/// Return a Set struct containing the data of the Set with the given ID, if it exists in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSet(id: Int): Set?{ 
 		pre{ 
 			id > 0:
@@ -586,14 +600,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return all Sets in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets(): [Set]{ 
 		return Pinnacle.sets
 	}
 	
 	/// Return a Set struct containing the data of the Set with the given name, if it exists in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetByName(_ name: String): Set?{ 
 		if let id = Pinnacle.setIDsByName[name]{ 
 			return Pinnacle.getSet(id: id)
@@ -603,21 +617,21 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return the ID of the Set with the given name, if it exists in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDByName(_ name: String): Int?{ 
 		return Pinnacle.setIDsByName[name]
 	}
 	
 	/// Allow iterating over Set names in the contract without allocating an array
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun forEachSetName(_ function: fun (String): Bool){ 
 		Pinnacle.setIDsByName.forEachKey(function)
 	}
 	
 	/// Return the contract's setIDsByName dictionary
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSetIDsByNames():{ String: Int}{ 
 		return Pinnacle.setIDsByName
 	}
@@ -779,14 +793,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return this Shape's metadata dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
 		
 		/// Return this Shape's variantPrintingPairsInEditions dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVariantPrintingPairsInEditions():{ String: UInt64}{ 
 			return self.variantPrintingPairsInEditions
 		}
@@ -796,14 +810,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	///
 	/// The ID is an incrementing integer equal to the length of the shapes array.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getLatestShapeID(): Int{ 
 		return Pinnacle.shapes.length
 	}
 	
 	/// Return a Shape struct containing the data of the Shape with the given ID, if it exists in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getShape(id: Int): Shape?{ 
 		pre{ 
 			id > 0:
@@ -814,7 +828,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return all Shapes in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllShapes(): [Shape]{ 
 		return Pinnacle.shapes
 	}
@@ -937,7 +951,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Check if this Edition's max mint size has been reached
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isMaxEditionMintSizeReached(): Bool{ 
 			return self.numberMinted == self.maxMintSize
 		}
@@ -1037,7 +1051,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return this Edition's traits dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits():{ String: AnyStruct}{ 
 			return self.traits
 		}
@@ -1047,7 +1061,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	///
 	/// The ID is an incrementing integer equal to the length of the editions array.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getLatestEditionID(): Int{ 
 		return Pinnacle.editions.length
 	}
@@ -1055,7 +1069,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	/// Return an Edition struct containing the data of the Edition with the given ID, if it exists in the
 	/// contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getEdition(id: Int): Edition?{ 
 		pre{ 
 			id > 0:
@@ -1066,7 +1080,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return all Editions in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllEditions(): [Edition]{ 
 		return Pinnacle.editions
 	}
@@ -1155,7 +1169,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	///
 	/// The ID is an incrementing integer equal to the length of the editionTypes array.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getLatestEditionTypeID(): Int{ 
 		return Pinnacle.editionTypes.length
 	}
@@ -1163,7 +1177,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	/// Return an EditionType struct containing the data of the EditionType with the given ID, if it exists
 	/// in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getEditionType(id: Int): EditionType?{ 
 		pre{ 
 			id > 0:
@@ -1174,7 +1188,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return all Edition Types in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllEditionTypes(): [EditionType]{ 
 		return Pinnacle.editionTypes
 	}
@@ -1182,7 +1196,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	/// Return an EditionType struct containing the data of the EditionType with the given name, if it exists
 	/// in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getEditionTypeByName(_ name: String): EditionType?{ 
 		if let id = Pinnacle.editionTypeIDsByName[name]{ 
 			return Pinnacle.getEditionType(id: id)
@@ -1192,7 +1206,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return the ID of the Edition Type with the given name, if it exists in the contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionTypeIDByName(_ name: String): Int?{ 
 		return Pinnacle.editionTypeIDsByName[name]
 	}
@@ -1247,7 +1261,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return this Inscription's extension dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtension():{ String: AnyStruct}{ 
 			return self.extension
 		}
@@ -1325,7 +1339,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		///
 		/// Return this NFT's maturity date if it is a Maturing Edition NFT, nil otherwise
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMaturityDate(): UInt64?{ 
 			let edition = Pinnacle.getEdition(id: self.editionID)!
 			return edition.maturationPeriod != nil ? edition.creationDate + edition.maturationPeriod! : nil
@@ -1333,7 +1347,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return if this NFT's is locked by maturity date. 
 		/// Return true if the current block timestamp is less than the lock expiry, false otherwise.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLocked(): Bool{ 
 			if let maturityDate = self.getMaturityDate(){ 
 				return maturityDate > UInt64(getCurrentBlock().timestamp)
@@ -1343,7 +1357,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return this NFT's inscriptions limit
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getInscriptionsLimit(): Int{ 
 			return Pinnacle.inscriptionsLimits[self.id] ?? 100
 		}
@@ -1469,7 +1483,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		///
 		/// The ID is an incrementing integer equal to the length of the inscriptions array.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLatestInscriptionID(): Int{ 
 			return self.inscriptions.length
 		}
@@ -1477,7 +1491,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// Return an Inscription struct containing the data of the Inscription with the given ID, if it
 		/// exists in the NFT
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getInscription(id: Int): Inscription?{ 
 			pre{ 
 				id > 0:
@@ -1488,7 +1502,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return all Inscriptions in the NFT
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllInscriptions(): [Inscription]{ 
 			return self.inscriptions
 		}
@@ -1496,7 +1510,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// Return an Inscription struct containing the data of the Inscription with the given address if it
 		/// exists in the NFT
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getInscriptionByAddress(_ address: Address): Inscription?{ 
 			if let id = self.inscriptionIDsByAddress[address]{ 
 				return self.getInscription(id: id)
@@ -1506,21 +1520,21 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return the ID of the Inscription with the given address, if it exists in the NFT
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInscriptionIDsByAddress(_ address: Address): Int?{ 
 			return self.inscriptionIDsByAddress[address]
 		}
 		
 		/// Return this NFT's inscriptionIDsByAddress dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllInscriptionIDsByAddresses():{ Address: Int}{ 
 			return self.inscriptionIDsByAddress
 		}
 		
 		/// Return this NFT's extension dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtension():{ String: AnyStruct}{ 
 			return self.extension
 		}
@@ -1565,21 +1579,21 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Resolve this NFT's Display view
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplayView(): MetadataViews.Display{ 
 			return MetadataViews.Display(name: self.getName(), description: self.getDescription(), thumbnail: self.getThumbnailPath())
 		}
 		
 		/// Resolve this NFT's ExternalURL view
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveExternalURLView(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("https://disneypinnacle.com")
 		}
 		
 		/// Resolve this NFT's Traits view
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveTraitsView(): MetadataViews.Traits{ 
 			// Retrieve this NFT's parent Edition, Shape, Set, and Series data
 			let edition = Pinnacle.getEdition(id: self.editionID)!
@@ -1614,14 +1628,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Resolve this NFT's Medias view
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveMediasView(): MetadataViews.Medias{ 
 			return MetadataViews.Medias([MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://assets.disneypinnacle.com/on-chain/pinnacle.jpg"), mediaType: "image/jpg")])
 		}
 		
 		/// Resolve this NFT's Editions view
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveEditionsView(): MetadataViews.Editions{ 
 			let edition = Pinnacle.getEdition(id: self.editionID)!
 			let shape = Pinnacle.getShape(id: edition.shapeID)!
@@ -1634,14 +1648,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Resolve this NFT's Serial view if it is a Limited Edition NFT - return nil otherwise
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveSerialView(): MetadataViews.Serial?{ 
 			return (Pinnacle.getEditionType(id: (Pinnacle.getEdition(id: self.editionID)!).editionTypeID)!).isLimited ? MetadataViews.Serial(self.serialNumber!) : nil
 		}
 		
 		/// Resolve this NFT's Royalties view
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveRoyaltiesView(): MetadataViews.Royalties{ 
 			let royaltyReceiver: Capability<&{FungibleToken.Receiver}> = getAccount(Pinnacle.royaltyAddress).capabilities.get<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath())!
 			return MetadataViews.Royalties([MetadataViews.Royalty(receiver: royaltyReceiver, cut: 0.05, description: "placeholder_royalty_description")])
@@ -1649,7 +1663,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return this NFT's name
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			// Retrieve this NFT's parent Edition, Shape, and Set data
 			let edition = Pinnacle.getEdition(id: self.editionID)!
@@ -1669,7 +1683,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// Admin's approval to be updated (see the updateNFTInscriptionNote function in the Collection
 		/// resource).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			var notes = ""
 			for inscription in self.inscriptions{ 
@@ -1690,35 +1704,35 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Return this NFT's thumbnail path
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnailPath(): MetadataViews.HTTPFile{ 
 			return MetadataViews.HTTPFile(url: "https://assets.disneypinnacle.com/on-chain/pinnacle.jpg")
 		}
 		
 		/// Return an asset path
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetPath(): String{ 
 			return "placeholder_pinnacle_base_asset_path"
 		}
 		
 		/// Return an image path
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImagePath(): String{ 
 			return "placeholder_image_path"
 		}
 		
 		/// Return a video path
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideoPath(): String{ 
 			return "placeholder_video_path"
 		}
 		
 		/// Return a Pin path
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPinPath(): String{ 
 			return "placeholder_pinnacle_pin_path"
 		}
@@ -1737,21 +1751,21 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface PinNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowNFTSafe(id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPinNFT(id: UInt64): &Pinnacle.NFT?
 	}
 	
@@ -1793,7 +1807,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Withdraw the tokens with given IDs and returns them as a Collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create an empty Collection
 			var batchCollection <- create Collection()
@@ -1808,7 +1822,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// Deposit an NFT into this Collection
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Pinnacle.NFT
 			let id: UInt64 = token.id
 			// Add the new token to the dictionary which removes the old one
@@ -1819,7 +1833,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Deposit the NFTs from a Collection into this Collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Iterate through the NFT IDs in the Collection
 			for id in tokens.ownedNFTs.keys{ 
@@ -1832,7 +1846,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// Add an Inscription in the NFT with the specified ID for the current owner and return the
 		/// Inscription ID. The Inscription becomes permanent after the undo period has expired.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTInscription(id: UInt64): Int{ 
 			pre{ 
 				self.owner != nil:
@@ -1846,7 +1860,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This will fail if the undo period has expired or if another Inscription has been added after the
 		/// current owner's.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNFTInscription(id: UInt64){ 
 			(self.borrowPinNFT(id: id)!).removeCurrentOwnerInscription((self.owner!).address)
 		}
@@ -1860,7 +1874,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		///
 		/// This will fail if the Inscription was not previously added by the current owner.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTInscriptionNote(id: UInt64, note: String, adminRef: &Admin){ 
 			(self.borrowPinNFT(id: id)!).updateCurrentOwnerInscriptionNote(currentOwner: (self.owner!).address, note: note)
 		}
@@ -1870,14 +1884,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// If this NFT's XP has been previously activated, this will deactivate it. It will remain possible
 		/// to reactivate XP but XP will be reinitialized to 0.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleNFTXP(id: UInt64): UInt64?{ 
 			return (self.borrowPinNFT(id: id)!).toggleXP()
 		}
 		
 		/// Activate or deactivate the XP of all the NFTs in this Collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchToggleXP(_ activateAll: Bool){ 
 			// Iterate through the NFT IDs in the Collection
 			for id in self.ownedNFTs.keys{ 
@@ -1909,7 +1923,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		///
 		/// This function returns nil if the NFT does not exist in this Collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowNFTSafe(id: UInt64): &{NonFungibleToken.NFT}?{ 
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
@@ -1923,7 +1937,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// modifier so that they can only be called in the scope of this contract through the corresponding
 		/// wrapper functions defined in the Collection and Admin resources.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPinNFT(id: UInt64): &Pinnacle.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -1968,7 +1982,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return a Collection Public reference to the Collection owned by the account with the specified address
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCollectionPublic(owner: Address, _ publicPathID: String?): &Pinnacle.Collection?{ 
 		return getAccount(owner).capabilities.get_<YOUR_TYPE>(publicPathID != nil ? PublicPath(identifier: publicPathID!)! : Pinnacle.CollectionPublicPath).borrow<&Pinnacle.Collection>()
 	}
@@ -1980,7 +1994,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	///
 	access(all)
 	resource interface NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: Int, extension:{ String: String}?): @Pinnacle.NFT
 	}
 	
@@ -1995,7 +2009,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This is irreversible, it will not be possible to remove the Series once it is created
 		/// (no undo period).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSeries(name: String): Int{ 
 			pre{ 
 				name != "":
@@ -2029,14 +2043,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the Series to lock.
 		/// @param undo: A boolean to indicate whether to unlock the Series within the undo period.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockSeries(id: Int, undo: Bool){ 
 			undo ? (self.borrowSeries(id: id)!).unlock() : (self.borrowSeries(id: id)!).lock()
 		}
 		
 		/// Update a Series's name
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSeriesName(id: Int, name: String){ 
 			(self.borrowSeries(id: id)!).updateName(name)
 		}
@@ -2046,7 +2060,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This is irreversible, it will not be possible to remove the Set once it is created
 		/// (no undo period).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(renderID: String, name: String, editionType: String, seriesID: Int): Int{ 
 			pre{ 
 				// Check that renderID is valid
@@ -2095,14 +2109,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the Set to lock.
 		/// @param undo: A boolean to indicate whether to unlock the Set within the undo period.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockSet(id: Int, undo: Bool){ 
 			undo ? (self.borrowSet(id: id)!).unlock() : (self.borrowSet(id: id)!).lock()
 		}
 		
 		/// Update a Set's name
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetName(id: Int, name: String){ 
 			(self.borrowSet(id: id)!).updateName(name)
 		}
@@ -2112,7 +2126,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This is irreversible, it will not be possible to remove the Shape once it is created
 		/// (no undo period).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createShape(renderID: String, setID: Int, name: String, metadata:{ String: AnyStruct}): Int{ 
 			pre{ 
 				// Check that renderID is valid
@@ -2184,14 +2198,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the Shape to close.
 		/// @param undo: A boolean to indicate whether to reopen the Shape within the undo period.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeShape(id: Int, undo: Bool){ 
 			undo ? (self.borrowShape(id: id)!).reopen() : (self.borrowShape(id: id)!).close()
 		}
 		
 		/// Update a Series's name
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateShapeName(id: Int, name: String){ 
 			let shapeRef = self.borrowShape(id: id)!
 			shapeRef.updateName(name, self.borrowSet(id: shapeRef.setID)!)
@@ -2199,7 +2213,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Increment a Shape's current printing
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementShapeCurrentPrinting(id: Int): UInt64{ 
 			return (self.borrowShape(id: id)!).incrementCurrentPrinting()
 		}
@@ -2209,7 +2223,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This becomes irreversible once NFTs have been minted from the Edition or another Edition has been
 		/// created in the contract.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(renderID: String, shapeID: Int, variant: String?, description: String, isChaser: Bool, maxMintSize: UInt64?, maturationPeriod: UInt64?, traits:{ String: AnyStruct}): Int{ 
 			pre{ 
 				// Check that renderID is valid
@@ -2303,7 +2317,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// primary release sales. The ability to mint NFTs from the Edition is determined by the Edition's
 		/// number minted being less than the max mint size.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeEdition(id: Int){ 
 			(self.borrowEdition(id: id)!).close()
 		}
@@ -2313,7 +2327,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This will fail if NFTs have been minted from the Edition or the Edition is not the last one that
 		/// was created in the contract.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEdition(id: Int){ 
 			let editionRef = self.borrowEdition(id: id)!
 			assert(editionRef.numberMinted == 0 && id == Pinnacle.getLatestEditionID(), message: "Cannot remove an Edition that has minted NFTs and is not the last one created")
@@ -2326,21 +2340,21 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		///
 		/// This will fail if the Edition is a Limited Edition or if the undo period has expired.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reopenEdition(id: Int){ 
 			(self.borrowEdition(id: id)!).reopen()
 		}
 		
 		/// Update an Edition's description
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEditionDescription(id: Int, description: String){ 
 			(self.borrowEdition(id: id)!).updateDescription(description)
 		}
 		
 		/// Update an Edition's renderID
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEditionRenderID(id: Int, renderID: String){ 
 			(self.borrowEdition(id: id)!).updateRenderID(renderID)
 		}
@@ -2350,7 +2364,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This is irreversible, it will not be possible to remove the Edition Type once it is created
 		/// (no undo period).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEditionType(name: String, isLimited: Bool, isMaturing: Bool): Int{ 
 			pre{ 
 				name != "":
@@ -2394,7 +2408,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// automatically.
 		/// @param closeDependentShapes: Same purpose as the lockDependentSets param but for Shapes.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeEditionType(id: Int, lockDependentSets: Bool, closeDependentShapes: Bool):{ String: [Int]}{ 
 			let editionTypeRef = self.borrowEditionType(id: id)!
 			editionTypeRef.close()
@@ -2428,7 +2442,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// done separately using the lockSet and reopenShape functions with the undo flag set to true, if
 		/// the undo period has not expired.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reopenEditionType(id: Int){ 
 			(self.borrowEditionType(id: id)!).reopen()
 		}
@@ -2438,7 +2452,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// This is irreversible, it will not be possible to remove the Variant once it is inserted
 		/// (no undo period). Furthermore, Variants cannot be closed.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertVariant(name: String){ 
 			pre{ 
 				name != "":
@@ -2452,7 +2466,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Mint a Pin NFT in the Edition with the given ID and return it to the caller
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: Int, extension:{ String: String}?): @Pinnacle.NFT{ 
 			let pinNFT <- create NFT(editionID: editionID, extension: extension)
 			(self.borrowEdition(id: editionID)!).incrementNumberMinted()
@@ -2465,7 +2479,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// allow the Admin to decrement the Edition's number minted while burning an Open Edition NFT in an
 		/// Edition that has not been closed.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnOpenEditionNFT(_ nft: @{NonFungibleToken.NFT}){ 
 			let nft <- nft as! @Pinnacle.NFT
 			(			 // Decrement the number minted in the Edition. This will fail if the Edition is a Limited Edition.
@@ -2477,7 +2491,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// Set a limit on the number entries that can be added to the inscriptions of the NFT with the given
 		/// ID (default is 100)
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNFTInscriptionsLimit(nftID: UInt64, limit: Int, owner: Address, collectionPublicPathID: String?){ 
 			pre{ 
 				limit > 100:
@@ -2490,14 +2504,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		
 		/// Add XP to an NFT and return the NFT's new XP balance
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addXPtoNFT(nftID: UInt64, owner: Address, collectionPublicPathID: String?, value: UInt64): UInt64{ 
 			return ((Pinnacle.borrowCollectionPublic(owner: owner, collectionPublicPathID)!).borrowPinNFT(id: nftID)!).addXP(value)
 		}
 		
 		/// Remove XP from an NFT and return the NFT's new XP balance
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun subtractXPfromNFT(nftID: UInt64, owner: Address, collectionPublicPathID: String?, value: UInt64): UInt64{ 
 			return ((Pinnacle.borrowCollectionPublic(owner: owner, collectionPublicPathID)!).borrowPinNFT(id: nftID)!).subtractXP(value)
 		}
@@ -2505,35 +2519,35 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 		/// When conducting primary release sales, emit a "Purchased" event to facilitate purchase tracking
 		/// off-chain. The parameters are passed through to the event and are not used by the contract.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emitPurchasedEvent(purchaseIntentID: String, buyerAddress: Address, countPurchased: UInt64, totalSalePrice: UFix64){ 
 			emit Purchased(purchaseIntentID: purchaseIntentID, buyerAddress: buyerAddress, countPurchased: countPurchased, totalSalePrice: totalSalePrice)
 		}
 		
 		/// Create an Admin resource and return it to the caller
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		/// Set the contract's royalty address
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyAddress(_ address: Address){ 
 			Pinnacle.royaltyAddress = address
 		}
 		
 		/// Set the contract's end user license URL
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEndUserLicenseURL(_ url: String){ 
 			Pinnacle.endUserLicenseURL = url
 		}
 		
 		/// Set an entry in the contract's extension dictionary
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExtensionEntry(_ key: String, _ value: AnyStruct, _ overwrite: Bool){ 
 			pre{ 
 				key != "":
@@ -2552,49 +2566,49 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	//------------------------------------------------------------
 	/// Return the contract's variants dictionary
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllVariants():{ String: Bool}{ 
 		return Pinnacle.variants
 	}
 	
 	/// Allow iterating over Variants in the contract without allocating an array
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun forEachVariant(_ function: fun (String): Bool){ 
 		Pinnacle.variants.forEachKey(function)
 	}
 	
 	/// Return this contract's extension dictionary
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExtension():{ String: AnyStruct}{ 
 		return Pinnacle.extension
 	}
 	
 	/// Return a public path that is scoped to this contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(suffix: String): PublicPath{ 
 		return PublicPath(identifier: "Pinnacle".concat(suffix))!
 	}
 	
 	/// Return a private path that is scoped to this contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(suffix: String): PrivatePath{ 
 		return PrivatePath(identifier: "Pinnacle".concat(suffix))!
 	}
 	
 	/// Return a storage path that is scoped to this contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(suffix: String): StoragePath{ 
 		return StoragePath(identifier: "Pinnacle".concat(suffix))!
 	}
 	
 	/// Return a Collection name with an optional bucket suffix
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeCollectionName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Collection_".concat(bucketName)
@@ -2604,7 +2618,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Return a queue name with an optional bucket suffix
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeQueueName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Queue_".concat(bucketName)
@@ -2618,7 +2632,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	/// 0x1d7e57aa55817448 is the address of the known NonFungibleToken contract standard on mainnet.
 	/// This is a workaround for the fact that there is no way to check the network ID in Cadence yet.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isContractDeployedToMainnet(): Bool{ 
 		return Type<{NonFungibleToken}>().identifier == "A.1d7e57aa55817448.NonFungibleToken"
 	}
@@ -2628,14 +2642,14 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	//------------------------------------------------------------
 	/// Return the metadata view types available for this contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}
 	
 	/// Resolve this contract's metadata views
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		post{ 
 			result == nil || (result!).getType() == view:
@@ -2652,7 +2666,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Resolve this contract's NFTCollectionData view
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveNFTCollectionDataView(): MetadataViews.NFTCollectionData{ 
 		return MetadataViews.NFTCollectionData(storagePath: Pinnacle.CollectionStoragePath, publicPath: Pinnacle.CollectionPublicPath, publicCollection: Type<&Pinnacle.Collection>(), publicLinkedType: Type<&Pinnacle.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 				return <-Pinnacle.createEmptyCollection(nftType: Type<@Pinnacle.Collection>())
@@ -2661,7 +2675,7 @@ contract Pinnacle: NonFungibleToken, ViewResolver{
 	
 	/// Resolve this contract's NFTCollectionDisplay view
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveNFTCollectionDisplayView(): MetadataViews.NFTCollectionDisplay{ 
 		let squareImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://assets.disneypinnacle.com/on-chain/pinnacle.jpg"), mediaType: "image/jpg")
 		let bannerImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://assets.disneypinnacle.com/on-chain/pinnacle-banner.jpeg"), mediaType: "image/jpeg")

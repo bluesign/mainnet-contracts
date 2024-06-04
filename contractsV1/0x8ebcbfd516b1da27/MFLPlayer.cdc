@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -196,7 +210,7 @@ contract MFLPlayer: NonFungibleToken{
 		}
 		
 		// Withdraws multiple Players and returns them as a Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			
@@ -209,7 +223,7 @@ contract MFLPlayer: NonFungibleToken{
 		
 		// Takes a NFT and adds it to the collections dictionary and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MFLPlayer.NFT
 			let id: UInt64 = token.id
 			
@@ -265,7 +279,7 @@ contract MFLPlayer: NonFungibleToken{
 	}
 	
 	// Get data for a specific player ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPlayerData(id: UInt64): PlayerData?{ 
 		return self.playersDatas[id]
 	}
@@ -276,10 +290,10 @@ contract MFLPlayer: NonFungibleToken{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPlayer(id: UInt64, metadata:{ String: AnyStruct}, season: UInt32, image:{ MetadataViews.File}): @MFLPlayer.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePlayerMetadata(id: UInt64, metadata:{ String: AnyStruct})
 	}
 	
@@ -293,7 +307,7 @@ contract MFLPlayer: NonFungibleToken{
 		}
 		
 		// Mint a new Player and returns it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPlayer(id: UInt64, metadata:{ String: AnyStruct}, season: UInt32, image:{ MetadataViews.File}): @MFLPlayer.NFT{ 
 			pre{ 
 				MFLPlayer.getPlayerData(id: id) == nil:
@@ -305,7 +319,7 @@ contract MFLPlayer: NonFungibleToken{
 		}
 		
 		// Update Player Metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePlayerMetadata(id: UInt64, metadata:{ String: AnyStruct}){ 
 			let playerData = MFLPlayer.playersDatas[id] ?? panic("Data not found")
 			let updatedPlayerData = MFLPlayer.PlayerData(id: playerData.id, metadata: metadata, season: playerData.season, image: playerData.image)
@@ -313,7 +327,7 @@ contract MFLPlayer: NonFungibleToken{
 			emit Updated(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPlayerAdmin(): @PlayerAdmin{ 
 			return <-create PlayerAdmin()
 		}

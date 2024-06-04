@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Author: Jude Zhu jude.zhu@dapperlabs.com
 */
 
@@ -149,7 +163,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		
 		// Close this edition
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			pre{ 
 				self.active:
@@ -162,7 +176,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		// Mint a Seasonal NFT in this edition, with the given minting mintingDate.
 		// Note that this will panic if the max mint size has already been reached.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(): @AllDaySeasonal.NFT{ 
 			pre{ 
 				self.active:
@@ -191,7 +205,7 @@ contract AllDaySeasonal: NonFungibleToken{
 	
 	// Get the publicly available data for a Edition
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionData(id: UInt64): AllDaySeasonal.EditionData{ 
 		pre{ 
 			AllDaySeasonal.editionByID[id] != nil:
@@ -243,18 +257,18 @@ contract AllDaySeasonal: NonFungibleToken{
 	access(all)
 	resource interface AllDaySeasonalCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAllDaySeasonal(id: UInt64): &AllDaySeasonal.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -288,7 +302,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @AllDaySeasonal.NFT
 			let id: UInt64 = token.id
 			
@@ -301,7 +315,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -335,7 +349,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		
 		// borrowAllDaySeasonal gets a reference to an AllDaySeasonal in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAllDaySeasonal(id: UInt64): &AllDaySeasonal.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				if let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?{ 
@@ -388,7 +402,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		// Mint a single NFT
 		// The Edition for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @AllDaySeasonal.NFT
 	}
 	
@@ -399,7 +413,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		
 		// Borrow an Edition
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEdition(id: UInt64): &AllDaySeasonal.Edition{ 
 			pre{ 
 				AllDaySeasonal.editionByID[id] != nil:
@@ -410,7 +424,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		
 		// Create a Edition 
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(metadata:{ String: String}): UInt64{ 
 			// Create and store the new edition
 			let edition <- create AllDaySeasonal.Edition(metadata: metadata)
@@ -423,7 +437,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		
 		// Close an Edition
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeEdition(id: UInt64): UInt64{ 
 			if let edition = &AllDaySeasonal.editionByID[id] as &AllDaySeasonal.Edition?{ 
 				edition.close()
@@ -435,7 +449,7 @@ contract AllDaySeasonal: NonFungibleToken{
 		// Mint a single NFT
 		// The Edition for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @AllDaySeasonal.NFT{ 
 			pre{ 
 				// Make sure the edition we are creating this NFT in exists

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -71,16 +85,16 @@ contract RedSquirrelNFT: NonFungibleToken{
 	access(all)
 	resource interface RedSquirrelNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowRedSquirrelNFT(id: UInt64): &RedSquirrelNFT.NFT?{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowRedSquirrelNFT(id: UInt64): &RedSquirrelNFT.NFT{ 
 			post{ 
 				result == nil || result?.id == id:
 					"Cannot borrow RedSquirrelNFT reference: the ID of the returned reference is incorrect"
@@ -110,7 +124,7 @@ contract RedSquirrelNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @RedSquirrelNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -144,7 +158,7 @@ contract RedSquirrelNFT: NonFungibleToken{
 		//	 }
 		//	 return nil
 		// }
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRedSquirrelNFT(id: UInt64): &NFT{ 
 			let refNFT = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? ?? panic("something1")
 			return refNFT as! &NFT
@@ -197,7 +211,7 @@ contract RedSquirrelNFT: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String){ 
 			
 			// create a new NFT

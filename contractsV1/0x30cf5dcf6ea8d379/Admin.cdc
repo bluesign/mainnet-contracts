@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -51,7 +65,7 @@ contract Admin{
 	// Admin things
 	/// ===================================================================================
 	//Admin client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxyClient(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -59,8 +73,8 @@ contract Admin{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface AdminProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Server>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&Admin.Server>): Void
 	}
 	
 	//admin proxy with capability receiver 
@@ -69,7 +83,7 @@ contract Admin{
 		access(self)
 		var capability: Capability<&Server>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Server>){ 
 			pre{ 
 				cap.check():
@@ -80,7 +94,7 @@ contract Admin{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerGame(_ game: AeraNFT.Game){ 
 			pre{ 
 				self.capability != nil:
@@ -89,7 +103,7 @@ contract Admin{
 			AeraNFT.addGame(game)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerPlayMetadata(_ play: AeraNFT.PlayMetadata){ 
 			pre{ 
 				self.capability != nil:
@@ -98,7 +112,7 @@ contract Admin{
 			AeraNFT.addPlayMetadata(play)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerLicense(_ license: AeraNFT.License){ 
 			pre{ 
 				self.capability != nil:
@@ -107,7 +121,7 @@ contract Admin{
 			AeraNFT.addLicense(license)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerPlayer(_ player: AeraNFT.Player){ 
 			pre{ 
 				self.capability != nil:
@@ -116,7 +130,7 @@ contract Admin{
 			AeraNFT.addPlayer(player)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAeraWithBadges(recipient: &{NonFungibleToken.Receiver}, edition: UInt64, play: AeraNFT.Play, badges: [AeraNFT.Badge]){ 
 			pre{ 
 				self.capability != nil:
@@ -125,7 +139,7 @@ contract Admin{
 			AeraNFT.mintNFT(recipient: recipient, edition: edition, play: play, badges: badges)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAera(recipient: &{NonFungibleToken.Receiver}, edition: UInt64, play: AeraNFT.Play){ 
 			pre{ 
 				self.capability != nil:
@@ -134,7 +148,7 @@ contract Admin{
 			AeraNFT.mintNFT(recipient: recipient, edition: edition, play: play, badges: [])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun advanceClock(_ time: UFix64){ 
 			pre{ 
 				self.capability != nil:
@@ -145,7 +159,7 @@ contract Admin{
 			Clock.tick(time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun debug(_ value: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -154,7 +168,7 @@ contract Admin{
 			Debug.enable(value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPacksLeftForType(_ type: UInt64, amount: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -164,7 +178,7 @@ contract Admin{
 			packs.setPacksLeftForType(type, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerPackMetadata(typeId: UInt64, metadata: AeraPack.Metadata, items: Int, tier: String, receiverPath: String){ 
 			pre{ 
 				self.capability != nil:
@@ -176,7 +190,7 @@ contract Admin{
 			AeraPackExtraData.registerReceiverPathForPackType(typeId: typeId, receiverPath: receiverPath)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintPacks(typeId: UInt64, hashes: [String]){ 
 			pre{ 
 				self.capability != nil:
@@ -188,7 +202,7 @@ contract Admin{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requeue(packId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -198,7 +212,7 @@ contract Admin{
 			cap.requeue(packId: packId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfill(packId: UInt64, rewardIds: [UInt64], salt: String){ 
 			pre{ 
 				self.capability != nil:
@@ -207,7 +221,7 @@ contract Admin{
 			AeraPack.fulfill(packId: packId, rewardIds: rewardIds, salt: salt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(fromPath: String, toPath: String, ids: [UInt64]){ 
 			pre{ 
 				self.capability != nil:
@@ -219,7 +233,7 @@ contract Admin{
 			self.sendNFT(storagePath: fromPath, recipient: collection, ids: ids)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sendNFT(storagePath: String, recipient: &{NonFungibleToken.Receiver}, ids: [UInt64]){ 
 			pre{ 
 				self.capability != nil:
@@ -232,7 +246,7 @@ contract Admin{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuthPointer(pathIdentifier: String, id: UInt64): FindViews.AuthNFTPointer{ 
 			pre{ 
 				self.capability != nil:
@@ -248,7 +262,7 @@ contract Admin{
 			return FindViews.AuthNFTPointer(cap: cap!, id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProviderCapForPath(path: PrivatePath): Capability<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>{ 
 			pre{ 
 				self.capability != nil:
@@ -257,7 +271,7 @@ contract Admin{
 			return Admin.account.capabilities.get<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>(path)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProviderCap(): Capability<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>{ 
 			pre{ 
 				self.capability != nil:
@@ -266,7 +280,7 @@ contract Admin{
 			return Admin.account.capabilities.get<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>(AeraNFT.CollectionPrivatePath)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(storagePath: String, ids: [UInt64]){ 
 			pre{ 
 				self.capability != nil:
@@ -281,7 +295,7 @@ contract Admin{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnNFT(storagePath: String, ids: [UInt64]){ 
 			pre{ 
 				self.capability != nil:
@@ -294,7 +308,7 @@ contract Admin{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerPanelTemplate(panel: AeraPanels.PanelTemplate, mint_count: UInt64?){ 
 			pre{ 
 				self.capability != nil:
@@ -303,7 +317,7 @@ contract Admin{
 			AeraPanels.addPanelTemplate(panel: panel, mint_count: mint_count)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerChapterTemplate(_ chapter: AeraPanels.ChapterTemplate){ 
 			pre{ 
 				self.capability != nil:
@@ -312,7 +326,7 @@ contract Admin{
 			AeraPanels.addChapterTemplate(chapter)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAeraPanel(recipient: &{NonFungibleToken.Receiver}, edition: UInt64, panelTemplateId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -321,7 +335,7 @@ contract Admin{
 			AeraPanels.mintNFT(recipient: recipient, edition: edition, panelTemplateId: panelTemplateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerRewardTemplate(reward: AeraRewards.RewardTemplate, maxQuantity: UInt64?){ 
 			pre{ 
 				self.capability != nil:
@@ -330,7 +344,7 @@ contract Admin{
 			AeraRewards.addRewardTemplate(reward: reward, maxQuantity: maxQuantity)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAeraReward(recipient: &{NonFungibleToken.Receiver}, rewardTemplateId: UInt64, rewardFields:{ UInt64:{ String: String}}): UInt64{ 
 			pre{ 
 				self.capability != nil:

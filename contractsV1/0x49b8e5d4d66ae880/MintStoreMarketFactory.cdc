@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: 
 
 	authors: Matthew Balazsi, Alex Béliveau, Joseph Djenandji and Francis Ouellet
@@ -54,7 +68,7 @@ contract MintStoreMarketFactory{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @FUSD.Vault): @MintStoreItem.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -62,13 +76,13 @@ contract MintStoreMarketFactory{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMintStoreItem(id: UInt64): &MintStoreItem.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -137,7 +151,7 @@ contract MintStoreMarketFactory{
 		//
 		// Parameters: tokenID: The id of the NFT to be put up for sale
 		//			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenID: UInt64, price: UFix64){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowMintStoreItem(id: tokenID) != nil:
@@ -164,7 +178,7 @@ contract MintStoreMarketFactory{
 		//
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -190,7 +204,7 @@ contract MintStoreMarketFactory{
 		//			 buyTokens: the fungible tokens that are used to buy the NFT
 		//
 		// Returns: @MintStoreItem.NFT: the purchased NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @FUSD.Vault): @MintStoreItem.NFT{ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowMintStoreItem(id: tokenID) != nil && self.prices[tokenID] != nil:
@@ -240,13 +254,13 @@ contract MintStoreMarketFactory{
 		// Parameters: tokenID: The ID of the NFT whose price to get
 		//
 		// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.prices.keys
 		}
@@ -258,7 +272,7 @@ contract MintStoreMarketFactory{
 		//
 		// Returns: &MintStoreItem.NFT? Optional reference to a MintStoreItem for sale 
 		//						so that the caller can read its data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMintStoreItem(id: UInt64): &MintStoreItem.NFT?{ 
 			if self.prices[id] != nil{ 
 				let ref = (self.ownerCollection.borrow()!).borrowMintStoreItem(id: id)
@@ -295,19 +309,19 @@ contract MintStoreMarketFactory{
 		access(account)
 		fun isItemValidMerchant(item: &MintStoreItem.NFT): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMerchantIDs(): [UInt32]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalRoyaltyRate(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyNames(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyRate(royaltyName: String): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleCollection(
 			ownerCollection: Capability<&MintStoreItem.Collection>,
 			ownerCapability: Capability<&FUSD.Vault>,
@@ -356,7 +370,7 @@ contract MintStoreMarketFactory{
 		}
 		
 		// Allow a merchant to operate in the market
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowMerchant(merchantID: UInt32){ 
 			pre{ 
 				self.istInitializationValid()
@@ -365,7 +379,7 @@ contract MintStoreMarketFactory{
 			emit MarketMerchantAdded(marketID: self.marketID, merchantID: merchantID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMerchantAccess(merchantID: UInt32){ 
 			pre{ 
 				self.istInitializationValid()
@@ -374,7 +388,7 @@ contract MintStoreMarketFactory{
 			emit MarketMerchantRemoved(marketID: self.marketID, merchantID: merchantID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freezeMarket(){ 
 			pre{ 
 				self.istInitializationValid()
@@ -383,7 +397,7 @@ contract MintStoreMarketFactory{
 			emit MarketFrozen(marketID: self.marketID, marketAddress: self.marketAddress!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unFreezeMarket(){ 
 			pre{ 
 				self.istInitializationValid()
@@ -395,7 +409,7 @@ contract MintStoreMarketFactory{
 		// setSaleCollectionStoragePath changes the Market's sale collection storage path
 		//
 		// Parameters: storagePath: The new path to use for SaleCollectionStoragePath
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleCollectionStoragePath(storagePath: StoragePath){ 
 			self.SaleCollectionStoragePath = storagePath
 		}
@@ -403,20 +417,20 @@ contract MintStoreMarketFactory{
 		// setSaleCollectionPublicPath changes the Market's sale collection public path
 		//
 		// Parameters: publicPath: The new path to use for SaleCollectionPublicPath
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleCollectionPublicPath(publicPath: PublicPath){ 
 			self.SaleCollectionPublicPath = publicPath
 		}
 		
 		// setAddress changes the Market's address so it knows it when emitting events
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddress(address: Address){ 
 			self.marketAddress = address
 			emit MarketAddressChanged(marketID: self.marketID, marketAddress: address)
 		}
 		
 		// createCollection returns a new collection resource to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleCollection(ownerCollection: Capability<&MintStoreItem.Collection>, ownerCapability: Capability<&FUSD.Vault>, marketCapability: Capability<&{MintStoreMarketFactory.MarketPublic}>): @SaleCollection{ 
 			pre{ 
 				self.istInitializationValid()
@@ -430,7 +444,7 @@ contract MintStoreMarketFactory{
 		//			 wallet: the new capability for the recipient of the cut of the sale
 		//			 rate: the percentage of the sale that goes to that recipient
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRoyalty(name: String, wallet: Capability<&FUSD.Vault>, rate: UFix64){ 
 			pre{ 
 				self.istInitializationValid()
@@ -451,7 +465,7 @@ contract MintStoreMarketFactory{
 		//
 		// Parameters: name: the key of the recipient to remove
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRoyalty(name: String){ 
 			pre{ 
 				self.istInitializationValid()
@@ -467,7 +481,7 @@ contract MintStoreMarketFactory{
 		// Parameters: name: the key of the recipient to update
 		//			 rate: the new percentage of the sale that goes to that recipient
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyRate(name: String, rate: UFix64){ 
 			pre{ 
 				self.istInitializationValid()
@@ -495,12 +509,12 @@ contract MintStoreMarketFactory{
 		}
 		
 		// getMerchantIDs returns an array of the MerchantIDs that are allowed to operate for this market
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMerchantIDs(): [UInt32]{ 
 			return self.allowedMerchant.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalRoyaltyRate(): UFix64{ 
 			var totalRoyalty = 0.0
 			for key in self.royalties.keys{ 
@@ -510,12 +524,12 @@ contract MintStoreMarketFactory{
 			return totalRoyalty
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyNames(): [String]{ 
 			return self.royalties.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyRate(royaltyName: String): UFix64?{ 
 			return self.royalties[royaltyName]?.rate
 		}
@@ -547,7 +561,7 @@ contract MintStoreMarketFactory{
 		// createNewAdmin creates a new Admin resource
 		//
 		// Returns: @Admin: the created admin
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			let newID = MintStoreMarketFactory.nextAdminID
 			// Increment the ID so that it isn't used again
@@ -558,7 +572,7 @@ contract MintStoreMarketFactory{
 		// createNewMarket creates a new Market resource
 		//
 		// Returns: @Market: the created market
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMarket(): @Market{ 
 			let newID = MintStoreMarketFactory.nextMarketID
 			// Increment the ID so that it isn't used again

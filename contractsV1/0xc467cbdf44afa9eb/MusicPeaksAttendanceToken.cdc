@@ -1,4 +1,18 @@
-// MADE BY: Emerald City, Jacob Tucker
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// MADE BY: Emerald City, Jacob Tucker
 // This contract is for FLOAT, a proof of participation platform
 // on Flow. It is similar to POAP, but a lot, lot cooler. ;)
 // The main idea is that FLOATs are simply NFTs. They are minted from
@@ -174,7 +188,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Helper function to get the metadata of the event
 		// this MusicPeaksAttendanceToken is from.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getEventMetadata(): &FLOATEvent?{ 
 			if let events = self.eventsCap.borrow(){ 
 				return events.borrowPublicEventRef(eventId: self.eventId)
@@ -192,7 +206,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return supportedViews
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventExtraMetadata():{ String: AnyStruct}?{ 
 			if let _event = self.getEventMetadata(){ 
 				return _event.getExtraMetadata()
@@ -200,7 +214,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventImage(): String{ 
 			if let extraMetadata = self.getEventExtraMetadata(){ 
 				if let image = extraMetadata["eventImage"]{ 
@@ -269,22 +283,22 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		view fun borrowFLOAT(id: UInt64): &NFT?
+		access(TMP_ENTITLEMENT_OWNER)
+		view fun borrowFLOAT(id: UInt64): &MusicPeaksAttendanceToken.NFT?
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedIdsFromEvent(eventId: UInt64): [UInt64]
 	}
 	
@@ -305,7 +319,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Deposits a FLOAT to the collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let nft <- token as! @NFT
 			let id = nft.id
 			let eventId = nft.eventId
@@ -349,7 +363,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delete(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("You do not own this FLOAT in your collection")
 			let nft <- token as! @NFT
@@ -374,7 +388,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		}
 		
 		// Returns all the FLOATs ids
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
@@ -387,7 +401,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		// from `ownedNFTs` (not possible after June 2022 spork),
 		// but this makes sure the returned
 		// ids are all actually owned by this account.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedIdsFromEvent(eventId: UInt64): [UInt64]{ 
 			let answer: [UInt64] = []
 			if let idsInEvent = self.events[eventId]?.keys{ 
@@ -405,7 +419,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowFLOAT(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -489,31 +503,31 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		access(all)
 		let url: String
 		
-		access(all)
-		fun claim(recipient: &Collection, params:{ String: AnyStruct})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun claim(recipient: &MusicPeaksAttendanceToken.Collection, params:{ String: AnyStruct}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimed():{ Address: TokenIdentifier}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolders():{ UInt64: TokenIdentifier}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolder(serial: UInt64): TokenIdentifier?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraMetadata():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers():{ String: [{IVerifier}]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGroups(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getPrices():{ String: TokenInfo}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasClaimed(account: Address): TokenIdentifier?
 		
 		access(account)
@@ -594,14 +608,14 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		/***************** Setters for the Event Owner *****************/
 		// Toggles claiming on/off
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleClaimable(): Bool{ 
 			self.claimable = !self.claimable
 			return self.claimable
 		}
 		
 		// Toggles transferring on/off
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleTransferrable(): Bool{ 
 			self.transferrable = !self.transferrable
 			return self.transferrable
@@ -609,24 +623,24 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Updates the metadata in case you want
 		// to add something.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newExtraMetadata:{ String: AnyStruct}){ 
 			for key in newExtraMetadata.keys{ 
 				self.extraMetadata[key] = newExtraMetadata[key]
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun test_removeTimelockVerifier(){ 
 			self.verifiers.remove(key: "A.644ee69fccf4ab48.FLOATVerifiers.Timelock")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun test_removeVerifierById(verifierId: String){ 
 			self.verifiers.remove(key: verifierId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun test_appendVerifiers(verifiers: [{IVerifier}]){ 
 			for verifier in verifiers{ 
 				let identifier = verifier.getType().identifier
@@ -666,14 +680,14 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		/***************** Getters (all exposed to the public) *****************/
 		// Returns info about the FLOAT that this account claimed
 		// (if any)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasClaimed(account: Address): TokenIdentifier?{ 
 			return self.claimed[account]
 		}
 		
 		// This is a guarantee that the person owns the FLOAT
 		// with the passed in serial
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolder(serial: UInt64): TokenIdentifier?{ 
 			pre{ 
 				self.currentHolders[serial] != nil:
@@ -689,7 +703,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Returns an accurate dictionary of all the
 		// claimers
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimed():{ Address: TokenIdentifier}{ 
 			return self.claimed
 		}
@@ -699,24 +713,24 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		// resource from the public.
 		// Use `getCurrentHolder(serial: UInt64)` to truly
 		// verify if someone holds that serial.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolders():{ UInt64: TokenIdentifier}{ 
 			return self.currentHolders
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraMetadata():{ String: AnyStruct}{ 
 			return self.extraMetadata
 		}
 		
 		// Gets all the verifiers that will be used
 		// for claiming
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers():{ String: [{IVerifier}]}{ 
 			return self.verifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGroups(): [String]{ 
 			return self.groups.keys
 		}
@@ -726,7 +740,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return [Type<MetadataViews.Display>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getPrices():{ String: TokenInfo}?{ 
 			if let prices = self.extraMetadata["prices"]{ 
 				return prices as!{ String: TokenInfo}
@@ -734,7 +748,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			// Trim string > 100 chars due to Dapper limitation
 			if self.name.length > 100{ 
@@ -743,7 +757,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			// Provide alternative description
 			if let description = self.extraMetadata["eventDescription"]{ 
@@ -752,7 +766,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return self.description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImage(): String{ 
 			if let image = self.extraMetadata["eventImage"]{ 
 				return image as! String
@@ -772,7 +786,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		/****************** Getting a FLOAT ******************/
 		// Will not panic if one of the recipients has already claimed.
 		// It will just skip them.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMint(recipients: [&Collection]){ 
 			for recipient in recipients{ 
 				if self.claimed[(recipient.owner!).address] == nil{ 
@@ -790,7 +804,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		// run the verifiers on the user. It bypasses all of them.
 		//
 		// Return the id of the FLOAT it minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &Collection, params:{ String: AnyStruct}): UInt64{ 
 			pre{ 
 				self.claimed[(recipient.owner!).address] == nil:
@@ -847,7 +861,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		// For example, the FLOAT platform allows event hosts
 		// to specify a secret phrase. That secret phrase will
 		// be passed in the `params`.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(recipient: &Collection, params:{ String: AnyStruct}){ 
 			pre{ 
 				self.getPrices() == nil:
@@ -912,7 +926,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			self.events.remove(key: eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEvents(): [UInt64]{ 
 			return self.events.keys
 		}
@@ -932,19 +946,19 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 	access(all)
 	resource interface FLOATEventsPublic{ 
 		// Public Getters
-		access(all)
-		view fun borrowPublicEventRef(eventId: UInt64): &FLOATEvent?
+		access(TMP_ENTITLEMENT_OWNER)
+		view fun borrowPublicEventRef(eventId: UInt64): &MusicPeaksAttendanceToken.FLOATEvent?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEvents():{ UInt64: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGroup(groupName: String): &Group?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGroups(): [String]
 		
 		// Account Getters
@@ -965,7 +979,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Creates a new FLOAT Event by passing in some basic parameters
 		// and a list of all the verifiers this event must abide by
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEvent(claimable: Bool, description: String, image: String, name: String, transferrable: Bool, url: String, verifiers: [{IVerifier}], _ extraMetadata:{ String: AnyStruct}, initialGroups: [String]): UInt64{ 
 			let typedVerifiers:{ String: [{IVerifier}]} ={} 
 			for verifier in verifiers{ 
@@ -987,7 +1001,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Deletes an event. Also makes sure to remove
 		// the event from all the groups its in.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteEvent(eventId: UInt64){ 
 			let eventRef = self.borrowEventRef(eventId: eventId) ?? panic("This FLOAT does not exist.")
 			for groupName in eventRef.getGroups(){ 
@@ -997,7 +1011,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			destroy self.events.remove(key: eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createGroup(groupName: String, image: String, description: String){ 
 			pre{ 
 				self.groups[groupName] == nil:
@@ -1008,7 +1022,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Deletes a group. Also makes sure to remove
 		// the group from all the events that use it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteGroup(groupName: String){ 
 			let eventsInGroup = self.groups[groupName]?.getEvents() ?? panic("This Group does not exist.")
 			for eventId in eventsInGroup{ 
@@ -1020,7 +1034,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Adds an event to a group. Also adds the group
 		// to the event.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEventToGroup(groupName: String, eventId: UInt64){ 
 			pre{ 
 				self.groups[groupName] != nil:
@@ -1035,7 +1049,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		}
 		
 		// Simply takes the event away from the group
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEventFromGroup(groupName: String, eventId: UInt64){ 
 			pre{ 
 				self.groups[groupName] != nil:
@@ -1049,12 +1063,12 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			eventRef.removeFromGroup(groupName: groupName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGroup(groupName: String): &Group?{ 
 			return &self.groups[groupName] as &Group?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGroups(): [String]{ 
 			return self.groups.keys
 		}
@@ -1063,7 +1077,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		// If `fromHost` has allowed you to share your account
 		// in the GrantedAccountAccess.cdc contract, you can get a reference
 		// to their FLOATEvents here and do pretty much whatever you want.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSharedRef(fromHost: Address): &FLOATEvents{ 
 			let sharedInfo = getAccount(fromHost).capabilities.get<&GrantedAccountAccess.Info>(GrantedAccountAccess.InfoPublicPath).borrow<&GrantedAccountAccess.Info>() ?? panic("Cannot borrow the InfoPublic from the host")
 			assert(sharedInfo.isAllowed(account: (self.owner!).address), message: "This account owner does not share their account with you.")
@@ -1077,7 +1091,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 			return &self as &FLOATEvents
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEventRef(eventId: UInt64): &FLOATEvent?{ 
 			return &self.events[eventId] as &FLOATEvent?
 		}
@@ -1085,7 +1099,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		/************* Getters (for anyone) *************/
 		// Get a public reference to the FLOATEvent
 		// so you can call some helpful getters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowPublicEventRef(eventId: UInt64): &FLOATEvent?{ 
 			return &self.events[eventId] as &FLOATEvent?
 		}
@@ -1097,7 +1111,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		
 		// Maps the eventId to the name of that
 		// event. Just a kind helper.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEvents():{ UInt64: String}{ 
 			let answer:{ UInt64: String} ={} 
 			for id in self.events.keys{ 
@@ -1123,7 +1137,7 @@ contract MusicPeaksAttendanceToken: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyFLOATEventCollection(): @FLOATEvents{ 
 		return <-create FLOATEvents()
 	}

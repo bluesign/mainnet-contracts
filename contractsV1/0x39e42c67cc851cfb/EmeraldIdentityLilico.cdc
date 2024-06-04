@@ -1,4 +1,18 @@
-// Welcome to the EmeraldIdentity contract!
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Welcome to the EmeraldIdentity contract!
 //
 // This contract is a service that maps a user's on-chain 
 // LILICO address to their DiscordID. 
@@ -44,7 +58,7 @@ contract EmeraldIdentityLilico{
 		access(account)
 		var discordToAccount:{ String: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEmeraldID(account: Address, discordID: String){ 
 			pre{ 
 				EmeraldIdentityLilico.getAccountFromDiscord(discordID: discordID) == nil:
@@ -57,7 +71,7 @@ contract EmeraldIdentityLilico{
 			emit EmeraldIDCreated(account: account, discordID: discordID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeByAccount(account: Address){ 
 			let discordID =
 				EmeraldIdentityLilico.getDiscordFromAccount(account: account)
@@ -65,7 +79,7 @@ contract EmeraldIdentityLilico{
 			self.remove(account: account, discordID: discordID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeByDiscord(discordID: String){ 
 			let account =
 				EmeraldIdentityLilico.getAccountFromDiscord(discordID: discordID)
@@ -80,7 +94,7 @@ contract EmeraldIdentityLilico{
 			emit EmeraldIDRemoved(account: account, discordID: discordID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdministrator(): Capability<&Administrator>{ 
 			return EmeraldIdentityLilico.account.capabilities.get<&Administrator>(
 				EmeraldIdentityLilico.AdministratorPrivatePath
@@ -94,7 +108,7 @@ contract EmeraldIdentityLilico{
 	}
 	
 	/*** USE THE BELOW FUNCTIONS FOR SECURE VERIFICATION OF ID ***/
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getDiscordFromAccount(account: Address): String?{ 
 		let admin =
 			EmeraldIdentityLilico.account.storage.borrow<&Administrator>(
@@ -103,7 +117,7 @@ contract EmeraldIdentityLilico{
 		return admin.accountToDiscord[account]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getAccountFromDiscord(discordID: String): Address?{ 
 		let admin =
 			EmeraldIdentityLilico.account.storage.borrow<&Administrator>(

@@ -1,4 +1,18 @@
-import GameLevels from "./GameLevels.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import GameLevels from "./GameLevels.cdc"
 
 access(all)
 contract GameEngine{ 
@@ -19,18 +33,18 @@ contract GameEngine{
 		access(all)
 		var relativePositions: [[Int]]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toMap():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fromMap(_ map:{ String: String})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReferencePoint(_ newReferencePoint: [Int]){ 
 			self.referencePoint = newReferencePoint
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tick(
 			tickCount: UInt64,
 			events: [
@@ -183,20 +197,20 @@ contract GameEngine{
 		}
 		
 		// Add the given gameobject to the gameboard
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun add(_ gameObject:{ GameObject}){ 
 			self.updateBoard(gameObject, false)
 		}
 		
 		// Remove this object from the gameboard
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(_ gameObject:{ GameObject}?){ 
 			if gameObject != nil{ 
 				self.updateBoard(gameObject!, true)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollisionMap(_ gameObject:{ GameObject}): [[Int]]{ 
 			var collisionMap: [[Int]] = []
 			var x = 0
@@ -261,13 +275,13 @@ contract GameEngine{
 		access(all)
 		let extras:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createInitialGameObjects(): [{GameObject}?]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun parseGameObjectsFromMaps(_ map: [{String: String}]): [{GameObject}?]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun storeGameObjects(_ objects: [{GameObject}?]){ 
 			for object in objects{ 
 				if object != nil{ 
@@ -277,18 +291,18 @@ contract GameEngine{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setState(_ state:{ String: String}){ 
 			self.state = state
 		}
 		
 		// Default implementation of tick is to tick on all contained
 		// game objects that have doesTick set to true
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tick(tickCount: UInt64, events: [PlayerEvent])
 		
 		// Default implementation of postTick is to do nothing
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun postTick(tickCount: UInt64, events: [PlayerEvent])
 	}
 	
@@ -298,7 +312,7 @@ contract GameEngine{
 	// ------------------------------------------
 	//  Public game engine functions
 	// ------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun convertGameObjectsToStrMaps(_ gameObjects:{ UInt64:{ GameEngine.GameObject}}): [{
 		
 			String: String
@@ -313,7 +327,7 @@ contract GameEngine{
 		return maps
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun startLevel(contractAddress: Address, contractName: String, levelName: String):{ Level}{ 
 		let gameLevels: &{GameLevels} =
 			getAccount(contractAddress).contracts.borrow<&{GameLevels}>(name: contractName)
@@ -326,7 +340,7 @@ contract GameEngine{
 		return level
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLevel(contractAddress: Address, contractName: String, levelName: String):{ Level}{ 
 		let gameLevels: &{GameLevels} =
 			getAccount(contractAddress).contracts.borrow<&{GameLevels}>(name: contractName)
@@ -335,7 +349,7 @@ contract GameEngine{
 		return level
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tickLevel(
 		contractAddress: Address,
 		contractName: String,

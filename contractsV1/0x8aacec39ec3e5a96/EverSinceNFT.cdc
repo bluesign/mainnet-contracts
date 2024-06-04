@@ -1,4 +1,18 @@
-// EverSinceNFT.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// EverSinceNFT.cdc
 //
 // This is a complete version of the EverSinceNFT contract
 // that includes withdraw and deposit functionality, as well as a
@@ -73,12 +87,12 @@ contract EverSinceNFT: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useBonus(minter: AuthAccount){ 
 			let m = minter.address.toString()
 			assert(self.metadata["minter"] == m, message: "only minter can approve bonus")
@@ -131,10 +145,10 @@ contract EverSinceNFT: NonFungibleToken{
 	access(all)
 	resource interface EverSinceNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
@@ -143,7 +157,7 @@ contract EverSinceNFT: NonFungibleToken{
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? // from MetadataViews
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEverSinceNFT(id: UInt64): &EverSinceNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -169,7 +183,7 @@ contract EverSinceNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @EverSinceNFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -194,7 +208,7 @@ contract EverSinceNFT: NonFungibleToken{
 			return card as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEverSinceNFT(id: UInt64): &EverSinceNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -237,7 +251,7 @@ contract EverSinceNFT: NonFungibleToken{
 	// that allows them to mint new NFTs when needed
 	access(all)
 	resource interface EverSinceNFTMinterPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetExperienceIds(sku: String): [UInt64]
 	}
 	
@@ -258,7 +272,7 @@ contract EverSinceNFT: NonFungibleToken{
 			self.NFTPool ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GetExperienceIds(sku: String): [UInt64]{ 
 			if self.NFTPool[sku] != nil{ 
 				return self.NFTPool[sku]!
@@ -267,18 +281,18 @@ contract EverSinceNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeExperienceIds(sku: String, id: UInt64){ 
 			let indexOfid = (self.NFTPool[sku]!).firstIndex(of: id)
 			(self.NFTPool[sku]!).remove(at: indexOfid!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AddExperienceIds(sku: String, id: UInt64){ 
 			(self.NFTPool[sku]!).append(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			// deposit it in the recipient's account using their reference
 			metadata["minter"] = (self.owner?.address!).toString()

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -244,16 +258,16 @@ contract BasicBeasts: NonFungibleToken{
 		access(contract)
 		let evolvedFrom: [BeastNftStruct]?
 		
-		access(all)
-		fun getBeastTemplate(): BeastTemplate
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getBeastTemplate(): BasicBeasts.BeastTemplate
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNickname(): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstOwner(): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEvolvedFrom(): [BeastNftStruct]?
 	}
 	
@@ -317,7 +331,7 @@ contract BasicBeasts: NonFungibleToken{
 			emit BeastMinted(id: self.id, address: self.owner?.address, beastTemplateID: self.beastTemplate.beastTemplateID, serialNumber: self.serialNumber, sex: self.sex, matron: self.matron, sire: self.sire)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNickname(nickname: String){ 
 			pre{ 
 				BasicBeasts.validateNickname(nickname: nickname):
@@ -336,7 +350,7 @@ contract BasicBeasts: NonFungibleToken{
 		// 
 		// Parameters: firstOwner: The address of the firstOwner
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFirstOwner(firstOwner: Address){ 
 			pre{ 
 				self.firstOwner == nil:
@@ -346,22 +360,22 @@ contract BasicBeasts: NonFungibleToken{
 			emit BeastFirstOwnerSet(id: self.id, firstOwner: self.firstOwner!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBeastTemplate(): BeastTemplate{ 
 			return self.beastTemplate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNickname(): String?{ 
 			return self.nickname
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstOwner(): Address?{ 
 			return self.firstOwner
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEvolvedFrom(): [BeastNftStruct]?{ 
 			return self.evolvedFrom
 		}
@@ -479,7 +493,7 @@ contract BasicBeasts: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBeastTemplate(beastTemplateID: UInt32, dexNumber: UInt32, name: String, description: String, image: String, imageTransparentBg: String, rarity: String, skin: String, starLevel: UInt32, asexual: Bool, breedableBeastTemplateID: UInt32, maxAdminMintAllowed: UInt32, ultimateSkill: String, basicSkills: [String], elements: [String], data:{ String: String}): UInt32{ 
 			pre{ 
 				BasicBeasts.beastTemplates[beastTemplateID] == nil:
@@ -495,7 +509,7 @@ contract BasicBeasts: NonFungibleToken{
 			return newBeastTemplate.beastTemplateID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBeast(beastTemplateID: UInt32): @NFT{ 
 			// Admin specific pre-condition for minting a beast
 			pre{ 
@@ -510,19 +524,19 @@ contract BasicBeasts: NonFungibleToken{
 			return <-newBeast
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireBeast(beastTemplateID: UInt32){ 
 			BasicBeasts.retireBeast(beastTemplateID: beastTemplateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewGeneration(): UInt32{ 
 			BasicBeasts.currentGeneration = BasicBeasts.currentGeneration + 1
 			emit NewGenerationStarted(newCurrentGeneration: BasicBeasts.currentGeneration)
 			return BasicBeasts.currentGeneration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -531,15 +545,15 @@ contract BasicBeasts: NonFungibleToken{
 	access(all)
 	resource interface BeastCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBeast(id: UInt64): &BasicBeasts.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -565,7 +579,7 @@ contract BasicBeasts: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BasicBeasts.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -585,13 +599,13 @@ contract BasicBeasts: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBeast(id: UInt64): &BasicBeasts.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &BasicBeasts.NFT?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireBeast(id: UInt64): &BasicBeasts.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &BasicBeasts.NFT?
@@ -658,7 +672,7 @@ contract BasicBeasts: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	// Public Functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateNickname(nickname: String): Bool{ 
 		if nickname.length > 16{ 
 			return false
@@ -669,47 +683,47 @@ contract BasicBeasts: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	// Public Getter Functions
 	// -----------------------------------------------------------------------	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBeastTemplates():{ UInt32: BeastTemplate}{ 
 		return self.beastTemplates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBeastTemplateIDs(): [UInt32]{ 
 		return self.beastTemplates.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBeastTemplate(beastTemplateID: UInt32): BeastTemplate?{ 
 		return self.beastTemplates[beastTemplateID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRetiredDictionary():{ UInt32: Bool}{ 
 		return self.retired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllRetiredKeys(): [UInt32]{ 
 		return self.retired.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isBeastRetired(beastTemplateID: UInt32): Bool?{ 
 		return self.retired[beastTemplateID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllNumberMintedPerBeastTemplate():{ UInt32: UInt32}{ 
 		return self.numberMintedPerBeastTemplate
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllNumberMintedPerBeastTemplateKeys(): [UInt32]{ 
 		return self.numberMintedPerBeastTemplate.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerBeastTemplate(beastTemplateID: UInt32): UInt32?{ 
 		return self.numberMintedPerBeastTemplate[beastTemplateID]
 	}

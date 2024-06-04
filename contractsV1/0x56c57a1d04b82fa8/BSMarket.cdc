@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -87,7 +101,7 @@ contract BSMarket{
 		// If they send the correct payment in DevryCoin, and if the item is still available,
 		// the BSListings NFT will be placed in their BSListings.Collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &BSListings.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerPayment.balance == self.salePrice:
@@ -151,7 +165,7 @@ contract BSMarket{
 	// createSaleOffer
 	// Make creating a SaleOffer publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleOffer(
 		sellerItemProvider: Capability<&BSListings.Collection>,
 		saleNFTID: UInt64,
@@ -176,10 +190,10 @@ contract BSMarket{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(offer: @BSMarket.SaleOffer)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(offer: @BSMarket.SaleOffer): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(saleNFTID: UInt64): @SaleOffer
 	}
 	
@@ -190,12 +204,12 @@ contract BSMarket{
 	//
 	access(all)
 	resource interface CollectionPurchaser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			saleNFTID: UInt64,
 			buyerCollection: &BSListings.Collection,
 			buyerPayment: @{FungibleToken.Vault}
-		)
+		): Void
 	}
 	
 	// CollectionPublic
@@ -203,13 +217,13 @@ contract BSMarket{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(saleNFTID: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			saleNFTID: UInt64,
 			buyerCollection: &BSListings.Collection,
@@ -228,7 +242,7 @@ contract BSMarket{
 		// insert
 		// Insert a SaleOffer into the collection, replacing one with the same saleNFTID if present.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @BSMarket.SaleOffer){ 
 			let id: UInt64 = offer.saleNFTID
 			
@@ -240,7 +254,7 @@ contract BSMarket{
 		
 		// remove
 		// Remove and return a SaleOffer from the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(saleNFTID: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(saleNFTID: saleNFTID, saleItemCollection: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: saleNFTID) ?? panic("missing SaleOffer"))
@@ -258,7 +272,7 @@ contract BSMarket{
 		//   3. BSListings.Deposit
 		//   4. SaleOffer.SaleOfferFinished
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(saleNFTID: UInt64, buyerCollection: &BSListings.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleOffers[saleNFTID] != nil:
@@ -272,7 +286,7 @@ contract BSMarket{
 		// getSaleOfferIDs
 		// Returns an array of the IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
@@ -281,7 +295,7 @@ contract BSMarket{
 		// Returns an Optional read-only view of the SaleItem for the given saleNFTID if it is contained by this collection.
 		// The optional will be nil if the provided saleNFTID is not present in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(saleNFTID: UInt64): &SaleOffer?{ 
 			if self.saleOffers[saleNFTID] == nil{ 
 				return nil
@@ -302,7 +316,7 @@ contract BSMarket{
 	// createEmptyCollection
 	// Make creating a Collection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -46,15 +60,15 @@ contract InceptionBlackBox: NonFungibleToken{
 	access(all)
 	resource interface InceptionBlackBoxCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInceptionBlackBox(id: UInt64): &InceptionBlackBox.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -74,12 +88,12 @@ contract InceptionBlackBox: NonFungibleToken{
 		access(self)
 		var metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -117,7 +131,7 @@ contract InceptionBlackBox: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata(): InceptionBlackBoxTemplate{ 
 			return InceptionBlackBox.InceptionBlackBoxMetadata
 		}
@@ -146,7 +160,7 @@ contract InceptionBlackBox: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @InceptionBlackBox.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -154,7 +168,7 @@ contract InceptionBlackBox: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -173,7 +187,7 @@ contract InceptionBlackBox: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInceptionBlackBox(id: UInt64): &InceptionBlackBox.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -190,7 +204,7 @@ contract InceptionBlackBox: NonFungibleToken{
 			return exampleNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openBox(tokenID: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: tokenID) ?? panic("missing NFT")
 			emit Opened(id: token.id)
@@ -224,7 +238,7 @@ contract InceptionBlackBox: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintInceptionBlackBox(recipient: &{NonFungibleToken.CollectionPublic}){ 
 			pre{ 
 				InceptionBlackBox.mintLimit >= InceptionBlackBox.totalSupply:
@@ -236,17 +250,17 @@ contract InceptionBlackBox: NonFungibleToken{
 			InceptionBlackBox.totalSupply = InceptionBlackBox.totalSupply + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInceptionBlackBoxMetadata(newMetadata:{ String: String}){ 
 			InceptionBlackBox.InceptionBlackBoxMetadata.updateMetadata(newMetadata: newMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInceptionBlackBoxCrystalPrice(newCrystalPrice: UInt64){ 
 			InceptionBlackBox.crystalPrice = newCrystalPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseMintLimit(increment: UInt64){ 
 			pre{ 
 				increment > 0:
@@ -256,7 +270,7 @@ contract InceptionBlackBox: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getInceptionBlackBoxMetadata(): InceptionBlackBox.InceptionBlackBoxTemplate{ 
 		return InceptionBlackBox.InceptionBlackBoxMetadata
 	}

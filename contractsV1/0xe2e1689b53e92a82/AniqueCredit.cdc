@@ -1,4 +1,18 @@
-//  SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//  SPDX-License-Identifier: UNLICENSED
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
@@ -64,7 +78,7 @@ contract AniqueCredit: FungibleToken{
 	
 	access(all)
 	resource interface Provider{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawByAdmin(amount: UFix64, admin: &AniqueCredit.Admin): @AniqueCredit.Vault{ 
 			post{ 
 				// `result` refers to the return value of the function
@@ -82,7 +96,7 @@ contract AniqueCredit: FungibleToken{
 		/// deposit takes a Vault and deposits it into the implementing resource type
 		///
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault})
+		fun deposit(from: @{FungibleToken.Vault}): Void
 	}
 	
 	access(all)
@@ -102,7 +116,7 @@ contract AniqueCredit: FungibleToken{
 		}
 		
 		// withdraw
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawByAdmin(amount: UFix64, admin: &AniqueCredit.Admin): @AniqueCredit.Vault{ 
 			self.balance = self.balance - amount
 			emit TokensWithdrawn(amount: amount, from: self.owner?.address)
@@ -120,7 +134,7 @@ contract AniqueCredit: FungibleToken{
 		
 		// deposit
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @AniqueCredit.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -154,7 +168,7 @@ contract AniqueCredit: FungibleToken{
 		// using their `Receiver` reference.
 		// We say `&AnyResource{Receiver}` to say that the recipient can be any resource
 		// as long as it implements the Receiver interface
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64, recipient: &{Receiver}){ 
 			AniqueCredit.totalSupply = AniqueCredit.totalSupply + amount
 			recipient.deposit(from: <-create Vault(balance: amount))
@@ -172,7 +186,7 @@ contract AniqueCredit: FungibleToken{
 		// using their `Provider` reference.
 		// We say `&AnyResource{Provider}` to say that the sender can be any resource
 		// as long as it implements the Provider interface
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(amount: UFix64, account: &{Provider}, admin: &AniqueCredit.Admin){ 
 			let vault <- account.withdrawByAdmin(amount: amount, admin: admin)
 			destroy vault
@@ -184,17 +198,17 @@ contract AniqueCredit: FungibleToken{
 	resource Admin{ 
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewVaultMinter(): @VaultMinter{ 
 			return <-create VaultMinter()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewVaultBurner(): @VaultBurner{ 
 			return <-create VaultBurner()
 		}

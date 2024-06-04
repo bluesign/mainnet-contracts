@@ -1,4 +1,18 @@
-import Debug from "./Debug.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Debug from "./Debug.cdc"
 
 import Clock from "./Clock.cdc"
 
@@ -30,7 +44,7 @@ contract Admin{
 	let AdminProxyStoragePath: StoragePath
 	
 	//Admin client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxyClient(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -38,8 +52,8 @@ contract Admin{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface AdminProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&NeoMotorcycle.Collection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&NeoMotorcycle.Collection>): Void
 	}
 	
 	//admin proxy with capability receiver 
@@ -48,7 +62,7 @@ contract Admin{
 		access(self)
 		var capability: Capability<&NeoMotorcycle.Collection>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&NeoMotorcycle.Collection>){ 
 			pre{ 
 				cap.check():
@@ -59,7 +73,7 @@ contract Admin{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPhysicalLink(id: UInt64, physicalLink: String){ 
 			pre{ 
 				self.capability != nil:
@@ -69,7 +83,7 @@ contract Admin{
 			((motorcycleCap.borrow()!).borrowNeoMotorcycle(id: id)!).addPhysicalLink(physicalLink)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMotorcycleName(id: UInt64, name: String){ 
 			pre{ 
 				self.capability != nil:
@@ -79,7 +93,7 @@ contract Admin{
 			((motorcycleCap.borrow()!).borrowNeoMotorcycle(id: id)!).setName(name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerNeoVoucherMetadata(typeID: UInt64, metadata: NeoVoucher.Metadata){ 
 			pre{ 
 				self.capability != nil:
@@ -88,7 +102,7 @@ contract Admin{
 			NeoVoucher.registerMetadata(typeID: typeID, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNeoVoucher(count: Int){ 
 			pre{ 
 				self.capability != nil:
@@ -101,7 +115,7 @@ contract Admin{
 		}
 		
 		//This will consume the voucher and send the reward to the user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun consumeNeoVoucher(voucherID: UInt64, rewardID: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -110,22 +124,22 @@ contract Admin{
 			NeoVoucher.consume(voucherID: voucherID, rewardID: rewardID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNeoMember(): &{NonFungibleToken.Collection}{ 
 			return Admin.account.storage.borrow<&{NonFungibleToken.Collection}>(from: NeoMember.CollectionStoragePath) ?? panic("Could not borrow a reference to the admin's collection")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNeoVouchers(): &{NonFungibleToken.Collection}{ 
 			return Admin.account.storage.borrow<&{NonFungibleToken.Collection}>(from: NeoVoucher.CollectionStoragePath) ?? panic("Could not borrow a reference to the admin's collection")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWallet(): Capability<&{FungibleToken.Receiver}>{ 
 			return Admin.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAchievementToMember(user: Address, memberId: UInt64, name: String, description: String){ 
 			let userAccount = getAccount(user)
 			let memberCap = userAccount.capabilities.get<&{NeoMember.CollectionPublic}>(NeoMember.CollectionPublicPath)
@@ -133,7 +147,7 @@ contract Admin{
 			member.addAchievement(id: memberId, achievement: NeoMotorcycle.Achievement(name: name, description: description))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAchievementToFounder(user: Address, founderId: UInt64, name: String, description: String){ 
 			let userAccount = getAccount(user)
 			let founderCap = userAccount.capabilities.get<&{NeoFounder.CollectionPublic}>(NeoFounder.CollectionPublicPath)
@@ -141,7 +155,7 @@ contract Admin{
 			founder.addAchievement(id: founderId, achievement: NeoMotorcycle.Achievement(name: name, description: description))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAchievementToTeam(teamId: UInt64, name: String, description: String){ 
 			let motorcycleCap = Admin.account.capabilities.get<&NeoMotorcycle.Collection>(NeoMotorcycle.CollectionPrivatePath)
 			((motorcycleCap.borrow()!).borrowNeoMotorcycle(id: teamId)!).addAchievement(NeoMotorcycle.Achievement(name: name, description: description))
@@ -177,7 +191,7 @@ contract Admin{
 				}
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNeoAvatar(teamId: UInt64, series: String, role: String, mediaHash: String, wallet: Capability<&{FungibleToken.Receiver}>, collection: Capability<&{NonFungibleToken.Receiver}>){ 
 			pre{ 
 				self.capability != nil:
@@ -186,7 +200,7 @@ contract Admin{
 			NeoAvatar.mint(teamId: teamId, series: series, role: role, imageHash: mediaHash, wallet: wallet, collection: collection)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNeoMotorcycle(description: String, metadata:{ String: String}){ 
 			pre{ 
 				self.capability != nil:
@@ -205,7 +219,7 @@ contract Admin{
 			unique.deposit(token: <-nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNeoMember(edition: UInt64, maxEdition: UInt64, role: String, description: String, motorcycleId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -222,7 +236,7 @@ contract Admin{
 		}
 		
 		/// Advance the clock and enable debug mode
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun advanceClock(_ time: UFix64){ 
 			pre{ 
 				self.capability != nil:

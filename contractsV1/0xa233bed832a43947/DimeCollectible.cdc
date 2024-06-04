@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract DimeCollectible: NonFungibleToken{ 
@@ -68,15 +82,15 @@ contract DimeCollectible: NonFungibleToken{
 	access(all)
 	resource interface DimeCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DimeCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -107,7 +121,7 @@ contract DimeCollectible: NonFungibleToken{
 		
 		// Takes a NFT and adds it to the collection dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DimeCollectible.NFT
 			let id: UInt64 = token.id
 			
@@ -131,7 +145,7 @@ contract DimeCollectible: NonFungibleToken{
 		}
 		
 		// Gets a reference to an NFT in the collection as a DimeCollectible.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DimeCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -172,7 +186,7 @@ contract DimeCollectible: NonFungibleToken{
 	resource NFTMinter{ 
 		// Mints an NFT with a new ID and deposits it in the recipient's
 		// collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(collection: &{NonFungibleToken.CollectionPublic}, tokenId: UInt64, creator: Address, content: String){ 
 			emit Minted(id: tokenId)
 			
@@ -187,7 +201,7 @@ contract DimeCollectible: NonFungibleToken{
 	// If it has a collection but does not contain the itemId, return nil.
 	// If it has a collection and that collection contains the itemId,
 	// return a reference to it
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemId: UInt64): &DimeCollectible.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&DimeCollectible.Collection>(DimeCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.borrowCollectible(id: itemId)

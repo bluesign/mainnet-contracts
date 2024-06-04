@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -45,7 +59,7 @@ contract TheFabricantNFTAccess{
 	resource Admin{ 
 		
 		//add event to event dictionary
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEvent(eventName: String, types: [Type]){ 
 			pre{ 
 				TheFabricantNFTAccess.event[eventName] == nil:
@@ -56,13 +70,13 @@ contract TheFabricantNFTAccess{
 			emit EventAdded(eventName: eventName, types: types)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeAccessList(eventName: String, addresses: [Address]){ 
 			TheFabricantNFTAccess.accessList[eventName] = addresses
 			emit AccessListChanged(eventName: eventName, addresses: addresses)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -72,7 +86,7 @@ contract TheFabricantNFTAccess{
 	resource Redeemer{ 
 		
 		// user redeems an nft for an event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(eventName: String, nftRef: &{NonFungibleToken.NFT}){ 
 			pre{ 
 				(nftRef.owner!).address == (self.owner!).address:
@@ -103,22 +117,22 @@ contract TheFabricantNFTAccess{
 		init(){} 
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewRedeemer(): @Redeemer{ 
 		return <-create Redeemer()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEvent():{ String:{ Address: UInt64}}{ 
 		return TheFabricantNFTAccess.event
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventToTypes():{ String: [Type]}{ 
 		return TheFabricantNFTAccess.eventToTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessList():{ String: [Address]}{ 
 		return TheFabricantNFTAccess.accessList
 	}

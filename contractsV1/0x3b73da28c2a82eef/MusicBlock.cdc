@@ -1,4 +1,18 @@
-// This is an example implementation of a Flow Non-Fungible Token
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This is an example implementation of a Flow Non-Fungible Token
 // It is not part of the official standard but it assumed to be
 // very similar to how many NFTs would implement the core functionality.
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -74,7 +88,7 @@ contract MusicBlock: NonFungibleToken{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrecedences(): [UInt64]{ 
 			return self.precedences
 		}
@@ -106,7 +120,7 @@ contract MusicBlock: NonFungibleToken{
 		// self.supply = initSupply			
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMusicBlockData(): MusicBlockData{ 
 			return self.data
 		}
@@ -115,21 +129,21 @@ contract MusicBlock: NonFungibleToken{
 	access(all)
 	resource interface MusicBlockCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
-		fun getMusicBlockData(id: UInt64): MusicBlockData
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getMusicBlockData(id: UInt64): MusicBlock.MusicBlockData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUri(id: UInt64): String
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMusicBlock(id: UInt64): &MusicBlock.NFT{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -164,7 +178,7 @@ contract MusicBlock: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MusicBlock.NFT
 			let id: UInt64 = token.id
 			
@@ -183,17 +197,17 @@ contract MusicBlock: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMusicBlockData(id: UInt64): MusicBlockData{ 
 			return self.borrowMusicBlock(id: id).getMusicBlockData()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUri(id: UInt64): String{ 
 			return MusicBlock.baseMetadataUri.concat("/").concat(id.toString())
 		}
@@ -210,7 +224,7 @@ contract MusicBlock: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the MusicBlock.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMusicBlock(id: UInt64): &MusicBlock.NFT{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &MusicBlock.NFT
@@ -246,7 +260,7 @@ contract MusicBlock: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, creator: Address, cpower: UInt64, cid: String, precedences: [UInt64], allowCocreate: Bool){ 
 			emit Minted(id: MusicBlock.totalSupply)
 			// create a new NFT

@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import FungibleBeatoken from "./FungibleBeatoken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -27,20 +41,20 @@ contract MarketplaceBeatoken{
 	
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenID: UInt64,
 			recipient: &NonFungibleBeatoken.Collection,
 			buyTokens: @FungibleBeatoken.Vault
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
@@ -71,7 +85,7 @@ contract MarketplaceBeatoken{
 			self.ownerVault = vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @{NonFungibleToken.NFT}{ 
 			self.prices.remove(key: tokenID)
 			let token <- self.forSale.remove(key: tokenID) ?? panic("missing NFT")
@@ -79,7 +93,7 @@ contract MarketplaceBeatoken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @{NonFungibleToken.NFT}, price: UFix64){ 
 			let id = token.id
 			self.prices[id] = price
@@ -88,13 +102,13 @@ contract MarketplaceBeatoken{
 			emit ForSale(id: id, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			self.prices[tokenID] = newPrice
 			emit PriceChanged(id: tokenID, newPrice: newPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, recipient: &NonFungibleBeatoken.Collection, buyTokens: @FungibleBeatoken.Vault){ 
 			pre{ 
 				self.forSale[tokenID] != nil && self.prices[tokenID] != nil:
@@ -110,22 +124,22 @@ contract MarketplaceBeatoken{
 			emit TokenPurchased(id: tokenID, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}{ 
 			return &self.forSale[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64, recipient: &NonFungibleBeatoken.Collection){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -137,7 +151,7 @@ contract MarketplaceBeatoken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&NonFungibleBeatoken.Collection>,
 		ownerVault: Capability<&FungibleBeatoken.Vault>

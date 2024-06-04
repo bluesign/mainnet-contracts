@@ -1,4 +1,18 @@
-//ArleeScene NFT Contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//ArleeScene NFT Contract
 /*  This contract defines ArleeScene NFTs.
 	Users can mint this NFT with FLOW
 	Users owning the ArleePartner NFT can mint an Advanced One.
@@ -149,7 +163,7 @@ contract ArleeScene: NonFungibleToken{
 		}
 		
 		// Function to return royalty
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [Royalty]{ 
 			return self.royalties
 		}
@@ -182,21 +196,21 @@ contract ArleeScene: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(collection: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(collection: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArleeScene(id: UInt64): &ArleeScene.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -228,7 +242,7 @@ contract ArleeScene: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(withdrawIDs: [UInt64]): @{NonFungibleToken.Collection}{ 
 			let collection <- ArleeScene.createEmptyCollection(nftType: Type<@ArleeScene.Collection>())
 			for id in withdrawIDs{ 
@@ -239,7 +253,7 @@ contract ArleeScene: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ArleeScene.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -251,7 +265,7 @@ contract ArleeScene: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @{NonFungibleToken.Collection}){ 
 			for id in collection.getIDs(){ 
 				let token <- collection.withdraw(withdrawID: id)
@@ -270,7 +284,7 @@ contract ArleeScene: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArleeScene(id: UInt64): &ArleeScene.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -311,7 +325,7 @@ contract ArleeScene: NonFungibleToken{
 	
 	/* Query Function (Can also be done in Arlee Contract) */
 	// return true if the address holds the Scene NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneIDs(addr: Address): [UInt64]?{ 
 		let holderCap = getAccount(addr).capabilities.get<&ArleeScene.Collection>(ArleeScene.CollectionPublicPath)
 		if holderCap.borrow() == nil{ 
@@ -321,32 +335,32 @@ contract ArleeScene: NonFungibleToken{
 		return holderRef.getIDs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalty(): [Royalty]{ 
 		return [Royalty(creditor: "Arlequin", wallet: ArleeScene.arlequinWallet, cut: ArleeScene.marketplaceCut)]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneCID(id: UInt64): String?{ 
 		return ArleeScene.mintedScenes[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllArleeSceneCID():{ UInt64: String}{ 
 		return ArleeScene.mintedScenes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFreeMintAcct():{ Address: UInt64}{ 
 		return ArleeScene.freeMintAcct
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFreeMintQuota(addr: Address): UInt64?{ 
 		return ArleeScene.freeMintAcct[addr]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwner(id: UInt64): Address?{ 
 		for addr in ArleeScene.ownedScenes.keys{ 
 			if (ArleeScene.ownedScenes[addr]!).contains(id){ 

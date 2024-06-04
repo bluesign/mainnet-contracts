@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -44,7 +58,7 @@ contract GeniacePacks{
 		]
 	)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchase(
 		collectionName: String,
 		tier: String,
@@ -112,20 +126,20 @@ contract GeniacePacks{
 	// publically assessible functions
 	access(all)
 	resource interface collectionCapabilityPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionCapability(
 			collectionOwner: Address,
 			capability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isCapabilityExist(collectionOwner: Address): Bool
 	}
 	
 	// Prviate functions
 	access(all)
 	resource interface collectionCapabilityManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionCapability(collectionOwner: Address): &{
 			NonFungibleToken.Provider,
 			NonFungibleToken.CollectionPublic
@@ -144,14 +158,14 @@ contract GeniacePacks{
 		
 		// The owner of the NFT collection will create a private capability of his collection
 		// transer it to the collection holder using this publically assessible function
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionCapability(collectionOwner: Address, capability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>){ 
 			self.collectionCapabilityList[collectionOwner] = capability
 		}
 		
 		// This publically accessible function will be used to check weather a collection capability
 		// of a specific account is available or not
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isCapabilityExist(collectionOwner: Address): Bool{ 
 			let ref = self.collectionCapabilityList[collectionOwner]?.borrow()
 			if ref == nil{ 
@@ -162,7 +176,7 @@ contract GeniacePacks{
 		
 		// This private function can be used to fetch the stored capability of a specific user
 		// and can call the private functions such as 'withdraw'
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionCapability(collectionOwner: Address): &{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}{ 
 			let ref = (self.collectionCapabilityList[collectionOwner]!).borrow()!
 			return ref
@@ -174,7 +188,7 @@ contract GeniacePacks{
 	}
 	
 	// Public function to create and return collectionCapabilityHolder resource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCapabilityHolder(): @collectionCapabilityHolder{ 
 		return <-create collectionCapabilityHolder()
 	}

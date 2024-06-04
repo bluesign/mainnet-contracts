@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -121,7 +135,7 @@ contract StrikeNow: NonFungibleToken{
 			emit SeriesCreated(seriesId: seriesId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSeriesMetadata(metadata:{ String: String}, fights: [{String: String}]?){ 
 			pre{ 
 				self.sealed == false:
@@ -132,7 +146,7 @@ contract StrikeNow: NonFungibleToken{
 			emit SeriesMetadataUpdated(seriesId: self.seriesId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNftSet(setId: UInt32, metadata:{ String: String}, assets: [{String: String}]?, result:{ String: String}?){ 
 			pre{ 
 				self.setIds.contains(setId) == false:
@@ -149,7 +163,7 @@ contract StrikeNow: NonFungibleToken{
 			emit SetCreated(seriesId: self.seriesId, setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetMetadata(setId: UInt32, metadata:{ String: String}, assets: [{String: String}]?, result:{ String: String}?){ 
 			pre{ 
 				self.sealed == false:
@@ -162,7 +176,7 @@ contract StrikeNow: NonFungibleToken{
 			emit SetMetadataUpdated(seriesId: self.seriesId, setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintStrikeNow(recipient: &{NonFungibleToken.CollectionPublic}, setId: UInt32){ 
 			pre{ 
 				StrikeNow.numberEditionsMintedPerSet[setId] != nil:
@@ -178,7 +192,7 @@ contract StrikeNow: NonFungibleToken{
 			StrikeNow.numberEditionsMintedPerSet[setId] = index
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sealSeries(){ 
 			pre{ 
 				self.sealed == false:
@@ -188,7 +202,7 @@ contract StrikeNow: NonFungibleToken{
 			emit SeriesSealed(seriesId: self.seriesId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEditionsProceedingSerially(){ 
 			pre{ 
 				self.sealed == false:
@@ -200,7 +214,7 @@ contract StrikeNow: NonFungibleToken{
 			emit SeriesEditionsSetToProceedSerially(seriesId: self.seriesId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun applyEditionsToRange(setId: UInt32, editionMap:{ UInt32: UInt32}){ 
 			pre{ 
 				self.sealed == false:
@@ -215,7 +229,7 @@ contract StrikeNow: NonFungibleToken{
 			emit SetEditionShuffleActivated(id: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(setId: UInt32, tokenIndex: UInt32): UInt32{ 
 			pre{ 
 				self.setEditionMap.containsKey(setId):
@@ -226,7 +240,7 @@ contract StrikeNow: NonFungibleToken{
 			return (self.setEditionMap[setId]!)[tokenIndex]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleState(setId: UInt32, onSale: Bool){ 
 			pre{ 
 				self.setEditionMap.containsKey(setId):
@@ -353,7 +367,7 @@ contract StrikeNow: NonFungibleToken{
 			self.vaultPath = vaultPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSeries(seriesId: UInt32, metadata:{ String: String}, fights: [{String: String}]?){ 
 			pre{ 
 				StrikeNow.series[seriesId] == nil:
@@ -363,7 +377,7 @@ contract StrikeNow: NonFungibleToken{
 			StrikeNow.series[seriesId] <-! newSeries
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(seriesId: UInt32): &Series{ 
 			pre{ 
 				StrikeNow.series[seriesId] != nil:
@@ -372,7 +386,7 @@ contract StrikeNow: NonFungibleToken{
 			return (&StrikeNow.series[seriesId] as &Series?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setId: UInt32): &StrikeNowData.SetData{ 
 			pre{ 
 				StrikeNow.setData[setId] != nil:
@@ -381,7 +395,7 @@ contract StrikeNow: NonFungibleToken{
 			return &StrikeNow.setData[setId]! as &StrikeNowData.SetData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSets(seriesId: UInt32): [&StrikeNowData.SetData]{ 
 			pre{ 
 				StrikeNow.series[seriesId] != nil:
@@ -394,13 +408,13 @@ contract StrikeNow: NonFungibleToken{
 			return sets
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateConfigData(input:{ String: String}, socials:{ String: String}){ 
 			StrikeNow.config = StrikeNowData.ConfigData(input: input, socials: socials)
 		}
 		
 		//Allow the admin to update the DUC vault with which to receive currency
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateVaultPath(vaultPath: PublicPath){ 
 			self.vaultPath = vaultPath
 		}
@@ -410,7 +424,7 @@ contract StrikeNow: NonFungibleToken{
 		//and a collection reference in which to deposit minted NFTs.
 		//If payment is in correct amount and denomination and NFTs are all set to 
 		//on sale, mints them in the amounts specified and deposits them in the user collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintStrikeNow(paymentVault: @{FungibleToken.Vault}, setIdToAmountMap:{ UInt32: UInt32}, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			pre{ 
 				StrikeNow.getSetsPurchasable(setIds: setIdToAmountMap.keys):
@@ -444,25 +458,25 @@ contract StrikeNow: NonFungibleToken{
 	//A public interface to allow minting on demand in exchange for DUC
 	access(all)
 	resource interface StrikeNowMinterPublic{ 
-		access(all)
-		fun mintStrikeNow(paymentVault: @{FungibleToken.Vault}, setIdToAmountMap:{ UInt32: UInt32}, recipient: &{NonFungibleToken.CollectionPublic})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintStrikeNow(paymentVault: @{FungibleToken.Vault}, setIdToAmountMap:{ UInt32: UInt32}, recipient: &{NonFungibleToken.CollectionPublic}): Void
 	}
 	
 	access(all)
 	resource interface StrikeNowCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStrikeNow(id: UInt64): &StrikeNow.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -483,7 +497,7 @@ contract StrikeNow: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -493,7 +507,7 @@ contract StrikeNow: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StrikeNow.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -501,7 +515,7 @@ contract StrikeNow: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -520,7 +534,7 @@ contract StrikeNow: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStrikeNow(id: UInt64): &StrikeNow.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &StrikeNow.NFT?
@@ -558,23 +572,23 @@ contract StrikeNow: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, id: UInt64): &StrikeNow.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&StrikeNow.Collection>(StrikeNow.CollectionPublicPath).borrow<&StrikeNow.Collection>() ?? panic("Couldn't get collection")
 		return collection.borrowStrikeNow(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeries(): [StrikeNowData.SeriesData]{ 
 		return StrikeNow.seriesData.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets(): [StrikeNowData.SetData]{ 
 		return StrikeNow.setData.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesMetadata(seriesId: UInt32):{ String: String}?{ 
 		pre{ 
 			StrikeNow.seriesData.containsKey(seriesId):
@@ -583,7 +597,7 @@ contract StrikeNow: NonFungibleToken{
 		return StrikeNow.seriesData[seriesId]?.metadataRaw
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetMetadata(setId: UInt32):{ String: String}?{ 
 		pre{ 
 			StrikeNow.setData.containsKey(setId):
@@ -592,7 +606,7 @@ contract StrikeNow: NonFungibleToken{
 		return StrikeNow.setData[setId]?.metadataRaw
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSetSeriesId(_ setId: UInt32): UInt32?{ 
 		pre{ 
 			StrikeNow.setData.containsKey(setId):
@@ -601,13 +615,13 @@ contract StrikeNow: NonFungibleToken{
 		return StrikeNow.setData[setId]?.seriesId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getConfigData(): StrikeNowData.ConfigData{ 
 		return StrikeNow.config
 	}
 	
 	//Returns the shuffled edition number that is mapped to the token index in that set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionNumber(seriesId: UInt32, setId: UInt32, tokenIndex: UInt32): UInt32?{ 
 		pre{ 
 			StrikeNow.seriesData.containsKey(seriesId):
@@ -620,7 +634,7 @@ contract StrikeNow: NonFungibleToken{
 	
 	//Just returns the total minted for a given set, as we will be running
 	//open editions
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxEditions(setId: UInt32): UInt64?{ 
 		pre{ 
 			StrikeNow.setData.containsKey(setId):
@@ -630,7 +644,7 @@ contract StrikeNow: NonFungibleToken{
 	}
 	
 	//Return the FightData that is referenced by a particular set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFightForSet(_ setId: UInt32): StrikeNowData.FightData{ 
 		pre{ 
 			StrikeNow.setData.containsKey(setId):
@@ -643,7 +657,7 @@ contract StrikeNow: NonFungibleToken{
 		return series.fights[set.fightId]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSetPurchasable(setId: UInt32): Bool{ 
 		pre{ 
 			StrikeNow.setData.containsKey(setId):
@@ -656,7 +670,7 @@ contract StrikeNow: NonFungibleToken{
 	
 	//Return the total purchasability of an array of sets, as represented by
 	//ids
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSetsPurchasable(setIds: [UInt32]): Bool{ 
 		for setId in setIds{ 
 			if !StrikeNow.getSetPurchasable(setId: setId){ 
@@ -667,7 +681,7 @@ contract StrikeNow: NonFungibleToken{
 	}
 	
 	//Return the price for an individual set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPriceForSet(setId: UInt32): UFix64{ 
 		pre{ 
 			StrikeNow.setData.containsKey(setId):
@@ -682,7 +696,7 @@ contract StrikeNow: NonFungibleToken{
 	//  setId: numberToPurchase,
 	//  setId: numberToPurchase  
 	//}
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPriceForSetBatch(setIdToAmountMap:{ UInt32: UInt32}): UFix64{ 
 		var price: UFix64 = 0.0
 		for setId in setIdToAmountMap.keys{ 
@@ -691,12 +705,12 @@ contract StrikeNow: NonFungibleToken{
 		return price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwnerAddress(): Address{ 
 		return self.account.address
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAssetForId(setId: UInt32, assetId: UInt32): StrikeNowData.AssetData{ 
 		pre{ 
 			StrikeNow.setData.containsKey(setId):

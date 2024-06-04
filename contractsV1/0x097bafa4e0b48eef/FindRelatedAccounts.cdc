@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract FindRelatedAccounts{ 
 	access(all)
 	let storagePath: StoragePath
@@ -50,28 +64,28 @@ contract FindRelatedAccounts{
 	
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlowAccounts():{ String: [Address]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRelatedAccounts(_ network: String):{ String: [String]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllRelatedAccounts():{ String:{ String: [String]}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllRelatedAccountInfo():{ String: AccountInformation}
 		
 		// verify ensure this wallet address exist under the network
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(network: String, address: String): Bool
 		
 		// linked ensure this wallet is linked in both wallet with the same name (but not socially linked only)
 		// only supports flow for now
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun linked(name: String, network: String, address: Address): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccount(name: String, network: String, address: String): AccountInformation?
 	}
 	
@@ -97,7 +111,7 @@ contract FindRelatedAccounts{
 			self.accounts ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun linked(name: String, network: String, address: Address): Bool{ 
 			let cap = FindRelatedAccounts.getCapability(address)
 			if cap.check(){ 
@@ -108,7 +122,7 @@ contract FindRelatedAccounts{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(network: String, address: String): Bool{ 
 			if let wallets = self.networks[network]{ 
 				for wallet in wallets{ 
@@ -123,7 +137,7 @@ contract FindRelatedAccounts{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlowAccounts():{ String: [Address]}{ 
 			let network = "Flow"
 			let tempItems:{ String: [Address]} ={} 
@@ -142,22 +156,22 @@ contract FindRelatedAccounts{
 			return tempItems
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRelatedAccounts(_ network: String):{ String: [String]}{ 
 			return self.internal_getRelatedAccounts(network)[network] ??{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllRelatedAccounts():{ String:{ String: [String]}}{ 
 			return self.internal_getRelatedAccounts(nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllRelatedAccountInfo():{ String: AccountInformation}{ 
 			return self.accounts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccount(name: String, network: String, address: String): AccountInformation?{ 
 			let id = FindRelatedAccounts.getIdentifier(name: name, network: network, address: address)
 			return self.accounts[id]
@@ -191,7 +205,7 @@ contract FindRelatedAccounts{
 			return tempRes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFlowAccount(name: String, address: Address){ 
 			let network = "Flow"
 			let id = FindRelatedAccounts.getIdentifier(name: name, network: network, address: address.toString())
@@ -202,7 +216,7 @@ contract FindRelatedAccounts{
 			emit RelatedAccount(user: (self.owner!).address, walletId: id, walletName: name, address: address.toString(), network: network, action: "add")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRelatedAccount(name: String, network: String, address: String){ 
 			let id = FindRelatedAccounts.getIdentifier(name: name, network: network, address: address)
 			if self.accounts[id] != nil{ 
@@ -212,19 +226,19 @@ contract FindRelatedAccounts{
 			emit RelatedAccount(user: (self.owner!).address, walletId: id, walletName: name, address: address, network: network, action: "add")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFlowAccount(name: String, oldAddress: Address, address: Address){ 
 			self.removeRelatedAccount(name: name, network: "Flow", address: oldAddress.toString())
 			self.addFlowAccount(name: name, address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRelatedAccount(name: String, network: String, oldAddress: String, address: String){ 
 			self.removeRelatedAccount(name: name, network: network, address: oldAddress)
 			self.addRelatedAccount(name: name, network: network, address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRelatedAccount(name: String, network: String, address: String){ 
 			let id = FindRelatedAccounts.getIdentifier(name: name, network: network, address: address)
 			if self.accounts[id] == nil{ 
@@ -269,22 +283,22 @@ contract FindRelatedAccounts{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyAccounts(): @Accounts{ 
 		return <-create Accounts()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIdentifier(name: String, network: String, address: String): String{ 
 		return network.concat("_").concat(name).concat("_").concat(address)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCapability(_ addr: Address): Capability<&Accounts>{ 
 		return getAccount(addr).capabilities.get<&Accounts>(self.publicPath)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun findRelatedFlowAccounts(address: Address):{ String: [Address]}{ 
 		let cap = self.getCapability(address)
 		if !cap.check(){ 
@@ -293,7 +307,7 @@ contract FindRelatedAccounts{
 		return (cap.borrow()!).getFlowAccounts()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun findRelatedAccounts(address: Address):{ String:{ String: [String]}}{ 
 		let cap = self.getCapability(address)
 		if !cap.check(){ 

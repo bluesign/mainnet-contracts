@@ -1,4 +1,18 @@
-import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FLOAT from "../0x2d4c3caffbeab845/FLOAT.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -8,7 +22,7 @@ import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 access(all)
 contract FLOATWrapper{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRef(_ account: Address, _ id: UInt64): &FLOAT.NFT?{ 
 		if let collection =
 			getAccount(account).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath)
@@ -20,7 +34,7 @@ contract FLOATWrapper{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getContractAttributes():{ String: AnyStruct}{ 
 		return{ 
 			"_contract.name": "FLOAT",
@@ -34,7 +48,7 @@ contract FLOATWrapper{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTAttributes(_ float: &FLOAT.NFT?):{ String: AnyStruct}{ 
 		let display = (float!).resolveView(Type<MetadataViews.Display>())! as! MetadataViews.Display
 		return{ 
@@ -73,7 +87,7 @@ contract FLOATWrapper{
 	access(all)
 	var contractData:{ String: AnyStruct}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setup(){ 
 		destroy self.account.storage.load<@AnyResource>(from: /storage/FLOAT)
 		self.account.storage.save(
@@ -94,7 +108,7 @@ contract FLOATWrapper{
 		self.account.capabilities.publish(capability_2, at: FLOAT.FLOATCollectionPublicPath)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	init(){ 
 		self.contractData = self.getContractAttributes()
 		self.setup()
@@ -102,7 +116,7 @@ contract FLOATWrapper{
 	
 	access(all)
 	resource Wrapper: MetadataWrapper.WrapperInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setData(address: Address, id: UInt64){ 
 			self.address = address
 			self.id = id
@@ -142,7 +156,7 @@ contract FLOATWrapper{
 		access(all)
 		var views:{ Type: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			if let nft = FLOATWrapper.getRef(self.address, self.id){ 
 				if let viewLocation = self.views[view]{ 
@@ -159,7 +173,7 @@ contract FLOATWrapper{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return self.views.keys
 		}

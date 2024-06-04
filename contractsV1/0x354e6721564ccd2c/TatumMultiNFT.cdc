@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract TatumMultiNFT: NonFungibleToken{ 
@@ -58,18 +72,18 @@ contract TatumMultiNFT: NonFungibleToken{
 	access(all)
 	resource interface TatumMultiNftCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDsByType(type: String): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTatumNFT(id: UInt64, type: String): &TatumMultiNFT.NFT
 	}
 	
@@ -98,7 +112,7 @@ contract TatumMultiNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @TatumMultiNFT.NFT
 			let id: UInt64 = token.id
 			let type: String = token.type
@@ -122,7 +136,7 @@ contract TatumMultiNFT: NonFungibleToken{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDsByType(type: String): [UInt64]{ 
 			if self.types[type] != nil{ 
 				let x = self.types[type] ?? panic("No such type")
@@ -146,7 +160,7 @@ contract TatumMultiNFT: NonFungibleToken{
 		
 		// borrowNFT gets a reference to an NFT in the collection
 		// so that the caller can read its metadata and call its methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTatumNFT(id: UInt64, type: String): &TatumMultiNFT.NFT{ 
 			let x = self.types[type] ?? panic("No such token type.")
 			let token = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &TatumMultiNFT.NFT
@@ -187,7 +201,7 @@ contract TatumMultiNFT: NonFungibleToken{
 			self.minters ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMinter(minterAccount: AuthAccount, type: String){ 
 			if self.minters[minterAccount.address] == 1{ 
 				panic("Unable to add minter, already present as a minter for another token type.")
@@ -215,7 +229,7 @@ contract TatumMultiNFT: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{TatumMultiNftCollectionPublic}, type: String, url: String, address: Address){ 
 			if self.type != type{ 
 				panic("Unable to mint token for type, where this account is not a minter")

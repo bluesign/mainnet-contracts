@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 // Owners NFT
 //
@@ -74,15 +88,15 @@ contract Owners: NonFungibleToken{
 	access(all)
 	resource interface OwnersCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOwners(id: UInt64): &Owners.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -119,7 +133,7 @@ contract Owners: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Owners.NFT
 			let id: UInt64 = token.id
 			
@@ -150,7 +164,7 @@ contract Owners: NonFungibleToken{
 		// Gets a reference to an NFT in the collection as a Owners,
 		// This is safe as there are no functions that can be called on the Owners.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOwners(id: UInt64): &Owners.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -202,7 +216,7 @@ contract Owners: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, twitterID: UInt64){ 
 			emit Minted(id: Owners.totalSupply)
 			// deposit it in the recipient's account using their reference
@@ -214,11 +228,11 @@ contract Owners: NonFungibleToken{
 	access(all)
 	resource interface NFTOperatorPublic{ 
 		// give the operator ability to mint new NFT
-		access(all)
-		fun addMinterCapability(cap: Capability<&NFTMinter>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addMinterCapability(cap: Capability<&Owners.NFTMinter>): Void
 		
 		// give the operator abililty to transfer NFT from admin wallet
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTransferCapability(cap: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>)
 	}
 	
@@ -237,7 +251,7 @@ contract Owners: NonFungibleToken{
 			self.nftProviderCapability = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMinterCapability(cap: Capability<&NFTMinter>){ 
 			pre{ 
 				cap.borrow() != nil:
@@ -246,7 +260,7 @@ contract Owners: NonFungibleToken{
 			self.operatorCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTransferCapability(cap: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>){ 
 			pre{ 
 				cap.borrow() != nil:
@@ -256,7 +270,7 @@ contract Owners: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNFTOperator(): @NFTOperator{ 
 		return <-create NFTOperator()
 	}
@@ -267,7 +281,7 @@ contract Owners: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Owners.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&Owners.Collection>(Owners.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Owners.Collection.borowOwners to get the correct itemID

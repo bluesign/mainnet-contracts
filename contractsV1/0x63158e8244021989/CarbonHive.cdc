@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract CarbonHive: NonFungibleToken{ 
@@ -141,7 +155,7 @@ contract CarbonHive: NonFungibleToken{
 			emit FundingRoundCreated(id: self.fundingRoundID, projectID: projectID, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addReport(reportID: UInt32){ 
 			self.reports.append(reportID)
 		}
@@ -179,7 +193,7 @@ contract CarbonHive: NonFungibleToken{
 		access(self)
 		let metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			self.closed = true
 		}
@@ -298,32 +312,32 @@ contract CarbonHive: NonFungibleToken{
 		access(self)
 		var impactAmountPerFundingRound:{ UInt32: UInt32}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundingRounds(): [UInt32]{ 
 			return self.fundingRounds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundingRoundCompleted(fundingRoundID: UInt32): Bool?{ 
 			return self.fundingRoundCompleted[fundingRoundID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReports(): [UInt32]{ 
 			return self.reports
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImpactMintedPerFundingRound(fundingRoundID: UInt32): UInt32?{ 
 			return self.impactMintedPerFundingRound[fundingRoundID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImpactAmountPerFundingRound(fundingRoundID: UInt32): UInt32?{ 
 			return self.impactAmountPerFundingRound[fundingRoundID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -347,7 +361,7 @@ contract CarbonHive: NonFungibleToken{
 			CarbonHive.projectDatas[self.projectID] = ProjectData(closed: self.closed, url: url, metadata: metadata, name: name, developer: developer, description: description, location: location, locationDescriptor: locationDescriptor, type: type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addReport(reportID: UInt32){ 
 			pre{ 
 				CarbonHive.reportDatas[reportID] != nil:
@@ -358,7 +372,7 @@ contract CarbonHive: NonFungibleToken{
 		}
 		
 		// Add report to both Funding Round and owning Project
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addReportToFundingRound(reportID: UInt32, fundingRoundID: UInt32){ 
 			pre{ 
 				CarbonHive.reportDatas[reportID] != nil:
@@ -373,7 +387,7 @@ contract CarbonHive: NonFungibleToken{
 			emit ReportAddedToFundingRound(projectID: self.projectID, fundingRoundID: fundingRoundID, reportID: reportID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFundingRound(fundingRoundID: UInt32){ 
 			pre{ 
 				CarbonHive.fundingRoundDatas[fundingRoundID] != nil:
@@ -390,7 +404,7 @@ contract CarbonHive: NonFungibleToken{
 			emit FundingRoundAddedToProject(projectID: self.projectID, fundingRoundID: fundingRoundID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeFundingRound(fundingRoundID: UInt32){ 
 			pre{ 
 				self.fundingRoundCompleted[fundingRoundID] != nil:
@@ -402,14 +416,14 @@ contract CarbonHive: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeAllFundingRound(){ 
 			for fundingRound in self.fundingRounds{ 
 				self.completeFundingRound(fundingRoundID: fundingRound)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			if !self.closed{ 
 				self.closed = true
@@ -420,7 +434,7 @@ contract CarbonHive: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintImpact(fundingRoundID: UInt32, amount: UInt32, location: String, locationDescriptor: String, vintagePeriod: String, content: @{CarbonHive.Content}): @NFT{ 
 			pre{ 
 				CarbonHive.fundingRoundDatas[fundingRoundID] != nil:
@@ -483,10 +497,10 @@ contract CarbonHive: NonFungibleToken{
 	
 	access(all)
 	resource interface Content{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContentType(): String
 	}
 	
@@ -503,12 +517,12 @@ contract CarbonHive: NonFungibleToken{
 			self.type = type
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData(): String{ 
 			return self.data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContentType(): String{ 
 			return self.type
 		}
@@ -525,12 +539,12 @@ contract CarbonHive: NonFungibleToken{
 		access(self)
 		let content: @{CarbonHive.Content}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContentData(): String{ 
 			return self.content.getData()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContentType(): String{ 
 			return self.content.getContentType()
 		}
@@ -551,28 +565,28 @@ contract CarbonHive: NonFungibleToken{
 	
 	access(all)
 	resource interface ProjectAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFundingRound(name: String, description: String, formula: String, formulaType: String, unit: String, vintagePeriod: String, totalAmount: UInt32, roundEnds: Fix64, location: String, locationDescriptor: String, projectID: UInt32, metadata:{ String: String}): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createReport(date: String, projectID: UInt32, fundingRoundID: UInt32, description: String, reportContent: String, reportContentType: String, metadata:{ String: String}): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProject(name: String, description: String, url: String, developer: String, type: String, location: String, locationDescriptor: String, metadata:{ String: String})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProject(projectID: UInt32): &Project?
 	}
 	
 	access(all)
 	resource interface ContentAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createContent(data: String, contentType: String): @{CarbonHive.Content}
 	}
 	
 	access(all)
 	resource Admin: ProjectAdmin, ContentAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFundingRound(name: String, description: String, formula: String, formulaType: String, unit: String, vintagePeriod: String, totalAmount: UInt32, roundEnds: Fix64, location: String, locationDescriptor: String, projectID: UInt32, metadata:{ String: String}): UInt32{ 
 			var newFundingRound = FundingRoundData(name: name, description: description, formula: formula, formulaType: formulaType, unit: unit, vintagePeriod: vintagePeriod, totalAmount: totalAmount, roundEnds: roundEnds, location: location, locationDescriptor: locationDescriptor, projectID: projectID, metadata: metadata)
 			let newID = newFundingRound.fundingRoundID
@@ -580,7 +594,7 @@ contract CarbonHive: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createReport(date: String, projectID: UInt32, fundingRoundID: UInt32, description: String, reportContent: String, reportContentType: String, metadata:{ String: String}): UInt32{ 
 			var newReport = ReportData(date: date, projectID: projectID, fundingRoundID: fundingRoundID, description: description, reportContent: reportContent, reportContentType: reportContentType, metadata: metadata)
 			let newID = newReport.reportID
@@ -588,23 +602,23 @@ contract CarbonHive: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProject(name: String, description: String, url: String, developer: String, type: String, location: String, locationDescriptor: String, metadata:{ String: String}){ 
 			var newProject <- create Project(name: name, description: description, url: url, developer: developer, type: type, location: location, locationDescriptor: locationDescriptor, metadata: metadata)
 			CarbonHive.projects[newProject.projectID] <-! newProject
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createContent(data: String, contentType: String): @{CarbonHive.Content}{ 
 			return <-create ImpactContent(data: data, type: contentType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProject(projectID: UInt32): &Project?{ 
 			return &CarbonHive.projects[projectID] as &Project?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -613,18 +627,18 @@ contract CarbonHive: NonFungibleToken{
 	access(all)
 	resource interface ImpactCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowImpact(id: UInt64): &CarbonHive.NFT?
 	}
 	
@@ -644,7 +658,7 @@ contract CarbonHive: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -654,7 +668,7 @@ contract CarbonHive: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CarbonHive.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -664,7 +678,7 @@ contract CarbonHive: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -683,7 +697,7 @@ contract CarbonHive: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowImpact(id: UInt64): &CarbonHive.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -714,32 +728,32 @@ contract CarbonHive: NonFungibleToken{
 		return <-create CarbonHive.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectData(projectID: UInt32): ProjectData?{ 
 		return self.projectDatas[projectID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReportData(reportID: UInt32): ReportData?{ 
 		return self.reportDatas[reportID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFundingRoundData(fundingRoundID: UInt32): FundingRoundData?{ 
 		return self.fundingRoundDatas[fundingRoundID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFundingRoundsInProject(projectID: UInt32): [UInt32]?{ 
 		return CarbonHive.projects[projectID]?.getFundingRounds()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReportsInProject(projectID: UInt32): [UInt32]?{ 
 		return CarbonHive.projects[projectID]?.getReports()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountUsedInFundingRound(projectID: UInt32, fundingRoundID: UInt32): UInt32?{ 
 		if let projectToRead <- CarbonHive.projects.remove(key: projectID){ 
 			let amount = projectToRead.getImpactAmountPerFundingRound(fundingRoundID: fundingRoundID)

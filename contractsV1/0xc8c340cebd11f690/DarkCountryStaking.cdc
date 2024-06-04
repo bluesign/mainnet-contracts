@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract DarkCountryStaking{ 
 	
 	// Staked Items.
@@ -20,17 +34,17 @@ contract DarkCountryStaking{
 	access(all)
 	let AdminStoragePath: StoragePath
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakedNFTsForAddress(userAddress: Address): [UInt64]?{ 
 		return self.stakedItems[userAddress]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun requestSetStakedNFTsForAddress(userAddress: Address, stakedNFTs: [UInt64]){ 
 		emit ItemsRequestedForStaking(from: userAddress, ids: stakedNFTs)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun requestSetUnstakedNFTsForAddress(userAddress: Address, stakedNFTs: [UInt64]){ 
 		emit ItemsRequestedForUnstaking(from: userAddress, ids: stakedNFTs)
 	}
@@ -47,7 +61,7 @@ contract DarkCountryStaking{
 		// 
 		// To be used to unstaked the NFTs for user 
 		// only Admin/Minter can do that
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStakedNFTsForAddress(userAddress: Address, stakedNFTs: [UInt64]){ 
 			DarkCountryStaking.stakedItems[userAddress] = stakedNFTs
 			emit ItemsStaked(from: userAddress, ids: stakedNFTs)
@@ -55,7 +69,7 @@ contract DarkCountryStaking{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

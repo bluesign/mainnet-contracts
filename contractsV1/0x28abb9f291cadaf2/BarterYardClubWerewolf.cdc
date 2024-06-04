@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -76,15 +90,15 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		access(all)
 		var totalSupply: UInt16
 		
-		access(all)
-		fun increment(){ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun increment(): Void{ 
 			post{ 
 				self.totalSupply == before(self.totalSupply) + 1:
 					"[SupplyManager](increment): totalSupply should be incremented"
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrement(){ 
 			pre{ 
 				self.totalSupply > 0:
@@ -159,22 +173,22 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		access(all)
 		var totalSupply: UInt16
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increment(){ 
 			self.totalSupply = self.totalSupply + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrement(){ 
 			self.totalSupply = self.totalSupply - 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toPublic(): BarterYardClubWerewolf.PublicTrait{ 
 			return BarterYardClubWerewolf.PublicTrait(id: self.id, traitType: self.traitType, value: self.value, totalSupply: self.totalSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toNft(): BarterYardClubWerewolf.NftTrait{ 
 			return BarterYardClubWerewolf.NftTrait(id: self.id, traitType: self.traitType, value: self.value)
 		}
@@ -242,25 +256,25 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		access(all)
 		var utc: Int8
 		
-		access(all)
-		fun setUTC(utc: Int8)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setUTC(utc: Int8): Void
 		
 		/// auto: if set to true, let the system compute which NFT to return
 		access(all)
 		var auto: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAuto(auto: Bool)
 		
 		/// default: allow the user to set a default image if auto is turned off
 		access(all)
 		var defaultImage: ImageType
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultImage(imageType: ImageType)
 		
 		/// getThumbnail returns the current image to display depending on user preferences
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnail(): MetadataViews.IPFSFile
 	}
 	
@@ -287,7 +301,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		access(all)
 		let animation: MetadataViews.IPFSFile
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAttributes(): [NftTrait; 8]{ 
 			return self.attributes
 		}
@@ -372,7 +386,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 			self.thumbnail = dayImage
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUTC(utc: Int8){ 
 			BarterYardClubWerewolf.timezonedWerewolves.containsKey(utc)
 			// Remove werewolf from old UTC
@@ -389,7 +403,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 			self.computeThumbnail()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAuto(auto: Bool){ 
 			self.auto = auto
 			if !self.auto && BarterYardClubWerewolf.timezonedWerewolves.containsKey(self.utc){ 
@@ -400,13 +414,13 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 			self.computeThumbnail()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultImage(imageType: ImageType){ 
 			self.defaultImage = imageType
 			self.computeThumbnail()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun computeThumbnail(){ 
 			let newThumbnail = self.getThumbnail()
 			if newThumbnail.uri() == self.thumbnail.uri(){ 
@@ -416,7 +430,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 			emit WerewolfTransformed(ids: [self.id], imageType: self.getAutoImageType().rawValue)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAutoImageType(): ImageType{ 
 			if self.auto{ 
 				let hour = BarterYardClubWerewolf.getCurrentHour(self.utc)
@@ -427,7 +441,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		}
 		
 		/// getThumbnail implementation from Werewolf interface
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnail(): MetadataViews.IPFSFile{ 
 			let imageType = self.getAutoImageType()
 			switch imageType{ 
@@ -519,7 +533,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BarterYardClubWerewolf.NFT
 			let id: UInt64 = token.id
 			
@@ -542,7 +556,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBarterYardClubWerewolfNFT(id: UInt64): &BarterYardClubWerewolf.NFT?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -601,7 +615,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new Id
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(name: String, description: String, attributes: [NftTrait; 8], dayImage: MetadataViews.IPFSFile, nightImage: MetadataViews.IPFSFile, animation: MetadataViews.IPFSFile): @BarterYardClubWerewolf.NFT{ 
 			// create a new NFT
 			var nftId: UInt64 = BarterYardStats.getNextTokenId()
@@ -618,12 +632,12 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTraitType(_ traitType: String){ 
 			BarterYardClubWerewolf.traitTypes.insert(key: Int8(BarterYardClubWerewolf.traitTypes.length), traitType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTrait(traitType: Int8, value: String){ 
 			pre{ 
 				BarterYardClubWerewolf.traitTypes[traitType] != nil:
@@ -634,12 +648,12 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTraitsTypes():{ Int8: String}{ 
 		return self.traitTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicTraits():{ UInt8: PublicTrait}{ 
 		let traits:{ UInt8: PublicTrait} ={} 
 		for trait in self.traits.values{ 
@@ -648,7 +662,7 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		return traits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftTraits():{ UInt8: NftTrait}{ 
 		let traits:{ UInt8: NftTrait} ={} 
 		for trait in self.traits.values{ 
@@ -657,26 +671,26 @@ contract BarterYardClubWerewolf: NonFungibleToken{
 		return traits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEmptyNftTraits(): [BarterYardClubWerewolf.NftTrait; 8]{ 
 		let emptyTrait = NftTrait(id: 0, traitType: -1, value: "Empty")
 		return [emptyTrait, emptyTrait, emptyTrait, emptyTrait, emptyTrait, emptyTrait, emptyTrait, emptyTrait]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentHour(_ utc: Int8): Int{ 
 		let currentTime = Int(getCurrentBlock().timestamp)
 		let hour = (currentTime + Int(utc) * 3600) / 3600 % 24
 		return hour
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTimezonedWerewolves():{ Int8:{ UInt64: Bool}}{ 
 		return self.timezonedWerewolves
 	}
 	
 	/// computeTimezoneForWerewolves gets werewolves in timezones that needs to be updated and call computeThumbnail
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun computeTimezoneForWerewolves(){ 
 		let utcTimestamp = Int(getCurrentBlock().timestamp)
 		var elapsedHours = (utcTimestamp - self.lastSyncedTimestamp) / 3600 % 24

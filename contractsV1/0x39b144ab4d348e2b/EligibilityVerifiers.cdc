@@ -1,4 +1,18 @@
-// EligibilityVerifiers are used to check the eligibility of accounts
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// EligibilityVerifiers are used to check the eligibility of accounts
 //
 // With drizzle, you can decide who is eligible for your rewards by using our different modes.
 // 1. FLOAT Event. You can limit the eligibility to people who own FLOATs of specific FLOAT Event at the time of the DROP being created.
@@ -42,8 +56,8 @@ contract EligibilityVerifiers{
 		access(all)
 		let usedNFTs:{ UInt64: Address}
 		
-		access(all)
-		fun addUsedNFTs(account: Address, nftTokenIDs: [UInt64])
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addUsedNFTs(account: Address, nftTokenIDs: [UInt64]): Void
 	}
 	
 	access(all)
@@ -51,8 +65,13 @@ contract EligibilityVerifiers{
 		access(all)
 		let type: String
 		
-		access(all)
-		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2
+		access(TMP_ENTITLEMENT_OWNER)
+		fun verify(
+			account: Address,
+			params:{ 
+				String: AnyStruct
+			}
+		): EligibilityVerifiers.VerifyResultV2
 	}
 	
 	access(all)
@@ -96,7 +115,7 @@ contract EligibilityVerifiers{
 			self.type = "Whitelist"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2{ 
 			return VerifyResultV2(isEligible: self.whitelist[account] != nil, usedNFTs: [], extraData:{} )
 		}
@@ -135,7 +154,7 @@ contract EligibilityVerifiers{
 			self.usedNFTs ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2{ 
 			let floatCollection = getAccount(account).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 			if floatCollection == nil{ 
@@ -160,7 +179,7 @@ contract EligibilityVerifiers{
 			return VerifyResultV2(isEligible: false, usedNFTs: [], extraData:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addUsedNFTs(account: Address, nftTokenIDs: [UInt64]){ 
 			for tokenID in nftTokenIDs{ 
 				self.usedNFTs[tokenID] = account
@@ -200,7 +219,7 @@ contract EligibilityVerifiers{
 			self.usedNFTs ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2{ 
 			// let floatEventCollection = getAccount(self.group.host)
 			//	 .getCapability(FLOAT.FLOATEventsPublicPath)
@@ -248,7 +267,7 @@ contract EligibilityVerifiers{
 			return VerifyResultV2(isEligible: false, usedNFTs: [], extraData:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addUsedNFTs(account: Address, nftTokenIDs: [UInt64]){ 
 			for tokenID in nftTokenIDs{ 
 				self.usedNFTs[tokenID] = account
@@ -313,7 +332,7 @@ contract EligibilityVerifiers{
 			self.type = "FLOATGroup"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2{ 
 			// let floatEventCollection = getAccount(self.group.host)
 			//	 .getCapability(FLOAT.FLOATEventsPublicPath)
@@ -380,7 +399,7 @@ contract EligibilityVerifiers{
 			self.type = "FLOATs"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(account: Address, params:{ String: AnyStruct}): VerifyResultV2{ 
 			let floatCollection = getAccount(account).capabilities.get<&FLOAT.Collection>(FLOAT.FLOATCollectionPublicPath).borrow<&FLOAT.Collection>()
 			if floatCollection == nil{ 

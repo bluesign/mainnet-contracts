@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -84,7 +98,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 			self.itemCount = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAdditional():{ String: String}{ 
 			return self.additional
 		}
@@ -121,12 +135,12 @@ contract YahooPartnersCollectible: NonFungibleToken{
 		}
 		
 		// Expose metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata?{ 
 			return YahooPartnersCollectible.itemMetadata[self.itemID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			var royalties: [MetadataViews.Royalty] = []
 			let receiver = getAccount(0x77e38c96fda5c5c5).capabilities.get<&{FungibleToken.Vault}>(/public/flowTokenReceiver)
@@ -134,7 +148,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 			return MetadataViews.Royalties(royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): MetadataViews.Editions{ 
 			let metadata = self.getMetadata() ?? panic("missing metadata")
 			let editionInfo = MetadataViews.Edition(name: metadata.name, number: self.editionNumber, max: metadata.itemCount)
@@ -142,32 +156,32 @@ contract YahooPartnersCollectible: NonFungibleToken{
 			return MetadataViews.Editions(editionList)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalURL(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("https://bay.blocto.app/flow/yahooPartners/".concat(self.id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: YahooPartnersCollectible.CollectionStoragePath, publicPath: YahooPartnersCollectible.CollectionPublicPath, publicCollection: Type<&YahooPartnersCollectible.Collection>(), publicLinkedType: Type<&YahooPartnersCollectible.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-YahooPartnersCollectible.createEmptyCollection(nftType: Type<@YahooPartnersCollectible.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let squareImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://raw.githubusercontent.com/portto/assets/main/nft/flow/yahoo/logo.png"), mediaType: "image/png")
 			let bannerImager = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://raw.githubusercontent.com/portto/assets/main/nft/flow/yahoo/banner.png"), mediaType: "image/png")
 			return MetadataViews.NFTCollectionDisplay(name: "Yahoo Partners", description: "NFT partners of Yahoo Taiwan", externalURL: MetadataViews.ExternalURL("https://bay.blocto.app/market?collections=yahoo_partners"), squareImage: squareImage, bannerImage: bannerImager, socials:{ "twitter": MetadataViews.ExternalURL("https://twitter.com/Yahoo")})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits{ 
 			let metadata = self.getMetadata() ?? panic("missing metadata")
 			return MetadataViews.dictToTraits(dict: metadata.getAdditional(), excludedNames: [])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias{ 
 			let metadata = self.getMetadata() ?? panic("missing metadata")
 			let file = MetadataViews.IPFSFile(cid: metadata.mediaHash, path: nil)
@@ -216,15 +230,15 @@ contract YahooPartnersCollectible: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYahooPartnersCollectible(id: UInt64): &YahooPartnersCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -261,7 +275,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @YahooPartnersCollectible.NFT
 			let id: UInt64 = token.id
 			
@@ -293,7 +307,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the YahooPartnersCollectible.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYahooPartnersCollectible(id: UInt64): &YahooPartnersCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -356,7 +370,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, itemID: UInt64, codeHash: String?){ 
 			pre{ 
 				codeHash == nil || !YahooPartnersCollectible.checkCodeHashUsed(codeHash: codeHash!):
@@ -380,7 +394,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 		// Mints a batch of new NFTs
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, itemID: UInt64, count: Int){ 
 			var index = 0
 			while index < count{ 
@@ -392,7 +406,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 		// registerMetadata
 		// Registers metadata for a itemID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerMetadata(itemID: UInt64, metadata: Metadata){ 
 			pre{ 
 				YahooPartnersCollectible.itemMetadata[itemID] == nil:
@@ -404,7 +418,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 		// updateMetadata
 		// Registers metadata for a itemID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(itemID: UInt64, metadata: Metadata){ 
 			pre{ 
 				YahooPartnersCollectible.itemMetadata[itemID] != nil:
@@ -423,7 +437,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &YahooPartnersCollectible.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&YahooPartnersCollectible.Collection>(YahooPartnersCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust YahooPartnersCollectible.Collection.borowYahooPartnersCollectible to get the correct itemID
@@ -434,7 +448,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 	// getMetadata
 	// Get the metadata for a specific type of YahooPartnersCollectible
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(itemID: UInt64): Metadata?{ 
 		return YahooPartnersCollectible.itemMetadata[itemID]
 	}
@@ -442,7 +456,7 @@ contract YahooPartnersCollectible: NonFungibleToken{
 	// checkCodeHashUsed
 	// Check if a codeHash has been registered
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun checkCodeHashUsed(codeHash: String): Bool{ 
 		var redeemedCodes = YahooPartnersCollectible.account.storage.copy<{String: Bool}>(from: /storage/redeemedCodes)!
 		return redeemedCodes[codeHash] ?? false

@@ -1,4 +1,18 @@
-import MonoCat from "../0x8529aaf64c168952/MonoCat.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MonoCat from "../0x8529aaf64c168952/MonoCat.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -36,7 +50,7 @@ contract Migrate{
 	access(all)
 	event ContractInitialized()
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun recycleMonoCats(tokenIds: [UInt64], acct: AuthAccount, ethAddress: String){ 
 		// get user's collection
 		let col = acct.borrow<&MonoCat.Collection>(from: MonoCat.CollectionStoragePath)
@@ -55,7 +69,7 @@ contract Migrate{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllRetrievableMonoCatsIds(ethAddress: String): [UInt64]{ 
 		let ret: [UInt64] = []
 		for cat in self.storedMonoCats{ 

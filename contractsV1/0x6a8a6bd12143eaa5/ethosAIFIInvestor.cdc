@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for ethosAIFIInvestor
 	
 	This smart contract contains the core functionality for 
@@ -179,15 +193,15 @@ contract ethosAIFIInvestor: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &ethosAIFIInvestor.NFT?
 	}
 	
@@ -215,7 +229,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 		// Takes a NFT and adds it to the collections dictionary
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let myToken <- token as! @ethosAIFIInvestor.NFT
 			emit Deposit(id: myToken.id, to: self.owner?.address)
 			self.ownedNFTs[myToken.id] <-! myToken
@@ -245,7 +259,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &ethosAIFIInvestor.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let reference = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -291,7 +305,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 		// Mints an new NFT
 		// and deposits it in the Admins collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			// create a new NFT 
 			var newNFT <- create NFT(_metadata: metadata)
@@ -304,7 +318,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 		// Batch mints ethosAIFIInvestor NFTs
 		// and deposits in the Admins collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMint(recipient: &{NonFungibleToken.CollectionPublic}, metadataArray: [{String: String}]){ 
 			var i: Int = 0
 			while i < metadataArray.length{ 
@@ -316,12 +330,12 @@ contract ethosAIFIInvestor: NonFungibleToken{
 		
 		// updateCollectionInfo
 		// change piece of collection info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCollectionInfo(key: String, value: AnyStruct){ 
 			ethosAIFIInvestor.collectionInfo[key] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -330,8 +344,8 @@ contract ethosAIFIInvestor: NonFungibleToken{
 	// The interface that Admins can use to give adminRights to other users
 	access(all)
 	resource interface AdminProxyPublic{ 
-		access(all)
-		fun giveAdminRights(cap: Capability<&Admin>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun giveAdminRights(cap: Capability<&ethosAIFIInvestor.Admin>): Void
 	}
 	
 	// AdminProxy is a special procxy resource that
@@ -346,7 +360,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 			self.cap = nil!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun giveAdminRights(cap: Capability<&Admin>){ 
 			pre{ 
 				self.cap == nil:
@@ -355,7 +369,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 			self.cap = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checkAdminRights(): Bool{ 
 			return self.cap.check()
 		}
@@ -371,19 +385,19 @@ contract ethosAIFIInvestor: NonFungibleToken{
 			return self.cap.borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			let admin = self.borrow()
 			admin.mint(recipient: recipient, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMint(recipient: &{NonFungibleToken.CollectionPublic}, metadataArray: [{String: String}]){ 
 			let admin = self.borrow()
 			admin.batchMint(recipient: recipient, metadataArray: metadataArray)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCollectionInfo(key: String, value: AnyStruct){ 
 			let admin = self.borrow()
 			admin.updateCollectionInfo(key: key, value: value)
@@ -404,14 +418,14 @@ contract ethosAIFIInvestor: NonFungibleToken{
 	// getNFTMetadata
 	// public function that anyone can call to get information about a NFT
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTMetadata(_ metadataId: UInt64):{ String: String}{ 
 		return self.metadatas[metadataId]
 	}
 	
 	// getNFTMetadatas
 	// public function that anyone can call to get all NFT metadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTMetadatas(): [{String: String}]{ 
 		return self.metadatas
 	}
@@ -419,7 +433,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 	// getCollectionInfo
 	// public function that anyone can call to get information about the collection
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionInfo():{ String: AnyStruct}{ 
 		let collectionInfo = self.collectionInfo
 		collectionInfo["metadatas"] = self.metadatas
@@ -431,7 +445,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 	// getCollectionAttribute
 	// public function that anyone can call to get a specific piece of collection info
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionAttribute(key: String): AnyStruct{ 
 		return self.collectionInfo[key] ?? panic(key.concat(" is not an attribute in this collection."))
 	}
@@ -439,7 +453,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 	// getOptionalCollectionAttribute
 	// public function that anyone can call to get an optional piece of collection info
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOptionalCollectionAttribute(key: String): AnyStruct?{ 
 		return self.collectionInfo[key]
 	}
@@ -447,7 +461,7 @@ contract ethosAIFIInvestor: NonFungibleToken{
 	// canMint
 	// public function that anyone can call to check if the contract can mint more NFTs
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun canMint(): Bool{ 
 		return self.getCollectionAttribute(key: "minting") as! Bool
 	}

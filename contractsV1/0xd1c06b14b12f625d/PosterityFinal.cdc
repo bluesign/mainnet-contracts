@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -162,15 +176,15 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface PosterityFinalCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPosterityFinal(id: UInt64): &PosterityFinal.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -195,7 +209,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		// Deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			
@@ -222,7 +236,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPosterityFinal(id: UInt64): &PosterityFinal.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -239,7 +253,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(){ 
 			if let storage = &PosterityFinal.nftStorage[(self.owner!).address] as auth(Mutate) &{UInt64: NFT}?{ 
 				for id in storage.keys{ 
@@ -271,7 +285,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 	access(all)
 	resource Administrator{ 
 		// Function to upload the Metadata to the contract.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSVGPath(_randomID: UInt64, _userAddress: Address){ 
 			// Create a SVGStorage resource and store it inside the Admin account
 			// at a unique path generated with the randomID
@@ -284,7 +298,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		
 		// mintNFT mints a new NFT and deposits
 		// it in the recipients collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: Address, signature: String, traits: String, randomNumber: UInt64){ 
 			
 			// Fetch StoragePath for this randomID and recipient	
@@ -300,7 +314,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		}
 		
 		// Fun to add strings to an array(SVG) in pieces
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToSVG(_randomID: UInt64, _stringPiece: String){ 
 			let identifier = "PosteritySVGStorage_".concat(_randomID.toString())
 			let path = StoragePath(identifier: identifier)!
@@ -310,14 +324,14 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		}
 		
 		// create a new Administrator resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Administrator{ 
 			return <-create Administrator()
 		}
 		
 		// fetch the Metadata Storage from the account
 		// change PosterityFinal of collection info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeField(key: String, value: AnyStruct){ 
 			PosterityFinal.collectionInfo[key] = value
 		}
@@ -334,7 +348,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -358,7 +372,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 			return metadatas
 		} */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionInfo():{ String: AnyStruct}{ 
 		let collectionInfo = self.collectionInfo
 		collectionInfo["totalSupply"] = self.totalSupply
@@ -366,7 +380,7 @@ contract PosterityFinal: NonFungibleToken, ViewResolver{
 		return collectionInfo
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionAttribute(key: String): AnyStruct{ 
 		return self.collectionInfo[key] ?? panic(key.concat(" is not an attribute in this collection."))
 	}

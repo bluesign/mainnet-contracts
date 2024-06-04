@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract RelatedAccounts{ 
 	access(all)
 	let storagePath: StoragePath
@@ -46,16 +60,16 @@ contract RelatedAccounts{
 	
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlowAccounts():{ String: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRelatedAccounts(_ network: String):{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllRelatedAccounts():{ String:{ String: String}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(network: String, address: String): Bool
 	}
 	
@@ -65,7 +79,7 @@ contract RelatedAccounts{
 		access(self)
 		let accounts:{ String: AccountInformation}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(network: String, address: String): Bool{ 
 			for account in self.accounts.keys{ 
 				let item = self.accounts[account]!
@@ -77,7 +91,7 @@ contract RelatedAccounts{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlowAccounts():{ String: Address}{ 
 			let items:{ String: Address} ={} 
 			for account in self.accounts.keys{ 
@@ -89,7 +103,7 @@ contract RelatedAccounts{
 			return items
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRelatedAccounts(_ network: String):{ String: String}{ 
 			let items:{ String: String} ={} 
 			for account in self.accounts.keys{ 
@@ -102,7 +116,7 @@ contract RelatedAccounts{
 			return items
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllRelatedAccounts():{ String:{ String: String}}{ 
 			let items:{ String:{ String: String}} ={} 
 			for account in self.accounts.keys{ 
@@ -120,19 +134,19 @@ contract RelatedAccounts{
 			return items
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFlowAccount(name: String, address: Address){ 
 			self.accounts[name] = AccountInformation(name: name, address: address, network: "Flow", otherAddress: nil)
 			emit RelatedAccountAdded(name: name, address: (self.owner!).address, related: address.toString(), network: "Flow")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRelatedAccount(name: String, address: String, network: String){ 
 			self.accounts[name] = AccountInformation(name: name, address: nil, network: network, otherAddress: address)
 			emit RelatedAccountAdded(name: name, address: (self.owner!).address, related: address, network: network)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteAccount(name: String){ 
 			let item = self.accounts.remove(key: name)!
 			emit RelatedAccountRemoved(name: name, address: (self.owner!).address, related: item.address?.toString() ?? item.otherAddress!, network: "Flow")
@@ -143,12 +157,12 @@ contract RelatedAccounts{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyAccounts(): @Accounts{ 
 		return <-create Accounts()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun findRelatedFlowAccounts(address: Address):{ String: Address}{ 
 		let cap = getAccount(address).capabilities.get<&Accounts>(self.publicPath)
 		if !cap.check(){ 

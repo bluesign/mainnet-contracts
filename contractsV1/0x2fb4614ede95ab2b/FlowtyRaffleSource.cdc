@@ -1,4 +1,18 @@
-import FlowtyRaffles from "./FlowtyRaffles.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlowtyRaffles from "./FlowtyRaffles.cdc"
 
 /*
 FlowtyRaffleSource - Contains a basic implementation of RaffleSource which can be used for all `AnyStruct`
@@ -30,27 +44,27 @@ contract FlowtyRaffleSource{
 		access(all)
 		let removeAfterReveal: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntryType(): Type{ 
 			return self.entryType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntryAt(index: Int): AnyStruct{ 
 			return self.entries[index]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntries(): [AnyStruct]{ 
 			return self.entries
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntryCount(): Int{ 
 			return self.entries.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntry(_ v: AnyStruct){ 
 			pre{ 
 				v.getType() == self.entryType:
@@ -59,7 +73,7 @@ contract FlowtyRaffleSource{
 			self.entries.append(v)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntries(_ v: [AnyStruct]){ 
 			pre{ 
 				VariableSizedArrayType(self.entryType) == v.getType():
@@ -68,7 +82,7 @@ contract FlowtyRaffleSource{
 			self.entries.appendAll(v)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealCallback(drawingResult: FlowtyRaffles.DrawingResult){ 
 			if !self.removeAfterReveal{ 
 				return
@@ -83,7 +97,7 @@ contract FlowtyRaffleSource{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createRaffleSource(entryType: Type, removeAfterReveal: Bool): @AnyStructRaffleSource{ 
 		pre{ 
 			entryType.isSubtype(of: Type<AnyStruct>()):

@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract FanTopSerial{ 
 	access(all)
 	struct Box{ 
@@ -11,12 +25,12 @@ contract FanTopSerial{
 		access(self)
 		let stock: [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStock(): [UInt64]{ 
 			return self.stock
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isInStock(_ serialNumber: UInt32): Bool{ 
 			pre{ 
 				serialNumber >= 1:
@@ -53,7 +67,7 @@ contract FanTopSerial{
 			return count
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(size: UInt32, pickTo: UInt32){ 
 			pre{ 
 				size >= pickTo:
@@ -85,12 +99,12 @@ contract FanTopSerial{
 	access(self)
 	let boxes:{ String: Box}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasBox(itemId: String): Bool{ 
 		return self.boxes.containsKey(itemId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBoxRef(itemId: String): &Box?{ 
 		if !self.boxes.containsKey(itemId){ 
 			return nil

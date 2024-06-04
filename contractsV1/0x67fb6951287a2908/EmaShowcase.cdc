@@ -1,4 +1,18 @@
-import MessageCard from "../0xf38fadaba79009cc/MessageCard.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MessageCard from "../0xf38fadaba79009cc/MessageCard.cdc"
 
 access(all)
 contract EmaShowcase{ 
@@ -33,7 +47,7 @@ contract EmaShowcase{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMax(max: Int){ 
 			EmaShowcase.max = max
 			while EmaShowcase.emas.length > EmaShowcase.max{ 
@@ -42,29 +56,29 @@ contract EmaShowcase{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePaused(paused: Bool){ 
 			EmaShowcase.paused = paused
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAllowedTemplateId(templateId: UInt64){ 
 			EmaShowcase.allowedTemplateIds[templateId] = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAllowedTemplateId(templateId: UInt64){ 
 			EmaShowcase.allowedTemplateIds.remove(key: templateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun clearEmas(){ 
 			EmaShowcase.emas = []
 			EmaShowcase.exists ={} 
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addEma(id: UInt64, collectionCapability: Capability<&MessageCard.Collection>){ 
 		pre{ 
 			!EmaShowcase.paused:
@@ -84,7 +98,7 @@ contract EmaShowcase{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEmas(from: Int, upTo: Int): [Ema]{ 
 		if from >= EmaShowcase.emas.length{ 
 			return []

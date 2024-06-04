@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 * SPDX-License-Identifier: UNLICENSED
 */
 
@@ -64,15 +78,15 @@ contract YUP: NonFungibleToken{
 	access(all)
 	resource interface YUPCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYUP(id: UInt64): &YUP.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -94,7 +108,7 @@ contract YUP: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @YUP.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -112,7 +126,7 @@ contract YUP: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowYUP(id: UInt64): &YUP.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -149,7 +163,7 @@ contract YUP: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintYUP(recipient: &{NonFungibleToken.CollectionPublic}, influencerID: UInt32, editionID: UInt32, serialNumber: UInt32, url: String){ 
 			emit Minted(id: YUP.totalSupply, influencerID: influencerID, editionID: editionID, serialNumber: serialNumber, url: url)
 			recipient.deposit(token: <-create YUP.NFT(initID: YUP.totalSupply, initInfluencerID: influencerID, initEditionID: editionID, initSerialNumber: serialNumber, initUrl: url))
@@ -157,7 +171,7 @@ contract YUP: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &YUP.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&YUP.Collection>(YUP.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.borrowYUP(id: itemID)

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FindViews from "./FindViews.cdc"
 
@@ -103,23 +117,23 @@ contract FindLeaseMarket{
 	
 	// ========================================
 	/* Get Tenant */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTenant(_ tenant: Address): &FindMarket.Tenant{ 
 		return (FindMarket.getTenantCapability(tenant)!).borrow()!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemTypes(): [Type]{ 
 		return self.saleItemTypes
 	}
 	
 	/* Get SaleItemCollections */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCollectionTypes(): [Type]{ 
 		return self.saleItemCollectionTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCollectionCapabilities(tenantRef: &FindMarket.Tenant, address: Address): [
 		Capability<&{FindLeaseMarket.SaleItemCollectionPublic}>
 	]{ 
@@ -135,7 +149,7 @@ contract FindLeaseMarket{
 		return caps
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCollectionCapability(
 		tenantRef: &FindMarket.Tenant,
 		marketOption: String,
@@ -151,7 +165,7 @@ contract FindLeaseMarket{
 	}
 	
 	/* Get Sale Reports and Sale Item */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertOperationValid(tenant: Address, name: String, marketOption: String): &{SaleItem}{ 
 		let tenantRef = self.getTenant(tenant)
 		let address =
@@ -175,7 +189,7 @@ contract FindLeaseMarket{
 	}
 	
 	/* Get Sale Reports and Sale Item */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleInformation(
 		tenant: Address,
 		name: String,
@@ -200,7 +214,7 @@ contract FindLeaseMarket{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemReport(tenant: Address, address: Address, getLeaseInfo: Bool):{ 
 		String: FindLeaseMarket.SaleItemCollectionReport
 	}{ 
@@ -216,7 +230,7 @@ contract FindLeaseMarket{
 		return report
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItems(tenant: Address, name: String, getLeaseInfo: Bool):{ 
 		String: FindLeaseMarket.SaleItemCollectionReport
 	}{ 
@@ -234,7 +248,7 @@ contract FindLeaseMarket{
 		return report
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLeaseListing(tenant: Address, name: String, getLeaseInfo: Bool):{ 
 		String: FindLeaseMarket.SaleItemInformation
 	}{ 
@@ -322,17 +336,17 @@ contract FindLeaseMarket{
 	}
 	
 	/* Get Bid Collections */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidTypes(): [Type]{ 
 		return self.marketBidTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidCollectionTypes(): [Type]{ 
 		return self.marketBidCollectionTypes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidCollectionCapabilities(tenantRef: &FindMarket.Tenant, address: Address): [
 		Capability<&{FindLeaseMarket.MarketBidCollectionPublic}>
 	]{ 
@@ -346,7 +360,7 @@ contract FindLeaseMarket{
 		return caps
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketBidCollectionCapability(
 		tenantRef: &FindMarket.Tenant,
 		marketOption: String,
@@ -361,7 +375,7 @@ contract FindLeaseMarket{
 		panic("Cannot find market option : ".concat(marketOption))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBid(
 		tenant: Address,
 		address: Address,
@@ -385,7 +399,7 @@ contract FindLeaseMarket{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBidsReport(tenant: Address, address: Address, getLeaseInfo: Bool):{ 
 		String: FindLeaseMarket.BidItemCollectionReport
 	}{ 
@@ -448,7 +462,7 @@ contract FindLeaseMarket{
 		return FindLeaseMarket.BidItemCollectionReport(items: info, ghosts: ghost)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertBidOperationValid(
 		tenant: Address,
 		address: Address,
@@ -495,16 +509,16 @@ contract FindLeaseMarket{
 		access(all)
 		let uuid: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun valid(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLease(): FIND.LeaseInformation
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun owner(): Address
 		
 		access(contract)
@@ -538,22 +552,22 @@ contract FindLeaseMarket{
 			return self.cap.borrow() ?? panic("The capability of pointer is not linked.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLease(): FIND.LeaseInformation{ 
 			return self.borrow().getLease(self.name) ?? panic("The owner doesn't hold the lease anymore".concat(self.name))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUID(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun owner(): Address{ 
 			return self.cap.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun valid(): Bool{ 
 			if !self.cap.check() || !(self.cap.borrow()!).getNames().contains(self.name){ 
 				return false
@@ -594,17 +608,17 @@ contract FindLeaseMarket{
 			return self.cap.borrow() ?? panic("The capability of pointer is not linked.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLease(): FIND.LeaseInformation{ 
 			return self.borrow().getLease(self.name) ?? panic("The owner doesn't hold the lease anymore".concat(self.name))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUID(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun valid(): Bool{ 
 			if !self.cap.check() || !(self.cap.borrow()!).getNames().contains(self.name){ 
 				return false
@@ -627,7 +641,7 @@ contract FindLeaseMarket{
 			self.borrow().move(name: self.name, profile: profile!, to: leases!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun owner(): Address{ 
 			return self.cap.address
 		}
@@ -721,71 +735,71 @@ contract FindLeaseMarket{
 	access(all)
 	resource interface SaleItem{ 
 		//this is the type of sale this is, active, cancelled etc
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleType(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeller(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyer(): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerName(): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyerName(): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toLeaseInfo(): FindLeaseMarket.LeaseInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkPointer(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingTypeIdentifier(): String
 		
 		//the Type of the item for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type
 		
 		//The id of the nft for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuction(): AuctionItem?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFtType(): Type //The type of FT used for this sale item
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValidUntil(): UFix64? //A timestamp that says when this item is valid until
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleItemExtraField():{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64
 	}
 	
 	access(all)
 	resource interface Bid{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerAddress(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidExtraField():{ String: AnyStruct}
 	}
 	
@@ -948,28 +962,28 @@ contract FindLeaseMarket{
 	
 	access(all)
 	resource interface SaleItemCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameSales(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameSale(_ name: String): Bool
 		
 		access(account)
 		fun borrowSaleItem(_ name: String): &{SaleItem}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type
 	}
 	
 	access(all)
 	resource interface MarketBidCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameBids(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameBid(_ name: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidType(): Type
 		
 		access(account)

@@ -1,4 +1,18 @@
-// This is an example implementation of a Flow Non-Fungible Token
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This is an example implementation of a Flow Non-Fungible Token
 // It is not part of the official standard but it assumed to be
 // very similar to how many NFTs would implement the core functionality.
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -59,7 +73,7 @@ contract NftItems: NonFungibleToken{
 		access(self)
 		var metadataobjs:{ UInt64:{ String: String}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataobjs():{ UInt64:{ String: String}}{ 
 			return self.metadataobjs
 		}
@@ -67,7 +81,7 @@ contract NftItems: NonFungibleToken{
 		access(self)
 		var properties:{ UInt64:{ String: String}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProperties():{ UInt64:{ String: String}}{ 
 			return self.properties
 		}
@@ -75,7 +89,7 @@ contract NftItems: NonFungibleToken{
 		access(self)
 		let metadata:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -153,15 +167,15 @@ contract NftItems: NonFungibleToken{
 	access(all)
 	resource interface NftItemsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftItems(id: UInt64): &NftItems.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -192,7 +206,7 @@ contract NftItems: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NftItems.NFT
 			let id: UInt64 = token.id
 			
@@ -215,7 +229,7 @@ contract NftItems: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftItems(id: UInt64): &NftItems.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -262,7 +276,7 @@ contract NftItems: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, collectionthumbnail: String, metadataobjs:{ UInt64:{ String: String}}, properties:{ UInt64:{ String: String}}, cid: String, path: String, traitName: String, traitValue: String, metadata:{ String: AnyStruct}){ 
 			let metadata:{ String: AnyStruct} ={} 
 			let currentBlock = getCurrentBlock()

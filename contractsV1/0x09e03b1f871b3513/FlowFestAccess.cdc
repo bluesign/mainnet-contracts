@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: FlowFestAccess Contract
    
 	This contract allows users to redeem their FlowFest NFTs to gain access to thefabricant.studio
@@ -23,7 +37,7 @@ contract FlowFestAccess{
 	var accountsVerified:{ Address: UInt64}
 	
 	//redeem a flowfest nft by adding it into accountsVerified mapping if not already
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun giveAccess(
 		id: UInt64,
 		collectionCap: Capability<&{TheFabricantMysteryBox_FF1.FabricantCollectionPublic}>
@@ -49,13 +63,13 @@ contract FlowFestAccess{
 	
 	// get dictionary of accounts that are verified and the id
 	// of the flowfest nft that it used
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccountsVerified():{ Address: UInt64}{ 
 		return FlowFestAccess.accountsVerified
 	}
 	
 	// check if account is already verified
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isAccountVerified(address: Address): Bool{ 
 		for key in FlowFestAccess.accountsVerified.keys{ 
 			if key == address{ 

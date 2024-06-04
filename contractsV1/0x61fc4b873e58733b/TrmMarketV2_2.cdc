@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 	TrmMarketV2_2.cdc
 
@@ -304,19 +318,19 @@ contract TrmMarketV2_2{
 			paymentID: String
 		): UInt64
 		
-		access(all)
-		fun getTransferListing(tokenID: UInt64): &TransferListing?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getTransferListing(tokenID: UInt64): &TrmMarketV2_2.TransferListing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentListing(tokenID: UInt64): &RentListing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsset(id: UInt64): &TrmAssetV2_2.NFT?{ 
 			/// If the result isn't nil, the id of the returned reference
 			/// should be the same as the argument to the function
@@ -631,7 +645,7 @@ contract TrmMarketV2_2{
 		/// Parameters: tokenID: The ID of the NFT whose listing to get
 		///
 		/// Returns: TransferListing: The transfer listing of the token including price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransferListing(tokenID: UInt64): &TransferListing?{ 
 			if self.transferListings.containsKey(tokenID){ 
 				return &self.transferListings[tokenID] as &TransferListing?
@@ -644,7 +658,7 @@ contract TrmMarketV2_2{
 		/// Parameters: tokenID: The ID of the NFT whose listing to get
 		///
 		/// Returns: RentListing: The rent listing of the token including price, rental period
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentListing(tokenID: UInt64): &RentListing?{ 
 			if self.rentListings.containsKey(tokenID){ 
 				return &self.rentListings[tokenID] as &RentListing?
@@ -653,13 +667,13 @@ contract TrmMarketV2_2{
 		}
 		
 		/// getTransferIDs returns an array of token IDs that are for transfer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransferIDs(): [UInt64]{ 
 			return self.transferListings.keys
 		}
 		
 		/// getRentIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentIDs(): [UInt64]{ 
 			return self.rentListings.keys
 		}
@@ -669,7 +683,7 @@ contract TrmMarketV2_2{
 		/// Parameters: id: The ID of the token to borrow a reference to
 		///
 		/// Returns: &TrmAssetV2_2.NFT? Optional reference to a token for transfer so that the caller can read its data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsset(id: UInt64): &TrmAssetV2_2.NFT?{ 
 			/// first check this collection
 			if self.transferListings[id] != nil || self.rentListings[id] != nil{ 
@@ -681,7 +695,7 @@ contract TrmMarketV2_2{
 	}
 	
 	/// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&TrmAssetV2_2.Collection>
 	): @SaleCollection{ 
@@ -689,7 +703,7 @@ contract TrmMarketV2_2{
 	}
 	
 	// emitCreateSaleCollectionEvent emits events for asset collection initialization
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun emitCreateSaleCollectionEvent(userAccountAddress: Address){ 
 		emit SaleCollectionInitialized(userAccountAddress: userAccountAddress)
 	}
@@ -698,7 +712,7 @@ contract TrmMarketV2_2{
 	/// allows the admin to perform important functions
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForTransfer(
 			saleCollectionAddress: Address,
 			tokenID: UInt64,
@@ -723,7 +737,7 @@ contract TrmMarketV2_2{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForRent(
 			saleCollectionAddress: Address,
 			tokenID: UInt64,
@@ -744,7 +758,7 @@ contract TrmMarketV2_2{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchListForTransfer(
 			saleCollectionAddress: Address,
 			tokenIDs: [
@@ -771,7 +785,7 @@ contract TrmMarketV2_2{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchListForRent(
 			saleCollectionAddress: Address,
 			tokenIDs: [
@@ -794,7 +808,7 @@ contract TrmMarketV2_2{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelTransfer(saleCollectionAddress: Address, tokenID: UInt64){ 
 			let saleCollectionCapability =
 				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_2.SaleCollection>(
@@ -806,7 +820,7 @@ contract TrmMarketV2_2{
 			saleCollectionCapability.cancelTransfer(tokenID: tokenID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelRent(saleCollectionAddress: Address, tokenID: UInt64){ 
 			let saleCollectionCapability =
 				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_2.SaleCollection>(
@@ -818,7 +832,7 @@ contract TrmMarketV2_2{
 			saleCollectionCapability.cancelRent(tokenID: tokenID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCancelTransfer(saleCollectionAddress: Address, tokenIDs: [UInt64]){ 
 			let saleCollectionCapability =
 				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_2.SaleCollection>(
@@ -830,7 +844,7 @@ contract TrmMarketV2_2{
 			saleCollectionCapability.batchCancelTransfer(tokenIDs: tokenIDs)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCancelRent(saleCollectionAddress: Address, tokenIDs: [UInt64]){ 
 			let saleCollectionCapability =
 				getAccount(saleCollectionAddress).capabilities.get<&TrmMarketV2_2.SaleCollection>(
@@ -842,7 +856,7 @@ contract TrmMarketV2_2{
 			saleCollectionCapability.batchCancelRent(tokenIDs: tokenIDs)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(
 			saleCollectionAddress: Address,
 			tokenID: UInt64,
@@ -867,7 +881,7 @@ contract TrmMarketV2_2{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rent(
 			saleCollectionAddress: Address,
 			tokenID: UInt64,

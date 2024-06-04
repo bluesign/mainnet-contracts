@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -52,26 +66,26 @@ contract Marketplace{
 	//
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenID: UInt64,
 			recipientCap: Capability<&{Art.CollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleItem(tokenID: UInt64): MarketplaceData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUIDforSaleItem(tokenID: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listSaleItems(): [MarketplaceData]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContent(tokenID: UInt64): String
 	}
 	
@@ -125,22 +139,22 @@ contract Marketplace{
 			self.prices ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUIDforSaleItem(tokenID: UInt64): UInt64{ 
 			return self.forSale[tokenID]?.uuid!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContent(tokenID: UInt64): String{ 
 			return self.forSale[tokenID]?.content()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtType(tokenID: UInt64): String{ 
 			return self.forSale[tokenID]?.metadata?.type!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listSaleItems(): [MarketplaceData]{ 
 			var saleItems: [MarketplaceData] = []
 			for id in self.getIDs(){ 
@@ -149,7 +163,7 @@ contract Marketplace{
 			return saleItems
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArt(id: UInt64): &{Art.Public}?{ 
 			if self.forSale[id] != nil{ 
 				return (&self.forSale[id] as &Art.NFT?)!
@@ -158,7 +172,7 @@ contract Marketplace{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @Art.NFT{ 
 			let price = self.prices.remove(key: tokenID)
 			// remove and return the token
@@ -169,7 +183,7 @@ contract Marketplace{
 		}
 		
 		// listForSale lists an NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @Art.NFT, price: UFix64){ 
 			emit SaleItem(id: token.id, seller: self.ownerVault.address, price: price, active: true, title: token.metadata.name, artist: token.metadata.artist, edition: token.metadata.edition, maxEdition: token.metadata.maxEdition, cacheKey: token.cacheKey())
 			let id = token.id
@@ -184,7 +198,7 @@ contract Marketplace{
 		}
 		
 		// changePrice changes the price of a token that is currently for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			self.prices[tokenID] = newPrice
 			emit PriceChanged(id: tokenID, newPrice: newPrice)
@@ -193,7 +207,7 @@ contract Marketplace{
 		}
 		
 		// purchase lets a user send tokens to purchase an NFT that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, recipientCap: Capability<&{Art.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.forSale[tokenID] != nil && self.prices[tokenID] != nil:
@@ -227,7 +241,7 @@ contract Marketplace{
 		}
 		
 		// idPrice returns the price of a specific token in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleItem(tokenID: UInt64): MarketplaceData{ 
 			let metadata = self.forSale[tokenID]?.metadata
 			let cacheKey = self.forSale[tokenID]?.cacheKey()
@@ -235,19 +249,19 @@ contract Marketplace{
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(ownerVault: Capability<&{FungibleToken.Receiver}>): @SaleCollection{ 
 		return <-create SaleCollection(vault: ownerVault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	init(){ 
 		self.CollectionPublicPath = /public/versusArtMarketplace
 		self.CollectionStoragePath = /storage/versusArtMarketplace

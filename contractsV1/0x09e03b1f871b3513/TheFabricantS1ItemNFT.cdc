@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: TheFabricantS1ItemNFT Contract
    
 	TheFabricantS1ItemNFT NFTs are mintable by anyone, but requires a combination of 1 
@@ -161,7 +175,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 			self.mutable = mutable
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataImmutable(){ 
 			pre{ 
 				self.mutable == true:
@@ -170,7 +184,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 			self.mutable = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataValue(metadataValue: String){ 
 			pre{ 
 				self.mutable == true:
@@ -211,20 +225,20 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// change a mutable metadata in the metadata struct
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(metadataKey: String, metadataValue: String){ 
 			(self.metadatas[metadataKey]!).setMetadataValue(metadataValue: metadataValue)
 			emit ItemMetadataChanged(itemDataID: self.itemDataID, metadataKey: metadataKey, metadataValue: metadataValue)
 		}
 		
 		// prevent changing of a metadata in the metadata struct
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataKeyImmutable(metadataKey: String){ 
 			(self.metadatas[metadataKey]!).setMetadataImmutable()
 			emit ItemMetadataImmutable(itemDataID: self.itemDataID, metadataKey: metadataKey)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: TheFabricantS1ItemNFT.Metadata}{ 
 			return self.metadatas
 		}
@@ -350,7 +364,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// get a reference to the garment that item stores
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGarment(): &TheFabricantS1GarmentNFT.NFT?{ 
 			let garmentOptional <- self.garment <- nil
 			let garment <- garmentOptional!
@@ -360,7 +374,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// get a reference to the material that item stores
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMaterial(): &TheFabricantS1MaterialNFT.NFT?{ 
 			let materialOptional <- self.material <- nil
 			let material <- materialOptional!
@@ -376,7 +390,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 	}
 	
 	//destroy item if it is considered dead
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun cleanDeadItems(item: @TheFabricantS1ItemNFT.NFT){ 
 		pre{ 
 			item.isDead:
@@ -387,7 +401,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 	
 	// mint the NFT, based on a combination of garment, material, primaryColor and secondaryColor. 
 	// The itemData that is used to mint the Item is based on the garment and material' garmentDataID and materialDataID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(name: String, royaltyVault: TheFabricantS1ItemNFT.Royalty, garment: @TheFabricantS1GarmentNFT.NFT, material: @TheFabricantS1MaterialNFT.NFT, primaryColor: String, secondaryColor: String): @NFT{ 
 		let garmentDataID = garment.garment.garmentDataID
 		let materialDataID = material.material.materialDataID
@@ -411,18 +425,18 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 	access(all)
 	resource interface ItemCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &TheFabricantS1ItemNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -447,7 +461,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun split(id: UInt64, garmentCap: Capability<&{TheFabricantS1GarmentNFT.GarmentCollectionPublic}>, materialCap: Capability<&{TheFabricantS1MaterialNFT.MaterialCollectionPublic}>){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("Cannot withdraw: Item does not exist in the collection")
 			let item <- token as! @TheFabricantS1ItemNFT.NFT
@@ -478,7 +492,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Items
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -497,7 +511,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			//todo: someFunction that transfers royalty
 			// Cast the deposited token as  NFT to make sure
 			// it is the correct type
@@ -521,7 +535,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -560,7 +574,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &TheFabricantS1ItemNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -600,7 +614,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		// create itemdataid allocation based on the 
 		// garmentDataID, materialDataID, primaryColor and secondaryColor
 		// and create an itemdata struct based on it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItemDataWithAllocation(garmentDataID: UInt32, materialDataID: UInt32, primaryColor: String, secondaryColor: String, metadatas:{ String: TheFabricantS1ItemNFT.Metadata}, coCreator: Address): UInt32{ 
 			
 			// check whether colors are valid colors
@@ -640,7 +654,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// change the metadatavalue of an itemData
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(itemDataID: UInt32, metadataKey: String, metadataValue: String){ 
 			let itemDataTemp = TheFabricantS1ItemNFT.itemDatas[itemDataID]!
 			itemDataTemp.setMetadata(metadataKey: metadataKey, metadataValue: metadataValue)
@@ -648,7 +662,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// make the metadatavalue of an itemData immutable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataImmutable(itemData: UInt32, metadataKey: String){ 
 			let itemDataTemp = TheFabricantS1ItemNFT.itemDatas[itemData]!
 			itemDataTemp.setMetadataKeyImmutable(metadataKey: metadataKey)
@@ -656,7 +670,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// add the primaryColor to array of availablePrimaryColors
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPrimaryColor(color: String){ 
 			pre{ 
 				!TheFabricantS1ItemNFT.availablePrimaryColors.contains(color):
@@ -667,7 +681,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// add the primaryColor to array of availablePrimaryColors
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSecondaryColor(color: String){ 
 			pre{ 
 				!TheFabricantS1ItemNFT.availableSecondaryColors.contains(color):
@@ -678,7 +692,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// add the primaryColor to array of availablePrimaryColors
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePrimaryColor(color: String){ 
 			pre{ 
 				TheFabricantS1ItemNFT.availablePrimaryColors.contains(color):
@@ -696,7 +710,7 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		}
 		
 		// add the primaryColor to array of availablePrimaryColors
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSecondaryColor(color: String){ 
 			pre{ 
 				TheFabricantS1ItemNFT.availableSecondaryColors.contains(color):
@@ -715,27 +729,27 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSplittable(){ 
 			TheFabricantS1ItemNFT.isSplittable = true
 			emit ItemNFTNowSplittable()
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeItemDataNumberMintable(itemDataID: UInt32, number: UInt32){ 
 			TheFabricantS1ItemNFT.numberMintablePerItemData[itemDataID] = number
 			emit numberItemDataMintableChanged(itemDataID: itemDataID, number: number)
 		}
 		
 		// Retire itemData so that it cannot be used to mint anymore
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireItemData(itemDataID: UInt32){ 
 			pre{ 
 				TheFabricantS1ItemNFT.isItemDataRetired[itemDataID] != nil:
@@ -762,68 +776,68 @@ contract TheFabricantS1ItemNFT: NonFungibleToken{
 	}
 	
 	// get dictionary of numberMintedPerItem
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerItem():{ UInt32: UInt32}{ 
 		return TheFabricantS1ItemNFT.numberMintedPerItem
 	}
 	
 	// get how many Items with itemDataID are minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemNumberMinted(id: UInt32): UInt32{ 
 		let numberMinted = TheFabricantS1ItemNFT.numberMintedPerItem[id] ?? panic("itemDataID not found")
 		return numberMinted
 	}
 	
 	// get the ItemData of a specific id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemData(id: UInt32): ItemData{ 
 		let itemData = TheFabricantS1ItemNFT.itemDatas[id] ?? panic("itemDataID not found")
 		return itemData
 	}
 	
 	// get the map of item data allocations
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDataAllocations():{ String: UInt32}{ 
 		let itemDataAllocation = TheFabricantS1ItemNFT.itemDataAllocation
 		return itemDataAllocation
 	}
 	
 	// get the itemData allocation from the garment and material dataID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDataAllocation(garmentDataID: UInt32, materialDataID: UInt32, primaryColor: String, secondaryColor: String): UInt32{ 
 		let itemDataAllocation = TheFabricantS1ItemNFT.itemDataAllocation[TheFabricantS1ItemNFT.getUniqueString(garmentDataID: garmentDataID, materialDataID: materialDataID, primaryColor: primaryColor, secondaryColor: secondaryColor)] ?? panic("garment and material dataID pair not allocated")
 		return itemDataAllocation
 	}
 	
 	// get all ItemDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDatas():{ UInt32: ItemData}{ 
 		return TheFabricantS1ItemNFT.itemDatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailablePrimaryColors(): [String]{ 
 		return TheFabricantS1ItemNFT.availablePrimaryColors
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableSecondaryColors(): [String]{ 
 		return TheFabricantS1ItemNFT.availableSecondaryColors
 	}
 	
 	// get dictionary of itemdataids and whether they are retired
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDatasRetired():{ UInt32: Bool}{ 
 		return TheFabricantS1ItemNFT.isItemDataRetired
 	}
 	
 	// get bool of if itemdataid is retired
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemDataRetired(itemDataID: UInt32): Bool?{ 
 		return TheFabricantS1ItemNFT.isItemDataRetired[itemDataID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUniqueString(garmentDataID: UInt32, materialDataID: UInt32, primaryColor: String, secondaryColor: String): String{ 
 		return garmentDataID.toString().concat("_").concat(materialDataID.toString()).concat("_").concat(primaryColor).concat("_").concat(secondaryColor)
 	}

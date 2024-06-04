@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 /*
 	Description: Central Smart Contract for arbitrary ZeedzItems
@@ -80,7 +94,7 @@ contract ZeedzItems: NonFungibleToken{
 			self.metadata = initMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -94,15 +108,15 @@ contract ZeedzItems: NonFungibleToken{
 	access(all)
 	resource interface ZeedzItemsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowZeedzItem(id: UInt64): &ZeedzItems.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -119,8 +133,8 @@ contract ZeedzItems: NonFungibleToken{
 	// 
 	access(all)
 	resource interface ZeedzItemsCollectionPrivate{ 
-		access(all)
-		fun burn(burnID: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun burn(burnID: UInt64): Void
 	}
 	
 	// 
@@ -142,7 +156,7 @@ contract ZeedzItems: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(burnID: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: burnID) ?? panic("Not able to find specified NFT within the owner's collection")
 			destroy token
@@ -153,7 +167,7 @@ contract ZeedzItems: NonFungibleToken{
 		// Takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ZeedzItems.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -181,7 +195,7 @@ contract ZeedzItems: NonFungibleToken{
 		// Gets a reference to an NFT in the collection as a ZeedzItem,
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the ZeedzItem.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowZeedzItem(id: UInt64): &ZeedzItems.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -232,7 +246,7 @@ contract ZeedzItems: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, metadata:{ String: String}){ 
 			emit Minted(id: ZeedzItems.totalSupply, metadata: metadata)
 			// deposit it in the recipient's account using their reference
@@ -247,7 +261,7 @@ contract ZeedzItems: NonFungibleToken{
 	// If it has a collection but does not contain the itemId, return nil.
 	// If it has a collection and that collection contains the itemId, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &ZeedzItems.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&ZeedzItems.Collection>(ZeedzItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust ZeedzItems.Collection.borowZeedzItem to get the correct itemID

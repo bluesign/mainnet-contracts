@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract Items: NonFungibleToken{ 
@@ -149,7 +163,7 @@ contract Items: NonFungibleToken{
 			Items.pieceDatas[self.pieceID] = PieceData(metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -157,7 +171,7 @@ contract Items: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintItems(): @NFT{ 
 			
 			// Mint the new item
@@ -169,7 +183,7 @@ contract Items: NonFungibleToken{
 			return <-newItems
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintItems(quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -180,12 +194,12 @@ contract Items: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtist(): UInt32{ 
 			return self.artistID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMinted(): UInt32{ 
 			return self.numberMinted
 		}
@@ -218,12 +232,12 @@ contract Items: NonFungibleToken{
 			self.numberMinted = piece.numberMinted
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtist(): UInt32{ 
 			return self.artistID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMinted(): UInt32{ 
 			return self.numberMinted
 		}
@@ -282,7 +296,7 @@ contract Items: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createArtist(metadata:{ String: String}): UInt32{ 
 			// Create the new Artist
 			var newArtist = Artist(metadata: metadata)
@@ -297,7 +311,7 @@ contract Items: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPiece(artistID: UInt32, metadata:{ String: String}): UInt32{ 
 			
 			// Create the new Set
@@ -313,7 +327,7 @@ contract Items: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPiece(pieceID: UInt32): &Piece{ 
 			pre{ 
 				Items.pieces[pieceID] != nil:
@@ -327,7 +341,7 @@ contract Items: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -336,18 +350,18 @@ contract Items: NonFungibleToken{
 	access(all)
 	resource interface ItemsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItems(id: UInt64): &Items.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -391,7 +405,7 @@ contract Items: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Itemss
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -410,7 +424,7 @@ contract Items: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Items NFT to make sure
 			// it is the correct type
@@ -434,7 +448,7 @@ contract Items: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -472,7 +486,7 @@ contract Items: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItems(id: UInt64): &Items.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -503,17 +517,17 @@ contract Items: NonFungibleToken{
 		return <-create Items.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllArtists(): [Items.Artist]{ 
 		return Items.artistDatas.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArtistMetaData(artistID: UInt32):{ String: String}?{ 
 		return Items.artistDatas[artistID]?.metadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPieceData(pieceID: UInt32): QueryPieceData?{ 
 		if Items.pieces[pieceID] == nil{ 
 			return nil
@@ -522,7 +536,7 @@ contract Items: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isPieceLocked(pieceID: UInt32): Bool?{ 
 		// Don't force a revert if the pieceID is invalid
 		return Items.pieces[pieceID]?.locked

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NFTStorefront from "./../../standardsV1/NFTStorefront.cdc"
 
@@ -105,7 +119,7 @@ contract SequelMarketplace{
 	)
 	
 	// listToken
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun listToken(
 		storefront: &NFTStorefront.Storefront,
 		nftProviderCapability: Capability<
@@ -160,7 +174,7 @@ contract SequelMarketplace{
 		return listingID
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyToken(
 		storefrontAddress: Address,
 		storefront: &NFTStorefront.Storefront,
@@ -186,7 +200,7 @@ contract SequelMarketplace{
 		return <-item
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun payForMintedTokens(
 		unitPrice: UFix64,
 		numEditions: UInt64,
@@ -233,7 +247,7 @@ contract SequelMarketplace{
 	// withdrawToken
 	// Cancel sale
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawToken(
 		storefrontAddress: Address,
 		storefront: &NFTStorefront.Storefront,
@@ -256,7 +270,7 @@ contract SequelMarketplace{
 	
 	// buildPayments constructs a list of payments based on the given Evengreen profile.
 	// Any residual amount goes to the given seller's address.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buildPayments(
 		profile: Evergreen.Profile,
 		seller: Address,

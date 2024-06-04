@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: 
 
 	authors: Matthew Balazsi (matthew@mint.store), Joseph Djenandji (joseph@mint.store)
@@ -260,7 +274,7 @@ contract MintStoreItem: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintItem(): @NFT{ 
 			pre{ 
 				self.numberOfItemsMinted < self.printingLimit ?? 4294967295 as UInt32:
@@ -290,7 +304,7 @@ contract MintStoreItem: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Items that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintItems(quantity: UInt32): @Collection{ 
 			pre{ 
 				self.numberOfItemsMinted + quantity <= self.printingLimit ?? 4294967295 as UInt32:
@@ -317,7 +331,7 @@ contract MintStoreItem: NonFungibleToken{
 		// 
 		// Returns: the EditionID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(updates:{ String: String}, suffix: String): UInt32{ 
 			
 			// prevalidation 
@@ -487,7 +501,7 @@ contract MintStoreItem: NonFungibleToken{
 		//  name: The name of the Edition
 		//  printingLimit: We can only mint this quantity of NFTs. If printingLimit is nil there is no limit (theoretically UInt32.max)
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(merchantID: UInt32, metadata:{ String: String}, name: String, printingLimit: UInt32?){ 
 			// Create the new Edition
 			var newEdition <- create Edition(merchantID: merchantID, metadata: metadata, name: name, printingLimit: printingLimit)
@@ -506,7 +520,7 @@ contract MintStoreItem: NonFungibleToken{
 		// Returns: A reference to the Edition with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEdition(editionID: UInt32): &Edition{ 
 			pre{ 
 				MintStoreItem.editions[editionID] != nil:
@@ -531,7 +545,7 @@ contract MintStoreItem: NonFungibleToken{
 		// 
 		// Returns: the EditionID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEditionMetadata(editionID: UInt32, updates:{ String: String}, suffix: String): UInt32{ 
 			pre{ 
 				MintStoreItem.editions[editionID] != nil:
@@ -544,7 +558,7 @@ contract MintStoreItem: NonFungibleToken{
 			return editionID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMerchant(merchantName: String): UInt32{ 
 			pre{ 
 				merchantName != nil:
@@ -561,7 +575,7 @@ contract MintStoreItem: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMerchant(merchantID: UInt32, merchantName: String): UInt32{ 
 			pre{ 
 				MintStoreItem.merchants[merchantID] != nil:
@@ -578,7 +592,7 @@ contract MintStoreItem: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			let newID = MintStoreItem.nextAdminID
 			// Increment the ID so that it isn't used again
@@ -593,18 +607,18 @@ contract MintStoreItem: NonFungibleToken{
 	access(all)
 	resource interface MintStoreItemCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMintStoreItem(id: UInt64): &MintStoreItem.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -654,7 +668,7 @@ contract MintStoreItem: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn MintStore items
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -674,7 +688,7 @@ contract MintStoreItem: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a MintStoreItem NFT to make sure
 			// it is the correct type
@@ -698,7 +712,7 @@ contract MintStoreItem: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -745,7 +759,7 @@ contract MintStoreItem: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMintStoreItem(id: UInt64): &MintStoreItem.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -795,25 +809,25 @@ contract MintStoreItem: NonFungibleToken{
 		return <-create MintStoreItem.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyMintStoreItemCollection(): @MintStoreItem.Collection{ 
 		return <-create MintStoreItem.Collection()
 	}
 	
 	// getMerchantIDs returns an array of the merchant IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMerchantIDs(): [UInt32]{ 
 		return self.merchants.keys
 	}
 	
 	// getMerchantNames returns an array of the merchant Names
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMerchantNames(): [String]{ 
 		return self.merchants.values
 	}
 	
 	// getMerchant returns the merchant name with a given merchantID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMerchant(merchantID: UInt32): String?{ 
 		return self.merchants[merchantID]
 	}

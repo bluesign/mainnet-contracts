@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 	TrmAssetMSV1_0.cdc
 
@@ -91,7 +105,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 		case public
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assetTypeToString(_ assetType: AssetType): String{ 
 		switch assetType{ 
 			case AssetType.private:
@@ -103,7 +117,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stringToAssetType(_ assetTypeStr: String): AssetType{ 
 		switch assetTypeStr{ 
 			case "private":
@@ -685,126 +699,126 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowAsset(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowAsset(id: UInt64): &TrmAssetMSV1_0.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetInfo(id: UInt64): AssetData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(id: UInt64): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMasterTokenID(id: UInt64): UInt64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalTokens(id: UInt64): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwners(id: UInt64):{ String: UInt32}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwner(id: UInt64, owner: String): UInt32?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownerExists(id: UInt64, owner: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRenters(id: UInt64): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun renterExists(id: UInt64, renter: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInvitees(id: UInt64): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteeExists(id: UInt64, invitee: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetType(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiryTimestamp(id: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExpired(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValid(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValid(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataEntry(id: UInt64, metadataEntry: String): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSongID(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKID(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getURL(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnailURL(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getORH(id: UInt64): [String]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getISRC(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPerformers(id: UInt64): [String]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLyricists(id: UInt64): [String]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getComposers(id: UInt64): [String]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArrangers(id: UInt64): [String]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseDate(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlayingTime(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAlbumTitle(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCatalogNumber(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTrackNumber(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwnersHash(id: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevenueHash(id: UInt64): String?
 	}
 	
@@ -833,7 +847,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			pre{ 
 				false:
 					"Depositing Asset directly to Asset contract is not allowed"
@@ -860,7 +874,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsset(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -870,7 +884,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refNFT as! &NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetInfo(id: UInt64): AssetData{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -889,12 +903,12 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(id: UInt64): UInt32{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -905,7 +919,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.serialNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMasterTokenID(id: UInt64): UInt64{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -916,7 +930,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.masterTokenID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalTokens(id: UInt64): UInt32{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -927,7 +941,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.totalTokens
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwners(id: UInt64):{ String: UInt32}{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -938,7 +952,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return *refAssetNFT.data.owners
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwner(id: UInt64, owner: String): UInt32?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -950,7 +964,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return owners[owner]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownerExists(id: UInt64, owner: String): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -962,7 +976,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return owners.containsKey(owner)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRenters(id: UInt64): [String]{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -973,7 +987,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return *refAssetNFT.data.renters
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun renterExists(id: UInt64, renter: String): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -985,7 +999,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return renters.contains(renter)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInvitees(id: UInt64): [String]{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -996,7 +1010,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return *refAssetNFT.data.invitees
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteeExists(id: UInt64, invitee: String): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1008,7 +1022,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return invitees.contains(invitee)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetType(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1019,7 +1033,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return TrmAssetMSV1_0.assetTypeToString(*refAssetNFT.data.type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiryTimestamp(id: UInt64): UFix64{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1030,7 +1044,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.expiryTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExpired(id: UInt64): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1041,7 +1055,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.expiryTimestamp < getCurrentBlock().timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValid(id: UInt64): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1052,7 +1066,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.valid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValid(id: UInt64): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1063,7 +1077,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.valid && refAssetNFT.data.expiryTimestamp >= getCurrentBlock().timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1074,7 +1088,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return *refAssetNFT.data.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataEntry(id: UInt64, metadataEntry: String): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1086,7 +1100,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return metadata[metadataEntry]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSongID(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1107,7 +1121,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKID(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1128,7 +1142,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1149,7 +1163,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1170,7 +1184,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getURL(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1191,7 +1205,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnailURL(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1212,7 +1226,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getORH(id: UInt64): [String]?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1233,7 +1247,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getISRC(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1254,7 +1268,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPerformers(id: UInt64): [String]?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1275,7 +1289,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLyricists(id: UInt64): [String]?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1296,7 +1310,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getComposers(id: UInt64): [String]?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1317,7 +1331,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArrangers(id: UInt64): [String]?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1338,7 +1352,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseDate(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1359,7 +1373,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlayingTime(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1380,7 +1394,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAlbumTitle(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1401,7 +1415,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCatalogNumber(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1422,7 +1436,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTrackNumber(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1443,7 +1457,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwnersHash(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1454,7 +1468,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return refAssetNFT.data.ownersHash
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevenueHash(id: UInt64): String?{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -1654,14 +1668,14 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun emitCreateEmptyAssetCollectionEvent(userAccountAddress: Address){ 
 		emit AssetCollectionInitialized(userAccountAddress: userAccountAddress)
 	}
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(collectionRef: &TrmAssetMSV1_0.Collection, serialNumber: UInt32, masterTokenID: UInt64?, totalTokens: UInt32, owners:{ String: UInt32}, renters: [String], invitees: [String], type: String, expiryTimestamp: UFix64, valid: Bool, metadata:{ String: String}, songID: String?, kID: String?, title: String?, description: String?, url: String?, thumbnailURL: String?, orh: [String]?, isrc: String?, performers: [String]?, lyricists: [String]?, composers: [String]?, arrangers: [String]?, releaseDate: String?, playingTime: String?, albumTitle: String?, catalogNumber: String?, trackNumber: String?, ownersHash: String?, revenueHash: String?, previewURL: String?, lyricsURL: String?, timestamp: String?, uploadID: String?, webhookID: String?): UInt64{ 
 			pre{ 
 				masterTokenID == nil && serialNumber == 0 || masterTokenID != nil && serialNumber > 0:
@@ -1683,7 +1697,7 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			return TrmAssetMSV1_0.totalSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFTs(collectionRef: &TrmAssetMSV1_0.Collection, totalCount: UInt32, startSerialNumber: UInt32, masterTokenID: UInt64, totalTokens: UInt32, owners:{ String: UInt32}, renters: [String], invitees: [String], type: String, expiryTimestamp: UFix64, valid: Bool, metadata:{ String: String}, songID: String?, kID: String?, title: String?, description: String?, url: String?, thumbnailURL: String?, orh: [String]?, isrc: String?, performers: [String]?, lyricists: [String]?, composers: [String]?, arrangers: [String]?, releaseDate: String?, playingTime: String?, albumTitle: String?, catalogNumber: String?, trackNumber: String?, ownersHash: String?, revenueHash: String?, previewURL: String?, lyricsURL: String?, timestamp: String?, uploadID: String?, webhookID: String?): UInt64{ 
 			pre{ 
 				totalCount > 0:
@@ -1717,62 +1731,62 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferOwner(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, ownerFrom: String, ownerTo: String, tokens: UInt32, songID: String, ownersHash: String, previousOwnersHash: String, price: UFix64?, priceUnit: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.transferOwner(id: id, ownerFrom: ownerFrom, ownerTo: ownerTo, tokens: tokens, songID: songID, ownersHash: ownersHash, previousOwnersHash: previousOwnersHash, price: price, priceUnit: priceUnit, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRenter(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, renter: String, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.addRenter(id: id, renter: renter, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRenter(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, renter: String, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.removeRenter(id: id, renter: renter, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addInvitee(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, invitee: String, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.addInvitee(id: id, invitee: invitee, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeInvitee(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, invitee: String, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.removeInvitee(id: id, invitee: invitee, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateType(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, type: String, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.updateType(id: id, type: type, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAssetMetadata(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, metadata:{ String: String}, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.setMetadata(id: id, metadata: metadata, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAssetMetadata(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, metadata: [String], songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.removeMetadata(id: id, metadata: metadata, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAsset(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, songID: String?, expiryTimestamp: UFix64?, valid: Bool?, kID: String?, title: String?, description: String?, url: String?, thumbnailURL: String?, orh: [String]?, isrc: String?, performers: [String]?, lyricists: [String]?, composers: [String]?, arrangers: [String]?, releaseDate: String?, playingTime: String?, albumTitle: String?, catalogNumber: String?, trackNumber: String?, ownersHash: String?, previousOwnersHash: String?, revenueHash: String?, previousRevenueHash: String?, revenueData: String?, previewURL: String?, lyricsURL: String?, iv: String?, timestamp: String?, uploadID: String?, webhookID: String?){ 
 			collectionRef.update(id: id, songID: songID, expiryTimestamp: expiryTimestamp, valid: valid, kID: kID, title: title, description: description, url: url, thumbnailURL: thumbnailURL, orh: orh, isrc: isrc, performers: performers, lyricists: lyricists, composers: composers, arrangers: arrangers, releaseDate: releaseDate, playingTime: playingTime, albumTitle: albumTitle, catalogNumber: catalogNumber, trackNumber: trackNumber, ownersHash: ownersHash, previousOwnersHash: previousOwnersHash, revenueHash: revenueHash, previousRevenueHash: previousRevenueHash, revenueData: revenueData, previewURL: previewURL, lyricsURL: lyricsURL, iv: iv, timestamp: timestamp, uploadID: uploadID, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resetAsset(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, songID: String?, revenueData: String?, previewURL: String?, lyricsURL: String?, iv: String?, timestamp: String?, uploadID: String?, webhookID: String?){ 
 			collectionRef.reset(id: id, songID: songID, revenueData: revenueData, previewURL: previewURL, lyricsURL: lyricsURL, iv: iv, timestamp: timestamp, uploadID: uploadID, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyNFT(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.destroyNFT(id: id, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDestroyNFTs(collectionRef: &TrmAssetMSV1_0.Collection, ids: [UInt64], songID: String?, timestamp: String?, webhookID: String?){ 
 			for id in ids{ 
 				collectionRef.destroyNFT(id: id, songID: songID, timestamp: timestamp, webhookID: webhookID)
@@ -1780,12 +1794,12 @@ contract TrmAssetMSV1_0: NonFungibleToken{
 			emit AssetBatchDestroyed(ids: ids, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun dangerouslyDestroyNFT(collectionRef: &TrmAssetMSV1_0.Collection, id: UInt64, songID: String?, timestamp: String?, webhookID: String?){ 
 			collectionRef.dangerouslyDestroyNFT(id: id, songID: songID, timestamp: timestamp, webhookID: webhookID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDangerouslyDestroyNFTs(collectionRef: &TrmAssetMSV1_0.Collection, ids: [UInt64], songID: String?, timestamp: String?, webhookID: String?){ 
 			for id in ids{ 
 				collectionRef.dangerouslyDestroyNFT(id: id, songID: songID, timestamp: timestamp, webhookID: webhookID)

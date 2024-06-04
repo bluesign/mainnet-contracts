@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -51,7 +65,7 @@ contract LCubeNFT: NonFungibleToken{
 	access(all)
 	event SetLocked(setID: UInt64)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMinter(creator: Address, metadata:{ String: String}): @NFTMinter{ 
 		assert(metadata.containsKey("setName"), message: "setName property is required for LCubeNFTSet!")
 		assert(metadata.containsKey("thumbnail"), message: "thumbnail property is required for LCubeNFTSet!")
@@ -70,7 +84,7 @@ contract LCubeNFT: NonFungibleToken{
 		return <-create NFTMinter(setID: setID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowSet(storagePath: StoragePath): &LCubeNFTSet{ 
 		return self.account.storage.borrow<&LCubeNFTSet>(from: storagePath)!
 	}
@@ -151,12 +165,12 @@ contract LCubeNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
@@ -170,15 +184,15 @@ contract LCubeNFT: NonFungibleToken{
 	access(all)
 	resource interface LCubeNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubeNFT(id: UInt64): &LCubeNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -204,7 +218,7 @@ contract LCubeNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LCubeNFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -222,7 +236,7 @@ contract LCubeNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubeNFT(id: UInt64): &LCubeNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -239,19 +253,19 @@ contract LCubeNFT: NonFungibleToken{
 			return refItem
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &LCubeNFT.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return (ref as! &LCubeNFT.NFT).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: UInt64): [MetadataViews.Royalty]{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return (ref as! &LCubeNFT.NFT).getRoyalties()
@@ -287,7 +301,7 @@ contract LCubeNFT: NonFungibleToken{
 			self.setID = setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(creator: Capability<&{NonFungibleToken.Receiver}>, metadata:{ String: String}, royalties: [MetadataViews.Royalty]): &{NonFungibleToken.NFT}{ 
 			assert(metadata.containsKey("nftType"), message: "nftType property is required for LCubeNFT!")
 			assert(metadata.containsKey("name"), message: "name property is required for LCubeNFT!")

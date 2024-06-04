@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -121,16 +135,16 @@ contract ByteNextStaking{
 	
 	access(all)
 	resource interface StageStakingPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardsPendding(user: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserOrders(user: Address): [StakingOrder]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserStakedAmount(user: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakingInfo():{ String: AnyStruct}
 	}
 	
@@ -480,7 +494,7 @@ contract ByteNextStaking{
 			return pendingTime / UFix64(secondsOneYear) * userStakedAmount * annualProfit / 100.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardsPendding(user: Address): UFix64{ 
 			var totalPendding: UFix64 = 0.0
 			if self.stakers[user] == nil{ 
@@ -496,17 +510,17 @@ contract ByteNextStaking{
 			return totalPendding
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserOrders(user: Address): [StakingOrder]{ 
 			return self.stakers[user]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserStakedAmount(user: Address): UFix64{ 
 			return self.userStakedAmount[user] ?? 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakingInfo():{ String: AnyStruct}{ 
 			return{ "id": self.id, "isFrozen": self.isFrozen, "totalOrder": self.totalOrder, "totalStaker": self.stakers.length, "startTime": self.startTime, "endTime": self.endTime, "minAmount": self.minAmount, "duration": self.duration, "annualProfit": self.annualProfit, "unstakeFee": self.unstakeFee, "rewardVault": self.rewardVault.balance, "stakeVault": self.stakeVault.balance}
 		}
@@ -514,7 +528,7 @@ contract ByteNextStaking{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(stageId: UInt64){ 
 			pre{ 
 				ByteNextStaking.stageStaking.containsKey(stageId):
@@ -524,7 +538,7 @@ contract ByteNextStaking{
 			stage.setFrozen(isFrozen: true)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(stageId: UInt64){ 
 			pre{ 
 				ByteNextStaking.stageStaking.containsKey(stageId):
@@ -534,7 +548,7 @@ contract ByteNextStaking{
 			stage.setFrozen(isFrozen: false)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReceiverFeeUnstake(
 			stageId: UInt64,
 			capability: Capability<&{FungibleToken.Receiver}>
@@ -547,7 +561,7 @@ contract ByteNextStaking{
 			stage.setReceiverFeeUnstake(capability: capability)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStage(
 			startTime: UFix64,
 			endTime: UFix64,
@@ -583,7 +597,7 @@ contract ByteNextStaking{
 			ByteNextStaking.stakingCount = ByteNextStaking.stakingCount + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStageStaking(
 			stageId: UInt64,
 			startTime: UFix64,
@@ -608,7 +622,7 @@ contract ByteNextStaking{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToRewardPool(stageId: UInt64, vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				ByteNextStaking.stageStaking.containsKey(stageId):
@@ -622,7 +636,7 @@ contract ByteNextStaking{
 			stage.rewardVault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardPool(stageId: UInt64, amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				ByteNextStaking.stageStaking.containsKey(stageId):
@@ -635,7 +649,7 @@ contract ByteNextStaking{
 	
 	access(all)
 	resource StakingProxy{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stake(stageId: UInt64, vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				ByteNextStaking.stageStaking.containsKey(stageId):
@@ -647,7 +661,7 @@ contract ByteNextStaking{
 			stage.stake(user: (self.owner!).address, vault: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeBoost(
 			stageId: UInt64,
 			vault: @{FungibleToken.Vault},
@@ -663,7 +677,7 @@ contract ByteNextStaking{
 			stage.stakeBoost(user: (self.owner!).address, vault: <-vault, nftBoost: <-nftBoost)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewards(stageId: UInt64, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				ByteNextStaking.stageStaking.containsKey(stageId):
@@ -675,7 +689,7 @@ contract ByteNextStaking{
 			stage.withdrawRewards(receiver: receiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardByOrder(
 			stageId: UInt64,
 			orderId: UInt64,
@@ -691,7 +705,7 @@ contract ByteNextStaking{
 			stage.withdrawRewardByOrder(orderId: orderId, receiverReward: receiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawByOrder(
 			stageId: UInt64,
 			orderId: UInt64,
@@ -715,12 +729,12 @@ contract ByteNextStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowStage(stageId: UInt64): &StageStaking?{ 
 		return (&self.stageStaking[stageId] as &StageStaking?)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStakingProxy(): @StakingProxy{ 
 		return <-create StakingProxy()
 	}

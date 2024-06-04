@@ -1,4 +1,18 @@
-// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
 // import NonFungibleToken from "../0x631e88ae7f1d7c20/NonFungibleToken.cdc"
 // import MetadataViews from "../0x631e88ae7f1d7c20/MetadataViews.cdc"
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -104,15 +118,15 @@ contract Syllables: NonFungibleToken{
 	access(all)
 	resource interface SyllablesCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSyllables(id: UInt64): &Syllables.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -138,7 +152,7 @@ contract Syllables: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Syllables.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -156,7 +170,7 @@ contract Syllables: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSyllables(id: UInt64): &Syllables.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -196,7 +210,7 @@ contract Syllables: NonFungibleToken{
 	
 	access(all)
 	resource PublishedMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintLibraryPass(_name: String, _ipfsLink: String): @Syllables.NFT?{ 
 			if Syllables.libraryPassTotalSupply == 9999{ 
 				return nil
@@ -208,7 +222,7 @@ contract Syllables: NonFungibleToken{
 			return <-libraryPassNft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintWillo(_name: String, _ipfsLink: String): @Syllables.NFT?{ 
 			if Syllables.willoTotalSupply == 100{ 
 				return nil

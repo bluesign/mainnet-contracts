@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -179,7 +193,7 @@ contract OpenEditionV3{
 			self.numberOfMaxNFT = numberOfMaxNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleOpenEdition(clientEdition: &Edition.EditionCollection){ 
 			pre{ 
 				!self.cancelled:
@@ -213,7 +227,7 @@ contract OpenEditionV3{
 			return remaining
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(): UFix64{ 
 			return self.price
 		}
@@ -267,7 +281,7 @@ contract OpenEditionV3{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			buyerTokens: @FUSD.Vault,
 			buyerCollectionCap: Capability<&{Collectible.CollectionPublic}>,
@@ -336,7 +350,7 @@ contract OpenEditionV3{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOpenEditionStatus(): OpenEditionStatus{ 
 			return OpenEditionStatus(
 				id: self.openEditionID,
@@ -352,7 +366,7 @@ contract OpenEditionV3{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOpenEdition(clientEdition: &Edition.EditionCollection){ 
 			pre{ 
 				!self.completed:
@@ -373,16 +387,16 @@ contract OpenEditionV3{
 	// retreiving the auction price list and placing bids
 	access(all)
 	resource interface OpenEditionCollectionPublic{ 
-		access(all)
-		fun getOpenEditionStatuses():{ UInt64: OpenEditionStatus}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getOpenEditionStatuses():{ UInt64: OpenEditionV3.OpenEditionStatus}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOpenEditionStatus(_ id: UInt64): OpenEditionStatus?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(_ id: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			id: UInt64,
 			buyerTokens: @FUSD.Vault,
@@ -406,14 +420,14 @@ contract OpenEditionV3{
 			self.minterCap = minterCap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun keys(): [UInt64]{ 
 			return self.openEditionsItems.keys
 		}
 		
 		// addTokenToauctionItems adds an NFT to the auction items and sets the meta data
 		// for the auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOpenEdition(price: UFix64, startTime: UFix64, saleLength: UFix64, editionNumber: UInt64, metadata: Collectible.Metadata, platformVaultCap: Capability<&FUSD.Vault>, numberOfMaxNFT: UInt64){ 
 			pre{ 
 				saleLength > 0.00:
@@ -444,7 +458,7 @@ contract OpenEditionV3{
 		}
 		
 		// getOpenEditionPrices returns a dictionary of available NFT IDs with their current price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOpenEditionStatuses():{ UInt64: OpenEditionStatus}?{ 
 			if self.openEditionsItems.keys.length == 0{ 
 				return nil
@@ -457,7 +471,7 @@ contract OpenEditionV3{
 			return priceList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOpenEditionStatus(_ id: UInt64): OpenEditionStatus?{ 
 			if self.openEditionsItems[id] == nil{ 
 				return nil
@@ -468,7 +482,7 @@ contract OpenEditionV3{
 			return (itemRef!).getOpenEditionStatus()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(_ id: UInt64): UFix64?{ 
 			if self.openEditionsItems[id] == nil{ 
 				return nil
@@ -481,7 +495,7 @@ contract OpenEditionV3{
 		
 		// settleOpenEdition sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleOpenEdition(id: UInt64, clientEdition: &Edition.EditionCollection){ 
 			pre{ 
 				self.openEditionsItems[id] != nil:
@@ -491,7 +505,7 @@ contract OpenEditionV3{
 			(itemRef!).settleOpenEdition(clientEdition: clientEdition)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOpenEdition(id: UInt64, clientEdition: &Edition.EditionCollection){ 
 			pre{ 
 				self.openEditionsItems[id] != nil:
@@ -503,7 +517,7 @@ contract OpenEditionV3{
 		}
 		
 		// purchase sends the buyer's tokens to the buyer's tokens vault	  
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(id: UInt64, buyerTokens: @FUSD.Vault, collectionCap: Capability<&{Collectible.CollectionPublic}>){ 
 			pre{ 
 				self.openEditionsItems[id] != nil:

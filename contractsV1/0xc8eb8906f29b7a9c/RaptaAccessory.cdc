@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -174,28 +188,28 @@ contract RaptaAccessory: NonFungibleToken{
 	//Accessory Interfaces
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMint(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplateId(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCategory(): String
 	}
 	
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAccessory(id: UInt64): &RaptaAccessory.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -231,10 +245,10 @@ contract RaptaAccessory: NonFungibleToken{
 	
 	access(all)
 	resource interface TemplateCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAccessoryTemplate(id: UInt64): &RaptaAccessory.Template?
 	}
 	
@@ -270,42 +284,42 @@ contract RaptaAccessory: NonFungibleToken{
 			RaptaAccessory.setTotalMintedAccessoriesByTemplate(id: templateId, value: self.mint)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMint(): UInt64{ 
 			return self.mint
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplateId(): UInt64{ 
 			return self.templateId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): RaptaAccessory.TemplateData{ 
 			return RaptaAccessory.getAccessoryTemplate(id: self.templateId)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPNG(): String{ 
 			return self.getTemplate().png!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayer(): String{ 
 			return self.getTemplate().layer!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCategory(): String{ 
 			return self.getTemplate().category
 		}
@@ -358,7 +372,7 @@ contract RaptaAccessory: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @RaptaAccessory.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -376,7 +390,7 @@ contract RaptaAccessory: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAccessory(id: UInt64): &RaptaAccessory.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -448,32 +462,32 @@ contract RaptaAccessory: NonFungibleToken{
 			self.layer = layer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePNG(newPNG: String){ 
 			self.png = newPNG
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLayer(newLayer: String){ 
 			self.layer = newLayer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDescription(newDescription: String){ 
 			self.description = newDescription
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCategory(newCategory: String){ 
 			self.category = newCategory
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateName(newName: String){ 
 			self.name = newName
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMintLimit(newLimit: UInt64){ 
 			self.mintLimit = newLimit
 		}
@@ -488,19 +502,19 @@ contract RaptaAccessory: NonFungibleToken{
 			self.ownedTemplates <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(template: @RaptaAccessory.Template){ 
 			let id: UInt64 = template.id
 			let oldTemplate <- self.ownedTemplates[id] <- template
 			destroy oldTemplate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedTemplates.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAccessoryTemplate(id: UInt64): &RaptaAccessory.Template?{ 
 			if self.ownedTemplates[id] != nil{ 
 				let ref = (&self.ownedTemplates[id] as &RaptaAccessory.Template?)!
@@ -518,7 +532,7 @@ contract RaptaAccessory: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getpngForAccessory(address: Address, accessoryId: UInt64): String?{ 
 		let account = getAccount(address)
 		if let collection = account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath).borrow<&{RaptaAccessory.CollectionPublic}>(){ 
@@ -527,7 +541,7 @@ contract RaptaAccessory: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessory(address: Address, accessoryId: UInt64): AccessoryData?{ 
 		let account = getAccount(address)
 		if let collection = account.capabilities.get<&{RaptaAccessory.CollectionPublic}>(self.CollectionPublicPath).borrow<&{RaptaAccessory.CollectionPublic}>(){ 
@@ -538,7 +552,7 @@ contract RaptaAccessory: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessories(address: Address): [AccessoryData]{ 
 		var accessoryData: [AccessoryData] = []
 		let account = getAccount(address)
@@ -572,7 +586,7 @@ contract RaptaAccessory: NonFungibleToken{
 		return <-create TemplateCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessoryTemplates(): [TemplateData]{ 
 		var accessoryTemplateData: [TemplateData] = []
 		if let templateCollection = self.account.capabilities.get<&{RaptaAccessory.TemplateCollectionPublic}>(self.TemplatePublicPath).borrow<&{RaptaAccessory.TemplateCollectionPublic}>(){ 
@@ -584,7 +598,7 @@ contract RaptaAccessory: NonFungibleToken{
 		return accessoryTemplateData
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getAccessoryTemplate(id: UInt64): TemplateData?{ 
 		if let templateCollection = self.account.capabilities.get<&{RaptaAccessory.TemplateCollectionPublic}>(self.TemplatePublicPath).borrow<&{RaptaAccessory.TemplateCollectionPublic}>(){ 
 			if let template = templateCollection.borrowAccessoryTemplate(id: id){ 
@@ -594,7 +608,7 @@ contract RaptaAccessory: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTotalMintedAccessoriesByTemplate(id: UInt64): UInt64?{ 
 		return RaptaAccessory.totalMintedAccessories[id]
 	}

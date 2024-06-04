@@ -1,4 +1,18 @@
-// Starly staking.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Starly staking.
 //
 // Main features:
 //   * compound interests, periodic compounding with 1 second period
@@ -123,25 +137,25 @@ contract StarlyTokenStaking: NonFungibleToken{
 	
 	access(all)
 	resource interface StakePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrincipal(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakeTimestamp(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinStakingSeconds(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getK(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccumulatedAmount(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnstakingFees(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canUnstake(): Bool
 	}
 	
@@ -226,27 +240,27 @@ contract StarlyTokenStaking: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrincipal(): UFix64{ 
 			return self.principalVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakeTimestamp(): UFix64{ 
 			return self.stakeTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinStakingSeconds(): UFix64{ 
 			return self.minStakingSeconds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getK(): UFix64{ 
 			return self.k
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccumulatedAmount(): UFix64{ 
 			let timestamp = getCurrentBlock().timestamp
 			let seconds = timestamp - self.stakeTimestamp
@@ -254,7 +268,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 		}
 		
 		// calculate unstaking fees using current StarlyTokenStaking parameters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnstakingFees(): UFix64{ 
 			return self.getUnstakingFeesInternal(unstakingFee: StarlyTokenStaking.unstakingFee, unstakingFlatFee: StarlyTokenStaking.unstakingFlatFee, unstakingFeesNotAppliedAfterSeconds: StarlyTokenStaking.unstakingFeesNotAppliedAfterSeconds)
 		}
@@ -272,7 +286,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canUnstake(): Bool{ 
 			let timestamp = getCurrentBlock().timestamp
 			let seconds = timestamp - self.stakeTimestamp
@@ -292,7 +306,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 	// We put stake creation logic into minter, its job is to have checks, emit events, update counters
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintStake(address: Address?, principalVault: @StarlyToken.Vault, stakeTimestamp: UFix64, minStakingSeconds: UFix64, k: UFix64): @StarlyTokenStaking.NFT{ 
 			pre{ 
 				StarlyTokenStaking.stakingEnabled:
@@ -316,7 +330,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 	// We put stake unstaking logic into burner, its job is to have checks, emit events, update counters
 	access(all)
 	resource NFTBurner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnStake(stake: @StarlyTokenStaking.NFT, k: UFix64, address: Address?, minStakingSeconds: UFix64, unstakingFee: UFix64, unstakingFlatFee: UFix64, unstakingFeesNotAppliedAfterSeconds: UFix64, unstakingDisabledUntilTimestamp: UFix64): @StarlyToken.Vault{ 
 			pre{ 
 				StarlyTokenStaking.unstakingEnabled:
@@ -358,13 +372,13 @@ contract StarlyTokenStaking: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStakePublic(id: UInt64): &StarlyTokenStaking.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakedAmount(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakingTier(): Tier
 		
 		// admin has to have the ability to refund stake
@@ -374,16 +388,16 @@ contract StarlyTokenStaking: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStakePrivate(id: UInt64): &StarlyTokenStaking.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stake(principalVault: @StarlyToken.Vault)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstake(id: UInt64): @StarlyToken.Vault
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(): @StarlyToken.Vault
 	}
 	
@@ -404,7 +418,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StarlyTokenStaking.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -417,7 +431,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakedAmount(): UFix64{ 
 			var sum: UFix64 = 0.0
 			for nftId in self.ownedNFTs.keys{ 
@@ -428,7 +442,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 			return sum
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStakingTier(): Tier{ 
 			var sum = self.getStakedAmount()
 			if sum >= 50000.0{ 
@@ -465,21 +479,21 @@ contract StarlyTokenStaking: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStakePublic(id: UInt64): &StarlyTokenStaking.NFT{ 
 			let stakeRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let intermediateRef = stakeRef as! &StarlyTokenStaking.NFT
 			return intermediateRef as &StarlyTokenStaking.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stake(principalVault: @StarlyToken.Vault){ 
 			let minter = StarlyTokenStaking.account.storage.borrow<&NFTMinter>(from: StarlyTokenStaking.MinterStoragePath)!
 			let stake <- minter.mintStake(address: self.owner?.address, principalVault: <-principalVault, stakeTimestamp: getCurrentBlock().timestamp, minStakingSeconds: StarlyTokenStaking.minStakingSeconds, k: StarlyTokenStaking.k)
 			self.deposit(token: <-stake)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstake(id: UInt64): @StarlyToken.Vault{ 
 			let burner = StarlyTokenStaking.account.storage.borrow<&NFTBurner>(from: StarlyTokenStaking.BurnerStoragePath)!
 			let stake <- self.withdraw(withdrawID: id) as! @StarlyTokenStaking.NFT
@@ -487,7 +501,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 			return <-burner.burnStake(stake: <-stake, k: k, address: self.owner?.address, minStakingSeconds: StarlyTokenStaking.minStakingSeconds, unstakingFee: StarlyTokenStaking.unstakingFee, unstakingFlatFee: StarlyTokenStaking.unstakingFlatFee, unstakingFeesNotAppliedAfterSeconds: StarlyTokenStaking.unstakingFeesNotAppliedAfterSeconds, unstakingDisabledUntilTimestamp: StarlyTokenStaking.unstakingDisabledUntilTimestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(): @StarlyToken.Vault{ 
 			let burner = StarlyTokenStaking.account.storage.borrow<&NFTBurner>(from: StarlyTokenStaking.BurnerStoragePath)
 			let unstakeVault <- StarlyToken.createEmptyVault(vaultType: Type<@StarlyToken.Vault>()) as! @StarlyToken.Vault
@@ -498,7 +512,7 @@ contract StarlyTokenStaking: NonFungibleToken{
 			return <-unstakeVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStakePrivate(id: UInt64): &StarlyTokenStaking.NFT{ 
 			let stakePassRef = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return stakePassRef as! &StarlyTokenStaking.NFT
@@ -528,47 +542,47 @@ contract StarlyTokenStaking: NonFungibleToken{
 	// Admin resource for controlling the configuration parameters and refunding
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStakingEnabled(_ enabled: Bool){ 
 			StarlyTokenStaking.stakingEnabled = enabled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUnstakingEnabled(_ enabled: Bool){ 
 			StarlyTokenStaking.unstakingEnabled = enabled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUnstakingFee(_ amount: UFix64){ 
 			StarlyTokenStaking.unstakingFee = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUnstakingFlatFee(_ amount: UFix64){ 
 			StarlyTokenStaking.unstakingFlatFee = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUnstakingFeesNotAppliedAfterSeconds(_ seconds: UFix64){ 
 			StarlyTokenStaking.unstakingFeesNotAppliedAfterSeconds = seconds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinStakingSeconds(_ seconds: UFix64){ 
 			StarlyTokenStaking.minStakingSeconds = seconds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinStakePrincipal(_ amount: UFix64){ 
 			StarlyTokenStaking.minStakePrincipal = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUnstakingDisabledUntilTimestamp(_ timestamp: UFix64){ 
 			StarlyTokenStaking.unstakingDisabledUntilTimestamp = timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setK(_ k: UFix64){ 
 			pre{ 
 				k <= CompoundInterest.k200:
@@ -577,17 +591,17 @@ contract StarlyTokenStaking: NonFungibleToken{
 			StarlyTokenStaking.k = k
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refund(collection: &{StarlyTokenStaking.CollectionPublic}, id: UInt64, k: UFix64){ 
 			collection.refund(id: id, k: k)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMinter(): @NFTMinter{ 
 			return <-create NFTMinter()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTBurner(): @NFTBurner{ 
 			return <-create NFTBurner()
 		}

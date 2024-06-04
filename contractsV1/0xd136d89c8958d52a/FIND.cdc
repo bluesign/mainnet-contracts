@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
 
@@ -126,7 +140,7 @@ contract FIND{
 	//These methods are basically just here for convenience
 	/// Calculate the cost of an name
 	/// @param _ the name to calculate the cost for
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateCost(_ name: String): UFix64{ 
 		pre{ 
 			FIND.validateFindName(name):
@@ -139,7 +153,7 @@ contract FIND{
 	}
 	
 	/// Lookup the address registered for a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun lookupAddress(_ name: String): Address?{ 
 		pre{ 
 			FIND.validateFindName(name):
@@ -152,7 +166,7 @@ contract FIND{
 	}
 	
 	/// Lookup the profile registered for a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun lookup(_ name: String): &{Profile.Public}?{ 
 		pre{ 
 			FIND.validateFindName(name):
@@ -167,7 +181,7 @@ contract FIND{
 	/// Deposit FT to name
 	/// @param to: The name to send money too
 	/// @param from: The vault to send too
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deposit(to: String, from: @{FungibleToken.Vault}){ 
 		pre{ 
 			FIND.validateFindName(to):
@@ -183,7 +197,7 @@ contract FIND{
 	
 	/// Return the status for a given name
 	/// @return The Name status of a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun status(_ name: String): NameStatus{ 
 		pre{ 
 			FIND.validateFindName(name):
@@ -268,47 +282,47 @@ contract FIND{
 			self.addons ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAddon(_ addon: String){ 
 			self.addons[addon] = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExtentionOnLateBid(_ time: UFix64){ 
 			self.auctionExtensionOnLateBid = time
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAuctionDuration(_ duration: UFix64){ 
 			self.auctionDuration = duration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSalePrice(_ price: UFix64?){ 
 			self.salePrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReservePrice(_ price: UFix64?){ 
 			self.auctionReservePrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinBidIncrement(_ price: UFix64){ 
 			self.auctionMinBidIncrement = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStartAuctionPrice(_ price: UFix64?){ 
 			self.auctionStartPrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCallback(_ callback: Capability<&BidCollection>?){ 
 			self.offerCallback = callback
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendLease(_ vault: @FUSD.Vault){ 
 			let network = self.networkCap.borrow()!
 			network.renew(name: self.name, vault: <-vault)
@@ -320,22 +334,22 @@ contract FIND{
 			network.move(name: self.name, profile: profile)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseExpireTime(): UFix64{ 
 			return (self.networkCap.borrow()!).getLeaseExpireTime(self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseLocedUntil(): UFix64{ 
 			return (self.networkCap.borrow()!).getLeaseLocedUntil(self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProfile(): &{Profile.Public}?{ 
 			return (self.networkCap.borrow()!).profile(self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseStatus(): LeaseStatus{ 
 			return FIND.status(self.name).status
 		}
@@ -379,12 +393,12 @@ contract FIND{
 			self.name = name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return (self.latestBidCallback.borrow()!).getBalance(self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBid(callback: Capability<&BidCollection>, timestamp: UFix64){ 
 			let offer = callback.borrow()!
 			offer.setBidType(name: self.name, type: "auction")
@@ -506,14 +520,14 @@ contract FIND{
 	access(all)
 	resource interface LeaseCollectionPublic{ 
 		//fetch all the tokens in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeases(): [String]
 		
 		//fetch all names that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseInformation(): [LeaseInformation]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLease(_ name: String): LeaseInformation?
 		
 		//add a new lease token to the collection, can only be called in this contract
@@ -531,10 +545,10 @@ contract FIND{
 		fun bid(name: String, callback: Capability<&BidCollection>)
 		
 		//anybody should be able to fulfill an auction as long as it is done
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillAuction(_ name: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyAddon(name: String, addon: String, vault: @FUSD.Vault)
 	}
 	
@@ -603,7 +617,7 @@ contract FIND{
 				}
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyAddon(name: String, addon: String, vault: @FUSD.Vault){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -618,7 +632,7 @@ contract FIND{
 			(self.networkWallet.borrow()!).deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLease(_ name: String): LeaseInformation?{ 
 			if !self.leases.containsKey(name){ 
 				return nil
@@ -639,7 +653,7 @@ contract FIND{
 			return LeaseInformation(name: name, status: token.getLeaseStatus(), validUntil: token.getLeaseExpireTime(), lockedUntil: token.getLeaseLocedUntil(), latestBid: latestBid, auctionEnds: auctionEnds, salePrice: token.salePrice, latestBidBy: latestBidBy, auctionStartPrice: token.auctionStartPrice, auctionReservePrice: token.auctionReservePrice, extensionOnLateBid: token.auctionExtensionOnLateBid, address: (token.owner!).address, addons: *token.addons.keys)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseInformation(): [LeaseInformation]{ 
 			var info: [LeaseInformation] = []
 			for name in self.leases.keys{ 
@@ -656,7 +670,7 @@ contract FIND{
 		}
 		
 		//call this to start an auction for this lease
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startAuction(_ name: String){ 
 			let timestamp = Clock.time()
 			let lease = self.borrow(name)
@@ -771,7 +785,7 @@ contract FIND{
 		}
 		
 		//cancel will cancel and auction or reject a bid if no auction has started
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(_ name: String){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -807,7 +821,7 @@ contract FIND{
 		}
 		
 		/// fulfillAuction wraps the fulfill method and ensure that only a finished auction can be fulfilled by anybody
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillAuction(_ name: String){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -818,7 +832,7 @@ contract FIND{
 			return self.fulfill(name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfill(_ name: String){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -878,7 +892,7 @@ contract FIND{
 			destroy auction
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForAuction(name: String, auctionStartPrice: UFix64, auctionReservePrice: UFix64, auctionDuration: UFix64, auctionExtensionOnLateBid: UFix64){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -892,7 +906,7 @@ contract FIND{
 			emit ForAuction(name: name, owner: (self.owner!).address, expireAt: tokenRef.getLeaseExpireTime(), auctionStartPrice: tokenRef.auctionStartPrice!, auctionReservePrice: tokenRef.auctionReservePrice!, active: true)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(name: String, directSellPrice: UFix64){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -903,7 +917,7 @@ contract FIND{
 			emit ForSale(name: name, owner: (self.owner!).address, expireAt: tokenRef.getLeaseExpireTime(), directSellPrice: tokenRef.salePrice!, active: true)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delistAuction(_ name: String){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -915,7 +929,7 @@ contract FIND{
 			tokenRef.setReservePrice(nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delistSale(_ name: String){ 
 			pre{ 
 				self.leases.containsKey(name):
@@ -927,7 +941,7 @@ contract FIND{
 		}
 		
 		//note that when moving a name
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun move(name: String, profile: Capability<&{Profile.Public}>, to: Capability<&LeaseCollection>){ 
 			let token <- self.leases.remove(key: name) ?? panic("missing NFT")
 			emit Moved(name: name, previousOwner: (self.owner!).address, newOwner: profile.address, expireAt: token.getLeaseExpireTime())
@@ -945,26 +959,26 @@ contract FIND{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeases(): [String]{ 
 			return self.leases.keys
 		}
 		
 		// borrowNFT gets a reference to an NFT in the collection
 		// so that the caller can read its metadata and call its methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ name: String): &FIND.Lease{ 
 			return &self.leases[name] as &FIND.Lease?
 		}
 		
 		//borrow the auction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAuction(_ name: String): &FIND.Auction{ 
 			return &self.auctions[name] as &FIND.Auction?
 		}
 		
 		//This has to be here since you can only get this from a auth account and thus we ensure that you cannot use wrong paths
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun register(name: String, vault: @FUSD.Vault){ 
 			let profileCap = (self.owner!).capabilities.get<&{Profile.Public}>(Profile.publicPath)
 			let leases = (self.owner!).capabilities.get<&LeaseCollection>(FIND.LeasePublicPath)
@@ -977,7 +991,7 @@ contract FIND{
 	}
 	
 	//Create an empty lease collection that store your leases to a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyLeaseCollection(): @FIND.LeaseCollection{ 
 		if let network = self.account.storage.borrow<&Network>(from: FIND.NetworkStoragePath){ 
 			return <-create LeaseCollection(networkCut: network.secondaryCut, networkWallet: network.wallet)
@@ -1025,17 +1039,17 @@ contract FIND{
 			self.name = name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setValidUntil(_ unit: UFix64){ 
 			self.validUntil = unit
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLockedUntil(_ unit: UFix64){ 
 			self.lockedUntil = unit
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun status(): LeaseStatus{ 
 			let time = Clock.time()
 			if time >= self.lockedUntil{ 
@@ -1125,12 +1139,12 @@ contract FIND{
 			self.publicEnabled = publicEnabled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddonPrice(name: String, price: UFix64){ 
 			self.addonPrices[name] = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(_default: UFix64, additionalPrices:{ Int: UFix64}){ 
 			self.defaultPrice = _default
 			self.lengthPrices = additionalPrices
@@ -1188,7 +1202,7 @@ contract FIND{
 		}
 		
 		//everybody can call register, normally done through the convenience method in the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun register(
 			name: String,
 			vault: @FUSD.Vault,
@@ -1236,7 +1250,7 @@ contract FIND{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun readStatus(_ name: String): NameStatus{ 
 			let currentTime = Clock.time()
 			if let lease = self.profiles[name]{ 
@@ -1262,7 +1276,7 @@ contract FIND{
 		}
 		
 		//lookup a name that is not locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lookup(_ name: String): &{Profile.Public}?{ 
 			let nameStatus = self.readStatus(name)
 			if nameStatus.status != LeaseStatus.TAKEN{ 
@@ -1274,7 +1288,7 @@ contract FIND{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateCost(_ name: String): UFix64{ 
 			if self.lengthPrices[name.length] != nil{ 
 				return self.lengthPrices[name.length]!
@@ -1283,12 +1297,12 @@ contract FIND{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWallet(_ wallet: Capability<&{FungibleToken.Receiver}>){ 
 			self.wallet = wallet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPublicEnabled(_ enabled: Bool){ 
 			self.publicEnabled = enabled
 		}
@@ -1371,10 +1385,10 @@ contract FIND{
 	
 	access(all)
 	resource interface BidCollectionPublic{ 
-		access(all)
-		fun getBids(): [BidInfo]
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getBids(): [FIND.BidInfo]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(_ name: String): UFix64
 		
 		access(contract)
@@ -1431,7 +1445,7 @@ contract FIND{
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBids(): [BidInfo]{ 
 			var bidInfo: [BidInfo] = []
 			for id in self.bids.keys{ 
@@ -1443,7 +1457,7 @@ contract FIND{
 		}
 		
 		//make a bid on a name
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bid(name: String, vault: @FUSD.Vault){ 
 			let nameStatus = FIND.status(name)
 			if nameStatus.status == LeaseStatus.FREE{ 
@@ -1460,7 +1474,7 @@ contract FIND{
 		}
 		
 		//increase a bid, will not work if the auction has already started
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseBid(name: String, vault: @{FungibleToken.Vault}){ 
 			let nameStatus = FIND.status(name)
 			if nameStatus.status == LeaseStatus.FREE{ 
@@ -1475,7 +1489,7 @@ contract FIND{
 		}
 		
 		//cancel a bid, will panic if called after auction has started
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelBid(_ name: String){ 
 			let nameStatus = FIND.status(name)
 			if nameStatus.status == LeaseStatus.FREE{ 
@@ -1487,7 +1501,7 @@ contract FIND{
 			self.cancel(name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(_ name: String): &Bid{ 
 			return &self.bids[name] as &FIND.Bid?
 		}
@@ -1498,14 +1512,14 @@ contract FIND{
 			bid.setType(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(_ name: String): UFix64{ 
 			let bid = self.borrowBid(name)
 			return bid.vault.balance
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyBidCollection(
 		receiver: Capability<&{FungibleToken.Receiver}>,
 		leases: Capability<&LeaseCollection>
@@ -1513,7 +1527,7 @@ contract FIND{
 		return <-create BidCollection(receiver: receiver, leases: leases)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateFindName(_ value: String): Bool{ 
 		if value.length < 3 || value.length > 16{ 
 			return false
@@ -1524,7 +1538,7 @@ contract FIND{
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateAlphanumericLowerDash(_ value: String): Bool{ 
 		let lowerA: UInt8 = 97
 		let lowerZ: UInt8 = 122
@@ -1547,7 +1561,7 @@ contract FIND{
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun validateHex(_ value: String): Bool{ 
 		let lowerA: UInt8 = 97
 		let lowerF: UInt8 = 102

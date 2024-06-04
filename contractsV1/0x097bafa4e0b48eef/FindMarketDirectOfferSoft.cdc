@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -68,18 +82,18 @@ contract FindMarketDirectOfferSoft{
 			self.totalRoyalties = self.pointer.getTotalRoyaltiesCut()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.pointer.getUUID()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptDirectOffer(){ 
 			self.directOfferAccepted = true
 		}
 		
 		//Here we do not get a vault back, it is sent in to the method itself
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptNonEscrowedBid(){ 
 			if !self.offerCallback.check(){ 
 				panic("Bidder unlinked the bid collection capability. Bidder Address : ".concat(self.offerCallback.address.toString()))
@@ -88,12 +102,12 @@ contract FindMarketDirectOfferSoft{
 			(self.offerCallback.borrow()!).acceptNonEscrowed(<-pointer.withdraw())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(): MetadataViews.Royalties{ 
 			return self.pointer.getRoyalty()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFtType(): Type{ 
 			if !self.offerCallback.check(){ 
 				panic("Bidder unlinked the bid collection capability. Bidder Address : ".concat(self.offerCallback.address.toString()))
@@ -101,22 +115,22 @@ contract FindMarketDirectOfferSoft{
 			return (self.offerCallback.borrow()!).getVaultType(self.getId())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemID(): UInt64{ 
 			return self.pointer.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type{ 
 			return self.pointer.getItemType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuction(): FindMarket.AuctionItem?{ 
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleType(): String{ 
 			if self.directOfferAccepted{ 
 				return "active_finished"
@@ -124,17 +138,17 @@ contract FindMarketDirectOfferSoft{
 			return "active_ongoing"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type{ 
 			return Type<@SaleItem>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingTypeIdentifier(): String{ 
 			return Type<@SaleItem>().identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			if !self.offerCallback.check(){ 
 				panic("Bidder unlinked the bid collection capability. Bidder Address : ".concat(self.offerCallback.address.toString()))
@@ -142,23 +156,23 @@ contract FindMarketDirectOfferSoft{
 			return (self.offerCallback.borrow()!).getBalance(self.getId())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeller(): Address{ 
 			return self.pointer.owner()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerName(): String?{ 
 			let address = self.pointer.owner()
 			return FIND.reverseLookup(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyer(): Address?{ 
 			return self.offerCallback.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyerName(): String?{ 
 			if let name = FIND.reverseLookup(self.offerCallback.address){ 
 				return name
@@ -166,42 +180,42 @@ contract FindMarketDirectOfferSoft{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toNFTInfo(_ detail: Bool): FindMarket.NFTInfo{ 
 			return FindMarket.NFTInfo(self.pointer.getViewResolver(), id: self.pointer.id, detail: detail)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setValidUntil(_ time: UFix64?){ 
 			self.validUntil = time
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValidUntil(): UFix64?{ 
 			return self.validUntil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPointer(_ pointer: FindViews.AuthNFTPointer){ 
 			self.pointer = pointer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCallback(_ callback: Capability<&MarketBidCollection>){ 
 			self.offerCallback = callback
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkPointer(): Bool{ 
 			return self.pointer.valid()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkSoulBound(): Bool{ 
 			return self.pointer.checkSoulBound()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleItemExtraField():{ String: AnyStruct}{ 
 			return self.saleItemExtraField
 		}
@@ -211,22 +225,22 @@ contract FindMarketDirectOfferSoft{
 			self.saleItemExtraField = field
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalRoyalties(): UFix64{ 
 			return self.totalRoyalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun validateRoyalties(): Bool{ 
 			return self.totalRoyalties == self.pointer.getTotalRoyaltiesCut()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display{ 
 			return self.pointer.getDisplay()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return self.pointer.getNFTCollectionData()
 		}
@@ -235,10 +249,10 @@ contract FindMarketDirectOfferSoft{
 	access(all)
 	resource interface SaleItemCollectionPublic{ 
 		//fetch all the tokens in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsId(_ id: UInt64): Bool
 		
 		access(contract)
@@ -287,7 +301,7 @@ contract FindMarketDirectOfferSoft{
 			return self.tenantCapability.borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAcceptedDirectOffer(_ id: UInt64): Bool{ 
 			if !self.items.containsKey(id){ 
 				panic("Invalid id=".concat(id.toString()))
@@ -296,7 +310,7 @@ contract FindMarketDirectOfferSoft{
 			return saleItem.directOfferAccepted
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type{ 
 			return Type<@SaleItem>()
 		}
@@ -408,7 +422,7 @@ contract FindMarketDirectOfferSoft{
 		}
 		
 		//cancel will reject a direct offer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(_ id: UInt64){ 
 			if !self.items.containsKey(id){ 
 				panic("Invalid id=".concat(id.toString()))
@@ -434,7 +448,7 @@ contract FindMarketDirectOfferSoft{
 			destroy <-self.items.remove(key: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(_ pointer: FindViews.AuthNFTPointer){ 
 			let id = pointer.getUUID()
 			if !self.items.containsKey(id){ 
@@ -509,12 +523,12 @@ contract FindMarketDirectOfferSoft{
 			destroy <-self.items.remove(key: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]{ 
 			return self.items.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyChangedIds(): [UInt64]{ 
 			let ids: [UInt64] = []
 			for id in self.getIds(){ 
@@ -526,12 +540,12 @@ contract FindMarketDirectOfferSoft{
 			return ids
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsId(_ id: UInt64): Bool{ 
 			return self.items.containsKey(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ id: UInt64): &SaleItem{ 
 			if !self.items.containsKey(id){ 
 				panic("This id does not exist.".concat(id.toString()))
@@ -539,7 +553,7 @@ contract FindMarketDirectOfferSoft{
 			return (&self.items[id] as &SaleItem?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(_ id: UInt64): &{FindMarket.SaleItem}{ 
 			if !self.items.containsKey(id){ 
 				panic("This id does not exist.".concat(id.toString()))
@@ -599,17 +613,17 @@ contract FindMarketDirectOfferSoft{
 			self.balance = self.balance + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerAddress(): Address{ 
 			return self.from.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidExtraField():{ String: AnyStruct}{ 
 			return self.bidExtraField
 		}
@@ -617,13 +631,13 @@ contract FindMarketDirectOfferSoft{
 	
 	access(all)
 	resource interface MarketBidCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(_ id: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultType(_ id: UInt64): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsId(_ id: UInt64): Bool
 		
 		access(contract)
@@ -672,27 +686,27 @@ contract FindMarketDirectOfferSoft{
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultType(_ id: UInt64): Type{ 
 			return self.borrowBid(id).vaultType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]{ 
 			return self.bids.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsId(_ id: UInt64): Bool{ 
 			return self.bids.containsKey(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidType(): Type{ 
 			return Type<@Bid>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bid(item: FindViews.ViewReadPointer, amount: UFix64, vaultType: Type, nftCap: Capability<&{NonFungibleToken.Receiver}>, validUntil: UFix64?, saleItemExtraField:{ String: AnyStruct}, bidExtraField:{ String: AnyStruct}){ 
 			
 			// ensure it is not a 0 dollar listing
@@ -734,7 +748,7 @@ contract FindMarketDirectOfferSoft{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillDirectOffer(id: UInt64, vault: @{FungibleToken.Vault}){ 
 			if self.bids[id] == nil{ 
 				panic("You need to have a bid here already".concat(id.toString()))
@@ -747,7 +761,7 @@ contract FindMarketDirectOfferSoft{
 			saleItem.fulfillDirectOfferNonEscrowed(id: id, vault: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseBid(id: UInt64, increaseBy: UFix64){ 
 			let bid = self.borrowBid(id)
 			bid.setBidAt(Clock.time())
@@ -759,7 +773,7 @@ contract FindMarketDirectOfferSoft{
 		}
 		
 		/// The users cancel a bid himself
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelBid(_ id: UInt64){ 
 			let bid = self.borrowBid(id)
 			if !bid.from.check(){ 
@@ -777,7 +791,7 @@ contract FindMarketDirectOfferSoft{
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(_ id: UInt64): &Bid{ 
 			if !self.bids.containsKey(id){ 
 				panic("This id does not exist.".concat(id.toString()))
@@ -785,7 +799,7 @@ contract FindMarketDirectOfferSoft{
 			return (&self.bids[id] as &Bid?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBidItem(_ id: UInt64): &{FindMarket.Bid}{ 
 			if !self.bids.containsKey(id){ 
 				panic("This id does not exist.".concat(id.toString()))
@@ -793,7 +807,7 @@ contract FindMarketDirectOfferSoft{
 			return (&self.bids[id] as &Bid?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(_ id: UInt64): UFix64{ 
 			let bid = self.borrowBid(id)
 			return bid.balance
@@ -801,14 +815,14 @@ contract FindMarketDirectOfferSoft{
 	}
 	
 	//Create an empty lease collection that store your leases to a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptySaleItemCollection(
 		_ tenantCapability: Capability<&FindMarket.Tenant>
 	): @SaleItemCollection{ 
 		return <-create SaleItemCollection(tenantCapability)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyMarketBidCollection(
 		receiver: Capability<&{FungibleToken.Receiver}>,
 		tenantCapability: Capability<&FindMarket.Tenant>
@@ -816,7 +830,7 @@ contract FindMarketDirectOfferSoft{
 		return <-create MarketBidCollection(receiver: receiver, tenantCapability: tenantCapability)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCapability(marketplace: Address, user: Address): Capability<
 		&SaleItemCollection
 	>?{ 
@@ -829,7 +843,7 @@ contract FindMarketDirectOfferSoft{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBidCapability(marketplace: Address, user: Address): Capability<&MarketBidCollection>?{ 
 		if FindMarket.getTenantCapability(marketplace) == nil{ 
 			panic("Invalid tenant")

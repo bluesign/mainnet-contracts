@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 ============================================================
 Name: NFT Verifier Contract for Mindtrix
 ============================================================
@@ -31,7 +45,7 @@ contract Verifier{
 		let endTime: UFix64
 		
 		// The _ (underscore) indicates that a parameter in a function has no argument label.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let currentTime = getCurrentBlock().timestamp
 			log("essence start time:".concat(self.startTime.toString()))
@@ -51,7 +65,7 @@ contract Verifier{
 		access(all)
 		var capacity: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}){ 
 			let totalSupply = Mindtrix.totalSupply
 			assert(totalSupply < self.capacity, message: "Oops! Run out of the supply!")

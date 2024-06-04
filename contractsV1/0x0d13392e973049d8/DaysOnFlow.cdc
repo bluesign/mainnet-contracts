@@ -1,4 +1,18 @@
-// Implementation of the DaysOnFlow contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Implementation of the DaysOnFlow contract
 // Each DaysOnFlow series represents a collection of DayNFTs
 // NFTs can be minted for free by the holders of the DayNFTs in the series
 // The series also support WL and public minting
@@ -145,22 +159,22 @@ contract DaysOnFlow: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowDOF(id: UInt64): &NFT?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowDOF(id: UInt64): &DaysOnFlow.NFT?
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedIdsFromSeries(seriesId: UInt64): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedDOFsFromSeries(seriesId: UInt64): [&NFT]
 	}
 	
@@ -178,7 +192,7 @@ contract DaysOnFlow: NonFungibleToken{
 		
 		// Deposits a DOF into the collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let nft <- token as! @NFT
 			let id = nft.id
 			let seriesId = nft.seriesId
@@ -210,7 +224,7 @@ contract DaysOnFlow: NonFungibleToken{
 		
 		// Returns an array of ids that belong to
 		// the passed in seriesId
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedIdsFromSeries(seriesId: UInt64): [UInt64]{ 
 			if self.series[seriesId] != nil{ 
 				return (self.series[seriesId]!).keys
@@ -220,7 +234,7 @@ contract DaysOnFlow: NonFungibleToken{
 		
 		// Returns an array of DOFs that belong to
 		// the passed in seriesId
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun ownedDOFsFromSeries(seriesId: UInt64): [&NFT]{ 
 			let answer: [&NFT] = []
 			let ids = self.ownedIdsFromSeries(seriesId: seriesId)
@@ -235,7 +249,7 @@ contract DaysOnFlow: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDOF(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -325,7 +339,7 @@ contract DaysOnFlow: NonFungibleToken{
 		var publicMinted: UInt64
 		
 		// Get number of DayNFT WL that have been claimed vs total
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun dayNFTwlStats(): [Int]{ 
 			var claimed = 0
 			for wl in self.dayNFTwlClaimed.keys{ 
@@ -337,7 +351,7 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// Get number of WL that have been claimed vs total
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun wlStats(): [Int]{ 
 			var claimed = 0
 			for wl in self.wlClaimed.keys{ 
@@ -349,7 +363,7 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// Number of NFT mintable based on holding DayNFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun nbDayNFTwlToMint(address: Address): Int{ 
 			// DayNFT collection
 			let holder = getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath).borrow<&DayNFT.Collection>()
@@ -368,13 +382,13 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// Checks if an address is on the white list
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasWlToMint(address: Address): Bool{ 
 			return self.wlClaimable && self.wlClaimed[address] != nil && !self.wlClaimed[address]!
 		}
 		
 		// Mints items available based on holding DayNFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintDayNFTwl(address: Address){ 
 			if !self.wlClaimable{ 
 				panic("Unclaimable series")
@@ -390,7 +404,7 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// Mints an item for a whitelisted address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintWl(address: Address, vault: @FlowToken.Vault){ 
 			if !self.wlClaimable{ 
 				panic("Unclaimable series")
@@ -411,7 +425,7 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// Number of items left for the public sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun nbPublicToMint(): Int{ 
 			if !self.publicClaimable{ 
 				return 0
@@ -420,7 +434,7 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// Mint an item on the public sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPublic(address: Address, vault: @FlowToken.Vault){ 
 			if !self.publicClaimable{ 
 				panic("Unclaimable series")
@@ -501,7 +515,7 @@ contract DaysOnFlow: NonFungibleToken{
 	resource SeriesMinter{ 
 		
 		// Create a new series
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSeries(_wlClaimable: Bool, _publicClaimable: Bool, _description: String, _image: String, _name: String, _dayNFTwl: [UInt64], _wl: [Address], _wlPrice: UFix64, _publicSupply: UInt64, _publicPrice: UFix64){ 
 			let series <- create DOFSeries(_wlClaimable: _wlClaimable, _publicClaimable: _publicClaimable, _description: _description, _image: _image, _name: _name, _dayNFTwl: _dayNFTwl, _wl: _wl, _wlPrice: _wlPrice, _publicSupply: _publicSupply, _publicPrice: _publicPrice)
 			let seriesId = series.seriesId
@@ -509,13 +523,13 @@ contract DaysOnFlow: NonFungibleToken{
 		}
 		
 		// Make a series claimable / not claimable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setClaimable(seriesId: UInt64, wlClaimable: Bool, publicClaimable: Bool){ 
 			DaysOnFlow.getSeries(seriesId: seriesId).setClaimable(wlClaimable: wlClaimable, publicClaimable: publicClaimable)
 		}
 		
 		// Delete a series
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSeries(seriesId: UInt64){ 
 			let series <- DaysOnFlow.allSeries.remove(key: seriesId)
 			destroy series
@@ -526,7 +540,7 @@ contract DaysOnFlow: NonFungibleToken{
 	
 	// PUBLIC APIs
 	// Get a list of all available series
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeries(): [&DOFSeries]{ 
 		let answer: [&DOFSeries] = []
 		for id in self.allSeries.keys{ 
@@ -537,7 +551,7 @@ contract DaysOnFlow: NonFungibleToken{
 	}
 	
 	// Get a reference to a specific series
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeries(seriesId: UInt64): &DOFSeries{ 
 		return (&self.allSeries[seriesId] as &DOFSeries?)!
 	}

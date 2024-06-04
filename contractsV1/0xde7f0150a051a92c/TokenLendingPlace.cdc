@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -143,7 +157,7 @@ contract TokenLendingPlace{
 	let CertificatePrivatePath: PrivatePath
 	
 	// The rate of borrowed FLOW
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlowUtilizationRate(): UFix64{ 
 		if TokenLendingPlace.TokenVaultFlow.balance
 		+ TokenLendingPlace.mFlowBorrowingAmountToken
@@ -162,7 +176,7 @@ contract TokenLendingPlace{
 	}
 	
 	// The rate of borrowed FiatToken
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFiatTokenUtilizationRate(): UFix64{ 
 		if TokenLendingPlace.TokenVaultFiatToken.balance
 		+ TokenLendingPlace.mFiatTokenBorrowingAmountToken
@@ -181,7 +195,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get mFlowBorrowingTokenPrice
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getmFlowBorrowingTokenPrice(): UFix64{ 
 		let delta = getCurrentBlock().timestamp - TokenLendingPlace.finalTimestamp
 		return TokenLendingPlace.mFlowBorrowingtokenPrice
@@ -189,7 +203,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get mFiatTokenBorrowingTokenPrice
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getmFiatTokenBorrowingTokenPrice(): UFix64{ 
 		let delta = getCurrentBlock().timestamp - TokenLendingPlace.finalTimestamp
 		return TokenLendingPlace.mFiatTokenBorrowingtokenPrice
@@ -197,7 +211,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get mFlowTokenPrice
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getmFlowTokenPrice(): UFix64{ 
 		let delta = getCurrentBlock().timestamp - TokenLendingPlace.finalTimestamp
 		return TokenLendingPlace.mFlowtokenPrice
@@ -205,7 +219,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get mFiatTokenTokenPrice
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getmFiatTokenTokenPrice(): UFix64{ 
 		let delta = getCurrentBlock().timestamp - TokenLendingPlace.finalTimestamp
 		return TokenLendingPlace.mFiatTokentokenPrice
@@ -213,7 +227,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get total supply
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalsupply():{ String: UFix64}{ 
 		return{ 
 			"flowTotalSupply":
@@ -228,7 +242,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get deposit limit
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDepositLimit():{ String: UFix64}{ 
 		return{ 
 			"flowDepositLimit": TokenLendingPlace.depositeLimitFLOWToken,
@@ -237,7 +251,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get total borrow
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalBorrow():{ String: UFix64}{ 
 		return{ 
 			"flowTotalBorrow":
@@ -250,7 +264,7 @@ contract TokenLendingPlace{
 	}
 	
 	// Get token real price
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenPrice():{ String: UFix64}{ 
 		return{ 
 			"flowTokenPrice": TokenLendingPlace.FlowTokenRealPrice,
@@ -258,7 +272,7 @@ contract TokenLendingPlace{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCollection(address: Address): &TokenLendingCollection?{ 
 		if self.lendingCollection[address] != nil{ 
 			return &self.lendingCollection[address] as &TokenLendingPlace.TokenLendingCollection?
@@ -352,28 +366,28 @@ contract TokenLendingPlace{
 			self.ownerAddress = _owner
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getmFlow(): UFix64{ 
 			return self.mFlow
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getmFiatToken(): UFix64{ 
 			return self.mFiatToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMyBorrowingmFlow(): UFix64{ 
 			return self.myBorrowingmFlow
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMyBorrowingmFiatToken(): UFix64{ 
 			return self.myBorrowingmFiatToken
 		}
 		
 		// User deposits the token as Liquidity and mint mtoken
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLiquidity(from: @{FungibleToken.Vault}, _cer: Capability<&UserCertificate>){ 
 			assert(
 				self.ownerAddress == ((_cer.borrow()!).owner!).address,
@@ -398,7 +412,7 @@ contract TokenLendingPlace{
 		}
 		
 		// User redeems mtoken and withdraw the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeLiquidity(_amount: UFix64, _token: Int, _cer: Capability<&UserCertificate>): @{
 			FungibleToken.Vault
 		}{ 
@@ -428,7 +442,7 @@ contract TokenLendingPlace{
 		}
 		
 		// Get user's net value
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNetValue(): UFix64{ 
 			// to USD
 			let NetValue =
@@ -444,7 +458,7 @@ contract TokenLendingPlace{
 		}
 		
 		// Get user's total supply
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMyTotalsupply(): UFix64{ 
 			// to USD
 			let FlowPower =
@@ -457,7 +471,7 @@ contract TokenLendingPlace{
 		}
 		
 		// Get user's total borrow
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMyTotalborrow(): UFix64{ 
 			// to USD
 			let FlowBorrow =
@@ -470,7 +484,7 @@ contract TokenLendingPlace{
 		}
 		
 		// User borrows FLOW token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlow(_amount: UFix64, _cer: Capability<&UserCertificate>): @{
 			FungibleToken.Vault
 		}{ 
@@ -499,7 +513,7 @@ contract TokenLendingPlace{
 		}
 		
 		// User borrows FiatToken token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFiatToken(_amount: UFix64, _cer: Capability<&UserCertificate>): @{
 			FungibleToken.Vault
 		}{ 
@@ -528,7 +542,7 @@ contract TokenLendingPlace{
 		}
 		
 		// User repays FLow
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repayFlow(from: @FlowToken.Vault, _cer: Capability<&UserCertificate>){ 
 			pre{ 
 				self.myBorrowingmFlow - from.balance / TokenLendingPlace.getmFlowBorrowingTokenPrice() >= 0.0:
@@ -555,7 +569,7 @@ contract TokenLendingPlace{
 		}
 		
 		// User repays FiatToken
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun repayFiatToken(from: @FiatToken.Vault, _cer: Capability<&UserCertificate>){ 
 			pre{ 
 				self.myBorrowingmFiatToken - from.balance / TokenLendingPlace.getmFiatTokenBorrowingTokenPrice() >= 0.0:
@@ -582,7 +596,7 @@ contract TokenLendingPlace{
 		}
 		
 		// Check if the borrowing amount over the loan limit
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkBorrowValid(){ 
 			if self.getMyTotalborrow() != 0.0{ 
 				assert(self.getMyTotalborrow() / self.getMyTotalsupply() < TokenLendingPlace.loanToValueRatio, message: "It's greater than loanToValueRatio")
@@ -590,7 +604,7 @@ contract TokenLendingPlace{
 		}
 		
 		// Check if the borrowing amount over the UtilizationRate
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkLiquidValid(){ 
 			assert(
 				self.getMyTotalborrow() / self.getMyTotalsupply()
@@ -600,7 +614,7 @@ contract TokenLendingPlace{
 		}
 		
 		// Check if the deposit amount over the deposit limit
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkDepositValid(){ 
 			assert(
 				TokenLendingPlace.TokenVaultFlow.balance
@@ -619,7 +633,7 @@ contract TokenLendingPlace{
 		}
 		
 		// Liquidate the user over the UtilizationRate
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun liquidateFlow(from: @{FungibleToken.Vault}, liquidatorVault: &TokenLendingCollection){ 
 			self.checkLiquidValid()
 			// FLOW in, FLOW out
@@ -650,7 +664,7 @@ contract TokenLendingPlace{
 			TokenLendingPlace.updatePriceAndInterest()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun liquidateFiatToken(
 			from: @{FungibleToken.Vault},
 			liquidatorVault: &TokenLendingCollection
@@ -698,13 +712,13 @@ contract TokenLendingPlace{
 	access(all)
 	resource UserCertificate{} 
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCertificate(): @UserCertificate{ 
 		return <-create UserCertificate()
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenLendingCollection(_cer: Capability<&UserCertificate>){ 
 		TokenLendingPlace.lendingCollection[
 			((_cer.borrow()!).owner!).address
@@ -713,7 +727,7 @@ contract TokenLendingPlace{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewSetter(): @Setter{ 
 			return <-create Setter()
 		}
@@ -721,13 +735,13 @@ contract TokenLendingPlace{
 	
 	access(all)
 	resource Setter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePricefromOracle(_FlowPrice: UFix64, _FiatTokenPrice: UFix64){ 
 			TokenLendingPlace.FlowTokenRealPrice = _FlowPrice
 			TokenLendingPlace.FiatTokenRealPrice = _FiatTokenPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDepositLimit(_FlowLimit: UFix64, _FiatTokenLimit: UFix64){ 
 			TokenLendingPlace.depositeLimitFLOWToken = _FlowLimit
 			TokenLendingPlace.depositeLimitFiatToken = _FiatTokenLimit
@@ -736,8 +750,8 @@ contract TokenLendingPlace{
 	
 	access(all)
 	resource interface SetterProxyPublic{ 
-		access(all)
-		fun setSetterCapability(cap: Capability<&Setter>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setSetterCapability(cap: Capability<&TokenLendingPlace.Setter>): Void
 	}
 	
 	access(all)
@@ -748,17 +762,17 @@ contract TokenLendingPlace{
 		
 		// Anyone can call this, but only the admin can create Setter capabilities,
 		// so the type system constrains this to being called by the admin.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSetterCapability(cap: Capability<&Setter>){ 
 			self.SetterCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePricefromOracle(_FlowPrice: UFix64, _FiatTokenPrice: UFix64){ 
 			((self.SetterCapability!).borrow()!).updatePricefromOracle(_FlowPrice: _FlowPrice, _FiatTokenPrice: _FiatTokenPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDepositLimit(_FlowLimit: UFix64, _FiatTokenLimit: UFix64){ 
 			((self.SetterCapability!).borrow()!).updateDepositLimit(_FlowLimit: _FlowLimit, _FiatTokenLimit: _FiatTokenLimit)
 		}
@@ -768,7 +782,7 @@ contract TokenLendingPlace{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSetterProxy(): @SetterProxy{ 
 		return <-create SetterProxy()
 	}

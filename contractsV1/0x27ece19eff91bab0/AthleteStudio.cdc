@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -172,7 +186,7 @@ contract AthleteStudio: NonFungibleToken{
 	access(self)
 	let editions:{ UInt64: Edition}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEdition(id: UInt64): Edition?{ 
 		return AthleteStudio.editions[id]
 	}
@@ -196,7 +210,7 @@ contract AthleteStudio: NonFungibleToken{
 		
 		/// Return the edition that this NFT belongs to.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(): Edition{ 
 			return AthleteStudio.getEdition(id: self.editionID)!
 		}
@@ -234,35 +248,35 @@ contract AthleteStudio: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTView(_ metadata: Metadata): MetadataViews.NFTView{ 
 			return MetadataViews.NFTView(id: self.id, uuid: self.uuid, display: self.resolveDisplay(metadata), externalURL: self.resolveExternalURL(metadata), collectionData: self.resolveNFTCollectionData(), collectionDisplay: self.resolveNFTCollectionDisplay(), royalties: self.resolveRoyalties(), traits: nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplay(_ metadata: Metadata): MetadataViews.Display{ 
 			return MetadataViews.Display(name: metadata.name, description: metadata.description, thumbnail: MetadataViews.IPFSFile(cid: metadata.thumbnail, path: nil))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveExternalURL(_ metadata: Metadata): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL(metadata.athleteURL)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let media = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://d3w5a827wx4ops.cloudfront.net/athlete-studio-logo-light.png"), mediaType: "image/png")
 			return MetadataViews.NFTCollectionDisplay(name: "Athlete Studio NFTs", description: "Officially licensed NFTs from Pro Athletes.", externalURL: MetadataViews.ExternalURL("https://athlete.studio"), squareImage: media, bannerImage: media, socials:{ "twitter": MetadataViews.ExternalURL("https://athlete.studio/twitter"), "instagram": MetadataViews.ExternalURL("https://athlete.studio/instagram")})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: AthleteStudio.CollectionStoragePath, publicPath: AthleteStudio.CollectionPublicPath, publicCollection: Type<&AthleteStudio.Collection>(), publicLinkedType: Type<&AthleteStudio.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-AthleteStudio.createEmptyCollection(nftType: Type<@AthleteStudio.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveRoyalties(): MetadataViews.Royalties{ 
 			// Return the Athlete Studio royalty if one is set
 			if let royalty = AthleteStudio.royalty{ 
@@ -271,22 +285,22 @@ contract AthleteStudio: NonFungibleToken{
 			return MetadataViews.Royalties([])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveEditionView(_ edition: Edition): MetadataViews.Edition{ 
 			return MetadataViews.Edition(name: "Edition", number: self.serialNumber, max: edition.size)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveSerialView(_ serialNumber: UInt64): MetadataViews.Serial{ 
 			return MetadataViews.Serial(serialNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveMedia(_ metadata: Metadata): MetadataViews.Media{ 
 			return MetadataViews.Media(file: MetadataViews.IPFSFile(cid: metadata.asset, path: nil), mediaType: metadata.assetType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveMedias(_ metadata: Metadata): MetadataViews.Medias{ 
 			return MetadataViews.Medias([MetadataViews.Media(file: MetadataViews.IPFSFile(cid: metadata.asset, path: nil), mediaType: metadata.assetType), MetadataViews.Media(file: MetadataViews.IPFSFile(cid: metadata.thumbnail, path: nil), mediaType: "image/png")])
 		}
@@ -300,15 +314,15 @@ contract AthleteStudio: NonFungibleToken{
 	access(all)
 	resource interface AthleteStudioCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAthleteStudio(id: UInt64): &AthleteStudio.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -341,7 +355,7 @@ contract AthleteStudio: NonFungibleToken{
 		/// Deposit an NFT into this collection.
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @AthleteStudio.NFT
 			let id: UInt64 = token.id
 			
@@ -372,7 +386,7 @@ contract AthleteStudio: NonFungibleToken{
 		///
 		/// This function returns nil if the NFT does not exist in this collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAthleteStudio(id: UInt64): &AthleteStudio.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -426,7 +440,7 @@ contract AthleteStudio: NonFungibleToken{
 		/// This function does not mint any NFTs. It only creates the
 		/// edition data that will later be associated with minted NFTs.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(mintID: String, size: UInt64, name: String, description: String, thumbnail: String, asset: String, assetType: String, athleteID: Int, athleteName: String, athleteURL: String, itemType: String, itemCategory: String, series: String, eventName: String, eventDate: String, eventType: String, signed: Bool): UInt64{ 
 			// Prevent multiple editions from being minted with the same mint ID
 			assert(AthleteStudioMintCache.getEditionByMintID(mintID: mintID) == nil, message: "an edition has already been created with mintID=".concat(mintID))
@@ -449,7 +463,7 @@ contract AthleteStudio: NonFungibleToken{
 		/// This function will panic if the edition has already
 		/// reached its maximum size.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @AthleteStudio.NFT{ 
 			let edition = AthleteStudio.editions[editionID] ?? panic("edition does not exist")
 			
@@ -469,7 +483,7 @@ contract AthleteStudio: NonFungibleToken{
 		
 		/// Set the royalty percentage and receiver for all Athlete Studio NFTs.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalty(royalty: MetadataViews.Royalty){ 
 			AthleteStudio.royalty = royalty
 		}
@@ -477,21 +491,21 @@ contract AthleteStudio: NonFungibleToken{
 	
 	/// Return a public path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(suffix: String): PublicPath{ 
 		return PublicPath(identifier: "AthleteStudio_".concat(suffix))!
 	}
 	
 	/// Return a private path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(suffix: String): PrivatePath{ 
 		return PrivatePath(identifier: "AthleteStudio_".concat(suffix))!
 	}
 	
 	/// Return a storage path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(suffix: String): StoragePath{ 
 		return StoragePath(identifier: "AthleteStudio_".concat(suffix))!
 	}

@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 # Contract: FantastecSwapDataV2
 # Description:
 
@@ -198,7 +212,7 @@ contract FantastecSwapDataV2{
 			return cardCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCardCollection(
 			id: UInt64,
 			title: String,
@@ -211,13 +225,13 @@ contract FantastecSwapDataV2{
 			emit CardCollectionCreated(id: newCardCollection.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCardCollection(id: UInt64){ 
 			FantastecSwapDataV2.getDataManager().removeCardCollectionData(id)
 			emit CardCollectionDeleted(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCardCollectionMetadata(
 			collectionId: UInt64,
 			metadataType: String,
@@ -228,7 +242,7 @@ contract FantastecSwapDataV2{
 			cardCollection.save()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCardCollectionMetadata(
 			collectionId: UInt64,
 			metadataType: String,
@@ -239,7 +253,7 @@ contract FantastecSwapDataV2{
 			cardCollection.save()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emitCardCollectionUpdated(_ id: UInt64){ 
 			emit CardCollectionUpdated(id: id)
 		}
@@ -255,7 +269,7 @@ contract FantastecSwapDataV2{
 			return card
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCard(
 			id: UInt64,
 			name: String,
@@ -270,13 +284,13 @@ contract FantastecSwapDataV2{
 			emit CardCreated(id: newCard.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCard(id: UInt64){ 
 			FantastecSwapDataV2.getDataManager().removeCardData(id)
 			emit CardDeleted(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCardMetadata(
 			cardId: UInt64,
 			metadataType: String,
@@ -287,14 +301,14 @@ contract FantastecSwapDataV2{
 			card.save()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCardMetadata(cardId: UInt64, metadataType: String, metadataId: UInt64){ 
 			let card = self.getCard(id: cardId)
 			card.removeMetadata(metadataType, metadataId)
 			card.save()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emitCardUpdated(_ id: UInt64){ 
 			emit CardUpdated(id: id)
 		}
@@ -338,12 +352,12 @@ contract FantastecSwapDataV2{
 	// ------------------------
 	// CardCollection functions
 	// ------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardCollectionById(id: UInt64): CardCollectionData?{ 
 		return *self.getDataManager().cardCollectionData[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardCollectionIds(): [UInt64]{ 
 		var keys: [UInt64] = []
 		for collection in self.getDataManager().cardCollectionData.values{ 
@@ -355,7 +369,7 @@ contract FantastecSwapDataV2{
 	// --------------
 	// Card functions
 	// --------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCards(_ offset: Int?, _ pageSize: Int?):{ UInt64: CardData}{ 
 		let cardIds = self.getCardIds(offset, pageSize)
 		let dataManager = self.getDataManager()
@@ -366,12 +380,12 @@ contract FantastecSwapDataV2{
 		return cardsDictionary
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardById(id: UInt64): CardData?{ 
 		return *self.getDataManager().cardData[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardIds(_ offset: Int?, _ pageSize: Int?): [UInt64]{ 
 		let cardIds = self.getDataManager().cardData.keys
 		return FantastecSwapDataV2.paginateIds(*cardIds, offset, pageSize)
@@ -380,7 +394,7 @@ contract FantastecSwapDataV2{
 	// -----------------
 	// Utility functions
 	// -----------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun join(_ array: [String]): String{ 
 		var res = ""
 		for string in array{ 
@@ -389,7 +403,7 @@ contract FantastecSwapDataV2{
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun paginateIds(_ ids: [UInt64], _ offset: Int?, _ pageSize: Int?): [UInt64]{ 
 		let from = offset ?? 0
 		if from >= ids.length{ 
@@ -448,7 +462,7 @@ contract FantastecSwapDataV2{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeMetadataElementById(
 		_ array: [{
 			FantastecSwapDataProperties.MetadataElement}

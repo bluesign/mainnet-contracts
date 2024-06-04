@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 A hepler contract to deal with annoying but commonly used functionality.
 All should be a pure function that has no dependency.
 */
@@ -35,14 +49,14 @@ contract MindtrixUtility{
 	//========================================================
 	// String 
 	//========================================================
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAlphabet(_ singleUTF8: UInt8): Bool{ 
 		let isLowerCase = singleUTF8 >= 97 && singleUTF8 <= 122
 		let isUpperCase = singleUTF8 >= 65 && singleUTF8 <= 90
 		return isLowerCase || isUpperCase
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toUpperCase(_ lowerCase: String): String{ 
 		var upperCase = ""
 		for c in lowerCase{ 
@@ -53,7 +67,7 @@ contract MindtrixUtility{
 		return upperCase
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toLowerCase(_ upperCase: String): String{ 
 		var lowerCase = ""
 		for c in upperCase{ 
@@ -64,14 +78,14 @@ contract MindtrixUtility{
 		return lowerCase
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun upperCaseFirstChar(_ str: String): String{ 
 		return self.toUpperCase(str.slice(from: 0, upTo: 1)).concat(
 			str.slice(from: 1, upTo: str.length)
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun concatJsonKeyValue(k: String, v: String, isEnd: Bool): String{ 
 		return "\"".concat(k).concat("\":\"").concat(v).concat("\"").concat(isEnd ? "" : ",")
 	}

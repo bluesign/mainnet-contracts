@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -96,7 +110,7 @@ contract NeoAvatar: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.IPFSFile>(), Type<NeoViews.Royalties>(), Type<NeoAvatarView>(), Type<NeoViews.ExternalDomainViewUrl>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWallet(_ wallet: Capability<&{FungibleToken.Receiver}>){ 
 			self.originalMinterWallet = wallet
 		}
@@ -120,7 +134,7 @@ contract NeoAvatar: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(): NeoViews.Royalties{ 
 			let minterRoyalty = NeoViews.Royalty(wallet: NeoAvatar.account.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!, cut: 0.05)
 			let founderRoyalty = NeoViews.Royalty(wallet: self.originalMinterWallet, cut: 0.01)
@@ -155,7 +169,7 @@ contract NeoAvatar: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			if token.originalMinterWallet.address == NeoAvatar.account.address{ 
 				token.setWallet((self.owner!).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver)!)
@@ -207,7 +221,7 @@ contract NeoAvatar: NonFungibleToken{
 	//This is temp until we have some global admin
 	access(all)
 	resource NeoAvatarAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(teamId: UInt64, series: String, role: String, imageHash: String, wallet: Capability<&{FungibleToken.Receiver}>, collection: Capability<&{NonFungibleToken.Receiver}>){ 
 			NeoAvatar.mint(teamId: teamId, series: series, role: role, imageHash: imageHash, wallet: wallet, collection: collection)
 		}
@@ -223,7 +237,7 @@ contract NeoAvatar: NonFungibleToken{
 		(collection.borrow()!).deposit(token: <-newNFT)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchase(id: UInt64, vault: @{FungibleToken.Vault}, nftReceiver: Capability<&{NonFungibleToken.Receiver}>){ 
 		let collection = NeoAvatar.account.storage.borrow<&NeoAvatar.Collection>(from: self.CollectionStoragePath)!
 		let ids = collection.getIDs()

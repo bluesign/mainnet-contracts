@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -50,13 +64,13 @@ contract AFLPack{
 	access(all)
 	resource interface PackPublic{ 
 		// making this function public to call by authorized users
-		access(all)
-		fun openPack(packNFT: @AFLNFT.NFT, receiptAddress: Address)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun openPack(packNFT: @AFLNFT.NFT, receiptAddress: Address): Void
 	}
 	
 	access(all)
 	resource Pack: PackPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateOwnerAddress(owner: Address){ 
 			pre{ 
 				owner != nil:
@@ -65,7 +79,7 @@ contract AFLPack{
 			AFLPack.ownerAddress = owner
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyPackFromAdmin(templateIds: [{String: UInt64}], packTemplateId: UInt64, receiptAddress: Address, price: UFix64){ 
 			pre{ 
 				templateIds.length > 0:
@@ -98,7 +112,7 @@ contract AFLPack{
 			emit PurchaseDetails(buyer: receiptAddress, momentsInPack: templateIds, pricePaid: price, packID: packTemplateId, settledOnChain: false)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyPack(templateIds: [{String: UInt64}], packTemplateId: UInt64, receiptAddress: Address, price: UFix64, flowPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				templateIds.length > 0:
@@ -136,7 +150,7 @@ contract AFLPack{
 			emit PurchaseDetails(buyer: receiptAddress, momentsInPack: templateIds, pricePaid: price, packID: packTemplateId, settledOnChain: true)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(packNFT: @AFLNFT.NFT, receiptAddress: Address){ 
 			pre{ 
 				packNFT != nil:

@@ -1,4 +1,18 @@
-import Ashes from "./Ashes.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Ashes from "./Ashes.cdc"
 
 import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
 
@@ -9,13 +23,13 @@ contract AshesMessageBoard{
 	
 	access(all)
 	resource interface PublicMessageBoard{ 
-		access(all)
-		fun getMessages(ashSerials: [UInt64]):{ UInt64: Message}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getMessages(ashSerials: [UInt64]):{ UInt64: AshesMessageBoard.Message}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getConfig(): BoardConfig
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publishMesasge(ash: @Ashes.Ash, payload: String, encoding: String): @Ashes.Ash
 	}
 	
@@ -48,7 +62,7 @@ contract AshesMessageBoard{
 		access(all)
 		var meta:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkCanPost(payload: String, encoding: String){ 
 			// message exists
 			if self.paused{ 
@@ -97,7 +111,7 @@ contract AshesMessageBoard{
 		access(self)
 		var conf: BoardConfig
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMessages(ashSerials: [UInt64]):{ UInt64: Message}{ 
 			let res:{ UInt64: Message} ={} 
 			for ashSerial in ashSerials{ 
@@ -106,17 +120,17 @@ contract AshesMessageBoard{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getConfig(): BoardConfig{ 
 			return self.conf
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setConfig(conf: BoardConfig){ 
 			self.conf = conf
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publishMesasge(ash: @Ashes.Ash, payload: String, encoding: String): @Ashes.Ash{ 
 			let ashSerial = ash.ashSerial
 			let message = self.getOrCreateMessage(ashSerial: ashSerial)
@@ -135,12 +149,12 @@ contract AshesMessageBoard{
 			return <-ash
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMessage(ashSerial: UInt64, message: Message){ 
 			self.messages[ashSerial] = message
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOrCreateMessage(ashSerial: UInt64): Message{ 
 			var message = self.messages[ashSerial]
 			if message == nil{ 

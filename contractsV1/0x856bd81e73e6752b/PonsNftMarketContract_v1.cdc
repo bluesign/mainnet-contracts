@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -87,19 +101,19 @@ contract PonsNftMarketContract_v1{
 		}
 		
 		/* Get the nftIds of all NFTs for sale */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getForSaleIds(): [String]{ 
 			return self.salePrices.keys
 		}
 		
 		/* Get the price of an NFT */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(nftId: String): PonsUtils.FlowUnits?{ 
 			return self.salePrices[nftId]
 		}
 		
 		/* Borrow an NFT from the marketplace, to browse its details */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNft(nftId: String): &PonsNftContractInterface.NFT?{ 
 			return self.collection.borrowNft(nftId: nftId)
 		}
@@ -108,7 +122,7 @@ contract PonsNftMarketContract_v1{
 		/* The price of the first edition of the NFT minted is determined by the basePrice, which must be at least the minimumMintingPrice */
 		/* When only one edition is minted, the incrementalPrice is inconsequential */
 		/* When the Pons marketplace mints multiple editions of NFTs, the market price of each succeesive NFT is incremented by the incrementalPrice */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintForSale(_ artistCertificate: &PonsNftContract.PonsArtistCertificate, metadata:{ String: String}, quantity: Int, basePrice: PonsUtils.FlowUnits, incrementalPrice: PonsUtils.FlowUnits, _ royaltyRatio: PonsUtils.Ratio, _ receivePaymentCap: Capability<&{FungibleToken.Receiver}>): @[{PonsNftMarketContract.PonsListingCertificate}]{ 
 			if !basePrice.isAtLeast(self.minimumMintingPrice){ 
 				panic("NFTs minted on Pons must have a minimum price of ".concat(self.minimumMintingPrice.toString()))
@@ -151,7 +165,7 @@ contract PonsNftMarketContract_v1{
 		}
 		
 		/* List a Pons NFT on the marketplace for sale */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(_ nft: @PonsNftContractInterface.NFT, _ salePrice: PonsUtils.FlowUnits, _ receivePaymentCap: Capability<&{FungibleToken.Receiver}>): @{PonsNftMarketContract.PonsListingCertificate}{ 
 			// Record the previous owner of the NFT
 			// let ownerAddress = nft .owner !.address
@@ -181,7 +195,7 @@ contract PonsNftMarketContract_v1{
 		}
 		
 		/* Purchase a Pons NFT from the marketplace */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(nftId: String, _ purchaseVault: @{FungibleToken.Vault}): @PonsNftContractInterface.NFT{ 
 			// Check that the NFT is available on the market
 			if !self.salePrices.containsKey(nftId){ 
@@ -243,7 +257,7 @@ contract PonsNftMarketContract_v1{
 		}
 		
 		/* Unlist a Pons NFT from the marketplace */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlist(_ ponsListingCertificate: @{PonsNftMarketContract.PonsListingCertificate}): @PonsNftContractInterface.NFT{ 
 			// Cast the certificate to a @PonsListingCertificate_v1, which is the only resource type recognised in this contract
 			var ponsListingCertificate_v1 <- ponsListingCertificate as! @PonsListingCertificate_v1

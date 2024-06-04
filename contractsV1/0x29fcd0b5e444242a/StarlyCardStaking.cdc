@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -19,7 +33,7 @@ contract StarlyCardStaking{
 			self.editions = editions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRemainingResource(starlyID: String, remainingResource: UFix64){ 
 			self.editions.insert(key: starlyID, remainingResource)
 		}
@@ -40,7 +54,7 @@ contract StarlyCardStaking{
 	access(all)
 	let EditorProxyPublicPath: PublicPath
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRemainingResource(collectionID: String, starlyID: String): UFix64?{ 
 		if let collection = StarlyCardStaking.collections[collectionID]{ 
 			return collection.editions[starlyID]
@@ -49,7 +63,7 @@ contract StarlyCardStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRemainingResourceWithDefault(starlyID: String): UFix64{ 
 		let metadata =
 			StarlyMetadata.getCardEdition(starlyID: starlyID) ?? panic("Missing metadata")
@@ -64,13 +78,17 @@ contract StarlyCardStaking{
 	
 	access(all)
 	resource interface IEditor{ 
-		access(all)
-		fun setRemainingResource(collectionID: String, starlyID: String, remainingResource: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setRemainingResource(
+			collectionID: String,
+			starlyID: String,
+			remainingResource: UFix64
+		): Void
 	}
 	
 	access(all)
 	resource Editor: IEditor{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRemainingResource(collectionID: String, starlyID: String, remainingResource: UFix64){ 
 			if let collection = StarlyCardStaking.collections[collectionID]{ 
 				(StarlyCardStaking.collections[collectionID]!).setRemainingResource(starlyID: starlyID, remainingResource: remainingResource)
@@ -82,8 +100,8 @@ contract StarlyCardStaking{
 	
 	access(all)
 	resource interface EditorProxyPublic{ 
-		access(all)
-		fun setEditorCapability(cap: Capability<&Editor>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setEditorCapability(cap: Capability<&StarlyCardStaking.Editor>): Void
 	}
 	
 	access(all)
@@ -91,12 +109,12 @@ contract StarlyCardStaking{
 		access(self)
 		var editorCapability: Capability<&Editor>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEditorCapability(cap: Capability<&Editor>){ 
 			self.editorCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRemainingResource(collectionID: String, starlyID: String, remainingResource: UFix64){ 
 			((self.editorCapability!).borrow()!).setRemainingResource(collectionID: collectionID, starlyID: starlyID, remainingResource: remainingResource)
 		}
@@ -106,14 +124,14 @@ contract StarlyCardStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEditorProxy(): @EditorProxy{ 
 		return <-create EditorProxy()
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewEditor(): @Editor{ 
 			return <-create Editor()
 		}

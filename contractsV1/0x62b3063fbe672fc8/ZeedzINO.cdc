@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -192,7 +206,7 @@ contract ZeedzINO: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return{ "id": self.id, "name": self.name, "description": self.description, "typeID": self.typeID, "serialNumber": self.serialNumber, "edition": self.edition, "editionCap": self.editionCap, "evolutionStage": self.evolutionStage, "rarity": self.rarity, "imageURI": self.imageURI, "carbonOffset": self.carbonOffset}
 		}
@@ -221,15 +235,15 @@ contract ZeedzINO: NonFungibleToken{
 	access(all)
 	resource interface ZeedzCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowZeedle(id: UInt64): &ZeedzINO.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -247,10 +261,10 @@ contract ZeedzINO: NonFungibleToken{
 	// 
 	access(all)
 	resource interface ZeedzCollectionPrivate{ 
-		access(all)
-		fun burn(burnID: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun burn(burnID: UInt64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(redeemID: UInt64, message: String)
 	}
 	
@@ -269,7 +283,7 @@ contract ZeedzINO: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(burnID: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: burnID) ?? panic("Not able to find specified NFT within the owner's collection")
 			let zeedle <- token as! @ZeedzINO.NFT
@@ -280,7 +294,7 @@ contract ZeedzINO: NonFungibleToken{
 			emit Burned(id: burnID, from: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeem(redeemID: UInt64, message: String){ 
 			let token <- self.ownedNFTs.remove(key: redeemID) ?? panic("Not able to find specified NFT within the owner's collection")
 			let zeedle <- token as! @ZeedzINO.NFT
@@ -292,7 +306,7 @@ contract ZeedzINO: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ZeedzINO.NFT
 			let id: UInt64 = token.id
 			//  add the new token to the dictionary which removes the old one
@@ -323,7 +337,7 @@ contract ZeedzINO: NonFungibleToken{
 		//  exposing all of its fields
 		//  this is safe as there are no functions that can be called on the Zeed.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowZeedle(id: UInt64): &ZeedzINO.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -386,7 +400,7 @@ contract ZeedzINO: NonFungibleToken{
 		//  Mints a new NFT with a new ID
 		//  and deposit it in the recipients collection using their collection reference.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, typeID: UInt32, serialNumber: String, edition: UInt32, editionCap: UInt32, evolutionStage: UInt32, rarity: String, imageURI: String){ 
 			recipient.deposit(token: <-create ZeedzINO.NFT(initID: ZeedzINO.totalSupply, initName: name, initDescription: description, initTypeID: typeID, initSerialNumber: serialNumber, initEdition: edition, initEditionCap: editionCap, initEvolutionStage: evolutionStage, initRarity: rarity, initImageURI: imageURI, initCarbonOffset: 0))
 			emit Minted(id: ZeedzINO.totalSupply, name: name, description: description, typeID: typeID, serialNumber: serialNumber, edition: edition, rarity: rarity)
@@ -403,7 +417,7 @@ contract ZeedzINO: NonFungibleToken{
 		//
 		//  Increase the Zeedle's total carbon offset by the given amount
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseOffset(zeedleRef: &ZeedzINO.NFT, amount: UInt64){ 
 			zeedleRef.increaseOffset(amount: amount)
 			emit Offset(id: zeedleRef.id, amount: zeedleRef.carbonOffset)
@@ -412,7 +426,7 @@ contract ZeedzINO: NonFungibleToken{
 		//
 		//  Retrieve an NFT from an account's collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retrieveNFT(from: &{ZeedzINO.ZeedzCollectionPublic}, id: UInt64): @{NonFungibleToken.NFT}{ 
 			return <-from.retrieve(id: id)
 		}
@@ -420,13 +434,13 @@ contract ZeedzINO: NonFungibleToken{
 		//
 		//  Change the Zeedle's total carbon offset to the given amount
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOffset(zeedleRef: &ZeedzINO.NFT, offset: UInt64){ 
 			zeedleRef.changeOffset(offset: offset)
 			emit Offset(id: zeedleRef.id, amount: offset)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun evolve(zeedle: @ZeedzINO.NFT?, nextEvolutionMetadata:{ String: String}): @ZeedzINO.NFT{ 
 			let evolvedZeedle <- create ZeedzINO.NFT(initID: ZeedzINO.totalSupply, initName: nextEvolutionMetadata["name"]!, initDescription: nextEvolutionMetadata["description"]!, initTypeID: UInt32.fromString(nextEvolutionMetadata["typeID"]!)!, initSerialNumber: zeedle?.serialNumber != nil ? zeedle?.serialNumber! : nextEvolutionMetadata["serialNumber"]!, initEdition: zeedle?.edition != nil ? zeedle?.edition! : 99, initEditionCap: zeedle?.editionCap != nil ? zeedle?.editionCap! : 0, initEvolutionStage: UInt32.fromString(nextEvolutionMetadata["evolutionStage"]!)!, initRarity: nextEvolutionMetadata["rarity"]!, initImageURI: nextEvolutionMetadata["imageURI"]!, initCarbonOffset: zeedle?.carbonOffset != nil ? zeedle?.carbonOffset! : 0)
 			
@@ -449,7 +463,7 @@ contract ZeedzINO: NonFungibleToken{
 	//  If it has a collection but does not contain the zeedleId, return nil.
 	//  If it has a collection and that collection contains the zeedleId, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, zeedleID: UInt64): &ZeedzINO.NFT?{ 
 		let capability = getAccount(from).capabilities.get<&ZeedzINO.Collection>(ZeedzINO.CollectionPublicPath)
 		if capability.check(){ 
@@ -463,7 +477,7 @@ contract ZeedzINO: NonFungibleToken{
 	// 
 	//  Returns the number of minted Zeedles for each Zeedle type.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedPerType():{ UInt32: UInt64}{ 
 		return self.numberMintedPerType
 	}

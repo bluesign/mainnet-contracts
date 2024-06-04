@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for Chapter2 Bikes
 	
 	This smart contract contains the core functionality for 
@@ -198,15 +212,15 @@ contract Chapter2Bikes: NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &Chapter2Bikes.NFT?
 	}
 	
@@ -234,7 +248,7 @@ contract Chapter2Bikes: NonFungibleToken{
 		// Takes a NFT and adds it to the collections dictionary
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let myToken <- token as! @Chapter2Bikes.NFT
 			emit Deposit(id: myToken.id, to: self.owner?.address)
 			self.ownedNFTs[myToken.id] <-! myToken
@@ -264,7 +278,7 @@ contract Chapter2Bikes: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEntireNFT(id: UInt64): &Chapter2Bikes.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let reference = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -310,7 +324,7 @@ contract Chapter2Bikes: NonFungibleToken{
 		// Mints an new NFT
 		// and deposits it in the Admins collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &{NonFungibleToken.CollectionPublic}, edition: Chapter2Bikes.Edition, metadata:{ String: String}){ 
 			// create a new NFT 
 			var newNFT <- create NFT(_edition: edition, _metadata: metadata)
@@ -323,7 +337,7 @@ contract Chapter2Bikes: NonFungibleToken{
 		// Batch mints Chapter2Bikes NFTs
 		// and deposits in the Admins collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMint(recipient: &{NonFungibleToken.CollectionPublic}, edition: Chapter2Bikes.Edition, metadataArray: [{String: String}]){ 
 			var i: Int = 0
 			while i < metadataArray.length{ 
@@ -332,7 +346,7 @@ contract Chapter2Bikes: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -341,8 +355,8 @@ contract Chapter2Bikes: NonFungibleToken{
 	// The interface that Admins can use to give adminRights to other users
 	access(all)
 	resource interface AdminProxyPublic{ 
-		access(all)
-		fun giveAdminRights(cap: Capability<&Admin>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun giveAdminRights(cap: Capability<&Chapter2Bikes.Admin>): Void
 	}
 	
 	// AdminProxy is a resource that allows the owner to give admin rights to other users
@@ -355,7 +369,7 @@ contract Chapter2Bikes: NonFungibleToken{
 			self.cap = nil!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun giveAdminRights(cap: Capability<&Admin>){ 
 			pre{ 
 				self.cap == nil:
@@ -364,7 +378,7 @@ contract Chapter2Bikes: NonFungibleToken{
 			self.cap = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checkAdminRights(): Bool{ 
 			return self.cap.check()
 		}
@@ -380,13 +394,13 @@ contract Chapter2Bikes: NonFungibleToken{
 			return self.cap.borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &{NonFungibleToken.CollectionPublic}, edition: Chapter2Bikes.Edition, metadata:{ String: String}){ 
 			let admin = self.borrow()
 			admin.mint(recipient: recipient, edition: edition, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMint(recipient: &{NonFungibleToken.CollectionPublic}, edition: Chapter2Bikes.Edition, metadataArray: [{String: String}]){ 
 			let admin = self.borrow()
 			admin.batchMint(recipient: recipient, edition: edition, metadataArray: metadataArray)
@@ -407,7 +421,7 @@ contract Chapter2Bikes: NonFungibleToken{
 	// editionToString
 	// public function that anyone can call to convert an edition to a string
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun editionString(_ edition: Edition): String{ 
 		switch edition{ 
 			case Edition.Frame:

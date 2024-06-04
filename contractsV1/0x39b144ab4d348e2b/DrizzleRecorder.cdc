@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract DrizzleRecorder{ 
 	access(all)
 	let RecorderStoragePath: StoragePath
@@ -111,7 +125,7 @@ contract DrizzleRecorder{
 			self.extraData = extraData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAsClaimed(rewardTokenIDs: [UInt64], extraData:{ String: AnyStruct}){ 
 			assert(self.claimedAt == nil, message: "Already marked as Claimed")
 			self.rewardTokenIDs.appendAll(rewardTokenIDs)
@@ -126,13 +140,13 @@ contract DrizzleRecorder{
 	
 	access(all)
 	resource interface IRecorderPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRecords():{ String:{ UInt64: AnyStruct}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRecordsByType(_ type: Type):{ UInt64: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRecord(type: Type, uuid: UInt64): AnyStruct?
 	}
 	
@@ -141,24 +155,24 @@ contract DrizzleRecorder{
 		access(all)
 		let records:{ String:{ UInt64: AnyStruct}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRecords():{ String:{ UInt64: AnyStruct}}{ 
 			return self.records
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRecordsByType(_ type: Type):{ UInt64: AnyStruct}{ 
 			self.initTypeRecords(type: type)
 			return self.records[type.identifier]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRecord(type: Type, uuid: UInt64): AnyStruct?{ 
 			self.initTypeRecords(type: type)
 			return (self.records[type.identifier]!)[uuid]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertOrUpdateRecord(_ record: AnyStruct){ 
 			let type = record.getType()
 			self.initTypeRecords(type: type)
@@ -183,7 +197,7 @@ contract DrizzleRecorder{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRecord(_ record: AnyStruct){ 
 			let type = record.getType()
 			self.initTypeRecords(type: type)
@@ -213,7 +227,7 @@ contract DrizzleRecorder{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyRecorder(): @Recorder{ 
 		return <-create Recorder()
 	}

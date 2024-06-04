@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract KabuniCoin{ 
 	access(all)
 	var totalSupply: UFix64
@@ -14,14 +28,14 @@ contract KabuniCoin{
 	
 	access(all)
 	resource interface Provider{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @KabuniCoin.Vault
 	}
 	
 	access(all)
 	resource interface Receiver{ 
-		access(all)
-		fun deposit(from: @KabuniCoin.Vault)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(from: @KabuniCoin.Vault): Void
 	}
 	
 	access(all)
@@ -33,7 +47,7 @@ contract KabuniCoin{
 			self.balance = balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @KabuniCoin.Vault{ 
 			pre{ 
 				self.balance >= amount:
@@ -43,7 +57,7 @@ contract KabuniCoin{
 			return <-create Vault(balance: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @KabuniCoin.Vault){ 
 			self.balance = self.balance + from.balance
 			destroy from
@@ -62,12 +76,12 @@ contract KabuniCoin{
 		self.account.capabilities.publish(capability_1, at: /public/provider)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @KabuniCoin.Vault{ 
 		return <-create Vault(balance: 0.0)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintTokens(to: Address, amount: UFix64){ 
 		pre{ 
 			amount > 0.0:

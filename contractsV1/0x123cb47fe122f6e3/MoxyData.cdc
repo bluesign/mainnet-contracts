@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract MoxyData{ 
 	access(all)
 	struct DictionaryMapped{ 
@@ -8,19 +22,19 @@ contract MoxyData{
 		access(all)
 		var arrayMap: [UFix64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setValue(_ value: AnyStruct){ 
 			let timestamp = getCurrentBlock().timestamp
 			self.dictionary[timestamp] = value
 			self.arrayMap.append(timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun valueNow(): AnyStruct{ 
 			return self.valueFor(timestamp: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun valueFor(timestamp: UFix64): AnyStruct{ 
 			if self.arrayMap.length == 0 || timestamp < self.arrayMap[0]{ 
 				// No values for that timestamp
@@ -66,7 +80,7 @@ contract MoxyData{
 		access(all)
 		var agesMap: [UFix64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDictionary():{ UFix64: UFix64}{ 
 			return self.dictionary
 		}
@@ -77,7 +91,7 @@ contract MoxyData{
 					less than the parameter received.
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValueOrMostRecentFor(timestamp: UFix64): UFix64{ 
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: timestamp)
 			if self.dictionary[time0000] != nil{ 
@@ -103,7 +117,7 @@ contract MoxyData{
 			return self.dictionary[self.arrayMap[index]]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValueFor(timestamp: UFix64): UFix64{ 
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: timestamp)
 			if self.dictionary[time0000] == nil{ 
@@ -112,7 +126,7 @@ contract MoxyData{
 			return self.dictionary[time0000]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValueForToday(): UFix64{ 
 			let balance = self.getValueOrMostRecentFor(timestamp: getCurrentBlock().timestamp)
 			if balance == nil{ 
@@ -121,14 +135,14 @@ contract MoxyData{
 			return balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValueChangeForToday(): Fix64{ 
 			return self.getValueChange(timestamp: getCurrentBlock().timestamp)
 		}
 		
 		// Get the difference between the day (represented by timestamp) with the
 		// previous date (previous date could be several days ago, depending on activity)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValueChange(timestamp: UFix64): Fix64{ 
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: timestamp)
 			if self.dictionary.length < 1{ 
@@ -173,12 +187,12 @@ contract MoxyData{
 			return Fix64(timestamp!) - Fix64(timestampBefore!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValueChanges():{ UFix64: UFix64}{ 
 			return self.getValueChangesUpTo(timestamp: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValueChangesUpTo(timestamp: UFix64):{ UFix64: UFix64}{ 
 			let resu:{ UFix64: UFix64} ={} 
 			var amountBefore = 0.0
@@ -227,7 +241,7 @@ contract MoxyData{
 			return resu
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastKeyAdded(): UFix64?{ 
 			let pos = self.dictionary.length - 1
 			if pos < 0{ 
@@ -236,7 +250,7 @@ contract MoxyData{
 			return self.arrayMap[pos]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFirstKeyAdded(): UFix64?{ 
 			if self.arrayMap.length == 0{ 
 				return nil
@@ -244,7 +258,7 @@ contract MoxyData{
 			return self.arrayMap[0]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastValue(): UFix64{ 
 			let pos = self.dictionary.length - 1
 			if pos < 0{ 
@@ -253,7 +267,7 @@ contract MoxyData{
 			return self.dictionary[self.arrayMap[pos]!]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAmountFor(timestamp: UFix64, amount: UFix64){ 
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: timestamp)
 			let lastTimestamp = self.getLastKeyAdded()
@@ -270,7 +284,7 @@ contract MoxyData{
 			self.dictionary[time0000] = self.dictionary[time0000]! + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAge(timestamp: UFix64, amount: UFix64){ 
 			if self.ages[timestamp] == nil{ 
 				self.ages[timestamp] = 0.0
@@ -279,7 +293,7 @@ contract MoxyData{
 			self.ages[timestamp] = self.ages[timestamp]! + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun subtractOldestAge(amount: UFix64):{ UFix64: UFix64}{ 
 			var amountRemaining = amount
 			let dict:{ UFix64: UFix64} ={} 
@@ -307,7 +321,7 @@ contract MoxyData{
 			return dict
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canUpdateTo(timestamp: UFix64): Bool{ 
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: timestamp)
 			let lastTimestamp = self.getLastKeyAdded()
@@ -317,7 +331,7 @@ contract MoxyData{
 			return lastTimestamp == nil || time0000 >= lastTimestamp!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawValueFromOldest(amount: UFix64):{ UFix64: UFix64}{ 
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: getCurrentBlock().timestamp)
 			let lastTimestamp = self.getLastKeyAdded()
@@ -332,7 +346,7 @@ contract MoxyData{
 			return dict
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyWith(orderedDictionary: @OrderedDictionary){ 
 			let dict = orderedDictionary.getDictionary()
 			for timestamp in dict.keys{ 
@@ -353,18 +367,18 @@ contract MoxyData{
 	
 	access(all)
 	resource interface OrderedDictionaryInfo{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDictionary():{ UFix64: UFix64}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTimestampTo0000(timestamp: UFix64): UFix64{ 
 		let dayInSec = 86400.0
 		let days = timestamp / dayInSec
 		return UFix64(UInt64(days)) * dayInSec
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewOrderedDictionary(): @OrderedDictionary{ 
 		return <-create OrderedDictionary()
 	}

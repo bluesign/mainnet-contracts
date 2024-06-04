@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	FlowStakingCollection
 
@@ -116,7 +130,7 @@ contract FlowStakingCollection{
 		}
 		
 		// Gets the address of the machine account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(): Address{ 
 			return ((self.machineAccountVaultProvider.borrow()!).owner!).address
 		}
@@ -132,32 +146,32 @@ contract FlowStakingCollection{
 		access(all)
 		var unlockedTokensUsed: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNodeObject(
 			_ node: @FlowIDTableStaking.NodeStaker,
-			machineAccountInfo: MachineAccountInfo?
-		)
+			machineAccountInfo: FlowStakingCollection.MachineAccountInfo?
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addDelegatorObject(_ delegator: @FlowIDTableStaking.NodeDelegator)
 		
 		//pub fun depositToMachineAccount(nodeID: String, from: @FlowToken.Vault)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun doesStakeExist(nodeID: String, delegatorID: UInt32?): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNodeIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDelegatorIDs(): [DelegatorIDs]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllNodeInfo(): [FlowIDTableStaking.NodeInfo]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllDelegatorInfo(): [FlowIDTableStaking.DelegatorInfo]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMachineAccounts():{ String: MachineAccountInfo}
 	}
 	
@@ -315,7 +329,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Returns true if a Stake or Delegation record exists in the StakingCollection for a given nodeID and optional delegatorID, otherwise false.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun doesStakeExist(nodeID: String, delegatorID: UInt32?): Bool{ 
 			var tokenHolderNodeID: String? = nil
 			var tokenHolderDelegatorNodeID: String? = nil
@@ -341,7 +355,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to add an existing NodeStaker object
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNodeObject(_ node: @FlowIDTableStaking.NodeStaker, machineAccountInfo: MachineAccountInfo?){ 
 			let id = node.id
 			let stakingInfo = FlowIDTableStaking.NodeInfo(nodeID: id)
@@ -355,7 +369,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to add an existing NodeDelegator object
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addDelegatorObject(_ delegator: @FlowIDTableStaking.NodeDelegator){ 
 			let stakingInfo = FlowIDTableStaking.DelegatorInfo(nodeID: delegator.nodeID, delegatorID: delegator.id)
 			let totalStaked = stakingInfo.totalTokensInRecord() - stakingInfo.tokensRewarded
@@ -368,7 +382,7 @@ contract FlowStakingCollection{
 		/// If the user has used any locked tokens, removing NodeStaker objects is not allowed.
 		/// We do not clear the machine account field for this node here
 		/// because the operator may want to keep it the same
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNode(nodeID: String): @FlowIDTableStaking.NodeStaker?{ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: nil):
@@ -399,7 +413,7 @@ contract FlowStakingCollection{
 		
 		/// Function to remove an existing NodeDelegator object.
 		/// If the user has used any locked tokens, removing NodeDelegator objects is not allowed.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeDelegator(nodeID: String, delegatorID: UInt32): @FlowIDTableStaking.NodeDelegator?{ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -432,7 +446,7 @@ contract FlowStakingCollection{
 		
 		/// Operations to register new staking objects
 		/// Function to register a new Staking Record to the Staking Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerNode(id: String, role: UInt8, networkingAddress: String, networkingKey: String, stakingKey: String, amount: UFix64, payer: AuthAccount): AuthAccount?{ 
 			let tokens <- self.getTokens(amount: amount)
 			let nodeStaker <- FlowIDTableStaking.addNodeRecord(id: id, role: role, networkingAddress: networkingAddress, networkingKey: networkingKey, stakingKey: stakingKey, tokensCommitted: <-tokens)
@@ -499,7 +513,7 @@ contract FlowStakingCollection{
 		/// or if they decide they want to use a different machine account for one of their nodes
 		/// If they want to use a different machine account, it is their responsibility to
 		/// transfer the qc or dkg object to the new account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMachineAccountRecord(nodeID: String, machineAccount: AuthAccount){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: nil):
@@ -529,7 +543,7 @@ contract FlowStakingCollection{
 		
 		/// If a user has created a node before epochs were enabled, they'll need to use this function
 		/// to create their machine account with their node 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMachineAccountForExistingNode(nodeID: String, payer: AuthAccount): AuthAccount?{ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: nil)
@@ -549,7 +563,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Allows the owner to withdraw any available FLOW from their machine account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFromMachineAccount(nodeID: String, amount: UFix64){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: nil):
@@ -566,7 +580,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to register a new Delegator Record to the Staking Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDelegator(nodeID: String, amount: UFix64){ 
 			let delegatorIDs = self.getDelegatorIDs()
 			for idInfo in delegatorIDs{ 
@@ -611,7 +625,7 @@ contract FlowStakingCollection{
 		// If they are staking for a delegator, they provide the node ID for the node they are delegating to
 		// and their delegator ID to specify that it is for their delegator object
 		/// Updates the stored networking address for the specified node
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNetworkingAddress(nodeID: String, newAddress: String){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: nil):
@@ -629,7 +643,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to stake new tokens for an existing Stake or Delegation record in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeNewTokens(nodeID: String, delegatorID: UInt32?, amount: UFix64){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -674,7 +688,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to stake unstaked tokens for an existing Stake or Delegation record in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeUnstakedTokens(nodeID: String, delegatorID: UInt32?, amount: UFix64){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -696,7 +710,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to stake rewarded tokens for an existing Stake or Delegation record in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeRewardedTokens(nodeID: String, delegatorID: UInt32?, amount: UFix64){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -724,7 +738,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to request tokens to be unstaked for an existing Stake or Delegation record in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(nodeID: String, delegatorID: UInt32?, amount: UFix64){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -747,7 +761,7 @@ contract FlowStakingCollection{
 		
 		/// Function to unstake all tokens for an existing node staking record in the StakingCollection
 		/// Only available for node operators
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(nodeID: String){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: nil):
@@ -762,7 +776,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to withdraw unstaked tokens for an existing Stake or Delegation record in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(nodeID: String, delegatorID: UInt32?, amount: UFix64){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -786,7 +800,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to withdraw rewarded tokens for an existing Stake or Delegation record in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(nodeID: String, delegatorID: UInt32?, amount: UFix64){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -824,7 +838,7 @@ contract FlowStakingCollection{
 		// Closers
 		/// Closes an existing stake or delegation, moving all withdrawable tokens back to the users account and removing the stake
 		/// or delegator object from the StakingCollection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeStake(nodeID: String, delegatorID: UInt32?){ 
 			pre{ 
 				self.doesStakeExist(nodeID: nodeID, delegatorID: delegatorID):
@@ -889,7 +903,7 @@ contract FlowStakingCollection{
 		
 		/// Getters
 		/// Function to get all node ids for all Staking records in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNodeIDs(): [String]{ 
 			let nodeIDs: [String] = self.nodeStakers.keys
 			if let tokenHolderCapability = self.tokenHolder{ 
@@ -903,7 +917,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to get all delegator ids for all Delegation records in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDelegatorIDs(): [DelegatorIDs]{ 
 			let nodeIDs: [String] = self.nodeDelegators.keys
 			let delegatorIDs: [DelegatorIDs] = []
@@ -925,7 +939,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to get all Node Info records for all Staking records in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllNodeInfo(): [FlowIDTableStaking.NodeInfo]{ 
 			let nodeInfo: [FlowIDTableStaking.NodeInfo] = []
 			let nodeIDs: [String] = self.nodeStakers.keys
@@ -943,7 +957,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Function to get all Delegator Info records for all Delegation records in the StakingCollection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllDelegatorInfo(): [FlowIDTableStaking.DelegatorInfo]{ 
 			let delegatorInfo: [FlowIDTableStaking.DelegatorInfo] = []
 			let nodeIDs: [String] = self.nodeDelegators.keys
@@ -967,7 +981,7 @@ contract FlowStakingCollection{
 		}
 		
 		/// Gets a users list of machine account information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMachineAccounts():{ String: MachineAccountInfo}{ 
 			return self.machineAccounts
 		}
@@ -975,7 +989,7 @@ contract FlowStakingCollection{
 	
 	// Getter functions for accounts StakingCollection information
 	/// Function to get see if a node or delegator exists in an accounts staking collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun doesStakeExist(address: Address, nodeID: String, delegatorID: UInt32?): Bool{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -985,7 +999,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Function to get the unlocked tokens used amount for an account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUnlockedTokensUsed(address: Address): UFix64{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -995,7 +1009,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Function to get the locked tokens used amount for an account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLockedTokensUsed(address: Address): UFix64{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -1005,7 +1019,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Function to get all node ids for all Staking records in a users StakingCollection, if one exists.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNodeIDs(address: Address): [String]{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -1015,7 +1029,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Function to get all delegator ids for all Delegation records in a users StakingCollection, if one exists.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDelegatorIDs(address: Address): [DelegatorIDs]{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -1025,7 +1039,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Function to get all Node Info records for all Staking records in a users StakingCollection, if one exists.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllNodeInfo(address: Address): [FlowIDTableStaking.NodeInfo]{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -1035,7 +1049,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Function to get all Delegator Info records for all Delegation records in a users StakingCollection, if one exists.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllDelegatorInfo(address: Address): [FlowIDTableStaking.DelegatorInfo]{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -1045,7 +1059,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Global function to get all the machine account info for all the nodes managed by an address' staking collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMachineAccounts(address: Address):{ String: MachineAccountInfo}{ 
 		let account = getAccount(address)
 		let stakingCollectionRef =
@@ -1055,7 +1069,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Determines if an account is set up with a Staking Collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun doesAccountHaveStakingCollection(address: Address): Bool{ 
 		let account = getAccount(address)
 		return account.capabilities.get<&StakingCollection>(self.StakingCollectionPublicPath)
@@ -1063,7 +1077,7 @@ contract FlowStakingCollection{
 	}
 	
 	/// Creates a brand new empty staking collection resource and returns it to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStakingCollection(
 		unlockedVault: Capability<&FlowToken.Vault>,
 		tokenHolder: Capability<&LockedTokens.TokenHolder>?

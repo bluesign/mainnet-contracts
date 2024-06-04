@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for LCube Tickets
 
 	This smart contract contains the core functionality for 
@@ -331,7 +345,7 @@ contract LCubeTickets: NonFungibleToken{
 		// The Event needs to be not locked
 		// The TicketType can't have already been added to the Event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTicketType(ticketTypeID: UInt32){ 
 			pre{ 
 				LCubeTickets.ticketTypeDatas[ticketTypeID] != nil:
@@ -355,7 +369,7 @@ contract LCubeTickets: NonFungibleToken{
 		// Parameters: ticketTypesIDs: The IDs of the TicketTypes that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTicketTypes(ticketTypeIDs: [UInt32]){ 
 			for ticketType in ticketTypeIDs{ 
 				self.addTicketType(ticketTypeID: ticketType)
@@ -369,7 +383,7 @@ contract LCubeTickets: NonFungibleToken{
 		// Pre-Conditions:
 		// The TicketType is part of the Event and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireTicketType(ticketTypeID: UInt32){ 
 			pre{ 
 				self.retired[ticketTypeID] != nil:
@@ -384,7 +398,7 @@ contract LCubeTickets: NonFungibleToken{
 		// retireAll retires all the ticketTypes in the Event
 		// Afterwards, none of the retired TicketTypes will be able to mint new Tickets
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for ticketType in self.ticketTypes{ 
 				self.retireTicketType(ticketTypeID: ticketType)
@@ -400,7 +414,7 @@ contract LCubeTickets: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTicket(ticketTypeID: UInt32, metadata: String?): @NFT{ 
 			pre{ 
 				self.retired[ticketTypeID] != nil:
@@ -426,7 +440,7 @@ contract LCubeTickets: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Tickets that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintTicket(ticketTypeID: UInt32, metadatas: [String?], quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -437,17 +451,17 @@ contract LCubeTickets: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketTypes(): [UInt32]{ 
 			return self.ticketTypes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumMintedPerTicketType():{ UInt32: UInt32}{ 
 			return self.numberMintedPerTicketType
 		}
@@ -493,17 +507,17 @@ contract LCubeTickets: NonFungibleToken{
 			self.numberMintedPerTicketType = *_event.numberMintedPerTicketType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTicketTypes(): [UInt32]{ 
 			return self.ticketTypes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRetired():{ UInt32: Bool}{ 
 			return self.retired
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMintedPerTicketType():{ UInt32: UInt32}{ 
 			return self.numberMintedPerTicketType
 		}
@@ -601,14 +615,14 @@ contract LCubeTickets: NonFungibleToken{
 		
 		// If the Ticket is destroyed, emit an event to indicate 
 		// to outside ovbservers that it has been destroyed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let ticketTypeName: String = LCubeTickets.getTicketTypeName(ticketTypeID: self.data.ticketTypeID) ?? ""
 			let eventName: String = LCubeTickets.getEventName(eventID: self.data.eventID) ?? ""
 			return eventName.concat(" ").concat(ticketTypeName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let eventName: String = LCubeTickets.getEventName(eventID: self.data.eventID) ?? ""
 			let ticketTypeName: String = LCubeTickets.getTicketTypeName(ticketTypeID: self.data.ticketTypeID) ?? ""
@@ -656,7 +670,7 @@ contract LCubeTickets: NonFungibleToken{
 		//
 		// Returns: the ID of the new TicketType object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTicketType(ticketTypeID: UInt32, eventID: UInt32, name: String, initialPrice: UFix64, totalAmount: UInt32, image: String?, description: String?): UInt32{ 
 			// Create the new TicketType
 			var newTicketType = TicketType(ticketTypeID: ticketTypeID, eventID: eventID, name: name, initialPrice: initialPrice, totalAmount: totalAmount, image: image, description: description)
@@ -682,7 +696,7 @@ contract LCubeTickets: NonFungibleToken{
 		//			 description : description of the event. example {NBA finals between Lakers and Golden States}
 		//
 		// Returns: The ID of the created event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEvent(name: String, startTime: String, venue: String, eventType: String, timeZone: Int, gateTime: String, image: String?, description: String?): UInt32{ 
 			// Increment the eventID 
 			LCubeTickets.totalEvents = LCubeTickets.totalEvents + 1
@@ -704,7 +718,7 @@ contract LCubeTickets: NonFungibleToken{
 		// Returns: A reference to the Event with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEvent(eventID: UInt32): &Event{ 
 			pre{ 
 				LCubeTickets.events[eventID] != nil:
@@ -717,7 +731,7 @@ contract LCubeTickets: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -729,18 +743,18 @@ contract LCubeTickets: NonFungibleToken{
 	access(all)
 	resource interface LCubeTicketsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: UInt64): &LCubeTickets.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -789,7 +803,7 @@ contract LCubeTickets: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -806,7 +820,7 @@ contract LCubeTickets: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as a TopShot NFT to make sure
 			// it is the correct type
 			let token <- token as! @LCubeTickets.NFT
@@ -825,7 +839,7 @@ contract LCubeTickets: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -869,7 +883,7 @@ contract LCubeTickets: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: UInt64): &LCubeTickets.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -921,12 +935,12 @@ contract LCubeTickets: NonFungibleToken{
 	// getAllTicketTypes returns all the TicketTypes in lCube tickets
 	//
 	// Returns: An array of all the TicketTypes that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTicketTypes(): [LCubeTickets.TicketType]{ 
 		return LCubeTickets.ticketTypeDatas.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeName(ticketTypeID: UInt32): String?{ 
 		if let ticketType = LCubeTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.name
@@ -935,7 +949,7 @@ contract LCubeTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeInitialPrice(ticketTypeID: UInt32): UFix64?{ 
 		if let ticketType = LCubeTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.initialPrice
@@ -944,7 +958,7 @@ contract LCubeTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeTotalAmount(ticketTypeID: UInt32): UInt32?{ 
 		if let ticketType = LCubeTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.totalAmount
@@ -953,7 +967,7 @@ contract LCubeTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeImage(ticketTypeID: UInt32): String?{ 
 		if let ticketType = LCubeTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.image
@@ -962,7 +976,7 @@ contract LCubeTickets: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypeDescription(ticketTypeID: UInt32): String?{ 
 		if let ticketType = LCubeTickets.ticketTypeDatas[ticketTypeID]{ 
 			return ticketType.description
@@ -977,7 +991,7 @@ contract LCubeTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The QueryEventData struct that has all the important information about the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventData(eventID: UInt32): QueryEventData?{ 
 		if LCubeTickets.events[eventID] == nil{ 
 			return nil
@@ -992,7 +1006,7 @@ contract LCubeTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The name of the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventName(eventID: UInt32): String?{ 
 		// Don't force a revert if the eventID is invalid
 		return LCubeTickets.eventDatas[eventID]?.name
@@ -1004,7 +1018,7 @@ contract LCubeTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The venue of the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventVenue(eventID: UInt32): String?{ 
 		// Don't force a revert if the eventID is invalid
 		return LCubeTickets.eventDatas[eventID]?.venue
@@ -1016,7 +1030,7 @@ contract LCubeTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: The StartDate of the Event
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventStartDate(eventID: UInt32): String?{ 
 		// Don't force a revert if the eventID is invalid
 		return LCubeTickets.eventDatas[eventID]?.startTime
@@ -1028,7 +1042,7 @@ contract LCubeTickets: NonFungibleToken{
 	// Parameters: eventName: The name of the Event that is being searched
 	//
 	// Returns: An array of the IDs of the Event if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventIDsByName(eventName: String): [UInt32]?{ 
 		var eventIDs: [UInt32] = []
 		// Iterate through all the eventDatas and search for the name
@@ -1052,7 +1066,7 @@ contract LCubeTickets: NonFungibleToken{
 	// Parameters: eventID: The id of the Event that is being searched
 	//
 	// Returns: An array of TicketTypeIDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketTypesInEvent(eventID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the eventID is invalid
 		return LCubeTickets.events[eventID]?.ticketTypes
@@ -1066,7 +1080,7 @@ contract LCubeTickets: NonFungibleToken{
 	//
 	// Returns: The total number of Tickets 
 	//		  that have been minted from an from a certain TicketType on an event.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumTicketsInTicketType(eventID: UInt32, ticketTypeID: UInt32): UInt32?{ 
 		if let eventData = self.getEventData(eventID: eventID){ 
 			// Read the numMintedPerTicketType

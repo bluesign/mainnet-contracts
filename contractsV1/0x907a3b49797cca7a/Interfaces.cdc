@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 ## The Interfaces of Flow Quest
 
 > Author: Bohao Tang<tech@btang.cn>
@@ -53,44 +67,44 @@ contract Interfaces{
 	access(all)
 	resource interface ProfilePublic{ 
 		// readable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferredFrom(): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralCode(): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentities(): [LinkedIdentity]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentity(platform: String): LinkedIdentity
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountiesCompleted():{ UInt64: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isBountyCompleted(bountyId: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionStatus(missionKey: String): MissionStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionsParticipanted(): [String]
 		
 		// season points
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRegistered(seasonId: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeasonsJoined(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeasonPoints(seasonId: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProfilePoints(): UInt64
 		
 		// writable
@@ -134,11 +148,11 @@ contract Interfaces{
 		let communityId: UInt64
 		
 		// get Bounty Entity
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountyEntity(): &{BountyEntityPublic}
 		
 		// To simple string uid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toString(): String{ 
 			return self.communityId.toString().concat(":").concat(self.key)
 		}
@@ -158,11 +172,11 @@ contract Interfaces{
 		let communityId: UInt64
 		
 		// display
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStandardDisplay(): MetadataViews.Display
 		
 		// To simple string uid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toString(): String{ 
 			return self.communityId.toString().concat(":").concat(self.key)
 		}
@@ -170,7 +184,7 @@ contract Interfaces{
 	
 	access(all)
 	struct interface MissionInfoPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): MissionDetail
 	}
 	
@@ -190,7 +204,7 @@ contract Interfaces{
 	
 	access(all)
 	struct interface QuestInfoPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): QuestDetail
 	}
 	
@@ -214,32 +228,32 @@ contract Interfaces{
 		access(all)
 		let type: UInt8
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isUnlocked(_ params:{ String: AnyStruct}): Bool
 	}
 	
 	// Bounty information
 	access(all)
 	resource interface BountyInfoPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPreconditions(): [{UnlockCondition}]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier():{ BountyEntityIdentifier}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequiredMissionKeys(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardType(): Helper.MissionRewardType
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPointReward(): Helper.PointReward
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFLOATReward(): Helper.FLOATReward
 	}
 	
@@ -247,18 +261,18 @@ contract Interfaces{
 	access(all)
 	resource interface CompetitionPublic{ 
 		// status
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isActive(): Bool
 		
 		// information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeasonId(): UInt64
 		
 		// leaderboard
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRank(_ addr: Address): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaderboardRanking(limit: Int?):{ UInt64: [Address]}
 		
 		// onProfile
@@ -268,36 +282,36 @@ contract Interfaces{
 	
 	access(all)
 	resource interface CompetitionServicePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralAddress(_ code: String): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReferralCode(_ addr: Address): String?
 		
 		// season
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSeasonID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeason(seasonId: UInt64): &{CompetitionPublic}
 		
 		// bounties
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountyIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrimaryBountyIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasBountyByKey(_ key: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkBountyCompleteStatus(acct: Address, bountyId: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBountyInfo(_ bountyId: UInt64): &{BountyInfoPublic}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMissionRef(_ missionKey: String): &{BountyEntityPublic, MissionInfoPublic}
 		
 		access(account)

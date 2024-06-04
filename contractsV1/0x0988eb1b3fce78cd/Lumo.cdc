@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
  * 
  * @Use: Lumo fungible token
  * @Date: Dec 1st, 2021
@@ -126,7 +140,7 @@ contract Lumo: FungibleToken{
 		// been consumed and therefore can be destroyed.
 		//
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @Lumo.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -164,7 +178,7 @@ contract Lumo: FungibleToken{
 		//
 		// Function that creates and returns a new minter resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
@@ -187,7 +201,7 @@ contract Lumo: FungibleToken{
 		// Function that mints new tokens, adds them to the total supply,
 		// and returns them to the calling context.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @Lumo.Vault{ 
 			pre{ 
 				amount <= self.allowedAmount:
@@ -206,7 +220,7 @@ contract Lumo: FungibleToken{
 		// Function that lifts the supply cap of lumo tokens
 		// Fail if the cap is lower than the current totalSupply
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeTotalSupplyCap(cap: UFix64){ 
 			pre{ 
 				cap > 0.0:

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MotoGPAdmin from "../0xa49cc0ee46c54bfb/MotoGPAdmin.cdc"
 
@@ -6,7 +20,7 @@ import MotoGPAdmin from "../0xa49cc0ee46c54bfb/MotoGPAdmin.cdc"
 // corresponding to the SHRD ERC-20 on Ethereum.
 access(all)
 contract SHRD: FungibleToken{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.0"
 	}
@@ -16,7 +30,7 @@ contract SHRD: FungibleToken{
 	// Interface to enable creation of a private-pathed capability for minting
 	access(all)
 	resource interface SHRDMinterPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @SHRD.Vault
 	}
 	
@@ -24,7 +38,7 @@ contract SHRD: FungibleToken{
 	// By accessing minting in this way, all mint functions can have access(contract) visibility
 	access(all)
 	resource SHRDMinter: SHRDMinterPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @SHRD.Vault{ 
 			return <-SHRD.mint(amount: amount)
 		}
@@ -129,7 +143,7 @@ contract SHRD: FungibleToken{
 		// @event TokensDeposited
 		//
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @SHRD.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)

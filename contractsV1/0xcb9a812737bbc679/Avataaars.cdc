@@ -1,4 +1,18 @@
-/*!
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*!
 * Avataaars (@dicebear/avataaars)
 *
 * Code licensed under MIT License.
@@ -158,15 +172,15 @@ contract Avataaars: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface AvataaarsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAvataaars(id: UInt64): &Avataaars.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -207,7 +221,7 @@ contract Avataaars: NonFungibleToken, ViewResolver{
 		/// @param token: The NFT resource to be included in the collection
 		/// 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Avataaars.NFT
 			let id: UInt64 = token.id
 			
@@ -243,7 +257,7 @@ contract Avataaars: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAvataaars(id: UInt64): &Avataaars.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -293,8 +307,8 @@ contract Avataaars: NonFungibleToken, ViewResolver{
 	
 	access(all)
 	resource interface MinterPublic{ 
-		access(all)
-		fun mintNFT(recipient: &Avataaars.Collection)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintNFT(recipient: &Avataaars.Collection): Void
 	}
 	
 	/// Resource that an admin or something similar would own to be
@@ -307,7 +321,7 @@ contract Avataaars: NonFungibleToken, ViewResolver{
 		///
 		/// @param recipient: A capability to the collection where the new NFT will be deposited
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &Avataaars.Collection){ 
 			// we want IDs to start at 1, so we'll increment first
 			Avataaars.totalSupply = Avataaars.totalSupply + 1
@@ -341,7 +355,7 @@ contract Avataaars: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -359,12 +373,12 @@ contract Avataaars: NonFungibleToken, ViewResolver{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowMinter(): &{MinterPublic}{ 
 		return self.account.storage.borrow<&{MinterPublic}>(from: self.MinterStoragePath)!
 	}

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	BloctoTokenPublicSale
 
@@ -120,7 +134,7 @@ contract BloctoTokenPublicSale{
 	// BLT purchase method
 	// User pays tUSDT and get unlocked BloctoToken
 	// Note that "address" can potentially be faked, but there's no incentive doing so
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchase(from: @TeleportedTetherToken.Vault, address: Address){ 
 		pre{ 
 			self.isSaleActive:
@@ -137,64 +151,64 @@ contract BloctoTokenPublicSale{
 		emit Purchased(address: address, amount: amount, ticketId: purchaseInfo.ticketId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIsSaleActive(): Bool{ 
 		return self.isSaleActive
 	}
 	
 	// Get all purchaser addresses
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPurchasers(): [Address]{ 
 		return self.purchases.keys
 	}
 	
 	// Get all purchase records
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPurchases():{ Address: PurchaseInfo}{ 
 		return self.purchases
 	}
 	
 	// Get purchase record from an address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPurchase(address: Address): PurchaseInfo?{ 
 		return self.purchases[address]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBltVaultBalance(): UFix64{ 
 		return self.bltVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTusdtVaultBalance(): UFix64{ 
 		return self.tusdtVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrice(): UFix64{ 
 		return self.price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPersonalCap(): UFix64{ 
 		return self.personalCap
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			BloctoTokenPublicSale.isSaleActive = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			BloctoTokenPublicSale.isSaleActive = false
 		}
 		
 		// Distribute BLT with an allocation amount
 		// If user's purchase amount exceeds allocation amount, the remainder will be refunded
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun distribute(address: Address, allocationAmount: UFix64){ 
 			pre{ 
 				BloctoTokenPublicSale.purchases[address] != nil:
@@ -239,7 +253,7 @@ contract BloctoTokenPublicSale{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refund(address: Address){ 
 			pre{ 
 				BloctoTokenPublicSale.purchases[address] != nil:
@@ -264,7 +278,7 @@ contract BloctoTokenPublicSale{
 			emit Refunded(address: address, amount: purchaseInfo.amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrice(price: UFix64){ 
 			pre{ 
 				price > 0.0:
@@ -274,28 +288,28 @@ contract BloctoTokenPublicSale{
 			emit NewPrice(price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePersonalCap(personalCap: UFix64){ 
 			BloctoTokenPublicSale.personalCap = personalCap
 			emit NewPersonalCap(personalCap: personalCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBlt(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-BloctoTokenPublicSale.bltVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawTusdt(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-BloctoTokenPublicSale.tusdtVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBlt(from: @{FungibleToken.Vault}){ 
 			BloctoTokenPublicSale.bltVault.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositTusdt(from: @{FungibleToken.Vault}){ 
 			BloctoTokenPublicSale.tusdtVault.deposit(from: <-from)
 		}

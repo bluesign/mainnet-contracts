@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import cBridge from "./cBridge.cdc"
 
@@ -126,13 +140,13 @@ contract SafeBox{
 	access(account)
 	var records:{ String: Bool}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenConfig(identifier: String): TokenCfg{ 
 		let tokenCfg = self.tokMap[identifier]!
 		return tokenCfg
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun recordExist(id: String): Bool{ 
 		return self.records.containsKey(id)
 	}
@@ -140,31 +154,31 @@ contract SafeBox{
 	// ========== resource ==========
 	access(all)
 	resource SafeBoxAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTok(identifier: String, tok: TokenCfg){ 
 			assert(!SafeBox.tokMap.containsKey(identifier), message: "this token already exist")
 			SafeBox.tokMap[identifier] = tok
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rmTok(identifier: String){ 
 			assert(SafeBox.tokMap.containsKey(identifier), message: "this token do not exist")
 			SafeBox.tokMap.remove(key: identifier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pause(){ 
 			SafeBox.isPaused = true
 			DelayedTransfer.pause()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unPause(){ 
 			SafeBox.isPaused = false
 			DelayedTransfer.unPause()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSafeBoxAdmin(): @SafeBoxAdmin{ 
 			return <-create SafeBoxAdmin()
 		}
@@ -183,7 +197,7 @@ contract SafeBox{
 		self.account.storage.save<@SafeBoxAdmin>(<-create SafeBoxAdmin(), to: self.AdminPath)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deposit(from: &{FungibleToken.Provider}, info: DepoInfo){ 
 		pre{ 
 			!self.isPaused:
@@ -221,7 +235,7 @@ contract SafeBox{
 	
 	// we can also use recipient: &AnyResource{FungibleToken.Receiver} to do deposit.
 	// but now, we use the tokCfg pubPath to get the Receiver first.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdraw(token: String, wdmsg: [UInt8], sigs: [cBridge.SignerSig]){ 
 		pre{ 
 			!self.isPaused:
@@ -271,7 +285,7 @@ contract SafeBox{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun executeDelayedTransfer(wdId: String){ 
 		pre{ 
 			!self.isPaused:

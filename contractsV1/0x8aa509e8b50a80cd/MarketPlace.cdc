@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -43,20 +57,20 @@ contract MarketPlace{
 	
 	access(all)
 	resource interface SaleCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenID: UInt64,
 			recipientCap: Capability<&Collectible.Collection>,
 			buyTokens: @FUSD.Vault
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &Collectible.NFT?
 	}
 	
@@ -98,7 +112,7 @@ contract MarketPlace{
 		}
 		
 		// withdraw gives the owner the opportunity to remove a sale from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @Collectible.NFT{ 
 			// remove the price
 			self.prices.remove(key: tokenID)
@@ -110,7 +124,7 @@ contract MarketPlace{
 		}
 		
 		// listForSale lists an NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @Collectible.NFT, price: UFix64){ 
 			pre{ 
 				price > 0.00:
@@ -131,7 +145,7 @@ contract MarketPlace{
 		}
 		
 		// changePrice changes the price of a token that is currently for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -148,7 +162,7 @@ contract MarketPlace{
 		}
 		
 		// remove nft from sale. this uses is to differ between cancel sale and buy NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFromSale(tokenID: UInt64): @Collectible.NFT{ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -160,18 +174,18 @@ contract MarketPlace{
 		}
 		
 		// idPrice returns the price of a specific token in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &Collectible.NFT?{ 
 			if self.forSale[id] != nil{ 
 				let ref = &self.forSale[id] as &Collectible.NFT?
@@ -209,7 +223,7 @@ contract MarketPlace{
 		}
 		
 		// purchase lets a user send tokens to purchase an NFT that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, recipientCap: Capability<&Collectible.Collection>, buyTokens: @FUSD.Vault){ 
 			pre{ 
 				self.forSale[tokenID] != nil && self.prices[tokenID] != nil:
@@ -258,7 +272,7 @@ contract MarketPlace{
 	}
 	
 	// get info for NFT including metadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleDatas(address: Address): [SaleData]{ 
 		var saleData: [SaleData] = []
 		let account = getAccount(address)
@@ -276,7 +290,7 @@ contract MarketPlace{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(ownerVault: Capability<&FUSD.Vault>): @SaleCollection{ 
 		return <-create SaleCollection(vault: ownerVault)
 	}

@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Identity{ 
 	access(all)
 	event DelegationAdded(chainId: UInt8, operator: String, caller: Address?)
@@ -44,10 +58,10 @@ contract Identity{
 	
 	access(all)
 	resource interface DelegationsPublic{ 
-		access(all)
-		fun getDelegatedChains(): [CHAINS]
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getDelegatedChains(): [Identity.CHAINS]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDelegation(chainId: CHAINS): &Delegation?
 	}
 	
@@ -57,7 +71,7 @@ contract Identity{
 		access(all)
 		var delegations: @{CHAINS: Delegation}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun set(chainId: UInt8, address: String){ 
 			let formattedAddress = address.toLower()
 			var newDelegation <- create Delegation(chainId: Identity.CHAINS(rawValue: chainId) ?? panic("Invalid chain"), address: formattedAddress)
@@ -87,12 +101,12 @@ contract Identity{
 			destroy oldDelegation2
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDelegatedChains(): [CHAINS]{ 
 			return self.delegations.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDelegation(chainId: CHAINS): &Delegation?{ 
 			return &self.delegations[chainId] as &Delegation?
 		}
@@ -102,17 +116,17 @@ contract Identity{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDelegations(): @Delegations{ 
 		return <-create Delegations()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLookupsKeys(): [String]{ 
 		return self.AddressesLookup.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLookupsByDelegatedAddress(address: String):{ Address: Bool}?{ 
 		return self.AddressesLookup[address]
 	}

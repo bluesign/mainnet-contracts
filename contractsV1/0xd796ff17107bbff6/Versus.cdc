@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -159,14 +173,14 @@ contract Versus{
 			self.contentCapability = contentCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContent(): String{ 
 			let contentCollection = self.contentCapability.borrow()!
 			return contentCollection.content(self.contentId)
 		}
 		
 		//Returns a DropStatus struct that could be used in a script to show information about the drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDropStatus(): DropStatus{ 
 			let uniqueRef = &self.uniqueAuction as &Auction.AuctionItem
 			let editionRef = &self.editionAuctions as &Auction.AuctionCollection
@@ -217,7 +231,7 @@ contract Versus{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateStatus(edition: UFix64, unique: UFix64): String{ 
 			var winningStatus = ""
 			if edition > unique{ 
@@ -230,7 +244,7 @@ contract Versus{
 			return winningStatus
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settle(cutPercentage: UFix64, vault: Capability<&{FungibleToken.Receiver}>){ 
 			let status = self.getDropStatus()
 			if status.settledAt != nil{ 
@@ -262,14 +276,14 @@ contract Versus{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAllEditionedAuctions(){ 
 			for id in self.editionAuctions.keys(){ 
 				self.editionAuctions.settleAuction(id)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAllEditionedAuctions(){ 
 			for id in self.editionAuctions.keys(){ 
 				self.editionAuctions.cancelAuction(id)
@@ -287,14 +301,14 @@ contract Versus{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(auctionId: UInt64, address: Address): UFix64{ 
 			let auction = self.getAuction(auctionId: auctionId)
 			return auction.currentBidForUser(address: address)
 		}
 		
 		//place a bid on a given auction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			auctionId: UInt64,
 			bidTokens: @{FungibleToken.Vault},
@@ -408,7 +422,7 @@ contract Versus{
 		
 		//This would make it possible to extend the drop with more time from an admin interface
 		//here we just delegate to the auctions and extend them all
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendDropWith(_ time: UFix64){ 
 			log("Drop extended with duration")
 			self.uniqueAuction.extendWith(time)
@@ -546,22 +560,22 @@ contract Versus{
 	//An resource interface that everybody can access through a public capability.
 	access(all)
 	resource interface PublicDrop{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(dropId: UInt64, auctionId: UInt64, address: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllStatuses():{ UInt64: DropStatus}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCacheKeyForDrop(_ dropId: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(dropId: UInt64): DropStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArt(dropId: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			dropId: UInt64,
 			auctionId: UInt64,
@@ -573,7 +587,7 @@ contract Versus{
 	
 	access(all)
 	resource interface AdminDrop{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(
 			nft: @{NonFungibleToken.NFT},
 			editions: UInt64,
@@ -584,9 +598,9 @@ contract Versus{
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
 			duration: UFix64,
 			extensionOnLateBid: UFix64
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settle(_ dropId: UInt64)
 	}
 	
@@ -613,7 +627,7 @@ contract Versus{
 			self.drops <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(_ withdrawID: UInt64): @Drop{ 
 			let token <- self.drops.remove(key: withdrawID) ?? panic("missing drop")
 			return <-token
@@ -621,14 +635,14 @@ contract Versus{
 		
 		/// Set the cut percentage for versus
 		/// @param cut: The cut percentage as a Ufix64 that versus will take for each drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCutPercentage(_ cut: UFix64){ 
 			self.cutPercentage = cut
 		}
 		
 		// When creating a drop you send in an NFT and the number of editions you want to sell vs the unique one
 		// There will then be minted edition number of extra copies and put into the editions auction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(nft: @{NonFungibleToken.NFT}, editions: UInt64, minimumBidIncrement: UFix64, minimumBidUniqueIncrement: UFix64, startTime: UFix64, startPrice: UFix64, vaultCap: Capability<&{FungibleToken.Receiver}>, duration: UFix64, extensionOnLateBid: UFix64){ 
 			pre{ 
 				vaultCap.check() == true:
@@ -655,7 +669,7 @@ contract Versus{
 		}
 		
 		//Get all the drop statuses
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllStatuses():{ UInt64: DropStatus}{ 
 			var dropStatus:{ UInt64: DropStatus} ={} 
 			for id in self.drops.keys{ 
@@ -674,7 +688,7 @@ contract Versus{
 			return (&self.drops[dropId] as &Drop?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDropByCacheKey(_ cacheKey: UInt64): DropStatus?{ 
 			var dropStatus:{ UInt64: DropStatus} ={} 
 			for id in self.drops.keys{ 
@@ -686,47 +700,47 @@ contract Versus{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCacheKeyForDrop(_ dropId: UInt64): UInt64{ 
 			return self.getDrop(dropId).contentId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(dropId: UInt64): DropStatus{ 
 			return self.getDrop(dropId).getDropStatus()
 		}
 		
 		//get the art for this drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArt(dropId: UInt64): String{ 
 			return self.getDrop(dropId).getContent()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtType(dropId: UInt64): String{ 
 			return self.getDrop(dropId).metadata.type
 		}
 		
 		//settle a drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settle(_ dropId: UInt64){ 
 			self.getDrop(dropId).settle(cutPercentage: self.cutPercentage, vault: self.marketplaceVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(dropId: UInt64, auctionId: UInt64, address: Address): UFix64{ 
 			return self.getDrop(dropId).currentBidForUser(auctionId: auctionId, address: address)
 		}
 		
 		//place a bid, will just delegate to the method in the drop collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(dropId: UInt64, auctionId: UInt64, bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{Art.CollectionPublic}>){ 
 			self.getDrop(dropId).placeBid(auctionId: auctionId, bidTokens: <-bidTokens, vaultCap: vaultCap, collectionCap: collectionCap)
 		}
 	}
 	
 	// Get the art stored on chain for this drop
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArtForDrop(_ dropId: UInt64): String?{ 
 		let versusCap =
 			Versus.account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)
@@ -741,14 +755,14 @@ contract Versus{
 	
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDrops(): [Versus.DropStatus]{ 
 		let account = Versus.account
 		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(self.CollectionPublicPath)!
 		return (versusCap.borrow()!).getAllStatuses().values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDrop(_ id: UInt64): Versus.DropStatus?{ 
 		let account = Versus.account
 		let versusCap = account.capabilities.get<&{Versus.PublicDrop}>(Versus.CollectionPublicPath)
@@ -762,7 +776,7 @@ contract Versus{
 		Get the first active drop in the versus marketplace
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActiveDrop(): Versus.DropStatus?{ 
 		// get the accounts' public address objects
 		let account = Versus.account
@@ -782,8 +796,8 @@ contract Versus{
 	//The interface used to add a Versus Drop Collection capability to a AdminPublic
 	access(all)
 	resource interface AdminPublic{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Versus.DropCollection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&Versus.DropCollection>): Void
 	}
 	
 	//The versus admin resource that a client will create and store, then link up a public AdminPublic
@@ -796,7 +810,7 @@ contract Versus{
 			self.server = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Versus.DropCollection>){ 
 			pre{ 
 				cap.check():
@@ -808,7 +822,7 @@ contract Versus{
 		}
 		
 		// This will settle/end an auction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settle(_ dropId: UInt64){ 
 			pre{ 
 				self.server != nil:
@@ -821,7 +835,7 @@ contract Versus{
 			artC.burnAll()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVersusCut(_ num: UFix64){ 
 			pre{ 
 				self.server != nil:
@@ -831,7 +845,7 @@ contract Versus{
 			dc.setCutPercentage(num)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(nft: @{NonFungibleToken.NFT}, editions: UInt64, minimumBidIncrement: UFix64, minimumBidUniqueIncrement: UFix64, startTime: UFix64, startPrice: UFix64, //TODO: seperate startPrice for unique and edition																																											  
 																																											  vaultCap: Capability<&{FungibleToken.Receiver}>, duration: UFix64, extensionOnLateBid: UFix64){ 
 			pre{ 
@@ -842,7 +856,7 @@ contract Versus{
 		}
 		
 		/* A stored Transaction to mintArt on versus to a given artist */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintArt(artist: Address, artistName: String, artName: String, content: String, description: String, type: String, artistCut: UFix64, minterCut: UFix64): @Art.NFT{ 
 			pre{ 
 				self.server != nil:
@@ -860,12 +874,12 @@ contract Versus{
 			return <-art
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun editionArt(art: &Art.NFT, edition: UInt64, maxEdition: UInt64): @Art.NFT{ 
 			return <-Art.makeEdition(original: art, edition: edition, maxEdition: maxEdition)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun editionAndDepositArt(art: &Art.NFT, to: [Address]){ 
 			let maxEdition: UInt64 = UInt64(to.length)
 			var i: UInt64 = 1
@@ -878,7 +892,7 @@ contract Versus{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContent(): &Content.Collection{ 
 			pre{ 
 				self.server != nil:
@@ -887,7 +901,7 @@ contract Versus{
 			return Versus.account.storage.borrow<&Content.Collection>(from: Content.CollectionStoragePath)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlowWallet(): &{FungibleToken.Vault}{ 
 			pre{ 
 				self.server != nil:
@@ -896,7 +910,7 @@ contract Versus{
 			return Versus.account.storage.borrow<&{FungibleToken.Vault}>(from: /storage/flowTokenVault)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtCollection(): &{NonFungibleToken.Collection}{ 
 			pre{ 
 				self.server != nil:
@@ -905,7 +919,7 @@ contract Versus{
 			return Versus.account.storage.borrow<&{NonFungibleToken.Collection}>(from: Art.CollectionStoragePath)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDropCollection(): &Versus.DropCollection{ 
 			pre{ 
 				self.server != nil:
@@ -914,7 +928,7 @@ contract Versus{
 			return (self.server!).borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVersusProfile(): &Profile.User{ 
 			pre{ 
 				self.server != nil:
@@ -925,7 +939,7 @@ contract Versus{
 	}
 	
 	//make it possible for a user that wants to be a versus admin to create the client
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminClient(): @Admin{ 
 		return <-create Admin()
 	}

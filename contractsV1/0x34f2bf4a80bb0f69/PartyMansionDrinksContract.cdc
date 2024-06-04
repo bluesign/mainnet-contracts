@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 *  SPDX-License-Identifier: GPL-3.0-only
 */
 
@@ -301,7 +315,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		//  But the ocean’s not beer, and I’m not a duck. 
 		//  So raise up your glasses and shut the fuck up."
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return self.data.title
 		}
@@ -310,7 +324,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		//
 		// "Ashes to ashes, dust to dust, if it weren’t for our ass, our belly would bust!"
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return "A ".concat(PartyMansionDrinksContract.rarityToString(rarity: self.data.rarity)).concat(" ").concat(self.data.title).concat(" with serial number ").concat(self.id.toString())
 		}
@@ -319,7 +333,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		//
 		// "Here’s to being single, drinking doubles, and seeing triple."
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun imageCID(): String{ 
 			return self.data.cid
 		}
@@ -400,7 +414,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// "Proost op onze lever"
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		// Get all IDs related to the current Drink Collection
 		// returns an Array of IDs
@@ -409,7 +423,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// "Na EX!"
 		//
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		// Borrow NonFungibleToken NFT with ID from current Drink Collection 
 		// Param id refers to a Drink ID
@@ -427,7 +441,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// Czech
 		// "Na zdraví!"
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDrink(id: UInt64): &PartyMansionDrinksContract.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -502,7 +516,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// Polish
 		// "Sto lat!"
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fillFridge(collectionID: UInt64, title: String, description: String, cid: String, rarity: UInt64, metadata:{ String: AnyStruct}){ 
 			pre{ 
 				cid.length > 0:
@@ -517,7 +531,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// Polish
 		// "Za nas!"
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceDrinkInFridge(collectionID: UInt64, title: String, description: String, cid: String, rarity: UInt64, metadata:{ String: AnyStruct}, index: Int){ 
 			pre{ 
 				cid.length > 0:
@@ -536,7 +550,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// Polish
 		// “Za tych co nie mogą”
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeDrinkFromFridge(index: UInt64){ 
 			pre{ 
 				PartyMansionDrinksContract.fridge[index] != nil:
@@ -553,7 +567,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// ’Tis not so sweet as a woman’s lip
 		// But a damned sight more sincere."
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun throwHouseRound(collectionID: UInt64, title: String, description: String, cid: String, rarity: UInt64, metadata:{ String: AnyStruct}, drinkType: DrinkType, recipient: &{NonFungibleToken.CollectionPublic}, originalOwner: Address){ 
 			pre{ 
 				cid.length > 0:
@@ -570,7 +584,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		//
 		// "Time to hydrate"
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retrievePoolDrink(drinkType: DrinkType): DrinkStruct{ 
 			pre{ 
 				PartyMansionDrinksContract.checkIfBarIsSoldOut(drinkType: drinkType) == false:
@@ -586,7 +600,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// "May you always lie, cheat, and steal. Lie beside the one you love,
 		// cheat the devil, and steal away from bad company."
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun announceLastCall(lastCall: Bool){ 
 			PartyMansionDrinksContract.lastCall = lastCall
 		}
@@ -596,7 +610,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// Mexico
 		// "Por lo que ayer dolió y hoy ya no importa, salud!"
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDrinkPrices(beerPrice: UFix64, whiskyPrice: UFix64, longDrinkPrice: UFix64){ 
 			PartyMansionDrinksContract.beerPrice = beerPrice
 			PartyMansionDrinksContract.whiskyPrice = whiskyPrice
@@ -701,7 +715,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// Wherever you go."
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @PartyMansionDrinksContract.NFT
 			let id: UInt64 = token.id
 			
@@ -747,7 +761,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 		// Spanish
 		// "¡arriba, abajo, al centro y adentro!"
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDrink(id: UInt64): &PartyMansionDrinksContract.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -868,7 +882,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	//  wirst im Alter wie der Wein,
 	//  stets begehrt und heiter sein."
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun checkIfBarIsSoldOut(drinkType: DrinkType): Bool{ 
 		switch drinkType{ 
 			case DrinkType.Beer:
@@ -891,7 +905,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	// Doch in der Bibel steht geschrieben:
 	// „Du sollst auch deine Feinde lieben.“
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPriceByTypeFromPriceList(drinkType: DrinkType): UFix64{ 
 		var price: UFix64 = 0.00
 		switch drinkType{ 
@@ -915,7 +929,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	// doch viel bequemer hast du's hier,
 	// brauchst nur rufen: Wirt, ein Bier!"
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDrinkFromStorage(drinkType: DrinkType): DrinkStruct{ 
 		var disposedDrink: DrinkStruct = DrinkStruct(drinkID: 0 as UInt64, collectionID: 0 as UInt64, title: " ", description: " ", cid: " ", drinkType: drinkType, rarity: 0 as UInt64, metadata:{} )
 		switch drinkType{ 
@@ -938,7 +952,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	// German
 	// "Wer Liebe mag und Einigkeit, der trinkt auch mal ne Kleinigkeit."
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyDrink(recipient: &{NonFungibleToken.CollectionPublic}, address: Address, paymentVault: @{FungibleToken.Vault}, drinkType: DrinkType){ 
 		pre{ 
 			PartyMansionDrinksContract.lastCall == false:
@@ -970,7 +984,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	//
 	// “Alcohol may be man’s worst enemy, but the bible says love your enemy.”
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun retrieveFreeDrink(recipient: &{NonFungibleToken.CollectionPublic}, address: Address, giveawayCode: String, drinkType: DrinkType){ 
 		pre{ 
 			PartyMansionDrinksContract.checkIfBarIsSoldOut(drinkType: drinkType) == false:
@@ -1055,7 +1069,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	//
 	// “Lift ’em high and drain ’em dry, to the guy who says, “My turn to buy.”
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getContractAddress(): Address{ 
 		return self.account.address
 	}
@@ -1064,7 +1078,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	//
 	// "May we never go to hell but always be on our way."
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBeerPrice(): UFix64{ 
 		return self.beerPrice
 	}
@@ -1074,7 +1088,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	// "God in goodness sent us grapes to cheer both great and small. 
 	//  Little fools drink too much, and great fools not at all!"
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhiskyPrice(): UFix64{ 
 		return self.whiskyPrice
 	}
@@ -1084,7 +1098,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	// "The past is history, the future is a mystery, but today is a gift, 
 	//  because it’s the present."
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLongDrinkPrice(): UFix64{ 
 		return self.longDrinkPrice
 	}
@@ -1093,7 +1107,7 @@ contract PartyMansionDrinksContract: NonFungibleToken{
 	//
 	// "Life is short, but sweet."
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun rarityToString(rarity: UInt64): String{ 
 		switch rarity{ 
 			case 0 as UInt64:

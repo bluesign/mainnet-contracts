@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for Legaci Collectibles
 
 	authors: Aman Azad aman@legaci.shop
@@ -150,7 +164,7 @@ contract LegaciCollectible: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintLegaciCollectible(collectionId: String, unitId: String): @NFT{ 
 			// Mint the new moment
 			let newLegaciCollectible: @NFT <- create NFT(brandId: self.brandId, collectionId: collectionId, unitId: unitId)
@@ -227,7 +241,7 @@ contract LegaciCollectible: NonFungibleToken{
 		//
 		// Parameters: brandId: The UUID string of the Brand
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBrand(brandId: String){ 
 			// Create the new Brand
 			var newBrand <- create Brand(brandId: brandId)
@@ -243,7 +257,7 @@ contract LegaciCollectible: NonFungibleToken{
 		//
 		// Returns: The number of minted collectibles from the Brand 
 		// stored in the Legaci Collectible smart contract resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBrandMintedCollectiblesCount(brandId: String): UInt64?{ 
 			// Don't force a revert if the brandId is invalid
 			return LegaciCollectible.brands[brandId]?.numberOfMintedCollectibles
@@ -258,7 +272,7 @@ contract LegaciCollectible: NonFungibleToken{
 		// Returns: A reference to the Brand with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBrand(brandId: String): &Brand{ 
 			pre{ 
 				LegaciCollectible.brands[brandId] != nil:
@@ -272,7 +286,7 @@ contract LegaciCollectible: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -284,18 +298,18 @@ contract LegaciCollectible: NonFungibleToken{
 	access(all)
 	resource interface LegaciCollectibleCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLegaciCollectible(id: UInt64): &LegaciCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -344,7 +358,7 @@ contract LegaciCollectible: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Legaci Collectibles
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -363,7 +377,7 @@ contract LegaciCollectible: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Legaci Collectible NFT to make sure
 			// it is the correct type
@@ -387,7 +401,7 @@ contract LegaciCollectible: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -435,7 +449,7 @@ contract LegaciCollectible: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLegaciCollectible(id: UInt64): &LegaciCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -481,7 +495,7 @@ contract LegaciCollectible: NonFungibleToken{
 	// getBrands returns all the brands
 	//
 	// Returns: An array of all the plays that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBrands(): [String]{ 
 		return LegaciCollectible.brands.keys
 	}

@@ -1,4 +1,18 @@
-// This contract implements Bitku's HaikuNFT including the NFT resource which
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This contract implements Bitku's HaikuNFT including the NFT resource which
 // stores the text of each haiku and the function for minting+generating haiku.
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -68,7 +82,7 @@ contract HaikuNFT: NonFungibleToken{
 			self.text = text
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRenderedURL(): String{ 
 			var text = ""
 			var i = 0
@@ -129,18 +143,18 @@ contract HaikuNFT: NonFungibleToken{
 	
 	access(all)
 	resource interface HaikuCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHaiku(id: UInt64): &HaikuNFT.NFT?
 		
 		// Require all of the base NFT functions to be delcared as well
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 	}
 	
 	access(all)
@@ -165,7 +179,7 @@ contract HaikuNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @HaikuNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -188,7 +202,7 @@ contract HaikuNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHaiku(id: UInt64): &HaikuNFT.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &HaikuNFT.NFT?
@@ -223,12 +237,12 @@ contract HaikuNFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun rand(i: UInt64, m: UInt64): UInt64{ 
 		return (i * m + UInt64(666)) % UInt64(0xfeedface)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ceil(_ i: UFix64): Int{ 
 		if i > UFix64(UInt64(i)){ 
 			return Int(i) + 1
@@ -236,7 +250,7 @@ contract HaikuNFT: NonFungibleToken{
 		return Int(i)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOptions(lineNum: Int, previousPreviousWord: String, previousWord: String):{ String: Int}{ 
 		let wordPair: String = previousPreviousWord.concat(" ").concat(previousWord)
 		
@@ -264,7 +278,7 @@ contract HaikuNFT: NonFungibleToken{
 	
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEndOptions(previousPreviousWord: String, previousWord: String):{ String: Int}{ 
 		// When we get too many syllables on the last line, try to get options from the end model
 		let wordPair: String = previousPreviousWord.concat(" ").concat(previousWord)
@@ -277,7 +291,7 @@ contract HaikuNFT: NonFungibleToken{
 		return{} 
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun currentPrice(): UFix64{ 
 		let i = UFix64(self.totalSupply - self.preMint)
 		var price = i * i * i * self.priceDelta
@@ -287,7 +301,7 @@ contract HaikuNFT: NonFungibleToken{
 		return price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun captalize(_ a: String): String{ 
 		switch a{ 
 			case "a":
@@ -449,7 +463,7 @@ contract HaikuNFT: NonFungibleToken{
 		return haiku
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintHaiku(recipient: &{NonFungibleToken.Collection}, vault: @{FungibleToken.Vault}, id: UInt64, flowReceiverRef: &FlowToken.Vault){ 
 		pre{ 
 			// Make sure that the ID matches the current ID
@@ -502,7 +516,7 @@ contract HaikuNFT: NonFungibleToken{
 	// This function will save each haiku to the contract's collection.
 	// This function will fail if the premint number (64) has already been exceeded. 
 	// So this function can be called more times, but will have no effect.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun preMintHaikus(num: UInt64): UInt64{ 
 		pre{ 
 			// Make sure that the this wouldn't exceed the pre-mint

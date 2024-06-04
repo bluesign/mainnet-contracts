@@ -1,4 +1,18 @@
-// Popsycl NFT Marketplace
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Popsycl NFT Marketplace
 // NFT smart contract
 // Version		 : 0.0.1
 // Blockchain	  : Flow www.onFlow.org
@@ -65,7 +79,7 @@ contract Popsycl: NonFungibleToken{
 		access(self)
 		let metaData:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metaData
 		}
@@ -132,15 +146,15 @@ contract Popsycl: NonFungibleToken{
 	access(all)
 	resource interface PopsyclCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPopsycl(id: UInt64): &Popsycl.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -164,7 +178,7 @@ contract Popsycl: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Popsycl.NFT
 			let id: UInt64 = token.id
 			
@@ -187,7 +201,7 @@ contract Popsycl: NonFungibleToken{
 		}
 		
 		// function to check wether the owner have token or not
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tokenExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -200,7 +214,7 @@ contract Popsycl: NonFungibleToken{
 		}
 		
 		// exposing all of its fields.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPopsycl(id: UInt64): &Popsycl.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -238,7 +252,7 @@ contract Popsycl: NonFungibleToken{
 	resource NFTMinter{ 
 		
 		// Function to mint group of tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GroupMint(recipient: &{PopsyclCollectionPublic}, influencerRecipient: Address, content: String, edition: UInt, tokenGroupId: UInt64, royality: UFix64, name: String, description: String, previewContent: String, mimeType: String){ 
 			pre{ 
 				Popsycl.editionLimit >= edition:
@@ -256,7 +270,7 @@ contract Popsycl: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Mint(recipient: &{PopsyclCollectionPublic}, influencerRecipient: Address, content: String, royality: UFix64, name: String, description: String, previewContent: String, mimeType: String){ 
 			let token <- create NFT(id: Popsycl.totalSupply, content: content, royality: royality, creator: recipient.owner?.address, influencer: influencerRecipient, name: name, description: description, previewContent: previewContent, mimeType: mimeType)
 			emit Mint(id: Popsycl.totalSupply, content: content, royality: royality, owner: recipient.owner?.address, influencer: influencerRecipient)
@@ -274,7 +288,7 @@ contract Popsycl: NonFungibleToken{
 	// Admin can change the maximum supported group minting count limit for the platform. Currently it is 50
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeLimit(limit: UInt){ 
 			Popsycl.editionLimit = limit
 		}

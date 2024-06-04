@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -201,19 +215,19 @@ contract ListenMarketplace{
 		// This will assert in the same way as the NFT standard borrowNFT()
 		// if the NFT is absent, for example if it has been sold via another listing.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTs(): [&{NonFungibleToken.NFT}]
 		
 		// purchase
 		// Purchase the listing, buying the token.
 		// This pays the beneficiaries and returns the token to the buyer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}): @{NonFungibleToken.Collection}
 		
 		// getDetails
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails
 	}
 	
@@ -238,7 +252,7 @@ contract ListenMarketplace{
 		// This will assert in the same way as the NFT standard borrowNFT()
 		// if the NFT is absent, for example if it has been sold via another listing.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTs(): [&{NonFungibleToken.NFT}]{ 
 			let refs: [&{NonFungibleToken.NFT}] = []
 			for id in self.getDetails().nftIDs{ 
@@ -255,7 +269,7 @@ contract ListenMarketplace{
 		// This avoids having more public variables and getter methods for them, and plays
 		// nicely with scripts (which cannot return resources).
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails{ 
 			return self.details
 		}
@@ -264,7 +278,7 @@ contract ListenMarketplace{
 		// Purchase the listing, buying the token.
 		// This pays the beneficiaries and returns the token to the buyer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}): @{NonFungibleToken.Collection}{ 
 			pre{ 
 				self.details.purchased == false:
@@ -357,7 +371,7 @@ contract ListenMarketplace{
 		// createListing
 		// Allows the ListenStorefront owner to create and insert Listings.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -369,13 +383,12 @@ contract ListenMarketplace{
 			salePaymentVaultType: Type,
 			ftReceiverCap: Capability<&{FungibleToken.Receiver}>,
 			salePrice: UFix64
-		)		 // saleCuts: [SaleCut]
-		 : UInt64
+		): UInt64
 		
 		// removeListing
 		// Allows the ListenStorefront owner to remove any sale listing, acepted or not.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingResourceID: UInt64)
 	}
 	
@@ -385,13 +398,13 @@ contract ListenMarketplace{
 	//
 	access(all)
 	resource interface ListenStorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &Listing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(listingResourceID: UInt64)
 	}
 	
@@ -408,7 +421,7 @@ contract ListenMarketplace{
 		// insert
 		// Create and publish a Listing for an NFT.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftIDs: [UInt64], salePaymentVaultType: Type, ftReceiverCap: Capability<&{FungibleToken.Receiver}>, salePrice: UFix64)																																																																   // saleCuts: [SaleCut]
 																																																																   : UInt64{ 
 			let royaltyReceiverCap = getAccount(ListenMarketplace.listenRoyaltyPaymentAddress).capabilities.get<&{FungibleToken.Receiver}>(ListenUSD.ReceiverPublicPath)
@@ -437,7 +450,7 @@ contract ListenMarketplace{
 		// removeListing
 		// Remove a Listing that has not yet been purchased from the collection and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingResourceID: UInt64){ 
 			let listing <- self.listings.remove(key: listingResourceID) ?? panic("missing Listing")
 			
@@ -448,7 +461,7 @@ contract ListenMarketplace{
 		// getListingIDs
 		// Returns an array of the Listing resource IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]{ 
 			return self.listings.keys
 		}
@@ -456,7 +469,7 @@ contract ListenMarketplace{
 		// borrowSaleItem
 		// Returns a read-only view of the SaleItem for the given listingID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &Listing?{ 
 			if self.listings[listingResourceID] != nil{ 
 				return &self.listings[listingResourceID] as &ListenMarketplace.Listing?
@@ -470,7 +483,7 @@ contract ListenMarketplace{
 		// Anyone can call, but at present it only benefits the account owner to do so.
 		// Kind purchasers can however call it if they like.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(listingResourceID: UInt64){ 
 			pre{ 
 				self.listings[listingResourceID] != nil:
@@ -493,7 +506,7 @@ contract ListenMarketplace{
 	// createListenStorefront
 	// Make creating a ListenStorefront publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createListenStorefront(): @ListenStorefront{ 
 		return <-create ListenStorefront()
 	}

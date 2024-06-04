@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 /// NFTProviderAggregator
 ///
@@ -84,16 +98,16 @@ contract NFTProviderAggregator{
 	///
 	access(all)
 	resource interface SupplierPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAggregatorUUID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupplierAddedCollectionUUIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionUUIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
@@ -102,8 +116,8 @@ contract NFTProviderAggregator{
 	///
 	access(all)
 	resource interface SupplierFactory{ 
-		access(all)
-		fun createSupplier(): @Supplier
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createSupplier(): @NFTProviderAggregator.Supplier
 	}
 	
 	/// Interface used by a manager for exposing core Aggregator resource's functions to the Supplier
@@ -111,7 +125,7 @@ contract NFTProviderAggregator{
 	///
 	access(all)
 	resource interface SupplierAccess{ 
-		access(contract)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTProviderCapability(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -151,7 +165,7 @@ contract NFTProviderAggregator{
 		var nftProviderCapabilities:{ UInt64: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>}
 		
 		/// Add NFT provider capability (may be called by Supplier or directly by Aggregator)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTProviderCapability(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>): UInt64{ 
 			pre{ 
 				self.isNFTProviderCapabilityValid(nftProviderCapability: nftProviderCapability):
@@ -166,7 +180,7 @@ contract NFTProviderAggregator{
 		/// Remove NFT provider capability; it can be called by Supplier, only for capability they
 		/// added, or by Aggregator, for any capability
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNFTProviderCapability(collectionUUID: UInt64){ 
 			pre{ 
 				self.nftProviderCapabilities.containsKey(collectionUUID):
@@ -178,7 +192,7 @@ contract NFTProviderAggregator{
 		
 		/// Borrow the provider of an NFT located in one of multiple collections through iterating over each collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTProvider(id: UInt64): &{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}{ 
 			for collectionUUID in self.nftProviderCapabilities.keys{ 
 				// Check capabilities can still be borrowed since a NFT provider capability may pass the
@@ -217,7 +231,7 @@ contract NFTProviderAggregator{
 		
 		/// Borrow an NFT located in one of multiple collections through iterating over each collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}{ 
 			return self.borrowNFTProvider(id: id).borrowNFT(id)!
 		}
@@ -231,14 +245,14 @@ contract NFTProviderAggregator{
 		///
 		/// @return Supplier resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSupplier(): @Supplier{ 
 			return <-create Supplier(supplierAccessCapability: self.supplierAccessCapability, nftTypeIdentifier: self.nftTypeIdentifier, aggregatorUUID: self.uuid, aggregatorAddressAtCreation: self.owner?.address)
 		}
 		
 		/// Return an array of the NFT IDs accessible through nftProviderCapabilities
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			let ids: [UInt64] = []
 			for collectionUUID in self.nftProviderCapabilities.keys{ 
@@ -262,7 +276,7 @@ contract NFTProviderAggregator{
 		
 		/// Return an array of all the collection UUIDs
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionUUIDs(): [UInt64]{ 
 			return self.nftProviderCapabilities.keys
 		}
@@ -319,7 +333,7 @@ contract NFTProviderAggregator{
 		
 		/// Add NFT provider capability to parent Aggregator resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTProviderCapability(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>){ 
 			let collectionUUID = self.borrowAggregator().addNFTProviderCapability(nftProviderCapability: nftProviderCapability)
 			self.supplierAddedCollectionUUIDs.insert(key: collectionUUID, true)
@@ -328,7 +342,7 @@ contract NFTProviderAggregator{
 		/// Remove NFT provider capability from parent Aggregator resource
 		/// (can be called only for capabilities added by a given Supplier instance)
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNFTProviderCapability(collectionUUID: UInt64){ 
 			pre{ 
 				self.supplierAddedCollectionUUIDs.containsKey(collectionUUID):
@@ -340,21 +354,21 @@ contract NFTProviderAggregator{
 		
 		/// Return an array of the NFT IDs accessible through the Aggregator's provider capabilities
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.borrowAggregator().getIDs()
 		}
 		
 		/// Return the UUID of linked Aggregator resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAggregatorUUID(): UInt64{ 
 			return self.aggregatorUUID
 		}
 		
 		/// Return an array of the collection UUIDs added by the supplier
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupplierAddedCollectionUUIDs(): [UInt64]{ 
 			return self.supplierAddedCollectionUUIDs.keys
 		}
@@ -362,7 +376,7 @@ contract NFTProviderAggregator{
 		/// Return an array of all the collection UUIDs for capabilities currently present in the parent
 		/// manager
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionUUIDs(): [UInt64]{ 
 			return self.borrowAggregator().getCollectionUUIDs()
 		}
@@ -393,7 +407,7 @@ contract NFTProviderAggregator{
 	///
 	/// @return Aggregator resource
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAggregator(
 		nftTypeIdentifier: String,
 		useBorrowNFTSafe: Bool,

@@ -1,4 +1,18 @@
-import DapperUtilityCoin from "./../../standardsV1/DapperUtilityCoin.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import DapperUtilityCoin from "./../../standardsV1/DapperUtilityCoin.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -12,7 +26,7 @@ contract Vevent{
 	
 	access(all)
 	struct interface Verifier{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(user: Address): Bool
 	}
 	
@@ -64,7 +78,7 @@ contract Vevent{
 			ownerVault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleActive(){ 
 			self.active = !self.active
 		}
@@ -80,10 +94,10 @@ contract Vevent{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectPublic(projectId: UInt64): &Project?
 	}
 	
@@ -92,30 +106,30 @@ contract Vevent{
 		access(all)
 		let projects: @{UInt64: Project}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProject(prices:{ UFix64: UInt64}, verifier: [{Verifier}]){ 
 			let project <- create Project(prices: prices, verifier: verifier)
 			self.projects[project.id] <-! project
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(projectOwner: Address, projectId: UInt64, payment: @DapperUtilityCoin.Vault){ 
 			let collection: &Collection = getAccount(projectOwner).capabilities.get<&Collection>(Vevent.CollectionPublicPath).borrow<&Collection>() ?? panic("This project owner does not have a collection set up or linked properly.")
 			let project: &Project = collection.getProjectPublic(projectId: projectId) ?? panic("Project with this id does not exist.")
 			project.purchase(user: (self.owner!).address, vault: <-payment)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectIds(): [UInt64]{ 
 			return self.projects.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProject(projectId: UInt64): &Project?{ 
 			return &self.projects[projectId] as &Project?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProjectPublic(projectId: UInt64): &Project?{ 
 			return &self.projects[projectId] as &Project?
 		}
@@ -125,7 +139,7 @@ contract Vevent{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

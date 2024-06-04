@@ -1,4 +1,18 @@
-import GameLevels from "../0x9d041d36947924c0/GameLevels.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import GameLevels from "../0x9d041d36947924c0/GameLevels.cdc"
 
 import GameEngine from "../0x9d041d36947924c0/GameEngine.cdc"
 
@@ -31,7 +45,7 @@ contract Tetris: GameLevels{
 		access(all)
 		let extras:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewTetrisPiece(): TetrisObjects.TetrisPiece{ 
 			let tetrisPiece = TetrisObjects.TetrisPiece()
 			if self.state["lastShape"] == nil{ 
@@ -45,7 +59,7 @@ contract Tetris: GameLevels{
 			return tetrisPiece
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createInitialGameObjects(): [{GameEngine.GameObject}?]{ 
 			let tetrisPiece = self.createNewTetrisPiece()
 			let lockedInTetrisPiece = TetrisObjects.LockedInTetrisPiece()
@@ -69,7 +83,7 @@ contract Tetris: GameLevels{
 			return [tetrisPiece, lockedInTetrisPiece]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun parseGameObjectsFromMaps(_ map: [{String: String}]): [{GameEngine.GameObject}?]{ 
 			let objects: [{GameEngine.GameObject}?] = []
 			for objectMap in map{ 
@@ -86,7 +100,7 @@ contract Tetris: GameLevels{
 			return objects
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tick(tickCount: UInt64, events: [GameEngine.PlayerEvent]){ 
 			var keys = self.objects.keys
 			for key in keys{ 
@@ -188,7 +202,7 @@ contract Tetris: GameLevels{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun postTick(tickCount: UInt64, events: [GameEngine.PlayerEvent]){} 
 		
 		// do nothing
@@ -204,12 +218,12 @@ contract Tetris: GameLevels{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLevel(_ name: String): AnyStruct?{ 
 		return StandardLevel()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableLevels(): [String]{ 
 		return ["StandardLevel"]
 	}

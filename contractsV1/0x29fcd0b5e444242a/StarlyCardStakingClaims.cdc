@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -43,7 +57,7 @@ contract StarlyCardStakingClaims{
 		access(all)
 		var windowSizeSeconds: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addClaim(
 			timestamp: UFix64,
 			starlyID: String,
@@ -73,7 +87,7 @@ contract StarlyCardStakingClaims{
 			return claimAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimedAmount(): UFix64{ 
 			let thresholdTimestamp = getCurrentBlock().timestamp - self.windowSizeSeconds
 			var i = 0
@@ -94,7 +108,7 @@ contract StarlyCardStakingClaims{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claim(ids: [UInt64], address: Address){ 
 		pre{ 
 			StarlyCardStakingClaims.claimingEnabled:
@@ -151,7 +165,7 @@ contract StarlyCardStakingClaims{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClaimedAmountByAddress(address: Address): UFix64{ 
 		if !self.recentClaims.containsKey(address){ 
 			return 0.0
@@ -161,14 +175,14 @@ contract StarlyCardStakingClaims{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRemainingDailyClaimAmountByAddress(address: Address): UFix64{ 
 		return self.getDailyClaimAmountLimitByAddress(address: address).saturatingSubtract(
 			self.getClaimedAmountByAddress(address: address)
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDailyClaimAmountLimitByAddress(address: Address): UFix64{ 
 		let stakeCollectionRef =
 			(
@@ -181,14 +195,14 @@ contract StarlyCardStakingClaims{
 		return self.getDailyClaimAmount(stakedAmount: stakedAmount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDailyClaimAmount(stakedAmount: UFix64): UFix64{ 
 		return stakedAmount / 100.0
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setClaimingEnabled(_ enabled: Bool){ 
 			StarlyCardStakingClaims.claimingEnabled = enabled
 		}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -156,12 +170,12 @@ contract Flomies: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTraitsMetadataAsArray(): [MetadataViews.Trait]{ 
 			let traits = self.traits
 			var traitMetadata: [MetadataViews.Trait] = []
@@ -171,7 +185,7 @@ contract Flomies: NonFungibleToken{
 			return traitMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTraitsMetadata():{ String: MetadataViews.Trait}{ 
 			let traitMetadata:{ String: MetadataViews.Trait} ={} 
 			for trait in self.getAllTraitsMetadataAsArray(){ 
@@ -209,7 +223,7 @@ contract Flomies: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			//TODO: add nounce and emit better event the first time it is moved.
@@ -295,12 +309,12 @@ contract Flomies: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTraits():{ UInt64: MetadataViews.Trait}{ 
 		return self.traits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTrait(_ id: UInt64): MetadataViews.Trait?{ 
 		return self.traits[id]
 	}
@@ -316,7 +330,7 @@ contract Flomies: NonFungibleToken{
 	
 	access(all)
 	resource Forge: FindForge.Forge{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(platform: FindForge.MinterPlatform, data: AnyStruct, verifier: &FindForge.Verifier): @{NonFungibleToken.NFT}{ 
 			let info = data as?{ String: AnyStruct} ?? panic("The data passed in is not in form of {String : AnyStruct}")
 			let serial = info["serial"]! as? UInt64 ?? panic("Serial is missing")
@@ -325,7 +339,7 @@ contract Flomies: NonFungibleToken{
 			return <-Flomies.mintNFT(serial: serial, rootHash: rootHash, traits: traits)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addContractData(platform: FindForge.MinterPlatform, data: AnyStruct, verifier: &FindForge.Verifier){ 
 			let type = data.getType()
 			switch type{ 

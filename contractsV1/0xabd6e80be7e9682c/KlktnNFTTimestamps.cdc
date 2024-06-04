@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract KlktnNFTTimestamps{ 
 	access(all)
 	event ContractInitialized()
@@ -25,7 +39,7 @@ contract KlktnNFTTimestamps{
 			self.timestamps = newTimestamps
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTimestamps():{ String: UFix64}{ 
 			return self.timestamps
 		}
@@ -38,7 +52,7 @@ contract KlktnNFTTimestamps{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createKlktnNFTTemplateTimestamps(typeID: UInt64, initTimestamps:{ String: UFix64}){ 
 			pre{ 
 				!KlktnNFTTimestamps.KlktnNFTTimestampsSet.containsKey(typeID):
@@ -50,7 +64,7 @@ contract KlktnNFTTimestamps{
 			emit NFTTemplateTimestampCreated(typeID: typeID, timestamps: newNFTTimestamps)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateKlktnNFTTemplateTimestamps(
 			typeID: UInt64,
 			newTimestamps:{ 
@@ -68,7 +82,7 @@ contract KlktnNFTTimestamps{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTTemplateTimestamps(typeID: UInt64): KlktnNFTTemplateTimestamps{ 
 		return self.KlktnNFTTimestampsSet[typeID]!
 	}

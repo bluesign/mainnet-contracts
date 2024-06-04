@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -68,17 +82,17 @@ contract EpisodeNFT: NonFungibleToken{
 		access(all)
 		let metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(_ key: String, _ value: String){ 
 			self.metadata[key] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTotalMinted(_ total: UInt64){ 
 			self.totalMinted = total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEdition(_ edition: UInt64){ 
 			self.edition = edition
 		}
@@ -100,19 +114,19 @@ contract EpisodeNFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentOwners():{ UInt64: Address}{ 
 		return self.currentOwnerByID
 	}
 	
 	// getIDs returns the IDs minted by episodeID 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getResourceIDsFor(episodeID: String): [UInt64]{ 
 		return self.resourceIDsByEpisodeID[episodeID]!
 	}
 	
 	// This is the main function 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwners(episodeID: String): [Address]{ 
 		let addresses: [Address] = []
 		for key in self.getResourceIDsFor(episodeID: episodeID){ 
@@ -165,19 +179,19 @@ contract EpisodeNFT: NonFungibleToken{
 			emit Minted(id: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionDisplay>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata{ 
 			let metadata = EpisodeNFT.metadata[self.episodeID]!
 			metadata.setEdition(self.edition)
 			return metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			switch view{ 
 				case Type<MetadataViews.Display>():
@@ -200,24 +214,24 @@ contract EpisodeNFT: NonFungibleToken{
 	access(all)
 	resource interface EpisodeNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(collection: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(collection: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadatadata(id: UInt64): Metadata
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolver(id: UInt64): &EpisodeNFT.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(collectionCapability: Capability<&Collection>, episodeID: String)
 	}
 	
@@ -235,7 +249,7 @@ contract EpisodeNFT: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			let collection <- EpisodeNFT.createEmptyCollection(nftType: Type<@EpisodeNFT.Collection>())
 			for id in ids{ 
@@ -248,7 +262,7 @@ contract EpisodeNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @EpisodeNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -263,7 +277,7 @@ contract EpisodeNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @{NonFungibleToken.Collection}){ 
 			for id in collection.getIDs(){ 
 				let token <- collection.withdraw(withdrawID: id)
@@ -284,7 +298,7 @@ contract EpisodeNFT: NonFungibleToken{
 		
 		// borrowEpisodeNFT gets a reference to an NFT from the collection
 		// so the caller can read the NFT's extended information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEpisodeNFT(id: UInt64): &EpisodeNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -294,12 +308,12 @@ contract EpisodeNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadatadata(id: UInt64): Metadata{ 
 			return (self.borrowEpisodeNFT(id: id)!).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllItemMetadata(): [Metadata]{ 
 			var itemsMetadata: [Metadata] = []
 			for key in self.ownedNFTs.keys{ 
@@ -308,14 +322,14 @@ contract EpisodeNFT: NonFungibleToken{
 			return itemsMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolver(id: UInt64): &EpisodeNFT.NFT{ 
 			let token = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let nft = token as! &NFT
 			return nft as &EpisodeNFT.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(collectionCapability: Capability<&Collection>, episodeID: String){ 
 			pre{ 
 				(self.owner!).address == EpisodeNFT.account.address:
@@ -365,7 +379,7 @@ contract EpisodeNFT: NonFungibleToken{
 		
 		// Set the Episode Metadata for a episodeID
 		// either updates without affecting number minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEpisode(episodeID: String, maxEdition: UInt64, podcastID: String, metadata:{ String: String}){ 
 			var totalMinted: UInt64 = 0
 			if EpisodeNFT.metadata[episodeID] != nil{ 
@@ -375,14 +389,14 @@ contract EpisodeNFT: NonFungibleToken{
 			EpisodeNFT.metadata[episodeID]?.setTotalMinted(totalMinted)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEpisodeMetadata(episodeID: String, key: String, value: String){ 
 			EpisodeNFT.metadata[episodeID]?.setMetadata(key, value)
 		}
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFTs(recipient: &{NonFungibleToken.CollectionPublic}, name: String, episodeID: String, description: String, thumbnail: String, numberOfEditionsToMint: UInt64){ 
 			pre{ 
 				numberOfEditionsToMint > 0:

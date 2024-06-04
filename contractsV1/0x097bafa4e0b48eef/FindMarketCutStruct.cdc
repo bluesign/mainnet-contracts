@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -17,7 +31,7 @@ contract FindMarketCutStruct{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventSafeCuts(): [EventSafeCut]{ 
 			let cuts: [EventSafeCut] = []
 			for c in self.cuts{ 
@@ -63,28 +77,28 @@ contract FindMarketCutStruct{
 	
 	access(all)
 	struct interface Cut{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReceiverCap(): Capability<&{FungibleToken.Receiver}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCut(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPayableLogic(): fun (UFix64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(): MetadataViews.Royalty{ 
 			let cap = self.getReceiverCap()
 			return MetadataViews.Royalty(
@@ -94,7 +108,7 @@ contract FindMarketCutStruct{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAmountPayable(_ salePrice: UFix64): UFix64?{ 
 			if let cut = self.getPayableLogic()(salePrice){ 
 				return cut
@@ -102,7 +116,7 @@ contract FindMarketCutStruct{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventSafeCut(): EventSafeCut{ 
 			return EventSafeCut(
 				name: self.getName(),
@@ -141,37 +155,37 @@ contract FindMarketCutStruct{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReceiverCap(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCut(): UFix64{ 
 			return self.cut
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(): Address{ 
 			return self.cap.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			return self.description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: String}{ 
 			return{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPayableLogic(): fun (UFix64): UFix64?{ 
 			return fun (_ salePrice: UFix64): UFix64?{ 
 				return salePrice * self.cut
@@ -214,38 +228,38 @@ contract FindMarketCutStruct{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReceiverCap(): Capability<&{FungibleToken.Receiver}>{ 
 			let pp = PublicPath(identifier: self.publicPath)!
 			return getAccount(self.address).capabilities.get<&{FungibleToken.Receiver}>(pp)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCut(): UFix64{ 
 			return self.cut
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddress(): Address{ 
 			return self.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			return self.description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: String}{ 
 			return{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPayableLogic(): fun (UFix64): UFix64?{ 
 			return fun (_ salePrice: UFix64): UFix64?{ 
 				let rPayable = salePrice * self.cut

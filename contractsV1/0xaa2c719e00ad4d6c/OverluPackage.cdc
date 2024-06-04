@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -148,7 +162,7 @@ contract OverluPackage: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.Editions>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.Serial>(), Type<MetadataViews.Traits>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			let metadata = OverluPackage.predefinedMetadata[self.typeId] ??{} 
 			metadata["id"] = self.id
@@ -217,15 +231,15 @@ contract OverluPackage: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOverluPackage(id: UInt64): &OverluPackage.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -260,7 +274,7 @@ contract OverluPackage: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @OverluPackage.NFT
 			let id: UInt64 = token.id
 			
@@ -283,7 +297,7 @@ contract OverluPackage: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOverluPackage(id: UInt64): &OverluPackage.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -331,7 +345,7 @@ contract OverluPackage: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(typeId: UInt64, recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty]){ 
 			let preMetadata = OverluPackage.predefinedMetadata[typeId]!
 			let metadata:{ String: AnyStruct} ={} 
@@ -366,47 +380,47 @@ contract OverluPackage: NonFungibleToken{
 			OverluPackage.totalSupply = OverluPackage.totalSupply + UInt64(1)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(_ price: UFix64){ 
 			OverluPackage.price = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(_ pause: Bool){ 
 			OverluPackage.pause = pause
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSaleLimit(_ limit: UInt8){ 
 			OverluPackage.saleLimit = limit
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(_ uri: String){ 
 			OverluPackage.baseURI = uri
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOpenFlag(_ flag: Bool){ 
 			OverluPackage.isOpen = flag
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWhitelistFlag(_ flag: Bool){ 
 			OverluPackage.needWhitelist = flag
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWhitelist(_ list: [Address]){ 
 			OverluPackage.whitelist = list
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhitelist(_ list: [Address]){ 
 			OverluPackage.whitelist = OverluPackage.whitelist.concat(list)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVault(_ vault: @{FungibleToken.Vault}){ 
 			let vaultRef = &self.vault as &{FungibleToken.Vault}?
 			if vaultRef != nil && (vaultRef!).balance > 0.0{ 
@@ -416,12 +430,12 @@ contract OverluPackage: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVaultReceiver(_ cap: Capability<&{FungibleToken.Receiver}>){ 
 			OverluPackage.vaultReceiver = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultRef(): &{FungibleToken.Vault}?{ 
 			return &self.vault as &{FungibleToken.Vault}?
 		}
@@ -429,7 +443,7 @@ contract OverluPackage: NonFungibleToken{
 		// UpdateMetadata
 		// Update metadata for a typeId
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(typeId: UInt64, metadata:{ String: AnyStruct}){ 
 			let currentSupply = OverluPackage.supplyOfTypes[typeId] ?? 0
 			let max = (metadata["max"] as? UInt64?)!
@@ -439,7 +453,7 @@ contract OverluPackage: NonFungibleToken{
 			OverluPackage.predefinedMetadata[typeId] = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanSaleRecords(){ 
 			OverluPackage.saleRecords ={} 
 		}
@@ -458,7 +472,7 @@ contract OverluPackage: NonFungibleToken{
 	// getTypeSupply
 	// Get NFT supply of typeId
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTypeSupply(_ typeId: UInt64): UInt64?{ 
 		return OverluPackage.supplyOfTypes[typeId]
 	}
@@ -466,7 +480,7 @@ contract OverluPackage: NonFungibleToken{
 	// getTypeSupply
 	// Get NFT supply of typeId
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(_ typeId: UInt64):{ String: AnyStruct}?{ 
 		let metadata = OverluPackage.predefinedMetadata[typeId] ??{} 
 		// let keys = metadata.keys
@@ -474,7 +488,7 @@ contract OverluPackage: NonFungibleToken{
 	}
 	
 	// purchase package
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchasePackage(userCertificateCap: Capability<&{OverluConfig.IdentityCertificate}>, amount: UInt8, feeToken: @{FungibleToken.Vault}){ 
 		pre{ 
 			OverluPackage.pause == false:
@@ -511,7 +525,7 @@ contract OverluPackage: NonFungibleToken{
 		self.saleRecords[address] = records
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun openPackage(userCertificateCap: Capability<&{OverluConfig.IdentityCertificate}>, nft: @OverluPackage.NFT): @[{NonFungibleToken.NFT}]{ 
 		pre{ 
 			// nft.getType().identifier == OverluPackage.NFT.getType().identifier : OverluError.errorEncode(msg: "Package: mismatch nft type".concat(nft.getType().identifier).concat(" : ").concat(OverluPackage.NFT.getType().identifier), err: OverluError.ErrorCode.MISMATCH_RESOURCE_TYPE)
@@ -539,7 +553,7 @@ contract OverluPackage: NonFungibleToken{
 		return <-nfts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultBal(): UFix64{ 
 		let minter = OverluPackage.account.storage.borrow<&OverluPackage.NFTMinter>(from: OverluPackage.MinterStoragePath)
 		var bal = 0.0
@@ -550,7 +564,7 @@ contract OverluPackage: NonFungibleToken{
 		return bal
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultType(): String{ 
 		let minter = OverluPackage.account.storage.borrow<&OverluPackage.NFTMinter>(from: OverluPackage.MinterStoragePath)
 		var vaultType = ""
@@ -561,28 +575,28 @@ contract OverluPackage: NonFungibleToken{
 		return vaultType
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultReceiver(): Address?{ 
 		return ((OverluPackage.vaultReceiver!).borrow()!).owner?.address
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleRecords(_ address: Address): [UInt64]{ 
 		let records = OverluPackage.saleRecords[address] ?? []
 		return records
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSaleRecords():{ Address: [UInt64]}{ 
 		return OverluPackage.saleRecords
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelist(): [Address]{ 
 		return self.whitelist
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkEligible(_ address: Address): Bool{ 
 		return self.whitelist.contains(address)
 	}

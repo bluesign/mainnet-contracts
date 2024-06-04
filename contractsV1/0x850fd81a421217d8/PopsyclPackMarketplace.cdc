@@ -1,4 +1,18 @@
-// Popsycl NFT Marketplace
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Popsycl NFT Marketplace
 // Pack Marketplace Smart Contract
 // Version		 : 0.0.1
 // Blockchain	  : Flow www.onFlow.org
@@ -49,7 +63,7 @@ contract PopsyclPackMarketplace{
 	// recipientPack: &{PopsyclPack.PopsyclPackCollectionPublic},
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packPurchase(
 			packId: UInt64,
 			tokens: [
@@ -57,21 +71,21 @@ contract PopsyclPackMarketplace{
 			],
 			recipient: &{Popsycl.PopsyclCollectionPublic},
 			payment: @{FungibleToken.Vault}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packIdPrice(id: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packTokenCreator(id: UInt64): Address??
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packCurrentTokenOwner(id: UInt64): Address??
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packIsResale(id: UInt64): Bool?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packGetIDs(): [UInt64]
 	}
 	
@@ -134,7 +148,7 @@ contract PopsyclPackMarketplace{
 		}
 		
 		// Withdraw gives the owner the opportunity to remove a NFT from sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun nftwithdraw(id: UInt64): @Popsycl.NFT{ 
 			let token <- self.forSale.remove(key: id) ?? panic("missing NFT")
 			emit TokenWithdrawPopsycl(token: id)
@@ -142,7 +156,7 @@ contract PopsyclPackMarketplace{
 		}
 		
 		// Withdraw gives the owner the opportunity to remove a NFT from sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: UInt64): @PopsyclPack.NFT{ 
 			// remove the price
 			self.packPrices.remove(key: id)
@@ -157,7 +171,7 @@ contract PopsyclPackMarketplace{
 		}
 		
 		// lists an NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @Popsycl.NFT){ 
 			let id = token.id
 			let oldToken <- self.forSale[id] <- token
@@ -165,7 +179,7 @@ contract PopsyclPackMarketplace{
 		}
 		
 		// lists an pack NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packListForSale(token: @PopsyclPack.NFT, price: UFix64){ 
 			let id = token.id
 			
@@ -194,7 +208,7 @@ contract PopsyclPackMarketplace{
 		}
 		
 		// Change price of a pack of tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(packId: UInt64, newPrice: UFix64){ 
 			pre{ 
 				self.tokensExist(tokens: packId, ids: self.packForSale.keys):
@@ -204,7 +218,7 @@ contract PopsyclPackMarketplace{
 			emit PriceChanged(packTokenId: packId, newPrice: newPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun tokensExist(tokens: UInt64, ids: [UInt64]): Bool{ 
 			if ids.contains(tokens){ 
 				return true
@@ -214,7 +228,7 @@ contract PopsyclPackMarketplace{
 		}
 		
 		// Pack Purchase: Allows an user to send Flow to purchase a pack NFT that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packPurchase(packId: UInt64, tokens: [UInt64], recipient: &{Popsycl.PopsyclCollectionPublic}, payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.packForSale[packId] != nil && self.packPrices[packId] != nil:
@@ -257,46 +271,46 @@ contract PopsyclPackMarketplace{
 		}
 		
 		// pack flow share
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun flowshare(price: UFix64, commission: UFix64): UFix64{ 
 			return price / 100.0 * commission
 		}
 		
 		// Return the FLOW  pack price of a specific token that is listed for sale.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packIdPrice(id: UInt64): UFix64?{ 
 			return self.packPrices[id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packIsResale(id: UInt64): Bool?{ 
 			return self.packResale[id]
 		}
 		
 		// Returns the owner / original minter of a specific NFT token in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packTokenCreator(id: UInt64): Address??{ 
 			return self.packCreators[id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packTokenInfluencer(id: UInt64): Address??{ 
 			return self.packInfluencer[id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packCurrentTokenOwner(id: UInt64): Address??{ 
 			return self.packSeller[id]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun packGetIDs(): [UInt64]{ 
 			return self.packForSale.keys
 		}
 		
 		// Withdraw pack NFTs from PopsyclPackMarketplace
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun saleWithdrawn(packId: UInt64){ 
 			let owner = self.packSeller[packId]!!
 			let receiver = getAccount(owner).capabilities.get<&{PopsyclPack.PopsyclPackCollectionPublic}>(PopsyclPack.PopsyclPackPublicPath).borrow<&{PopsyclPack.PopsyclPackCollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
@@ -306,7 +320,7 @@ contract PopsyclPackMarketplace{
 	}
 	
 	// createCollection returns a new pack collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPackSaleCollection(
 		ownerVault: Capability<&{FungibleToken.Receiver}>
 	): @PackSaleCollection{ 

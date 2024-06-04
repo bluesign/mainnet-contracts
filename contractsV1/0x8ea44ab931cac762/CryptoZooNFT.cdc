@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -49,15 +63,15 @@ contract CryptoZooNFT: NonFungibleToken{
 	access(all)
 	resource interface CryptoZooNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCryptoZooNFT(id: UInt64): &CryptoZooNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -107,17 +121,17 @@ contract CryptoZooNFT: NonFungibleToken{
 		access(self)
 		var coordMinted:{ UInt64: [UInt64]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTimestamps():{ String: UFix64}{ 
 			return self.timestamps
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checkIsCoordMinted(coord: [UInt64]): Bool{ 
 			if !self.isLand{ 
 				return false
@@ -128,7 +142,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCoordMinted(coord: [UInt64]){ 
 			pre{ 
 				!self.checkIsCoordMinted(coord: coord):
@@ -143,7 +157,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCoordMinted():{ UInt64: [UInt64]}{ 
 			return self.coordMinted
 		}
@@ -237,12 +251,12 @@ contract CryptoZooNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTTemplate(): CryptoZooNFTTemplate?{ 
 			return CryptoZooNFT.CryptoZooNFTTypeDict[self.typeID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCoord(): [UInt64]{ 
 			return self.coord
 		}
@@ -274,7 +288,7 @@ contract CryptoZooNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CryptoZooNFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -282,7 +296,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -301,7 +315,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCryptoZooNFT(id: UInt64): &CryptoZooNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -311,7 +325,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(packID: UInt64){ 
 			pre{ 
 				self.ownedNFTs[packID] != nil:
@@ -354,7 +368,7 @@ contract CryptoZooNFT: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64){ 
 			pre{ 
 				CryptoZooNFT.CryptoZooNFTTypeDict.containsKey(typeID):
@@ -376,7 +390,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			CryptoZooNFT.tokenMintedPerTypeID[typeID] = CryptoZooNFT.tokenMintedPerTypeID[typeID]! + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintLandNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, coord: [UInt64], nftName: String){ 
 			pre{ 
 				CryptoZooNFT.CryptoZooNFTTypeDict.containsKey(typeID):
@@ -403,7 +417,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			CryptoZooNFT.tokenMintedPerTypeID[typeID] = CryptoZooNFT.tokenMintedPerTypeID[typeID]! + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(typeID: UInt64, newMetadata:{ String: String}): CryptoZooNFT.CryptoZooNFTTemplate{ 
 			pre{ 
 				CryptoZooNFT.CryptoZooNFTTypeDict.containsKey(typeID) != nil:
@@ -413,7 +427,7 @@ contract CryptoZooNFT: NonFungibleToken{
 			return CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTTemplate(typeID: UInt64, isPack: Bool, name: String, description: String, mintLimit: UInt64, priceUSD: UFix64, priceFlow: UFix64, metadata:{ String: String}, timestamps:{ String: UFix64}, isLand: Bool){ 
 			pre{ 
 				!CryptoZooNFT.CryptoZooNFTTypeDict.containsKey(typeID):
@@ -423,33 +437,33 @@ contract CryptoZooNFT: NonFungibleToken{
 			CryptoZooNFT.CryptoZooNFTTypeDict[newNFTTemplate.typeID] = newNFTTemplate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTTemplatePriceUSD(typeID: UInt64, newPriceUSD: UFix64){ 
 			(CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!).updatePriceUSD(newPriceUSD: newPriceUSD)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTTemplatePriceFlow(typeID: UInt64, newPriceFlow: UFix64){ 
 			(CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!).updatePriceFlow(newPriceFlow: newPriceFlow)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTTemplateMintLimit(typeID: UInt64, newMintLimit: UInt64){ 
 			(CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!).updateMintLimit(newMintLimit: newMintLimit)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun expireNFTTemplate(typeID: UInt64){ 
 			(CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!).expireNFTTemplate()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkMintLimit(typeID: UInt64): UInt64?{ 
 		if let token = CryptoZooNFT.CryptoZooNFTTypeDict[typeID]{ 
 			return token.mintLimit
@@ -458,17 +472,17 @@ contract CryptoZooNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkNFTTemplates(): [CryptoZooNFTTemplate]{ 
 		return CryptoZooNFT.CryptoZooNFTTypeDict.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkNFTTemplatesTypeIDs(): [UInt64]{ 
 		return CryptoZooNFT.CryptoZooNFTTypeDict.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isNFTTemplateExpired(typeID: UInt64): Bool{ 
 		if !CryptoZooNFT.CryptoZooNFTTypeDict.containsKey(typeID){ 
 			return true
@@ -476,7 +490,7 @@ contract CryptoZooNFT: NonFungibleToken{
 		return (CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!).isExpired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isNFTTemplateExist(typeID: UInt64): Bool{ 
 		if CryptoZooNFT.CryptoZooNFTTypeDict.containsKey(typeID){ 
 			return true
@@ -484,7 +498,7 @@ contract CryptoZooNFT: NonFungibleToken{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTTemplateMetadata(typeID: UInt64):{ String: String}{ 
 		if !CryptoZooNFT.CryptoZooNFTTypeDict.containsKey(typeID){ 
 			panic("invalid typeID")
@@ -492,12 +506,12 @@ contract CryptoZooNFT: NonFungibleToken{
 		return (CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!).getMetadata()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTTemplateByTypeID(typeID: UInt64): CryptoZooNFTTemplate{ 
 		return CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun checkIsCoordMinted(typeID: UInt64, coord: [UInt64]): Bool{ 
 		return (CryptoZooNFT.CryptoZooNFTTypeDict[typeID]!).checkIsCoordMinted(coord: coord)
 	}

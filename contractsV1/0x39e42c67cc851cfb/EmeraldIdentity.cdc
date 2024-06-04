@@ -1,4 +1,18 @@
-// Welcome to the EmeraldIdentity contract!
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Welcome to the EmeraldIdentity contract!
 //
 // This contract is a service that maps a user's on-chain address
 // to their DiscordID. 
@@ -50,7 +64,7 @@ contract EmeraldIdentity{
 		access(account)
 		var discordToAccount:{ String: Address}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEmeraldID(account: Address, discordID: String){ 
 			pre{ 
 				EmeraldIdentity.getAccountFromDiscord(discordID: discordID) == nil:
@@ -63,7 +77,7 @@ contract EmeraldIdentity{
 			emit EmeraldIDCreated(account: account, discordID: discordID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeByAccount(account: Address){ 
 			let discordID =
 				EmeraldIdentity.getDiscordFromAccount(account: account)
@@ -71,7 +85,7 @@ contract EmeraldIdentity{
 			self.remove(account: account, discordID: discordID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeByDiscord(discordID: String){ 
 			let account =
 				EmeraldIdentity.getAccountFromDiscord(discordID: discordID)
@@ -86,7 +100,7 @@ contract EmeraldIdentity{
 			emit EmeraldIDRemoved(account: account, discordID: discordID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdministrator(): Capability<&Administrator>{ 
 			return EmeraldIdentity.account.capabilities.get<&Administrator>(
 				EmeraldIdentity.AdministratorPrivatePath
@@ -100,7 +114,7 @@ contract EmeraldIdentity{
 	}
 	
 	/*** USE THE BELOW FUNCTIONS FOR SECURE VERIFICATION OF ID ***/
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getDiscordFromAccount(account: Address): String?{ 
 		let admin =
 			EmeraldIdentity.account.storage.borrow<&Administrator>(
@@ -109,7 +123,7 @@ contract EmeraldIdentity{
 		return admin.accountToDiscord[account]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getAccountFromDiscord(discordID: String): Address?{ 
 		let admin =
 			EmeraldIdentity.account.storage.borrow<&Administrator>(
@@ -118,7 +132,7 @@ contract EmeraldIdentity{
 		return admin.discordToAccount[discordID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEmeraldIDs(discordID: String):{ String: Address}{ 
 		let response:{ String: Address} ={} 
 		if let bloctoID = self.getAccountFromDiscord(discordID: discordID){ 
@@ -136,7 +150,7 @@ contract EmeraldIdentity{
 		return response
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveDiscordFromAccount(account: Address): String?{ 
 		if let bloctoID = self.getDiscordFromAccount(account: account){ 
 			return bloctoID

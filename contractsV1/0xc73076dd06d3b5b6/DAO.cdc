@@ -1,4 +1,18 @@
-import KissoNFT from "./KissoNFT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import KissoNFT from "./KissoNFT.cdc"
 
 import AdminToken from "./AdminToken.cdc"
 
@@ -67,7 +81,7 @@ contract DAO{
 		access(all)
 		var votesCount: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementVotesCount(numVotes: UInt64){ 
 			self.votesCount = self.votesCount + numVotes
 		}
@@ -99,7 +113,7 @@ contract DAO{
 		let votes:{ UInt64: Vote} // key is the uuid of a voting NFT
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun castVote(nftUUID: UInt64, weight: UInt64, choice: UInt64){ 
 			pre{ 
 				self.votes[nftUUID] == nil:
@@ -149,28 +163,28 @@ contract DAO{
 		access(all)
 		var cancelled: UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addVoter(address: Address){ 
 			self.voters.insert(key: address, Votes())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setClosed(){ 
 			self.closed = Clock.getTime()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCancelled(){ 
 			self.cancelled = Clock.getTime()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markClosedStatus(){ 
 			self.status = Status(rawValue: 1)!
 			self.closed = Clock.getTime()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markCancelledStatus(){ 
 			self.status = Status(rawValue: 2)!
 			self.cancelled = Clock.getTime()
@@ -200,7 +214,7 @@ contract DAO{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createProposal(
 		nftRef: &KissoNFT.NFT,
 		nftCollectionRef: &KissoNFT.Collection,
@@ -241,7 +255,7 @@ contract DAO{
 		DAO.totalProposals = DAO.totalProposals + UInt64(1)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun castVote(proposalID: UInt64, nftCollectionRef: &KissoNFT.Collection, choice: UInt64){ 
 		pre{ 
 			DAO.proposals[proposalID] != nil:
@@ -269,22 +283,22 @@ contract DAO{
 		emit VotesCast(voter: collectionOwnerAddress, proposalID: proposalID, choice: choice)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOpenProposalIDs(): [UInt64]{ 
 		return DAO.openProposalIDs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClosedProposalIDs(): [UInt64]{ 
 		return DAO.closedProposalIDs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCancelledProposalIDs(): [UInt64]{ 
 		return DAO.cancelledProposalIDs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProposal(proposalID: UInt64): Proposal?{ 
 		pre{ 
 			DAO.proposals[proposalID] != nil:
@@ -293,7 +307,7 @@ contract DAO{
 		return DAO.proposals[proposalID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun cancelOpenProposal(proposalID: UInt64, ref: &AdminToken.Token?){ 
 		pre{ 
 			DAO.proposals[proposalID] != nil:
@@ -308,7 +322,7 @@ contract DAO{
 		emit ProposalCancelled(id: removedProposalID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun closeOpenProposal(proposalID: UInt64){ 
 		pre{ 
 			DAO.proposals[proposalID] != nil:
@@ -323,7 +337,7 @@ contract DAO{
 		emit ProposalClosed(id: removedProposalID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addIneligibleAddress(address: Address, ref: &AdminToken.Token?){ 
 		pre{ 
 			DAO.ineligible[address] == nil:
@@ -334,7 +348,7 @@ contract DAO{
 		DAO.ineligible.insert(key: address, Clock.getTime())
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeIneligibleAddress(address: Address, ref: &AdminToken.Token?){ 
 		pre{ 
 			DAO.ineligible[address] != nil:

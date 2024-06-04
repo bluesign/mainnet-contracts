@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -25,9 +39,9 @@ contract Resolver{
 	// which is used within the Resolver resource for offer acceptance validation
 	access(all)
 	resource interface ResolverPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkOfferResolver(
-			item: &{NonFungibleToken.INFT, ViewResolver.Resolver},
+			item: &{ViewResolver.Resolver},
 			offerParamsString:{ 
 				String: String
 			},
@@ -46,7 +60,7 @@ contract Resolver{
 		// checkOfferResolver
 		// Holds the validation rules for resolver each type of supported ResolverType
 		// Function returns TRUE if the provided nft item passes the criteria for exchange
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkOfferResolver(item: &{NonFungibleToken.INFT, ViewResolver.Resolver}, offerParamsString:{ String: String}, offerParamsUInt64:{ String: UInt64}, offerParamsUFix64:{ String: UFix64}): Bool{ 
 			if offerParamsString["resolver"] == ResolverType.NFT.rawValue.toString(){ 
 				assert(item.id.toString() == offerParamsString["nftId"], message: "item NFT does not have specified ID")
@@ -79,7 +93,7 @@ contract Resolver{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createResolver(): @OfferResolver{ 
 		return <-create OfferResolver()
 	}

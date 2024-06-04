@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -173,12 +187,12 @@ contract Kicks: NonFungibleToken{
 		var blueprintIDs: [UInt32]
 		
 		// ───────────────  SneakerSet Getters  ─────────────── \\
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt32]{ 
 			return self.blueprintIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClasses(): [&Kicks.Blueprint]{ 
 			var blueprints: [&Kicks.Blueprint] = []
 			for id in self.blueprintIDs{ 
@@ -189,7 +203,7 @@ contract Kicks: NonFungibleToken{
 			return blueprints
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClass(atIndex index: Int): &Kicks.Blueprint?{ 
 			pre{ 
 				self.blueprintIDs.length > index:
@@ -198,7 +212,7 @@ contract Kicks: NonFungibleToken{
 			return &Kicks.blueprints[self.blueprintIDs[index]] as &Kicks.Blueprint?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalSupply(): UInt32{ 
 			var sum: UInt32 = 0
 			for blueprint in self.getClasses(){ 
@@ -289,17 +303,17 @@ contract Kicks: NonFungibleToken{
 		var nftIDs: [UInt32]
 		
 		// ─────  Blueprint Getters  ─────
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt32]{ 
 			return self.nftIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(): &Blueprint{ 
 			return &self as &Blueprint
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -484,7 +498,7 @@ contract Kicks: NonFungibleToken{
 		}
 		
 		// ─────  NFT Getters  ─────
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			let blueprintMetadata = self.getBlueprint().getMetadata()
 			var aggregateMetadata:{ String: AnyStruct} = self.metadata
@@ -496,29 +510,29 @@ contract Kicks: NonFungibleToken{
 			return aggregateMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getBlueprint(): &Blueprint{ 
 			return Kicks.getBlueprint(withID: self.classID) ?? panic("Could not return parent blueprint")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(): &NFT{ 
 			return &self as &NFT
 		}
 		
 		// ─────  NFT Metadata Views  ─────
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let name = self.getBlueprint().name
 			return name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let metadata = self.getBlueprint().getMetadata()
 			var description: String = ""
@@ -535,7 +549,7 @@ contract Kicks: NonFungibleToken{
 			return description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun defaultImage(): String?{ 
 			let metadata = self.getMetadata()
 			if let image = metadata["image"]{ 
@@ -639,10 +653,10 @@ contract Kicks: NonFungibleToken{
 	resource interface KicksCollectionPublic{ 
 		// ─────  NonFungibleToken CollectionPublic Conformance  ─────
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
@@ -652,16 +666,16 @@ contract Kicks: NonFungibleToken{
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
 		
 		// ─────  KicksCollectionPublic  ─────
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetIDs(): [UInt32]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassIDs(): [[UInt32; 2]]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowSneaker(id: UInt64): &Kicks.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -694,7 +708,7 @@ contract Kicks: NonFungibleToken{
 		}
 		
 		// batchWithdraw removes multiple Sneaker NFTs as a collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -706,7 +720,7 @@ contract Kicks: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Kicks.NFT
 			let id: UInt64 = token.id
 			
@@ -718,7 +732,7 @@ contract Kicks: NonFungibleToken{
 		
 		// batchDeposit takes another NFT Collection of Kicks and deposits
 		// each item into current collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			for key in tokens.getIDs(){ 
 				self.deposit(token: <-tokens.withdraw(withdrawID: key))
@@ -734,7 +748,7 @@ contract Kicks: NonFungibleToken{
 		}
 		
 		// getSetIDs returns all unique NFTLX set IDs the collection holds
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetIDs(): [UInt32]{ 
 			var setIDs: [UInt32] = []
 			for id in self.ownedNFTs.keys{ 
@@ -748,7 +762,7 @@ contract Kicks: NonFungibleToken{
 		}
 		
 		// getClassIDs returns all NFTLX set and class IDs the collection holds.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassIDs(): [[UInt32; 2]]{ 
 			var classIDs: [[UInt32; 2]] = []
 			for id in self.ownedNFTs.keys{ 
@@ -768,7 +782,7 @@ contract Kicks: NonFungibleToken{
 		
 		// borrowNFT gets a reference to an NFT in the collection
 		// so that the caller can read its metadata and call its methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowSneaker(id: UInt64): &Kicks.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as? &Kicks.NFT
@@ -781,7 +795,7 @@ contract Kicks: NonFungibleToken{
 		}
 		
 		// ───────────────  NFT Modifiers  ─────────────── \\
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeemSneaker(id: UInt64){ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -791,7 +805,7 @@ contract Kicks: NonFungibleToken{
 			sneaker.redeemSneaker()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSize(id: UInt64, size: UFix64){ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -850,7 +864,7 @@ contract Kicks: NonFungibleToken{
 						 updateSetURI function.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSneakerSet(name: String, URI: String){ 
 			// 1. Create new set
 			let newSetID = NFTLX.nextSetID
@@ -879,7 +893,7 @@ contract Kicks: NonFungibleToken{
 						 updateBlueprintURI function.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBlueprint(name: String, URI: String, metadata:{ String: AnyStruct}, maxSupply: UInt32?){ 
 			let newBlueprint <- create Blueprint(id: Kicks.currentBlueprint, name: name, URI: URI, metadata: metadata, maxSupply: maxSupply)
 			let old <- Kicks.blueprints.insert(key: Kicks.currentBlueprint, <-newBlueprint)
@@ -894,7 +908,7 @@ contract Kicks: NonFungibleToken{
 					NFT - typically, a TopShot moment - which the NFT will inseperably own.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, blueprintID: UInt32, setID: UInt32, taggedNFT: @{NonFungibleToken.NFT}?){ 
 			pre{ 
 				Kicks.blueprints.containsKey(blueprintID):
@@ -929,7 +943,7 @@ contract Kicks: NonFungibleToken{
 					NOTE: Does not support taggedNFTs in minting.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBatchNFT(recipient: &{Kicks.KicksCollectionPublic}, blueprintID: UInt32, setID: UInt32, quantity: Int){ 
 			pre{ 
 				Kicks.blueprints.containsKey(blueprintID):
@@ -972,32 +986,32 @@ contract Kicks: NonFungibleToken{
 		}
 		
 		// ───────────────  Set Organizing Functions  ─────────────── \\
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBlueprintToSet(blueprintID: UInt32, setID: UInt32){ 
 			var set = Kicks.getSneakerSet(withID: setID) ?? panic("Could not load set")
 			set.addBlueprint(blueprintID: blueprintID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBlueprintFromSet(blueprintID: UInt32, setID: UInt32){ 
 			var set = Kicks.getSneakerSet(withID: setID) ?? panic("Could not load set")
 			set.removeBlueprint(blueprintID: blueprintID)
 		}
 		
 		// ───────────────  State Modifying Functions  ─────────────── \\
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetURI(setID: UInt32, newURI: String){ 
 			let set = Kicks.getSneakerSet(withID: setID) ?? panic("Unable to retrieve set with given ID")
 			set.updateURI(newURI)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetName(setID: UInt32, newName: String){ 
 			let set = Kicks.getSneakerSet(withID: setID) ?? panic("Unable to retrieve set with given ID")
 			set.updateName(newName)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBlueprintURI(blueprintID: UInt32, newURI: String, media:{ String: AnyStruct}){ 
 			pre{ 
 				Kicks.blueprints.containsKey(blueprintID):
@@ -1009,7 +1023,7 @@ contract Kicks: NonFungibleToken{
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBlueprintName(blueprintID: UInt32, newName: String){ 
 			pre{ 
 				Kicks.blueprints.containsKey(blueprintID):
@@ -1021,7 +1035,7 @@ contract Kicks: NonFungibleToken{
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMetadataFieldsToBlueprint(withID blueprintID: UInt32, metadata:{ String: AnyStruct}){ 
 			var blueprint <- Kicks.blueprints.remove(key: blueprintID) ?? panic("Unable to retrieve blueprint with given ID")
 			for key in metadata.keys{ 
@@ -1033,7 +1047,7 @@ contract Kicks: NonFungibleToken{
 			destroy old
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMetadataFieldsFromBlueprint(withID blueprintID: UInt32, fields: [String]){ 
 			var blueprint <- Kicks.blueprints.remove(key: blueprintID) ?? panic("Unable to retrieve blueprint with given ID")
 			for key in fields{ 
@@ -1049,7 +1063,7 @@ contract Kicks: NonFungibleToken{
 					NFT reference. 
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceSetNFTMetadata(nft: &Kicks.NFT, key: String, value: AnyStruct){ 
 			nft.setMetadata(key: key, value: value)
 		}
@@ -1058,7 +1072,7 @@ contract Kicks: NonFungibleToken{
 	// ───────────────────────────────────────────────────────────────────────
 	// Universal Getters
 	// ───────────────────────────────────────────────────────────────────────
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBlueprints(): [&Blueprint]{ 
 		var blueprints: [&Blueprint] = []
 		for blueprintID in self.blueprints.keys{ 
@@ -1067,17 +1081,17 @@ contract Kicks: NonFungibleToken{
 		return blueprints
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getBlueprint(withID id: UInt32): &Blueprint?{ 
 		return &self.blueprints[id] as &Kicks.Blueprint?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSupplyOfBlueprint(withID id: UInt32): UInt32?{ 
 		return self.blueprints[id]?.numberMinted
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSneakerSet(withID id: UInt32): &SneakerSet?{ 
 		pre{ 
 			self.setIDs.contains(id):

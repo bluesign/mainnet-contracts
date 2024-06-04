@@ -1,4 +1,18 @@
-//SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier: UNLICENSED
 
 // The Creator Registry stores the mappings from the name of an
 // creator to the vaults in which they'd like to receive tokens,
@@ -61,7 +75,7 @@ contract DropchaseCreatorRegistry{
 	var defaultCutPackPercentage: UFix64
 	
 	// Get the capability for depositing accounting tokens to the influencer
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCapability(name: String): Capability?{ 
 		let ftId = Type<@DropchaseCoin.Vault>().identifier
 		if let caps = self.capabilities[name]{ 
@@ -72,7 +86,7 @@ contract DropchaseCreatorRegistry{
 	}
 	
 	// Get the current cut percentage for the creator
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCutPercentage(name: String): UFix64{ 
 		if let cut = DropchaseCreatorRegistry.cutPercentages[name]{ 
 			return cut
@@ -82,7 +96,7 @@ contract DropchaseCreatorRegistry{
 	}
 	
 	// Get the current pack cut percentage for the creator
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackCutPercentage(name: String): UFix64{ 
 		if let cut = DropchaseCreatorRegistry.cutPackPercentages[name]{ 
 			return cut
@@ -97,7 +111,7 @@ contract DropchaseCreatorRegistry{
 	resource Admin{ 
 		
 		// Update the FT-receiving capability for an creator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCapability(
 			name: String,
 			ftType: Type,
@@ -126,28 +140,28 @@ contract DropchaseCreatorRegistry{
 		}
 		
 		// Update the cut percentage for the creator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCutPercentage(name: String, cutPercentage: UFix64?){ 
 			DropchaseCreatorRegistry.cutPercentages[name] = cutPercentage
 			emit CutPercentageUpdated(name: name, cutPercentage: cutPercentage)
 		}
 		
 		// Update the pack cut percentage for the creator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCutPackPercentage(name: String, cutPackPercentage: UFix64?){ 
 			DropchaseCreatorRegistry.cutPackPercentages[name] = cutPackPercentage
 			emit CutPackPercentageUpdated(name: name, cutPackPercentage: cutPackPercentage)
 		}
 		
 		// Update the default cut percentage
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultCutPercentage(cutPercentage: UFix64){ 
 			DropchaseCreatorRegistry.defaultCutPercentage = cutPercentage
 			emit DefaultCutPercentageUpdated(cutPercentage: cutPercentage)
 		}
 		
 		// Update the default cut percentage
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultPackCutPercentage(cutPackPercentage: UFix64){ 
 			DropchaseCreatorRegistry.defaultCutPackPercentage = cutPackPercentage
 			emit DefaultCutPackPercentageUpdated(cutPackPercentage: cutPackPercentage)

@@ -1,4 +1,18 @@
-import Clock from "./Clock.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Clock from "./Clock.cdc"
 
 access(all)
 contract ProfileCache{ 
@@ -46,7 +60,7 @@ contract ProfileCache{
 	// We cannot panic here, because imagine someone has expired lease. 
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressLeaseName(_ address: Address): String?{ 
 		if self.addressLeaseName[address] == nil{ 
 			return nil
@@ -66,7 +80,7 @@ contract ProfileCache{
 		panic("There is already a cache for this name. Name : ".concat(leaseName))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNameAddress(_ name: String): LeaseCache?{ 
 		if (self.nameAddress[name]!).validUntil >= Clock.time(){ 
 			return self.nameAddress[name]
@@ -97,7 +111,7 @@ contract ProfileCache{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWalletIndex(address: Address, walletType: Type): Int?{ 
 		if self.profileWalletIndex[address] == nil{ 
 			return nil

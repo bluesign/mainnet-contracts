@@ -1,4 +1,18 @@
-import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import TopShot from "../0x0b2a3299cc857e29/TopShot.cdc"
 
 access(all)
 contract Ashes{ 
@@ -91,16 +105,16 @@ contract Ashes{
 	// and idExists fields in their Collection
 	access(all)
 	resource interface AshReceiver{ 
-		access(all)
-		fun deposit(token: @Ash)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @Ashes.Ash): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsh(id: UInt64): &Ash?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -129,7 +143,7 @@ contract Ashes{
 		//
 		// Function that removes an NFT from the collection 
 		// and moves it to the calling context
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @Ash{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token <- self.ownedNFTs.remove(key: withdrawID)!
@@ -141,7 +155,7 @@ contract Ashes{
 		//
 		// Function that takes a NFT as an argument and 
 		// adds it to the collections dictionary
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @Ash){ 
 			// add the new token to the dictionary with a force assignment
 			// if there is already a value at that key, it will fail and revert
@@ -151,30 +165,30 @@ contract Ashes{
 		
 		// idExists checks to see if a NFT 
 		// with the given ID exists in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsh(id: UInt64): &Ash?{ 
 			return (&self.ownedNFTs[id] as &Ash?)!
 		}
 	}
 	
 	// creates a new empty Collection resource and returns it 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mint(topshotNFT: @TopShot.NFT): @Ash{ 
 		let res <- create Ash(initID: topshotNFT.id, momentData: topshotNFT.data)
 		destroy topshotNFT
@@ -183,18 +197,18 @@ contract Ashes{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleAllowMint(allowMint: Bool){ 
 			Ashes.allowMint = allowMint
 			emit AllowMintToggled(allowMint: allowMint)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun broadcast(msg: Message){ 
 			Ashes.latestBroadcast = msg
 			emit BroadcastMessage(

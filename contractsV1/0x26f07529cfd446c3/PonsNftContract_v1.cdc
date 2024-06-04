@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import PonsCertificationContract from "./PonsCertificationContract.cdc"
 
@@ -124,7 +138,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		/* Withdraw an NFT from the PonsCollection, given its nftId */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNft(nftId: String): @PonsNftContractInterface.NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(PonsNftContract_v1.ponsNftSerialNumbers[nftId]!):
@@ -152,7 +166,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 		}
 		
 		/* Deposit a NFT from the PonsCollection, given its nftId */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNft(_ ponsNft: @PonsNftContractInterface.NFT): Void{ 
 			pre{ 
 				!self.ownedNFTs.containsKey(PonsNftContract_v1.ponsNftSerialNumbers[ponsNft.nftId]!):
@@ -183,7 +197,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 		}
 		
 		/* Get a list of nftIds stored in the PonsCollection */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftIds(): [String]{ 
 			// Iterate over the keys of ownedNFTs, convert them to nftIds, and put them in an array
 			let serialNumbers = self.ownedNFTs.keys
@@ -199,7 +213,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 		}
 		
 		/* Borrow a reference to a NFT in the PonsCollection, given its nftId */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNft(nftId: String): &PonsNftContractInterface.NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(PonsNftContract_v1.ponsNftSerialNumbers[nftId]!):
@@ -310,7 +324,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 		var nftIds: [String]
 		
 		/* Adds nftIds to the pool of available nftIds */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refillMintIds(mintIds: [String]){ 
 			var idIndex = 0
 			while idIndex < mintIds.length{ 
@@ -327,7 +341,7 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 		}
 		
 		/* Mints a new Pons NFT v1 */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNft(_ artistCertificate: &PonsNftContract.PonsArtistCertificate, royalty: PonsUtils.Ratio, editionLabel: String, metadata:{ String: String}): @PonsNftContractInterface.NFT{ 
 			pre{ 
 				self.nftIds.length > 0:
@@ -363,23 +377,23 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 	/* A straightforward instance of PonsNftContractImplementation which utilises PonsNftContract_v1 for all its functionality, used on initialization of the PonsNftContract_v1 contract. */
 	access(all)
 	resource PonsNftContractImplementation_v1: PonsNftContract.PonsNftContractImplementation{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArtist(_ ponsNftRef: &PonsNftContractInterface.NFT): &PonsNftContract.PonsArtist{ 
 			let ponsArtistId = PonsNftContract_v1.ponsNftArtistIds[ponsNftRef.nftId]!
 			return PonsNftContract.borrowArtistById(ponsArtistId: ponsArtistId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(_ ponsNftRef: &PonsNftContractInterface.NFT): PonsUtils.Ratio{ 
 			return PonsNftContract_v1.ponsNftRoyalties[ponsNftRef.nftId]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionLabel(_ ponsNftRef: &PonsNftContractInterface.NFT): String{ 
 			return PonsNftContract_v1.ponsNftEditionLabels[ponsNftRef.nftId]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(_ ponsNftRef: &PonsNftContractInterface.NFT):{ String: String}{ 
 			return PonsNftContract_v1.ponsNftMetadatas[ponsNftRef.nftId]!
 		}
@@ -389,8 +403,8 @@ contract PonsNftContract_v1: PonsNftContractInterface, NonFungibleToken{
 			return <-create Collection()
 		}
 		
-		access(all)
-		view fun updatePonsNft(_ ponsNft: @PonsNftContractInterface.NFT): @PonsNftContractInterface.NFT{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun updatePonsNft(_ ponsNft: @PonsNftContractInterface.NFT): @PonsNftContractInterface.NFT{ 
 			return <-ponsNft
 		}
 	}

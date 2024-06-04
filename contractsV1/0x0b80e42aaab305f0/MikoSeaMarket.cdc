@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -159,7 +173,7 @@ contract MikoSeaMarket{
 			self.checkAfterCreate()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.uuid
 		}
@@ -204,7 +218,7 @@ contract MikoSeaMarket{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}{ 
 			let ref = self.holderCap.borrow() ?? panic("ACCOUNT_NOT_SETUP")
 			let nft = ref.borrowNFT(self.nftID)
@@ -223,7 +237,7 @@ contract MikoSeaMarket{
 		//	 }
 		//	 return nil
 		// }
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(_ receiverAddress: Address){ 
 			self.checkBeforePurchase(receiverAddress)
 			log(self.receiverCap)
@@ -250,13 +264,13 @@ contract MikoSeaMarket{
 	//------------------------------------------------------------
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOrders(): [&OrderDetail]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOrder(_ orderId: UInt64): &OrderDetail?
 	}
 	
@@ -273,12 +287,12 @@ contract MikoSeaMarket{
 		}
 		
 		// get listing ids
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]{ 
 			return self.orderIds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOrders(): [&OrderDetail]{ 
 			let res: [&OrderDetail] = []
 			for orderId in self.getIds(){ 
@@ -289,7 +303,7 @@ contract MikoSeaMarket{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOrder(_ orderId: UInt64): &OrderDetail?{ 
 			if !self.getIds().contains(orderId){ 
 				return nil
@@ -297,14 +311,14 @@ contract MikoSeaMarket{
 			return MikoSeaMarket.getAdminRef().borrowOrder(orderId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOrder(nftType: Type, nftID: UInt64, holderCap: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, salePrice: UFix64, royalties: MetadataViews.Royalties, metadata:{ String: String}): UInt64{ 
 			let orderId = MikoSeaMarket.getAdminRef().createOrder(nftType: nftType, nftID: nftID, holderCap: holderCap, salePrice: salePrice, royalties: royalties, metadata: metadata)
 			self.orderIds.append(orderId)
 			return orderId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOrder(_ orderId: UInt64){ 
 			if let order = self.borrowOrder(orderId){ 
 				MikoSeaMarket.getAdminRef().removeOrder(orderId)
@@ -320,7 +334,7 @@ contract MikoSeaMarket{
 	//------------------------------------------------------------
 	access(all)
 	resource interface AdminPublicCollection{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOrder(
 			nftType: Type,
 			nftID: UInt64,
@@ -332,13 +346,13 @@ contract MikoSeaMarket{
 			}
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOrder(_ orderId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOrder(_ orderId: UInt64): &OrderDetail?
 	}
 	
@@ -354,17 +368,17 @@ contract MikoSeaMarket{
 			self.orders <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOrder(_ orderId: UInt64): &OrderDetail?{ 
 			return &self.orders[orderId] as &OrderDetail?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.orders.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOrder(nftType: Type, nftID: UInt64, holderCap: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, salePrice: UFix64, royalties: MetadataViews.Royalties, metadata:{ String: String}): UInt64{ 
 			let order <- create OrderDetail(nftType: nftType, nftID: nftID, holderCap: holderCap, salePrice: salePrice, royalties: royalties, metadata: metadata)
 			let orderId = order.uuid
@@ -375,7 +389,7 @@ contract MikoSeaMarket{
 			return orderId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(orderId: UInt64, holderCap: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>){ 
 			let order <- self.orders.remove(key: orderId) ?? panic("NOT_FOUND_ORDER")
 			assert(order.purchased == true, message: "ORDER_IS_PURCHASED")
@@ -385,7 +399,7 @@ contract MikoSeaMarket{
 			destroy order
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanAll(){ 
 			for orderId in self.orders.keys{ 
 				let order <- self.orders.remove(key: orderId) ?? panic("NOT_FOUND_ORDER")
@@ -393,14 +407,14 @@ contract MikoSeaMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOrder(_ orderId: UInt64){ 
 			let order <- self.orders.remove(key: orderId) ?? panic("NOT_FOUND_ORDER")
 			destroy order
 		}
 		
 		// when GMO payment success
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun onPaymentSuccess(orderId: UInt64, refId: String, receiverCap: Capability<&{NonFungibleToken.Receiver}>){ 
 			let order = self.borrowOrder(orderId)!
 			order.onPaymentSuccess(refId: refId, receiverCap: receiverCap)
@@ -408,7 +422,7 @@ contract MikoSeaMarket{
 		}
 		
 		// admin transfer nft to user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseForUser(_ orderId: UInt64, receiverAddress: Address){ 
 			let order = self.borrowOrder(orderId)
 			(order!).purchase(receiverAddress)
@@ -421,7 +435,7 @@ contract MikoSeaMarket{
 	//------------------------------------------------------------
 	// Create Empty Collection
 	//------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStorefront(): @Storefront{ 
 		return <-create Storefront()
 	}
@@ -431,17 +445,17 @@ contract MikoSeaMarket{
 		return self.adminCap.borrow() ?? panic("NOT_FOUND_ADMIN")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIDs(): [UInt64]{ 
 		return self.getAdminRef().getIDs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowOrder(_ orderId: UInt64): &OrderDetail?{ 
 		return self.getAdminRef().borrowOrder(orderId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAdminAddress(): Address{ 
 		return self.adminCap.address
 	}

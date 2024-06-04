@@ -1,4 +1,18 @@
-import FlowToken from "./../../standardsV1/FlowToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -545,22 +559,22 @@ contract CodeOfFlow{
 	  ** [Public methods]
 	  */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardInfo():{ UInt16: CardStruct}{ 
 		return self.cardInfo
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMatchingLimits(): [UFix64]{ 
 		return self.matchingLimits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStarterDeck(): [UInt16]{ 
 		return self.starterDeck
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRankingScores(): [RankScoreStruct]{ 
 		let ret: [RankScoreStruct] = []
 		for playerId in self.playerList.keys{ 
@@ -573,7 +587,7 @@ contract CodeOfFlow{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalScores(): [RankScoreStruct]{ 
 		let ret: [RankScoreStruct] = []
 		for playerId in self.playerList.keys{ 
@@ -586,7 +600,7 @@ contract CodeOfFlow{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calcPoint(win_count: UInt, loss_count: UInt): UInt{ 
 		if win_count + loss_count > 25{ 
 			return UInt(UFix64(win_count) / UFix64(win_count + loss_count) * 100.0) + win_count
@@ -599,12 +613,12 @@ contract CodeOfFlow{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRewardRaceBattleCount(): UInt{ 
 		return self.rankingBattleCount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentRunkingWinners(): [String]{ 
 		var rank1stName = ""
 		var rank2ndName = ""
@@ -631,7 +645,7 @@ contract CodeOfFlow{
 			** Save the Player's Card Deck
 			*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun save_deck(player_id: UInt, user_deck: [UInt16]){ 
 			if user_deck.length == 30{ 
 				CodeOfFlow.playerDeck[player_id] = user_deck
@@ -642,7 +656,7 @@ contract CodeOfFlow{
 			** Player Matching Transaction
 			*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun matching_start(player_id: UInt){ 
 			pre{ 
 				// preの中の条件に合わない場合はエラーメッセージが返ります。 ここでは"Still matching."。
@@ -768,7 +782,7 @@ contract CodeOfFlow{
 			** Game Start Transaction
 			*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun game_start(player_id: UInt, drawed_cards: [UInt16]){ 
 			pre{ 
 				drawed_cards.length == 4:
@@ -846,7 +860,7 @@ contract CodeOfFlow{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun put_card_on_the_field(
 			player_id: UInt,
 			unit_card:{ 
@@ -1292,7 +1306,7 @@ contract CodeOfFlow{
 			self.judgeTheWinner(player_id: player_id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun attack(
 			player_id: UInt,
 			attack_unit: UInt8,
@@ -1655,7 +1669,7 @@ contract CodeOfFlow{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun defence_action(
 			player_id: UInt,
 			opponent_defend_position: UInt8?,
@@ -2072,7 +2086,7 @@ contract CodeOfFlow{
 			self.judgeTheWinner(player_id: player_id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun turn_change(player_id: UInt, from_opponent: Bool, trigger_cards:{ UInt8: UInt16}){ 
 			if let info = CodeOfFlow.battleInfo[player_id]{ 
 				
@@ -2248,7 +2262,7 @@ contract CodeOfFlow{
 			self.judgeTheWinner(player_id: player_id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun surrender(player_id: UInt){ 
 			if CodeOfFlow.battleInfo[player_id] != nil{ 
 				let opponent = (CodeOfFlow.battleInfo[player_id]!).opponent
@@ -2280,7 +2294,7 @@ contract CodeOfFlow{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun judgeTheWinner(player_id: UInt): Bool{ 
 			pre{ 
 				CodeOfFlow.battleInfo[player_id] != nil:
@@ -2458,7 +2472,7 @@ contract CodeOfFlow{
 		}
 		
 		// Totalling Ranking values.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rankingTotalling(playerid: UInt){ 
 			CodeOfFlow.rankingBattleCount = CodeOfFlow.rankingBattleCount + 1
 			if let score = CodeOfFlow.playerList[playerid]{ 
@@ -2567,7 +2581,7 @@ contract CodeOfFlow{
 			** Add new card line-up / revise card info.
 			*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun edit_card_info(){ 
 			CodeOfFlow.cardInfo[28] = CodeOfFlow.CardStruct(
 					card_id: 28,
@@ -2609,19 +2623,19 @@ contract CodeOfFlow{
 	// [Interface] IPlayerPublic
 	access(all)
 	resource interface IPlayerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_current_status(): AnyStruct
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_marigan_cards(player_id: UInt): [[UInt16]]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_player_deck(player_id: UInt): [UInt16]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_players_score(): [CyberScoreStruct]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy_en(payment: @FlowToken.Vault)
 	}
 	
@@ -2638,7 +2652,7 @@ contract CodeOfFlow{
 		access(all)
 		let nickname: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_marigan_cards(player_id: UInt): [[UInt16]]{ 
 			if let playerMatchingInfo = CodeOfFlow.playerMatchingInfo[player_id]{ 
 				var ret_arr: [[UInt16]] = []
@@ -2656,7 +2670,7 @@ contract CodeOfFlow{
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_player_deck(player_id: UInt): [UInt16]{ 
 			if let deck = CodeOfFlow.playerDeck[player_id]{ 
 				return deck
@@ -2665,7 +2679,7 @@ contract CodeOfFlow{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_players_score(): [CyberScoreStruct]{ 
 			let retArr: [CyberScoreStruct] = []
 			retArr.append(CodeOfFlow.playerList[self.player_id]!)
@@ -2676,7 +2690,7 @@ contract CodeOfFlow{
 			return retArr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun get_current_status(): AnyStruct{ 
 			if let info = CodeOfFlow.battleInfo[self.player_id]{ 
 				return info
@@ -2687,7 +2701,7 @@ contract CodeOfFlow{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy_en(payment: @FlowToken.Vault){ 
 			pre{ 
 				payment.balance == 1.0:
@@ -2711,7 +2725,7 @@ contract CodeOfFlow{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPlayer(
 		nickname: String,
 		flow_vault_receiver: Capability<&FlowToken.Vault>

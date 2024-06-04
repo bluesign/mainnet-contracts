@@ -1,4 +1,18 @@
-//SPDX-License-Identifier : CC-BY-NC-4.0
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier : CC-BY-NC-4.0
 
 // testnet 0x9a0766d93b6608b7
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -110,7 +124,7 @@ contract OzoneToken: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @OzoneToken.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -154,7 +168,7 @@ contract OzoneToken: FungibleToken{
 		// Function that mints new tokens, adds them to the total supply,
 		// and returns them to the calling context.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @OzoneToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -180,7 +194,7 @@ contract OzoneToken: FungibleToken{
 		// Note: the burned tokens are automatically subtracted from the 
 		// total supply in the Vault destructor.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @OzoneToken.Vault
 			let amount = vault.balance
@@ -191,8 +205,8 @@ contract OzoneToken: FungibleToken{
 	
 	access(all)
 	resource interface MinterProxyPublic{ 
-		access(all)
-		fun setMinterCapability(cap: Capability<&Minter>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setMinterCapability(cap: Capability<&OzoneToken.Minter>): Void
 	}
 	
 	// MinterProxy
@@ -209,12 +223,12 @@ contract OzoneToken: FungibleToken{
 		
 		// Anyone can call this, but only the admin can create Minter capabilities,
 		// so the type system constrains this to being called by the admin.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterCapability(cap: Capability<&Minter>){ 
 			self.minterCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @OzoneToken.Vault{ 
 			return <-((self.minterCapability!).borrow()!).mintTokens(amount: amount)
 		}
@@ -230,7 +244,7 @@ contract OzoneToken: FungibleToken{
 	// Anyone can call this, but the MinterProxy cannot mint without a Minter capability,
 	// and only the admin can provide that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMinterProxy(): @MinterProxy{ 
 		return <-create MinterProxy()
 	}
@@ -257,7 +271,7 @@ contract OzoneToken: FungibleToken{
 		// then the admin account running:
 		// transactions/ozonetoken/admin/deposit_minter_capability.cdc
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(): @Minter{ 
 			emit MinterCreated()
 			return <-create Minter()
@@ -267,7 +281,7 @@ contract OzoneToken: FungibleToken{
 		//
 		// Function that creates and returns a new burner resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()

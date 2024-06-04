@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for ABD
 
 	This smart contract contains the core functionality for 
@@ -296,7 +310,7 @@ contract ABD: NonFungibleToken{
 		// The Set needs to be not locked
 		// The Play can't have already been added to the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlay(playID: UInt32){ 
 			pre{ 
 				ABD.playDatas[playID] != nil:
@@ -323,7 +337,7 @@ contract ABD: NonFungibleToken{
 		// Parameters: playIDs: The IDs of the Plays that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPlays(playIDs: [UInt32]){ 
 			for play in playIDs{ 
 				self.addPlay(playID: play)
@@ -337,7 +351,7 @@ contract ABD: NonFungibleToken{
 		// Pre-Conditions:
 		// The Play is part of the Set and not retired (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retirePlay(playID: UInt32){ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -352,7 +366,7 @@ contract ABD: NonFungibleToken{
 		// retireAll retires all the plays in the Set
 		// Afterwards, none of the retired Plays will be able to mint new Moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for play in self.plays{ 
 				self.retirePlay(playID: play)
@@ -363,7 +377,7 @@ contract ABD: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -380,7 +394,7 @@ contract ABD: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintMoment(playID: UInt32): @NFT{ 
 			pre{ 
 				self.retired[playID] != nil:
@@ -409,7 +423,7 @@ contract ABD: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Moments that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintMoment(playID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -491,7 +505,7 @@ contract ABD: NonFungibleToken{
 		//
 		// Returns: the ID of the new Play object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPlay(metadata:{ String: String}): UInt32{ 
 			// Create the new Play
 			var newPlay = Play(metadata: metadata)
@@ -507,7 +521,7 @@ contract ABD: NonFungibleToken{
 		//
 		// Parameters: name: The name of the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String){ 
 			// Create the new Set
 			var newSet <- create Set(name: name)
@@ -525,7 +539,7 @@ contract ABD: NonFungibleToken{
 		// Returns: A reference to the Set with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &ABD.Set?{ 
 			pre{ 
 				ABD.sets[setID] != nil:
@@ -548,7 +562,7 @@ contract ABD: NonFungibleToken{
 		//
 		// Returns: The new series number
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			// End the current series and start a new one
 			// by incrementing the ABD series number
@@ -559,7 +573,7 @@ contract ABD: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -571,18 +585,18 @@ contract ABD: NonFungibleToken{
 	access(all)
 	resource interface MomentCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &ABD.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -631,7 +645,7 @@ contract ABD: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -650,7 +664,7 @@ contract ABD: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a ABD NFT to make sure
 			// it is the correct type
@@ -674,7 +688,7 @@ contract ABD: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -729,7 +743,7 @@ contract ABD: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &ABD.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -775,7 +789,7 @@ contract ABD: NonFungibleToken{
 	// getAllPlays returns all the plays in ABD
 	//
 	// Returns: An array of all the plays that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPlays(): [ABD.Play]{ 
 		return ABD.playDatas.values
 	}
@@ -785,7 +799,7 @@ contract ABD: NonFungibleToken{
 	// Parameters: playID: The id of the Play that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaData(playID: UInt32):{ String: String}?{ 
 		return self.playDatas[playID]?.metadata
 	}
@@ -797,7 +811,7 @@ contract ABD: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayMetaDataByField(playID: UInt32, field: String): String?{ 
 		// Don't force a revert if the playID or field is invalid
 		if let play = ABD.playDatas[playID]{ 
@@ -813,7 +827,7 @@ contract ABD: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt32): String?{ 
 		// Don't force a revert if the setID is invalid
 		return ABD.setDatas[setID]?.name
@@ -825,7 +839,7 @@ contract ABD: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The series that the Set belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeries(setID: UInt32): UInt32?{ 
 		// Don't force a revert if the setID is invalid
 		return ABD.setDatas[setID]?.series
@@ -837,7 +851,7 @@ contract ABD: NonFungibleToken{
 	// Parameters: setName: The name of the Set that is being searched
 	//
 	// Returns: An array of the IDs of the Set if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDsByName(setName: String): [UInt32]?{ 
 		var setIDs: [UInt32] = []
 		
@@ -863,7 +877,7 @@ contract ABD: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: An array of Play IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlaysInSet(setID: UInt32): [UInt32]?{ 
 		// Don't force a revert if the setID is invalid
 		return ABD.sets[setID]?.plays
@@ -878,7 +892,7 @@ contract ABD: NonFungibleToken{
 	//			 playID: The id of the Play that is being searched
 	//
 	// Returns: Boolean indicating if the edition is retired or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setID: UInt32, playID: UInt32): Bool?{ 
 		// Don't force a revert if the set or play ID is invalid
 		// Remove the set from the dictionary to get its field
@@ -907,7 +921,7 @@ contract ABD: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: Boolean indicating if the Set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt32): Bool?{ 
 		// Don't force a revert if the setID is invalid
 		return ABD.sets[setID]?.locked
@@ -921,7 +935,7 @@ contract ABD: NonFungibleToken{
 	//
 	// Returns: The total number of Moments 
 	//		  that have been minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumMomentsInEdition(setID: UInt32, playID: UInt32): UInt32?{ 
 		// Don't force a revert if the Set or play ID is invalid
 		// Remove the Set from the dictionary to get its field

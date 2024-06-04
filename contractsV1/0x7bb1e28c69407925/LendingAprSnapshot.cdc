@@ -1,4 +1,18 @@
-import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
 
 import LendingError from "../0x2df970b6cdee5735/LendingError.cdc"
 
@@ -77,12 +91,12 @@ contract LendingAprSnapshot{
 		let _reservedFields:{ String: AnyStruct}
 		
 		/// Returns the index into the circular buffer of the given timestamp
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun observationIndexOf(timestamp: UFix64): UInt64{ 
 			return UInt64(timestamp) / self.sampleLength % self.numSamples
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sample(): Bool{ 
 			let now = getCurrentBlock().timestamp
 			let idx = self.observationIndexOf(timestamp: now)
@@ -101,7 +115,7 @@ contract LendingAprSnapshot{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun queryHistoricalAprData(scale: UInt8, plotPoints: UInt64): [Observation]{ 
 			let now = getCurrentBlock().timestamp
 			let idxNow: UInt64 = self.observationIndexOf(timestamp: now)
@@ -149,7 +163,7 @@ contract LendingAprSnapshot{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLatestData(): Observation{ 
 			let now = getCurrentBlock().timestamp
 			let idx = self.observationIndexOf(timestamp: now)
@@ -176,7 +190,7 @@ contract LendingAprSnapshot{
 	
 	/// sample() is made public so everyone can sample the given market's apr data, as long as it's expired.
 	/// @Returns sampled or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sample(poolAddr: Address): Bool{ 
 		pre{ 
 			self._markets.containsKey(poolAddr) == true:
@@ -190,7 +204,7 @@ contract LendingAprSnapshot{
 	/// @scale: Spanning of time the drawing should cover - 0 (1 month), 1 (6 months), 2 (1 year). 
 	/// @plotPoints: Maximum data points the drawing needs, e.g. 120 points in maximum
 	/// @Returns historical apy data in a timestamp-ascending order. Note: only meaningful data is returned, so the length is not guaranteed to be equal to `plotPoints`.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun queryHistoricalAprData(poolAddr: Address, scale: UInt8, plotPoints: UInt64): [Observation]{ 
 		pre{ 
 			self._markets.containsKey(poolAddr) == true:
@@ -202,7 +216,7 @@ contract LendingAprSnapshot{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLatestData(poolAddr: Address): Observation{ 
 		return (self._markets[poolAddr]!).getLatestData()
 	}
@@ -245,12 +259,12 @@ contract LendingAprSnapshot{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun trackMarketData(poolAddr: Address){ 
 			LendingAprSnapshot.trackMarketData(poolAddr: poolAddr)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun eraseMarketData(poolAddr: Address){ 
 			LendingAprSnapshot.eraseMarketData(poolAddr: poolAddr)
 		}

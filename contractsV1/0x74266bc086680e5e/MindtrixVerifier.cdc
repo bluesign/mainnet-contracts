@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 ============================================================
 Name: NFT Verifier Contract for Mindtrix
 ============================================================
@@ -21,7 +35,7 @@ contract MindtrixVerifier{
 		access(all)
 		let endTime: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}, _ isAssert: Bool):{ String: Bool}{ 
 			let currentTime = getCurrentBlock().timestamp
 			let isYetToStart = currentTime < self.startTime
@@ -48,7 +62,7 @@ contract MindtrixVerifier{
 		access(all)
 		var maxMintTimesPerAddress: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}, _ isAssert: Bool):{ String: Bool}{ 
 			let currentEdition = params["currentEdition"]! as! UInt64
 			let recipientMintTimes = params["recipientMintQuantityPerTransaction"]! as! UInt64
@@ -75,7 +89,7 @@ contract MindtrixVerifier{
 		access(all)
 		var fixDic:{ String: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}, _ isAssert: Bool):{ String: Bool}{ 
 			let maxEdition = self.intDic["maxEdition"]!
 			let maxSupplyPerRound = self.intDic["maxSupplyPerRound"] ?? nil
@@ -118,7 +132,7 @@ contract MindtrixVerifier{
 		access(all)
 		let randomstamp: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ params:{ String: AnyStruct}, _ isAssert: Bool):{ String: Bool}{ 
 			let randomstampStr = (params["claimCodeRandomstamp"]! as! UInt64).toString()
 			let recipientAddressStr = (params["recipientAddress"]! as! Address).toString()

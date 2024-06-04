@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import FlovatarDustCollectibleTemplate from "./FlovatarDustCollectibleTemplate.cdc"
@@ -162,28 +176,28 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		access(all)
 		let schema: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayers():{ UInt32: UInt64?}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessories(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSeries(): FlovatarDustCollectibleTemplate.CollectibleSeriesData?
 	}
 	
@@ -191,19 +205,19 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	//for the Flovatar and is accessible only to the owner of the NFT
 	access(all)
 	resource interface Private{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String, vault: @{FungibleToken.Vault}): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStory(text: String, vault: @{FungibleToken.Vault}): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPosition(latitude: Fix64, longitude: Fix64, vault: @{FungibleToken.Vault}): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessory(layer: UInt32, accessory: @FlovatarDustCollectibleAccessory.NFT): @FlovatarDustCollectibleAccessory.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(layer: UInt32): @FlovatarDustCollectibleAccessory.NFT?
 	}
 	
@@ -272,32 +286,32 @@ contract FlovatarDustCollectible: NonFungibleToken{
 			self.accessories <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties{ 
 			return self.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBio():{ String: String}{ 
 			return self.bio
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSeries(): FlovatarDustCollectibleTemplate.CollectibleSeriesData?{ 
 			return FlovatarDustCollectibleTemplate.getCollectibleSeries(id: self.series)
 		}
@@ -305,7 +319,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		// This will allow to change the Name of the Flovatar only once.
 		// It checks for the current name is empty, otherwise it will throw an error.
 		// $DUST vault must contain 100 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String, vault: @{FungibleToken.Vault}): String{ 
 			pre{ 
 				// TODO: Make sure that the text of the name is sanitized
@@ -339,7 +353,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		// The String will be concatenated each time.
 		// There is a limit of 300 characters per story but there is no limit in the full concatenated story length
 		// $DUST vault must contain 50 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStory(text: String, vault: @{FungibleToken.Vault}): String{ 
 			pre{ 
 				// TODO: Make sure that the text of the name is sanitized
@@ -364,7 +378,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		// This will allow to set the GPS location of a Flovatar
 		// It can be run multiple times and each time it will override the previous state
 		// $DUST vault must contain 10 tokens that will be burned in the process
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPosition(latitude: Fix64, longitude: Fix64, vault: @{FungibleToken.Vault}): String{ 
 			pre{ 
 				latitude >= -90.0:
@@ -387,12 +401,12 @@ contract FlovatarDustCollectible: NonFungibleToken{
 			return position
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayers():{ UInt32: UInt64?}{ 
 			return self.layers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessories(): [UInt64]{ 
 			let accessoriesIds: [UInt64] = []
 			for k in self.accessories.keys{ 
@@ -406,7 +420,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		
 		// This will allow to change the Accessory of the Flovatar any time.
 		// It checks for the right category and series before executing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessory(layer: UInt32, accessory: @FlovatarDustCollectibleAccessory.NFT): @FlovatarDustCollectibleAccessory.NFT?{ 
 			pre{ 
 				accessory.getSeries() == self.series:
@@ -422,7 +436,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		}
 		
 		// This will allow to remove the Accessory of the Flovatar any time.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(layer: UInt32): @FlovatarDustCollectibleAccessory.NFT?{ 
 			if FlovatarDustCollectibleTemplate.isCollectibleLayerAccessory(layer: layer, series: self.series){ 
 				emit Updated(id: self.id)
@@ -437,7 +451,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		// optional components (Accessory, Hat, Eyeglasses and Background) from their
 		// original Template resources, while all the other unmutable components are
 		// taken from the Metadata directly.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			let series = FlovatarDustCollectibleTemplate.getCollectibleSeries(id: self.series)
 			let layersArr: [String] = []
@@ -477,7 +491,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				return MetadataViews.ExternalURL("https://flovatar.com/collectibles/".concat(self.id.toString()))
 			}
@@ -547,15 +561,15 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDustCollectible(id: UInt64): &FlovatarDustCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -589,7 +603,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FlovatarDustCollectible.NFT
 			let id: UInt64 = token.id
 			
@@ -614,7 +628,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		
 		// borrowFlovatar returns a borrowed reference to a Flovatar
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDustCollectible(id: UInt64): &FlovatarDustCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -627,7 +641,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		
 		// borrowFlovatarPrivate returns a borrowed reference to a Flovatar using the Private interface
 		// so that the caller can read data and call methods from it, like setting the optional components.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDustCollectiblePrivate(id: UInt64): &{FlovatarDustCollectible.Private}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -719,7 +733,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	}
 	
 	// This function will look for a specific Flovatar on a user account and return a FlovatarData if found
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectible(address: Address, collectibleId: UInt64): FlovatarDustCollectibleData?{ 
 		let account = getAccount(address)
 		if let collectibleCollection = account.capabilities.get<&FlovatarDustCollectible.Collection>(self.CollectionPublicPath).borrow<&FlovatarDustCollectible.Collection>(){ 
@@ -731,7 +745,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	}
 	
 	// This function will return all Flovatars on a user account and return an array of FlovatarData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectibles(address: Address): [FlovatarDustCollectibleData]{ 
 		var dustCollectibleData: [FlovatarDustCollectibleData] = []
 		let account = getAccount(address)
@@ -746,13 +760,13 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	}
 	
 	// This returns all the previously minted combinations, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedCombinations(): [String]{ 
 		return FlovatarDustCollectible.mintedCombinations.keys
 	}
 	
 	// This returns all the previously minted names, so that duplicates won't be allowed
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintedNames(): [String]{ 
 		return FlovatarDustCollectible.mintedNames.keys
 	}
@@ -769,7 +783,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		FlovatarDustCollectible.mintedNames.insert(key: name, true)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCoreLayers(series: UInt64, layers:{ UInt32: UInt64?}):{ UInt32: UInt64}{ 
 		let coreLayers:{ UInt32: UInt64} ={} 
 		for k in layers.keys{ 
@@ -791,7 +805,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	// This helper function will generate a string from a list of components,
 	// to be used as a sort of barcode to keep the inventory of the minted
 	// Flovatars and to avoid duplicates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCombinationString(series: UInt64, layers:{ UInt32: UInt64}): String{ 
 		var combination = "S".concat(series.toString())
 		var i: UInt32 = UInt32(2)
@@ -814,7 +828,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	
 	// This function will get a list of component IDs and will check if the
 	// generated string is unique or if someone already used it before.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkCombinationAvailable(series: UInt64, layers:{ UInt32: UInt64}): Bool{ 
 		let combinationString = FlovatarDustCollectible.getCombinationString(series: series, layers: layers)
 		return !FlovatarDustCollectible.mintedCombinations.containsKey(combinationString)
@@ -822,7 +836,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	
 	// This will check if a specific Name has already been taken
 	// and assigned to some Flovatar
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkNameAvailable(name: String): Bool{ 
 		return name.length > 2 && name.length < 20 && !FlovatarDustCollectible.mintedNames.containsKey(name)
 	}
@@ -834,7 +848,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	// The Spark NFT will entitle to use any common basic component (body, hair, etc.)
 	// In order to use special rare components a boost of the same rarity will be needed
 	// for each component used
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDustCollectible(series: UInt64, layers: [UInt32], templateIds: [UInt64?], address: Address, vault: @{FungibleToken.Vault}): @FlovatarDustCollectible.NFT{ 
 		pre{ 
 			vault.isInstance(Type<@FlovatarDustToken.Vault>()):
@@ -924,12 +938,12 @@ contract FlovatarDustCollectible: NonFungibleToken{
 	
 	// These functions will return the current Royalty cuts for
 	// both the Creator and the Marketplace.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyCut(): UFix64{ 
 		return self.royaltyCut
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketplaceCut(): UFix64{ 
 		return self.marketplaceCut
 	}
@@ -955,7 +969,7 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		// contains all the SVG and basic informations to represent
 		// a specific part of the Flovatar (body, hair, eyes, mouth, etc.)
 		// More info in the FlovatarComponentTemplate.cdc file
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollectibleSeries(name: String, description: String, svgPrefix: String, svgSuffix: String, priceIncrease: UFix64, layers:{ UInt32: FlovatarDustCollectibleTemplate.Layer}, colors:{ UInt32: String}, metadata:{ String: String}, maxMintable: UInt64): @FlovatarDustCollectibleTemplate.CollectibleSeries{ 
 			return <-FlovatarDustCollectibleTemplate.createCollectibleSeries(name: name, description: description, svgPrefix: svgPrefix, svgSuffix: svgSuffix, priceIncrease: priceIncrease, layers: layers, colors: colors, metadata: metadata, maxMintable: maxMintable)
 		}
@@ -964,38 +978,38 @@ contract FlovatarDustCollectible: NonFungibleToken{
 		// contains all the SVG and basic informations to represent
 		// a specific part of the Flovatar (body, hair, eyes, mouth, etc.)
 		// More info in the FlovatarComponentTemplate.cdc file
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollectibleTemplate(name: String, description: String, series: UInt64, layer: UInt32, metadata:{ String: String}, rarity: String, basePrice: UFix64, svg: String, maxMintableComponents: UInt64): @FlovatarDustCollectibleTemplate.CollectibleTemplate{ 
 			return <-FlovatarDustCollectibleTemplate.createCollectibleTemplate(name: name, description: description, series: series, layer: layer, metadata: metadata, rarity: rarity, basePrice: basePrice, svg: svg, maxMintableComponents: maxMintableComponents)
 		}
 		
 		//This will mint a new Component based from a selected Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollectible(templateId: UInt64): @FlovatarDustCollectibleAccessory.NFT{ 
 			return <-FlovatarDustCollectibleAccessory.createCollectibleAccessoryInternal(templateId: templateId)
 		}
 		
 		//This will mint Components in batch and return a Collection instead of the single NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreateCollectibles(templateId: UInt64, quantity: UInt64): @FlovatarDustCollectibleAccessory.Collection{ 
 			return <-FlovatarDustCollectibleAccessory.batchCreateCollectibleAccessory(templateId: templateId, quantity: quantity)
 		}
 		
 		// With this function you can generate a new Admin resource
 		// and pass it to another user if needed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Helper functions to update the Royalty cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyCut(value: UFix64){ 
 			FlovatarDustCollectible.setRoyaltyCut(value: value)
 		}
 		
 		// Helper functions to update the Marketplace cut
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketplaceCut(value: UFix64){ 
 			FlovatarDustCollectible.setMarketplaceCut(value: value)
 		}

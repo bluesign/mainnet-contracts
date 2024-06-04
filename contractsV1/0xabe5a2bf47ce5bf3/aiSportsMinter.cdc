@@ -1,4 +1,18 @@
-//this address was 0xf8d6e0586b0a20c7 on localhost
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//this address was 0xf8d6e0586b0a20c7 on localhost
 //testnet: 0x631e88ae7f1d7c20
 //mainnet: 0x1d7e57aa55817448
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -161,15 +175,15 @@ contract aiSportsMinter: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface aiSportsMinterCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAiSportsMinter(id: UInt64): &aiSportsMinter.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -216,7 +230,7 @@ contract aiSportsMinter: NonFungibleToken, ViewResolver{
 		/// @param token: The NFT resource to be included in the collection
 		/// 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @aiSportsMinter.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -241,7 +255,7 @@ contract aiSportsMinter: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///	   
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAiSportsMinter(id: UInt64): &aiSportsMinter.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -281,7 +295,7 @@ contract aiSportsMinter: NonFungibleToken, ViewResolver{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStatus(userNft: &aiSportsMinter.NFT, status: String){ 
 			//let value = ref as! &aiSportsMinter.NFT
 			userNft.updateStatus(status: status)
@@ -303,7 +317,7 @@ contract aiSportsMinter: NonFungibleToken, ViewResolver{
 		/// @param thumbnail: The thumbnail for the NFT metadata
 		/// @param royalties: An array of Royalty structs, see MetadataViews docs 
 		///   
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, edition: String, thumbnail: String, royalties: [MetadataViews.Royalty], status: String, player: String, landscape: String, scene: String, style: String, medium: String){ 
 			let metadata:{ String: AnyStruct} ={} 
 			let currentBlock = getCurrentBlock()
@@ -331,7 +345,7 @@ contract aiSportsMinter: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -349,7 +363,7 @@ contract aiSportsMinter: NonFungibleToken, ViewResolver{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}

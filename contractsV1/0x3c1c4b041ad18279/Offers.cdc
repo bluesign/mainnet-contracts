@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -78,20 +92,20 @@ contract Offers{
 	
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
-		fun borrowOffer(offerResourceID: UInt64): &Offer?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowOffer(offerResourceID: UInt64): &Offers.Offer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(
 			offerResourceID: UInt64,
 			nft: @{NonFungibleToken.NFT},
 			receiver: Capability<&{FungibleToken.Receiver}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanupOffer(_ id: UInt64)
 		
 		access(contract)
@@ -103,7 +117,7 @@ contract Offers{
 		access(self)
 		let offers: @{UInt64: Offer}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOffer(offeredAmount: UFix64, paymentTokenType: Type, filterGroup: Filter.FilterGroup, expiry: UInt64, numAcceptable: Int, taker: Address?, paymentProvider: Capability<&{FungibleToken.Provider, FungibleToken.Balance, FungibleToken.Receiver}>, nftReceiver: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			pre{ 
 				paymentProvider.check():
@@ -131,7 +145,7 @@ contract Offers{
 			self.offers[offer.uuid] <-! offer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(offerResourceID: UInt64, nft: @{NonFungibleToken.NFT}, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			let offer = &self.offers[offerResourceID] as &Offer? ?? panic("offer not found")
 			let nftType = nft.getType()
@@ -159,7 +173,7 @@ contract Offers{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOffer(offerResourceID: UInt64){ 
 			let offer <- self.offers.remove(key: offerResourceID) ?? panic("no offer with that resource ID")
 			emit OfferCancelled(storefrontAddress: self.owner?.address, offerResourceID: offer.uuid)
@@ -169,7 +183,7 @@ contract Offers{
 			destroy offer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanupOffer(_ id: UInt64){ 
 			pre{ 
 				self.offers.containsKey(id):
@@ -181,12 +195,12 @@ contract Offers{
 			destroy offer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOffer(offerResourceID: UInt64): &Offer?{ 
 			return &self.offers[offerResourceID] as &Offer?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.offers.keys
 		}
@@ -287,13 +301,13 @@ contract Offers{
 			receiver: Capability<&{FungibleToken.Receiver}>
 		)
 		
-		access(all)
-		fun getDetails(): Details
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getDetails(): Offers.Details
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValid(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isMatch(_ nft: &{NonFungibleToken.NFT}): Bool
 	}
 	
@@ -344,17 +358,17 @@ contract Offers{
 			(self.receiver.borrow()!).deposit(token: <-nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isMatch(_ nft: &{NonFungibleToken.NFT}): Bool{ 
 			return self.details.filterGroup.match(nft: nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): Details{ 
 			return self.details
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValid(): Bool{ 
 			if !self.provider.check(){ 
 				return false
@@ -380,17 +394,17 @@ contract Offers{
 	
 	access(all)
 	resource interface AdminPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValidFilter(_ t: Type): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFilters():{ Type: Bool}
 	}
 	
 	access(all)
 	resource interface AdminCleaner{ 
-		access(all)
-		fun removeOffer(storefrontAddress: Address, offerResourceID: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun removeOffer(storefrontAddress: Address, offerResourceID: UInt64): Void
 	}
 	
 	access(all)
@@ -402,7 +416,7 @@ contract Offers{
 			self.permittedFilters ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPermittedFilter(_ t: Type){ 
 			pre{ 
 				t.isSubtype(of: Type<{Filter.NFTFilter}>())
@@ -411,24 +425,24 @@ contract Offers{
 			emit FilterTypeAdded(type: t)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFilter(_ t: Type){ 
 			if let removedType = self.permittedFilters.remove(key: t){ 
 				emit FilterTypeRemoved(type: t)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValidFilter(_ t: Type): Bool{ 
 			return self.permittedFilters[t] != nil && self.permittedFilters[t]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFilters():{ Type: Bool}{ 
 			return self.permittedFilters
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(storefrontAddress: Address, offerResourceID: UInt64){ 
 			let acct = getAccount(storefrontAddress)
 			let storefront = acct.capabilities.get<&Storefront>(Offers.OffersPublicPath)
@@ -436,22 +450,22 @@ contract Offers{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getValidFilters():{ Type: Bool}{ 
 		return Offers.borrowPublicAdmin().getFilters()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStorefront(): @Storefront{ 
 		return <-create Storefront()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun borrowPublicAdmin(): &Admin{ 
 		return self.account.storage.borrow<&Admin>(from: Offers.AdminStoragePath)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateFilterGroup(_ fg: Filter.FilterGroup): Bool{ 
 		let a = Offers.borrowPublicAdmin()
 		for f in fg.filters{ 

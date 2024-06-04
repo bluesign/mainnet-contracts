@@ -1,4 +1,18 @@
-import AACommon from "./AACommon.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import AACommon from "./AACommon.cdc"
 
 access(all)
 contract AACollectionManager{ 
@@ -37,7 +51,7 @@ contract AACollectionManager{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCuts(): [AACommon.PaymentCut]
 	}
 	
@@ -58,25 +72,25 @@ contract AACollectionManager{
 			self.cuts = cuts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItemToCollection(type: Type, nftID: UInt64){ 
 			self.items[AACommon.itemIdentifier(type: type, id: nftID)] = Item(type: type, nftID: nftID)
 			emit CollectionItemAdd(collectionID: self.uuid, type: type, nftID: nftID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeItemFromCollection(type: Type, nftID: UInt64){ 
 			self.items.remove(key: AACommon.itemIdentifier(type: type, id: nftID))
 			emit CollectionItemRemove(collectionID: self.uuid, type: type, nftID: nftID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCuts(): [AACommon.PaymentCut]{ 
 			return self.cuts
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCollection(id: UInt64): &Collection?{ 
 		if self.collections[id] != nil{ 
 			return (&self.collections[id] as &Collection?)!
@@ -84,7 +98,7 @@ contract AACollectionManager{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionCuts(type: Type, nftID: UInt64): [AACommon.PaymentCut]?{ 
 		if let collectionID = self.items[AACommon.itemIdentifier(type: type, id: nftID)]{ 
 			let collection = self.borrowCollection(id: collectionID)
@@ -95,7 +109,7 @@ contract AACollectionManager{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollection(name: String, cuts: [AACommon.PaymentCut]){ 
 			let collection <- create Collection(name: name, cuts: cuts)
 			let collectionID = collection.uuid
@@ -104,7 +118,7 @@ contract AACollectionManager{
 			emit CollectionCreated(collectionID: collectionID, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItemToCollection(collectionID: UInt64, type: Type, nftID: UInt64){ 
 			pre{ 
 				AACollectionManager.collections.containsKey(collectionID):
@@ -120,7 +134,7 @@ contract AACollectionManager{
 			AACollectionManager.items[id] = collectionID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeItemFromCollection(collectionID: UInt64, type: Type, nftID: UInt64){ 
 			pre{ 
 				AACollectionManager.collections.containsKey(collectionID):

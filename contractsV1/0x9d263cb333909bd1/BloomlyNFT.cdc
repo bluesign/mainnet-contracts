@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -190,7 +204,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//This method will update the brand data 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(brandName: String, externalURL: String, data:{ String: String}){ 
 			pre{ 
 				externalURL.length > 0:
@@ -206,7 +220,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//This method will update the brand name 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandName(brandName: String){ 
 			pre{ 
 				brandName.length > 0:
@@ -226,7 +240,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//This method will update the brand externanl url
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandExternalUrl(externalURL: String){ 
 			pre{ 
 				externalURL.length > 0:
@@ -236,7 +250,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//This method will update the brand data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandData(data:{ String: String}){ 
 			pre{ 
 				data.keys.length > 0:
@@ -246,7 +260,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//This method will update the brand platform fee 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandPlatformFee(platormFee: UFix64){ 
 			self.platormFee = platormFee
 		}
@@ -296,19 +310,19 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//A public method to provide all templates under that brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplates(): [UInt64]{ 
 			return self.templates
 		}
 		
 		//A public method to provide all nfts under that brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTs(): [UInt64]{ 
 			return self.nfts
 		}
 		
 		//A public method to provide data of brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData():{ String: String}{ 
 			return self.data
 		}
@@ -434,36 +448,36 @@ contract BloomlyNFT: NonFungibleToken{
 			self.contributors = contributors
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTIds(): [UInt64]{ 
 			return self.nfts
 		}
 		
 		// a method to get ImmutableData field of Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}{ 
 			return self.immutableData
 		}
 		
 		// a method to get MutableData field of Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMutableData():{ String: AnyStruct}?{ 
 			return self.mutableData
 		}
 		
 		// a method to get royalities of Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]?{ 
 			return self.royalties
 		}
 		
 		// a method to get contributors of Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContibutors():{ Address: UFix64}?{ 
 			return self.contributors
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyEnabledCheck(): Bool{ 
 			return self.isRoyaltyEnabled
 		}
@@ -531,13 +545,13 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		// a method to get the immutable data of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}?{ 
 			return self.immutableData
 		}
 		
 		// a method to get the mutable data of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMutableData():{ String: AnyStruct}?{ 
 			return self.mutableData
 		}
@@ -568,7 +582,7 @@ contract BloomlyNFT: NonFungibleToken{
 			emit NFTMinted(nftId: self.id, brandId: brandId, templateId: templateId, mintNumber: mintNumber, name: name, description: description, thumbnail: thumbnail, isTransferable: isTransferable)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserNFTData(): NFTDataView{ 
 			return self.data
 		}
@@ -632,15 +646,15 @@ contract BloomlyNFT: NonFungibleToken{
 	access(all)
 	resource interface BloomlyNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBloomlyNFT(id: UInt64): &BloomlyNFT.NFT
 	}
 	
@@ -666,14 +680,14 @@ contract BloomlyNFT: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnNFT(nftId: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: nftId) ?? panic("Invalid nft id")
 			destroy token
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BloomlyNFT.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -686,7 +700,7 @@ contract BloomlyNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBloomlyNFT(id: UInt64): &BloomlyNFT.NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -728,7 +742,7 @@ contract BloomlyNFT: NonFungibleToken{
 	resource SuperAdmin{ 
 		
 		//method to create Admin resource 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdminResource(adminAddress: Address): @Admin{ 
 			pre{ 
 				BloomlyNFT.allAdmins.contains(adminAddress) == false:
@@ -740,7 +754,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to remove Admin address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAdminAddress(adminAddress: Address){ 
 			pre{ 
 				BloomlyNFT.allAdmins.contains(adminAddress) == true:
@@ -756,7 +770,7 @@ contract BloomlyNFT: NonFungibleToken{
 	resource Admin{ 
 		
 		// method to create new Brand, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBrand(brandName: String, registrationNo: String, authors: [Address], externalURL: String, data:{ String: String}, platormFee: UFix64){ 
 			pre{ 
 				BloomlyNFT.allAdmins.contains((self.owner!).address) == true:
@@ -776,7 +790,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		// method to update Brand author
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandAuthor(brandId: UInt64, newAuthors: [Address]){ 
 			pre{ 
 				BloomlyNFT.allAdmins.contains((self.owner!).address) == true:
@@ -790,7 +804,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to create BrandAdmin resource and give the interface capability to the new brand admins
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBrandAdminResource(): @BloomlyNFT.BrandAdmin{ 
 			pre{ 
 				BloomlyNFT.allAdmins.contains((self.owner!).address) == true:
@@ -800,7 +814,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		// method to update Brand platform fee
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandPlatformFee(brandId: UInt64, platormFee: UFix64){ 
 			pre{ 
 				BloomlyNFT.allAdmins.contains((self.owner!).address) == true:
@@ -825,40 +839,40 @@ contract BloomlyNFT: NonFungibleToken{
 	// Interface, which contains all the methods that are called by any user to mint NFT and manage brand, and template funtionality
 	access(all)
 	resource interface NFTMethodsCapability{ 
-		access(all)
-		fun updateBrand(brandId: UInt64, brandName: String, externalURL: String, data:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun updateBrand(brandId: UInt64, brandName: String, externalURL: String, data:{ String: String}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandName(brandId: UInt64, brandName: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandExternalUrl(brandId: UInt64, externalURL: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandData(brandId: UInt64, data:{ String: String})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(brandId: UInt64, maxSupply: UInt64?, transferable: Bool, immutableData:{ String: AnyStruct}, mutableData:{ String: AnyStruct}?, royalties: [MetadataViews.Royalty]?, contributors:{ Address: UFix64}?, isRoyaltyEnabled: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMutableData(templateId: UInt64, mutableData:{ String: AnyStruct})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMutableAttribute(templateId: UInt64, key: String, value: AnyStruct)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(templateId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplateById(templateId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(brandId: UInt64, templateId: UInt64?, receiverRef: &{BloomlyNFT.BloomlyNFTCollectionPublic}, immutableData:{ String: AnyStruct}?, mutableData:{ String: AnyStruct}?, name: String, description: String, thumbnail: String, transferable: Bool, royalties: [MetadataViews.Royalty])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalties(brandId: UInt64, royalties: [MetadataViews.Royalty])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setContributors(brandId: UInt64, contributors:{ Address: UFix64})
 	}
 	
@@ -870,7 +884,7 @@ contract BloomlyNFT: NonFungibleToken{
 		var ownedTemplates:{ UInt64: Template}
 		
 		//method to update the existing Brand, only author of brand can update this brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrand(brandId: UInt64, brandName: String, externalURL: String, data:{ String: String}){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -883,7 +897,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to update the existing Brand name, only author of brand can update this brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandName(brandId: UInt64, brandName: String){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -896,7 +910,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to update the existing Brand external url, only author of brand can update this brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandExternalUrl(brandId: UInt64, externalURL: String){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -909,7 +923,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to update the existing Brand data, only author of brand can update this brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandData(brandId: UInt64, data:{ String: String}){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -922,7 +936,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to create new Template, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(brandId: UInt64, maxSupply: UInt64?, transferable: Bool, immutableData:{ String: AnyStruct}, mutableData:{ String: AnyStruct}?, royalties: [MetadataViews.Royalty]?, contributors:{ Address: UFix64}?, isRoyaltyEnabled: Bool){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -939,7 +953,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to update the existing template's mutable data, only author of brand can update this template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMutableData(templateId: UInt64, mutableData:{ String: AnyStruct}){ 
 			pre{ 
 				BloomlyNFT.allTemplates[templateId] != nil:
@@ -953,7 +967,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to update or add particular key-value pair in Template's mutable data, only author of brand can update this template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMutableAttribute(templateId: UInt64, key: String, value: AnyStruct){ 
 			pre{ 
 				BloomlyNFT.allTemplates[templateId] != nil:
@@ -967,7 +981,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to lock the template to not mint more nfts
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(templateId: UInt64){ 
 			pre{ 
 				BloomlyNFT.allTemplates[templateId] != nil:
@@ -981,7 +995,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to remove template by id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplateById(templateId: UInt64){ 
 			pre{ 
 				BloomlyNFT.allTemplates[templateId] != nil:
@@ -999,7 +1013,7 @@ contract BloomlyNFT: NonFungibleToken{
 		}
 		
 		//method to mint NFT, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(brandId: UInt64, templateId: UInt64?, receiverRef: &{BloomlyNFT.BloomlyNFTCollectionPublic}, immutableData:{ String: AnyStruct}?, mutableData:{ String: AnyStruct}?, name: String, description: String, thumbnail: String, transferable: Bool, royalties: [MetadataViews.Royalty]){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -1036,7 +1050,7 @@ contract BloomlyNFT: NonFungibleToken{
 			receiverRef.deposit(token: <-newNFT)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalties(brandId: UInt64, royalties: [MetadataViews.Royalty]){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -1050,7 +1064,7 @@ contract BloomlyNFT: NonFungibleToken{
 			emit BrandRoyaltiesAdded(brandId: brandId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setContributors(brandId: UInt64, contributors:{ Address: UFix64}){ 
 			pre{ 
 				BloomlyNFT.allBrands[brandId] != nil:
@@ -1084,13 +1098,13 @@ contract BloomlyNFT: NonFungibleToken{
 	}
 	
 	//method to get all Brands
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBrands():{ UInt64: Brand}{ 
 		return BloomlyNFT.allBrands
 	}
 	
 	//method to get brand by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBrandById(brandId: UInt64): Brand{ 
 		pre{ 
 			BloomlyNFT.allBrands[brandId] != nil:
@@ -1100,13 +1114,13 @@ contract BloomlyNFT: NonFungibleToken{
 	}
 	
 	//method to get all templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates():{ UInt64: Template}{ 
 		return BloomlyNFT.allTemplates
 	}
 	
 	//method to get template by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateById(templateId: UInt64): Template{ 
 		pre{ 
 			BloomlyNFT.allTemplates[templateId] != nil:
@@ -1116,7 +1130,7 @@ contract BloomlyNFT: NonFungibleToken{
 	}
 	
 	//method to get nft-data by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTDataById(nftId: UInt64): NFTDataView{ 
 		pre{ 
 			BloomlyNFT.allNFTs[nftId] != nil:
@@ -1125,17 +1139,17 @@ contract BloomlyNFT: NonFungibleToken{
 		return BloomlyNFT.allNFTs[nftId]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllNFTs():{ UInt64: NFTDataView}{ 
 		return BloomlyNFT.allNFTs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBrandPayouts(brandId: UInt64): Payout?{ 
 		return BloomlyNFT.payouts[brandId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllAdmins(): [Address]{ 
 		return BloomlyNFT.allAdmins
 	}

@@ -1,4 +1,18 @@
-//  SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//  SPDX-License-Identifier: UNLICENSED
 //
 //
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -146,7 +160,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		//
 		// Returns: The NFT that was minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCollectible(): @NFT{ 
 			// get the number of Collectibles that have been minted for this Item
 			// to use as this Collectible's serial number
@@ -168,7 +182,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		//
 		// Returns: Collection object that contains all the Collectibles that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintCollectible(quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -180,7 +194,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		}
 		
 		// Returns: the number of Collectibles
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNumberMinted(): UInt32{ 
 			return self.numberMintedPerItem
 		}
@@ -239,24 +253,24 @@ contract shield_hero: NonFungibleToken, Anique{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
 		// deposit multi tokens
-		access(all)
-		fun batchDeposit(tokens: @{Anique.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{Anique.Collection}): Void
 		
 		// contains NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(id: UInt64): Bool
 		
 		// borrow NFT as shield_hero token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowshield_heroCollectible(id: UInt64): &NFT
 	}
 	
@@ -298,7 +312,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn collectibles
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(collectibleIds: [UInt64]): @{Anique.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -317,7 +331,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as an shield_hero NFT to make sure
 			// it is the correct type
@@ -341,7 +355,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{Anique.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -363,7 +377,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		}
 		
 		// contains returns whether ID is in the Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun contains(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -384,7 +398,7 @@ contract shield_hero: NonFungibleToken, Anique{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAniqueNFT(id: UInt64): &{Anique.NFT}{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return nft as! &{Anique.NFT}
@@ -392,7 +406,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		
 		// borrowshield_heroCollectible returns a borrowed reference
 		// to an shield_hero Collectible
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowshield_heroCollectible(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -437,7 +451,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		//
 		// Returns: the ID of the new Item object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(metadata:{ String: String}): UInt32{ 
 			// Create the new Item
 			var newItem <- create Item(metadata: metadata)
@@ -457,7 +471,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		// Returns: A reference to the Item with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(itemID: UInt32): &Item{ 
 			pre{ 
 				shield_hero.items[itemID] != nil:
@@ -468,7 +482,7 @@ contract shield_hero: NonFungibleToken, Anique{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -494,7 +508,7 @@ contract shield_hero: NonFungibleToken, Anique{
 	//
 	// Returns: The total number of Collectibles
 	//		  that have been minted from a Item
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumCollectiblesInItem(itemID: UInt32): UInt32{ 
 		let item = (&shield_hero.items[itemID] as &Item?)!
 		return item.numberMintedPerItem

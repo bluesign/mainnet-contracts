@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import LicensedNFT from 0xf20df769e658c257
 
@@ -49,7 +63,7 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 	
 	access(all)
 	resource interface Metadata{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}
 	}
 	
@@ -74,12 +88,12 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 			self.royalties = royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [LicensedNFT.Royalty]{ 
 			return self.royalties
 		}
@@ -107,7 +121,7 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MatrixWorldAssetsNFT.NFT
 			let id: UInt64 = token.id
 			let dummy <- self.ownedNFTs[id] <- token
@@ -125,13 +139,13 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (ref as! &MatrixWorldAssetsNFT.NFT).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: UInt64): [LicensedNFT.Royalty]{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (ref as! &LicensedNFT.NFT).getRoyalties()
@@ -160,7 +174,7 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTo(creator: Capability<&{NonFungibleToken.Receiver}>, metadata:{ String: String}, royalties: [LicensedNFT.Royalty]): &{NonFungibleToken.NFT}{ 
 			let token <- create NFT(id: MatrixWorldAssetsNFT.totalSupply, creator: creator.address, metadata: metadata, royalties: royalties)
 			MatrixWorldAssetsNFT.totalSupply = MatrixWorldAssetsNFT.totalSupply + 1
@@ -171,7 +185,7 @@ contract MatrixWorldAssetsNFT: NonFungibleToken, LicensedNFT{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun minter(): &Minter{ 
 		return self.account.storage.borrow<&Minter>(from: self.minterStoragePath) ?? panic("Could not borrow minter reference")
 	}

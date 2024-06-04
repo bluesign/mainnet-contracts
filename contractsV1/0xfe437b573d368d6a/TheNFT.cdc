@@ -1,4 +1,18 @@
-// What makes an NFT an NFT?
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// What makes an NFT an NFT?
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -43,7 +57,7 @@ contract TheNFT: NonFungibleToken{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun data(): String{ 
 			return "data:text/plain,%23".concat(self.id.toString())
 		}
@@ -58,7 +72,7 @@ contract TheNFT: NonFungibleToken{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun data(): String{ 
 			return "data:text/html,%3C%21DOCTYPE%20html%3E%3Chtml%3E%3Cdiv%20style%3D%22display%3A%20flex%3B%20justify-content%3A%20center%3B%20align-items%3A%20center%3B%20height%3A%20100vh%3B%22%3E%3Ch1%3E%23".concat(self.id.toString()).concat("%3C%2Fh1%3E%3C%2Fdiv%3E%3C%2Fhtml%3E")
 		}
@@ -73,7 +87,7 @@ contract TheNFT: NonFungibleToken{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun data(): String{ 
 			return "data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%0D%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23000000%22%20%2F%3E%0D%0A%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%20fill%3D%22%23ffffff%22%3E%0D%0A%23".concat(self.id.toString()).concat("%0D%0A%3C%2Ftext%3E%3C%2Fsvg%3E%0D%0A")
 		}
@@ -88,7 +102,7 @@ contract TheNFT: NonFungibleToken{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun whatAreYou(): String{ 
 			return self.id.toString()
 		}
@@ -122,15 +136,15 @@ contract TheNFT: NonFungibleToken{
 	access(all)
 	resource interface TheNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTheNFT(id: UInt64): &TheNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -156,7 +170,7 @@ contract TheNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @TheNFT.NFT
 			let id: UInt64 = token.id
 			self.ownedNFTs[id] <-! token
@@ -173,7 +187,7 @@ contract TheNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTheNFT(id: UInt64): &TheNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &TheNFT.NFT
@@ -205,7 +219,7 @@ contract TheNFT: NonFungibleToken{
 	
 	access(all)
 	resource Maintainer{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseUrl(url: String){ 
 			TheNFT.baseUrl = url
 		}
@@ -216,7 +230,7 @@ contract TheNFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(): @NFT{ 
 		TheNFT.totalSupply = TheNFT.totalSupply + 1
 		emit Mint(id: TheNFT.totalSupply)

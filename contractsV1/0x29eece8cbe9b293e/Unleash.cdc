@@ -1,4 +1,18 @@
-//
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//
 // 88		88			   88									 88		   
 // 88		88			   88									 88		   
 // 88		88			   88									 88		   
@@ -62,16 +76,16 @@ contract Unleash: NonFungibleToken{
 		access(all)
 		let metadata:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMessage(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImageNumber(): UInt8
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -102,22 +116,22 @@ contract Unleash: NonFungibleToken{
 			self.stashes <- []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMessage(): String{ 
 			return self.message
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMessage(message: String){ 
 			self.message = message
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImageNumber(): UInt8{ 
 			return self.imageNumber
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setImageNumber(imageNumber: UInt8){ 
 			pre{ 
 				Int(imageNumber) < Unleash.imageIpfsCids.length:
@@ -161,12 +175,12 @@ contract Unleash: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stash(token: @{NonFungibleToken.NFT}){ 
 			self.stashes.insert(at: 0, <-token)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstash(): @{NonFungibleToken.NFT}{ 
 			return <-self.stashes.removeFirst()
 		}
@@ -189,15 +203,15 @@ contract Unleash: NonFungibleToken{
 	access(all)
 	resource interface UnleashCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowUnleashPublic(id: UInt64): &{Unleash.NFTPublic}?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -223,7 +237,7 @@ contract Unleash: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Unleash.NFT
 			let id: UInt64 = token.id
 			self.ownedNFTs[id] <-! token
@@ -240,7 +254,7 @@ contract Unleash: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowUnleashPublic(id: UInt64): &{Unleash.NFTPublic}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? as! &{Unleash.NFTPublic}?
@@ -248,7 +262,7 @@ contract Unleash: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowUnleash(id: UInt64): &Unleash.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? as! &Unleash.NFT?
@@ -285,22 +299,22 @@ contract Unleash: NonFungibleToken{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(): @Unleash.NFT{ 
 			return <-create NFT()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseAnimationUrl(baseAnimationUrl: String){ 
 			Unleash.baseAnimationUrl = baseAnimationUrl
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIpfsGatewayUrl(ipfsGatewayUrl: String){ 
 			Unleash.ipfsGatewayUrl = ipfsGatewayUrl
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setArweaveGatewayUrl(arweaveGatewayUrl: String){ 
 			Unleash.arweaveGatewayUrl = arweaveGatewayUrl
 		}

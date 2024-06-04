@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract ListedPairs{ 
 	/****** Events ******/
 	access(all)
@@ -49,7 +63,7 @@ contract ListedPairs{
 			self.liquidityToken = liquidityToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(liquidityToken: String?){ 
 			self.liquidityToken = liquidityToken ?? self.liquidityToken
 		}
@@ -57,7 +71,7 @@ contract ListedPairs{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPair(
 			name: String,
 			token0: String,
@@ -79,14 +93,14 @@ contract ListedPairs{
 			emit PairAdded(key: key, name: name, token0: token0, token1: token1, address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePair(name: String, address: Address, liquidityToken: String?){ 
 			var key = name.concat(".").concat(address.toString())
 			(ListedPairs._pairs[key]!).update(liquidityToken: liquidityToken)
 			emit PairUpdated(key: key)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePair(key: String){ 
 			ListedPairs._pairs.remove(key: key)
 			emit PairRemoved(key: key)
@@ -94,12 +108,12 @@ contract ListedPairs{
 	}
 	
 	/****** Methods ******/
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun pairExists(key: String): Bool{ 
 		return self._pairs.containsKey(key)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPairs(): [PairInfo]{ 
 		return self._pairs.values
 	}

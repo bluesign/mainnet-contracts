@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 ## The Flow Non-Fungible Token standard
 
@@ -47,7 +61,7 @@ Collection to complete the transfer.
 // The main NFT contract interface. Other NFT contracts will
 // import and implement this interface
 //
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface CapsuleNFT{ 
 	
 	// The total number of tokens of this type in existence
@@ -87,7 +101,7 @@ contract interface CapsuleNFT{
 	
 	// Interface that the NFTs have to conform to
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface INFT{ 
 		// The Capsule UniqueID given to the NFT
 		access(all)
@@ -96,7 +110,7 @@ contract interface CapsuleNFT{
 	
 	// Requirement that all conforming NFT smart contracts have
 	// to define a resource called NFT that conforms to INFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface NFT: INFT{ 
 		access(all)
 		let id: String
@@ -104,10 +118,10 @@ contract interface CapsuleNFT{
 	
 	// Interface to mediate withdraws from the Collection
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Provider{ 
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: String): @{CapsuleNFT.NFT}{ 
 			post{ 
 				result.id == id:
@@ -118,53 +132,53 @@ contract interface CapsuleNFT{
 	
 	// Interface to mediate deposits to the Collection
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Receiver{ 
 		// deposit takes an NFT as an argument and adds it to the Collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{CapsuleNFT.NFT})
 	}
 	
 	// Interface that an account would commonly 
 	// publish for their collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{CapsuleNFT.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: String): &{CapsuleNFT.NFT}
 	}
 	
 	// Requirement for the the concrete resource type
 	// to be declared in the implementing contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Collection: Provider, Receiver, CollectionPublic{ 
 		// Dictionary to hold the NFTs in the Collection
 		access(all)
 		var ownedNFTs: @{String:{ CapsuleNFT.NFT}}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: String): @{CapsuleNFT.NFT}
 		
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{CapsuleNFT.NFT})
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getIDs(): [String]
 		
 		// Returns a borrowed reference to an NFT in the collection
 		// so that the caller can read data and call methods from it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: String): &{CapsuleNFT.NFT}{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -175,7 +189,7 @@ contract interface CapsuleNFT{
 	
 	// createEmptyCollection creates an empty Collection
 	// and returns it to the caller so that they can own NFTs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @{CapsuleNFT.Collection}{ 
 		post{ 
 			result.getIDs().length == 0:

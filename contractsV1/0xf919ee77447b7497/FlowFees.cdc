@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -31,7 +45,7 @@ contract FlowFees{
 	access(self)
 	var vault: @FlowToken.Vault
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deposit(from: @{FungibleToken.Vault}){ 
 		let from <- from as! @FlowToken.Vault
 		let balance = from.balance
@@ -40,7 +54,7 @@ contract FlowFees{
 	}
 	
 	/// Get the balance of the Fees Vault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeeBalance(): UFix64{ 
 		return self.vault.balance
 	}
@@ -50,7 +64,7 @@ contract FlowFees{
 		// withdraw
 		//
 		// Allows the administrator to withdraw tokens from the fee vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawTokensFromFeeVault(amount: UFix64): @{FungibleToken.Vault}{ 
 			let vault <- FlowFees.vault.withdraw(amount: amount)
 			emit TokensWithdrawn(amount: amount)
@@ -58,7 +72,7 @@ contract FlowFees{
 		}
 		
 		/// Allows the administrator to change all the fee parameters at once
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeParameters(
 			surgeFactor: UFix64,
 			inclusionEffortCost: UFix64,
@@ -74,7 +88,7 @@ contract FlowFees{
 		}
 		
 		/// Allows the administrator to change the fee surge factor
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeSurgeFactor(_ surgeFactor: UFix64){ 
 			let oldParameters = FlowFees.getFeeParameters()
 			let newParameters =
@@ -140,7 +154,7 @@ contract FlowFees{
 	//
 	// The requiredBalance balance is defined as the minimum account balance + 
 	//  maximum transaction fees (inclusion fees + execution fees at max execution effort).
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun verifyPayersBalanceForTransactionExecution(
 		_ payerAcct: AuthAccount,
 		inclusionEffort: UFix64,
@@ -173,7 +187,7 @@ contract FlowFees{
 	
 	/// Called when a transaction is submitted to deduct the fee
 	/// from the AuthAccount that submitted it
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deductTransactionFee(
 		_ acct: AuthAccount,
 		inclusionEffort: UFix64,
@@ -208,7 +222,7 @@ contract FlowFees{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeeParameters(): FeeParameters{ 
 		return self.account.storage.copy<FeeParameters>(from: /storage/FlowTxFeeParameters)
 		?? panic("Error getting tx fee parameters. They need to be initialized first!")
@@ -227,7 +241,7 @@ contract FlowFees{
 	}
 	
 	// compute the transaction fees with the current fee parameters and the given inclusionEffort and executionEffort
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun computeFees(inclusionEffort: UFix64, executionEffort: UFix64): UFix64{ 
 		let params = self.getFeeParameters()
 		let totalFees =

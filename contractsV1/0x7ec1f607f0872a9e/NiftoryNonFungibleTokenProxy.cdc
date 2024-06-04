@@ -1,4 +1,18 @@
-import NiftoryNonFungibleToken from "./NiftoryNonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NiftoryNonFungibleToken from "./NiftoryNonFungibleToken.cdc"
 
 access(all)
 contract NiftoryNonFungibleTokenProxy{ 
@@ -13,28 +27,28 @@ contract NiftoryNonFungibleTokenProxy{
 	
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun add(
 			registryAddress: Address,
 			brand: String,
 			cap: Capability<
 				&{NiftoryNonFungibleToken.ManagerPrivate, NiftoryNonFungibleToken.ManagerPublic}
 			>
-		)
+		): Void
 	}
 	
 	access(all)
 	resource interface Private{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replace(
 			registryAddress: Address,
 			brand: String,
 			cap: Capability<
 				&{NiftoryNonFungibleToken.ManagerPrivate, NiftoryNonFungibleToken.ManagerPublic}
 			>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _access(registryAddress: Address, brand: String): &{
 			NiftoryNonFungibleToken.ManagerPrivate,
 			NiftoryNonFungibleToken.ManagerPublic
@@ -48,7 +62,7 @@ contract NiftoryNonFungibleTokenProxy{
 		access(self)
 		let _proxies:{ Address:{ String: Capability<&{NiftoryNonFungibleToken.ManagerPrivate, NiftoryNonFungibleToken.ManagerPublic}>}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun add(registryAddress: Address, brand: String, cap: Capability<&{NiftoryNonFungibleToken.ManagerPrivate, NiftoryNonFungibleToken.ManagerPublic}>){ 
 			pre{ 
 				self._proxies[registryAddress] == nil || (self._proxies[registryAddress]!)[brand] == nil:
@@ -61,7 +75,7 @@ contract NiftoryNonFungibleTokenProxy{
 			caps[brand] = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replace(registryAddress: Address, brand: String, cap: Capability<&{NiftoryNonFungibleToken.ManagerPrivate, NiftoryNonFungibleToken.ManagerPublic}>){ 
 			if self._proxies[registryAddress] == nil{ 
 				self._proxies[registryAddress] ={} 
@@ -70,7 +84,7 @@ contract NiftoryNonFungibleTokenProxy{
 			caps[brand] = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _access(registryAddress: Address, brand: String): &{NiftoryNonFungibleToken.ManagerPrivate, NiftoryNonFungibleToken.ManagerPublic}{ 
 			pre{ 
 				self._proxies[registryAddress] != nil && (self._proxies[registryAddress]!)[brand] != nil:
@@ -86,7 +100,7 @@ contract NiftoryNonFungibleTokenProxy{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(): @Proxy{ 
 		return <-create Proxy()
 	}

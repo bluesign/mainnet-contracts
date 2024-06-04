@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 /*
 *  This is a 5,000 supply based NFT collection named Jolly Jokers with minimal metadata.
 */
@@ -91,7 +105,7 @@ contract JollyJokers: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnail(): String{ 
 			return JollyJokers.thumbnails[self.id] ?? JollyJokers.baseURI.concat(self.id.toString()).concat(".png")
 		}
@@ -145,15 +159,15 @@ contract JollyJokers: NonFungibleToken{
 	access(all)
 	resource interface JollyJokersCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowJollyJokers(id: UInt64): &JollyJokers.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -184,7 +198,7 @@ contract JollyJokers: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @JollyJokers.NFT
 			let id: UInt64 = token.id
 			
@@ -207,7 +221,7 @@ contract JollyJokers: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowJollyJokers(id: UInt64): &JollyJokers.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -253,7 +267,7 @@ contract JollyJokers: NonFungibleToken{
 	resource NFTMinter{ 
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}){ 
 			pre{ 
 				JollyJokers.totalSupply < JollyJokers.maxSupply:
@@ -280,34 +294,34 @@ contract JollyJokers: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(newBaseURI: String){ 
 			JollyJokers.baseURI = newBaseURI
 			emit BaseURISet(newBaseURI: newBaseURI)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxSupply(newMaxSupply: UInt64){ 
 			JollyJokers.maxSupply = newMaxSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(newPrice: UFix64){ 
 			JollyJokers.price = newPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(name: String, description: String){ 
 			JollyJokers.name = name
 			JollyJokers.description = description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setThumbnail(id: UInt64, thumbnail: String){ 
 			JollyJokers.thumbnails[id] = thumbnail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTraits(id: UInt64, traits:{ String: String}){ 
 			JollyJokers.traits[id] = traits
 		}
@@ -319,7 +333,7 @@ contract JollyJokers: NonFungibleToken{
 	// If it has a collection but does not contain the jokerId, return nil.
 	// If it has a collection and that collection contains the jokerId, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, jokerId: UInt64): &JollyJokers.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&JollyJokers.Collection>(JollyJokers.CollectionPublicPath).borrow<&JollyJokers.Collection>() ?? panic("Couldn't get collection")
 		// We trust JollyJokers.Collection.borowJollyJokers to get the correct jokerId

@@ -1,4 +1,18 @@
-import NFTCatalog from "./../../standardsV1/NFTCatalog.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NFTCatalog from "./../../standardsV1/NFTCatalog.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -103,7 +117,7 @@ contract FINDNFTCatalog{
 	var totalProposals: UInt64
 	
 	// Get FIND and Dapper NFTCatalog 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCatalog():{ String: NFTCatalog.NFTCatalogMetadata}{ 
 		let find = self.catalog
 		let dapper = NFTCatalog.getCatalog()
@@ -113,7 +127,7 @@ contract FINDNFTCatalog{
 		return find
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCatalogEntry(collectionIdentifier: String): NFTCatalog.NFTCatalogMetadata?{ 
 		if let dapper = NFTCatalog.getCatalogEntry(collectionIdentifier: collectionIdentifier){ 
 			return dapper
@@ -121,7 +135,7 @@ contract FINDNFTCatalog{
 		return self.catalog[collectionIdentifier]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionsForType(nftTypeIdentifier: String):{ String: Bool}?{ 
 		if let dapper = NFTCatalog.getCollectionsForType(nftTypeIdentifier: nftTypeIdentifier){ 
 			// If there's dappers input and Find input, dappers will overwrite what's on find
@@ -138,7 +152,7 @@ contract FINDNFTCatalog{
 		return self.catalogTypeData[nftTypeIdentifier]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCatalogTypeData():{ String:{ String: Bool}}{ 
 		let find = self.catalogTypeData
 		let dapper = NFTCatalog.getCatalogTypeData()
@@ -149,7 +163,7 @@ contract FINDNFTCatalog{
 	}
 	
 	// A helper function to get CollectionData directly from NFTIdentifier
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionDataForType(nftTypeIdentifier: String): NFTCatalog.NFTCollectionData?{ 
 		if let collections =
 			FINDNFTCatalog.getCollectionsForType(nftTypeIdentifier: nftTypeIdentifier){ 
@@ -165,7 +179,7 @@ contract FINDNFTCatalog{
 	}
 	
 	// helper function to get Paths 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataFromType(_ t: Type): NFTCatalog.NFTCatalogMetadata?{ 
 		let collectionIdentifier = self.getCollectionsForType(nftTypeIdentifier: t.identifier)
 		if collectionIdentifier == nil || (collectionIdentifier!).length < 1{ 
@@ -175,22 +189,22 @@ contract FINDNFTCatalog{
 	}
 	
 	// Get only FIND NFTCatalog
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFINDCatalog():{ String: NFTCatalog.NFTCatalogMetadata}{ 
 		return self.catalog
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFINDCatalogEntry(collectionIdentifier: String): NFTCatalog.NFTCatalogMetadata?{ 
 		return self.catalog[collectionIdentifier]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFINDCollectionsForType(nftTypeIdentifier: String):{ String: Bool}?{ 
 		return self.catalogTypeData[nftTypeIdentifier]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFINDCatalogTypeData():{ String:{ String: Bool}}{ 
 		return self.catalogTypeData
 	}
@@ -200,7 +214,7 @@ contract FINDNFTCatalog{
 	// @param metadata: The Metadata for the NFT collection that will be stored in the catalog
 	// @param message: A message to the catalog owners
 	// @param proposer: Who is making the proposition(the address needs to be verified)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun proposeNFTMetadata(
 		collectionIdentifier: String,
 		metadata: NFTCatalog.NFTCatalogMetadata,
@@ -239,7 +253,7 @@ contract FINDNFTCatalog{
 	
 	// Withdraw a proposal from the catalog
 	// @param proposalID: The ID of proposal you want to withdraw
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun withdrawNFTProposal(proposalID: UInt64){ 
 		pre{ 
 			self.catalogProposals[proposalID] != nil:
@@ -260,17 +274,17 @@ contract FINDNFTCatalog{
 		self.removeCatalogProposal(proposalID: proposalID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCatalogProposals():{ UInt64: NFTCatalog.NFTCatalogProposal}{ 
 		return self.catalogProposals
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCatalogProposalEntry(proposalID: UInt64): NFTCatalog.NFTCatalogProposal?{ 
 		return self.catalogProposals[proposalID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNFTCatalogProposalManager(): @NFTCatalog.NFTCatalogProposalManager{ 
 		return <-NFTCatalog.createNFTCatalogProposalManager()
 	}

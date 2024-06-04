@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -49,7 +63,7 @@ contract LCubeTicket: NonFungibleToken{
 	access(all)
 	event Destroy(id: UInt64)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTicketMinter(creator: Address, metadata:{ String: String}): @TicketMinter{ 
 		assert(metadata.containsKey("eventName"), message: "eventName property is required for LCubeTicket!")
 		assert(metadata.containsKey("thumbnail"), message: "thumbnail property is required for LCubeTicket!")
@@ -154,12 +168,12 @@ contract LCubeTicket: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
@@ -173,15 +187,15 @@ contract LCubeTicket: NonFungibleToken{
 	access(all)
 	resource interface LCubeTicketCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubeTicket(id: UInt64): &LCubeTicket.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -212,7 +226,7 @@ contract LCubeTicket: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LCubeTicket.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -220,7 +234,7 @@ contract LCubeTicket: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useTicket(id: UInt64, address: Address){ 
 			let recipient = getAccount(address)
 			let recipientCap = recipient.capabilities.get<&{LCubeTicketComponent.LCubeTicketComponentCollectionPublic}>(LCubeTicketComponent.CollectionPublicPath)
@@ -264,21 +278,21 @@ contract LCubeTicket: NonFungibleToken{
 			return ticketNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let ticketNFT = nft as! &LCubeTicket.NFT
 			return ticketNFT.getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubeTicket(id: UInt64): &LCubeTicket.NFT?{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let ticketNFT = nft as! &LCubeTicket.NFT
 			return ticketNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: UInt64): [MetadataViews.Royalty]{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let ticketNFT = nft as! &LCubeTicket.NFT
@@ -306,7 +320,7 @@ contract LCubeTicket: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTickets(address: Address): [UInt64]?{ 
 		let account = getAccount(address)
 		if let ticketCollection = account.capabilities.get<&{LCubeTicket.LCubeTicketCollectionPublic}>(self.CollectionPublicPath).borrow<&{LCubeTicket.LCubeTicketCollectionPublic}>(){ 
@@ -315,7 +329,7 @@ contract LCubeTicket: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun minter(): Capability<&TicketMinter>{ 
 		return self.account.capabilities.get<&TicketMinter>(self.MinterPublicPath)!
 	}
@@ -341,7 +355,7 @@ contract LCubeTicket: NonFungibleToken{
 			return <-newTicket
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreateTickets(creator: Capability<&{NonFungibleToken.Receiver}>, startOfUse: UFix64, metadata:{ String: String}, royalties: [MetadataViews.Royalty], itemCount: UInt8, quantity: UInt8): @Collection{ 
 			assert(metadata.containsKey("name"), message: "name property is required for LCubeTicket!")
 			assert(metadata.containsKey("description"), message: "description property is required for LCubeTicket!")

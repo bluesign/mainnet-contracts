@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -61,7 +75,7 @@ contract BigMinter: NonFungibleToken{
 	
 	/// Return the royalty recipients for this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(): [MetadataViews.Royalty]{ 
 		return BigMinter.royalties
 	}
@@ -129,12 +143,12 @@ contract BigMinter: NonFungibleToken{
 		///
 		/// This can be used to hash the metadata and verify its integrity.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun encode(): [UInt8]{ 
 			return self.salt.concat(self.image.utf8).concat(self.serialNumber.toBigEndianBytes()).concat(self.name.utf8).concat(self.description.utf8).concat(self.shape.utf8).concat(self.color.utf8).concat(self.smile.utf8).concat(self.emboss.utf8).concat(self.outline.utf8).concat(self.birthmark.utf8).concat(self.redeemed.utf8)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hash(): [UInt8]{ 
 			return HashAlgorithm.SHA3_256.hash(self.encode())
 		}
@@ -153,7 +167,7 @@ contract BigMinter: NonFungibleToken{
 	///
 	/// This function returns nil if the NFT has not yet been revealed.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getMetadata(nftID: UInt64): Metadata?{ 
 		return BigMinter.metadata[nftID]
 	}
@@ -170,7 +184,7 @@ contract BigMinter: NonFungibleToken{
 	access(contract)
 	let nftsByHash:{ String: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTIDByHash(hash: String): UInt64?{ 
 		return BigMinter.nftsByHash[hash]
 	}
@@ -200,7 +214,7 @@ contract BigMinter: NonFungibleToken{
 		/// This function returns nil if the NFT metadata has
 		/// not yet been revealed.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMetadata(): Metadata?{ 
 			return BigMinter.metadata[self.id]
 		}
@@ -249,35 +263,35 @@ contract BigMinter: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplay(_ metadata: Metadata): MetadataViews.Display{ 
 			return MetadataViews.Display(name: metadata.name, description: metadata.description, thumbnail: MetadataViews.IPFSFile(cid: metadata.image, path: nil))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveExternalURL(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("https://flute-app.vercel.app/".concat(self.id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let media = MetadataViews.Media(file: MetadataViews.IPFSFile(cid: "bafkreicrfbblmaduqg2kmeqbymdifawex7rxqq2743mitmeia4zdybmmre", path: nil), mediaType: "image/jpeg")
 			return MetadataViews.NFTCollectionDisplay(name: "BigMinter", description: "Seeds of Testing", externalURL: MetadataViews.ExternalURL("https://flute-app.vercel.app"), squareImage: media, bannerImage: media, socials:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: BigMinter.CollectionStoragePath, publicPath: BigMinter.CollectionPublicPath, publicCollection: Type<&BigMinter.Collection>(), publicLinkedType: Type<&BigMinter.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-BigMinter.createEmptyCollection(nftType: Type<@BigMinter.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveRoyalties(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties(BigMinter.royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveSerial(_ metadata: Metadata): MetadataViews.Serial{ 
 			return MetadataViews.Serial(metadata.serialNumber)
 		}
@@ -291,15 +305,15 @@ contract BigMinter: NonFungibleToken{
 	access(all)
 	resource interface BigMinterCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBigMinter(id: UInt64): &BigMinter.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -332,7 +346,7 @@ contract BigMinter: NonFungibleToken{
 		/// Deposit an NFT into this collection.
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BigMinter.NFT
 			let id: UInt64 = token.id
 			
@@ -363,7 +377,7 @@ contract BigMinter: NonFungibleToken{
 		///
 		/// This function returns nil if the NFT does not exist in this collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBigMinter(id: UInt64): &BigMinter.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -417,7 +431,7 @@ contract BigMinter: NonFungibleToken{
 		/// To mint a blind NFT, specify its metadata hash
 		/// that can later be used to verify the revealed NFT.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(hash: [UInt8]): @BigMinter.NFT{ 
 			let hexHash = String.encodeHex(hash)
 			
@@ -436,7 +450,7 @@ contract BigMinter: NonFungibleToken{
 		///
 		/// To reveal an NFT, publish its complete metadata and unique salt value.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealNFT(id: UInt64, metadata: Metadata){ 
 			pre{ 
 				BigMinter.metadata[id] == nil:
@@ -460,7 +474,7 @@ contract BigMinter: NonFungibleToken{
 		/// This function updates the royalty recipients for all NFTs
 		/// minted by this contract.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalties(_ royalties: [MetadataViews.Royalty]){ 
 			BigMinter.royalties = royalties
 		}
@@ -468,21 +482,21 @@ contract BigMinter: NonFungibleToken{
 	
 	/// Return a public path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(suffix: String): PublicPath{ 
 		return PublicPath(identifier: "BigMinter_".concat(suffix))!
 	}
 	
 	/// Return a private path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(suffix: String): PrivatePath{ 
 		return PrivatePath(identifier: "BigMinter_".concat(suffix))!
 	}
 	
 	/// Return a storage path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(suffix: String): StoragePath{ 
 		return StoragePath(identifier: "BigMinter_".concat(suffix))!
 	}

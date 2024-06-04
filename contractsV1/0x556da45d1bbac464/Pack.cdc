@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Apache License 2.0
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Apache License 2.0
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import Elvn from "../0x3084a96e617d3b0a/Elvn.cdc"
@@ -65,7 +79,7 @@ contract Pack{
 		access(self)
 		var opened: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPacks(): @[Moments.NFT]{ 
 			pre{ 
 				Pack.getMomentsListRemainingCount(releaseId: self.releaseId) > 0:
@@ -90,7 +104,7 @@ contract Pack{
 			return <-momentsList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAvailable(): Bool{ 
 			return !self.opened
 		}
@@ -106,13 +120,13 @@ contract Pack{
 	
 	access(all)
 	resource interface PackCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @Pack.Token)
 	}
 	
@@ -122,7 +136,7 @@ contract Pack{
 		access(all)
 		var ownedPacks: @{UInt64: [Pack.Token]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]{ 
 			let ids: [UInt64] = []
 			for releaseId in self.ownedPacks.keys{ 
@@ -139,7 +153,7 @@ contract Pack{
 			return ids
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReleaseIds(): [UInt64]{ 
 			let releaseIds: [UInt64] = []
 			for releaseId in self.ownedPacks.keys{ 
@@ -152,7 +166,7 @@ contract Pack{
 			return releaseIds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawReleaseId(releaseId: UInt64): @Pack.Token{ 
 			pre{ 
 				self.ownedPacks[releaseId] != nil:
@@ -167,7 +181,7 @@ contract Pack{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: UInt64): @Pack.Token{ 
 			for key in self.ownedPacks.keys{ 
 				let tokenList = (&self.ownedPacks[key] as &[Pack.Token]?)!
@@ -187,7 +201,7 @@ contract Pack{
 			return panic("Not found id: ".concat(id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @Pack.Token){ 
 			let id = token.id
 			let releaseId = token.releaseId
@@ -205,12 +219,12 @@ contract Pack{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isPackExists(releaseId: UInt64): Bool{ 
 		return self.salePacks[releaseId] != nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPackRemainingCount(releaseId: UInt64): Int{ 
 		pre{ 
 			self.isPackExists(releaseId: releaseId):
@@ -220,7 +234,7 @@ contract Pack{
 		return packsRef.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getMomentsListRemainingCount(releaseId: UInt64): Int{ 
 		pre{ 
 			self.isPackExists(releaseId: releaseId):
@@ -230,7 +244,7 @@ contract Pack{
 		return momentsListCandidateRef.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getMomentsLength(releaseId: UInt64): Int{ 
 		pre{ 
 			self.getMomentsListRemainingCount(releaseId: releaseId) > 0:
@@ -241,7 +255,7 @@ contract Pack{
 		return momentsListRef.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOnSaleReleaseIds(): [UInt64]{ 
 		let releaseIds: [UInt64] = []
 		for releaseId in self.salePacks.keys{ 
@@ -253,7 +267,7 @@ contract Pack{
 		return releaseIds
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPackPrice(releaseId: UInt64): UFix64{ 
 		pre{ 
 			self.getPackRemainingCount(releaseId: releaseId) > 0:
@@ -264,7 +278,7 @@ contract Pack{
 		return packRef.price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyPack(releaseId: UInt64, vault: @Elvn.Vault): @Pack.Token{ 
 		pre{ 
 			self.getPackPrice(releaseId: releaseId) == vault.balance:
@@ -280,7 +294,7 @@ contract Pack{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItem(pack: @Pack.Token, momentsList: @[Moments.NFT]){ 
 			pre{ 
 				pack.momentsPerCount == UInt64(momentsList.length):
@@ -303,7 +317,7 @@ contract Pack{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPackToken(
 			releaseId: UInt64,
 			price: UFix64,
@@ -321,7 +335,7 @@ contract Pack{
 			return <-pack
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64?): @{FungibleToken.Vault}{ 
 			if let amount = amount{ 
 				return <-Pack.vault.withdraw(amount: amount)
@@ -332,7 +346,7 @@ contract Pack{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAvailablePackList(packList: &[Pack.Token]): Bool{ 
 		var i = 0
 		while i < packList.length{ 
@@ -345,7 +359,7 @@ contract Pack{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Pack.Collection{ 
 		return <-create Collection()
 	}

@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -37,7 +51,7 @@ contract InceptionCrystal: NonFungibleToken{
 	access(all)
 	resource interface InceptionCrystalCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
 		view fun getIDs(): [UInt64]
@@ -45,7 +59,7 @@ contract InceptionCrystal: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInceptionCrystal(id: UInt64): &InceptionCrystal.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -65,12 +79,12 @@ contract InceptionCrystal: NonFungibleToken{
 		access(self)
 		var metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -108,7 +122,7 @@ contract InceptionCrystal: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata(): InceptionCrystalTemplate{ 
 			return InceptionCrystal.InceptionCrystalMetadata
 		}
@@ -137,7 +151,7 @@ contract InceptionCrystal: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @InceptionCrystal.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -145,7 +159,7 @@ contract InceptionCrystal: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdrawInceptionCrystals(amount: UInt64): @InceptionCrystal.Collection{ 
 			pre{ 
 				UInt64(self.getIDs().length) >= amount:
@@ -161,7 +175,7 @@ contract InceptionCrystal: NonFungibleToken{
 			return <-(withdrawNFTVault as! @InceptionCrystal.Collection?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -180,7 +194,7 @@ contract InceptionCrystal: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInceptionCrystal(id: UInt64): &InceptionCrystal.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -224,7 +238,7 @@ contract InceptionCrystal: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintInceptionCrystal(recipient: &{NonFungibleToken.CollectionPublic}){ 
 			let newNFT: @NFT <- create InceptionCrystal.NFT(initID: InceptionCrystal.totalSupply, serialNumber: InceptionCrystal.totalSupply)
 			emit Minted(id: newNFT.id)
@@ -232,13 +246,13 @@ contract InceptionCrystal: NonFungibleToken{
 			InceptionCrystal.totalSupply = InceptionCrystal.totalSupply + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInceptionCrystalMetadata(newMetadata:{ String: String}){ 
 			InceptionCrystal.InceptionCrystalMetadata.updateMetadata(newMetadata: newMetadata)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getInceptionCrystalMetadata(): InceptionCrystal.InceptionCrystalTemplate{ 
 		return InceptionCrystal.InceptionCrystalMetadata
 	}

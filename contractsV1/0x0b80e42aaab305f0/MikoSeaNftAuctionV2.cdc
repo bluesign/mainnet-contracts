@@ -1,4 +1,18 @@
-// This contract allows users to put their NFTs up for sale. Other users
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This contract allows users to put their NFTs up for sale. Other users
 // can purchase these NFTs with fungible tokens.
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -442,12 +456,12 @@ contract MikoSeaNftAuctionV2{
 			self.auctionCompleteTime = getCurrentBlock().timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPymentWith(): MikoSeaNftAuctionV2.PaymentWithEnum{ 
 			return self.paymentWith
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun floor(_ num: Fix64): Int{ 
 			var strRes = ""
 			var numStr = num.toString()
@@ -462,7 +476,7 @@ contract MikoSeaNftAuctionV2{
 			return Int.fromString(strRes) ?? 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeader(): BidItem?{ 
 			let bidListLen = self.bidList.length
 			if bidListLen == 0{ 
@@ -486,7 +500,7 @@ contract MikoSeaNftAuctionV2{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getWinnerIndex(): Int?{ 
 			let bidListLen = self.bidList.length
 			if bidListLen == 0{ 
@@ -509,13 +523,13 @@ contract MikoSeaNftAuctionV2{
 			return self.bidList.length - 1 - step
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLastTimeCanPay(_ winnerIndex: Int): UFix64{ 
 			return (self.auctionCompleteTime ?? self.auctionEndTime)
 			+ self.timeOutWinner * UFix64(winnerIndex)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getWinner(): BidWinner?{ 
 			let bidListLen = self.bidList.length
 			if bidListLen == 0{ 
@@ -532,7 +546,7 @@ contract MikoSeaNftAuctionV2{
 			return BidWinner(bidItem: winner, lastTimeCanPay: self.getLastTimeCanPay(winnerIndex!))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isCanPlaceBid(): Bool{ 
 			let isRejected = MikoSeaNftAuctionV2.auctionIdRejected.contains(self.auctionId)
 			let active =
@@ -580,7 +594,7 @@ contract MikoSeaNftAuctionV2{
 			return
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentPriceDollar(): UFix64{ 
 			return MikoSeaUtility.yenToDollar(yen: self.getCurrentPrice())
 		// return MikoSeaNftAuctionV2.getPriceFromRate(unit: "USD_TO_YEN", price: self.getCurrentPrice())
@@ -737,7 +751,7 @@ contract MikoSeaNftAuctionV2{
 			return self.startPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValidStepBidPrice(bidPrice: UFix64): Bool{ 
 			var diffPrice: UFix64 = 0.0
 			if self.getCurrentPrice() == 0.0{ 
@@ -844,60 +858,60 @@ contract MikoSeaNftAuctionV2{
 	// retreiving the auction price list and placing bids
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
-		fun getAllAuctionInfo():{ UInt64: AuctionInfo}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getAllAuctionInfo():{ UInt64: MikoSeaNftAuctionV2.AuctionInfo}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionInfo(_ id: UInt64): AuctionInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidList(_ id: UInt64): [BidItem]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getWinner(_ id: UInt64): BidWinner?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMaxPriceCanPay(id: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValidPriceCanPay(id: UInt64, amount: UFix64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValidStepBidPrice(auctionId: UInt64, price: UFix64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			id: UInt64,
 			bidPrice: UFix64,
 			bidderCollectionCap: Capability<&{MIKOSEANFT.MikoSeaCollectionPublic}>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payAcution(
 			id: UInt64,
 			winner: Capability<&{MIKOSEANFT.MikoSeaCollectionPublic}>,
 			bidVault: @{FungibleToken.Vault}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftData(_ auctionId: UInt64): MIKOSEANFT.NFTData?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftImage(_ auctionId: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftTitle(_ auctionId: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftDescription(_ auctionId: UInt64): String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinNextBid(_ auctionId: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionPriceDollar(_ auctionId: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentWith(_ auctionId: UInt64): MikoSeaNftAuctionV2.PaymentWithEnum
 	}
 	
@@ -928,7 +942,7 @@ contract MikoSeaNftAuctionV2{
 		}
 		
 		// getAuctionPrices returns a dictionary of available NFT IDs with their current price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllAuctionInfo():{ UInt64: AuctionInfo}{ 
 			let priceList:{ UInt64: AuctionInfo} ={} 
 			for id in self.auctionItems.keys{ 
@@ -938,57 +952,57 @@ contract MikoSeaNftAuctionV2{
 			return priceList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionInfo(_ id: UInt64): AuctionInfo{ 
 			let itemRef = self.getAuctionRef(id)
 			return itemRef.getAuctionInfo()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidList(_ id: UInt64): [BidItem]{ 
 			let itemRef = self.getAuctionRef(id)
 			return *itemRef.bidList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getWinner(_ id: UInt64): BidWinner?{ 
 			let itemRef = self.getAuctionRef(id)
 			return itemRef.getWinner()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMaxPriceCanPay(id: UInt64): UFix64{ 
 			let itemRef = self.getAuctionRef(id)
 			return itemRef.getMaxPriceCanPay()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isValidPriceCanPay(id: UInt64, amount: UFix64): Bool{ 
 			let itemRef = self.getAuctionRef(id)
 			return itemRef.isValidPriceCanPay(amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isValidStepBidPrice(auctionId: UInt64, price: UFix64): Bool{ 
 			return self.getAuctionRef(auctionId).isValidStepBidPrice(bidPrice: price)
 		}
 		
 		// placeBid sends the bidder's tokens to the bid vault and updates the
 		// currentPrice of the current auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(id: UInt64, bidPrice: UFix64, bidderCollectionCap: Capability<&{MIKOSEANFT.MikoSeaCollectionPublic}>){ 
 			// Get the auction item resources
 			let itemRef = self.getAuctionRef(id)
 			itemRef.placeBid(bidPrice: bidPrice, bidderCollectionCap: bidderCollectionCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payAcution(id: UInt64, winner: Capability<&{MIKOSEANFT.MikoSeaCollectionPublic}>, bidVault: @{FungibleToken.Vault}){ 
 			let itemRef = self.getAuctionRef(id)
 			itemRef.payAuction(winner: winner, bidVault: <-bidVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendAllAuctionsWith(_ amount: UFix64){ 
 			for id in self.auctionItems.keys{ 
 				let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
@@ -996,36 +1010,36 @@ contract MikoSeaNftAuctionV2{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendAuctionWith(id: UInt64, amount: UFix64){ 
 			let itemRef = &self.auctionItems[id] as &AuctionItem?
 			itemRef?.extendWith(amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun keys(): [UInt64]{ 
 			return self.auctionItems.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftData(_ auctionId: UInt64): MIKOSEANFT.NFTData?{ 
 			let itemRef = (&self.auctionItems[auctionId] as &AuctionItem?)!
 			return *itemRef.NFT?.data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftImage(_ auctionId: UInt64): String?{ 
 			let itemRef = (&self.auctionItems[auctionId] as &AuctionItem?)!
 			return itemRef.NFT?.getImage()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftTitle(_ auctionId: UInt64): String?{ 
 			let itemRef = (&self.auctionItems[auctionId] as &AuctionItem?)!
 			return itemRef.NFT?.getTitle()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftDescription(_ auctionId: UInt64): String?{ 
 			let itemRef = (&self.auctionItems[auctionId] as &AuctionItem?)!
 			return itemRef.NFT?.getTitle()
@@ -1033,7 +1047,7 @@ contract MikoSeaNftAuctionV2{
 		
 		// addTokenToauctionItems adds an NFT to the auction items and sets the meta data
 		// for the auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(token: @MIKOSEANFT.NFT, minimumBidIncrement: UFix64, auctionEndTime: UFix64, auctionStartTime: UFix64, timeOutWinner: UFix64, startPrice: UFix64, maxPriceCanPay: UFix64, ownerCollectionCap: Capability<&{MIKOSEANFT.MikoSeaCollectionPublic}>, ownerVaultCap: Capability<&{FungibleToken.Receiver}>, metadata:{ String: String}, royalties: MetadataViews.Royalties, paymentWith: PaymentWithEnum){ 
 			pre{ 
 				ownerCollectionCap.borrow() != nil:
@@ -1058,39 +1072,39 @@ contract MikoSeaNftAuctionV2{
 			emit Created(auctionId: id, owner: owner, startPrice: startPrice, startTime: auctionStartTime, endTime: auctionEndTime, nftId: nftId, createdAt: createdAt, maxPriceCanPay: maxPriceCanPay, minimumBidIncrement: minimumBidIncrement, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(_ id: UInt64){ 
 			let itemRef = self.getAuctionRef(id)
 			itemRef.cancelAuction()
 			emit Canceled(auctionId: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeAuction(id: UInt64){ 
 			let itemRef = self.getAuctionRef(id)
 			itemRef.completeAuction()
 			emit Completed(auctionId: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sendNftToWiner(_ id: UInt64){ 
 			let itemRef = self.getAuctionRef(id)
 			itemRef.sendNftToWiner()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinNextBid(_ auctionId: UInt64): UFix64{ 
 			let itemRef = self.getAuctionRef(auctionId)
 			return itemRef.minNextBid()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionPriceDollar(_ auctionId: UInt64): UFix64{ 
 			let itemRef = self.getAuctionRef(auctionId)
 			return itemRef.getCurrentPriceDollar()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentWith(_ auctionId: UInt64): MikoSeaNftAuctionV2.PaymentWithEnum{ 
 			return self.getAuctionRef(auctionId).getPymentWith()
 		}
@@ -1101,17 +1115,17 @@ contract MikoSeaNftAuctionV2{
 	//------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultAuctionSaleCuts(_ royalty: MetadataViews.Royalties){ 
 			MikoSeaNftAuctionV2.defaultRoyalties = royalty
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNftAuctionSaleCuts(nftId: UInt64, cuts: MetadataViews.Royalties){ 
 			MikoSeaNftAuctionV2.nftRoyalties[nftId] = cuts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rejectAuction(auctionId: UInt64){ 
 			let indexFound = MikoSeaNftAuctionV2.auctionIdRejected.firstIndex(of: auctionId)
 			if indexFound == nil{ 
@@ -1120,7 +1134,7 @@ contract MikoSeaNftAuctionV2{
 			emit AuctionRejected(auctionId: auctionId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unRejectedAuction(auctionId: UInt64){ 
 			let indexFound = MikoSeaNftAuctionV2.auctionIdRejected.firstIndex(of: auctionId)
 			if indexFound != nil{ 
@@ -1129,7 +1143,7 @@ contract MikoSeaNftAuctionV2{
 			emit AuctionUnrejected(auctionId: auctionId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addUserToBlacklist(auctionId: UInt64, addresses: [Address]){ 
 			if MikoSeaNftAuctionV2.blackList[auctionId] == nil{ 
 				MikoSeaNftAuctionV2.blackList[auctionId] = []
@@ -1138,7 +1152,7 @@ contract MikoSeaNftAuctionV2{
 			emit AddToBlackList(auctionId: auctionId, addresses: addresses)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeUserFromBlacklist(auctionId: UInt64, addresses: [Address]){ 
 			if MikoSeaNftAuctionV2.blackList[auctionId] == nil
 			|| (MikoSeaNftAuctionV2.blackList[auctionId]!).length == 0{ 
@@ -1161,13 +1175,13 @@ contract MikoSeaNftAuctionV2{
 	}
 	
 	// MikoSeaAuction public function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isUserInBlacList(auctionId: UInt64, address: Address): Bool{ 
 		return MikoSeaNftAuctionV2.blackList[auctionId]?.contains(address) ?? false
 	}
 	
 	// createAuctionCollection returns a new AuctionCollection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionCollection(
 		ownerCap: Capability<&{FungibleToken.Receiver}>
 	): @AuctionCollection{ 

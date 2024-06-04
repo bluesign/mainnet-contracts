@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: 
 
 	authors: 
@@ -277,22 +291,22 @@ contract LOSTiNTurismo: NonFungibleToken{
 			emit ItemMinted(itemID: self.id, merchantID: LOSTiNTurismo.merchantID, name: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOriginalData(): ItemData{ 
 			return self.data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMutation(): ItemData?{ 
 			return LOSTiNTurismo.mutations[self.id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getData(): ItemData{ 
 			return self.getMutation() ?? self.getOriginalData()
 		}
@@ -362,7 +376,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		}
 		
 		// Mutator role should only be able to mutate a NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mutatePFP(tokenID: UInt64, name: String, description: String, thumbnail: String, thumbnailCID: String, thumbnailPathIPFS: String?, thumbnailMimeType: String, thumbnailHosting: String, mediaURL: String, mediaCID: String, mediaPathIPFS: String?, mimetype: String, mediaHosting: String, attributes:{ String: String}, rarity: String){ 
 			pre{ 
 				tokenID <= LOSTiNTurismo.totalSupply:
@@ -391,41 +405,41 @@ contract LOSTiNTurismo: NonFungibleToken{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExternalURL(url: String){ 
 			LOSTiNTurismo.ExternalURL = MetadataViews.ExternalURL(url)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSocial(key: String, url: String):{ String: MetadataViews.ExternalURL}{ 
 			LOSTiNTurismo.Socials.insert(key: key, MetadataViews.ExternalURL(url))
 			return LOSTiNTurismo.getSocials()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSocial(key: String):{ String: MetadataViews.ExternalURL}{ 
 			LOSTiNTurismo.Socials.remove(key: key)
 			return LOSTiNTurismo.getSocials()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(description: String){ 
 			LOSTiNTurismo.Description = description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSquareImage(url: String, mediaType: String){ 
 			LOSTiNTurismo.SquareImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: url), mediaType: mediaType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBannerImage(url: String, mediaType: String){ 
 			LOSTiNTurismo.BannerImage = MetadataViews.Media(file: MetadataViews.HTTPFile(url: url), mediaType: mediaType)
 		}
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			let newID = LOSTiNTurismo.nextAdminID
 			// Increment the ID so that it isn't used again
@@ -434,7 +448,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		}
 		
 		// createNewMutator creates a new Mutator resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMutator(): @Mutator{ 
 			let newID = LOSTiNTurismo.nextMutatorID
 			// Increment the ID so that it isn't used again
@@ -443,33 +457,33 @@ contract LOSTiNTurismo: NonFungibleToken{
 		}
 		
 		// Locks a mutator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockMutator(id: UInt32): Int{ 
 			LOSTiNTurismo.lockedMutators.insert(key: id, true)
 			return LOSTiNTurismo.lockedMutators.length
 		}
 		
 		// Unlocks a mutator
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockMutator(id: UInt32): Int{ 
 			LOSTiNTurismo.lockedMutators.remove(key: id)
 			return LOSTiNTurismo.lockedMutators.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMerchantID(merchantID: UInt32): UInt32{ 
 			LOSTiNTurismo.merchantID = merchantID
 			return LOSTiNTurismo.merchantID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPFP(name: String, description: String, thumbnail: String, thumbnailCID: String, thumbnailPathIPFS: String?, thumbnailMimeType: String, thumbnailHosting: String, mediaURL: String, mediaCID: String, mediaPathIPFS: String?, mimetype: String, mediaHosting: String, attributes:{ String: String}, rarity: String): @NFT{ 
 			// Mint the new item
 			let newItem: @NFT <- create NFT(name: name, description: description, thumbnail: thumbnail, thumbnailCID: thumbnailCID, thumbnailPathIPFS: thumbnailPathIPFS, thumbnailMimeType: thumbnailMimeType, thumbnailHosting: thumbnailHosting, mediaURL: mediaURL, mediaCID: mediaCID, mediaPathIPFS: mediaPathIPFS, mimetype: mimetype, mediaHosting: mediaHosting, attributes: attributes, rarity: rarity)
 			return <-newItem
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mutatePFP(tokenID: UInt64, name: String, description: String, thumbnail: String, thumbnailCID: String, thumbnailPathIPFS: String?, thumbnailMimeType: String, thumbnailHosting: String, mediaURL: String, mediaCID: String, mediaPathIPFS: String?, mimetype: String, mediaHosting: String, attributes:{ String: String}, rarity: String){ 
 			pre{ 
 				tokenID <= LOSTiNTurismo.totalSupply:
@@ -486,7 +500,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		//			 recipientAddress: the wallet address of the recipient of the cut of the sale
 		//			 rate: the percentage of the sale that goes to that recipient
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addDefaultRoyalty(name: String, royalty: MetadataViews.Royalty, rate: UFix64){ 
 			pre{ 
 				LOSTiNTurismo.defaultRoyalties[name] == nil:
@@ -505,7 +519,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		// Parameters: name: the key of the recipient to update
 		//			 rate: the new percentage of the sale that goes to that recipient
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeDefaultRoyaltyRate(name: String, rate: UFix64){ 
 			pre{ 
 				LOSTiNTurismo.defaultRoyalties[name] != nil:
@@ -525,7 +539,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		// removeDefaultRoyalty removes a default recipient from the cut of the sale
 		//
 		// Parameters: name: the key to store the royalty to remove
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeDefaultRoyalty(name: String){ 
 			pre{ 
 				LOSTiNTurismo.defaultRoyalties[name] != nil:
@@ -542,7 +556,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		//			 recipientAddress: the wallet address of the recipient of the cut of the sale
 		//			 rate: the percentage of the sale that goes to that recipient
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRoyaltyForPFP(tokenID: UInt64, name: String, royalty: MetadataViews.Royalty, rate: UFix64){ 
 			pre{ 
 				rate > 0.0:
@@ -572,7 +586,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		//			 name: the key to store the new royalty
 		//			 rate: the percentage of the sale that goes to that recipient
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyRateForPFP(tokenID: UInt64, name: String, rate: UFix64){ 
 			pre{ 
 				rate > 0.0:
@@ -591,7 +605,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		// Parameters: tokenID: the unique ID of the PFP
 		//			 name: the key to store the royalty to remove
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRoyaltyForPFP(tokenID: UInt64, name: String){ 
 			(LOSTiNTurismo.royaltiesForSpecificPFP[tokenID]!).remove(key: name)
 			emit RoyaltyForPFPRemoved(tokenID: tokenID, name: name)
@@ -602,7 +616,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		//
 		// Parameters: tokenID: the unique ID of the PFP
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revertRoyaltyForPFPToDefault(tokenID: UInt64){ 
 			LOSTiNTurismo.royaltiesForSpecificPFP.remove(key: tokenID)
 			emit RoyaltyForPFPRevertedToDefault(tokenID: tokenID)
@@ -615,18 +629,18 @@ contract LOSTiNTurismo: NonFungibleToken{
 	access(all)
 	resource interface LOSTiNTurismoCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLOSTiNTurismo(id: UInt64): &LOSTiNTurismo.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -673,7 +687,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn MintPFPs items
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -691,7 +705,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as a MintPFPs NFT to make sure
 			// it is the correct type
 			let token <- token as! @LOSTiNTurismo.NFT
@@ -710,7 +724,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -754,7 +768,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLOSTiNTurismo(id: UInt64): &LOSTiNTurismo.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -804,68 +818,68 @@ contract LOSTiNTurismo: NonFungibleToken{
 		return <-create LOSTiNTurismo.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyMintPFPsCollection(): @LOSTiNTurismo.Collection{ 
 		return <-create LOSTiNTurismo.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExternalURL(): MetadataViews.ExternalURL{ 
 		return LOSTiNTurismo.ExternalURL
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSocials():{ String: MetadataViews.ExternalURL}{ 
 		return LOSTiNTurismo.Socials
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDescription(): String{ 
 		return LOSTiNTurismo.Description
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSquareImage(): MetadataViews.Media{ 
 		return LOSTiNTurismo.SquareImage
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBannerImage(): MetadataViews.Media{ 
 		return LOSTiNTurismo.BannerImage
 	}
 	
 	// Returns all of the locked mutator IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLockedMutators():{ UInt32: Bool}{ 
 		return LOSTiNTurismo.lockedMutators
 	}
 	
 	// getMerchantID returns the merchant ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMerchantID(): UInt32{ 
 		return self.merchantID
 	}
 	
 	// getDefaultRoyalties returns the default royalties
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultRoyalties():{ String: MetadataViews.Royalty}{ 
 		return self.defaultRoyalties
 	}
 	
 	// getDefaultRoyalties returns the default royalties
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultRoyaltyNames(): [String]{ 
 		return self.defaultRoyalties.keys
 	}
 	
 	// getDefaultRoyaltyRate returns a royalty object
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultRoyalty(name: String): MetadataViews.Royalty?{ 
 		return self.defaultRoyalties[name]
 	}
 	
 	// returns the default
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalDefaultRoyaltyRate(): UFix64{ 
 		var totalRoyalty = 0.0
 		for key in self.defaultRoyalties.keys{ 
@@ -876,19 +890,19 @@ contract LOSTiNTurismo: NonFungibleToken{
 	}
 	
 	// getRoyaltiesForPFP returns the specific royalties for a PFP or the default royalties
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltiesForPFP(tokenID: UInt64):{ String: MetadataViews.Royalty}{ 
 		return self.royaltiesForSpecificPFP[tokenID] ?? self.getDefaultRoyalties()
 	}
 	
 	//  getRoyaltyNamesForPFP returns the  royalty names for a specific PFP or the default royalty names
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyNamesForPFP(tokenID: UInt64): [String]{ 
 		return self.royaltiesForSpecificPFP[tokenID]?.keys ?? self.getDefaultRoyaltyNames()
 	}
 	
 	// getRoyaltyNamesForPFP returns a given royalty for a specific PFP or the default royalty names
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyForPFP(tokenID: UInt64, name: String): MetadataViews.Royalty?{ 
 		if self.royaltiesForSpecificPFP.containsKey(tokenID){ 
 			let royaltiesForPFP:{ String: MetadataViews.Royalty} = self.royaltiesForSpecificPFP[tokenID]!
@@ -899,7 +913,7 @@ contract LOSTiNTurismo: NonFungibleToken{
 	}
 	
 	// getTotalRoyaltyRateForPFP returns the total royalty rate for a give PFP
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalRoyaltyRateForPFP(tokenID: UInt64): UFix64{ 
 		var totalRoyalty = 0.0
 		let royalties = self.getRoyaltiesForPFP(tokenID: tokenID)

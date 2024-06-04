@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -179,22 +193,22 @@ contract AvatarArtAuction{
 	
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AuctionDetail
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			price: UFix64,
 			affiliateVaultCap: Capability<&{FungibleToken.Receiver}>?,
@@ -333,19 +347,19 @@ contract AvatarArtAuction{
 		}
 		
 		//this can be negative if is expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64{ 
 			let currentTime = getCurrentBlock().timestamp
 			return Fix64(self.endTime) - Fix64(currentTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool{ 
 			let timeRemaining = self.timeRemaining()
 			return timeRemaining < Fix64(0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minNextBid(): UFix64{ 
 			//If there are bids then the next min bid is the current price plus the increment
 			if self.lastPrice != 0.0{ 
@@ -355,7 +369,7 @@ contract AvatarArtAuction{
 			return self.startPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address?{ 
 			if let vaultCap = self.recipientVaultCap{ 
 				return vaultCap.address
@@ -363,7 +377,7 @@ contract AvatarArtAuction{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.bidder() == address{ 
 				return self.bidVault.balance
@@ -371,7 +385,7 @@ contract AvatarArtAuction{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(price: UFix64, affiliateVaultCap: Capability<&{FungibleToken.Receiver}>?, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{AvatarArtNFT.CollectionPublic}>, bidTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.nft != nil:
@@ -508,7 +522,7 @@ contract AvatarArtAuction{
 			emit TokenPurchased(storeID: self.storeID, auctionID: self.uuid, nftID: nftID, price: self.lastPrice, from: self.ownerVaultCap.address, to: self.recipientCollectionCap?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AuctionDetail{ 
 			var leader: Address? = nil
 			if let recipient = self.recipientVaultCap{ 
@@ -520,7 +534,7 @@ contract AvatarArtAuction{
 	
 	access(all)
 	resource interface AuctionStorePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStandaloneAuction(
 			token: @AvatarArtNFT.NFT,
 			bidVault: @{FungibleToken.Vault},
@@ -531,19 +545,19 @@ contract AvatarArtAuction{
 			vaultCap: Capability<&{FungibleToken.Receiver}>
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAuction(auctionID: UInt64): &AuctionItem?
 	}
 	
 	access(all)
 	resource interface AuctionStoreManager{ 
-		access(all)
-		fun cancelAuction(auctionID: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun cancelAuction(auctionID: UInt64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(auctionID: UInt64)
 	}
 	
@@ -552,7 +566,7 @@ contract AvatarArtAuction{
 		access(self)
 		let auctions: @{UInt64: AuctionItem}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStandaloneAuction(token: @AvatarArtNFT.NFT, bidVault: @{FungibleToken.Vault}, startTime: UFix64, endTime: UFix64, startPrice: UFix64, collectionCap: Capability<&{AvatarArtNFT.CollectionPublic}>, vaultCap: Capability<&{FungibleToken.Receiver}>): UInt64{ 
 			pre{ 
 				AvatarArtTransactionInfo.isCurrencyAccepted(type: bidVault.getType()):
@@ -571,12 +585,12 @@ contract AvatarArtAuction{
 			return auctionId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionIDs(): [UInt64]{ 
 			return self.auctions.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAuction(auctionID: UInt64): &AuctionItem?{ 
 			if self.auctions[auctionID] != nil{ 
 				return &self.auctions[auctionID] as &AvatarArtAuction.AuctionItem?
@@ -585,14 +599,14 @@ contract AvatarArtAuction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(auctionID: UInt64){ 
 			let auction <- self.auctions.remove(key: auctionID) ?? panic("could not find auction with given id")
 			auction.returnAuctionItemToOwner()
 			destroy auction
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(auctionID: UInt64){ 
 			let auction <- self.auctions.remove(key: auctionID) ?? panic("could not find auction with given id")
 			auction.settleAuction()
@@ -607,12 +621,12 @@ contract AvatarArtAuction{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPriceStep(price: UFix64, priceStep: UFix64){ 
 			AvatarArtAuction.priceSteps[price] = priceStep
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeePreference(
 			feeReference: Capability<&AvatarArtTransactionInfo.FeeInfo>,
 			feeRecepientReference: Capability<&AvatarArtTransactionInfo.TransactionAddress>
@@ -637,7 +651,7 @@ contract AvatarArtAuction{
 		return priceStep
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionStore(): @AuctionStore{ 
 		return <-create AuctionStore()
 	}

@@ -1,4 +1,18 @@
-import FlovatarMarketplace from "../0x921ea449dffec68a/FlovatarMarketplace.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlovatarMarketplace from "../0x921ea449dffec68a/FlovatarMarketplace.cdc"
 
 import FlovatarComponent from "../0x921ea449dffec68a/FlovatarComponent.cdc"
 
@@ -25,47 +39,47 @@ contract Marketplace{
 	
 	access(all)
 	resource Collection: FlovatarMarketplace.SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseFlovatar(tokenId: UInt64, recipientCap: Capability<&{Flovatar.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			let ref = Marketplace.account.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)!
 			ref.deposit(from: <-buyTokens)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseFlovatarComponent(tokenId: UInt64, recipientCap: Capability<&{FlovatarComponent.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			let ref = Marketplace.account.storage.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)!
 			ref.deposit(from: <-buyTokens)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarPrice(tokenId: UInt64): UFix64?{ 
 			return nil
 		}
 		
 		// required
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentPrice(tokenId: UInt64): UFix64?{ 
 			return Marketplace.price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarIDs(): [UInt64]{ 
 			return []
 		}
 		
 		// required
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentIDs(): [UInt64]{ 
 			return Marketplace.FlovatarComponentIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatar(tokenId: UInt64): &{Flovatar.Public}?{ 
 			return nil
 		}
 		
 		// required
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponent(tokenId: UInt64): &{FlovatarComponent.Public}?{ 
 			let ref = Marketplace.account.storage.borrow<&{FlovatarComponent.Public}>(from: /storage/peachTea)!
 			return ref
@@ -86,37 +100,37 @@ contract Marketplace{
 		access(all)
 		let id: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): FlovatarComponentTemplate.ComponentTemplateData{ 
 			return FlovatarComponentTemplate.ComponentTemplateData(id: 0, name: "", category: "", color: "", description: "", svg: nil, series: 0, maxMintableComponents: 0, rarity: "")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			return ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCategory(): String{ 
 			return ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeries(): UInt32{ 
 			return 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String{ 
 			return ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isBooster(rarity: String): Bool{ 
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkCategorySeries(category: String, series: UInt32): Bool{ 
 			return true
 		}
@@ -152,23 +166,23 @@ contract Marketplace{
 	
 	access(all)
 	resource ComponentResource: FlovatarComponent.CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT}){ 
 			destroy token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}{ 
 			panic("todo")
 		}
 		
 		// required
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowComponent(id: UInt64): &FlovatarComponent.NFT?{ 
 			/*
 						
@@ -214,13 +228,13 @@ contract Marketplace{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrice(price: UFix64){ 
 			Marketplace.price = price
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupAdmin(){ 
 		if self.account.storage.borrow<&Admin>(from: /storage/admin) == nil{ 
 			self.account.storage.save(<-create Admin(), to: /storage/admin)

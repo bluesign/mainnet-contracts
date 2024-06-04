@@ -1,4 +1,18 @@
-// NFTv2.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// NFTv2.cdc
 //
 // This is a complete version of the GeniaceNFT contract
 // that includes withdraw and deposit functionality, as well as a
@@ -138,18 +152,18 @@ contract GeniaceNFT: NonFungibleToken{
 	access(all)
 	resource interface GeniaceNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGeniaceNFT(id: UInt64): &GeniaceNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -186,7 +200,7 @@ contract GeniaceNFT: NonFungibleToken{
 		// Function that takes a NFT as an argument and 
 		// adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GeniaceNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -198,7 +212,7 @@ contract GeniaceNFT: NonFungibleToken{
 		
 		// idExists checks to see if a NFT 
 		// with the given ID exists in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -223,7 +237,7 @@ contract GeniaceNFT: NonFungibleToken{
 		// exposing all of its fields, this reference will be used to retrive the meta info.
 		// This is safe as there are no functions that can be called on the GeniaceNFT.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGeniaceNFT(id: UInt64): &GeniaceNFT.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &GeniaceNFT.NFT?
@@ -267,7 +281,7 @@ contract GeniaceNFT: NonFungibleToken{
 		//
 		// Function that mints a new NFT with a new ID
 		// and returns it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, _metadata: Metadata){ 
 			emit Minted(id: GeniaceNFT.totalSupply)
 			
@@ -284,13 +298,13 @@ contract GeniaceNFT: NonFungibleToken{
 		var capability: Capability<&GeniaceNFT.NFTMinter>?
 		
 		// will recive the minter capability and store internally
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCapability(_ link: Capability<&GeniaceNFT.NFTMinter>?){ 
 			self.capability = link
 		}
 		
 		// borrow minter capability
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLink(): &GeniaceNFT.NFTMinter{ 
 			let ref = (self.capability!).borrow()!
 			return ref

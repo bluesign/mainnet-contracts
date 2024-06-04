@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import JollyJokers from "./JollyJokers.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -30,7 +44,7 @@ contract JollyJokersMinter{
 	access(self)
 	var whitelistedAccounts:{ Address: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPreOrderNFTWithDUC(
 		buyer: Address,
 		paymentVault: @{FungibleToken.Vault},
@@ -88,7 +102,7 @@ contract JollyJokersMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPublicNFTWithDUC(
 		buyer: Address,
 		paymentVault: @{FungibleToken.Vault},
@@ -140,7 +154,7 @@ contract JollyJokersMinter{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhiteListAddress(address: Address, amount: UInt64){ 
 			pre{ 
 				amount <= 6:
@@ -149,7 +163,7 @@ contract JollyJokersMinter{
 			JollyJokersMinter.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhiteListAddress(address: Address){ 
 			pre{ 
 				JollyJokersMinter.whitelistedAccounts[address] != nil:
@@ -158,12 +172,12 @@ contract JollyJokersMinter{
 			JollyJokersMinter.whitelistedAccounts.remove(key: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pruneWhitelist(){ 
 			JollyJokersMinter.whitelistedAccounts ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhiteListAddressAmount(address: Address, amount: UInt64){ 
 			pre{ 
 				JollyJokersMinter.whitelistedAccounts[address] != nil:
@@ -172,28 +186,28 @@ contract JollyJokersMinter{
 			JollyJokersMinter.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePreSalePriceInDUC(price: UFix64){ 
 			JollyJokersMinter.preSalePriceInDUC = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSalePriceInDUC(price: UFix64){ 
 			JollyJokersMinter.publicSalePriceInDUC = price
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistedAccounts():{ Address: UInt64}{ 
 		return JollyJokersMinter.whitelistedAccounts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistSpotsForAddress(address: Address): UInt64{ 
 		return JollyJokersMinter.whitelistedAccounts[address] ?? 0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPriceForAddress(addr: Address): UFix64{ 
 		// if address has a joker, price is 99.0
 		// does this address have any jokers?

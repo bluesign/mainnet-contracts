@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 # Contract: FantastecSwapDataProperties
 # Description:
 
@@ -44,7 +58,7 @@ contract FantastecSwapDataProperties{
 			self.content = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun add(_ collectionId: UInt64, _ chance: UFix64){ 
 			let productCollectionChance = ProductCollectionChance(collectionId, chance)
 			self.content.append(productCollectionChance)
@@ -405,12 +419,12 @@ contract FantastecSwapDataProperties{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun IsArrayMetadataType(_ type: String): Bool{ 
 		return self.arrayTypes.contains(type)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun parseUInt64(_ string: String?): UInt64?{ 
 		if string == nil{ 
 			return nil
@@ -418,7 +432,7 @@ contract FantastecSwapDataProperties{
 		return UInt64.fromString(string!)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun parseUFix64(_ string: String?): UFix64?{ 
 		if string == nil{ 
 			return nil
@@ -426,7 +440,7 @@ contract FantastecSwapDataProperties{
 		return UFix64.fromString(string!)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun parseAddress(_ string: String?): Address?{ 
 		if string == nil{ 
 			return nil
@@ -451,7 +465,7 @@ contract FantastecSwapDataProperties{
 		return address
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addToMetadata(
 		_ type: String,
 		_ metadataArray: [{
@@ -474,7 +488,7 @@ contract FantastecSwapDataProperties{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeFromMetadata(_ type: String, _ metadataArray: [{MetadataElement}], _ id: UInt64?): [{
 		MetadataElement}
 	]{ 
@@ -490,7 +504,7 @@ contract FantastecSwapDataProperties{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeMetadataElementById(_ array: [{MetadataElement}], _ id: UInt64): [{MetadataElement}]{ 
 		if array == nil{ 
 			return []

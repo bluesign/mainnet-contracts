@@ -1,4 +1,18 @@
-import FlowToken from "./../../standardsV1/FlowToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -35,7 +49,7 @@ contract FlowLottery{
 	event Donation(amount: UFix64)
 	
 	// donate without participating
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun donate(payment: @FlowToken.Vault){ 
 		pre{ 
 			payment.balance == UFix64(UInt64(payment.balance)):
@@ -46,7 +60,7 @@ contract FlowLottery{
 	}
 	
 	// buy tickets
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyTickets(address: Address, payment: @FlowToken.Vault){ 
 		pre{ 
 			payment.balance == UFix64(UInt64(payment.balance)):
@@ -135,7 +149,7 @@ contract FlowLottery{
 		let lotteryHistory: @{UInt64: LotteryDetails}
 		
 		// christmas special
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveWinner(): Winner{ 
 			let currentLotteryDetails: &LotteryDetails = self.borrowCurrentLotteryDetails()!
 			assert(
@@ -207,12 +221,12 @@ contract FlowLottery{
 			self.lotteryHistory[newLotteryDetails.id] <-! newLotteryDetails
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLotteryDetails(id: UInt64): &LotteryDetails?{ 
 			return &self.lotteryHistory[id] as &LotteryDetails?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCurrentLotteryDetails(): &LotteryDetails?{ 
 			return &self.lotteryHistory[FlowLottery.totalLotteries - 1] as &LotteryDetails?
 		}
@@ -223,18 +237,18 @@ contract FlowLottery{
 	}
 	
 	// gets a number between min & max, included
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRandom(min: UInt64, max: UInt64): UInt64{ 
 		let randomNumber: UInt64 = revertibleRandom()
 		return randomNumber % (max + 1 - min) + min
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPotTotal(): UFix64{ 
 		return self.pot.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCurrentLotteryDetails(): &LotteryDetails?{ 
 		return self.borrowAdmin().borrowCurrentLotteryDetails()
 	}

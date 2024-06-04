@@ -1,4 +1,18 @@
-// Black Hunter's Market
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Black Hunter's Market
 // Yosh! -swt
 //
 //
@@ -51,14 +65,14 @@ contract BlackMarketplace{
 	
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithWhitelist(
 			tokenID: UInt64,
 			recipientCap: Capability<&{NFTDayTreasureChest.NFTDayTreasureChestCollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithTreasureChest(
 			tokenID: UInt64,
 			recipientCap: Capability<&{NFTDayTreasureChest.NFTDayTreasureChestCollectionPublic}>,
@@ -66,10 +80,10 @@ contract BlackMarketplace{
 			chest: @NFTDayTreasureChest.NFT
 		): @NFTDayTreasureChest.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
@@ -90,7 +104,7 @@ contract BlackMarketplace{
 			self.prices ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(tokenID: UInt64): @NFTDayTreasureChest.NFT{ 
 			self.prices.remove(key: tokenID)
 			let token <- self.forSale.remove(key: tokenID) ?? panic("missing NFT")
@@ -98,7 +112,7 @@ contract BlackMarketplace{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @NFTDayTreasureChest.NFT, price: UFix64){ 
 			let id = token.id
 			self.prices[id] = price
@@ -110,14 +124,14 @@ contract BlackMarketplace{
 			emit ForSale(id: id, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenID: UInt64, newPrice: UFix64){ 
 			self.prices[tokenID] = newPrice
 			emit PriceChanged(id: tokenID, newPrice: newPrice)
 		}
 		
 		// Requires a whitelist to purchase
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithWhitelist(tokenID: UInt64, recipientCap: Capability<&{NFTDayTreasureChest.NFTDayTreasureChestCollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.forSale[tokenID] != nil && self.prices[tokenID] != nil:
@@ -146,7 +160,7 @@ contract BlackMarketplace{
 		}
 		
 		// Requires a chest to purchase
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseWithTreasureChest(tokenID: UInt64, recipientCap: Capability<&{NFTDayTreasureChest.NFTDayTreasureChestCollectionPublic}>, buyTokens: @{FungibleToken.Vault}, chest: @NFTDayTreasureChest.NFT): @NFTDayTreasureChest.NFT{ 
 			pre{ 
 				self.forSale[tokenID] != nil && self.prices[tokenID] != nil:
@@ -170,28 +184,28 @@ contract BlackMarketplace{
 			return <-chest
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(ownerVault: Capability<&{FungibleToken.Receiver}>): @SaleCollection{ 
 		return <-create SaleCollection(vault: ownerVault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistUsed(): [Address]{ 
 		return self.whitelistUsed
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSellers(): [Address]{ 
 		return self.sellers
 	}

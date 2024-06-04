@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 //
 access(all)
@@ -62,7 +76,7 @@ contract NyatheesOVO: NonFungibleToken{
 			return <-create Collection()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -81,18 +95,18 @@ contract NyatheesOVO: NonFungibleToken{
 	access(all)
 	resource interface NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTItem(id: UInt64): &NyatheesOVO.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -107,8 +121,8 @@ contract NyatheesOVO: NonFungibleToken{
 	// only for mystery box
 	access(all)
 	resource interface MinterPrivate{ 
-		access(all)
-		fun mintNFTForMysterBox(receiver: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintNFTForMysterBox(receiver: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}): Void
 	}
 	
 	// Collection
@@ -132,7 +146,7 @@ contract NyatheesOVO: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -142,7 +156,7 @@ contract NyatheesOVO: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NyatheesOVO.NFT
 			let id: UInt64 = token.id
 			
@@ -174,7 +188,7 @@ contract NyatheesOVO: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the NFTItem.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTItem(id: UInt64): &NyatheesOVO.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -226,7 +240,7 @@ contract NyatheesOVO: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			
 			// deposit it in the recipient's account using their reference
@@ -235,7 +249,7 @@ contract NyatheesOVO: NonFungibleToken{
 			NyatheesOVO.totalSupply = NyatheesOVO.totalSupply + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTForMysterBox(receiver: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			
 			// deposit it in the recipient's account using their reference
@@ -252,7 +266,7 @@ contract NyatheesOVO: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &NyatheesOVO.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&NyatheesOVO.Collection>(NyatheesOVO.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust NFTItem.Collection.NFTItem to get the correct itemID

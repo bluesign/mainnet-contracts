@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract MagnetiqLocking{ 
@@ -31,7 +45,7 @@ contract MagnetiqLocking{
 	// Parameters: nftRef: A reference to the NFT resource
 	//
 	// Returns: true if NFT is locked
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isLocked(nftRef: &{NonFungibleToken.NFT}): Bool{ 
 		return self.lockedNFTs.containsKey(nftRef.id)
 	}
@@ -41,7 +55,7 @@ contract MagnetiqLocking{
 	// Parameters: nftRef: A reference to the NFT resource
 	//
 	// Returns: unix timestamp
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLockExpiry(nftRef: &{NonFungibleToken.NFT}): UFix64{ 
 		if !self.lockedNFTs.containsKey(nftRef.id){ 
 			panic("NFT is not locked")
@@ -55,7 +69,7 @@ contract MagnetiqLocking{
 	//			 duration: number of seconds the NFT will be locked for
 	//
 	// Returns: the NFT resource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun lockNFT(nft: @{NonFungibleToken.NFT}, duration: UFix64): @{NonFungibleToken.NFT}{ 
 		let MagnetiqNFTType: Type = CompositeType("A.e55718549e2805ca.Magnetiq.NFT")!
 		if !nft.isInstance(MagnetiqNFTType){ 
@@ -78,7 +92,7 @@ contract MagnetiqLocking{
 	// Returns: the NFT resource
 	//
 	// NFT must be eligible for unlocking by an admin
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun unlockNFT(nft: @{NonFungibleToken.NFT}): @{NonFungibleToken.NFT}{ 
 		if !self.lockedNFTs.containsKey(nft.id){ 
 			// nft is not locked, short circuit and return the nft
@@ -100,7 +114,7 @@ contract MagnetiqLocking{
 	//
 	// Returns: array of ids
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIDs(): [UInt64]{ 
 		return self.lockedNFTs.keys
 	}
@@ -111,7 +125,7 @@ contract MagnetiqLocking{
 	//
 	// Returns: a unix timestamp in seconds
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExpiry(tokenID: UInt64): UFix64?{ 
 		return self.lockedNFTs[tokenID]
 	}
@@ -120,7 +134,7 @@ contract MagnetiqLocking{
 	//
 	// Returns: an integer containing the number of locked tokens
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLockedNFTsLength(): Int{ 
 		return self.lockedNFTs.length
 	}
@@ -132,7 +146,7 @@ contract MagnetiqLocking{
 	resource Admin{ 
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -141,13 +155,13 @@ contract MagnetiqLocking{
 		// unlockable, overridding the expiry timestamp
 		// the nft owner will still need to send an unlock transaction to unlock
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markNFTUnlockable(nftRef: &{NonFungibleToken.NFT}){ 
 			MagnetiqLocking.unlockableNFTs[nftRef.id] = true
 		}
 		
 		// unlocks all NFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockAll(){ 
 			MagnetiqLocking.lockedNFTs ={} 
 			MagnetiqLocking.unlockableNFTs ={} 

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -63,7 +77,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 	
 	/// Return the royalty recipients for this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(): [MetadataViews.Royalty]{ 
 		return SeedsOfHappinessGenesis.royalties
 	}
@@ -136,12 +150,12 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 		///
 		/// This can be used to hash the metadata and verify its integrity.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun encode(): [UInt8]{ 
 			return self.salt.concat(FreshmintEncoding.encodeString(self.image)).concat(FreshmintEncoding.encodeUInt64(self.serialNumber)).concat(FreshmintEncoding.encodeString(self.name)).concat(FreshmintEncoding.encodeString(self.description)).concat(FreshmintEncoding.encodeString(self.shape)).concat(FreshmintEncoding.encodeString(self.color)).concat(FreshmintEncoding.encodeString(self.smile)).concat(FreshmintEncoding.encodeString(self.emboss)).concat(FreshmintEncoding.encodeString(self.outline)).concat(FreshmintEncoding.encodeString(self.birthmark)).concat(FreshmintEncoding.encodeString(self.redeemed))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hash(): [UInt8]{ 
 			return HashAlgorithm.SHA3_256.hash(self.encode())
 		}
@@ -160,7 +174,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 	///
 	/// This function returns nil if the NFT has not yet been revealed.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getMetadata(nftID: UInt64): Metadata?{ 
 		return SeedsOfHappinessGenesis.metadata[nftID]
 	}
@@ -177,7 +191,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 	access(contract)
 	let nftsByHash:{ String: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTIDByHash(hash: String): UInt64?{ 
 		return SeedsOfHappinessGenesis.nftsByHash[hash]
 	}
@@ -207,7 +221,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 		/// This function returns nil if the NFT metadata has
 		/// not yet been revealed.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMetadata(): Metadata?{ 
 			return SeedsOfHappinessGenesis.metadata[self.id]
 		}
@@ -256,7 +270,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplay(_ metadata: Metadata): MetadataViews.Display{ 
 			// The first 46 characters of the string are the IPFS CID (for v0 CIDs only)
 			let cid = metadata.image.slice(from: 0, upTo: 46)
@@ -266,31 +280,31 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 			return MetadataViews.Display(name: metadata.name, description: metadata.description, thumbnail: MetadataViews.IPFSFile(cid: cid, path: path))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveExternalURL(): MetadataViews.ExternalURL{ 
 			let collectionURL = SeedsOfHappinessGenesis.collectionMetadata.externalURL.url
 			let nftID = self.id.toString()
 			return MetadataViews.ExternalURL(collectionURL.concat("/").concat(nftID))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			return SeedsOfHappinessGenesis.collectionMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: SeedsOfHappinessGenesis.CollectionStoragePath, publicPath: SeedsOfHappinessGenesis.CollectionPublicPath, publicCollection: Type<&SeedsOfHappinessGenesis.Collection>(), publicLinkedType: Type<&SeedsOfHappinessGenesis.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-SeedsOfHappinessGenesis.createEmptyCollection(nftType: Type<@SeedsOfHappinessGenesis.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveRoyalties(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties(SeedsOfHappinessGenesis.getRoyalties())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveSerial(_ metadata: Metadata): MetadataViews.Serial{ 
 			return MetadataViews.Serial(metadata.serialNumber)
 		}
@@ -304,15 +318,15 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 	access(all)
 	resource interface SeedsOfHappinessGenesisCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeedsOfHappinessGenesis(id: UInt64): &SeedsOfHappinessGenesis.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -345,7 +359,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 		/// Deposit an NFT into this collection.
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SeedsOfHappinessGenesis.NFT
 			let id: UInt64 = token.id
 			
@@ -376,7 +390,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 		///
 		/// This function returns nil if the NFT does not exist in this collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeedsOfHappinessGenesis(id: UInt64): &SeedsOfHappinessGenesis.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -430,7 +444,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 		/// To mint a blind NFT, specify its metadata hash
 		/// that can later be used to verify the revealed NFT.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(hash: [UInt8]): @SeedsOfHappinessGenesis.NFT{ 
 			let hexHash = String.encodeHex(hash)
 			
@@ -449,7 +463,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 		///
 		/// To reveal an NFT, publish its complete metadata and unique salt value.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealNFT(id: UInt64, metadata: Metadata){ 
 			pre{ 
 				SeedsOfHappinessGenesis.metadata[id] == nil:
@@ -470,7 +484,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 		
 		/// Update the collection metadata for this contract (e.g. website URL, icon, banner image).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionMetadata(_ collectionMetadata: MetadataViews.NFTCollectionDisplay){ 
 			SeedsOfHappinessGenesis.collectionMetadata = collectionMetadata
 		}
@@ -478,28 +492,28 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 	
 	/// Return a public path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(suffix: String): PublicPath{ 
 		return PublicPath(identifier: "SeedsOfHappinessGenesis_".concat(suffix))!
 	}
 	
 	/// Return a private path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(suffix: String): PrivatePath{ 
 		return PrivatePath(identifier: "SeedsOfHappinessGenesis_".concat(suffix))!
 	}
 	
 	/// Return a storage path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(suffix: String): StoragePath{ 
 		return StoragePath(identifier: "SeedsOfHappinessGenesis_".concat(suffix))!
 	}
 	
 	/// Return a collection name with an optional bucket suffix.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeCollectionName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Collection_".concat(bucketName)
@@ -509,7 +523,7 @@ contract SeedsOfHappinessGenesis: NonFungibleToken{
 	
 	/// Return a queue name with an optional bucket suffix.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeQueueName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Queue_".concat(bucketName)

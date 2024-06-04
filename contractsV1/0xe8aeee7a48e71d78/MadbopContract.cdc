@@ -1,4 +1,18 @@
-import MadbopNFTs from "./MadbopNFTs.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MadbopNFTs from "./MadbopNFTs.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -59,7 +73,7 @@ contract MadbopContract{
 			self.nftSchema = nftSchema
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateData(brandId: UInt64, jukeboxSchema: [UInt64], nftSchema: [UInt64]){ 
 			self.brandId = brandId
 			self.jukeboxSchema = jukeboxSchema
@@ -84,13 +98,13 @@ contract MadbopContract{
 	access(all)
 	resource interface JukeboxPublic{ 
 		// making this function public to call by other users
-		access(all)
-		fun openJukebox(jukeboxNFT: @{NonFungibleToken.NFT}, receiptAddress: Address)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun openJukebox(jukeboxNFT: @{NonFungibleToken.NFT}, receiptAddress: Address): Void
 	}
 	
 	access(all)
 	resource Jukebox: JukeboxPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createJukebox(templateId: UInt64, openDate: UFix64){ 
 			pre{ 
 				templateId != nil:
@@ -128,7 +142,7 @@ contract MadbopContract{
 		
 		// update madbop data function will be updated when a new user creates a new brand with its own data
 		// and pass new user details
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMadbopData(brandId: UInt64, jukeboxSchema: [UInt64], nftSchema: [UInt64]){ 
 			pre{ 
 				brandId != nil:
@@ -144,7 +158,7 @@ contract MadbopContract{
 		
 		// open jukebox function called by user to open specific jukebox to mint all the nfts in and transfer it to
 		// the user address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openJukebox(jukeboxNFT: @{NonFungibleToken.NFT}, receiptAddress: Address){ 
 			pre{ 
 				jukeboxNFT != nil:
@@ -170,7 +184,7 @@ contract MadbopContract{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllJukeboxes():{ UInt64: JukeboxData}{ 
 		pre{ 
 			MadbopContract.allJukeboxes != nil:
@@ -179,7 +193,7 @@ contract MadbopContract{
 		return MadbopContract.allJukeboxes
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getJukeboxById(jukeboxId: UInt64): JukeboxData{ 
 		pre{ 
 			MadbopContract.allJukeboxes[jukeboxId] != nil:
@@ -188,7 +202,7 @@ contract MadbopContract{
 		return MadbopContract.allJukeboxes[jukeboxId]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMadbopData(): MadbopData{ 
 		pre{ 
 			MadbopContract.madbopData != nil:

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -75,7 +89,7 @@ contract ATTANFT: NonFungibleToken{
 			return <-create Collection()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -92,15 +106,15 @@ contract ATTANFT: NonFungibleToken{
 	access(all)
 	resource interface ATTACollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowATTA(id: UInt64): &ATTANFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -137,7 +151,7 @@ contract ATTANFT: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ATTANFT.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -168,7 +182,7 @@ contract ATTANFT: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the ATTANFT.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowATTA(id: UInt64): &ATTANFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -212,7 +226,7 @@ contract ATTANFT: NonFungibleToken{
 	// buy ATTA NFT with FLOW token
 	// public function that anyone can call to buy a ATTA NFT with set price
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyATTA(paymentVault: @{FungibleToken.Vault}): @ATTANFT.NFT{ 
 		pre{ 
 			self.pause == false:
@@ -247,7 +261,7 @@ contract ATTANFT: NonFungibleToken{
 		var vault: @{FungibleToken.Vault}
 		
 		// mint NFT without pay any FLOW for admin only
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}?){ 
 			emit Minted(id: ATTANFT.totalSupply, metadata: metadata ??{} )
 			// deposit it in the recipient's account using their reference
@@ -256,34 +270,34 @@ contract ATTANFT: NonFungibleToken{
 		}
 		
 		// deposite FLOW when user buy NFT with `buyATTA` function
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositVault(paymentVault: @{FungibleToken.Vault}){ 
 			self.vault.deposit(from: <-paymentVault)
 		}
 		
 		// global pause status, for emergency
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(_ flag: Bool){ 
 			ATTANFT.pause = flag
 			emit PauseStateChanged(flag: flag)
 		}
 		
 		// baseURI field for the NFT metadata ,maintenaed off-chain
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(_ uri: String){ 
 			ATTANFT.baseURI = uri
 			emit BaseURIChanged(uri: uri)
 		}
 		
 		// set the NFT price to sell, user can buy nft by buyATTA function when price > 0 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(_ price: UFix64){ 
 			ATTANFT.mintPrice = price
 			emit MintPriceChanged(price: price)
 		}
 		
 		// query FLOW vault balance of admin vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultBalance(): UFix64{ 
 			pre{ 
 				self.vault != nil:
@@ -293,7 +307,7 @@ contract ATTANFT: NonFungibleToken{
 		}
 		
 		// withdraw FLOW from admin's flow vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawVault(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.vault != nil:
@@ -309,25 +323,25 @@ contract ATTANFT: NonFungibleToken{
 	}
 	
 	// query price 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrice(): UFix64{ 
 		return self.mintPrice
 	}
 	
 	// query pause status
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isPause(): Bool{ 
 		return self.pause
 	}
 	
 	// query the BaseURI 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBaseURI(): String{ 
 		return self.baseURI
 	}
 	
 	// query admin FLOW balance with pub function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultBalance(): UFix64{ 
 		let admin = ATTANFT.account.storage.borrow<&ATTANFT.Admin>(from: ATTANFT.AdminStoragePath) ?? panic("Could not borrow admin client")
 		return admin.getVaultBalance()
@@ -339,7 +353,7 @@ contract ATTANFT: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &ATTANFT.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&ATTANFT.Collection>(ATTANFT.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.borrowATTA(id: itemID)

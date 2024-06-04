@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 	FrontRowStorefront.cdc
 
@@ -150,14 +164,14 @@ contract FrontRowStorefront{
 		//
 		// Returns: purchased @FrontRow.NFT token
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @FUSD.Vault): @FrontRow.NFT
 		
 		// getDetails returns detailed information about a sale offer
 		//
 		// Returns: sale offer details
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): SaleOfferDetails
 	}
 	
@@ -187,7 +201,7 @@ contract FrontRowStorefront{
 		//
 		// Returns: sale offer details such as blueprint id, price, etc
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): SaleOfferDetails{ 
 			return self.details
 		}
@@ -199,7 +213,7 @@ contract FrontRowStorefront{
 		//
 		// Returns: purchased @FrontRow.NFT token
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @FUSD.Vault): @FrontRow.NFT{ 
 			//
 			let blueprint = FrontRow.getBlueprint(id: self.details.blueprintId)!
@@ -275,7 +289,7 @@ contract FrontRowStorefront{
 		//			  beneficiary:  the capability used for depositing the beneficiary's
 		//							sale proceeds
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, FrontRow.CollectionPublic}
@@ -284,7 +298,7 @@ contract FrontRowStorefront{
 			price: UFix64,
 			beneficiary: Capability<&{FungibleToken.Receiver}>,
 			minterCapability: Capability<&{FrontRow.Minter}>
-		)
+		): Void
 		
 		// removeSaleOffer removes sales offer from the owner's Storefront, sold out or not.
 		//
@@ -293,7 +307,7 @@ contract FrontRowStorefront{
 		//						   and a sale offer, the blueprint ID uniquely idetifies
 		//						   each sale offer
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffer(blueprintId: UInt32)
 	}
 	
@@ -306,7 +320,7 @@ contract FrontRowStorefront{
 		//
 		// Returns: an array of all sale offers
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt32]
 		
 		// borrowSaleOffer returns a reference to the SaleOffer resource
@@ -315,7 +329,7 @@ contract FrontRowStorefront{
 		//
 		// Returns: A reference to the SaleOffer resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(blueprintId: UInt32): &SaleOffer?
 	}
 	
@@ -339,7 +353,7 @@ contract FrontRowStorefront{
 		//							sale proceeds
 		//			  minterCapability: capability to mint NFTs. Used in on demand minting.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSaleOffer(nftProviderCapability: Capability<&{NonFungibleToken.Provider, FrontRow.CollectionPublic}>, blueprintId: UInt32, price: UFix64, beneficiary: Capability<&{FungibleToken.Receiver}>, minterCapability: Capability<&{FrontRow.Minter}>){ 
 			//
 			let blueprint: FrontRow.Blueprint? = FrontRow.getBlueprint(id: blueprintId)
@@ -363,7 +377,7 @@ contract FrontRowStorefront{
 		//
 		// Parameters: blueprintId: The ID of the blueprint to remove from sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSaleOffer(blueprintId: UInt32){ 
 			let blueprint: FrontRow.Blueprint? = FrontRow.getBlueprint(id: blueprintId)
 			assert(blueprint != nil, message: "Blueprint doesn't exist.")
@@ -382,7 +396,7 @@ contract FrontRowStorefront{
 		// getSaleOfferIDs returns an array of sale offers listed for sale
 		//
 		// Returns: an array of blueprint IDs listed in the Storefront for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt32]{ 
 			return self.saleOffers.keys
 		}
@@ -394,7 +408,7 @@ contract FrontRowStorefront{
 		// Returns: a reference to the &SaleOffer resource limited only to functionality
 		//		  outlined in the SaleOfferPublic interface
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleOffer(blueprintId: UInt32): &SaleOffer?{ 
 			if self.saleOffers[blueprintId] != nil{ 
 				return &self.saleOffers[blueprintId] as &SaleOffer?

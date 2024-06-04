@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import NowggNFT from "./NowggNFT.cdc"
 
@@ -42,7 +56,7 @@ contract NowggPuzzle{
 			self.childNftTypeIds = childNftTypeIds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPuzzleInfo():{ String: AnyStruct}{ 
 			return{ 
 				"puzzleId": self.puzzleId,
@@ -57,8 +71,8 @@ contract NowggPuzzle{
 	
 	access(all)
 	resource interface PuzzleHelperPublic{ 
-		access(all)
-		fun borrowPuzzle(puzzleId: String): Puzzle?{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowPuzzle(puzzleId: String): NowggPuzzle.Puzzle?{ 
 			post{ 
 				result == nil || result?.puzzleId == puzzleId:
 					"Cannot borrow puzzle reference: The ID of the returned reference is incorrect"
@@ -68,7 +82,7 @@ contract NowggPuzzle{
 	
 	access(all)
 	resource interface PuzzleHelperInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerPuzzle(
 			nftMinter: &NowggNFT.NFTMinter,
 			puzzleId: String,
@@ -77,9 +91,9 @@ contract NowggPuzzle{
 				String
 			],
 			maxCount: UInt64
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun combinePuzzle(
 			nftMinter: &NowggNFT.NFTMinter,
 			nftProvider: &{
@@ -101,7 +115,7 @@ contract NowggPuzzle{
 	// Resource that allows other accounts to access the functionality related to puzzles
 	access(all)
 	resource PuzzleHelper: PuzzleHelperPublic, PuzzleHelperInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPuzzle(puzzleId: String): Puzzle?{ 
 			if NowggPuzzle.allPuzzles[puzzleId] != nil{ 
 				return NowggPuzzle.allPuzzles[puzzleId]
@@ -110,7 +124,7 @@ contract NowggPuzzle{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerPuzzle(nftMinter: &NowggNFT.NFTMinter, puzzleId: String, parentNftTypeId: String, childNftTypeIds: [String], maxCount: UInt64){ 
 			assert(childNftTypeIds.length < 1000, message: "childNftTypeIds must have less than 1000 elements")
 			for childPuzzleTypeId in childNftTypeIds{ 
@@ -121,7 +135,7 @@ contract NowggPuzzle{
 			emit PuzzleRegistered(puzzleId: puzzleId, parentNftTypeId: parentNftTypeId, childNftTypeIds: childNftTypeIds)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun combinePuzzle(nftMinter: &NowggNFT.NFTMinter, nftProvider: &{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic, NowggNFT.NowggNFTCollectionPublic}, puzzleId: String, parentNftTypeId: String, childNftIds: [UInt64], metadata:{ String: AnyStruct}){ 
 			assert(childNftIds.length < 1000, message: "childNftIds must have less than 1000 elements")
 			let puzzle = self.borrowPuzzle(puzzleId: puzzleId)!

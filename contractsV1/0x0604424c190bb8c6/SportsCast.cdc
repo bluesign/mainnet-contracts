@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -64,7 +78,7 @@ contract SportsCast: NonFungibleToken{
 	
 	/// Return the royalty recipients for this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(): [MetadataViews.Royalty]{ 
 		return SportsCast.royalties
 	}
@@ -180,7 +194,7 @@ contract SportsCast: NonFungibleToken{
 		///
 		/// The supply is the number of NFTs minted minus the number burned.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supply(): UInt64{ 
 			return self.size - self.burned
 		}
@@ -232,7 +246,7 @@ contract SportsCast: NonFungibleToken{
 	access(self)
 	let editions:{ UInt64: Edition}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEdition(id: UInt64): Edition?{ 
 		return SportsCast.editions[id]
 	}
@@ -246,7 +260,7 @@ contract SportsCast: NonFungibleToken{
 	access(self)
 	let editionsByMintID:{ String: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionByMintID(mintID: String): UInt64?{ 
 		return SportsCast.editionsByMintID[mintID]
 	}
@@ -270,7 +284,7 @@ contract SportsCast: NonFungibleToken{
 		
 		/// Return the edition that this NFT belongs to.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(): Edition{ 
 			return SportsCast.getEdition(id: self.editionID)!
 		}
@@ -308,54 +322,54 @@ contract SportsCast: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplay(_ metadata: Metadata): MetadataViews.Display{ 
 			return MetadataViews.Display(name: metadata.name, description: metadata.description, thumbnail: FreshmintMetadataViews.ipfsFile(file: metadata.thumbnail))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveExternalURL(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("TODO")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTView(_ metadata: Metadata): MetadataViews.NFTView{ 
 			return MetadataViews.NFTView(id: self.id, uuid: self.uuid, display: self.resolveDisplay(metadata), externalURL: self.resolveExternalURL(), collectionData: self.resolveNFTCollectionData(), collectionDisplay: self.resolveNFTCollectionDisplay(), royalties: self.resolveRoyalties(), traits: nil)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			return SportsCast.collectionMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: SportsCast.CollectionStoragePath, publicPath: SportsCast.CollectionPublicPath, publicCollection: Type<&SportsCast.Collection>(), publicLinkedType: Type<&SportsCast.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-SportsCast.createEmptyCollection(nftType: Type<@SportsCast.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveRoyalties(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties(SportsCast.getRoyalties())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveEditionView(_ edition: Edition): MetadataViews.Edition{ 
 			return MetadataViews.Edition(name: "Edition", number: self.serialNumber, max: edition.size)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveSerialView(_ serialNumber: UInt64): MetadataViews.Serial{ 
 			return MetadataViews.Serial(serialNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveMedia(_ metadata: Metadata): MetadataViews.Media{ 
 			return MetadataViews.Media(file: MetadataViews.IPFSFile(cid: metadata.asset, path: nil), mediaType: metadata.assetType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveMedias(_ metadata: Metadata): MetadataViews.Medias{ 
 			return MetadataViews.Medias([MetadataViews.Media(file: MetadataViews.IPFSFile(cid: metadata.asset, path: nil), mediaType: metadata.assetType), MetadataViews.Media(file: MetadataViews.IPFSFile(cid: metadata.thumbnail, path: nil), mediaType: "image/png")])
 		}
@@ -369,15 +383,15 @@ contract SportsCast: NonFungibleToken{
 	access(all)
 	resource interface SportsCastCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSportsCast(id: UInt64): &SportsCast.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -410,7 +424,7 @@ contract SportsCast: NonFungibleToken{
 		/// Deposit an NFT into this collection.
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SportsCast.NFT
 			let id: UInt64 = token.id
 			
@@ -441,7 +455,7 @@ contract SportsCast: NonFungibleToken{
 		///
 		/// This function returns nil if the NFT does not exist in this collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSportsCast(id: UInt64): &SportsCast.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -495,7 +509,7 @@ contract SportsCast: NonFungibleToken{
 		/// This function does not mint any NFTs. It only creates the
 		/// edition data that will later be associated with minted NFTs.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(mintID: String, limit: UInt64?, name: String, description: String, thumbnail: String, asset: String, colorCard: String, itemType: String, athleteName: String, assetType: String, itemCategory: String, series: String, eventName: String, eventDate: String, eventType: String, signed: Bool, userURL: String, attributes:{ String: String}): UInt64{ 
 			let metadata = Metadata(name: name, description: description, thumbnail: thumbnail, asset: asset, colorCard: colorCard, itemType: itemType, athleteName: athleteName, assetType: assetType, itemCategory: itemCategory, series: series, eventName: eventName, eventDate: eventDate, eventType: eventType, signed: signed, userURL: userURL, attributes: attributes)
 			
@@ -518,7 +532,7 @@ contract SportsCast: NonFungibleToken{
 		/// This prevents new NFTs from being minted into the edition.
 		/// An edition cannot be reopened after it is closed.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeEdition(editionID: UInt64){ 
 			let edition = SportsCast.editions[editionID] ?? panic("edition does not exist")
 			
@@ -539,7 +553,7 @@ contract SportsCast: NonFungibleToken{
 		/// This function will panic if the edition has already
 		/// reached its maximum size.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @SportsCast.NFT{ 
 			let edition = SportsCast.editions[editionID] ?? panic("edition does not exist")
 			
@@ -571,28 +585,28 @@ contract SportsCast: NonFungibleToken{
 	
 	/// Return a public path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(suffix: String): PublicPath{ 
 		return PublicPath(identifier: "SportsCast_".concat(suffix))!
 	}
 	
 	/// Return a private path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(suffix: String): PrivatePath{ 
 		return PrivatePath(identifier: "SportsCast_".concat(suffix))!
 	}
 	
 	/// Return a storage path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(suffix: String): StoragePath{ 
 		return StoragePath(identifier: "SportsCast_".concat(suffix))!
 	}
 	
 	/// Return a collection name with an optional bucket suffix.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeCollectionName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Collection_".concat(bucketName)
@@ -602,7 +616,7 @@ contract SportsCast: NonFungibleToken{
 	
 	/// Return a queue name with an optional bucket suffix.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeQueueName(bucketName maybeBucketName: String?): String{ 
 		if let bucketName = maybeBucketName{ 
 			return "Queue_".concat(bucketName)

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -64,18 +78,18 @@ contract FindLeaseMarketDirectOfferSoft{
 			self.pointer = pointer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.pointer.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptDirectOffer(){ 
 			self.directOfferAccepted = true
 		}
 		
 		//Here we do not get a vault back, it is sent in to the method itself
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptNonEscrowedBid(){ 
 			pre{ 
 				self.offerCallback.check():
@@ -88,7 +102,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			pointer.move(to: self.offerCallback.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFtType(): Type{ 
 			pre{ 
 				self.offerCallback.check():
@@ -97,27 +111,27 @@ contract FindLeaseMarketDirectOfferSoft{
 			return (self.offerCallback.borrow()!).getVaultType(self.getLeaseName())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLeaseName(): String{ 
 			return self.pointer.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type{ 
 			return Type<@FIND.Lease>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuction(): FindLeaseMarket.AuctionItem?{ 
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): UInt64{ 
 			return self.pointer.getUUID()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleType(): String{ 
 			if self.directOfferAccepted{ 
 				return "active_finished"
@@ -125,17 +139,17 @@ contract FindLeaseMarketDirectOfferSoft{
 			return "active_ongoing"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type{ 
 			return Type<@SaleItem>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingTypeIdentifier(): String{ 
 			return Type<@SaleItem>().identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			pre{ 
 				self.offerCallback.check():
@@ -144,23 +158,23 @@ contract FindLeaseMarketDirectOfferSoft{
 			return (self.offerCallback.borrow()!).getBalance(self.getLeaseName())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeller(): Address{ 
 			return self.pointer.owner()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerName(): String?{ 
 			let address = self.pointer.owner()
 			return FIND.reverseLookup(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyer(): Address?{ 
 			return self.offerCallback.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyerName(): String?{ 
 			if let name = FIND.reverseLookup(self.offerCallback.address){ 
 				return name
@@ -168,37 +182,37 @@ contract FindLeaseMarketDirectOfferSoft{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toLeaseInfo(): FindLeaseMarket.LeaseInfo{ 
 			return FindLeaseMarket.LeaseInfo(self.pointer)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setValidUntil(_ time: UFix64?){ 
 			self.validUntil = time
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValidUntil(): UFix64?{ 
 			return self.validUntil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPointer(_ pointer: FindLeaseMarket.AuthLeasePointer){ 
 			self.pointer = pointer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCallback(_ callback: Capability<&MarketBidCollection>){ 
 			self.offerCallback = callback
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkPointer(): Bool{ 
 			return self.pointer.valid()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleItemExtraField():{ String: AnyStruct}{ 
 			return self.saleItemExtraField
 		}
@@ -212,10 +226,10 @@ contract FindLeaseMarketDirectOfferSoft{
 	access(all)
 	resource interface SaleItemCollectionPublic{ 
 		//fetch all the tokens in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameSales(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameSale(_ name: String): Bool
 		
 		access(contract)
@@ -268,7 +282,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			return self.tenantCapability.borrow()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAcceptedDirectOffer(_ name: String): Bool{ 
 			pre{ 
 				self.items.containsKey(name):
@@ -278,7 +292,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			return saleItem.directOfferAccepted
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingType(): Type{ 
 			return Type<@SaleItem>()
 		}
@@ -443,7 +457,7 @@ contract FindLeaseMarketDirectOfferSoft{
 		}
 		
 		//cancel will reject a direct offer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(_ name: String){ 
 			pre{ 
 				self.items.containsKey(name):
@@ -473,7 +487,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			destroy <-self.items.remove(key: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(_ pointer: FindLeaseMarket.AuthLeasePointer){ 
 			pre{ 
 				self.items.containsKey(pointer.name):
@@ -552,17 +566,17 @@ contract FindLeaseMarketDirectOfferSoft{
 			destroy <-self.items.remove(key: name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameSales(): [String]{ 
 			return self.items.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameSale(_ name: String): Bool{ 
 			return self.items.containsKey(name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ name: String): &SaleItem{ 
 			pre{ 
 				self.items.containsKey(name):
@@ -571,7 +585,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			return (&self.items[name] as &SaleItem?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(_ name: String): &{FindLeaseMarket.SaleItem}{ 
 			pre{ 
 				self.items.containsKey(name):
@@ -628,17 +642,17 @@ contract FindLeaseMarketDirectOfferSoft{
 			self.balance = self.balance + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSellerAddress(): Address{ 
 			return self.from.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidExtraField():{ String: AnyStruct}{ 
 			return self.bidExtraField
 		}
@@ -646,16 +660,16 @@ contract FindLeaseMarketDirectOfferSoft{
 	
 	access(all)
 	resource interface MarketBidCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(_ name: String): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultType(_ name: String): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameBid(_ name: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameBids(): [String]
 		
 		access(contract)
@@ -706,27 +720,27 @@ contract FindLeaseMarketDirectOfferSoft{
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVaultType(_ name: String): Type{ 
 			return self.borrowBid(name).vaultType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNameBids(): [String]{ 
 			return self.bids.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNameBid(_ name: String): Bool{ 
 			return self.bids.containsKey(name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidType(): Type{ 
 			return Type<@Bid>()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bid(
 			name: String,
 			amount: UFix64,
@@ -783,7 +797,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillDirectOffer(name: String, vault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.bids[name] != nil:
@@ -797,7 +811,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			saleItem.fulfillDirectOfferNonEscrowed(name: name, vault: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseBid(name: String, increaseBy: UFix64){ 
 			let bid = self.borrowBid(name)
 			bid.setBidAt(Clock.time())
@@ -809,7 +823,7 @@ contract FindLeaseMarketDirectOfferSoft{
 		}
 		
 		/// The users cancel a bid himself
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelBid(_ name: String){ 
 			let bid = self.borrowBid(name)
 			if !bid.from.check(){ 
@@ -827,7 +841,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(_ name: String): &Bid{ 
 			pre{ 
 				self.bids.containsKey(name):
@@ -836,7 +850,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			return (&self.bids[name] as &Bid?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBidItem(_ name: String): &{FindLeaseMarket.Bid}{ 
 			pre{ 
 				self.bids.containsKey(name):
@@ -845,7 +859,7 @@ contract FindLeaseMarketDirectOfferSoft{
 			return (&self.bids[name] as &Bid?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(_ name: String): UFix64{ 
 			let bid = self.borrowBid(name)
 			return bid.balance
@@ -853,14 +867,14 @@ contract FindLeaseMarketDirectOfferSoft{
 	}
 	
 	//Create an empty lease collection that store your leases to a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptySaleItemCollection(
 		_ tenantCapability: Capability<&FindMarket.Tenant>
 	): @SaleItemCollection{ 
 		return <-create SaleItemCollection(tenantCapability)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyMarketBidCollection(
 		receiver: Capability<&{FungibleToken.Receiver}>,
 		tenantCapability: Capability<&FindMarket.Tenant>
@@ -868,7 +882,7 @@ contract FindLeaseMarketDirectOfferSoft{
 		return <-create MarketBidCollection(receiver: receiver, tenantCapability: tenantCapability)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleItemCapability(marketplace: Address, user: Address): Capability<
 		&SaleItemCollection
 	>?{ 
@@ -882,7 +896,7 @@ contract FindLeaseMarketDirectOfferSoft{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBidCapability(marketplace: Address, user: Address): Capability<&MarketBidCollection>?{ 
 		pre{ 
 			FindMarket.getTenantCapability(marketplace) != nil:

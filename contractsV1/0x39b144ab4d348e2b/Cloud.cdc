@@ -1,4 +1,18 @@
-// Made by Lanford33
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Made by Lanford33
 //
 // Cloud.cdc defines the FungibleToken DROP and the collections of it.
 //
@@ -97,7 +111,7 @@ contract Cloud{
 			self.extraData = extraData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String{ 
 			switch self.status{ 
 				case EligibilityStatus.eligible:
@@ -224,7 +238,7 @@ contract Cloud{
 			self.extraData = extraData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String{ 
 			switch self.status{ 
 				case AvailabilityStatus.ok:
@@ -294,34 +308,34 @@ contract Cloud{
 		access(all)
 		var claimedAmount: UFix64
 		
-		access(all)
-		fun claim(receiver: &{FungibleToken.Receiver}, params:{ String: AnyStruct})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun claim(receiver: &{FungibleToken.Receiver}, params:{ String: AnyStruct}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkAvailability(params:{ String: AnyStruct}): Availability
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkEligibility(account: Address, params:{ String: AnyStruct}): Eligibility
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimedRecord(account: Address): ClaimRecord?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimedRecords():{ Address: ClaimRecord}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDropBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers():{ String: [{EligibilityVerifiers.IEligibilityVerifier}]}
 	}
 	
 	access(all)
 	resource interface IDropCollectionPublic{ 
-		access(all)
-		fun getAllDrops():{ UInt64: &{IDropPublic}}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getAllDrops():{ UInt64: &{Cloud.IDropPublic}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicDropRef(dropID: UInt64): &{IDropPublic}?
 	}
 	
@@ -384,7 +398,7 @@ contract Cloud{
 		access(self)
 		let dropVault: @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(receiver: &{FungibleToken.Receiver}, params:{ String: AnyStruct}){ 
 			params.insert(key: "recordUsedNFT", true)
 			let availability = self.checkAvailability(params: params)
@@ -404,7 +418,7 @@ contract Cloud{
 			receiver.deposit(from: <-v)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkAvailability(params:{ String: AnyStruct}): Availability{ 
 			if self.isEnded{ 
 				return Availability(status: AvailabilityStatus.ended, extraData:{} )
@@ -429,7 +443,7 @@ contract Cloud{
 			return Availability(status: AvailabilityStatus.ok, extraData:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkEligibility(account: Address, params:{ String: AnyStruct}): Eligibility{ 
 			if let record = self.claimedRecords[account]{ 
 				return Eligibility(status: EligibilityStatus.hasClaimed, eligibleAmount: record.amount, extraData:{} )
@@ -501,28 +515,28 @@ contract Cloud{
 			return Eligibility(status: isEligible ? EligibilityStatus.eligible : EligibilityStatus.notEligible, eligibleAmount: eligibleAmount, extraData:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimedRecord(account: Address): ClaimRecord?{ 
 			return self.claimedRecords[account]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimedRecords():{ Address: ClaimRecord}{ 
 			return self.claimedRecords
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDropBalance(): UFix64{ 
 			return self.dropVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers():{ String: [{EligibilityVerifiers.IEligibilityVerifier}]}{ 
 			return self.verifiers
 		}
 		
 		// private methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun togglePause(): Bool{ 
 			pre{ 
 				!self.isEnded:
@@ -540,7 +554,7 @@ contract Cloud{
 		// deposit more token into the DROP.
 		// If the whitelist of a DROP is allowed to extend, we need
 		// this function to make sure the claimers can have enough funds to withdraw.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{FungibleToken.Vault}){ 
 			pre{ 
 				!self.isEnded:
@@ -551,7 +565,7 @@ contract Cloud{
 			self.dropVault.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun end(receiver: &{FungibleToken.Receiver}){ 
 			self.isEnded = true
 			self.isPaused = true
@@ -615,7 +629,7 @@ contract Cloud{
 	
 	access(all)
 	resource interface ICloudPauser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleContractPause(): Bool
 	}
 	
@@ -623,7 +637,7 @@ contract Cloud{
 	resource Admin: ICloudPauser{ 
 		// Use to pause the creation of new DROP
 		// If we want to migrate the contracts, we can make sure no more DROP in old contracts be created.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleContractPause(): Bool{ 
 			Cloud.isPaused = !Cloud.isPaused
 			return Cloud.isPaused
@@ -635,7 +649,7 @@ contract Cloud{
 		access(all)
 		var drops: @{UInt64: Drop}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(name: String, description: String, host: Address, image: String?, url: String?, startAt: UFix64?, endAt: UFix64?, tokenInfo: TokenInfo, distributor:{ Distributors.IDistributor}, verifyMode: EligibilityVerifiers.VerifyMode, verifiers: [{EligibilityVerifiers.IEligibilityVerifier}], vault: @{FungibleToken.Vault}, extraData:{ String: AnyStruct}): UInt64{ 
 			pre{ 
 				verifiers.length == 1:
@@ -658,7 +672,7 @@ contract Cloud{
 			return dropID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllDrops():{ UInt64: &{IDropPublic}}{ 
 			let dropRefs:{ UInt64: &{IDropPublic}} ={} 
 			for dropID in self.drops.keys{ 
@@ -668,17 +682,17 @@ contract Cloud{
 			return dropRefs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicDropRef(dropID: UInt64): &{IDropPublic}?{ 
 			return &self.drops[dropID] as &{IDropPublic}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDropRef(dropID: UInt64): &Drop?{ 
 			return &self.drops[dropID] as &Drop?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteDrop(dropID: UInt64, receiver: &{FungibleToken.Receiver}){ 
 			// Clean the Drop before make it ownerless
 			let dropRef = self.borrowDropRef(dropID: dropID) ?? panic("This drop does not exist")
@@ -692,7 +706,7 @@ contract Cloud{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyDropCollection(): @DropCollection{ 
 		return <-create DropCollection()
 	}

@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract CupcakeFriendsV0{ 
 	access(all)
 	let CollectionStoragePath: StoragePath
@@ -37,12 +51,12 @@ contract CupcakeFriendsV0{
 			self.requestedFriendships = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): Int{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(request: @CupcakeFriendshipRequest, time: UInt64){ 
 			if self.id != request.getRequestedAcceptorId(){ 
 				panic("Cannot accept friendships for another Cupcake")
@@ -54,7 +68,7 @@ contract CupcakeFriendsV0{
 			destroy request
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRequestedFriendship(otherCupcakeId: Int){ 
 			let index = self.requestedFriendships.firstIndex(of: otherCupcakeId)
 			if index != nil{ 
@@ -62,17 +76,17 @@ contract CupcakeFriendsV0{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun storeRequestedFriendship(otherCupcakeId: Int){ 
 			self.requestedFriendships.append(otherCupcakeId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFriendshipRequest(myCupcake: Capability<&{NotYetKnownCupcake}>, otherCupcakeId: Int, time: UInt64): @CupcakeFriendshipRequest{ 
 			return <-create CupcakeFriendshipRequest(requestorId: self.id, requestedAcceptorId: otherCupcakeId, creationTime: time, requestorCupcake: myCupcake)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptBothSides(myCupcake: Capability<&{NotYetKnownCupcake}>, friendCupcake: Int, time: UInt64){ 
 			let holder <- self.openFriendshipRequests.remove(key: friendCupcake) ?? panic("No friend request from this Cupcake")
 			let request <- holder.getRequest()
@@ -83,7 +97,7 @@ contract CupcakeFriendsV0{
 			destroy holder
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun denyBothSides(myCupcake: Capability<&{NotYetKnownCupcake}>, friendCupcake: Int, time: UInt64){ 
 			let holder <- self.openFriendshipRequests.remove(key: friendCupcake) ?? panic("No friend request from this Cupcake")
 			let request <- holder.getRequest()
@@ -94,17 +108,17 @@ contract CupcakeFriendsV0{
 			destroy holder
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOpenRequests(): &{Int: CupcakeFriendshipRequestHolder}{ 
 			return &self.openFriendshipRequests as &{Int: CupcakeFriendshipRequestHolder}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFriendshipRequest(request: @CupcakeFriendshipRequestHolder){ 
 			self.openFriendshipRequests[request.getId()] <-! request
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFriendRequests(): [CupcakeState]{ 
 			let requestStates: [CupcakeState] = []
 			for key in self.openFriendshipRequests.keys{ 
@@ -115,12 +129,12 @@ contract CupcakeFriendsV0{
 			return requestStates
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestedFriendships(): [Int]{ 
 			return self.requestedFriendships
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFriends(): [CupcakeState]{ 
 			let requestStates: [CupcakeState] = []
 			for key in self.friendships.keys{ 
@@ -131,12 +145,12 @@ contract CupcakeFriendsV0{
 			return requestStates
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessory(id: Int){ 
 			self.accessoryId = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessory(): Int?{ 
 			return self.accessoryId
 		}
@@ -158,61 +172,63 @@ contract CupcakeFriendsV0{
 	
 	access(all)
 	resource interface FriendlyCupcake{ 
-		access(all)
-		fun accept(request: @CupcakeFriendshipRequest, time: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun accept(request: @CupcakeFriendsV0.CupcakeFriendshipRequest, time: UInt64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRequestedFriendship(otherCupcakeId: Int)
 	}
 	
 	access(all)
 	resource interface MyCupcake{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFriendshipRequest(
-			myCupcake: Capability<&{NotYetKnownCupcake}>,
+			myCupcake: Capability<&{CupcakeFriendsV0.NotYetKnownCupcake}>,
 			otherCupcakeId: Int,
 			time: UInt64
-		): @CupcakeFriendshipRequest
+		): @CupcakeFriendsV0.CupcakeFriendshipRequest
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptBothSides(
 			myCupcake: Capability<&{NotYetKnownCupcake}>,
 			friendCupcake: Int,
 			time: UInt64
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun denyBothSides(
 			myCupcake: Capability<&{NotYetKnownCupcake}>,
 			friendCupcake: Int,
 			time: UInt64
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun storeRequestedFriendship(otherCupcakeId: Int)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessory(id: Int)
 	}
 	
 	access(all)
 	resource interface NotYetKnownCupcake{ 
-		access(all)
-		fun depositFriendshipRequest(request: @CupcakeFriendshipRequestHolder)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositFriendshipRequest(
+			request: @CupcakeFriendsV0.CupcakeFriendshipRequestHolder
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFriendRequests(): [CupcakeState]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFriends(): [CupcakeState]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestedFriendships(): [Int]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessory(): Int?
 	}
 	
@@ -229,23 +245,23 @@ contract CupcakeFriendsV0{
 			self.acceptor <-{ 0: <-acceptor}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequest(): @CupcakeFriendshipRequest{ 
 			return <-self.request.remove(key: 0)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestRef(): &CupcakeFriendshipRequest{ 
 			let requestRef = &self.request[0] as &CupcakeFriendshipRequest?
 			return requestRef!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAcceptor(): @CupcakeFriendshipAcceptor{ 
 			return <-self.acceptor.remove(key: 0)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): Int{ 
 			let ref = &self.request[0] as &CupcakeFriendshipRequest?
 			return (ref!).getRequestorId()
@@ -261,7 +277,7 @@ contract CupcakeFriendsV0{
 			self.usedIds = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(id: Int): @Cupcake{ 
 			if self.usedIds.contains(id){ 
 				panic("ID has already been minted")
@@ -297,22 +313,22 @@ contract CupcakeFriendsV0{
 			self.creationTime = creationTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestorId(): Int{ 
 			return self.requestorId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAcceptorId(): Int{ 
 			return self.acceptorId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreationTime(): UInt64{ 
 			return self.creationTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestorCupcake(): Capability<&{NotYetKnownCupcake}>{ 
 			return self.requestorCupcake
 		}
@@ -344,17 +360,17 @@ contract CupcakeFriendsV0{
 			self.creationTime = creationTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestorId(): Int{ 
 			return self.requestorId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestedAcceptorId(): Int{ 
 			return self.requestedAcceptorId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestorCupcake(): Capability<&{NotYetKnownCupcake}>{ 
 			return self.requestorCupcake
 		}
@@ -373,7 +389,7 @@ contract CupcakeFriendsV0{
 			self.cupcake = cupcake
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(request: @CupcakeFriendshipRequest, time: UInt64){ 
 			if request.getRequestorId() != self.requestorId{ 
 				panic("I cannot accept friendship requests from you")
@@ -383,7 +399,7 @@ contract CupcakeFriendsV0{
 			cupcake.removeRequestedFriendship(otherCupcakeId: self.requestorId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deny(request: @CupcakeFriendshipRequest){ 
 			if request.getRequestorId() != self.requestorId{ 
 				panic("I cannot deny friendship requests from you")
@@ -403,7 +419,7 @@ contract CupcakeFriendsV0{
 			self.ownedCupcakes <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositCupcake(cupcake: @Cupcake){ 
 			if self.hasCupcake(){ 
 				panic("Cannot own more than one Cupcake")
@@ -411,7 +427,7 @@ contract CupcakeFriendsV0{
 			self.ownedCupcakes[0] <-! cupcake
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCupcake(): &Cupcake{ 
 			if !self.hasCupcake(){ 
 				panic("Do not have a Cupcake yet")
@@ -419,72 +435,72 @@ contract CupcakeFriendsV0{
 			return (&self.ownedCupcakes[0] as &Cupcake?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasCupcake(): Bool{ 
 			return self.ownedCupcakes.length != 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(request: @CupcakeFriendshipRequest, time: UInt64){ 
 			self.getCupcake().accept(request: <-request, time: time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeRequestedFriendship(otherCupcakeId: Int){ 
 			self.getCupcake().removeRequestedFriendship(otherCupcakeId: otherCupcakeId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun storeRequestedFriendship(otherCupcakeId: Int){ 
 			self.getCupcake().storeRequestedFriendship(otherCupcakeId: otherCupcakeId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createFriendshipRequest(myCupcake: Capability<&{NotYetKnownCupcake}>, otherCupcakeId: Int, time: UInt64): @CupcakeFriendshipRequest{ 
 			return <-self.getCupcake().createFriendshipRequest(myCupcake: myCupcake, otherCupcakeId: otherCupcakeId, time: time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFriendshipRequest(request: @CupcakeFriendshipRequestHolder){ 
 			self.getCupcake().depositFriendshipRequest(request: <-request)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getId(): Int{ 
 			return self.getCupcake().getId()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFriendRequests(): [CupcakeState]{ 
 			return self.getCupcake().getFriendRequests()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFriends(): [CupcakeState]{ 
 			return self.getCupcake().getFriends()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptBothSides(myCupcake: Capability<&{NotYetKnownCupcake}>, friendCupcake: Int, time: UInt64){ 
 			self.getCupcake().acceptBothSides(myCupcake: myCupcake, friendCupcake: friendCupcake, time: time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun denyBothSides(myCupcake: Capability<&{NotYetKnownCupcake}>, friendCupcake: Int, time: UInt64){ 
 			self.getCupcake().denyBothSides(myCupcake: myCupcake, friendCupcake: friendCupcake, time: time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRequestedFriendships(): [Int]{ 
 			return self.getCupcake().getRequestedFriendships()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessory(): Int?{ 
 			return self.getCupcake().getAccessory()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAccessory(id: Int){ 
 			self.getCupcake().setAccessory(id: id)
 		}
@@ -492,16 +508,16 @@ contract CupcakeFriendsV0{
 	
 	access(all)
 	resource interface CupcakeReceiver{ 
-		access(all)
-		fun depositCupcake(cupcake: @Cupcake)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositCupcake(cupcake: @CupcakeFriendsV0.Cupcake): Void
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @CupcakeCollection{ 
 		return <-create CupcakeCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun requestFriendship(
 		myCupcakeRef: Capability<&{MyCupcake}>,
 		notYetKnownMyCupcakeRef: Capability<&{NotYetKnownCupcake}>,
@@ -528,7 +544,7 @@ contract CupcakeFriendsV0{
 		otherCupcake.depositFriendshipRequest(request: <-holder)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupCollection(account: AuthAccount){ 
 		account.save(<-self.createEmptyCollection(), to: self.CollectionStoragePath)
 		account.link<&{CupcakeReceiver, NotYetKnownCupcake}>(

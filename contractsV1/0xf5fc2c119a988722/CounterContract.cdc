@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract CounterContract{ 
 	access(all)
 	let CounterStoragePath: StoragePath
@@ -11,7 +25,7 @@ contract CounterContract{
 	
 	access(all)
 	resource interface HasCount{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentCount(): UInt64
 	}
 	
@@ -24,18 +38,18 @@ contract CounterContract{
 			self.count = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun plusOne(hash: String){ 
 			self.count = self.count + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentCount(): UInt64{ 
 			return self.count
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun currentCount(): UInt64{ 
 		let counter = self.account.capabilities.get<&{HasCount}>(self.CounterPublicPath)
 		let counterRef = counter.borrow()!

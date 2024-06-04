@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Interest Rate Model
 
@@ -73,7 +87,7 @@ contract TwoSegmentsInterestRateModel{
 		let _reservedFields:{ String: AnyStruct}
 		
 		/// pool's capital utilization rate (scaled up by self.scaleFactor, e.g. 1e18)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUtilizationRate(cash: UInt256, borrows: UInt256, reserves: UInt256): UInt256{ 
 			if borrows == 0{ 
 				return 0
@@ -82,7 +96,7 @@ contract TwoSegmentsInterestRateModel{
 		}
 		
 		/// Get the borrow interest rate per block (scaled up by self.scaleFactor, e.g. 1e18)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBorrowRate(cash: UInt256, borrows: UInt256, reserves: UInt256): UInt256{ 
 			let scaleFactor = LendingConfig.scaleFactor
 			let scaledUtilRate = self.getUtilizationRate(cash: cash, borrows: borrows, reserves: reserves)
@@ -95,7 +109,7 @@ contract TwoSegmentsInterestRateModel{
 		}
 		
 		/// Get the supply interest rate per block (scaled up by self.scaleFactor, e.g. 1e18)
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupplyRate(cash: UInt256, borrows: UInt256, reserves: UInt256, reserveFactor: UInt256): UInt256{ 
 			assert(reserveFactor < LendingConfig.scaleFactor, message: "reserveFactor should always be less than 1.0 x scaleFactor")
 			let scaledUtilRate = self.getUtilizationRate(cash: cash, borrows: borrows, reserves: reserves)
@@ -105,12 +119,12 @@ contract TwoSegmentsInterestRateModel{
 		}
 		
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBlocksPerYear(): UInt256{ 
 			return self.blocksPerYear
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInterestRateModelParams():{ String: AnyStruct}{ 
 			return{ "modelName": self.modelName, "blocksPerYear": self.blocksPerYear, "scaleFactor": LendingConfig.scaleFactor, "scaledBaseRatePerBlock": self.scaledBaseRatePerBlock, "scaledBaseMultiplierPerBlock": self.scaledBaseMultiplierPerBlock, "scaledJumpMultiplierPerBlock": self.scaledJumpMultiplierPerBlock, "scaledCriticalUtilRate": self.scaledCriticalUtilRate}
 		}
@@ -169,7 +183,7 @@ contract TwoSegmentsInterestRateModel{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createInterestRateModel(
 			modelName: String,
 			blocksPerYear: UInt256,
@@ -188,7 +202,7 @@ contract TwoSegmentsInterestRateModel{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInterestRateModelParams(
 			updateCapability: Capability<&InterestRateModel>,
 			newBlocksPerYear: UInt256,

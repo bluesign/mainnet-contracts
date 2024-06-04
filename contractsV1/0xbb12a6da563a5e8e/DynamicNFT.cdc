@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 *
 *  This is an example of how to implement Dynamic NFTs on Flow.
 *  A Dynamic NFT is one that can be changed after minting. In 
@@ -91,12 +105,12 @@ contract DynamicNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTrades(): TraderflowScores.TradeScores{ 
 			return self.trades
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): NFTMetadata{ 
 			return NFTMetadata(name: self.metadata.name, description: self.metadata.description, thumbnail: self.metadata.thumbnail, metadata: self.trades.metadata())
 		}
@@ -128,15 +142,15 @@ contract DynamicNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAuthNFT(id: UInt64): &DynamicNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -158,7 +172,7 @@ contract DynamicNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DynamicNFT.NFT
 			emit Deposit(id: token.id, to: self.owner?.address)
 			self.ownedNFTs[token.id] <-! token
@@ -174,7 +188,7 @@ contract DynamicNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAuthNFT(id: UInt64): &DynamicNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -220,14 +234,14 @@ contract DynamicNFT: NonFungibleToken{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &Collection, name: String, description: String, thumbnail: String){ 
 			let nft <- create NFT(_name: name, _description: description, _thumbnail: thumbnail)
 			emit Minted(id: nft.id, by: (self.owner!).address, name: name, description: description, thumbnail: thumbnail)
 			recipient.deposit(token: <-nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pushTrade(id: UInt64, currentOwner: Address, trade: TraderflowScores.Trade){ 
 			let ownerCollection = getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath).borrow<&Collection>() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
 			let nftRef = ownerCollection.borrowAuthNFT(id: id) ?? panic("This account does not own an NFT with this id.")
@@ -236,7 +250,7 @@ contract DynamicNFT: NonFungibleToken{
 			emit rebuildNFT(id: id, owner: currentOwner, metadata: update)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pushEquity(id: UInt64, currentOwner: Address, equity: UFix64){ 
 			let ownerCollection = getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath).borrow<&Collection>() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
 			let nftRef = ownerCollection.borrowAuthNFT(id: id) ?? panic("This account does not own an NFT with this id.")
@@ -245,7 +259,7 @@ contract DynamicNFT: NonFungibleToken{
 			emit rebuildNFT(id: id, owner: currentOwner, metadata: update)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateArtwork(id: UInt64, currentOwner: Address, ipfs: String){ 
 			let ownerCollection = getAccount(currentOwner).capabilities.get<&Collection>(DynamicNFT.CollectionPublicPath).borrow<&Collection>() ?? panic("This person does not have a DynamicNFT Collection set up properly.")
 			let nftRef = ownerCollection.borrowAuthNFT(id: id) ?? panic("This account does not own an NFT with this id.")

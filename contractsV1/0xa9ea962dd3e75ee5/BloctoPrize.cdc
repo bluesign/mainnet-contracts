@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract BloctoPrize{ 
@@ -22,7 +36,7 @@ contract BloctoPrize{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCampaign(
 			title: String,
 			description: String,
@@ -48,7 +62,7 @@ contract BloctoPrize{
 			BloctoPrize.totalCampaigns = BloctoPrize.totalCampaigns + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCampaign(
 			id: Int,
 			title: String?,
@@ -72,17 +86,17 @@ contract BloctoPrize{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWinners(id: Int, addresses: [Address], prizeIndex: Int){ 
 			BloctoPrize.campaigns[id].addWinners(addresses: addresses, prizeIndex: prizeIndex)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWinners(id: Int, addresses: [Address], prizeIndex: Int){ 
 			BloctoPrize.campaigns[id].removeWinners(addresses: addresses, prizeIndex: prizeIndex)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPrize(id: Int, name: String, tokenKey: String, amount: UFix64){ 
 			BloctoPrize.campaigns[id].addPrize(
 				prize: Prize(name: name, tokenKey: tokenKey, amount: amount)
@@ -90,7 +104,7 @@ contract BloctoPrize{
 		}
 		
 		// remove fungible tokens for contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeToken(tokenKey: String){ 
 			let token = BloctoPrize.tokens[tokenKey]!
 			destroy BloctoPrize.account.storage.load<@AnyResource>(from: token.vaultPath)
@@ -100,7 +114,7 @@ contract BloctoPrize{
 		}
 		
 		// enable arbitrary fungible tokens for contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToken(
 			tokenKey: String,
 			name: String,
@@ -131,7 +145,7 @@ contract BloctoPrize{
 	
 	access(all)
 	resource Claimer: ClaimerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimPrizes(id: Int){ 
 			let address = (self.owner!).address
 			if BloctoPrize.campaigns[id].winners[address] != nil{ 
@@ -264,7 +278,7 @@ contract BloctoPrize{
 			self.cancelled = cancelled == nil ? false : cancelled!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(
 			title: String?,
 			description: String?,
@@ -301,7 +315,7 @@ contract BloctoPrize{
 			self.cancelled = cancelled != nil ? cancelled! : self.cancelled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWinners(addresses: [Address], prizeIndex: Int){ 
 			for address in addresses{ 
 				if self.winners[address] == nil{ 
@@ -311,7 +325,7 @@ contract BloctoPrize{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWinners(addresses: [Address], prizeIndex: Int){ 
 			for address in addresses{ 
 				var index = 0
@@ -329,12 +343,12 @@ contract BloctoPrize{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPrize(prize: Prize){ 
 			self.prizes.append(prize)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimPrizes(address: Address){ 
 			pre{ 
 				self.cancelled == false:
@@ -361,27 +375,27 @@ contract BloctoPrize{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun initClaimer(): @Claimer{ 
 		return <-create Claimer()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokens():{ String: Token}{ 
 		return self.tokens
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCampaignsLentgh(): Int{ 
 		return self.campaigns.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCampaigns(): [Campaign]{ 
 		return self.campaigns
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCampaign(id: Int): Campaign{ 
 		return self.campaigns[id]
 	}

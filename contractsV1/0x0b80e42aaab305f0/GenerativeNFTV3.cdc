@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -63,28 +77,28 @@ contract GenerativeNFTV3: NonFungibleToken{
 			self.metadata = initMeta
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImage(): String{ 
 			return self.getMetadata()["image"] ?? ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return self.getMetadata()["title"] ?? ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			return self.getMetadata()["description"] ?? ""
 		}
 		
 		// receiver: Capability<&AnyResource{FungibleToken.Receiver}>, cut: UFix64, description: String
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties([])
 		}
@@ -134,10 +148,10 @@ contract GenerativeNFTV3: NonFungibleToken{
 	access(all)
 	resource interface GenerativeNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
@@ -145,7 +159,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &GenerativeNFTV3.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -174,7 +188,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GenerativeNFTV3.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -186,7 +200,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -198,7 +212,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 			recipient.deposit(token: <-nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -220,7 +234,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 			panic("NFT not found in collection.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(id: UInt64): &GenerativeNFTV3.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -243,7 +257,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 		/// @param id: The ID of the NFT that want to be borrowed
 		/// @return An optional reference to the desired NFT, will be nil if the passed id does not exist
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: UInt64): &GenerativeNFTV3.NFT?{ 
 			return self.borrowItem(id: id)
 		}
@@ -275,7 +289,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 	//------------------------------------------------------------
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTs(initMetadata:{ String: String}): @GenerativeNFTV3.NFT{ 
 			pre{ 
 				GenerativeNFTV3.totalSupply < GenerativeNFTV3.maxSupply:
@@ -289,14 +303,14 @@ contract GenerativeNFTV3: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(initMetadata:{ String: String}, address: Address): @GenerativeNFTV3.NFT{ 
 			let newNFT <- self.mintNFTs(initMetadata: initMetadata)
 			GenerativeNFTV3.idToAddress[newNFT.id] = address
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSuply(num: UInt64){ 
 			GenerativeNFTV3.maxSupply = GenerativeNFTV3.maxSupply + num
 		}
@@ -305,7 +319,7 @@ contract GenerativeNFTV3: NonFungibleToken{
 	// getOwner
 	// Gets the current owner of the given item
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwner(itemID: UInt64): Address?{ 
 		if itemID >= 0 && itemID < self.maxSupply{ 
 			if itemID < GenerativeNFTV3.totalSupply{ 

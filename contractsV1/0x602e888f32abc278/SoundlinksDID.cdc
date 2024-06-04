@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 	Description: Central Smart Contract for SoundlinksDID
 	This smart contract contains the core functionality for SoundlinksDID.
 
@@ -93,18 +107,18 @@ contract SoundlinksDID: NonFungibleToken{
 	access(all)
 	resource interface SoundlinksDIDCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSoundlinksDID(id: UInt64): &SoundlinksDID.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -153,7 +167,7 @@ contract SoundlinksDID: NonFungibleToken{
 		///
 		/// Returns: @NonFungibleToken.Collection: A collection that contains the withdrawn DIDs
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			
 			// Create a new empty Collection
@@ -173,7 +187,7 @@ contract SoundlinksDID: NonFungibleToken{
 		/// Paramters: token: the DID to be deposited in the Collection
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a Soundlinks DID to make sure
 			// it is the correct type
@@ -195,7 +209,7 @@ contract SoundlinksDID: NonFungibleToken{
 		///
 		/// Paramters: tokens: the DIDs Collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -219,7 +233,7 @@ contract SoundlinksDID: NonFungibleToken{
 		
 		/// getIDByOne returns an ID that are in the collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDByOne(): UInt64{ 
 			pre{ 
 				self.ownedNFTs.length > 0:
@@ -231,7 +245,7 @@ contract SoundlinksDID: NonFungibleToken{
 		
 		/// getIDsByAmount returns an array of the specified number of IDs that are in the collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDsByAmount(amount: UInt32): [UInt64]{ 
 			pre{ 
 				amount <= UInt32(self.ownedNFTs.length):
@@ -266,7 +280,7 @@ contract SoundlinksDID: NonFungibleToken{
 		///
 		/// Returns: A reference to the Soundlinks DID
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSoundlinksDID(id: UInt64): &SoundlinksDID.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -307,7 +321,7 @@ contract SoundlinksDID: NonFungibleToken{
 		/// Parameters: recipient: The recipient's account using their reference
 		///			 hashs: An array of hashs to mint Soundlinks DIDs
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintDIDs(recipient: &{NonFungibleToken.CollectionPublic}, hashs: [String]){ 
 			for hash in hashs{ 
 				emit DIDMinted(id: SoundlinksDID.totalSupply, hash: hash)
@@ -322,7 +336,7 @@ contract SoundlinksDID: NonFungibleToken{
 		
 		/// createNewAdmin creates a new Admin resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

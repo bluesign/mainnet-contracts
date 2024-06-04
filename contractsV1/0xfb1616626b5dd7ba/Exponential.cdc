@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	Exponential Auction Contract
 
@@ -218,7 +232,7 @@ contract Exponential{
 			self.details = details
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTsToAuction(nftCollection: @{NonFungibleToken.Collection}){ 
 			pre{ 
 				self.isSettled == false:
@@ -278,14 +292,14 @@ contract Exponential{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLowestBid(): UFix64{ 
 			return self.bidValues.length < self.nftCollection.getIDs().length
 				? self.minStartingBid
 				: self.bidValues[self.bidValues.length - 1]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMeta(): AuctionMeta{ 
 			return AuctionMeta(
 				id: self.id,
@@ -304,7 +318,7 @@ contract Exponential{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidsMeta(): [BidMeta]?{ 
 			let bidsMeta: [BidMeta] = []
 			let total = self.bids.length
@@ -324,7 +338,7 @@ contract Exponential{
 		// getPrizeDetails
 		//
 		// would like to add support for metadata standard here once finalized
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrizeDetails(): [UInt64]{ 
 			return self.nftCollection.getIDs()
 		}
@@ -332,7 +346,7 @@ contract Exponential{
 		// getCurrentPremium
 		// 
 		// returns the current premium % applied to any incoming bids
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentPremium(): UFix64{ 
 			let minPremium = 0.0
 			let st = self.startTime // this can be start of premium time if whole auction doesn't have premium applied
@@ -359,7 +373,7 @@ contract Exponential{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun auctionIsOpen(): Bool{ 
 			let now = Exponential.now()
 			return now < self.endTime && now > self.startTime && self.isSettled == false
@@ -670,7 +684,7 @@ contract Exponential{
 		// create an auction
 		// 
 		// this is the only way an auction can be created.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(
 			ftCapability: Capability<&{FungibleToken.Receiver}>, // capability to receive payment for auction
 			
@@ -756,12 +770,12 @@ contract Exponential{
 			Exponential.nextID = Exponential.nextID + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBatchSize(newSize: Int){ 
 			Exponential.BATCH_SIZE = newSize
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePower(newPower: Int){ 
 			Exponential.POWER = newPower
 		}
@@ -769,7 +783,7 @@ contract Exponential{
 	
 	// Main public facing function for placing a bid in any active auction
 	// if this fails no funds move
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun placeBid(
 		auctionID: UInt64,
 		funds: @{FungibleToken.Vault},
@@ -886,7 +900,7 @@ contract Exponential{
 	}
 	
 	// Anyone can settle an auction once it's finished by calling this function, 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun settleAuction(id: UInt64){ 
 		let auctionRef = Exponential.borrowAuction(id: id)
 		assert(auctionRef != nil, message: "Auction not found.")
@@ -898,7 +912,7 @@ contract Exponential{
 	}
 	
 	// consider removing but currently used in frontend
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAuctions(): [UInt64]{ 
 		return self.auctions.keys
 	}
@@ -906,7 +920,7 @@ contract Exponential{
 	// borrowAuction
 	//
 	// convenience function to borrow access to an auction by ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun borrowAuction(id: UInt64): &Auction?{ 
 		if Exponential.auctions[id] != nil{ 
 			return &Exponential.auctions[id] as &Exponential.Auction?
@@ -917,7 +931,7 @@ contract Exponential{
 	
 	// return all auctions meta data....
 	// currently this gives all *live* auctions only.... historic data only available from events 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllAuctionsMeta(): [AuctionMeta]{ 
 		let allMetadata: [AuctionMeta] = []
 		let auctionIDs = self.auctions.keys
@@ -958,7 +972,7 @@ contract Exponential{
 	
 	// Binary Lookup helper
 	// returns sorted insertion point of value in bids array
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun find(value: UFix64, bids: [UFix64]): Int{ 
 		var lo = 0
 		var hi = bids.length

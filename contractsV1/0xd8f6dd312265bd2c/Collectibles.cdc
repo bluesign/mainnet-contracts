@@ -1,4 +1,18 @@
-import CapsuleNFT from "./CapsuleNFT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import CapsuleNFT from "./CapsuleNFT.cdc"
 
 access(all)
 contract Collectibles: CapsuleNFT{ 
@@ -84,16 +98,16 @@ contract Collectibles: CapsuleNFT{
 	/// It also allows for reading the details of an Collectible in the Collection.
 	access(all)
 	resource interface CollectiblesCollectionPublic{ 
-		access(all)
-		fun deposit(token: @{CapsuleNFT.NFT})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @{CapsuleNFT.NFT}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: String): &{CapsuleNFT.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: String): &Collectibles.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -116,7 +130,7 @@ contract Collectibles: CapsuleNFT{
 		}
 		
 		/// Removes an NFT from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: String): @{CapsuleNFT.NFT}{ 
 			let address: Address? = self.owner?.address
 			let account: &Account = getAccount(address!)
@@ -129,7 +143,7 @@ contract Collectibles: CapsuleNFT{
 		}
 		
 		/// Takes an NFT, adds it to the Collection dictionary and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{CapsuleNFT.NFT}){ 
 			let address: Address? = self.owner?.address
 			let account: &Account = getAccount(address!)
@@ -145,19 +159,19 @@ contract Collectibles: CapsuleNFT{
 		}
 		
 		/// Returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [String]{ 
 			return self.ownedNFTs.keys
 		}
 		
 		/// Gets a reference to an NFT in the collection so that the caller can read its metadata and call its methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: String): &{CapsuleNFT.NFT}{ 
 			return (&self.ownedNFTs[id] as &{CapsuleNFT.NFT}?)!
 		}
 		
 		/// Gets a reference to a Collectible in the Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: String): &Collectibles.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorised reference to allow downcasting
@@ -170,7 +184,7 @@ contract Collectibles: CapsuleNFT{
 	}
 	
 	/// Public function that anyone can call to create a new empty collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @{CapsuleNFT.Collection}{ 
 		emit CollectionCreated()
 		return <-create Collection()
@@ -181,7 +195,7 @@ contract Collectibles: CapsuleNFT{
 	resource NFTMinter{ 
 		/// Mints a new Collectible. 
 		/// Deposits it in the recipients Collection using their PublicCollection reference.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintCollectible(recipientCollection: &{CapsuleNFT.CollectionPublic}, id: String, name: String, collection: String, type: String, rarity: String, edition: String, mediaUri: String, mintedTime: String){ 
 			// Create a new Collectible NFT
 			var collectible: @Collectibles.NFT <- create NFT(id: id, name: name, collection: collection, type: type, rarity: rarity, edition: edition, mediaUri: mediaUri, mintedTime: mintedTime)

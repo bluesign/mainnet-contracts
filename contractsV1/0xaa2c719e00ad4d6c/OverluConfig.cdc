@@ -1,4 +1,18 @@
-import OverluError from "./OverluError.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import OverluError from "./OverluError.cdc"
 
 access(all)
 contract OverluConfig{ 
@@ -74,7 +88,7 @@ contract OverluConfig{
 	// overlu admin resource for manage staking contract
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhitelist(address: Address){ 
 			pre{ 
 				!OverluConfig.whitelist.contains(address):
@@ -84,7 +98,7 @@ contract OverluConfig{
 			emit WhitelistAdded(address: address, operator: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhitelist(_ idx: UInt8){ 
 			pre{ 
 				OverluConfig.whitelist[idx] != nil:
@@ -95,7 +109,7 @@ contract OverluConfig{
 			emit WhitelistRemoved(address: address, operator: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(_ flag: Bool){ 
 			pre{ 
 				OverluConfig.pause != flag:
@@ -106,7 +120,7 @@ contract OverluConfig{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRandomId(_ range: Int): UInt64{ 
 		return revertibleRandom<UInt64>() % UInt64(range)
 	}
@@ -131,38 +145,38 @@ contract OverluConfig{
 	}
 	
 	// ---- contract methods ----
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupUser(): @UserCertificate{ 
 		let certificate <- create UserCertificate()
 		return <-certificate
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUpgradeRecords(_ id: UInt64): [{String: AnyStruct}]?{ 
 		return OverluConfig.upgradeRecords[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExpandRecords(_ id: UInt64): [{String: AnyStruct}]?{ 
 		return OverluConfig.expandRecords[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDNANestRecords(_ id: UInt64): UInt64?{ 
 		return OverluConfig.dnaNestRecords[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllUpgradeRecords():{ UInt64: [{String: AnyStruct}]}{ 
 		return OverluConfig.upgradeRecords
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllDNANestRecords():{ UInt64: UInt64}{ 
 		return OverluConfig.dnaNestRecords
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllExpandRecords():{ UInt64: [{String: AnyStruct}]}{ 
 		return OverluConfig.expandRecords
 	}

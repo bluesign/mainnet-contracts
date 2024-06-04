@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -49,7 +63,7 @@ contract Admin{
 	// Admin things
 	/// ===================================================================================
 	//Admin client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxyClient(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -57,8 +71,8 @@ contract Admin{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface AdminProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Server>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&Admin.Server>): Void
 	}
 	
 	//admin proxy with capability receiver
@@ -67,7 +81,7 @@ contract Admin{
 		access(self)
 		var capability: Capability<&Server>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Server>){ 
 			pre{ 
 				cap.check():
@@ -78,7 +92,7 @@ contract Admin{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerWearableSet(_ s: Wearables.Set){ 
 			pre{ 
 				self.capability != nil:
@@ -87,7 +101,7 @@ contract Admin{
 			Wearables.addSet(s)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireWearableSet(_ id: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -96,7 +110,7 @@ contract Admin{
 			Wearables.retireSet(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerWearablePosition(_ p: Wearables.Position){ 
 			pre{ 
 				self.capability != nil:
@@ -105,7 +119,7 @@ contract Admin{
 			Wearables.addPosition(p)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireWearablePosition(_ id: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -114,7 +128,7 @@ contract Admin{
 			Wearables.retirePosition(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerWearableTemplate(_ t: Wearables.Template){ 
 			pre{ 
 				self.capability != nil:
@@ -123,7 +137,7 @@ contract Admin{
 			Wearables.addTemplate(t)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireWearableTemplate(_ id: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -132,7 +146,7 @@ contract Admin{
 			Wearables.retireTemplate(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWearableTemplateDescription(templateId: UInt64, description: String){ 
 			pre{ 
 				self.capability != nil:
@@ -141,7 +155,7 @@ contract Admin{
 			Wearables.updateTemplateDescription(templateId: templateId, description: description)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintWearable(recipient: &{NonFungibleToken.Receiver}, template: UInt64, context:{ String: String}){ 
 			pre{ 
 				self.capability != nil:
@@ -150,7 +164,7 @@ contract Admin{
 			Wearables.mintNFT(recipient: recipient, template: template, context: context)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintWearableDirect(recipientAddress: Address, template: UInt64, context:{ String: String}): @Wearables.NFT{ 
 			pre{ 
 				self.capability != nil:
@@ -160,7 +174,7 @@ contract Admin{
 			return <-newWearable
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintEditionWearable(recipient: &{NonFungibleToken.Receiver}, data: Wearables.WearableMintData, context:{ String: String}){ 
 			pre{ 
 				self.capability != nil:
@@ -169,7 +183,7 @@ contract Admin{
 			Wearables.mintEditionNFT(recipient: recipient, template: data.template, setEdition: data.setEdition, positionEdition: data.positionEdition, templateEdition: data.templateEdition, taggedTemplateEdition: data.taggedTemplateEdition, tagEditions: data.tagEditions, context: context)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun advanceClock(_ time: UFix64){ 
 			pre{ 
 				self.capability != nil:
@@ -180,7 +194,7 @@ contract Admin{
 			Clock.tick(time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun debug(_ value: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -189,7 +203,7 @@ contract Admin{
 			Debug.enable(value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeature(action: String, enabled: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -198,7 +212,7 @@ contract Admin{
 			Templates.setFeature(action: action, enabled: enabled)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resetCounter(){ 
 			pre{ 
 				self.capability != nil:
@@ -207,7 +221,7 @@ contract Admin{
 			Templates.resetCounters()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDoodlesBaseCharacter(_ d: Doodles.BaseCharacter){ 
 			pre{ 
 				self.capability != nil:
@@ -216,7 +230,7 @@ contract Admin{
 			Doodles.setBaseCharacter(d)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireDoodlesBaseCharacter(_ id: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -225,7 +239,7 @@ contract Admin{
 			Doodles.retireBaseCharacter(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDoodlesSpecies(_ d: Doodles.Species){ 
 			pre{ 
 				self.capability != nil:
@@ -234,7 +248,7 @@ contract Admin{
 			Doodles.addSpecies(d)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireDoodlesSpecies(_ id: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -243,7 +257,7 @@ contract Admin{
 			Doodles.retireSpecies(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDoodlesSet(_ d: Doodles.Set){ 
 			pre{ 
 				self.capability != nil:
@@ -252,7 +266,7 @@ contract Admin{
 			Doodles.addSet(d)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireDoodlesSet(_ id: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -261,7 +275,7 @@ contract Admin{
 			Doodles.retireSet(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintDoodles(recipientAddress: Address, doodleName: String, baseCharacter: UInt64, context:{ String: String}): @Doodles.NFT{ 
 			pre{ 
 				self.capability != nil:
@@ -271,7 +285,7 @@ contract Admin{
 			return <-doodle
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRedeemablesSet(name: String, canRedeem: Bool, redeemLimitTimestamp: UFix64, active: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -280,7 +294,7 @@ contract Admin{
 			Redeemables.createSet(name: name, canRedeem: canRedeem, redeemLimitTimestamp: redeemLimitTimestamp, active: active)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRedeemablesSetActive(setId: UInt64, active: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -289,7 +303,7 @@ contract Admin{
 			Redeemables.updateSetActive(setId: setId, active: active)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRedeemablesSetCanRedeem(setId: UInt64, canRedeem: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -298,7 +312,7 @@ contract Admin{
 			Redeemables.updateSetCanRedeem(setId: setId, canRedeem: canRedeem)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRedeemablesSetRedeemLimitTimestamp(setId: UInt64, redeemLimitTimestamp: UFix64){ 
 			pre{ 
 				self.capability != nil:
@@ -307,7 +321,7 @@ contract Admin{
 			Redeemables.updateSetRedeemLimitTimestamp(setId: setId, redeemLimitTimestamp: redeemLimitTimestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRedeemablesTemplate(setId: UInt64, name: String, description: String, brand: String, royalties: [MetadataViews.Royalty], type: String, thumbnail: MetadataViews.Media, image: MetadataViews.Media, active: Bool, extra:{ String: AnyStruct}){ 
 			pre{ 
 				self.capability != nil:
@@ -316,7 +330,7 @@ contract Admin{
 			Redeemables.createTemplate(setId: setId, name: name, description: description, brand: brand, royalties: royalties, type: type, thumbnail: thumbnail, image: image, active: active, extra: extra)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRedeemablesTemplateActive(templateId: UInt64, active: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -325,7 +339,7 @@ contract Admin{
 			Redeemables.updateTemplateActive(templateId: templateId, active: active)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintRedeemablesNFT(recipient: &{NonFungibleToken.Receiver}, templateId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -334,7 +348,7 @@ contract Admin{
 			Redeemables.mintNFT(recipient: recipient, templateId: templateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnRedeemablesUnredeemedSet(setId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -343,7 +357,7 @@ contract Admin{
 			Redeemables.burnUnredeemedSet(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDoodlesDropsWearablesMintTransaction(packTypeId: UInt64, packId: UInt64, transactionId: String){ 
 			pre{ 
 				self.capability != nil:
@@ -352,7 +366,7 @@ contract Admin{
 			TransactionsRegistry.registerDoodlesDropsWearablesMint(packTypeId: packTypeId, packId: packId, transactionId: transactionId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerDoodlesDropsRedeemablesMintTransaction(packTypeId: UInt64, packId: UInt64, transactionId: String){ 
 			pre{ 
 				self.capability != nil:
@@ -361,7 +375,7 @@ contract Admin{
 			TransactionsRegistry.registerDoodlesDropsRedeemablesMint(packTypeId: packTypeId, packId: packId, transactionId: transactionId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerTransaction(name: String, args: [String], value: String){ 
 			pre{ 
 				self.capability != nil:
@@ -370,7 +384,7 @@ contract Admin{
 			TransactionsRegistry.register(name: name, args: args, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPack(recipient: &{NonFungibleToken.Receiver}, typeId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -379,7 +393,7 @@ contract Admin{
 			DoodlePacks.mintNFT(recipient: recipient, typeId: typeId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPackType(id: UInt64, name: String, description: String, thumbnail: MetadataViews.Media, image: MetadataViews.Media, amountOfTokens: UInt8, templateDistributions: [DoodlePackTypes.TemplateDistribution], maxSupply: UInt64?): DoodlePackTypes.PackType{ 
 			pre{ 
 				self.capability != nil:
@@ -388,7 +402,7 @@ contract Admin{
 			return DoodlePackTypes.addPackType(id: id, name: name, description: description, thumbnail: thumbnail, image: image, amountOfTokens: amountOfTokens, templateDistributions: templateDistributions, maxSupply: maxSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePackRevealBlocks(revealBlocks: UInt64){ 
 			pre{ 
 				self.capability != nil:

@@ -1,4 +1,18 @@
-//SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier: MIT
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import Digiyo from "./Digiyo.cdc"
@@ -45,7 +59,7 @@ contract DigiyoSplitCollection{
 		}
 		
 		// batchWithdraw withdraws multiple tokens and returns them as a Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- Digiyo.createEmptyCollection(nftType: Type<@Digiyo.Collection>())
 			for id in ids{ 
@@ -56,7 +70,7 @@ contract DigiyoSplitCollection{
 		
 		// deposit takes a instance and adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let bucket = token.id % self.numBuckets
 			let collection <- self.collections.remove(key: bucket)!
 			collection.deposit(token: <-token)
@@ -64,7 +78,7 @@ contract DigiyoSplitCollection{
 		}
 		
 		// batchDeposit deposits all instances into the passed collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -97,7 +111,7 @@ contract DigiyoSplitCollection{
 		}
 		
 		// borrowInstance Returns a reference to an Instance in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInstance(id: UInt64): &Digiyo.NFT?{ 
 			let bucket = id % self.numBuckets
 			return self.collections[bucket]?.borrowInstance(id: id) ?? nil
@@ -114,7 +128,7 @@ contract DigiyoSplitCollection{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(numBuckets: UInt64): @SplitCollection{ 
 		return <-create SplitCollection(numBuckets: numBuckets)
 	}

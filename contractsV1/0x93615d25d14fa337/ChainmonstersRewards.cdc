@@ -1,4 +1,18 @@
-// This is the Kickstarter/Presale NFT contract of Chainmonsters.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This is the Kickstarter/Presale NFT contract of Chainmonsters.
 // Based on the "current" NonFungibleToken standard on Flow.
 // Does not include that much functionality as the only purpose it to mint and store the Presale NFTs.
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -183,18 +197,18 @@ contract ChainmonstersRewards: NonFungibleToken{
 	access(all)
 	resource interface ChainmonstersRewardCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowReward(id: UInt64): &ChainmonstersRewards.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -235,7 +249,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn rewards
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -252,7 +266,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ChainmonstersRewards.NFT
 			let id: UInt64 = token.id
 			
@@ -264,7 +278,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -298,7 +312,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowReward(id: UInt64): &ChainmonstersRewards.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -339,7 +353,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		
 		// creates a new Reward struct and stores it in the Rewards dictionary
 		// Parameters: metadata: the name of the reward
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createReward(metadata: String, totalSupply: UInt32): UInt32{ 
 			// Create the new Reward
 			var newReward = Reward(metadata: metadata)
@@ -358,7 +372,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		}
 		
 		// consuming an NFT (item) to be converted to in-game economy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun consumeItem(token: @{NonFungibleToken.NFT}, playerId: String){ 
 			let token <- token as! @ChainmonstersRewards.NFT
 			let id: UInt64 = token.id
@@ -367,7 +381,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		}
 		
 		// removing an NFT (item) from the rewards collection to be migrated to the new IMX contracts
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun migrateItem(token: @{NonFungibleToken.NFT}, playerId: String, imxWallet: String){ 
 			let token <- token as! @ChainmonstersRewards.NFT
 			let id: UInt64 = token.id
@@ -378,7 +392,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		// claiming an NFT item from e.g. Season Pass or Store
 		// rewardID - reward to be claimed
 		// uid - unique identifier from system
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimItem(rewardID: UInt32, playerId: String, uid: String): @NFT{ 
 			let nft <- self.mintReward(rewardID: rewardID)
 			emit ItemClaimed(itemID: nft.id, playerId: playerId, uid: uid)
@@ -387,7 +401,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		
 		// mintReward mints a new NFT-Reward with a new ID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintReward(rewardID: UInt32): @NFT{ 
 			pre{ 
 				
@@ -411,7 +425,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		
 		// batchMintReward mints an arbitrary quantity of Rewards
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintReward(rewardID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -422,7 +436,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 			return <-newCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowReward(rewardID: UInt32): &Reward{ 
 			pre{ 
 				ChainmonstersRewards.rewardDatas[rewardID] != nil:
@@ -436,7 +450,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		
 		// ends the current season by incrementing the season number
 		// Rewards minted after this will use the new season number.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeason(): UInt32{ 
 			ChainmonstersRewards.currentSeason = ChainmonstersRewards.currentSeason + UInt32(1)
 			emit NewSeasonStarted(newCurrentSeason: ChainmonstersRewards.currentSeason)
@@ -445,7 +459,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -462,25 +476,25 @@ contract ChainmonstersRewards: NonFungibleToken{
 	}
 	
 	// returns all the rewards setup in this contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllRewards(): [ChainmonstersRewards.Reward]{ 
 		return ChainmonstersRewards.rewardDatas.values
 	}
 	
 	// returns returns all the metadata associated with a specific Reward
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRewardMetaData(rewardID: UInt32): String?{ 
 		return self.rewardDatas[rewardID]?.metadata
 	}
 	
 	// returns the season this specified reward belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRewardSeason(rewardID: UInt32): UInt32?{ 
 		return ChainmonstersRewards.rewardDatas[rewardID]?.season
 	}
 	
 	// returns the maximum supply of a reward
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRewardMaxSupply(rewardID: UInt32): UInt32?{ 
 		return ChainmonstersRewards.rewardSupplies[rewardID]
 	}
@@ -492,7 +506,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 	//
 	//
 	// Returns: Boolean indicating if the reward is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isRewardLocked(rewardID: UInt32): Bool?{ 
 		// Don't force a revert if the reward is invalid
 		if ChainmonstersRewards.rewardSupplies[rewardID] == ChainmonstersRewards.numberMintedPerReward[rewardID]{ 
@@ -505,14 +519,14 @@ contract ChainmonstersRewards: NonFungibleToken{
 	}
 	
 	// returns the number of Rewards that have been minted already
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumRewardsMinted(rewardID: UInt32): UInt32?{ 
 		let amount = ChainmonstersRewards.numberMintedPerReward[rewardID]
 		return amount
 	}
 	
 	// Get reward metadata from the contract owner storage, can be upgraded
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExternalSeasonMetadata(seasonID: UInt32):{ String: String}?{ 
 		let data = self.account.capabilities.get<&[{String: String}]>(/public/ChainmonstersSeasonsMetadata).borrow()
 		if data == nil{ 
@@ -522,7 +536,7 @@ contract ChainmonstersRewards: NonFungibleToken{
 	}
 	
 	// Get reward metadata from the contract owner storage, can be upgraded
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExternalRewardMetadata(rewardID: UInt32):{ String: String}?{ 
 		let data = self.account.capabilities.get<&[{String: String}]>(/public/ChainmonstersRewardsMetadata).borrow()
 		if data == nil{ 

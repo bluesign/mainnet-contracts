@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import DapperUtilityCoin from "./../../standardsV1/DapperUtilityCoin.cdc"
@@ -18,7 +32,7 @@ contract KlktnVoucherMinter{
 	access(contract)
 	var mintedAccounts:{ Address: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintKlktnVoucher(buyer: Address, templateID: UInt64){ 
 		pre{ 
 			!KlktnVoucherMinter.mintedAccounts.containsKey(buyer):
@@ -47,14 +61,14 @@ contract KlktnVoucherMinter{
 		KlktnVoucherMinter.mintedAccounts[buyer] = 1
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasMinted(address: Address): Bool{ 
 		return KlktnVoucherMinter.mintedAccounts.containsKey(address)
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeUserFromMintedAccounts(address: Address){ 
 			pre{ 
 				KlktnVoucherMinter.mintedAccounts[address] != nil:

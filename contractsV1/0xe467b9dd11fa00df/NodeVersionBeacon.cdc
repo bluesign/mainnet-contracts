@@ -1,4 +1,18 @@
-/// The NodeVersionBeacon contract holds the past and future protocol versions.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/// The NodeVersionBeacon contract holds the past and future protocol versions.
 /// that should be used to execute/handle blocks at aa given block height.
 /// 
 /// The service account holds the NodeVersionBeacon.Heartbeat resource
@@ -46,7 +60,7 @@ contract NodeVersionBeacon{
 		
 		/// Returns version in Semver format (e.g. v<major>.<minor>.<patch>-<preRelease>)
 		/// as a String
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toString(): String{ 
 			let semverCoreString =
 				self.major.toString().concat(".").concat(self.minor.toString()).concat(".").concat(
@@ -62,7 +76,7 @@ contract NodeVersionBeacon{
 		/* Custom Comparators */
 		/// Returns true if Semver core is greater than
 		/// passed Semver core and false otherwise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun coreGreaterThan(_ other: Semver): Bool{ 
 			if self.major != other.major{ 
 				return self.major > other.major
@@ -78,28 +92,28 @@ contract NodeVersionBeacon{
 		
 		/// Returns true if Semver core is greater than or
 		/// equal to passed Semver core and false otherwise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun coreGreaterThanOrEqualTo(_ other: Semver): Bool{ 
 			return self.coreGreaterThan(other) || self.coreEqualTo(other)
 		}
 		
 		/// Returns true if Semver core is less than
 		/// passed Semver core and false otherwise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun coreLessThan(_ other: Semver): Bool{ 
 			return !self.coreGreaterThanOrEqualTo(other)
 		}
 		
 		/// Returns true if Semver core is less than or
 		/// equal to passed Semver core and false otherwise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun coreLessThanOrEqualTo(_ other: Semver): Bool{ 
 			return !self.coreGreaterThan(other)
 		}
 		
 		/// Returns true if Semver is equal to passed
 		/// Semver core and false otherwise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun coreEqualTo(_ other: Semver): Bool{ 
 			return self.major == other.major && self.minor == other.minor
 			&& self.patch == other.patch
@@ -107,14 +121,14 @@ contract NodeVersionBeacon{
 		
 		/// Returns true if Semver is *exactly* equal to passed
 		/// Semver and false otherwise
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun strictEqualTo(_ other: Semver): Bool{ 
 			return self.coreEqualTo(other) && self.preRelease == other.preRelease
 		}
 	}
 	
 	/// Returns the v0.0.0 version.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun zeroSemver(): Semver{ 
 		return Semver(major: 0, minor: 0, patch: 0, preRelease: nil)
 	}
@@ -139,7 +153,7 @@ contract NodeVersionBeacon{
 	/// Simplifies edge case code.
 	/// The zero boundary is at block height 0 and has version v0.0.0.
 	/// It is always the first element in the versionBoundaryBlockList.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun zeroVersionBoundary(): VersionBoundary{ 
 		let zeroVersion = self.zeroSemver()
 		return VersionBoundary(blockHeight: 0, version: zeroVersion)
@@ -198,7 +212,7 @@ contract NodeVersionBeacon{
 	access(all)
 	resource Admin{ 
 		/// Adds or updates a version boundary.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVersionBoundary(versionBoundary: VersionBoundary){ 
 			pre{ 
 				versionBoundary.blockHeight > getCurrentBlock().height + NodeVersionBeacon.versionBoundaryFreezePeriod:
@@ -236,7 +250,7 @@ contract NodeVersionBeacon{
 		}
 		
 		/// Deletes an upcoming version boundary.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteVersionBoundary(blockHeight: UInt64){ 
 			pre{ 
 				blockHeight > getCurrentBlock().height + NodeVersionBeacon.versionBoundaryFreezePeriod:
@@ -274,7 +288,7 @@ contract NodeVersionBeacon{
 		}
 		
 		/// Updates the number of blocks in which version boundaries are frozen.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVersionBoundaryFreezePeriod(newFreezePeriod: UInt64){ 
 			post{ 
 				NodeVersionBeacon.versionBoundaryFreezePeriod == newFreezePeriod:
@@ -312,7 +326,7 @@ contract NodeVersionBeacon{
 	access(all)
 	resource Heartbeat{ 
 		// heartbeat is called during the system transaction every block.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun heartbeat(){ 
 			self.checkFirstUpcomingBoundary()
 			if !NodeVersionBeacon.emitEventOnNextHeartbeat{ 
@@ -366,7 +380,7 @@ contract NodeVersionBeacon{
 	
 	/// getCurrentVersionBoundaries returns the current version boundaries.
 	/// this is the same list as the one emitted by the VersionBeacon event.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentVersionBoundaries(): [VersionBoundary]{ 
 		let tableUpdates: [VersionBoundary] = []
 		if NodeVersionBeacon.firstUpcomingBoundary == nil{ 
@@ -398,21 +412,21 @@ contract NodeVersionBeacon{
 	}
 	
 	/// Returns the versionBoundaryFreezePeriod
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersionBoundaryFreezePeriod(): UInt64{ 
 		return NodeVersionBeacon.versionBoundaryFreezePeriod
 	}
 	
 	/// Returns the sequence number of the next version beacon event
 	/// This can be used to verify that no version beacon events were missed.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNextVersionBeaconSequence(): UInt64{ 
 		return self.nextVersionBeaconEventSequence
 	}
 	
 	/// Function that returns the version that was defined at the most
 	/// recent block height boundary. May return zero boundary.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentVersionBoundary(): VersionBoundary{ 
 		var current = 0 as UInt64
 		
@@ -429,7 +443,7 @@ contract NodeVersionBeacon{
 		return self.versionBoundary[block]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNextVersionBoundary(): VersionBoundary?{ 
 		if let index = NodeVersionBeacon.firstUpcomingBoundary{ 
 			let block = self.versionBoundaryBlockList[index]
@@ -440,7 +454,7 @@ contract NodeVersionBeacon{
 	}
 	
 	/// Checks whether given version was compatible at the given historical block height
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersionBoundary(effectiveAtBlockHeight: UInt64): VersionBoundary{ 
 		let block =
 			self.searchForClosestHistoricalBlockBoundary(blockHeight: effectiveAtBlockHeight)
@@ -472,7 +486,7 @@ contract NodeVersionBeacon{
 	/// Returns a page of version boundaries
 	/// page is zero based
 	/// results are sorted by block height
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersionBoundariesPage(page: Int, perPage: Int): VersionBoundaryPage{ 
 		pre{ 
 			page >= 0:

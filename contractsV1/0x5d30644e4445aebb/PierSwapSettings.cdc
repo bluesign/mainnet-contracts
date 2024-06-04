@@ -1,4 +1,18 @@
-import MultiFungibleToken from "../0x3620aa78dc6c5b54/MultiFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MultiFungibleToken from "../0x3620aa78dc6c5b54/MultiFungibleToken.cdc"
 
 import PierLPToken from "../0xe31c5fc93a43c6bb/PierLPToken.cdc"
 
@@ -53,7 +67,7 @@ contract PierSwapSettings{
 		
 		// Updates `poolTotalFee` and `poolProtocolFee`
 		// Always update both values to avoid bad configuration by mistakes
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFees(newTotalFee: UFix64, newProtocolFee: UFix64){ 
 			pre{ 
 				newTotalFee <= 0.01:
@@ -73,7 +87,7 @@ contract PierSwapSettings{
 		}
 		
 		// Updates `protocolFeeRecipient`
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setProtocolFeeRecipient(newAddress: Address){ 
 			pre{ 
 				getAccount(newAddress).capabilities.get<&PierLPToken.Collection>(PierLPToken.CollectionPublicPath).check():
@@ -84,14 +98,14 @@ contract PierSwapSettings{
 		}
 		
 		// Turn on TWAP computation
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun enableObservation(){ 
 			PierSwapSettings.observationEnabled = true
 			emit ObservationSwitchUpdated(enabled: PierSwapSettings.observationEnabled)
 		}
 		
 		// Turn off TWAP computation
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun disableObservation(){ 
 			PierSwapSettings.observationEnabled = false
 			emit ObservationSwitchUpdated(enabled: PierSwapSettings.observationEnabled)
@@ -99,19 +113,19 @@ contract PierSwapSettings{
 	}
 	
 	// Used in PierPair to calculate total fee
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPoolTotalFeeCoefficient(): UFix64{ 
 		return self.poolTotalFee * 1_000.0
 	}
 	
 	// Used in PierPair to calculate protocol fee
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPoolProtocolFeeCoefficient(): UFix64{ 
 		return self.poolTotalFee / self.poolProtocolFee - 1.0
 	}
 	
 	// Used in PierPair to deposit minted LP tokens as protocol fee
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositProtocolFee(vault: @{MultiFungibleToken.Vault}){ 
 		let feeCollectionRef =
 			getAccount(self.protocolFeeRecipient).capabilities.get<&PierLPToken.Collection>(

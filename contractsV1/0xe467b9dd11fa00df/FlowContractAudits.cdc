@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract FlowContractAudits{ 
 	
 	// Event that is emitted when a new Auditor resource is created
@@ -68,13 +82,13 @@ contract FlowContractAudits{
 	}
 	
 	// Returns all current vouchers
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllVouchers():{ String: AuditVoucher}{ 
 		return self.vouchers
 	}
 	
 	// Get the associated dictionary key for given address and codeHash
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun generateVoucherKey(address: Address?, codeHash: String): String{ 
 		if address != nil{ 
 			return (address!).toString().concat("-").concat(codeHash)
@@ -82,7 +96,7 @@ contract FlowContractAudits{
 		return "any-".concat(codeHash)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hashContractCode(_ code: String): String{ 
 		return String.encodeHex(HashAlgorithm.SHA3_256.hash(code.utf8))
 	}
@@ -92,7 +106,7 @@ contract FlowContractAudits{
 	resource Auditor{ 
 		
 		// Create new voucher with contract code
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addVoucher(address: Address?, recurrent: Bool, expiryOffset: UInt64?, code: String){ 
 			let codeHash = FlowContractAudits.hashContractCode(code)
 			self.addVoucherHashed(
@@ -104,7 +118,7 @@ contract FlowContractAudits{
 		}
 		
 		// Create new voucher with hashed contract code
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addVoucherHashed(
 			address: Address?,
 			recurrent: Bool,
@@ -138,7 +152,7 @@ contract FlowContractAudits{
 		}
 		
 		// Remove a voucher with given key
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteVoucher(key: String){ 
 			FlowContractAudits.deleteVoucher(key)
 		}
@@ -147,8 +161,8 @@ contract FlowContractAudits{
 	// Used by admin to set the Auditor capability
 	access(all)
 	resource interface AuditorProxyPublic{ 
-		access(all)
-		fun setAuditorCapability(_ cap: Capability<&Auditor>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setAuditorCapability(_ cap: Capability<&FlowContractAudits.Auditor>): Void
 	}
 	
 	// The auditor account will have audit access through AuditorProxy
@@ -159,22 +173,22 @@ contract FlowContractAudits{
 		access(self)
 		var auditorCapability: Capability<&Auditor>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAuditorCapability(_ cap: Capability<&Auditor>){ 
 			self.auditorCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addVoucher(address: Address?, recurrent: Bool, expiryOffset: UInt64?, code: String){ 
 			((self.auditorCapability!).borrow()!).addVoucher(address: address, recurrent: recurrent, expiryOffset: expiryOffset, code: code)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addVoucherHashed(address: Address?, recurrent: Bool, expiryOffset: UInt64?, codeHash: String){ 
 			((self.auditorCapability!).borrow()!).addVoucherHashed(address: address, recurrent: recurrent, expiryOffset: expiryOffset, codeHash: codeHash)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteVoucher(key: String){ 
 			((self.auditorCapability!).borrow()!).deleteVoucher(key: key)
 		}
@@ -185,7 +199,7 @@ contract FlowContractAudits{
 	}
 	
 	// Can be called by anyone but needs a capability to function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuditorProxy(): @AuditorProxy{ 
 		return <-create AuditorProxy()
 	}
@@ -194,14 +208,14 @@ contract FlowContractAudits{
 	resource Administrator{ 
 		
 		// Creates new Auditor
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAuditor(): @Auditor{ 
 			emit AuditorCreated()
 			return <-create Auditor()
 		}
 		
 		// Checks all vouchers and removes expired ones
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanupExpiredVouchers(){ 
 			for key in FlowContractAudits.vouchers.keys{ 
 				let v = FlowContractAudits.vouchers[key]!
@@ -214,7 +228,7 @@ contract FlowContractAudits{
 		}
 		
 		// For testing
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun useVoucherForDeploy(address: Address, code: String): Bool{ 
 			return FlowContractAudits.useVoucherForDeploy(address: address, code: code)
 		}

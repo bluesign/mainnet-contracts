@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -18,10 +32,10 @@ contract CollectionVault{
 	
 	access(all)
 	resource interface VaultPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun storeVaultPublic(
 			capability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
-		)
+		): Void
 	}
 	
 	access(all)
@@ -35,12 +49,12 @@ contract CollectionVault{
 		access(contract)
 		var enabled: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKeys(): [String]{ 
 			return self.storedCapabilities.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasKey(_ key: String): Bool{ 
 			let capability = self.storedCapabilities[key]
 			if capability == nil{ 
@@ -49,7 +63,7 @@ contract CollectionVault{
 			return (capability!).check()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVault(_ key: String): &{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}?{ 
 			let capability = self.storedCapabilities[key]
 			if capability == nil{ 
@@ -59,12 +73,12 @@ contract CollectionVault{
 			return (capability!).borrow()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun storeVault(_ key: String, capability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>){ 
 			self.storedCapabilities.insert(key: key, capability)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun storeVaultPublic(capability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>){ 
 			let collection = capability.borrow() ?? panic("Could not borrow capability")
 			let type = collection.getType().identifier
@@ -76,12 +90,12 @@ contract CollectionVault{
 			self.storedCapabilities.insert(key: key, capability)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeVault(_ key: String){ 
 			self.storedCapabilities.remove(key: key)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowedPublic(_ allowedPublic: [String]?){ 
 			self.allowedPublic = allowedPublic
 		}
@@ -93,12 +107,12 @@ contract CollectionVault{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(_ allowedPublic: [String]?): @Vault{ 
 		return <-create Vault(allowedPublic)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddress(): Address{ 
 		return self.account.address
 	}

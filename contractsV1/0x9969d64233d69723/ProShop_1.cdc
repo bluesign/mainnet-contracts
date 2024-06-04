@@ -1,4 +1,18 @@
-// ProShop.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// ProShop.cdc
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -184,7 +198,7 @@ contract ProShop_1: NonFungibleToken{
 		}
 		
 		// destructor
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upgrade(metadata:{ String: String}){ 
 			pre{ 
 				metadata != nil:
@@ -195,17 +209,17 @@ contract ProShop_1: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGearPoints():{ UInt64: GearPoint}{ 
 			return self.gearPoints
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMembers():{ Address: ProShopMember}{ 
 			return self.members
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setProShopOwner(address: Address, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			var oldOwnerAddress: Address = 0x00
 			for key in self.members.keys{ 
@@ -227,7 +241,7 @@ contract ProShop_1: NonFungibleToken{
 		
 		// join new player to ProShop token
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun join(player: Address, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				self.members[player] == nil:
@@ -239,7 +253,7 @@ contract ProShop_1: NonFungibleToken{
 		
 		// kick player from ProShop token
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun kick(player: Address){ 
 			pre{ 
 				self.members[player] != nil:
@@ -249,14 +263,14 @@ contract ProShop_1: NonFungibleToken{
 			emit playerRemoved(player: player)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOwnerShare(share: UFix64){ 
 			self.ownerShare = share
 		}
 		
 		// make membership as officer
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun promote(player: Address){ 
 			pre{ 
 				self.members[player] != nil:
@@ -273,7 +287,7 @@ contract ProShop_1: NonFungibleToken{
 		
 		// make membership as member
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun demote(player: Address){ 
 			pre{ 
 				self.members[player] != nil:
@@ -288,7 +302,7 @@ contract ProShop_1: NonFungibleToken{
 			emit demotedMembership(player: player)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMemberPoints(players: [Address], points: [UFix64]){ 
 			pre{ 
 				players.length != 0 && points.length != 0 && players.length == points.length:
@@ -311,7 +325,7 @@ contract ProShop_1: NonFungibleToken{
 			emit addedMemberPoints(players: players, points: points)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setContributesAndGameWeek(){ 
 			//prepare contribute
 			for address in self.members.keys{ 
@@ -334,7 +348,7 @@ contract ProShop_1: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(gearId: UInt64, price: UFix64){ 
 			pre{ 
 				self.gearsNFTs[gearId] != nil:
@@ -349,7 +363,7 @@ contract ProShop_1: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGearPrice(gearId: UInt64): UFix64{ 
 			pre{ 
 				self.gearsNFTs[gearId] != nil:
@@ -363,7 +377,7 @@ contract ProShop_1: NonFungibleToken{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseGearForProShopWithPoints(gear: @{NonFungibleToken.NFT}, points: UFix64){ 
 			pre{ 
 				self.points >= points:
@@ -428,7 +442,7 @@ contract ProShop_1: NonFungibleToken{
 			emit gearPurchased(gearId: gearId, points: points)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyGearFromProShop(gearTokenId: UInt64, payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.gearsNFTs[gearTokenId] != nil:
@@ -473,7 +487,7 @@ contract ProShop_1: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startWeek(){ 
 			self.currentWeekPoints = 0.0
 			for address in self.members.keys{ 
@@ -545,12 +559,12 @@ contract ProShop_1: NonFungibleToken{
 			self.receiver = receiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRole(role: Role){ 
 			self.role = role
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReceiver(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.receiver
 		}
@@ -584,7 +598,7 @@ contract ProShop_1: NonFungibleToken{
 			self.sellWeekId = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContributes():{ Address: SaleCut}{ 
 			return self.contributes
 		}
@@ -607,12 +621,12 @@ contract ProShop_1: NonFungibleToken{
 			self.weekId = ProShop_1.weekId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMemberContributes():{ Address: SaleCut}{ 
 			return self.memberContributes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMemberContributes(contributes:{ Address: SaleCut}){ 
 			self.memberContributes = contributes
 		}
@@ -648,13 +662,13 @@ contract ProShop_1: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(newBaseURI: String){ 
 			ProShop_1.baseURI = newBaseURI
 			emit TokenBaseURISet(newBaseURI: newBaseURI)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startWeek(week: UInt64){ 
 			pre{ 
 				ProShop_1.weekId < week:
@@ -672,7 +686,7 @@ contract ProShop_1: NonFungibleToken{
 		
 		// add player in ProShop token
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMember(player: Address, id: UInt64, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			let proshoptoken = self.borrowProShop(id: id)
 			proshoptoken.join(player: player, receiver: receiver)
@@ -680,37 +694,37 @@ contract ProShop_1: NonFungibleToken{
 		
 		// remove player in ProShop token
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMember(player: Address, id: UInt64){ 
 			let proshoptoken = self.borrowProShop(id: id)
 			proshoptoken.kick(player: player)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun promoteMembership(player: Address, id: UInt64){ 
 			let proshoptoken = self.borrowProShop(id: id)
 			proshoptoken.promote(player: player)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun demoteMembership(player: Address, id: UInt64){ 
 			let proshoptoken = self.borrowProShop(id: id)
 			proshoptoken.demote(player: player)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOwnerShare(id: UInt64, share: UFix64){ 
 			let proshoptoken = self.borrowProShop(id: id)
 			proshoptoken.setOwnerShare(share: share)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMemberPoints(id: UInt64, players: [Address], points: [UFix64]){ 
 			let proshoptoken = self.borrowProShop(id: id)
 			proshoptoken.addMemberPoints(players: players, points: points)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun upgrade(id: UInt64, metadata:{ String: String}){ 
 			let proshoptoken = self.borrowProShop(id: id)
 			proshoptoken.upgrade(metadata: metadata)
@@ -732,18 +746,18 @@ contract ProShop_1: NonFungibleToken{
 	access(all)
 	resource interface ProShopCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnsoldGears(id: UInt64): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProShop(id: UInt64): &ProShop_1.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -753,7 +767,7 @@ contract ProShop_1: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyGearFromProShop(id: UInt64, gearTokenId: UInt64, payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}
 	}
 	
@@ -810,7 +824,7 @@ contract ProShop_1: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ProShop_1.NFT
 			let id: UInt64 = token.id
 			
@@ -821,7 +835,7 @@ contract ProShop_1: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferProshop(tokenId: UInt64, recipient: Address, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			var token <- self.withdraw(withdrawID: tokenId) as! @ProShop_1.NFT
 			token.setProShopOwner(address: recipient, receiver: receiver)
@@ -854,7 +868,7 @@ contract ProShop_1: NonFungibleToken{
 		// exposing all of its fields (including the ProShop attributes).
 		// This is safe as there are no functions that can be called on the ProShop.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProShop(id: UInt64): &ProShop_1.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -864,28 +878,28 @@ contract ProShop_1: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyGearFromProShop(id: UInt64, gearTokenId: UInt64, payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let proshoptoken = ref as! &ProShop_1.NFT
 			return <-proshoptoken.buyGearFromProShop(gearTokenId: gearTokenId, payment: <-payment)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUnsoldGears(id: UInt64): [UInt64]{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let proshoptoken = ref as! &ProShop_1.NFT
 			return proshoptoken.getGearPoints().keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGearPoints(id: UInt64):{ UInt64: GearPoint}{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let proshoptoken = ref as! &ProShop_1.NFT
 			return proshoptoken.getGearPoints()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(id: UInt64, gearId: UInt64, price: UFix64){ 
 			let ownerAddress = ProShop_1.owners[id]!
 			let account = getAccount(ownerAddress)
@@ -907,7 +921,7 @@ contract ProShop_1: NonFungibleToken{
 			proshoptoken.listForSale(gearId: gearId, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseGearForProShopWithPoints(id: UInt64, gear: @{NonFungibleToken.NFT}, points: UFix64){ 
 			let ownerAddress = ProShop_1.owners[id]!
 			let account = getAccount(ownerAddress)
@@ -928,7 +942,7 @@ contract ProShop_1: NonFungibleToken{
 			proshoptoken.purchaseGearForProShopWithPoints(gear: <-gear, points: points)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuthAccount(): Address{ 
 			return ProShop_1.account.address
 		}
@@ -975,7 +989,7 @@ contract ProShop_1: NonFungibleToken{
 		// Mints a new ProShop NFT with a new ID
 		// and deposits it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintProShop(recipient: &{NonFungibleToken.CollectionPublic}, name: String, metadata:{ String: String}, owner: Address, receiver: Capability<&{FungibleToken.Receiver}>){ 
 			emit Minted(id: ProShop_1.totalSupply)
 			
@@ -994,7 +1008,7 @@ contract ProShop_1: NonFungibleToken{
 		access(all)
 		var cutPercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}): @ProShop_1.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -1002,13 +1016,13 @@ contract ProShop_1: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProShop(id: UInt64): &ProShop_1.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -1025,7 +1039,7 @@ contract ProShop_1: NonFungibleToken{
 	// If it has a collection but does not contain the proshopId, return nil.
 	// If it has a collection and that collection contains the proshopId, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, proshopId: UInt64): &ProShop_1.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&ProShop_1.Collection>(ProShop_1.CollectionPublicPath).borrow<&ProShop_1.Collection>() ?? panic("Couldn't get collection")
 		// We trust ProShop.Collection.borowProShop to get the correct proshopId

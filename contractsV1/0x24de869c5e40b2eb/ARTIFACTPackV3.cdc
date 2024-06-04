@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Unlicense
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Unlicense
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -153,12 +167,12 @@ contract ARTIFACTPackV3: NonFungibleToken{
 			ARTIFACTPackV3.nextTemplateId = ARTIFACTPackV3.nextTemplateId + UInt64(1)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLockStatus(lockStatus: Bool){ 
 			self.lockStatus = lockStatus
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeIndex(indexPackAvailable: UInt64){ 
 			(ARTIFACTPackV3.packOptionsByTemplateId[self.templateId]!).remove(at: indexPackAvailable)
 		}
@@ -246,7 +260,7 @@ contract ARTIFACTPackV3: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(owner: Address): @[{NonFungibleToken.NFT}]{ 
 			pre{ 
 				!self.isOpen:
@@ -278,15 +292,15 @@ contract ARTIFACTPackV3: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &ARTIFACTPackV3.NFT?
 	}
 	
@@ -310,7 +324,7 @@ contract ARTIFACTPackV3: NonFungibleToken{
 		// Paramters: owner: The Pack NFT owner
 		// Paramters: collection: The NFTs collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(packID: UInt64, owner: Address, collection: &{ARTIFACTV2.CollectionPublic}){ 
 			let packRef = (&self.ownedNFTs[packID] as &{NonFungibleToken.NFT}?)!
 			let pack = packRef as! &NFT
@@ -344,7 +358,7 @@ contract ARTIFACTPackV3: NonFungibleToken{
 		// Paramters: token: The NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -367,7 +381,7 @@ contract ARTIFACTPackV3: NonFungibleToken{
 		//
 		// Returns: A reference to the NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &ARTIFACTPackV3.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -456,7 +470,7 @@ contract ARTIFACTPackV3: NonFungibleToken{
 	
 	// getPackTemplate get a specific templates stored in the contract by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackTemplate(templateId: UInt64): PackTemplate?{ 
 		return ARTIFACTPackV3.templateDatas[templateId]
 	}

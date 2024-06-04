@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 /*
 Welcome to the Wearables contract for Doodles2
 
@@ -91,22 +105,22 @@ contract Wearables: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreator(): String{ 
 			return self.creator
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassifier(): String{ 
 			return "set"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounterSuffix(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContract(): String{ 
 			return "wearable"
 		}
@@ -169,7 +183,7 @@ contract Wearables: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(_ index: Int): String{ 
 			if self.classifiers.length == 0{ 
 				return self.name
@@ -178,7 +192,7 @@ contract Wearables: NonFungibleToken{
 			return self.name.concat("_").concat(classifier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPositionCount(): Int{ 
 			let length = self.classifiers.length
 			if length == 0{ 
@@ -187,17 +201,17 @@ contract Wearables: NonFungibleToken{
 			return length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassifier(): String{ 
 			return "position"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounterSuffix(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContract(): String{ 
 			return "wearable"
 		}
@@ -288,7 +302,7 @@ contract Wearables: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTags(): [String]{ 
 			let t: [String] = []
 			for tag in self.tags{ 
@@ -297,58 +311,58 @@ contract Wearables: NonFungibleToken{
 			return t
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlural(): Bool{ 
 			return self.plural
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHidden(): Bool{ 
 			return self.hidden
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassifier(): String{ 
 			return "template"
 		}
 		
 		// Trim is not a unique identifier here
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounterSuffix(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContract(): String{ 
 			return "wearable"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPositionName(_ index: Int): String{ 
 			return (Wearables.positions[self.position]!).getName(index)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPosition(): Wearables.Position{ 
 			return Wearables.positions[self.position]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetName(): String{ 
 			return (Wearables.sets[self.set]!).name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSet(): Wearables.Set{ 
 			return Wearables.sets[self.set]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return (Wearables.sets[self.set]!).getRoyalties()
 		}
@@ -381,24 +395,24 @@ contract Wearables: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getValue(): String{ 
 			return self.value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCounterSuffix(): String{ 
 			return self.value
 		}
 		
 		// e.g. set , position
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClassifier(): String{ 
 			return "tag_".concat(self.value)
 		}
 		
 		// e.g. character, wearable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContract(): String{ 
 			return "wearable"
 		}
@@ -476,7 +490,7 @@ contract Wearables: NonFungibleToken{
 			self.editions = editions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContext():{ String: String}{ 
 			return self.context
 		}
@@ -486,25 +500,25 @@ contract Wearables: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.Traits>(), Type<MetadataViews.Editions>(), Type<Wearables.Metadata>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplateActive(): Bool{ 
 			let t = Wearables.templates[self.template.id]!
 			return t.active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPositionActive(): Bool{ 
 			let p = self.template.getPosition()
 			return p.active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetActive(): Bool{ 
 			let s = self.template.getSet()
 			return s.active
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActive(_ classifier: String): Bool{ 
 			switch classifier{ 
 				case "wearable":
@@ -519,7 +533,7 @@ contract Wearables: NonFungibleToken{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastInteraction(): Pointer?{ 
 			if self.interactions.length == 0{ 
 				return nil
@@ -539,17 +553,17 @@ contract Wearables: NonFungibleToken{
 		}
 		
 		//the thumbnail is a png but the image is a SVG, it was decided after deployment that the svg is what we will use for thumbnail and ignore the image
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnail():{ MetadataViews.File}{ 
 			return self.template.image.file as! MetadataViews.IPFSFile
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnailUrl(): String{ 
 			return self.getThumbnail().uri()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			if self.template.tags.length == 0{ 
 				return self.template.name
@@ -559,7 +573,7 @@ contract Wearables: NonFungibleToken{
 			return name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			var plural = self.template.getPlural()
 			var first = "This"
@@ -636,7 +650,7 @@ contract Wearables: NonFungibleToken{
 			self.nounce = self.nounce + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTraitsMetadata(): [MetadataViews.Trait]{ 
 			var rarity: MetadataViews.Rarity? = nil
 			let traits: [MetadataViews.Trait] = []
@@ -717,7 +731,7 @@ contract Wearables: NonFungibleToken{
 			self.extra ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isNewInteraction(owner: Address, characterId: UInt64): Bool{ 
 			return self.address == owner && self.characterId == characterId
 		}
@@ -744,7 +758,7 @@ contract Wearables: NonFungibleToken{
 		
 		// deposit moves an NFT into this collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			token.increaseNounce()
@@ -893,7 +907,7 @@ contract Wearables: NonFungibleToken{
 		return &Wearables.templates[id]! as &Wearables.Template
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateCicrulationSupply(templateId: UInt64): UInt64{ 
 		return Templates.getCounter("template_".concat(templateId.toString()))
 	}

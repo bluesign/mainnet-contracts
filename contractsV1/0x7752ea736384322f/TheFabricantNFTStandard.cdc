@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import TheFabricantMetadataViews from "./TheFabricantMetadataViews.cdc"
 
@@ -6,7 +20,7 @@ import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface TheFabricantNFTStandard{ 
 	access(contract)
 	var nftIdsToOwner:{ UInt64: Address}
@@ -24,7 +38,7 @@ contract interface TheFabricantNFTStandard{
 	// NOTE: The TFNFT interface describes the bare minimum that
 	// a TF NFT should implement to be considered as such. It specifies
 	// functions as opposed to properties to avoid being prescriptive.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface TFNFT{ 
 		// NFT View
 		// Display
@@ -71,13 +85,13 @@ contract interface TheFabricantNFTStandard{
 		// The edition number is the number the NFT is in the series.
 		// getFullName() returns the name + editionNumber
 		// eg XXories Original #4
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFullName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditions(): MetadataViews.Editions
 		
 		// NOTE: Refer to Revealable interface. Each campaign might have a 
@@ -85,15 +99,15 @@ contract interface TheFabricantNFTStandard{
 		// MetadataViews.Medias in the nft would make it un-Revealable,
 		// as .Medias is immutable. Thus, this function should be used
 		// to collect the media assets into a .Medias struct.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedias(): MetadataViews.Medias
 		
 		// Helper function for TF use to get images
 		// {"mainImage": "imageURL", "imageTwo": "imageURL"}
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImages():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVideos():{ String: String}
 		
 		// NOTE: This returns the traits that will be shown in marketplaces,
@@ -101,39 +115,39 @@ contract interface TheFabricantNFTStandard{
 		// flexibility to the implementation. The implementor might
 		// want to have a 'revealable' trait for example,
 		// and MetadataViews.Traits is immutable so not compatible.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits(): MetadataViews.Traits?
 		
 		// NOTE: Same as above, rarity might be revealed.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): MetadataViews.Rarity?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalRoyalties(): MetadataViews.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTFRoyalties(): TheFabricantMetadataViews.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionData(): MetadataViews.NFTCollectionData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTView(): MetadataViews.NFTView
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface TFRoyalties{ 
 		access(all)
 		let royalties: MetadataViews.Royalties //Royalty
@@ -144,9 +158,9 @@ contract interface TheFabricantNFTStandard{
 	}
 	
 	// Used to expose the public mint function so that users can mint
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface TFNFTPublicMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublicMinterDetails():{ String: AnyStruct}
 	}
 }

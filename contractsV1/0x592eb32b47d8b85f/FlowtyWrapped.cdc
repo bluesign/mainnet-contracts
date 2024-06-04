@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -58,13 +72,13 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 	
 	access(all)
 	struct interface WrappedEdition{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ t: Type, _ nft: &NFT): AnyStruct?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionSupply(): UInt64
 		
 		access(account)
@@ -159,15 +173,15 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface FlowtyWrappedCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlowtyWrapped(id: UInt64): &FlowtyWrapped.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -209,7 +223,7 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 		/// @param token: The NFT resource to be included in the collection
 		/// 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FlowtyWrapped.NFT
 			let nftOwnerAddress = token.address
 			assert(nftOwnerAddress == self.owner?.address, message: "The NFT must be owned by the collection owner")
@@ -247,7 +261,7 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFlowtyWrapped(id: UInt64): &FlowtyWrapped.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -310,7 +324,7 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 		///
 		/// @param recipient: A capability to the collection where the new NFT will be deposited
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionName: String, address: Address, data:{ String: AnyStruct}): @FlowtyWrapped.NFT{ 
 			// we want IDs to start at 1, so we'll increment first
 			FlowtyWrapped.totalSupply = FlowtyWrapped.totalSupply + 1
@@ -319,13 +333,13 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(editionName: String): AnyStruct{ 
 			let edition = FlowtyWrapped.getEditionRef(editionName)
 			return edition
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerEdition(_ edition:{ WrappedEdition}){ 
 			pre{ 
 				FlowtyWrapped.editions[edition.getName()] == nil:
@@ -334,12 +348,12 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 			FlowtyWrapped.editions[edition.getName()] = edition
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionExternalUrl(_ s: String){ 
 			FlowtyWrapped.collectionExternalUrl = s
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -350,7 +364,7 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -368,7 +382,7 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}
@@ -397,12 +411,12 @@ contract FlowtyWrapped: NonFungibleToken, ViewResolver{
 		return (&self.editions[name] as &{WrappedEdition}?)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEdition(_ name: String):{ WrappedEdition}{ 
 		return self.editions[name] ?? panic("no edition found with given name")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccountAddress(): Address{ 
 		return self.account.address
 	}

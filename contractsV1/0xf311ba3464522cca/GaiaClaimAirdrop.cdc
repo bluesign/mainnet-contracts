@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract GaiaClaimAirdrop{ 
@@ -106,7 +120,7 @@ contract GaiaClaimAirdrop{
 	
 	access(all)
 	resource ClaimManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addClaim(
 			claimID: String,
 			address: Address,
@@ -143,7 +157,7 @@ contract GaiaClaimAirdrop{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeClaim(claimID: String){ 
 			if GaiaClaimAirdrop.claims.containsKey(claimID){ 
 				let claim <- GaiaClaimAirdrop.claims.remove(key: claimID)!
@@ -156,7 +170,7 @@ contract GaiaClaimAirdrop{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressClaims(address: Address): [ClaimDetails]{ 
 		let claims: [ClaimDetails] = []
 		if GaiaClaimAirdrop.userClaims.containsKey(address){ 
@@ -171,7 +185,7 @@ contract GaiaClaimAirdrop{
 		return claims
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClaim(claimID: String): ClaimDetails?{ 
 		let claim = &GaiaClaimAirdrop.claims[claimID] as &Claim?
 		if claim != nil{ 
@@ -181,7 +195,7 @@ contract GaiaClaimAirdrop{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun completeClaim(claimID: String, receiverCapabilityPath: PublicPath): Address?{ 
 		let claim =
 			&GaiaClaimAirdrop.claims[claimID] as &GaiaClaimAirdrop.Claim?

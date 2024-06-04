@@ -1,4 +1,18 @@
-/**  
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**  
 # Contract defining records and songs. 
 
 ## Record:
@@ -138,11 +152,11 @@ contract Record: NonFungibleToken{
 		var audiokey: String?
 		
 		// Whether the record decryption key is locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLocked(): Bool
 		
 		// Whether the record decryption key is unlocked but unset yet
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tradable(): Bool
 		
 		// this function can only be called by the admin, and will fail if the record is still locked
@@ -206,12 +220,12 @@ contract Record: NonFungibleToken{
 			emit RecordUnlocked(id: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLocked(): Bool{ 
 			return self.locked
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tradable(): Bool{ 
 			return self.locked || self.audiokey != nil
 		}
@@ -229,19 +243,19 @@ contract Record: NonFungibleToken{
 	resource Admin{ 
 		
 		// Publish the decryption key of the record `id` from the given collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRecordAudioKey(collection: &Collection, id: UInt64, audiokey: String){ 
 			(collection.borrowRecord(recordID: id)!).setAudioKey(audiokey: audiokey)
 		}
 		
 		// New admins can be created by an admin.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// New minters can be created by an admin.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(): @Minter{ 
 			return <-create Minter()
 		}
@@ -254,7 +268,7 @@ contract Record: NonFungibleToken{
 	resource Minter{ 
 		
 		// Mint a new record with the given information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintRecord(title: String, artistID: UInt64, description: String, audioaddr: String, coveraddr: String): @Record.NFT{ 
 			let record <- create NFT(metadata: Metadata(title: title, artistID: artistID, description: description, audioaddr: audioaddr, coveraddr: coveraddr))
 			return <-record
@@ -266,15 +280,15 @@ contract Record: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRecord(recordID: UInt64): &{Record.Public}?{ 
 			post{ 
 				result == nil || result?.id == recordID:
@@ -305,7 +319,7 @@ contract Record: NonFungibleToken{
 		
 		// Deposit a record
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited record as a Record NFT to make sure
 			// it is the correct type
@@ -333,7 +347,7 @@ contract Record: NonFungibleToken{
 		}
 		
 		// Get and NFT as a Record.Public reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRecord(recordID: UInt64): &{Record.Public}?{ 
 			if self.ownedNFTs[recordID] != nil{ 
 				let ref = &self.ownedNFTs[recordID] as &{NonFungibleToken.NFT}?
@@ -344,7 +358,7 @@ contract Record: NonFungibleToken{
 		}
 		
 		// Lock the requested record 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockRecord(recordID: UInt64){ 
 			pre{ 
 				self.ownedNFTs[recordID] != nil:
@@ -358,7 +372,7 @@ contract Record: NonFungibleToken{
 		}
 		
 		// Unlock the requested record 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockRecord(recordID: UInt64){ 
 			pre{ 
 				self.ownedNFTs[recordID] != nil:

@@ -1,4 +1,18 @@
-// AUTO-GENERATED CONTRACT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// AUTO-GENERATED CONTRACT
 import Beam from "../0x86b4a0010a71cfc3/Beam.cdc"
 
 import CNN_NFT from "../0x329feb3ab062d289/CNN_NFT.cdc"
@@ -175,7 +189,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// Same method signature as getNFTs.cdc for backwards-compatability.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTs(ownerAddress: Address, ids:{ String: [UInt64]}): [NFTData?]{ 
 		let NFTs: [NFTData?] = []
 		let owner = getAccount(ownerAddress)
@@ -391,7 +405,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 		return NFTs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCnnNFT(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -447,7 +461,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x8b148183c28ff88f/contract/Gaia
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGaia(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -492,7 +506,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stringStartsWith(string: String, prefix: String): Bool{ 
 		if string.length < prefix.length{ 
 			return false
@@ -509,7 +523,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x86b4a0010a71cfc3/contract/Beam
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBeam(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -577,7 +591,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x6d008a788fc27265/contract/Crave
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCrave(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -644,7 +658,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0xed398881d9bf40fb/contract/CricketMoments
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCricketMoments(owner: &Account, id: UInt64): NFTData?{ 
 		let col =
 			owner.capabilities.get<&{CricketMoments.CricketMomentsCollectionPublic}>(
@@ -666,7 +680,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0xe703f7fee6400754/contract/Everbloom
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEternalMoment(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -715,7 +729,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x82b54037a8f180cf/contract/Shard
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEternalShard(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -753,7 +767,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x2e1ee1e7a96826ce/contract/FantastecNFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVoucher(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -799,7 +813,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x23dddd854fcc8c6f/contract/KOTD
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getKOTD(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -867,7 +881,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0xabd6e80be7e9682c/contract/KlktnNFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getKlktnNFT(owner: &Account, id: UInt64): NFTData?{ 
 		let col =
 			owner.capabilities.get<&{KlktnNFT.KlktnNFTCollectionPublic}>(
@@ -889,7 +903,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0xabd6e80be7e9682c/contract/KlktnNFT2
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getKlktnNFT2(owner: &Account, id: UInt64): NFTData?{ 
 		let col =
 			owner.capabilities.get<&{KlktnNFT2.KlktnNFTCollectionPublic}>(
@@ -911,7 +925,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x5634aefcb76e7d8c/contract/MusicBlock
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMynft(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -954,7 +968,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x75e0b6de94eb05d0/contract/NyatheesOVO
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRaceDay(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1013,7 +1027,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x329feb3ab062d289/contract/Andbox_NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRareRooms(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1071,7 +1085,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x8de96244f54db422/contract/SportsIconCollectible
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStarlyCard(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1121,7 +1135,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x98c9c2e548b84d31/contract/CaaPass
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCaaPass(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1170,7 +1184,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x0d9bc5af3fc0c2e3/contract/TuneGO
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTuneGO(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1221,7 +1235,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0xfef48806337aabf1/contract/TicalUniverse
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMatrixWorldFlowFest(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1259,7 +1273,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x0b2a3299cc857e29/contract/TopShot
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTopShot(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1299,7 +1313,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	}
 	
 	// https://flow-view-source.com/mainnet/account/0x233eb012d34b0070/contract/Domains
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlownsDomain(owner: &Account, id: UInt64): NFTData?{ 
 		let _contract =
 			NFTContractData(
@@ -1342,7 +1356,7 @@ contract AlchemyMetadataWrapperMainnetShard1{
 	
 	// https://flow-view-source.com/mainnet/account/0x81e95660ab5308e1/contract/TFCItems
 	// Same method signature as getNFTIDs.cdc for backwards-compatability.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTIDs(ownerAddress: Address):{ String: [UInt64]}{ 
 		let owner = getAccount(ownerAddress)
 		let ids:{ String: [UInt64]} ={} 

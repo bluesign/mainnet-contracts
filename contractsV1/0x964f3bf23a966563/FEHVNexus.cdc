@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -65,7 +79,7 @@ contract FEHVNexus: NonFungibleToken{
 	
 	// Helper to get an ExtraView view in a typesafe way
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExtraView(_ viewResolver: &{ViewResolver.Resolver}): ExtraView?{ 
 		if let view = viewResolver.resolveView(Type<ExtraView>()){ 
 			if let v = view as? ExtraView{ 
@@ -200,15 +214,15 @@ contract FEHVNexus: NonFungibleToken{
 	access(all)
 	resource interface NexusCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNexus(id: UInt64): &FEHVNexus.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -239,7 +253,7 @@ contract FEHVNexus: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FEHVNexus.NFT
 			let id: UInt64 = token.id
 			
@@ -262,7 +276,7 @@ contract FEHVNexus: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNexus(id: UInt64): &FEHVNexus.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -302,19 +316,19 @@ contract FEHVNexus: NonFungibleToken{
 	}
 	
 	// isMinted returns true if a Nexus with that external UUID was minted
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isMinted(externalUuid: String): Bool{ 
 		return self.minted[externalUuid] == true
 	}
 	
 	// viewCategory returns the category metadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun viewCategory(category: Int): Category?{ 
 		return self.metadata[category]
 	}
 	
 	// Increments the burnt registry for that address and token category
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun registerBurn(token: @FEHVNexus.NFT, from: Address){ 
 		// Burn token
 		let category = token.category
@@ -333,7 +347,7 @@ contract FEHVNexus: NonFungibleToken{
 	}
 	
 	// Returns the burnt balance of a category for a user
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBurntBalance(from: Address, category: Int): UInt64{ 
 		if !self.burned.containsKey(from){ 
 			return 0
@@ -352,7 +366,7 @@ contract FEHVNexus: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, externalUuid: String, category: Int){ 
 			pre{ 
 				!FEHVNexus.minted.containsKey(externalUuid):
@@ -375,12 +389,12 @@ contract FEHVNexus: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRegistry(key: String, value: AnyStruct){ 
 			FEHVNexus.registry[key] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(category: Int, name: String, description: String, thumbnail: String, externalUrl: String, video: String, traits: [MetadataViews.Trait]){ 
 			if !FEHVNexus.metadata.containsKey(category){ 
 				FEHVNexus.metadata.insert(key: category, Category())

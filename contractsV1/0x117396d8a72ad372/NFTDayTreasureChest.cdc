@@ -1,4 +1,18 @@
-// Wealth, Fame, Power.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Wealth, Fame, Power.
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -111,15 +125,15 @@ contract NFTDayTreasureChest: NonFungibleToken{
 	access(all)
 	resource interface NFTDayTreasureChestCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTDayTreasureChest(id: UInt64): &NFTDayTreasureChest.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -145,7 +159,7 @@ contract NFTDayTreasureChest: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFTDayTreasureChest.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -163,7 +177,7 @@ contract NFTDayTreasureChest: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTDayTreasureChest(id: UInt64): &NFTDayTreasureChest.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -201,7 +215,7 @@ contract NFTDayTreasureChest: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}){ 
 		pre{ 
 			!self.retired:
@@ -223,21 +237,21 @@ contract NFTDayTreasureChest: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun whitelistAddress(address: Address){ 
 			if !NFTDayTreasureChest.whitelist.contains(address){ 
 				NFTDayTreasureChest.whitelist.append(address)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retire(){ 
 			if !NFTDayTreasureChest.retired{ 
 				NFTDayTreasureChest.retired = true
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addRoyalty(beneficiaryCapability: Capability<&{FungibleToken.Receiver}>, cut: UFix64, description: String){ 
 			
 			// Make sure the royalty capability is valid before minting the NFT
@@ -248,12 +262,12 @@ contract NFTDayTreasureChest: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelist(): [Address]{ 
 		return self.whitelist
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMinted(): [Address]{ 
 		return self.minted
 	}

@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
   This contract allows MFL to create and manage packTemplates.
   A packTemplate is in a way the skeleton of a pack, where, among other things,
   a max supply and  current supply are defined,
@@ -171,13 +185,13 @@ contract MFLPackTemplate{
 	}
 	
 	// Get all packTemplates IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackTemplatesIDs(): [UInt64]{ 
 		return self.packTemplates.keys
 	}
 	
 	// Get a data reprensation of a specific packTemplate
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackTemplate(id: UInt64): PackTemplateData?{ 
 		if let packTemplate = self.getPackTemplateRef(id: id){ 
 			return PackTemplateData(id: packTemplate.id, name: packTemplate.name, description: packTemplate.description, maxSupply: packTemplate.maxSupply, currentSupply: packTemplate.currentSupply, isOpenable: packTemplate.isOpenable, imageUrl: packTemplate.imageUrl, type: packTemplate.type, slots: *packTemplate.slots)
@@ -186,7 +200,7 @@ contract MFLPackTemplate{
 	}
 	
 	// Get a data reprensation of all packTemplates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackTemplates(): [PackTemplateData]{ 
 		var packTemplatesData: [PackTemplateData] = []
 		for id in self.getPackTemplatesIDs(){ 
@@ -215,10 +229,10 @@ contract MFLPackTemplate{
 		access(all)
 		let name: String
 		
-		access(all)
-		fun allowToOpenPacks(id: UInt64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun allowToOpenPacks(id: UInt64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPackTemplate(
 			name: String,
 			description: String?,
@@ -240,7 +254,7 @@ contract MFLPackTemplate{
 			self.name = "PackTemplateAdminClaim"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowToOpenPacks(id: UInt64){ 
 			if let packTemplate = MFLPackTemplate.getPackTemplateRef(id: id){ 
 				packTemplate.allowToOpenPacks()
@@ -248,14 +262,14 @@ contract MFLPackTemplate{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPackTemplate(name: String, description: String?, maxSupply: UInt32, imageUrl: String, type: String, slots: [Slot]){ 
 			let newPackTemplate <- create PackTemplate(name: name, description: description, maxSupply: maxSupply, imageUrl: imageUrl, type: type, slots: slots)
 			let oldPackTemplate <- MFLPackTemplate.packTemplates[newPackTemplate.id] <- newPackTemplate
 			destroy oldPackTemplate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPackTemplateAdmin(): @PackTemplateAdmin{ 
 			return <-create PackTemplateAdmin()
 		}

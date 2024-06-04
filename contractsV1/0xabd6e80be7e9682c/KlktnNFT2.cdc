@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract KlktnNFT2: NonFungibleToken{ 
@@ -62,15 +76,15 @@ contract KlktnNFT2: NonFungibleToken{
 	access(all)
 	resource interface KlktnNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKlktnNFT(id: UInt64): &KlktnNFT2.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -80,32 +94,32 @@ contract KlktnNFT2: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(packID: UInt64)
 	}
 	
 	// AdminPrivate: admin private interface that Admin implements
 	access(all)
 	resource interface AdminPrivate{ 
-		access(all)
-		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, serialNumber: UInt64, metadata:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, serialNumber: UInt64, metadata:{ String: String}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNextAvailableNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, metadata:{ String: String})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(typeID: UInt64, metadataToUpdate:{ String: String}): KlktnNFT2.KlktnNFTTemplate
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTTemplate(typeID: UInt64, isPack: Bool, name: String, mintLimit: UInt64, priceUSD: UFix64, priceFlow: UFix64, isProtected: Bool, metadata:{ String: String})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun protectNFTTemplate(typeID: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unprotectNFTTemplate(typeID: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin
 	}
 	
@@ -151,61 +165,61 @@ contract KlktnNFT2: NonFungibleToken{
 		access(self)
 		var metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPublic(): KlktnNFTTemplatePublic{ 
 			return KlktnNFTTemplatePublic(initTypeID: self.typeID, initIsPack: self.isPack, initName: self.name, initMintLimit: self.mintLimit, initMetadata: self.metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSerialNumberMinted():{ UInt64: Bool}{ 
 			return self.serialNumberMinted
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSerialNumberToMintedDict(serialNumber: UInt64){ 
 			self.serialNumberMinted[serialNumber] = true
 			self.tokenMinted = self.tokenMinted + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaxSerialNumberMinted(mintedSerialNumber: UInt64){ 
 			if mintedSerialNumber > self.maxSerialNumberMinted{ 
 				self.maxSerialNumberMinted = mintedSerialNumber
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePriceUSD(newPriceUSD: UFix64){ 
 			self.priceUSD = newPriceUSD
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePriceFlow(newPriceFlow: UFix64){ 
 			self.priceFlow = newPriceFlow
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMintLimit(newMintLimit: UInt64){ 
 			self.mintLimit = newMintLimit
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}){ 
 			self.metadata = newMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun protect(){ 
 			self.isProtected = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unprotect(){ 
 			self.isProtected = false
 		}
 		
 		// expireNFTTemplate resets serialNumberMinted dictionary & mark NFT template as expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun expireNFTTemplate(){ 
 			self.serialNumberMinted ={} 
 			self.isExpired = true
@@ -275,19 +289,19 @@ contract KlktnNFT2: NonFungibleToken{
 		let metadata:{ String: String}
 		
 		// getNFTTemplateMetadata gets template metadata for the NFT template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTTemplate(): KlktnNFTTemplatePublic?{ 
 			return (KlktnNFT2.KlktnNFTTypeSet[self.typeID]!).getPublic()
 		}
 		
 		// getNFTMetadata gets NFT's own immutable metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
 		// getNFTMetadata gets a KlktnNFTTemplatePublic struct with combined metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFullMetadata(): KlktnNFTTemplatePublic{ 
 			let template = (KlktnNFT2.KlktnNFTTypeSet[self.typeID]!).getPublic()
 			let concatenatedMedata:{ String: String} ={} 
@@ -331,7 +345,7 @@ contract KlktnNFT2: NonFungibleToken{
 		
 		// deposit: takes an NFT and adds it to the Collection dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @KlktnNFT2.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -341,7 +355,7 @@ contract KlktnNFT2: NonFungibleToken{
 		}
 		
 		// batchDeposit: batch deposit a collection to current collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -369,7 +383,7 @@ contract KlktnNFT2: NonFungibleToken{
 		// - Gets a reference to an NFT in the collection as a KlktnNFT,
 		// - exposing all of its fields (including the typeID)
 		// - This is safe as there are no administrative functions that can be called on the KlktnNFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKlktnNFT(id: UInt64): &KlktnNFT2.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -380,7 +394,7 @@ contract KlktnNFT2: NonFungibleToken{
 		}
 		
 		// openPack: open an NFT as a pack by destroying it and emitting a PackOpened event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(packID: UInt64){ 
 			pre{ 
 				self.ownedNFTs[packID] != nil:
@@ -432,7 +446,7 @@ contract KlktnNFT2: NonFungibleToken{
 	resource Admin: AdminPrivate{ 
 		
 		// mintNFT: Mints a new NFT with a new ID and a specified serialNumber, deposit it in the recipient's collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, serialNumber: UInt64, metadata:{ String: String}){ 
 			pre{ 
 				KlktnNFT2.KlktnNFTTypeSet.containsKey(typeID): // template with typeID exists
@@ -466,7 +480,7 @@ contract KlktnNFT2: NonFungibleToken{
 		}
 		
 		// mintNextAvailableNFT: Mints a new NFT with a new ID and the next available serialNumber, deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNextAvailableNFT(recipient: &{NonFungibleToken.CollectionPublic}, typeID: UInt64, metadata:{ String: String}){ 
 			pre{ 
 				KlktnNFT2.KlktnNFTTypeSet.containsKey(typeID): // template with typeID exists
@@ -501,7 +515,7 @@ contract KlktnNFT2: NonFungibleToken{
 		}
 		
 		// updateTemplateMetadata updates an NFT template metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(typeID: UInt64, metadataToUpdate:{ String: String}): KlktnNFT2.KlktnNFTTemplate{ 
 			pre{ 
 				KlktnNFT2.KlktnNFTTypeSet.containsKey(typeID) != nil:
@@ -513,7 +527,7 @@ contract KlktnNFT2: NonFungibleToken{
 		}
 		
 		// createNFTTemplate creates an NFT template for token of typeID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTTemplate(typeID: UInt64, isPack: Bool, name: String, mintLimit: UInt64, priceUSD: UFix64, priceFlow: UFix64, isProtected: Bool, metadata:{ String: String}){ 
 			pre{ 
 				!KlktnNFT2.KlktnNFTTypeSet.containsKey(typeID):
@@ -526,31 +540,31 @@ contract KlktnNFT2: NonFungibleToken{
 		}
 		
 		// protectNFTTemplate: protects an NFT template from public purchase
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun protectNFTTemplate(typeID: UInt64){ 
 			(KlktnNFT2.KlktnNFTTypeSet[typeID]!).protect()
 		}
 		
 		// unprotectNFTTemplate: unprotects an NFT template to make it available for public purchase
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unprotectNFTTemplate(typeID: UInt64){ 
 			(KlktnNFT2.KlktnNFTTypeSet[typeID]!).unprotect()
 		}
 		
 		// updateNFTTemplatePriceUSD: updates priceFUSD for an NFT template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTTemplatePriceUSD(typeID: UInt64, newPriceUSD: UFix64){ 
 			(KlktnNFT2.KlktnNFTTypeSet[typeID]!).updatePriceUSD(newPriceUSD: newPriceUSD)
 		}
 		
 		// updateNFTTemplatePriceFlow: updates priceFlow for an NFT template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTTemplatePriceFlow(typeID: UInt64, newPriceFlow: UFix64){ 
 			(KlktnNFT2.KlktnNFTTypeSet[typeID]!).updatePriceFlow(newPriceFlow: newPriceFlow)
 		}
 		
 		// updateNFTTemplateMintLimit: updates mintLimit for an NFT template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateNFTTemplateMintLimit(typeID: UInt64, newMintLimit: UInt64){ 
 			pre{ 
 				(KlktnNFT2.KlktnNFTTypeSet[typeID]!).maxSerialNumberMinted <= newMintLimit:
@@ -560,13 +574,13 @@ contract KlktnNFT2: NonFungibleToken{
 		}
 		
 		// expireNFTTemplate expires an NFT template permanently
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun expireNFTTemplate(typeID: UInt64){ 
 			(KlktnNFT2.KlktnNFTTypeSet[typeID]!).expireNFTTemplate()
 		}
 		
 		// createNewAdmin creates a new Admin resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -576,7 +590,7 @@ contract KlktnNFT2: NonFungibleToken{
 	// KlktnNFT contract-level functions
 	// -----------------------------------------------------------------------
 	// peekTokenLimit returns enforced mint limit for a token of typeID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun peekTokenLimit(typeID: UInt64): UInt64?{ 
 		if let token = KlktnNFT2.KlktnNFTTypeSet[typeID]{ 
 			return token.mintLimit
@@ -587,19 +601,19 @@ contract KlktnNFT2: NonFungibleToken{
 	
 	// peekNFTTemplates returns all NFT templates
 	// note: this is safe as KlktnNFTTemplate does not have pub(set) access, so the retriever cannot alter the data inside
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun peekNFTTemplates(): [KlktnNFTTemplate]{ 
 		return KlktnNFT2.KlktnNFTTypeSet.values
 	}
 	
 	// peekNFTTemplates returns a list of typeID of all NFT templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun peekNFTTemplatesTypeID(): [UInt64]{ 
 		return KlktnNFT2.KlktnNFTTypeSet.keys
 	}
 	
 	// isValidSerialNumber returns boolean indicating serialNumber to mint for token of typeId is valid
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isValidSerialNumber(typeID: UInt64, serialNumber: UInt64): Bool{ 
 		var NFTTemplateObj = KlktnNFT2.KlktnNFTTypeSet[typeID]!
 		return !NFTTemplateObj.getSerialNumberMinted().containsKey(serialNumber)
@@ -607,7 +621,7 @@ contract KlktnNFT2: NonFungibleToken{
 	
 	// isNFTTemplateExpired returns boolean indicating token of typeID is expired
 	// - We also return true representing token of typeID is expired for tokens without valid templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isNFTTemplateExpired(typeID: UInt64): Bool{ 
 		if !KlktnNFT2.KlktnNFTTypeSet.containsKey(typeID){ 
 			return true
@@ -616,7 +630,7 @@ contract KlktnNFT2: NonFungibleToken{
 	}
 	
 	// isNFTTemplateExist returns boolean indicating if template exists
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isNFTTemplateExist(typeID: UInt64): Bool{ 
 		if KlktnNFT2.KlktnNFTTypeSet.containsKey(typeID){ 
 			return true
@@ -626,7 +640,7 @@ contract KlktnNFT2: NonFungibleToken{
 	
 	// getNFTTemplateMetadata
 	// - returns the metadata of an NFT given a typeID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTTemplateMetadata(typeID: UInt64):{ String: String}{ 
 		if KlktnNFT2.KlktnNFTTypeSet.containsKey(typeID){ 
 			return (KlktnNFT2.KlktnNFTTypeSet[typeID]!).getPublic().metadata
@@ -635,7 +649,7 @@ contract KlktnNFT2: NonFungibleToken{
 	}
 	
 	// getFlowPriceByTypeID gets the NFT template information by typeID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTTemplateInfo(typeID: UInt64): KlktnNFTTemplate{ 
 		return KlktnNFT2.KlktnNFTTypeSet[typeID]!
 	}

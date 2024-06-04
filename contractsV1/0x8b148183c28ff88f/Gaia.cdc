@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -84,7 +98,7 @@ contract Gaia: NonFungibleToken{
 	access(all)
 	var nextSetID: UInt64
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun royaltyAddress(): Address{ 
 		return 0x9eef2e4511390ce4
 	}
@@ -169,7 +183,7 @@ contract Gaia: NonFungibleToken{
 		access(self)
 		let allowedAccounts: [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun returnAllowedAccounts(): [Address]{ 
 			return self.allowedAccounts
 		}
@@ -205,7 +219,7 @@ contract Gaia: NonFungibleToken{
 			emit SetCreated(setID: self.setID, name: name, description: description, website: website, imageURI: imageURI, creator: creator, marketFee: marketFee)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAllowedAccount(account: Address){ 
 			pre{ 
 				!self.allowedAccounts.contains(account):
@@ -215,7 +229,7 @@ contract Gaia: NonFungibleToken{
 			emit SetAddedAllowedAccount(setID: self.setID, allowedAccount: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAllowedAccount(account: Address){ 
 			pre{ 
 				self.creator != account:
@@ -311,7 +325,7 @@ contract Gaia: NonFungibleToken{
 		// The Set needs to be not locked
 		// The template can't have already been added to the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(templateID: UInt64){ 
 			pre{ 
 				Gaia.templateDatas[templateID] != nil:
@@ -337,7 +351,7 @@ contract Gaia: NonFungibleToken{
 		//
 		// Parameters: templateIDs: The IDs of the templates that are being added
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplates(templateIDs: [UInt64]){ 
 			for template in templateIDs{ 
 				self.addTemplate(templateID: template)
@@ -351,7 +365,7 @@ contract Gaia: NonFungibleToken{
 		// Pre-Conditions:
 		// The Play is part of the Set and not retired (available for minting).
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(templateID: UInt64){ 
 			pre{ 
 				self.lockedTemplates[templateID] != nil:
@@ -366,7 +380,7 @@ contract Gaia: NonFungibleToken{
 		// lockAll lock all the templates in the Set
 		// Afterwards, none of the locked templates will be able to mint new NFTs
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockAll(){ 
 			for template in self.templates{ 
 				self.lockTemplate(templateID: template)
@@ -377,7 +391,7 @@ contract Gaia: NonFungibleToken{
 		//
 		// Pre-Conditions:
 		// The Set should not be locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -394,7 +408,7 @@ contract Gaia: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateID: UInt64): @NFT{ 
 			pre{ 
 				self.lockedTemplates[templateID] != nil:
@@ -423,7 +437,7 @@ contract Gaia: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the NFTs that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(templateID: UInt64, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -600,7 +614,7 @@ contract Gaia: NonFungibleToken{
 		//
 		// Returns: the ID of the new Template object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(metadata:{ String: String}): UInt64{ 
 			// Create the new Template
 			var newTemplate = Template(metadata: metadata)
@@ -611,7 +625,7 @@ contract Gaia: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplates(templates: [{String: String}], setID: UInt64, authorizedAccount: Address){ 
 			var templateIDs: [UInt64] = []
 			for metadata in templates{ 
@@ -626,7 +640,7 @@ contract Gaia: NonFungibleToken{
 		//
 		// Parameters: name: The name of the Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, description: String, website: String, imageURI: String, creator: Address, marketFee: UFix64){ 
 			// Create the new Set
 			var newSet <- create Set(name: name, description: description, website: website, imageURI: imageURI, creator: creator, marketFee: marketFee)
@@ -643,7 +657,7 @@ contract Gaia: NonFungibleToken{
 		// Returns: A reference to the Set with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64, authorizedAccount: Address): &Set{ 
 			pre{ 
 				Gaia.sets[setID] != nil:
@@ -659,7 +673,7 @@ contract Gaia: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -671,18 +685,18 @@ contract Gaia: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaNFT(id: UInt64): &Gaia.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -721,7 +735,7 @@ contract Gaia: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn NFTs
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -740,7 +754,7 @@ contract Gaia: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Gaia.NFT
 			let id: UInt64 = token.id
 			
@@ -752,7 +766,7 @@ contract Gaia: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -789,7 +803,7 @@ contract Gaia: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the GaiaAsset.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaNFT(id: UInt64): &Gaia.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -845,7 +859,7 @@ contract Gaia: NonFungibleToken{
 	// getAllTemplates returns all the plays in topshot
 	//
 	// Returns: An array of all the plays that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates(): [Gaia.Template]{ 
 		return Gaia.templateDatas.values
 	}
@@ -855,7 +869,7 @@ contract Gaia: NonFungibleToken{
 	// Parameters: templateID: The id of the Template that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateMetaData(templateID: UInt64):{ String: String}?{ 
 		return self.templateDatas[templateID]?.metadata
 	}
@@ -869,7 +883,7 @@ contract Gaia: NonFungibleToken{
 	//			 field: The field to search for
 	//
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateMetaDataByField(templateID: UInt64, field: String): String?{ 
 		// Don't force a revert if the playID or field is invalid
 		if let template = Gaia.templateDatas[templateID]{ 
@@ -885,25 +899,25 @@ contract Gaia: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: The name of the Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt64): String?{ 
 		// Don't force a revert if the setID is invalid
 		return Gaia.setDatas[setID]?.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetMarketFee(setID: UInt64): UFix64?{ 
 		// Don't force a revert if the setID is invalid
 		return Gaia.setDatas[setID]?.marketFee
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetImage(setID: UInt64): String?{ 
 		// Don't force a revert if the setID is invalid
 		return Gaia.setDatas[setID]?.imageURI
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetInfo(setID: UInt64): SetData?{ 
 		// Don't force a revert if the setID is invalid
 		return Gaia.setDatas[setID]
@@ -915,7 +929,7 @@ contract Gaia: NonFungibleToken{
 	// Parameters: setName: The name of the Set that is being searched
 	//
 	// Returns: An array of the IDs of the Set if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDsByName(setName: String): [UInt64]?{ 
 		var setIDs: [UInt64] = []
 		
@@ -941,7 +955,7 @@ contract Gaia: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: An array of Template IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplatesInSet(setID: UInt64): [UInt64]?{ 
 		// Don't force a revert if the setID is invalid
 		return Gaia.sets[setID]?.templates
@@ -956,7 +970,7 @@ contract Gaia: NonFungibleToken{
 	//			 playID: The id of the Play that is being searched
 	//
 	// Returns: Boolean indicating if the template is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetTemplateLocked(setID: UInt64, templateID: UInt64): Bool?{ 
 		// Don't force a revert if the set or play ID is invalid
 		// Remove the set from the dictionary to get its field
@@ -985,7 +999,7 @@ contract Gaia: NonFungibleToken{
 	// Parameters: setID: The id of the Set that is being searched
 	//
 	// Returns: Boolean indicating if the Set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt64): Bool?{ 
 		// Don't force a revert if the setID is invalid
 		return Gaia.sets[setID]?.locked
@@ -999,7 +1013,7 @@ contract Gaia: NonFungibleToken{
 	//
 	// Returns: The total number of NFTs
 	//		  that have been minted from an set and template
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalMinted(setID: UInt64, templateID: UInt64): UInt64?{ 
 		// Don't force a revert if the Set or play ID is invalid
 		// Remove the Set from the dictionary to get its field
@@ -1023,7 +1037,7 @@ contract Gaia: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Gaia.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&Gaia.Collection>(Gaia.CollectionPublicPath).borrow<&Gaia.Collection>() ?? panic("Couldn't get collection")
 		// We trust Gaia.Collection.borowGaiaAsset to get the correct itemID
@@ -1036,7 +1050,7 @@ contract Gaia: NonFungibleToken{
 	// If an account does not have a Gaia.Collection, returns false.
 	// If it has a collection, return true.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkSetup(_ address: Address): Bool{ 
 		return getAccount(address).capabilities.get<&{Gaia.CollectionPublic}>(Gaia.CollectionPublicPath).check()
 	}

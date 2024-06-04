@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -47,7 +61,7 @@ contract BarterYardPackNFT: NonFungibleToken{
 		access(all)
 		var totalSupply: UInt16
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increment(): UInt16{ 
 			pre{ 
 				self.totalSupply < self.maxSupply:
@@ -81,13 +95,13 @@ contract BarterYardPackNFT: NonFungibleToken{
 		access(all)
 		var totalSupply: UInt16
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increment(): UInt16{ 
 			self.totalSupply = self.totalSupply + 1
 			return self.totalSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(id: Int, name: String, description: String, ipfsThumbnailCid: String, ipfsThumbnailPath: String?, maxSupply: UInt16, totalSupply: UInt16){ 
 			self.id = id
 			self.name = name
@@ -171,15 +185,15 @@ contract BarterYardPackNFT: NonFungibleToken{
 	access(all)
 	resource interface BarterYardPackNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBarterYardPackNFT(id: UInt64): &BarterYardPackNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -210,7 +224,7 @@ contract BarterYardPackNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BarterYardPackNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -233,7 +247,7 @@ contract BarterYardPackNFT: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBarterYardPackNFT(id: UInt64): &BarterYardPackNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -280,7 +294,7 @@ contract BarterYardPackNFT: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new Id
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(packPartId: Int): @BarterYardPackNFT.NFT{ 
 			let packPart = BarterYardPackNFT.packParts[packPartId] ?? panic("[Admin](mintNFT): can't mint nft because invalid packPartId was providen")
 			let edition = packPart.increment()
@@ -294,7 +308,7 @@ contract BarterYardPackNFT: NonFungibleToken{
 		}
 		
 		// Create a new pack part
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewPack(name: String, description: String, ipfsThumbnailCid: String, ipfsThumbnailPath: String?, maxSupply: UInt16){ 
 			let newPackId = BarterYardPackNFT.packParts.length
 			let packPart = PackPart(id: newPackId, name: name, description: description, ipfsThumbnailCid: ipfsThumbnailCid, ipfsThumbnailPath: ipfsThumbnailPath, maxSupply: maxSupply, totalSupply: 0)
@@ -302,12 +316,12 @@ contract BarterYardPackNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackPartsIds(): [Int]{ 
 		return self.packParts.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackPartById(packPartId: Int): BarterYardPackNFT.PackPart?{ 
 		return self.packParts[packPartId]
 	}

@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: TheFabricantS2Minting Contract
    
 	This contract lets users mint TheFabricantS2ItemNFT NFTs for a specified amount of FLOW
@@ -120,22 +134,22 @@ contract TheFabricantS2Minting{
 			self.maxMintAmount = maxMintAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsEventClosed(isClosed: Bool){ 
 			self.closed = isClosed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMaxMintAmount(newMax: UInt32){ 
 			self.maxMintAmount = newMax
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePaymentType(newPaymentType: Type){ 
 			self.paymentType = newPaymentType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePaymentAmount(newPaymentAmount: UFix64){ 
 			self.paymentAmount = newPaymentAmount
 		}
@@ -149,14 +163,14 @@ contract TheFabricantS2Minting{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressMintCount():{ Address: UInt32}{ 
 			return self.addressMintCount
 		}
 	}
 	
 	// check if an address holds certain nfts to allow mint
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun doesAddressHoldAccessPass(address: Address): Bool{ 
 		var hasTheFabricantAccessPass: Bool = false
 		if getAccount(address).capabilities.get<
@@ -177,7 +191,7 @@ contract TheFabricantS2Minting{
 	resource Minter{ 
 		
 		//call S2ItemNFT's mintItem function
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAndTransferItem(
 			garmentDataID: UInt32,
 			materialDataID: UInt32,
@@ -367,7 +381,7 @@ contract TheFabricantS2Minting{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeIsEventClosed(eventName: String, isClosed: Bool){ 
 			pre{ 
 				TheFabricantS2Minting.eventsDetail[eventName] != nil:
@@ -379,7 +393,7 @@ contract TheFabricantS2Minting{
 			emit IsEventClosedChanged(eventName: eventName, isClosed: isClosed)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMaxMintAmount(eventName: String, newMax: UInt32){ 
 			pre{ 
 				TheFabricantS2Minting.eventsDetail[eventName] != nil:
@@ -391,7 +405,7 @@ contract TheFabricantS2Minting{
 			emit MaxMintAmountChanged(eventName: eventName, newMax: newMax)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePaymentType(eventName: String, newPaymentType: Type){ 
 			pre{ 
 				TheFabricantS2Minting.eventsDetail[eventName] != nil:
@@ -403,7 +417,7 @@ contract TheFabricantS2Minting{
 			emit PaymentTypeChanged(eventName: eventName, newPaymentType: newPaymentType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePaymentAmount(eventName: String, newPaymentAmount: UFix64){ 
 			pre{ 
 				TheFabricantS2Minting.eventsDetail[eventName] != nil:
@@ -415,13 +429,13 @@ contract TheFabricantS2Minting{
 			emit PaymentAmountChanged(eventName: eventName, newPaymentAmount: newPaymentAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeItemMinterCapability(minterCapability: Capability<&TheFabricantS2ItemNFT.Admin>){ 
 			TheFabricantS2Minting.itemMinterCapability = minterCapability
 			emit ItemMinterCapabilityChanged(address: minterCapability.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeGarmentMinterCapability(
 			minterCapability: Capability<&TheFabricantS2GarmentNFT.Admin>
 		){ 
@@ -429,7 +443,7 @@ contract TheFabricantS2Minting{
 			emit GarmentMinterCapabilityChanged(address: minterCapability.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMaterialMinterCapability(
 			minterCapability: Capability<&TheFabricantS2MaterialNFT.Admin>
 		){ 
@@ -437,7 +451,7 @@ contract TheFabricantS2Minting{
 			emit MaterialMinterCapabilityChanged(address: minterCapability.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePaymentReceiverCapability(
 			paymentReceiverCapability: Capability<&{FungibleToken.Receiver}>
 		){ 
@@ -448,7 +462,7 @@ contract TheFabricantS2Minting{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEvent(eventName: String, eventDetail: EventDetail){ 
 			pre{ 
 				TheFabricantS2Minting.eventsDetail[eventName] == nil:
@@ -458,28 +472,28 @@ contract TheFabricantS2Minting{
 			emit EventAdded(eventName: eventName, eventDetail: eventDetail)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewMinter(): @Minter{ 
 		return <-create Minter()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEventsDetail():{ String: EventDetail}{ 
 		return TheFabricantS2Minting.eventsDetail
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPaymentReceiverAddress(): Address{ 
 		return (TheFabricantS2Minting.paymentReceiverCapability!).address
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMinterCapabilityAddress(): Address{ 
 		return (TheFabricantS2Minting.itemMinterCapability!).address
 	}

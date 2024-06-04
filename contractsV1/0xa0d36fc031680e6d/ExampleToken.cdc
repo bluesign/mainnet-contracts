@@ -1,4 +1,18 @@
-// ExampleToken.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// ExampleToken.cdc
 //
 // The ExampleToken contract is a sample implementation of a fungible token on Flow.
 //
@@ -37,8 +51,8 @@ contract ExampleToken{
 		// them access by publishing a resource that exposes the withdraw
 		// function.
 		//
-		access(all)
-		fun withdraw(amount: UFix64): @Vault{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdraw(amount: UFix64): @ExampleToken.Vault{ 
 			post{ 
 				// `result` refers to the return value of the function
 				result.balance == UFix64(amount):
@@ -64,8 +78,8 @@ contract ExampleToken{
 		// Function that can be called to deposit tokens
 		// into the implementing resource type
 		//
-		access(all)
-		fun deposit(from: @Vault){ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(from: @ExampleToken.Vault): Void{ 
 			pre{ 
 				from.balance > 0.0:
 					"Deposit balance must be positive"
@@ -116,7 +130,7 @@ contract ExampleToken{
 		// created Vault to the context that called so it can be deposited
 		// elsewhere.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @Vault{ 
 			self.balance = self.balance - amount
 			return <-create Vault(balance: amount)
@@ -130,7 +144,7 @@ contract ExampleToken{
 		// It is allowed to destroy the sent Vault because the Vault
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @Vault){ 
 			self.balance = self.balance + from.balance
 			destroy from
@@ -144,7 +158,7 @@ contract ExampleToken{
 	// and store the returned Vault in their storage in order to allow their
 	// account to be able to receive deposits of this token type.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @Vault{ 
 		return <-create Vault(balance: 0.0)
 	}
@@ -158,7 +172,7 @@ contract ExampleToken{
 		// using their `Receiver` reference.
 		// We say `&AnyResource{Receiver}` to say that the recipient can be any resource
 		// as long as it implements the Receiver interface
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64, recipient: Capability<&{Receiver}>){ 
 			let recipientRef =
 				recipient.borrow() ?? panic("Could not borrow a receiver reference to the vault")

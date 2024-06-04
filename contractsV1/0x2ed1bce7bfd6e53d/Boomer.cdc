@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract Boomer: NonFungibleToken{ 
@@ -137,7 +151,7 @@ contract Boomer: NonFungibleToken{
 		// Parameters: templateId: The ID of the Template
 		//
 		// returns: @NonFungibleToken.NFT the token that was created
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTemplate(templateId: UInt32): @NFT{ 
 			let numMinted = Boomer.numberMintedByTemplate[templateId]!
 			let newTemplate: @NFT <- create NFT(serialNumber: numMinted, templateId: templateId)
@@ -151,7 +165,7 @@ contract Boomer: NonFungibleToken{
 		// Parameters: amount: Amount of NFT to be create
 		//
 		// returns: @Collection the collection with new NFTs 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintTemplate(templateId: UInt32, amount: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -167,7 +181,7 @@ contract Boomer: NonFungibleToken{
 		// Parameters: metadata: The metadata to save inside Template 
 		//
 		// returns: UInt32 the new template ID 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(metadata:{ String: String}): UInt32{ 
 			var newTemplate = Template(metadata: metadata)
 			Boomer.numberMintedByTemplate[newTemplate.templateId] = 0
@@ -182,18 +196,18 @@ contract Boomer: NonFungibleToken{
 	access(all)
 	resource interface BoomerCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBoomerNFT(id: UInt64): &Boomer.NFT?
 	}
 	
@@ -233,7 +247,7 @@ contract Boomer: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -250,7 +264,7 @@ contract Boomer: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Boomer.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -262,7 +276,7 @@ contract Boomer: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -293,7 +307,7 @@ contract Boomer: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBoomerNFT(id: UInt64): &Boomer.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -337,14 +351,14 @@ contract Boomer: NonFungibleToken{
 	
 	// getAllTemplates get all templates stored in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates(): [Boomer.Template]{ 
 		return Boomer.templateDatas.values
 	}
 	
 	// getTemplate get specific template stored in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplate(templateId: UInt32): Boomer.Template?{ 
 		return Boomer.templateDatas[templateId]
 	}

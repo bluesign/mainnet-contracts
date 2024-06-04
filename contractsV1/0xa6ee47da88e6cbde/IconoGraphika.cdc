@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -275,15 +289,15 @@ contract IconoGraphika: NonFungibleToken{
 	access(all)
 	resource interface IconoGraphikaCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowIconoGraphika(id: UInt64): &IconoGraphika.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -291,8 +305,8 @@ contract IconoGraphika: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	access(all)
@@ -317,7 +331,7 @@ contract IconoGraphika: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @IconoGraphika.NFT
 			let id: UInt64 = token.id
 			
@@ -339,7 +353,7 @@ contract IconoGraphika: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowIconoGraphika(id: UInt64): &IconoGraphika.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -377,7 +391,7 @@ contract IconoGraphika: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMinter(): @NFTMinter{ 
 		return <-create NFTMinter()
 	}
@@ -386,7 +400,7 @@ contract IconoGraphika: NonFungibleToken{
 	resource NFTMinter{ 
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, collectionName: String, collectionDescription: String, collectionSquareImageCID: String, collectionBannerImageCID: String, shortDescription: String, fullDescription: String, creatorName: String, mintDateTime: UInt64, mintLocation: String, copyrightHolder: String, minterName: String, fileFormat: String, propertyObjectType: String, propertyColour: String, rightsAndObligationsSummary: String, rightsAndObligationsFullText: String, editionSize: UInt64, editionNumber: UInt64, fileSizeMb: UFix64, royalties: [MetadataViews.Royalty], imageCID: String){ 
 			var newNFT <- create NFT(id: IconoGraphika.totalSupply, name: name, collectionName: collectionName, collectionDescription: collectionDescription, collectionSquareImageCID: collectionSquareImageCID, collectionBannerImageCID: collectionBannerImageCID, shortDescription: shortDescription, fullDescription: fullDescription, creatorName: creatorName, mintDateTime: mintDateTime, mintLocation: mintLocation, copyrightHolder: copyrightHolder, minterName: minterName, fileFormat: fileFormat, propertyObjectType: propertyObjectType, propertyColour: propertyColour, rightsAndObligationsSummary: rightsAndObligationsSummary, rightsAndObligationsFullText: rightsAndObligationsFullText, editionSize: editionSize, editionNumber: editionNumber, fileSizeMb: fileSizeMb, royalties: royalties, imageCID: imageCID)
 			

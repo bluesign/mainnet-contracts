@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -101,7 +115,7 @@ contract TuneGONFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultCollectionMetadata(): CollectionMetadata{ 
 		let media = "https://www.tunegonft.com/assets/images/tunego-beta-logo.png"
 		return TuneGONFT.CollectionMetadata(collectionName: "TuneGO NFT", collectionDescription: "Unique music collectibles from the TuneGO Community", collectionURL: "https://www.tunegonft.com/", collectionMedia: media, collectionMediaMimeType: "image/png", collectionMediaBanner: media, collectionMediaBannerMimeType: "image/png", collectionSocials:{ "discord": "https://discord.gg/nsGnsRbMke", "facebook": "https://www.facebook.com/tunego", "instagram": "https://www.instagram.com/tunego", "twitter": "https://twitter.com/TuneGONFT", "tiktok": "https://www.tiktok.com/@tunegoadmin?lang=en"})
@@ -231,7 +245,7 @@ contract TuneGONFT: NonFungibleToken{
 			self.mintedTime = mintedTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionMetadata(): CollectionMetadata{ 
 			if self.collectionName != nil{ 
 				return TuneGONFT.CollectionMetadata(collectionName: self.collectionName!, collectionDescription: self.collectionDescription!, collectionURL: self.collectionURL!, collectionMedia: self.collectionMedia!, collectionMediaMimeType: self.collectionMediaMimeType!, collectionMediaBanner: self.collectionMediaBanner, collectionMediaBannerMimeType: self.collectionMediaBannerMimeType, collectionSocials: self.collectionSocials!)
@@ -239,7 +253,7 @@ contract TuneGONFT: NonFungibleToken{
 			return TuneGONFT.getDefaultCollectionMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toDict():{ String: AnyStruct?}{ 
 			let rawMetadata:{ String: AnyStruct?} ={} 
 			rawMetadata.insert(key: "title", self.title)
@@ -279,7 +293,7 @@ contract TuneGONFT: NonFungibleToken{
 			return rawMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toStringDict():{ String: String?}{ 
 			let rawMetadata:{ String: String?} ={} 
 			rawMetadata.insert(key: "title", self.title)
@@ -340,7 +354,7 @@ contract TuneGONFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun editionCirculatingKey(itemId: String): String{ 
 		return "circulating:".concat(itemId)
 	}
@@ -392,17 +406,17 @@ contract TuneGONFT: NonFungibleToken{
 			self.additionalInfo = additionalInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAdditionalInfo():{ String: String}{ 
 			return self.additionalInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun totalEditions(): UInt64{ 
 			return TuneGONFT.itemEditions[self.itemId] ?? UInt64(0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun circulatingEditions(): UInt64{ 
 			return TuneGONFT.itemEditions[TuneGONFT.editionCirculatingKey(itemId: self.itemId)] ?? self.totalEditions()
 		}
@@ -476,15 +490,15 @@ contract TuneGONFT: NonFungibleToken{
 	access(all)
 	resource interface TuneGONFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTuneGONFT(id: UInt64): &TuneGONFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -508,7 +522,7 @@ contract TuneGONFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @TuneGONFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -526,7 +540,7 @@ contract TuneGONFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTuneGONFT(id: UInt64): &TuneGONFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -572,7 +586,7 @@ contract TuneGONFT: NonFungibleToken{
 	
 	// burnNFTs
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun burnNFTs(nfts: @{UInt64: TuneGONFT.NFT}){ 
 		let toBurn: Int = nfts.keys.length
 		var nftItemID: String? = nil
@@ -590,7 +604,7 @@ contract TuneGONFT: NonFungibleToken{
 	}
 	
 	// Claiming
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimNFT(nft: @{NonFungibleToken.NFT}, receiver: &{NonFungibleToken.Receiver}, tag: String?){ 
 		let id = nft.id
 		let type = nft.getType().identifier
@@ -684,7 +698,7 @@ contract TuneGONFT: NonFungibleToken{
 			emit ClaimedReward(id: id, recipient: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMinter(): @NFTMinter{ 
 			return <-create NFTMinter()
 		}
@@ -710,7 +724,7 @@ contract TuneGONFT: NonFungibleToken{
 			self.metadatas[fullId] = data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: String, edition: UInt64?): Metadata?{ 
 			if edition != nil{ 
 				let perItem = self.metadatas[id.concat((edition!).toString())]
@@ -730,7 +744,7 @@ contract TuneGONFT: NonFungibleToken{
 			self.royalties[fullId] = royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: String, edition: UInt64?):{ Address: UFix64}?{ 
 			if edition != nil{ 
 				let perItem = self.royalties[id.concat((edition!).toString())]

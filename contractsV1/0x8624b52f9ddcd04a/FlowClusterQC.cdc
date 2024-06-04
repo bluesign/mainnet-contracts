@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 *
 *  Manages the process of collecting votes for the root quorum certificate of the upcoming
 *  epoch for all collection node clusters assigned for the upcoming epoch.
@@ -107,14 +121,14 @@ contract FlowClusterQC{
 		}
 		
 		/// Returns the number of nodes in the cluster
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun size(): UInt16{ 
 			return UInt16(self.nodeWeights.length)
 		}
 		
 		/// Returns the minimum sum of vote weight required in order to be able to generate a
 		/// valid quorum certificate for this cluster.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun voteThreshold(): UInt64{ 
 			if self.totalWeight == 0 as UInt64{ 
 				return 0 as UInt64
@@ -135,7 +149,7 @@ contract FlowClusterQC{
 		/// Then this cluster's QC generation is considered complete and this method returns 
 		/// the vote message that reached quorum
 		/// If no vote is found to reach quorum, then `nil` is returned
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isComplete(): String?{ 
 			for message in self.uniqueVoteMessageTotalWeights.keys{ 
 				if self.uniqueVoteMessageTotalWeights[message]! >= self.voteThreshold(){ 
@@ -147,7 +161,7 @@ contract FlowClusterQC{
 		
 		/// Generates the Quorum Certificate for this cluster
 		/// If the cluster is not complete, this returns `nil`
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateQuorumCertificate(): ClusterQC?{ 
 			
 			// Only generate the QC if the voting is complete for this cluster
@@ -266,12 +280,12 @@ contract FlowClusterQC{
 			self.voterIDs = voterIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSignature(_ signature: String){ 
 			self.voteSignatures.append(signature)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addVoterID(_ voterID: String){ 
 			self.voterIDs.append(voterID)
 		}
@@ -307,7 +321,7 @@ contract FlowClusterQC{
 		/// Params: voteSignature: Signed `voteMessage` with the nodes `stakingKey`
 		///		 voteMessage: Hex-encoded message
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun vote(voteSignature: String, voteMessage: String){ 
 			pre{ 
 				FlowClusterQC.inProgress:
@@ -368,16 +382,16 @@ contract FlowClusterQC{
 	/// These are accessed by the `FlowEpoch` contract through a capability
 	access(all)
 	resource interface EpochOperations{ 
-		access(all)
-		fun createVoter(nodeID: String, stakingKey: String): @Voter
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createVoter(nodeID: String, stakingKey: String): @FlowClusterQC.Voter
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startVoting(clusters: [Cluster])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stopVoting()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceStopVoting()
 	}
 	
@@ -389,7 +403,7 @@ contract FlowClusterQC{
 		/// Creates a new Voter resource for a collection node
 		/// This function will be publicly accessible in the FlowEpoch
 		/// contract, which will restrict the creation to only collector nodes
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createVoter(nodeID: String, stakingKey: String): @Voter{ 
 			return <-create Voter(nodeID: nodeID, stakingKey: stakingKey)
 		}
@@ -400,7 +414,7 @@ contract FlowClusterQC{
 		/// transitioning to the Epoch Setup Phase.
 		///
 		/// CAUTION: calling this erases the votes for the current/previous epoch.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startVoting(clusters: [Cluster]){ 
 			FlowClusterQC.inProgress = true
 			FlowClusterQC.clusters = clusters
@@ -419,7 +433,7 @@ contract FlowClusterQC{
 		
 		/// Stops voting for the current epoch. Can only be called once a 2/3 
 		/// majority of each cluster has submitted a vote. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stopVoting(){ 
 			pre{ 
 				FlowClusterQC.votingCompleted():
@@ -430,14 +444,14 @@ contract FlowClusterQC{
 		
 		/// Force a stop of the voting period
 		/// Should only be used if the protocol halts and needs to be reset
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceStopVoting(){ 
 			FlowClusterQC.inProgress = false
 		}
 	}
 	
 	/// Returns a boolean telling if the voter is registered for the current voting phase
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun voterIsRegistered(_ nodeID: String): Bool{ 
 		return FlowClusterQC.nodeCluster[nodeID] != nil
 	}
@@ -445,13 +459,13 @@ contract FlowClusterQC{
 	/// Returns a boolean telling if the node has claimed their `Voter` resource object
 	/// The object can only be claimed once, but if the node destroys their `Voter` object,
 	/// It could be claimed again
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun voterIsClaimed(_ nodeID: String): Bool{ 
 		return FlowClusterQC.voterClaimed[nodeID] != nil
 	}
 	
 	/// Returns whether this voter has successfully submitted a vote for this epoch.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun nodeHasVoted(_ nodeID: String): Bool{ 
 		if let clusterIndex = FlowClusterQC.nodeCluster[nodeID]{ 
 			let cluster = FlowClusterQC.clusters[clusterIndex]
@@ -463,13 +477,13 @@ contract FlowClusterQC{
 	}
 	
 	/// Gets all of the collector clusters for the current epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClusters(): [Cluster]{ 
 		return self.clusters
 	}
 	
 	/// Returns true if we have collected enough votes for all clusters.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun votingCompleted(): Bool{ 
 		for cluster in FlowClusterQC.clusters{ 
 			if cluster.isComplete() == nil{ 

@@ -1,4 +1,18 @@
-/* SPDX-License-Identifier: UNLICENSED */
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* SPDX-License-Identifier: UNLICENSED */
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -98,7 +112,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 		access(self)
 		let creators: [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreators(): [Address]{ 
 			return self.creators
 		}
@@ -109,7 +123,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 		access(all)
 		let hiddenContent: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasHiddenContent(): Bool{ 
 			return self.hiddenContent != nil
 		}
@@ -126,7 +140,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 		access(self)
 		var history: [Transaction]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHistory(): [Transaction]{ 
 			return self.history
 		}
@@ -134,7 +148,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 		access(self)
 		let previousHistory: [Transaction]?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPreviousHistory(): [Transaction]?{ 
 			return self.previousHistory
 		}
@@ -142,7 +156,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 		access(self)
 		let royalties: MetadataViews.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): MetadataViews.Royalties{ 
 			return self.royalties!
 		}
@@ -174,7 +188,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 			self.creationTime = getCurrentBlock().timestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSale(toUser: Address, atPrice: UFix64){ 
 			self.history.append(Transaction(seller: (self.owner!).address, buyer: toUser, price: atPrice, time: getCurrentBlock().timestamp))
 		}
@@ -219,12 +233,12 @@ contract DimeCollectibleV4: NonFungibleToken{
 	access(all)
 	resource interface DimeCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DimeCollectibleV4.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -234,8 +248,8 @@ contract DimeCollectibleV4: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 	}
 	
 	// Collection
@@ -258,7 +272,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 		
 		// Takes a NFT and adds it to the collection dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DimeCollectibleV4.NFT
 			let id: UInt64 = token.id
 			
@@ -282,7 +296,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 		}
 		
 		// Gets a reference to an NFT in the collection as a DimeCollectibleV4.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DimeCollectibleV4.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -327,7 +341,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 	access(all)
 	resource NFTMinter{ 
 		// Mint a standard DimeCollectible NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTs(collection: &{NonFungibleToken.CollectionPublic}, name: String, description: String, blueprintId: UInt64, numCopies: UInt64, creators: [Address], content: String, hiddenContent: String?, tradeable: Bool, previousHistory: [Transaction]?, royalties: MetadataViews.Royalties, initialSale: Transaction?){ 
 			let history: [Transaction] = initialSale != nil ? [initialSale!] : []
 			var counter = 1 as UInt64
@@ -340,7 +354,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 			DimeCollectibleV4.totalSupply = DimeCollectibleV4.totalSupply + numCopies
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintRoyaltyNFTs(collection: &{NonFungibleToken.CollectionPublic}, name: String, description: String, blueprintId: UInt64, numCopies: UInt64, creators: [Address], content: String, tradeable: Bool, royalties: MetadataViews.Royalties, initialSale: Transaction?): [UInt64]{ 
 			let history: [Transaction] = initialSale != nil ? [initialSale!] : []
 			var counter = 1 as UInt64
@@ -356,7 +370,7 @@ contract DimeCollectibleV4: NonFungibleToken{
 			return idsUsed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintReleaseNFTs(collection: &{NonFungibleToken.CollectionPublic}, name: String, description: String, blueprintId: UInt64, numCopies: UInt64, creators: [Address], content: String, hiddenContent: String?, tradeable: Bool, previousHistory: [Transaction]?, royalties: MetadataViews.Royalties, initialSale: Transaction?){ 
 			let history: [Transaction] = initialSale != nil ? [initialSale!] : []
 			var counter = 1 as UInt64

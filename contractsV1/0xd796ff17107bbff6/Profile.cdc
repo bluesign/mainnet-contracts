@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 * Inspiration: https://flow-view-source.com/testnet/account/0xba1132bc08f82fe2/contract/Ghost
 */
 
@@ -250,47 +264,47 @@ contract Profile{
 	
 	access(all)
 	resource interface Public{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTags(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvatar(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollections(): [ResourceCollection]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun follows(_ address: Address): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowers(): [FriendStatus]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowing(): [FriendStatus]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWallets(): [Wallet]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLinks(): [Link]
 		
 		//TODO: create another method to deposit with message
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supportedFungigleTokenTypes(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun asProfile(): UserProfile
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isBanned(_ val: Address): Bool
 		
 		//TODO: should getBanned be here?
@@ -303,15 +317,15 @@ contract Profile{
 	
 	access(all)
 	resource interface Owner{ 
-		access(all)
-		fun setName(_ val: String){ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setName(_ val: String): Void{ 
 			pre{ 
 				val.length <= 16:
 					"Name must be 16 or less characters"
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAvatar(_ val: String){ 
 			pre{ 
 				val.length <= 255:
@@ -319,7 +333,7 @@ contract Profile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTags(_ val: [String]){ 
 			pre{ 
 				Profile.verifyTags(tags: val, tagLength: 10, tagSize: 3):
@@ -328,7 +342,7 @@ contract Profile{
 		}
 		
 		//validate length of description to be 255 or something?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(_ val: String){ 
 			pre{ 
 				val.length <= 255:
@@ -336,7 +350,7 @@ contract Profile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun follow(_ address: Address, tags: [String]){ 
 			pre{ 
 				Profile.verifyTags(tags: tags, tagLength: 10, tagSize: 3):
@@ -344,50 +358,50 @@ contract Profile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfollow(_ address: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCollection(_ val: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollection(_ val: ResourceCollection)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWallet(_ val: Wallet)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWallet(_ val: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWallets(_ val: [Wallet])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLink(_ val: Link)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeLink(_ val: String)
 		
 		//Verify that this user has signed something.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ val: String)
 		
 		//A user must be able to remove a follower since this data in your account is added there by another user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFollower(_ val: Address)
 		
 		//manage bans
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBan(_ val: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBan(_ val: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBans(): [Address]
 		
 		//Set if user is allowed to store followers or now
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowStoringFollowers(_ val: Bool)
 	}
 	
@@ -440,37 +454,37 @@ contract Profile{
 			self.bans ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addBan(_ val: Address){ 
 			self.bans[val] = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBan(_ val: Address){ 
 			self.bans.remove(key: val)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBans(): [Address]{ 
 			return self.bans.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isBanned(_ val: Address): Bool{ 
 			return self.bans.containsKey(val)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowStoringFollowers(_ val: Bool){ 
 			self.allowStoringFollowers = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(_ val: String){ 
 			emit Verification(account: (self.owner!).address, message: val)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun asProfile(): UserProfile{ 
 			let wallets: [WalletProfile] = []
 			for w in self.wallets{ 
@@ -483,22 +497,22 @@ contract Profile{
 			return UserProfile(address: (self.owner!).address, name: self.getName(), description: self.getDescription(), tags: self.getTags(), avatar: self.getAvatar(), links: self.getLinks(), wallets: wallets, collections: collections, following: self.getFollowing(), followers: self.getFollowers(), allowStoringFollowers: self.allowStoringFollowers)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLinks(): [Link]{ 
 			return self.links.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addLink(_ val: Link){ 
 			self.links[val.title] = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeLink(_ val: String){ 
 			self.links.remove(key: val)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supportedFungigleTokenTypes(): [Type]{ 
 			let types: [Type] = []
 			for w in self.wallets{ 
@@ -510,7 +524,7 @@ contract Profile{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			for w in self.wallets{ 
 				if from.isInstance(w.accept){ 
 					(w.receiver.borrow()!).deposit(from: <-from)
@@ -523,17 +537,17 @@ contract Profile{
 			panic("could not find a supported wallet for:".concat(identifier))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWallets(): [Wallet]{ 
 			return self.wallets
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWallet(_ val: Wallet){ 
 			self.wallets.append(val)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWallet(_ val: String){ 
 			let numWallets = self.wallets.length
 			var i = 0
@@ -546,88 +560,88 @@ contract Profile{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWallets(_ val: [Wallet]){ 
 			self.wallets = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFollower(_ val: Address){ 
 			self.followers.remove(key: val)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun follows(_ address: Address): Bool{ 
 			return self.following.containsKey(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			return self.description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTags(): [String]{ 
 			return self.tags
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvatar(): String{ 
 			return self.avatar
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowers(): [FriendStatus]{ 
 			return self.followers.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFollowing(): [FriendStatus]{ 
 			return self.following.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(_ val: String){ 
 			self.name = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAvatar(_ val: String){ 
 			self.avatar = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDescription(_ val: String){ 
 			self.description = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTags(_ val: [String]){ 
 			self.tags = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCollection(_ val: String){ 
 			self.collections.remove(key: val)
 		}
 		
 		//TODO: make this the identifier of the collection type rather then the name. just remove the name
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCollection(_ val: ResourceCollection){ 
 			self.collections[val.name] = val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollections(): [ResourceCollection]{ 
 			return self.collections.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun follow(_ address: Address, tags: [String]){ 
 			let friendProfile = Profile.find(address)
 			let owner = (self.owner!).address
@@ -637,7 +651,7 @@ contract Profile{
 			emit Follow(follower: owner, following: address, tags: tags)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfollow(_ address: Address){ 
 			self.following.remove(key: address)
 			Profile.find(address).internal_removeFollower((self.owner!).address)
@@ -669,13 +683,13 @@ contract Profile{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun find(_ address: Address): &{Profile.Public}{ 
 		return (getAccount(address).capabilities.get<&{Profile.Public}>(Profile.publicPath)!)
 			.borrow()!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createUser(
 		name: String,
 		description: String,
@@ -700,7 +714,7 @@ contract Profile{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun verifyTags(tags: [String], tagLength: Int, tagSize: Int): Bool{ 
 		if tags.length > tagSize{ 
 			return false

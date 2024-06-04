@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -152,10 +166,10 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface StarNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
@@ -163,7 +177,7 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStarNFT(id: UInt64): &StarNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -204,7 +218,7 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 		/// @param token: The NFT resource to be included in the collection
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StarNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -217,7 +231,7 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 		
 		// transfer takes an NFT ID and a reference to a recipient's collection
 		// and transfers the NFT corresponding to that ID to the recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -231,7 +245,7 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 		}
 		
 		// burn destroys an NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -266,7 +280,7 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStarNFT(id: UInt64): &StarNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -317,7 +331,7 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 	
 	/// Allows anyone to claim an NFT with a valid claim signature from Galxe
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claim(chain_id: String, campaign_id: UInt256, verify_id: UInt256, cap: UInt256, recipient: Address, signature: String, name: String, description: String, thumbnail: String, metadata:{ String: String}){ 
 		// check if verify_id is already minted
 		if StarNFT.minted[verify_id] != nil{ 
@@ -397,14 +411,14 @@ contract StarNFT: NonFungibleToken, ViewResolver{
 	///
 	access(all)
 	resource Owner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSigner(newSigner: Address){ 
 			StarNFT.signer = newSigner
 		}
 	}
 	
 	// Gets the owner of the given token ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ownerOf(tokenId: UInt64): Address?{ 
 		if tokenId >= 0{ 
 			return StarNFT.owners[tokenId]

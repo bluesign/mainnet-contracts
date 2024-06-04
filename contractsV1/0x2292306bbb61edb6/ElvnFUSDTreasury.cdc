@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Apache License 2.0
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Apache License 2.0
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
@@ -39,7 +53,7 @@ contract ElvnFUSDTreasury{
 	
 	access(all)
 	resource ElvnAdministrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				amount > 0.0:
@@ -53,7 +67,7 @@ contract ElvnFUSDTreasury{
 			return <-ElvnFUSDTreasury.elvnVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawAllAmount(): @{FungibleToken.Vault}{ 
 			let vaultAmount = ElvnFUSDTreasury.elvnVault.balance
 			if vaultAmount <= 0.0{ 
@@ -66,7 +80,7 @@ contract ElvnFUSDTreasury{
 	
 	access(all)
 	resource FUSDAdministrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				amount > 0.0:
@@ -80,7 +94,7 @@ contract ElvnFUSDTreasury{
 			return <-ElvnFUSDTreasury.fusdVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawAllAmount(): @{FungibleToken.Vault}{ 
 			let vaultAmount = ElvnFUSDTreasury.fusdVault.balance
 			if vaultAmount <= 0.0{ 
@@ -91,7 +105,7 @@ contract ElvnFUSDTreasury{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositElvn(vault: @{FungibleToken.Vault}){ 
 		pre{ 
 			vault.balance > 0.0:
@@ -102,7 +116,7 @@ contract ElvnFUSDTreasury{
 		emit DepositedElvn(amount: amount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositFUSD(vault: @{FungibleToken.Vault}){ 
 		pre{ 
 			vault.balance > 0.0:
@@ -113,7 +127,7 @@ contract ElvnFUSDTreasury{
 		emit DepositedFUSD(amount: amount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapElvnToFUSD(vault: @Elvn.Vault): @{FungibleToken.Vault}{ 
 		let vaultAmount = vault.balance
 		if vaultAmount <= 0.0{ 
@@ -127,7 +141,7 @@ contract ElvnFUSDTreasury{
 		return <-self.fusdVault.withdraw(amount: vaultAmount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapFUSDToElvn(vault: @FUSD.Vault): @{FungibleToken.Vault}{ 
 		let vaultAmount = vault.balance
 		if vaultAmount <= 0.0{ 
@@ -141,7 +155,7 @@ contract ElvnFUSDTreasury{
 		return <-self.elvnVault.withdraw(amount: vaultAmount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalance(): [UFix64]{ 
 		return [self.elvnVault.balance, self.fusdVault.balance]
 	}

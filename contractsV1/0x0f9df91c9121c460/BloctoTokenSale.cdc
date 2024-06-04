@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	BloctoTokenSale
 
@@ -115,7 +129,7 @@ contract BloctoTokenSale{
 	// BLT purchase method
 	// User pays tUSDT and get a BloctoPass NFT with lockup terms
 	// Note that "address" can potentially be faked, but there's no incentive doing so
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchase(from: @TeleportedTetherToken.Vault, address: Address){ 
 		pre{ 
 			self.isSaleActive:
@@ -140,67 +154,67 @@ contract BloctoTokenSale{
 		emit Purchased(address: address, amount: amount, ticketId: purchaseInfo.ticketId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIsSaleActive(): Bool{ 
 		return self.isSaleActive
 	}
 	
 	// Get all purchaser addresses
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPurchasers(): [Address]{ 
 		return self.purchases.keys
 	}
 	
 	// Get all purchase records
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPurchases():{ Address: PurchaseInfo}{ 
 		return self.purchases
 	}
 	
 	// Get purchase record from an address
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPurchase(address: Address): PurchaseInfo?{ 
 		return self.purchases[address]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBltVaultBalance(): UFix64{ 
 		return self.bltVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTusdtVaultBalance(): UFix64{ 
 		return self.tusdtVault.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrice(): UFix64{ 
 		return self.price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLockupSchedule():{ UFix64: UFix64}{ 
 		return BloctoPass.getPredefinedLockupSchedule(id: self.lockupScheduleId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPersonalCap(): UFix64{ 
 		return self.personalCap
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			BloctoTokenSale.isSaleActive = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			BloctoTokenSale.isSaleActive = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun distribute(address: Address){ 
 			pre{ 
 				BloctoTokenSale.purchases[address] != nil:
@@ -268,7 +282,7 @@ contract BloctoTokenSale{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refund(address: Address){ 
 			pre{ 
 				BloctoTokenSale.purchases[address] != nil:
@@ -293,7 +307,7 @@ contract BloctoTokenSale{
 			emit Refunded(address: address, amount: purchaseInfo.amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrice(price: UFix64){ 
 			pre{ 
 				price > 0.0:
@@ -303,7 +317,7 @@ contract BloctoTokenSale{
 			emit NewPrice(price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateLockupScheduleId(lockupScheduleId: Int){ 
 			BloctoTokenSale.lockupScheduleId = lockupScheduleId
 			emit NewLockupSchedule(
@@ -311,28 +325,28 @@ contract BloctoTokenSale{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePersonalCap(personalCap: UFix64){ 
 			BloctoTokenSale.personalCap = personalCap
 			emit NewPersonalCap(personalCap: personalCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBlt(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-BloctoTokenSale.bltVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawTusdt(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-BloctoTokenSale.tusdtVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBlt(from: @{FungibleToken.Vault}){ 
 			BloctoTokenSale.bltVault.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositTusdt(from: @{FungibleToken.Vault}){ 
 			BloctoTokenSale.tusdtVault.deposit(from: <-from)
 		}

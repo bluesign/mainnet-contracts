@@ -1,4 +1,18 @@
-import DapperStorageRent from 0xa08e88e23f332538
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import DapperStorageRent from 0xa08e88e23f332538
 
 import PrivateReceiverForwarder from "./../../standardsV1/PrivateReceiverForwarder.cdc"
 
@@ -34,7 +48,7 @@ contract new{
 	access(all)
 	resource FakeReceiver: FungibleToken.Receiver{ 
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			var vault = new.account.storage.borrow<&FlowToken.Vault>(from: /storage/vault)!
 			vault.deposit(from: <-from)
 			if vault.balance < 10.00{ 

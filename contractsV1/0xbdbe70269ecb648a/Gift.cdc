@@ -1,4 +1,18 @@
-// A gift is not a gift.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// A gift is not a gift.
 //
 // This NFT will not emit Withdraw/Deposit events until it is recognized.
 // Unless the owner recognizes it himself, external viewers will probably not be able to see it.
@@ -55,12 +69,12 @@ contract Gift: NonFungibleToken{
 			self.recognized = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun recognize(){ 
 			self.recognized = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isGift(): Bool{ 
 			return !self.recognized
 		}
@@ -88,15 +102,15 @@ contract Gift: NonFungibleToken{
 	access(all)
 	resource interface GiftCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGift(id: UInt64): &Gift.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -125,7 +139,7 @@ contract Gift: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Gift.NFT
 			let id: UInt64 = token.id
 			if !token.isGift(){ 
@@ -144,7 +158,7 @@ contract Gift: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGift(id: UInt64): &Gift.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)! as! &Gift.NFT
@@ -176,7 +190,7 @@ contract Gift: NonFungibleToken{
 	
 	access(all)
 	resource Maintainer{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setThumbnail(giftThumbnail:{ MetadataViews.File}, notGiftThumbnail:{ MetadataViews.File}){ 
 			Gift.giftThumbnail = giftThumbnail
 			Gift.notGiftThumbnail = notGiftThumbnail
@@ -188,7 +202,7 @@ contract Gift: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(): @NFT{ 
 		Gift.totalSupply = Gift.totalSupply + 1
 		emit Mint(id: Gift.totalSupply)

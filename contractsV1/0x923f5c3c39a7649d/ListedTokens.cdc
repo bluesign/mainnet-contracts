@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract ListedTokens{ 
 	/****** Events ******/
 	access(all)
@@ -74,7 +88,7 @@ contract ListedTokens{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToken(
 			name: String,
 			displayName: String,
@@ -106,7 +120,7 @@ contract ListedTokens{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateToken(
 			name: String,
 			displayName: String,
@@ -135,7 +149,7 @@ contract ListedTokens{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeToken(key: String){ 
 			ListedTokens._tokens.remove(key: key)
 			emit TokenRemoved(key: key)
@@ -143,12 +157,12 @@ contract ListedTokens{
 	}
 	
 	/****** Methods ******/
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tokenExists(key: String): Bool{ 
 		return self._tokens.containsKey(key)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokens(): [TokenInfo]{ 
 		return self._tokens.values
 	}

@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Account0{ 
 	access(all)
 	var n: Int
@@ -15,17 +29,17 @@ contract Account0{
 	access(all)
 	var totalSupply2: UInt64
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setN(_n: Int){ 
 		self.n = _n
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setUrl1(newUrl: String){ 
 		self.url1 = newUrl
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setUrl2(newUrl: String){ 
 		self.url2 = newUrl
 	}
@@ -35,17 +49,17 @@ contract Account0{
 		access(all)
 		var collection: @{UInt64: NFT1}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(nft: @NFT1){ 
 			self.collection[nft.id] <-! nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.collection.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &NFT1{ 
 			return (&self.collection[id] as &NFT1?)!
 		}
@@ -60,17 +74,17 @@ contract Account0{
 		access(all)
 		var collection: @{UInt64: NFT2}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(nft: @NFT2){ 
 			self.collection[nft.id] <-! nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.collection.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: UInt64): &NFT2{ 
 			return (&self.collection[id] as &NFT2?)!
 		}
@@ -244,17 +258,17 @@ contract Account0{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCollection1(): @Collection1{ 
 		return <-create Account0.Collection1()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCollection2(): @Collection2{ 
 		return <-create Account0.Collection2()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNFT1(
 		dato_11: String,
 		dato_12: String,
@@ -273,7 +287,7 @@ contract Account0{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNFT2(
 		dato_11: String,
 		dato_12: String,

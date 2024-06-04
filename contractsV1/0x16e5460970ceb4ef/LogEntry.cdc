@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
   LogEntry for Increment products for purpose of onchain data analysis.
 
@@ -43,12 +57,12 @@ contract LogEntry{
 	)
 	
 	// ... More to be added here ...
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun LogAgreement(addr: Address){ 
 		emit LogAgreementE(a: addr, t: getCurrentBlock().timestamp)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun LogAggregateSwap(
 		userAddr: Address,
 		tokenInKey: String,
@@ -75,7 +89,7 @@ contract LogEntry{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun LogPoolSwapInAggregator(
 		tokenInKey: String,
 		tokenOutKey: String,

@@ -1,4 +1,18 @@
-import ChainmonstersRewards from "./ChainmonstersRewards.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import ChainmonstersRewards from "./ChainmonstersRewards.cdc"
 
 import PRNG from "./PRNG.cdc"
 
@@ -158,7 +172,7 @@ contract ChainmonstersFoundation{
 	   * Gets the tier of a bundle with the given rewardID or nil if it's not registered as a bundle.
 	   */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTierFromBundleRewardID(rewardID: UInt32): Tier?{ 
 		return self.bundleRewardTierMapping[rewardID]
 	}
@@ -167,7 +181,7 @@ contract ChainmonstersFoundation{
 	   * Gets the rewardID of a given tier or nil if it's not registered as a bundle.
 	   */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBundleRewardIDFromTier(tier: Tier): UInt32?{ 
 		for rewardID in self.bundleRewardTierMapping.keys{ 
 			let currentTier = self.bundleRewardTierMapping[rewardID]!
@@ -185,8 +199,8 @@ contract ChainmonstersFoundation{
 	
 	access(all)
 	resource interface TiersCollectionPublic{ 
-		access(all)
-		fun collectionSize(tier: Tier): Int?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun collectionSize(tier: ChainmonstersFoundation.Tier): Int?
 	}
 	
 	/**
@@ -204,7 +218,7 @@ contract ChainmonstersFoundation{
 		access(self)
 		let legendaryCollection: @ChainmonstersRewards.Collection
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollection(tier: Tier): &ChainmonstersRewards.Collection?{ 
 			switch tier{ 
 				case Tier.RARE:
@@ -222,7 +236,7 @@ contract ChainmonstersFoundation{
 			 * Returns the number of NFTs still available in the given tier
 			 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun collectionSize(tier: Tier): Int?{ 
 			switch tier{ 
 				case Tier.RARE:
@@ -249,7 +263,7 @@ contract ChainmonstersFoundation{
 			 * Sell a random bundle of a given tier
 			 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sellBundle(tier: Tier): @{NonFungibleToken.NFT}{ 
 			let nft <- ChainmonstersFoundation.pickBundle(tier: tier)
 			emit BundleSold(nftID: nft.id, tier: tier.rawValue)
@@ -260,7 +274,7 @@ contract ChainmonstersFoundation{
 			 * Redeem a bundle for NFTs
 			 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeemBundle(nft: @ChainmonstersRewards.NFT): @{NonFungibleToken.Collection}{ 
 			pre{ 
 				ChainmonstersFoundation.bundleRewardTierMapping[nft.data.rewardID] != nil:
@@ -338,17 +352,17 @@ contract ChainmonstersFoundation{
 			 * Can be used for testing or giveaways
 			 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun manualRaffle(rng: &PRNG.Generator, tier: Tier): @{NonFungibleToken.NFT}?{ 
 			return <-ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: tier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewTiersCollection(): @TiersCollection{ 
 			return <-create TiersCollection()
 		}

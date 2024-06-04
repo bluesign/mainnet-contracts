@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -46,7 +60,7 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 	event POAPTokenDesposited(id: UInt64, reciever: Address?, timestamp: UFix64)
 	
 	//################################### LOGIC ############################
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAttendees():{ Address: SimpleTokenView}{ 
 		return self.attendees
 	}
@@ -106,7 +120,7 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 	}
 	
 	//Function to return view 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTSTokenView(_ viewResolver: &{ViewResolver.Resolver}): TSTokenView?{ 
 		if let view = viewResolver.resolveView(Type<TSTokenView>()){ 
 			if let v = view as? TSTokenView{ 
@@ -210,7 +224,7 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 	access(all)
 	resource interface TSINNOVATORSMARCH2023CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		// returns an array of the IDs that are in the collection
 		access(all)
@@ -224,11 +238,11 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
 		
 		// Check if user has a token 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasToken(): Bool
 		
 		// Force casting to a specific 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTSINNOVATORSMARCH2023NFT(id: UInt64): &TSINNOVATORSMARCH2023.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -245,7 +259,7 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 		
 		// takes an NFT and adds it to the user's collection 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			pre{ 
 				self.getIDs().length == 0:
 					"You Already Own A Token From the TribalScale event"
@@ -263,7 +277,7 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 		}
 		
 		// returns whether there is already a token in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasToken(): Bool{ 
 			return !(self.getIDs().length == 0)
 		}
@@ -289,7 +303,7 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 		}
 		
 		// Returns a reference to a token downcasted to TSINNOVATORSMARCH2023.NFT type
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTSINNOVATORSMARCH2023NFT(id: UInt64): &TSINNOVATORSMARCH2023.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -333,7 +347,7 @@ contract TSINNOVATORSMARCH2023: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createToken(email: String, description: String, ipfsHash: String, org: String, royalties: [MetadataViews.Royalty]): @TSINNOVATORSMARCH2023.NFT{ 
 		return <-create NFT(email: email, description: description, ipfsHash: ipfsHash, org: org, royalties: royalties)
 	}

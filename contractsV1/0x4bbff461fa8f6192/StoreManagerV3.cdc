@@ -1,4 +1,18 @@
-import FantastecSwapDataProperties from "./FantastecSwapDataProperties.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FantastecSwapDataProperties from "./FantastecSwapDataProperties.cdc"
 
 access(all)
 contract StoreManagerV3{ 
@@ -182,7 +196,7 @@ contract StoreManagerV3{
 			self.productId = productId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addProduct(product: Product){ 
 			self.product = product
 		}
@@ -213,7 +227,7 @@ contract StoreManagerV3{
 			self.type = type
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSectionItem(position: UInt64, productId: UInt64): SectionItem{ 
 			let id = StoreManagerV3.nextSectionItemId
 			let sectionItem = SectionItem(id: id, position: position, productId: productId)
@@ -222,7 +236,7 @@ contract StoreManagerV3{
 			return sectionItem
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addProductToSectionItem(sectionItemId: UInt64, product: Product): SectionItem?{ 
 			if let sectionItem = self.sectionItems[sectionItemId]{ 
 				sectionItem.addProduct(product: product)
@@ -232,7 +246,7 @@ contract StoreManagerV3{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSectionItem(id: UInt64): SectionItem?{ 
 			return self.sectionItems.remove(key: id)
 		}
@@ -241,22 +255,22 @@ contract StoreManagerV3{
 	//-------------------------
 	// Contract level functions
 	//-------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStore():{ UInt64: Section}{ 
 		return self.getDataManager().getStore()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProduct(productId: UInt64): Product?{ 
 		return self.getDataManager().getProduct(productId: productId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProducts(productIds: [UInt64]): [Product]{ 
 		return self.getDataManager().getProducts(productIds: productIds)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllProducts():{ UInt64: Product}{ 
 		return self.getDataManager().getAllProducts()
 	}
@@ -269,7 +283,7 @@ contract StoreManagerV3{
 		access(contract)
 		let store:{ UInt64: Section}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStore():{ UInt64: Section}{ 
 			let products = self.products
 			let store = self.store
@@ -293,7 +307,7 @@ contract StoreManagerV3{
 			return store
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addProduct(
 			id: UInt64,
 			description: String,
@@ -347,7 +361,7 @@ contract StoreManagerV3{
 			emit ProductAdded(id: product.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementProductVolumeForSale(productId: UInt64){ 
 			let newVolumeForSale = self.products[productId]?.decrementProductVolumeForSale()
 			if newVolumeForSale != nil{ 
@@ -355,12 +369,12 @@ contract StoreManagerV3{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProduct(productId: UInt64): Product?{ 
 			return self.products[productId]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProducts(productIds: [UInt64]): [Product]{ 
 			let products: [Product] = []
 			for productId in productIds{ 
@@ -372,12 +386,12 @@ contract StoreManagerV3{
 			return products
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllProducts():{ UInt64: Product}{ 
 			return self.products
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeProduct(productId: UInt64){ 
 			let store = self.store
 			let sectionItemsToRemove:{ UInt64: UInt64} ={} 
@@ -409,7 +423,7 @@ contract StoreManagerV3{
 			emit ProductUpdated(id: productId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSection(position: UInt64, title: String, type: String): UInt64{ 
 			let id = StoreManagerV3.nextSectionId
 			let section = Section(id: id, position: position, title: title, type: type)
@@ -419,18 +433,18 @@ contract StoreManagerV3{
 			return id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSection(sectionId: UInt64): Section?{ 
 			return self.store[sectionId]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSection(sectionId: UInt64){ 
 			self.store.remove(key: sectionId)
 			emit SectionRemoved(id: sectionId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSectionItemToSection(
 			sectionId: UInt64,
 			position: UInt64,
@@ -443,7 +457,7 @@ contract StoreManagerV3{
 			return (sectionItem!).id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSectionItemFromSection(sectionId: UInt64, sectionItemId: UInt64){ 
 			let sectionItem = self.store[sectionId]?.removeSectionItem(id: sectionItemId)
 			sectionItem ?? panic("no section found with ID ".concat(sectionId.toString()))

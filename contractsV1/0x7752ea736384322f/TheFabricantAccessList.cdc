@@ -1,4 +1,18 @@
-// Used for managing access lists on the BC. It does not manage the 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Used for managing access lists on the BC. It does not manage the 
 // minting process, only the access lists.
 access(all)
 contract TheFabricantAccessList{ 
@@ -155,13 +169,13 @@ contract TheFabricantAccessList{
 	// 
 	access(all)
 	struct interface AddressListPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressList():{ Address: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressListLength(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsAddress(address: Address): Bool
 	}
 	
@@ -171,22 +185,22 @@ contract TheFabricantAccessList{
 		access(self)
 		var addressList:{ Address: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressList():{ Address: Bool}{ 
 			return self.addressList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAddressListLength(): Int{ 
 			return self.addressList.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsAddress(address: Address): Bool{ 
 			return self.addressList.containsKey(address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAddressesToAddressList(addressDict:{ Address: Bool}){ 
 			var i = 0
 			while i < addressDict.length{ 
@@ -195,7 +209,7 @@ contract TheFabricantAccessList{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddressFromAddressList(address: Address): Bool{ 
 			if !self.addressList.containsKey(address){ 
 				return false
@@ -205,7 +219,7 @@ contract TheFabricantAccessList{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyAddressList(){ 
 			self.addressList ={} 
 		}
@@ -280,7 +294,7 @@ contract TheFabricantAccessList{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessListOpenState():{ String: Bool}{ 
 			var state:{ String: Bool} ={} 
 			state["isOpen"] = self.isOpen()
@@ -289,7 +303,7 @@ contract TheFabricantAccessList{
 			return state
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessListDetails():{ String: AnyStruct}{ 
 			var ret:{ String: AnyStruct} ={} 
 			ret["id"] = self.id
@@ -305,19 +319,19 @@ contract TheFabricantAccessList{
 			return ret
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIsActive(isActive: Bool){ 
 			self.isActive = isActive
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOnlyUseInternalTestingList(useTestingList: Bool){ 
 			self.onlyUseTestingList = useTestingList
 		}
 		
 		// NOTE: This is the function that should be used for determining
 		// access via the contract level doesAddressHaveAccess()!
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkAccessFor(address: Address): Bool{ 
 			if self.isOpenInternally(){ 
 				// In testing mode
@@ -336,7 +350,7 @@ contract TheFabricantAccessList{
 		// Use doesAddressHaveAccess for access rights.
 		// This function tells you what lists the address is in and what the state of the
 		// ALD currently is.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addressIsInList(address: Address):{ String: AnyStruct}{ 
 			var ret:{ String: AnyStruct} ={} 
 			ret["AccessListDetailsId"] = self.id
@@ -348,7 +362,7 @@ contract TheFabricantAccessList{
 			return ret
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAccessListDetails(collection: String?, description: String?){ 
 			if let collection = collection{ 
 				self.collection = collection
@@ -411,7 +425,7 @@ contract TheFabricantAccessList{
 	// * Used to control CRUD ALDs + ALs. 
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIsActive(accessListDetailsId: UInt64, isActive: Bool){ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -430,7 +444,7 @@ contract TheFabricantAccessList{
 		}
 		
 		// NOTE: WARNING! Setting this to false will open up the external (public) access list!
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOnlyUseInternalTestingList(accessListDetailsId: UInt64, useTestingList: Bool){ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -451,7 +465,7 @@ contract TheFabricantAccessList{
 		}
 		
 		// The user must create an ALD before creating an AL
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAccessListDetails(collection: String, description: String?){ 
 			let accessListDetails: AccessListDetails =
 				TheFabricantAccessList.AccessListDetails(
@@ -501,7 +515,7 @@ contract TheFabricantAccessList{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAccessListDetails(
 			accessListDetailsId: UInt64,
 			collection: String?,
@@ -524,7 +538,7 @@ contract TheFabricantAccessList{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteAccessListDetails(accessListDetailsId: UInt64){ 
 			// Delete entire details and list from top level dictionary
 			pre{ 
@@ -567,7 +581,7 @@ contract TheFabricantAccessList{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAddressesToAccessList(accessListDetailsId: UInt64, addresses:{ Address: Bool}){ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -582,7 +596,7 @@ contract TheFabricantAccessList{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddressFromAccessList(accessListDetailsId: UInt64, address: Address): Bool{ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -598,7 +612,7 @@ contract TheFabricantAccessList{
 			return addressRemoved
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyAccessList(accessListDetailsId: UInt64){ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -615,7 +629,7 @@ contract TheFabricantAccessList{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAddressesToTestingList(accessListDetailsId: UInt64, addresses:{ Address: Bool}){ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -630,7 +644,7 @@ contract TheFabricantAccessList{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAddressFromTestingList(accessListDetailsId: UInt64, address: Address): Bool{ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -644,7 +658,7 @@ contract TheFabricantAccessList{
 			return addressRemoved
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun emptyTestingList(accessListDetailsId: UInt64){ 
 			let accessListDetails =
 				TheFabricantAccessList.accessListDetails[accessListDetailsId]
@@ -685,7 +699,7 @@ contract TheFabricantAccessList{
 	// -----------------------------------------------------------------------
 	// Public Query Functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessList(accessListDetailsId: UInt64):{ Address: Bool}?{ 
 		if let accessListDetails = TheFabricantAccessList.accessListDetails[accessListDetailsId]{ 
 			if let addressListRef = TheFabricantAccessList.account.capabilities.get<&AddressList>(accessListDetails.accessListPublicPath).borrow(){ 
@@ -695,7 +709,7 @@ contract TheFabricantAccessList{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllAccessLists():{ UInt64:{ Address: Bool}}{ 
 		let keys: [UInt64] = TheFabricantAccessList.accessListDetails.keys
 		var ret:{ UInt64:{ Address: Bool}} ={} 
@@ -712,7 +726,7 @@ contract TheFabricantAccessList{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTestingList(accessListDetailsId: UInt64):{ Address: Bool}?{ 
 		if let accessListDetails = TheFabricantAccessList.accessListDetails[accessListDetailsId]{ 
 			if let addressListRef = TheFabricantAccessList.account.capabilities.get<&AddressList>(accessListDetails.testingListPublicPath).borrow(){ 
@@ -722,7 +736,7 @@ contract TheFabricantAccessList{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTestingLists():{ UInt64:{ Address: Bool}}{ 
 		let keys: [UInt64] = TheFabricantAccessList.accessListDetails.keys
 		var ret:{ UInt64:{ Address: Bool}} ={} 
@@ -741,7 +755,7 @@ contract TheFabricantAccessList{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessListDetails(accessListDetailsId: UInt64):{ String: AnyStruct}?{ 
 		if let accessListDetails = self.accessListDetails[accessListDetailsId]{ 
 			return accessListDetails.getAccessListDetails()
@@ -749,7 +763,7 @@ contract TheFabricantAccessList{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllAccessListDetails():{ UInt64: TheFabricantAccessList.AccessListDetails}{ 
 		return TheFabricantAccessList.accessListDetails
 	}
@@ -762,7 +776,7 @@ contract TheFabricantAccessList{
 	// This function returns a dict containing
 	// a Bool that determines if the address has access and details on the
 	// state of the ALD.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAddressInList(accessListDetailsId: UInt64, address: Address):{ String: AnyStruct}?{ 
 		if let accessListDetail = TheFabricantAccessList.accessListDetails[accessListDetailsId]{ 
 			return accessListDetail.addressIsInList(address: address)
@@ -770,7 +784,7 @@ contract TheFabricantAccessList{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkAccessForAddress(accessListDetailsId: UInt64, address: Address): Bool{ 
 		if let accessListDetail = TheFabricantAccessList.accessListDetails[accessListDetailsId]{ 
 			return accessListDetail.checkAccessFor(address: address)
@@ -781,7 +795,7 @@ contract TheFabricantAccessList{
 	// -----------------------------------------------------------------------
 	// Public Utility Functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun constructAccessListStoragePath(accessListDetailsId: UInt64): StoragePath{ 
 		let masterPathString = TheFabricantAccessList.AccessListStoragePath.toString()
 		let accessListString = "_accessLists_".concat(accessListDetailsId.toString())
@@ -792,7 +806,7 @@ contract TheFabricantAccessList{
 		return StoragePath(identifier: accessListPathString)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun constructAccessListPublicPath(accessListDetailsId: UInt64): PublicPath{ 
 		let masterPathString = TheFabricantAccessList.AccessListStoragePath.toString()
 		let accessListString = "_accessLists_".concat(accessListDetailsId.toString())
@@ -803,7 +817,7 @@ contract TheFabricantAccessList{
 		return PublicPath(identifier: accessListPathString)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun constructTestingListStoragePath(accessListDetailsId: UInt64): StoragePath{ 
 		let masterPathString = TheFabricantAccessList.AccessListStoragePath.toString()
 		let testingListString = "_testingLists_".concat(accessListDetailsId.toString())
@@ -814,7 +828,7 @@ contract TheFabricantAccessList{
 		return StoragePath(identifier: testingListPathString)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun constructTestingListPublicPath(accessListDetailsId: UInt64): PublicPath{ 
 		let masterPathString = TheFabricantAccessList.AccessListStoragePath.toString()
 		let testingListString = "_testingLists_".concat(accessListDetailsId.toString())

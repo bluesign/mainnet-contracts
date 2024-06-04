@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import TitToken from 0x66b60643244a7738 // Replace with actual address
 
@@ -27,7 +41,7 @@ contract TitTokenMarket{
 		}
 		
 		// This method allows the transfer of tokens to a buyer's vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferTokens(buyerVaultRef: &{FungibleToken.Receiver}){ 
 			let amount = self.amount
 			let tokens <- self.tokenVault.withdraw(amount: amount)
@@ -51,7 +65,7 @@ contract TitTokenMarket{
 	event ListingRemoved(listingId: UInt64, seller: Address)
 	
 	// Function to list TitTokens for sale
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createListing(signer: AuthAccount, price: UFix64, amount: UFix64): UInt64{ 
 		let vaultRef =
 			signer.borrow<&TitToken.Vault>(from: TitToken.VaultStoragePath)
@@ -77,7 +91,7 @@ contract TitTokenMarket{
 	}
 	
 	// Function to purchase TitTokens
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun purchaseTokens(
 		listingId: UInt64,
 		buyer: AuthAccount,
@@ -107,7 +121,7 @@ contract TitTokenMarket{
 	}
 	
 	// Function to remove a listing
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeListing(signer: AuthAccount, listingId: UInt64){ 
 		let listing <- self.listings.remove(key: listingId) ?? panic("Listing does not exist.")
 		assert(listing.seller == signer.address, message: "Only the seller can remove the listing")

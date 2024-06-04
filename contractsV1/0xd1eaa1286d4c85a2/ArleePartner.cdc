@@ -1,4 +1,18 @@
-//Arlee Partner NFT Contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//Arlee Partner NFT Contract
 /*  This contract defines ArleePartner NFTs.
 	Users can buy this NFT whenever to enjoy advanced features on Arlequin paint.
 	The fund received will not deposit to the Admin wallet, 
@@ -112,7 +126,7 @@ contract ArleePartner: NonFungibleToken{
 		}
 		
 		// Function to return royalty
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [Royalty]{ 
 			return self.royalties
 		}
@@ -144,21 +158,21 @@ contract ArleePartner: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(collection: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(collection: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArleePartner(id: UInt64): &ArleePartner.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -190,7 +204,7 @@ contract ArleePartner: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(withdrawIDs: [UInt64]): @{NonFungibleToken.Collection}{ 
 			let collection <- ArleePartner.createEmptyCollection(nftType: Type<@ArleePartner.Collection>())
 			for id in withdrawIDs{ 
@@ -201,7 +215,7 @@ contract ArleePartner: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ArleePartner.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -213,7 +227,7 @@ contract ArleePartner: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @{NonFungibleToken.Collection}){ 
 			for id in collection.getIDs(){ 
 				let token <- collection.withdraw(withdrawID: id)
@@ -232,7 +246,7 @@ contract ArleePartner: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArleePartner(id: UInt64): &ArleePartner.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -273,7 +287,7 @@ contract ArleePartner: NonFungibleToken{
 	
 	/* Query Function (Can also be done in Arlee Contract) */
 	// return true if the address holds the ArleePartner NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkArleePartnerNFT(addr: Address): Bool{ 
 		let holderCap = getAccount(addr).capabilities.get<&ArleePartner.Collection>(ArleePartner.CollectionPublicPath)
 		if holderCap.borrow == nil{ 
@@ -287,7 +301,7 @@ contract ArleePartner: NonFungibleToken{
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerNFTIDs(addr: Address): [UInt64]?{ 
 		let holderCap = getAccount(addr).capabilities.get<&ArleePartner.Collection>(ArleePartner.CollectionPublicPath)
 		if holderCap.borrow == nil{ 
@@ -297,12 +311,12 @@ contract ArleePartner: NonFungibleToken{
 		return holderRef.getIDs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerNFTName(id: UInt64): String?{ 
 		return ArleePartner.mintedArleePartnerNFTs[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerNFTNames(addr: Address): [String]?{ 
 		let ids = ArleePartner.getArleePartnerNFTIDs(addr: addr)
 		if ids == nil || (ids!).length == 0{ 
@@ -318,18 +332,18 @@ contract ArleePartner: NonFungibleToken{
 		return list
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllArleePartnerNFTNames():{ UInt64: String}{ 
 		return ArleePartner.mintedArleePartnerNFTs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties():{ String: Royalty}{ 
 		let royalties = ArleePartner.allRoyalties
 		return ArleePartner.allRoyalties
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPartnerRoyalty(partner: String): Royalty?{ 
 		for partnerName in ArleePartner.allRoyalties.keys{ 
 			if partnerName == partner{ 
@@ -339,7 +353,7 @@ contract ArleePartner: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwner(id: UInt64): Address?{ 
 		for addr in ArleePartner.ownedArleePartnerNFTs.keys{ 
 			if (ArleePartner.ownedArleePartnerNFTs[addr]!).contains(id){ 
@@ -349,7 +363,7 @@ contract ArleePartner: NonFungibleToken{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintable():{ String: Bool}{ 
 		var mintableDict:{ String: Bool} ={} 
 		// if mintable is disabled, return all false

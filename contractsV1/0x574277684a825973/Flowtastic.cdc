@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Flowtastic{ 
 	
 	// Declare a Path constant so we don't need to harcode in tx
@@ -27,17 +41,17 @@ contract Flowtastic{
 	}
 	
 	// Function to create a new Review
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createReview(metadata:{ String: String}): @Review{ 
 		return <-create Review(metadata: metadata)
 	}
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowReview(id: UInt64): &Review?
 	}
 	
@@ -51,7 +65,7 @@ contract Flowtastic{
 		var reviews: @{UInt64: Review}
 		
 		// a method to save a review in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun saveReview(review: @Review){ 
 			// add the new review to the dictionary with 
 			// a force assignment (check glossary!)
@@ -61,12 +75,12 @@ contract Flowtastic{
 		}
 		
 		// get all the id's of the reviews in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.reviews.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowReview(id: UInt64): &Review?{ 
 			if self.reviews[id] != nil{ 
 				let ref = (&self.reviews[id] as &Flowtastic.Review?)!
@@ -81,7 +95,7 @@ contract Flowtastic{
 	}
 	
 	// create a new collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import PierLPToken from 0x609e10301860b683
 
@@ -13,7 +27,7 @@ that should be exposed to public access.
 
  */
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface IPierPair{ 
 	
 	// Event that is emitted when the contract is created
@@ -33,7 +47,7 @@ contract interface IPierPair{
 	event Burn(poolId: UInt64, amountLP: UFix64, amountAOut: UFix64, amountBOut: UFix64)
 	
 	// IPool defines the exposed components of a liquidity pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IPool{ 
 		
 		// *** Basic Information ***
@@ -55,7 +69,7 @@ contract interface IPierPair{
 		let tokenBType: Type
 		
 		// returns [token A reserve, token B reserve]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReserves(): [UFix64; 2]
 		
 		// *** TWAP Information for Oracles ***
@@ -79,7 +93,7 @@ contract interface IPierPair{
 		// @param fromVault The input vault of the swap (either token A or token B)
 		// @param forAmount The expected output balance of the swap
 		// @return A vault of the other token in the pool with its balance equals to `forAmount`
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun swap(fromVault: @{FungibleToken.Vault}, forAmount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				forAmount > 0.0:
@@ -104,7 +118,7 @@ contract interface IPierPair{
 		// @param vaultA Liquidity to provide for token A
 		// @param vaultB Liquidity to provide for token B
 		// @return New LP tokens as a share of the pool
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(
 			vaultA: @{FungibleToken.Vault},
 			vaultB: @{FungibleToken.Vault}
@@ -127,7 +141,7 @@ contract interface IPierPair{
 		//
 		// @param lpTokenVault The LP tokens to burn
 		// @return The withdrawn share of the pool as [token A vault, token B vault]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(lpTokenVault: @PierLPToken.Vault): @[{FungibleToken.Vault}; 2]{ 
 			pre{ 
 				lpTokenVault.tokenId == self.poolId:

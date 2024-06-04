@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract NFTContract: NonFungibleToken{ 
@@ -155,7 +169,7 @@ contract NFTContract: NonFungibleToken{
 			self.data = data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(data:{ String: String}){ 
 			self.data = data
 		}
@@ -297,7 +311,7 @@ contract NFTContract: NonFungibleToken{
 		}
 		
 		// a method to get ImmutableData field of Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}{ 
 			return self.immutableData
 		}
@@ -370,15 +384,15 @@ contract NFTContract: NonFungibleToken{
 	access(all)
 	resource interface NFTContractCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNowWhereNFT(id: UInt64): &NFTContract.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -415,7 +429,7 @@ contract NFTContract: NonFungibleToken{
 		
 		// deposit method will store NFT into user storage 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFTContract.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -437,7 +451,7 @@ contract NFTContract: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNowWhereNFT(id: UInt64): &NFTContract.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -470,36 +484,36 @@ contract NFTContract: NonFungibleToken{
 	// Special Capability, that is needed by user to utilize our contract. Only verified user can get this capability so it will add a KYC layer in our white-lable-solution
 	access(all)
 	resource interface UserSpecialCapability{ 
-		access(all)
-		fun addCapability(cap: Capability<&{NFTMethodsCapability}>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(cap: Capability<&{NFTContract.NFTMethodsCapability}>): Void
 	}
 	
 	// Interface, which contains all the methods that are called by any user to mint NFT and manage brand, schema and template funtionality
 	access(all)
 	resource interface NFTMethodsCapability{ 
-		access(all)
-		fun createNewBrand(brandName: String, data:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createNewBrand(brandName: String, data:{ String: String}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandData(brandId: UInt64, data:{ String: String})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSchema(schemaName: String, format:{ String: SchemaType})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(brandId: UInt64, schemaId: UInt64, maxSupply: UInt64, immutableData:{ String: AnyStruct})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateId: UInt64, account: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplateById(templateId: UInt64)
 	}
 	
 	//AdminCapability to add whiteListedAccounts
 	access(all)
 	resource AdminCapability{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addwhiteListedAccount(_user: Address){ 
 			pre{ 
 				NFTContract.whiteListedAccounts.contains(_user) == false:
@@ -508,7 +522,7 @@ contract NFTContract: NonFungibleToken{
 			NFTContract.whiteListedAccounts.append(_user)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isWhiteListedAccount(_user: Address): Bool{ 
 			return NFTContract.whiteListedAccounts.contains(_user)
 		}
@@ -540,7 +554,7 @@ contract NFTContract: NonFungibleToken{
 		var capability: Capability<&{NFTMethodsCapability}>?
 		
 		// method which provide capability to user to utilize methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(cap: Capability<&{NFTMethodsCapability}>){ 
 			pre{ 
 				// we make sure the SpecialCapability is
@@ -557,7 +571,7 @@ contract NFTContract: NonFungibleToken{
 		}
 		
 		//method to create new Brand, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBrand(brandName: String, data:{ String: String}){ 
 			pre{ 
 				// the transaction will instantly revert if
@@ -575,7 +589,7 @@ contract NFTContract: NonFungibleToken{
 		}
 		
 		//method to update the existing Brand, only author of brand can update this brand
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBrandData(brandId: UInt64, data:{ String: String}){ 
 			pre{ 
 				// the transaction will instantly revert if
@@ -596,7 +610,7 @@ contract NFTContract: NonFungibleToken{
 		}
 		
 		//method to create new Schema, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSchema(schemaName: String, format:{ String: SchemaType}){ 
 			pre{ 
 				// the transaction will instantly revert if 
@@ -614,7 +628,7 @@ contract NFTContract: NonFungibleToken{
 		}
 		
 		//method to create new Template, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTemplate(brandId: UInt64, schemaId: UInt64, maxSupply: UInt64, immutableData:{ String: AnyStruct}){ 
 			pre{ 
 				// the transaction will instantly revert if 
@@ -636,7 +650,7 @@ contract NFTContract: NonFungibleToken{
 		}
 		
 		//method to mint NFT, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(templateId: UInt64, account: Address){ 
 			pre{ 
 				// the transaction will instantly revert if 
@@ -657,7 +671,7 @@ contract NFTContract: NonFungibleToken{
 		}
 		
 		//method to remove template by id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTemplateById(templateId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -690,19 +704,19 @@ contract NFTContract: NonFungibleToken{
 	}
 	
 	//method to create Admin Resources
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminResource(): @AdminResource{ 
 		return <-create AdminResource()
 	}
 	
 	//method to get all brands
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBrands():{ UInt64: Brand}{ 
 		return NFTContract.allBrands
 	}
 	
 	//method to get brand by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBrandById(brandId: UInt64): Brand{ 
 		pre{ 
 			NFTContract.allBrands[brandId] != nil:
@@ -712,13 +726,13 @@ contract NFTContract: NonFungibleToken{
 	}
 	
 	//method to get all schema
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSchemas():{ UInt64: Schema}{ 
 		return NFTContract.allSchemas
 	}
 	
 	//method to get schema by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSchemaById(schemaId: UInt64): Schema{ 
 		pre{ 
 			NFTContract.allSchemas[schemaId] != nil:
@@ -728,13 +742,13 @@ contract NFTContract: NonFungibleToken{
 	}
 	
 	//method to get all templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates():{ UInt64: Template}{ 
 		return NFTContract.allTemplates
 	}
 	
 	//method to get template by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateById(templateId: UInt64): Template{ 
 		pre{ 
 			NFTContract.allTemplates[templateId] != nil:
@@ -744,7 +758,7 @@ contract NFTContract: NonFungibleToken{
 	}
 	
 	//method to get nft-data by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTDataById(nftId: UInt64): NFTData{ 
 		pre{ 
 			NFTContract.allNFTs[nftId] != nil:

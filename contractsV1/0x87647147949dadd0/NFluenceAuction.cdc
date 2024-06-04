@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 This is a multifaceted contract that sets up an auction resource, the parameters for 
 running an auctions and setting up an account storefront to store all active auctions
  */
@@ -166,31 +180,31 @@ contract NFluenceAuction{
 	
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTData(): NFluence.NFluenceNFTData?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidHistory(): [Bid]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentHighestBidder(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAuctionExpired(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun minNextBid(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionData(): AuctionData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bidTokens: @{FungibleToken.Vault},
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
@@ -284,14 +298,14 @@ contract NFluenceAuction{
 		}
 		
 		// Function to get the metadata of the NFT being auctioned
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTData(): NFluence.NFluenceNFTData?{ 
 			let ref = self.ownerCollectionCap.borrow()!
 			let data = ref.getTokenData(id: self.nftId)
 			return data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidHistory(): [Bid]{ 
 			return self.bidHistory
 		}
@@ -326,7 +340,7 @@ contract NFluenceAuction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentHighestBidder(): Address{ 
 			return ((self.recipientVaultCap.borrow()!).owner!).address
 		}
@@ -372,18 +386,18 @@ contract NFluenceAuction{
 		}
 		
 		// This can be negative if the auction has expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64{ 
 			return Fix64(self.auctionStartTime + self.auctionLength) - Fix64(getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAuctionExpired(): Bool{ 
 			let timeRemaining = self.timeRemaining()
 			return timeRemaining < Fix64(0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun minNextBid(): UFix64{ 
 			return self.currentPrice + UFix64(self.minimumBidIncrement)
 		}
@@ -395,7 +409,7 @@ contract NFluenceAuction{
 		}
 		
 		// Returns the last bid made by a user regardless of if it's the current winning bid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.currentHighestBidder() == address{ 
 				return self.bidVault.balance
@@ -415,7 +429,7 @@ contract NFluenceAuction{
 			self.auctionCompleted = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{NFluence.NFluenceCollectionPublic}>){ 
 			pre{ 
 				!self.auctionCompleted:
@@ -452,7 +466,7 @@ contract NFluenceAuction{
 			emit BidReceived(tokenID: self.nftId, user: ownerAddress, bidPrice: self.currentPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionData(): AuctionData{ 
 			return AuctionData(auctionId: self.auctionID, currentPrice: self.currentPrice, timeRemaining: self.timeRemaining(), nftData: self.getNFTData(), leader: ((self.recipientCollectionCap.borrow()!).owner!).address, startTime: self.auctionStartTime, endTime: self.auctionStartTime + self.auctionLength, minNextBid: self.minNextBid(), completed: self.auctionCompleted, expired: self.isAuctionExpired(), numBids: self.numberOfBids)
 		}
@@ -460,10 +474,10 @@ contract NFluenceAuction{
 	
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &AuctionItem?
 	}
 	
@@ -472,7 +486,7 @@ contract NFluenceAuction{
 		access(self)
 		var listings: @{UInt64: AuctionItem}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(token: UInt64, minimumBidIncrement: Int32, auctionLength: UFix64, auctionStartTime: UFix64, startPrice: UFix64, collectionCap: Capability<&NFluence.Collection>, vaultCap: Capability<&{FungibleToken.Receiver}>){ 
 			let listing <- create AuctionItem(nftId: token, minimumBidIncrement: minimumBidIncrement, auctionStartTime: auctionStartTime, startPrice: startPrice, auctionLength: auctionLength, ownerCollectionCap: collectionCap, ownerVaultCap: vaultCap)
 			let auctionID = listing.auctionID
@@ -487,7 +501,7 @@ contract NFluenceAuction{
 		}
 		
 		// Remove a Listing that has not yet been purchased from the collection and destroy it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingResourceID: UInt64){ 
 			if self.checkIdInListing(tokenId: listingResourceID){ 
 				let listing <- self.listings.remove(key: listingResourceID)!
@@ -497,24 +511,24 @@ contract NFluenceAuction{
 			return
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkIdInListing(tokenId: UInt64): Bool{ 
 			return self.listings.containsKey(tokenId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleListing(listingResourceID: UInt64){ 
 			let listing <- self.listings.remove(key: listingResourceID) ?? panic("missing Listing")
 			listing.settleAuction()
 			destroy listing
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]{ 
 			return self.listings.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &AuctionItem?{ 
 			if self.listings[listingResourceID] != nil{ 
 				return &self.listings[listingResourceID] as &NFluenceAuction.AuctionItem?
@@ -529,7 +543,7 @@ contract NFluenceAuction{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStorefront(): @Storefront{ 
 		return <-create Storefront()
 	}

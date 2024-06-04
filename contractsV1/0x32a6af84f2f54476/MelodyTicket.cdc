@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -116,7 +130,7 @@ contract MelodyTicket: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMetadata():{ String: AnyStruct}{ 
 			let metadata = MelodyTicket.predefinedMetadata[self.id] ??{} 
 			metadata["metadata"] = self.metadata
@@ -192,21 +206,21 @@ contract MelodyTicket: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTResolver(id: UInt64): &{ViewResolver.Resolver}?
 	}
 	
 	access(all)
 	resource interface CollectionPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMelodyTicket(id: UInt64): &MelodyTicket.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -237,7 +251,7 @@ contract MelodyTicket: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			pre{ 
 				self.checkTransferable(token.id, address: self.owner?.address) == true:
 					MelodyError.errorEncode(msg: "Ticket is not transferable", err: MelodyError.ErrorCode.NOT_TRANSFERABLE)
@@ -258,7 +272,7 @@ contract MelodyTicket: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checkTransferable(_ id: UInt64, address: Address?): Bool{ 
 			let metadata = MelodyTicket.getMetadata(id)!
 			let receievr = (metadata["receiver"] as? Address?)!
@@ -282,7 +296,7 @@ contract MelodyTicket: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTResolver(id: UInt64): &{ViewResolver.Resolver}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -292,7 +306,7 @@ contract MelodyTicket: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMelodyTicket(id: UInt64): &MelodyTicket.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -354,7 +368,7 @@ contract MelodyTicket: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(_ uri: String){ 
 			emit BaseURIUpdated(before: MelodyTicket.baseURI, after: uri)
 			MelodyTicket.baseURI = uri
@@ -381,12 +395,12 @@ contract MelodyTicket: NonFungibleToken{
 	}
 	
 	// public funcs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return MelodyTicket.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getMetadata(_ id: UInt64):{ String: AnyStruct}?{ 
 		return MelodyTicket.predefinedMetadata[id]
 	}

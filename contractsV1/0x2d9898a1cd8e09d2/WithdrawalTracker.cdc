@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract WithdrawalTracker{ 
 	access(all)
 	event WithdrawalTotalTrackerCreated(withdrawalLimit: UFix64, runningTotal: UFix64)
@@ -12,18 +26,18 @@ contract WithdrawalTracker{
 	// So the total can be checked publicly via a Capability
 	access(all)
 	resource interface WithdrawalTotalChecker{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentRunningTotal(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentWithdrawalLimit(): UFix64
 	}
 	
 	// For admins, if needed
 	access(all)
 	resource interface SetWithdrawalLimit{ 
-		access(all)
-		fun setWithdrawalLimit(withdrawalLimit: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setWithdrawalLimit(withdrawalLimit: UFix64): Void
 	}
 	
 	// Anyone can create one.
@@ -38,23 +52,23 @@ contract WithdrawalTracker{
 		access(self)
 		var runningTotal: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentRunningTotal(): UFix64{ 
 			return self.runningTotal
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentWithdrawalLimit(): UFix64{ 
 			return self.withdrawalLimit
 		}
 		
 		// The user can call this if they wish to avoid an exception from updateRunningTotal
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun wouldExceedLimit(withdrawalAmount: UFix64): Bool{ 
 			return self.runningTotal + withdrawalAmount > self.withdrawalLimit
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRunningTotal(withdrawalAmount: UFix64){ 
 			pre{ 
 				!self.wouldExceedLimit(withdrawalAmount: withdrawalAmount):
@@ -64,7 +78,7 @@ contract WithdrawalTracker{
 			emit RunningTotalUpdated(amount: withdrawalAmount, runningTotal: self.runningTotal, withdrawalLimit: self.withdrawalLimit)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWithdrawalLimit(withdrawalLimit: UFix64){ 
 			emit WithdrawalLimitSet(oldLimit: self.withdrawalLimit, newLimit: withdrawalLimit, runningTotal: self.runningTotal)
 			self.withdrawalLimit = withdrawalLimit
@@ -77,7 +91,7 @@ contract WithdrawalTracker{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createWithdrawalTotalTracker(
 		initialLimit: UFix64,
 		initialRunningTotal: UFix64

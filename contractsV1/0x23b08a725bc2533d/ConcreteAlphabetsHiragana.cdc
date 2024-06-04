@@ -1,4 +1,18 @@
-// You can create concrete poems with these alphabet resources.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// You can create concrete poems with these alphabet resources.
 access(all)
 contract ConcreteAlphabetsHiragana{ 
 	access(all)
@@ -341,7 +355,7 @@ contract ConcreteAlphabetsHiragana{
 	resource U3000{} // 　 (Idepgraphic Space) 
 	
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun newLetter(_ ch: Character): @AnyResource{ 
 		switch ch{ 
 			case "\u{3041}":
@@ -517,7 +531,7 @@ contract ConcreteAlphabetsHiragana{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun newText(_ str: String): @[AnyResource]{ 
 		var res: @[AnyResource] <- []
 		for ch in str{ 
@@ -526,7 +540,7 @@ contract ConcreteAlphabetsHiragana{
 		return <-res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toCharacter(_ letter: &AnyResource): Character{ 
 		switch letter.getType(){ 
 			case Type<@U3041>():
@@ -704,7 +718,7 @@ contract ConcreteAlphabetsHiragana{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toString(_ text: &[AnyResource]): String{ 
 		var res: String = ""
 		var i = 0

@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract PrimalRaveVariantMintLimits{ 
 	
 	// -----------------------------------------------------------------------
@@ -47,7 +61,7 @@ contract PrimalRaveVariantMintLimits{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVariantMintLimits(variantMintLimitsDict:{ UInt64: UInt64}){ 
 			let keys = variantMintLimitsDict.keys
 			let values = variantMintLimitsDict.values
@@ -59,7 +73,7 @@ contract PrimalRaveVariantMintLimits{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVariantMintsForAddress(address: Address, variantId: UInt64, numberOfMints: UInt64){ 
 			if let variantMintsByAddress:{ UInt64: UInt64} =
 				PrimalRaveVariantMintLimits.addressVariantMints[address]{ 
@@ -72,7 +86,7 @@ contract PrimalRaveVariantMintLimits{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNumberOfVariants(numberOfVariants: UInt64){ 
 			PrimalRaveVariantMintLimits.numberOfVariants = numberOfVariants
 		}
@@ -86,7 +100,7 @@ contract PrimalRaveVariantMintLimits{
 	// Helpers
 	// -----------------------------------------------------------------------
 	// Checks if an address can mint a variant
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkAddressCanMintVariant(address: Address, variantId: UInt64): Bool{ 
 		pre{ 
 			variantId <= self.numberOfVariants:
@@ -111,7 +125,7 @@ contract PrimalRaveVariantMintLimits{
 	}
 	
 	// Increments the number of mints an address has minted for a given variant
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun incrementVariantMintsForAddress(address: Address, variantId: UInt64){ 
 		if let variantMintsByAddress:{ UInt64: UInt64} = self.addressVariantMints[address]{ 
 			// Get the number of mints for the variant
@@ -136,22 +150,22 @@ contract PrimalRaveVariantMintLimits{
 	// -----------------------------------------------------------------------
 	// Public Utility Functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVariantMintLimits():{ UInt64: UInt64}{ 
 		return self.variantMintLimits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllVariantMints():{ Address:{ UInt64: UInt64}}{ 
 		return self.addressVariantMints
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllVariantMintsForAddress(address: Address):{ UInt64: UInt64}?{ 
 		return self.addressVariantMints[address]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVariantMintsForAddress(address: Address, variantId: UInt64):{ UInt64: UInt64}?{ 
 		if let variantMintsByAddress:{ UInt64: UInt64} = self.addressVariantMints[address]{ 
 			let mints = variantMintsByAddress[variantId]
@@ -164,7 +178,7 @@ contract PrimalRaveVariantMintLimits{
 	}
 	
 	// returns {variantId: {mints | limit: value}}
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVariantMintsAndLimitsForAddress(address: Address):{ UInt64:{ String: UInt64?}}{ 
 		var i: UInt64 = 0
 		let ret:{ UInt64:{ String: UInt64?}} ={} 

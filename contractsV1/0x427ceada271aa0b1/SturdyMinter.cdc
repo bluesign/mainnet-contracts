@@ -1,4 +1,18 @@
-import SturdyTokens from "./SturdyTokens.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import SturdyTokens from "./SturdyTokens.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -28,7 +42,7 @@ contract SturdyMinter{
 		access(all)
 		var whitelistedAccounts:{ Address: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhiteListAddress(address: Address, amount: UInt64){ 
 			pre{ 
 				self.whitelistedAccounts[address] == nil:
@@ -37,7 +51,7 @@ contract SturdyMinter{
 			self.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhiteListAddress(address: Address){ 
 			pre{ 
 				self.whitelistedAccounts[address] != nil:
@@ -46,12 +60,12 @@ contract SturdyMinter{
 			self.whitelistedAccounts.remove(key: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pruneWhitelist(){ 
 			self.whitelistedAccounts ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhiteListAddressAmount(address: Address, amount: UInt64){ 
 			pre{ 
 				self.whitelistedAccounts[address] != nil:
@@ -60,12 +74,12 @@ contract SturdyMinter{
 			self.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrivateSalePrice(price: UFix64){ 
 			self.privateSalePrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSalePrice(price: UFix64){ 
 			self.publicSalePrice = price
 		}
@@ -77,7 +91,7 @@ contract SturdyMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPrivateNFTWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -147,7 +161,7 @@ contract SturdyMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPublicNFTWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -209,7 +223,7 @@ contract SturdyMinter{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMintableSet(setID: UInt64, privateSalePrice: UFix64, publicSalePrice: UFix64){ 
 			pre{ 
 				SturdyMinter.mintableSets[setID] == nil:
@@ -221,7 +235,7 @@ contract SturdyMinter{
 				)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhiteListAddress(setID: UInt64, address: Address, amount: UInt64){ 
 			(SturdyMinter.mintableSets[setID]!).addWhiteListAddress(
 				address: address,
@@ -229,17 +243,17 @@ contract SturdyMinter{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhiteListAddress(setID: UInt64, address: Address){ 
 			(SturdyMinter.mintableSets[setID]!).removeWhiteListAddress(address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pruneWhitelist(setID: UInt64){ 
 			(SturdyMinter.mintableSets[setID]!).pruneWhitelist()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhiteListAddressAmount(setID: UInt64, address: Address, amount: UInt64){ 
 			(SturdyMinter.mintableSets[setID]!).updateWhiteListAddressAmount(
 				address: address,
@@ -247,18 +261,18 @@ contract SturdyMinter{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrivateSalePrice(setID: UInt64, price: UFix64){ 
 			(SturdyMinter.mintableSets[setID]!).updatePrivateSalePrice(price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSalePrice(setID: UInt64, price: UFix64){ 
 			(SturdyMinter.mintableSets[setID]!).updatePublicSalePrice(price: price)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistedAccounts(setID: UInt64):{ Address: UInt64}{ 
 		return (SturdyMinter.mintableSets[setID]!).whitelistedAccounts
 	}

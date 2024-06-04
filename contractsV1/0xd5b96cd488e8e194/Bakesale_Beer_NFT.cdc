@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -125,15 +139,15 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	access(all)
 	resource interface Bakesale_Beer_NFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBakesale_Beer_NFT(id: UInt64): &Bakesale_Beer_NFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -166,7 +180,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Bakesale_Beer_NFT.NFT
 			let id: UInt64 = token.id
 			
@@ -196,7 +210,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		// borrowBakesale_Beer_NFT
 		// Gets a reference to an NFT in the collection as a Bakesale_Beer_NFT.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBakesale_Beer_NFT(id: UInt64): &Bakesale_Beer_NFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -209,7 +223,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		// pop
 		// Removes and returns the next NFT from the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pop(): @{NonFungibleToken.NFT}{ 
 			let nextID = self.ownedNFTs.keys[0]
 			return <-self.withdraw(withdrawID: nextID)
@@ -217,7 +231,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		
 		// size
 		// Returns the current size of the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun size(): Int{ 
 			return self.ownedNFTs.length
 		}
@@ -263,7 +277,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setId: UInt32){ 
 			pre{ 
 				Bakesale_Beer_NFT.numberEditionsMintedPerSet[setId] != nil:
@@ -295,7 +309,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		// batchMintNFT
 		// Mints multiple new NFTs given and deposits the NFTs
 		// into the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setId: UInt32, quantity: UInt64){ 
 			pre{ 
 				quantity > 0:
@@ -309,7 +323,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 		}
 		
 		// adds an NFT Set to this contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNftSet(setId: UInt32, maxEditions: UInt32, ipfsMetadataHash: String, ipfsMediaHash: String){ 
 			pre{ 
 				Bakesale_Beer_NFT.setIds.contains(setId) == false:
@@ -330,7 +344,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 			emit SetAdded(setId: setId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNftSet(setId: UInt32){ 
 			pre{ 
 				Bakesale_Beer_NFT.setIds.contains(setId):
@@ -357,7 +371,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Bakesale_Beer_NFT.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&{Bakesale_Beer_NFT.Bakesale_Beer_NFTCollectionPublic}>(Bakesale_Beer_NFT.CollectionPublicPath).borrow<&{Bakesale_Beer_NFT.Bakesale_Beer_NFTCollectionPublic}>() ?? panic("Couldn't get collection")
 		
@@ -367,7 +381,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	}
 	
 	// listSetData returns the dictionary of set data
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun listSetData():{ UInt32: NFTSetData}{ 
 		return self.setData
 	}
@@ -375,7 +389,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	// getAllSets returns all the sets
 	//
 	// Returns: An array of all the sets that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets(): [Bakesale_Beer_NFT.NFTSetData]{ 
 		return Bakesale_Beer_NFT.setData.values
 	}
@@ -386,13 +400,13 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The max number of NFT editions in this Set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSetMaxEditions(setId: UInt32): UInt32?{ 
 		return Bakesale_Beer_NFT.setData[setId]?.maxEditions
 	}
 	
 	//getNumberEditionsMintedPerSet
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberEditionsMintedPerSet(setId: UInt32): UInt32?{ 
 		return Bakesale_Beer_NFT.numberEditionsMintedPerSet[setId]
 	}
@@ -402,7 +416,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The ipfs hash of nft for the set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getIpfsMetadataHashBySet(setId: UInt32): String?{ 
 		if let set = Bakesale_Beer_NFT.setData[setId]{ 
 			return set.ipfsMetadataHash
@@ -416,7 +430,7 @@ contract Bakesale_Beer_NFT: NonFungibleToken{
 	// Parameters: setId: The id of the Set that is being searched
 	//
 	// Returns: The ipfs hash of the media for the nft for the set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIpfsMediaHashBySet(setId: UInt32): String?{ 
 		// Don't force a revert if the setId or field is invalid
 		if let set = Bakesale_Beer_NFT.setData[setId]{ 

@@ -1,4 +1,18 @@
-// SilverlightLocationNFT NFT Contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SilverlightLocationNFT NFT Contract
 //
 // Extends the NonFungibleToken standard with extra metadata for each Silverlight NFT.
 // Tracks which accounts are holding the NFTs when they are deposited 
@@ -131,22 +145,22 @@ contract SilverlightLocationNFT: NonFungibleToken{
 		access(all)
 		let metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(_ key: String, _ value: String){ 
 			self.metadata[key] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTotalMinted(_ total: UInt64){ 
 			self.totalMinted = total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEdition(_ edition: UInt64){ 
 			self.edition = edition
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			self.isLocked = true
 		}
@@ -186,34 +200,34 @@ contract SilverlightLocationNFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLocationIDs(): [UInt64]{ 
 		return self.metadata.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLocation(id: UInt64): AnyStruct{ 
 		return self.metadata[id]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLocations():{ UInt64: AnyStruct}{ 
 		return self.metadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentOwners():{ UInt64: Address}{ 
 		return self.currentOwnerByIDs
 	}
 	
 	// getIDs returns the IDs minted by locationID 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getResourceIDsFor(locationID: UInt64): [UInt64]{ 
 		return self.resourceIDsByLocationID[locationID]!
 	}
 	
 	// Returns list of all owners of a particular location NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOwners(locationID: UInt64): [Address]{ 
 		let addresses: [Address] = []
 		for key in self.getResourceIDsFor(locationID: locationID){ 
@@ -247,7 +261,7 @@ contract SilverlightLocationNFT: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<SilverlightLocationNFT.Metadata>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata{ 
 			let metadata = SilverlightLocationNFT.metadata[self.locationID]!
 			metadata.setEdition(self.edition)
@@ -291,21 +305,21 @@ contract SilverlightLocationNFT: NonFungibleToken{
 	access(all)
 	resource interface SilverlightLocationNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(collection: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(collection: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadatadata(id: UInt64): Metadata
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSilverlightLocationNFT(id: UInt64): &SilverlightLocationNFT.NFT?
 	}
 	
@@ -329,7 +343,7 @@ contract SilverlightLocationNFT: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			let collection <- SilverlightLocationNFT.createEmptyCollection(nftType: Type<@SilverlightLocationNFT.Collection>())
 			for id in ids{ 
@@ -342,7 +356,7 @@ contract SilverlightLocationNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SilverlightLocationNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -357,7 +371,7 @@ contract SilverlightLocationNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @{NonFungibleToken.Collection}){ 
 			for id in collection.getIDs(){ 
 				let token <- collection.withdraw(withdrawID: id)
@@ -380,7 +394,7 @@ contract SilverlightLocationNFT: NonFungibleToken{
 		
 		// borrowSilverlightLocationNFT gets a reference to an NFT from the collection
 		// so the caller can read the NFT's extended information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSilverlightLocationNFT(id: UInt64): &SilverlightLocationNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -390,12 +404,12 @@ contract SilverlightLocationNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadatadata(id: UInt64): Metadata{ 
 			return (self.borrowSilverlightLocationNFT(id: id)!).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllItemMetadata(): [Metadata]{ 
 			var itemsMetadata: [Metadata] = []
 			for key in self.ownedNFTs.keys{ 
@@ -406,7 +420,7 @@ contract SilverlightLocationNFT: NonFungibleToken{
 		
 		// MetadataViews 
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let locationNFT = nft as! &SilverlightLocationNFT.NFT
@@ -438,7 +452,7 @@ contract SilverlightLocationNFT: NonFungibleToken{
 		
 		// Set the Location Metadata for a locationID
 		// either updates without affecting number minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLocation(id: UInt64, maxEdition: UInt64, landmark: Bool, title: String, category: String, rarity: String, description: String, imageURL: String, cardURL: String, ipfsCID: String, location: String, state: String, country: String, continent: String, longitude: Fix64, lattitude: Fix64, elevationMeters: UFix64, metadata:{ String: String}){ 
 			var totalMinted: UInt64 = 0
 			if SilverlightLocationNFT.metadata[id] != nil{ 
@@ -449,19 +463,19 @@ contract SilverlightLocationNFT: NonFungibleToken{
 			SilverlightLocationNFT.metadata[id]?.setTotalMinted(totalMinted)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLocationMetadata(id: UInt64, key: String, value: String){ 
 			SilverlightLocationNFT.metadata[id]?.setMetadata(key, value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockLocation(id: UInt64){ 
 			SilverlightLocationNFT.metadata[id]?.lock()
 		}
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFTs(recipient: &{SilverlightLocationNFT.SilverlightLocationNFTCollectionPublic}, locationID: UInt64, numberOfEditionsToMint: UInt64){ 
 			pre{ 
 				numberOfEditionsToMint > 0:

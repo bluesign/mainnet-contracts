@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 *   A contract that manages the creation and sale of packs, cards and tokens
 *
 */
@@ -192,7 +206,7 @@ contract HWGaragePMV2{
 				 */
 		
 		// One call to add a new seriesID for Packs and Card
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewSeriesID(seriesID: UInt64){ 
 			HWGaragePMV2.addSeriesID(seriesID: seriesID)
 			self.addPackSeriesID(packSeriesID: seriesID)
@@ -204,7 +218,7 @@ contract HWGaragePMV2{
 				 * HWGarageToken
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTokenSeriesID(packSeriesID: UInt64){ 
 			pre{ 
 				packSeriesID >= 1:
@@ -217,7 +231,7 @@ contract HWGaragePMV2{
 		/// To accomodate any further changes to the metadata we can emit the entire 
 		/// metadata payload for an airdropped token and avoid staically assigning 
 		/// payload. All fields can get sent to the traits struct
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun airdropRedeemable(
 			airdropSeriesID: UInt64,
 			address: Address,
@@ -268,7 +282,7 @@ contract HWGaragePMV2{
 				*/
 		
 		// Add a packSeries to the dictionary to support a new drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCardSeriesID(packSeriesID: UInt64){ 
 			pre{ 
 				packSeriesID >= 1:
@@ -278,7 +292,7 @@ contract HWGaragePMV2{
 			emit AdminAddNewCardSeries(cardSeriesID: packSeriesID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialHWGarageCardV2(
 			address: Address,
 			packHash: String,
@@ -312,7 +326,7 @@ contract HWGaragePMV2{
 				*/
 		
 		// Add a packSeries to the dictionary to support a new drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPackSeriesID(packSeriesID: UInt64){ 
 			pre{ 
 				packSeriesID >= 1:
@@ -323,7 +337,7 @@ contract HWGaragePMV2{
 			emit AdminAddNewPackSeries(packSeriesID: packSeriesID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialHWGaragePackV2(
 			address: Address,
 			packHash: String,
@@ -531,22 +545,22 @@ contract HWGaragePMV2{
 		*   HWGaragePMV2
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledSeries():{ UInt64: Bool}{ 
 		return HWGaragePMV2.HWGaragePMV2SeriesIdIsLive
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledTokenSeries():{ UInt64: Bool}{ 
 		return HWGaragePMV2.HWGarageTokenV2SeriesIdIsLive
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledCardSeries():{ UInt64: Bool}{ 
 		return HWGaragePMV2.HWGarageCardV2SeriesIdIsLive
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledPackSeries():{ UInt64: Bool}{ 
 		return HWGaragePMV2.HWGaragePackV2SeriesIdIsLive
 	}
@@ -555,7 +569,7 @@ contract HWGaragePMV2{
 		 *  Public Pack Functions
 		 */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimPack(address: Address, packHash: String){ 
 		// this event is picked up by a web hook to verify packHash
 		// if packHash is valid, the backend will mint the pack and
@@ -563,7 +577,7 @@ contract HWGaragePMV2{
 		emit PackClaimBegin(address: address, packHash: packHash)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicRedeemPack(address: Address, pack: @{NonFungibleToken.NFT}, packHash: String){ 
 		pre{ 
 			getCurrentBlock().timestamp >= self.packRedeemStartTime:
@@ -584,12 +598,12 @@ contract HWGaragePMV2{
 		destroy packInstance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackEditionIdByPackSeriesId():{ UInt64: UInt64}{ 
 		return HWGaragePackV2.currentPackEditionIdByPackSeriesId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardEditionIdByPackSeriesId():{ UInt64: UInt64}{ 
 		return HWGarageCardV2.currentCardEditionIdByPackSeriesId
 	}
@@ -598,7 +612,7 @@ contract HWGaragePMV2{
 		 *  Public Airdrop functions
 		 */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun burnAirdrop(
 		walletAddress: Address,
 		tokenSerial: String,
@@ -622,7 +636,7 @@ contract HWGaragePMV2{
 		 *  Public Bridge functions
 		 */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun migrateAsset(waxWallet: String, assetIds: [String], flowWallet: Address){ 
 		// emit event to start asset migration
 		emit ClaimBridgeAsset(waxWallet: waxWallet, assetIds: assetIds, flowWallet: flowWallet)

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -99,7 +113,7 @@ contract EnvironmentAct: NonFungibleToken{
 			self.wallet = wallet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProfile(address: Address): UserProfile{ 
 			return UserProfile(wallet: self.wallet, address: address)
 		}
@@ -145,7 +159,7 @@ contract EnvironmentAct: NonFungibleToken{
 			emit EnvironmentActCreated(id: initID, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExternalURL(): String{ 
 			if self.metadata["guid"] != nil{ 
 				let guid = self.metadata["guid"]!
@@ -154,7 +168,7 @@ contract EnvironmentAct: NonFungibleToken{
 			return ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun assetPath(): String{ 
 			if self.metadata["ipfs"] != nil{ 
 				let ipfs = self.metadata["ipfs"]!
@@ -164,14 +178,14 @@ contract EnvironmentAct: NonFungibleToken{
 		}
 		
 		// returns a url to display an medium sized image
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mediumimage(): String{ 
 			let url = self.assetPath().concat("?width=512")
 			return url
 		}
 		
 		// returns a url to display a thumbnail sized image
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun thumbnail(): String{ 
 			let url = self.assetPath().concat("?width=256")
 			return url
@@ -217,15 +231,15 @@ contract EnvironmentAct: NonFungibleToken{
 	access(all)
 	resource interface EnvironmentActCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEnvironmentAct(id: UInt64): &EnvironmentAct.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -235,21 +249,21 @@ contract EnvironmentAct: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupporters(id: UInt64):{ Address: UserProfile}?
 	}
 	
 	// deposit funds into EnvAct vault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun topup(vault: @FUSD.Vault){ 
 		self.vault.deposit(from: <-vault)
 	}
 	
 	// get vault balance
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalance(): UFix64{ 
 		return self.vault.balance
 	}
@@ -280,7 +294,7 @@ contract EnvironmentAct: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @EnvironmentAct.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -311,7 +325,7 @@ contract EnvironmentAct: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the EnvironmentAct.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEnvironmentAct(id: UInt64): &EnvironmentAct.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -328,7 +342,7 @@ contract EnvironmentAct: NonFungibleToken{
 			return environmentAct as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -339,7 +353,7 @@ contract EnvironmentAct: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupporters(id: UInt64):{ Address: UserProfile}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -375,22 +389,22 @@ contract EnvironmentAct: NonFungibleToken{
 	
 	access(all)
 	resource interface EnvironmentActVaultPublic{ 
-		access(all)
-		fun topup(envActVault: @Vault)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun topup(envActVault: @EnvironmentAct.Vault): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun topupFUSD(vault: @FUSD.Vault)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @Vault
 		
 		access(account)
 		fun withdrawFUSD(amount: UFix64): @FUSD.Vault
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFunds(amount: UFix64, ref: &NFTMinter)
 	}
 	
@@ -400,19 +414,19 @@ contract EnvironmentAct: NonFungibleToken{
 		access(contract)
 		let vault: @FUSD.Vault
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun topup(envActVault: @Vault){ 
 			let fusdVault <- envActVault.vault.withdraw(amount: envActVault.getBalance())
 			self.vault.deposit(from: <-fusdVault)
 			destroy envActVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun topupFUSD(vault: @FUSD.Vault){ 
 			self.vault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @Vault{ 
 			let envActVault <- create Vault()
 			envActVault.vault.deposit(from: <-self.vault.withdraw(amount: amount))
@@ -424,14 +438,14 @@ contract EnvironmentAct: NonFungibleToken{
 			return <-(self.vault.withdraw(amount: amount) as! @FUSD.Vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFunds(amount: UFix64, ref: &NFTMinter){ 
 			// assert(ref != nil, "Ref admin is bad")
 			let vault <- self.vault.withdraw(amount: amount)
 			EnvironmentAct.vault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.vault.balance
 		}
@@ -445,7 +459,7 @@ contract EnvironmentAct: NonFungibleToken{
 	}
 	
 	// createEmptyVault
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @Vault{ 
 		return <-create Vault()
 	}
@@ -459,7 +473,7 @@ contract EnvironmentAct: NonFungibleToken{
 	}
 	
 	// create user
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createUser(wallet: Capability<&{FungibleToken.Receiver}>): @User{ 
 		return <-create User(wallet: wallet)
 	}
@@ -474,7 +488,7 @@ contract EnvironmentAct: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, metadata:{ String: String}){ 
 			emit Minted(id: EnvironmentAct.totalSupply, metadata: metadata)
 			// deposit it in the recipient's account using their reference
@@ -489,7 +503,7 @@ contract EnvironmentAct: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &EnvironmentAct.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&EnvironmentAct.Collection>(EnvironmentAct.CollectionPublicPath).borrow<&EnvironmentAct.Collection>() ?? panic("Couldn't get collection")
 		// We trust EnvironmentAct.Collection.borowEnvironmentAct to get the correct itemID

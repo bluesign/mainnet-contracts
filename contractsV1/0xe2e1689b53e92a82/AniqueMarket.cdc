@@ -1,4 +1,18 @@
-//  SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//  SPDX-License-Identifier: UNLICENSED
 //
 //  Secondary marketplace for Anique NFTs.
 //
@@ -38,7 +52,7 @@ contract AniqueMarket{
 		access(all)
 		var cutRate: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenID: UInt64,
 			buyTokens: @AniqueCredit.Vault,
@@ -52,13 +66,13 @@ contract AniqueMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &{Anique.NFT}?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -130,7 +144,7 @@ contract AniqueMarket{
 		
 		// listForSale lists an NFT for sale in this sale collection
 		// at the specified price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenID: UInt64, price: UFix64){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowNFT(id: tokenID) != nil:
@@ -148,7 +162,7 @@ contract AniqueMarket{
 		//
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -167,7 +181,7 @@ contract AniqueMarket{
 		
 		// purchase lets a user send tokens to purchase an NFT that is for sale
 		// the purchased NFT is returned to the transaction context that called it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @AniqueCredit.Vault, admin: &AniqueCredit.Admin): @{Anique.NFT}{ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowNFT(id: tokenID) != nil && self.prices[tokenID] != nil:
@@ -197,7 +211,7 @@ contract AniqueMarket{
 		}
 		
 		// changeRate changes the cut rate of the tokens that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRate(_ newRate: UFix64){ 
 			pre{ 
 				newRate >= 0.0 && newRate < 1.0:
@@ -208,7 +222,7 @@ contract AniqueMarket{
 		}
 		
 		// changeOwnerReceiver updates the capability for the sellers fungible token Vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(_ newOwnerCapability: Capability<&{AniqueCredit.Receiver}>){ 
 			pre{ 
 				newOwnerCapability.borrow() != nil:
@@ -218,7 +232,7 @@ contract AniqueMarket{
 		}
 		
 		// changeBeneficiaryReceiver updates the capability for the beneficiary of the cut of the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(_ newBeneficiaryCapability: Capability<&{AniqueCredit.Receiver}>){ 
 			pre{ 
 				newBeneficiaryCapability.borrow() != nil:
@@ -228,20 +242,20 @@ contract AniqueMarket{
 		}
 		
 		// getPrice returns the price of a specific token in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.prices.keys
 		}
 		
 		// borrowCollectible Returns a borrowed reference to a Collectible in the collection
 		// so that the caller can read data from it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &{Anique.NFT}?{ 
 			if self.prices[id] != nil{ 
 				return (self.ownerCollection.borrow()!).borrowAniqueNFT(id: id)
@@ -252,7 +266,7 @@ contract AniqueMarket{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&{Anique.Collection}>,
 		ownerCapability: Capability<&{AniqueCredit.Receiver}>,

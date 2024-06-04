@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -115,7 +129,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 		
 		// If the NFT is destroyed, emit an event to indicate 
 		// to outside observers that it has been destroyed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun checkSoulbound(): Bool{ 
 			return HeroesOfTheFlow.getEntityMetaDataByField(entityID: self.entityID, field: "soulbound") == "true"
 		}
@@ -202,7 +216,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 	resource NFTMinter: FlowversePrimarySaleV2.IMinter{ 
 		init(){} 
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(entityID: UInt64, minterAddress: Address): @NFT{ 
 			return <-HeroesOfTheFlow.mint(entityID: entityID, minterAddress: minterAddress)
 		}
@@ -217,7 +231,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 		
 		// createEntity creates a new Entity struct 
 		// and stores it in the Entities dictionary in the HeroesOfTheFlow smart contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEntity(metadata:{ String: String}): UInt64{ 
 			// Create the new Entity
 			var newEntity = Entity(metadata: metadata)
@@ -236,7 +250,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 		}
 		
 		// updateEntity updates an existing Entity 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEntity(entityID: UInt64, metadata:{ String: String}){ 
 			let updatedEntity = HeroesOfTheFlow.entityDatas[entityID]!
 			updatedEntity.metadata = metadata
@@ -244,7 +258,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 			emit EntityUpdated(id: entityID, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEntitySoulbound(entityID: UInt64, soulbound: Bool){ 
 			assert(HeroesOfTheFlow.entityDatas[entityID] != nil, message: "Cannot set soulbound: the entity doesn't exist.")
 			if soulbound{ 
@@ -254,19 +268,19 @@ contract HeroesOfTheFlow: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(entityID: UInt64, minterAddress: Address): @NFT{ 
 			return <-HeroesOfTheFlow.mint(entityID: entityID, minterAddress: minterAddress)
 		}
 		
 		// createNFTMinter creates a new NFTMinter resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMinter(): @NFTMinter{ 
 			return <-create NFTMinter()
 		}
 		
 		// createNewAdmin creates a new Admin resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -276,18 +290,18 @@ contract HeroesOfTheFlow: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHeroesOfTheFlowNFT(id: UInt64): &HeroesOfTheFlow.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -297,8 +311,8 @@ contract HeroesOfTheFlow: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 	}
 	
 	// Collection of HeroesOfTheFlow NFTs owned by an account
@@ -329,7 +343,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @HeroesOfTheFlow.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -337,7 +351,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -356,7 +370,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHeroesOfTheFlowNFT(id: UInt64): &HeroesOfTheFlow.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -400,24 +414,24 @@ contract HeroesOfTheFlow: NonFungibleToken{
 	}
 	
 	// getAllEntities returns all the entities available
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllEntities(): [HeroesOfTheFlow.Entity]{ 
 		return HeroesOfTheFlow.entityDatas.values
 	}
 	
 	// getEntity returns an entity by ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEntity(entityID: UInt64): HeroesOfTheFlow.Entity?{ 
 		return self.entityDatas[entityID]
 	}
 	
 	// getEntityMetaData returns all the metadata associated with a specific Entity
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEntityMetaData(entityID: UInt64):{ String: String}?{ 
 		return self.entityDatas[entityID]?.metadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getEntityMetaDataByField(entityID: UInt64, field: String): String?{ 
 		if let entity = HeroesOfTheFlow.entityDatas[entityID]{ 
 			return entity.metadata[field]
@@ -426,7 +440,7 @@ contract HeroesOfTheFlow: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumMintedPerEntity():{ UInt64: UInt64}{ 
 		return self.numMintedPerEntity
 	}

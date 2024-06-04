@@ -1,4 +1,18 @@
-// MADE BY: Bohao Tang
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// MADE BY: Bohao Tang
 
 // This contract is for FLOAT EventSeries
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -234,7 +248,7 @@ contract FLOATEventSeries{
 		emit ContractTokenDefintionUpdated(identifier: token.identifier, path: path, isNFT: isNFT)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenDefinition(_ token: Type): TokenDefinition?{ 
 		return self.tokenDefinitions[token]
 	}
@@ -325,7 +339,7 @@ contract FLOATEventSeries{
 		}
 		
 		// get the reference of the given event
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventPublic(): &FLOAT.FLOATEvent{ 
 			let ownerEvents =
 				getAccount(self.host).capabilities.get<&FLOAT.FLOATEvents>(
@@ -337,7 +351,7 @@ contract FLOATEventSeries{
 		}
 		
 		// convert identifier to string
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun toString(): String{ 
 			return self.host.toString().concat("#").concat(self.eventId.toString())
 		}
@@ -360,7 +374,7 @@ contract FLOATEventSeries{
 		}
 		
 		// get the reference of the given series
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventSeriesPublic(): &FLOATEventSeries.EventSeries{ 
 			let ref =
 				getAccount(self.host).capabilities.get<&EventSeriesBuilder>(
@@ -372,7 +386,7 @@ contract FLOATEventSeries{
 		}
 		
 		// convert identifier to string
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun toString(): String{ 
 			return self.host.toString().concat("#").concat(self.id.toString())
 		}
@@ -382,11 +396,11 @@ contract FLOATEventSeries{
 	access(all)
 	struct interface EventSlot{ 
 		// get the event identifier
-		access(all)
-		fun getIdentifier(): EventIdentifier?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getIdentifier(): FLOATEventSeries.EventIdentifier?
 		
 		// if the event is required for achievement
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isEventRequired(): Bool
 		
 		// set the event identifier
@@ -404,12 +418,12 @@ contract FLOATEventSeries{
 			self.identifier = identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier(): EventIdentifier?{ 
 			return self.identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isEventRequired(): Bool{ 
 			return true
 		}
@@ -430,12 +444,12 @@ contract FLOATEventSeries{
 			self.identifier = identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier(): EventIdentifier?{ 
 			return self.identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isEventRequired(): Bool{ 
 			return false
 		}
@@ -460,12 +474,12 @@ contract FLOATEventSeries{
 			self.identifier = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier(): EventIdentifier?{ 
 			return self.identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isEventRequired(): Bool{ 
 			return self.isRequired
 		}
@@ -484,7 +498,7 @@ contract FLOATEventSeries{
 		let title: String
 		
 		// how many points will be obtain when reach this goal
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPoints(): UInt64{ 
 			post{ 
 				result > 0:
@@ -493,7 +507,7 @@ contract FLOATEventSeries{
 		}
 		
 		// Fetch detail of the goal
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGoalDetail():{ String: AnyStruct}
 		
 		// Check if user fits some criteria.
@@ -554,11 +568,11 @@ contract FLOATEventSeries{
 		
 		// ---- readonly methods ----
 		// get total amount (For FT) of the delivery
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalAmount(): UFix64
 		
 		// get rest amount (For FT) of the delivery
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRestAmount(): UFix64
 		
 		// ---- writable methods ----
@@ -630,12 +644,12 @@ contract FLOATEventSeries{
 		}
 		
 		// interface implement
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalAmount(): UFix64{ 
 			return self.oneShareAmount.saturatingMultiply(UFix64(self.maxClaimableShares))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRestAmount(): UFix64{ 
 			return self.restAmount
 		}
@@ -711,12 +725,12 @@ contract FLOATEventSeries{
 		}
 		
 		// interface implement
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalAmount(): UFix64{ 
 			return self.totalAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRestAmount(): UFix64{ 
 			return self.restAmount
 		}
@@ -789,12 +803,12 @@ contract FLOATEventSeries{
 		}
 		
 		// interface implement
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalAmount(): UFix64{ 
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRestAmount(): UFix64{ 
 			return 0.0
 		}
@@ -930,37 +944,37 @@ contract FLOATEventSeries{
 		}
 		
 		// get a copy of strategy information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getInfo(): StrategyInformation{ 
 			return self.info
 		}
 		
 		// get current state of the strategy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentState(): StrategyState{ 
 			return self.info.currentState
 		}
 		
 		// get total shares of the strategy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalShares(): UInt64{ 
 			return self.info.delivery.maxClaimableShares
 		}
 		
 		// get claimed shares of the strategy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimedShares(): UInt64{ 
 			return self.info.delivery.claimedShares
 		}
 		
 		// get claimed addresses
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimedAddresses(): [Address]{ 
 			return self.claimed
 		}
 		
 		// if user has claimed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasClaimed(address: Address): Bool{ 
 			return self.claimed.contains(address)
 		}
@@ -1046,7 +1060,7 @@ contract FLOATEventSeries{
 		}
 		
 		// Fetch detail of the strategy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getStrategyDetail(): AnyStruct
 		
 		// invoked when state changed
@@ -1104,7 +1118,7 @@ contract FLOATEventSeries{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let id: UInt64 = token.id
 			self.depositedNFTs[id] <-! token
 		}
@@ -1143,33 +1157,33 @@ contract FLOATEventSeries{
 	access(all)
 	resource interface TreasuryPublic{ 
 		// get token types from treasury
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTreasuryAssets(isNFT: Bool): [Type]
 		
 		// get token balance from the token identifier
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTreasuryTokenBalance(type: Type): &{FungibleToken.Balance}?
 		
 		// get nft collection public 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTreasuryNFTCollection(type: Type): &{NonFungibleToken.CollectionPublic}?
 		
 		// get all strategy information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getStrategies(states: [StrategyState]?, _ user: &Achievement?): [
 			StrategyQueryResultWithUser
 		]
 		
 		// Refresh strategy status
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refreshUserStatus(user: &Achievement)
 		
 		// For the public to get strategy information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getStrategyDetail(strategyIndex: Int): StrategyDetail
 		
 		// For the public to claim rewards
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(strategyIndex: Int, user: &Achievement)
 		
 		// borrow strategy reference
@@ -1213,7 +1227,7 @@ contract FLOATEventSeries{
 		}
 		
 		// --- Getters - Public Interfaces ---
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTreasuryAssets(isNFT: Bool): [Type]{ 
 			if isNFT{ 
 				return self.genericNFTPool.keys
@@ -1222,18 +1236,18 @@ contract FLOATEventSeries{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTreasuryTokenBalance(type: Type): &{FungibleToken.Balance}?{ 
 			return &self.genericFTPool[type] as &{FungibleToken.Balance}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTreasuryNFTCollection(type: Type): &{NonFungibleToken.CollectionPublic}?{ 
 			return &self.genericNFTPool[type] as &{NonFungibleToken.CollectionPublic}?
 		}
 		
 		// get all strategy information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getStrategies(states: [StrategyState]?, _ user: &Achievement?): [StrategyQueryResultWithUser]{ 
 			if user != nil{ 
 				let achievementIdentifier = (user!).target.toString()
@@ -1270,7 +1284,7 @@ contract FLOATEventSeries{
 		}
 		
 		// For the public to get strategy information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getStrategyDetail(strategyIndex: Int): StrategyDetail{ 
 			pre{ 
 				self.strategies[strategyIndex] != nil:
@@ -1281,7 +1295,7 @@ contract FLOATEventSeries{
 			return StrategyDetail(id: data.getType().identifier, data: data, status: strategyRef.controller.getInfo())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refreshUserStatus(user: &Achievement){ 
 			// ensure achievement record should be same
 			let achievementIdentifier = user.target.toString()
@@ -1296,7 +1310,7 @@ contract FLOATEventSeries{
 		}
 		
 		// execute claiming
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(strategyIndex: Int, user: &Achievement){ 
 			// ensure achievement record should be same
 			let achievementIdentifier = user.target.toString()
@@ -1328,14 +1342,14 @@ contract FLOATEventSeries{
 		
 		// --- Setters - Private Interfaces ---
 		// update DropReceiver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDropReceiver(receiver: Address){ 
 			self.receiver = receiver
 			emit FLOATEventSeriesTreasuryUpdateDropReceiver(seriesId: self.seriesId, host: (self.owner!).address, receiver: receiver)
 		}
 		
 		// drop all treasury, if no strategy alive
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun dropTreasury(){ 
 			pre{ 
 				self.strategies.length == self.getStrategies(states: [StrategyState.closed], nil).length:
@@ -1365,7 +1379,7 @@ contract FLOATEventSeries{
 		}
 		
 		// deposit ft to treasury
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFungibleToken(from: @{FungibleToken.Vault}){ 
 			let fromType = from.getType()
 			let tokenInfo = FLOATEventSeries.getTokenDefinition(fromType) ?? panic("This token is not defined.")
@@ -1382,7 +1396,7 @@ contract FLOATEventSeries{
 		}
 		
 		// deposit nft to treasury
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNonFungibleTokens(nfts: @[{NonFungibleToken.NFT}]){ 
 			assert(nfts.length > 0, message: "Empty collection.")
 			let nftType = (&nfts[0] as &{NonFungibleToken.NFT}).getType()
@@ -1409,7 +1423,7 @@ contract FLOATEventSeries{
 		}
 		
 		// add a new strategy
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStrategy(strategy: @{ITreasuryStrategy}, autoStart: Bool){ 
 			let id = strategy.getType().identifier
 			
@@ -1459,7 +1473,7 @@ contract FLOATEventSeries{
 		}
 		
 		// go next strategy stage
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun nextStrategyStage(idx: Int, _ forceClose: Bool): StrategyState{ 
 			let strategy = self.borrowStrategyRef(idx: idx)
 			var nextState: StrategyState = StrategyState.opening
@@ -1562,43 +1576,43 @@ contract FLOATEventSeries{
 		
 		// ---- Methods ----
 		// get series id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64
 		
 		// get series identifier
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier(): EventSeriesIdentifier
 		
 		// get last slot index
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastSlotIdx(): Int
 		
 		// get all slots data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlots(): [{EventSlot}]
 		
 		// get a event slot by index
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlot(idx: Int):{ EventSlot}
 		
 		// get all goals data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGoals(): [{IAchievementGoal}]
 		
 		// get an achievement goal by index
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGoal(idx: Int):{ IAchievementGoal}
 		
 		// get extra information of event series
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: AnyStruct}
 		
 		// check if goals of this user reached
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkGoalsReached(user: Address, idxs: [Int]?): [Bool]
 		
 		// borrow the treasury public reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTreasuryPublic(): &Treasury
 	}
 	
@@ -1673,27 +1687,27 @@ contract FLOATEventSeries{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIdentifier(): EventSeriesIdentifier{ 
 			return EventSeriesIdentifier((self.owner!).address, self.uuid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLastSlotIdx(): Int{ 
 			return self.slots.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlots(): [{EventSlot}]{ 
 			return self.slots
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlot(idx: Int):{ EventSlot}{ 
 			pre{ 
 				idx >= 0 && idx < self.slots.length:
@@ -1702,12 +1716,12 @@ contract FLOATEventSeries{
 			return self.slots[idx]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGoals(): [{IAchievementGoal}]{ 
 			return self.goals
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getGoal(idx: Int):{ IAchievementGoal}{ 
 			pre{ 
 				idx >= 0 && idx < self.goals.length:
@@ -1716,18 +1730,18 @@ contract FLOATEventSeries{
 			return self.goals[idx]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtra():{ String: AnyStruct}{ 
 			return self.extra
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTreasuryPublic(): &Treasury{ 
 			return &self.treasury as &Treasury
 		}
 		
 		// check if goals of this user reached
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkGoalsReached(user: Address, idxs: [Int]?): [Bool]{ 
 			let ret: [Bool] = []
 			var checkingGoals: [{IAchievementGoal}] = []
@@ -1748,12 +1762,12 @@ contract FLOATEventSeries{
 		
 		// --- Setters - Private Interfaces ---
 		// borrow the treasury private reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTreasury(): &Treasury{ 
 			return &self.treasury as &Treasury
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBasics(name: String, description: String, image: String){ 
 			self.name = name
 			self.description = description
@@ -1761,7 +1775,7 @@ contract FLOATEventSeries{
 			emit FLOATEventSeriesBasicsUpdated(seriesId: self.uuid, host: self.host, name: name, description: description, image: image)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSlotData(idx: Int, identifier: EventIdentifier){ 
 			pre{ 
 				idx < self.slots.length:
@@ -1777,7 +1791,7 @@ contract FLOATEventSeries{
 			emit FLOATEventSeriesSlotUpdated(seriesId: self.uuid, host: self.host, index: idx, eventHost: identifier.host, eventId: identifier.eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAchievementGoal(goal:{ IAchievementGoal}){ 
 			self.goals.append(goal)
 			let global = FLOATEventSeries.borrowEventSeriesGlobal()
@@ -1786,7 +1800,7 @@ contract FLOATEventSeries{
 		}
 		
 		// sync eventseries related certificate FLOATs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun syncCertificates(events: [EventIdentifier]){ 
 			pre{ 
 				events.length > 0:
@@ -1830,15 +1844,15 @@ contract FLOATEventSeries{
 		
 		// ---- Methods ----
 		// get all ids including revoked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventSeriesIDs(): [UInt64]
 		
 		// check if some id is revoked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRevoked(seriesId: UInt64): Bool
 		
 		// borrow the public interface of EventSeries
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEventSeriesPublic(seriesId: UInt64): &EventSeries?
 		
 		// internal full reference borrowing
@@ -1877,24 +1891,24 @@ contract FLOATEventSeries{
 			return &self.series[id] as &{ViewResolver.Resolver}? ?? panic("Failed to borrow ViewResolver.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEventSeriesPublic(seriesId: UInt64): &EventSeries?{ 
 			return &self.series[seriesId] as &EventSeries?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventSeriesIDs(): [UInt64]{ 
 			return self.series.keys.concat(self.revoked.keys)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isRevoked(seriesId: UInt64): Bool{ 
 			return self.revoked[seriesId] != nil
 		}
 		
 		// Maps the eventId to the name of that
 		// event series. Just a kind helper.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEventSeries(_ revoked: Bool):{ UInt64: String}{ 
 			let answer:{ UInt64: String} ={} 
 			let keys = revoked ? self.revoked.keys : self.series.keys
@@ -1909,7 +1923,7 @@ contract FLOATEventSeries{
 		}
 		
 		// --- Setters - Private Interfaces ---
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEventSeries(name: String, description: String, image: String, slots: [{EventSlot}], goals: [{IAchievementGoal}], extra:{ String: AnyStruct}): UInt64{ 
 			let host = (self.owner!).address
 			let eventSeries <- create EventSeries(host: host, name: name, description: description, image: image, slots: slots, goals: goals, extra)
@@ -1919,7 +1933,7 @@ contract FLOATEventSeries{
 			return seriesId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revokeEventSeries(seriesId: UInt64){ 
 			// drop treasury first
 			let seriesRef = &self.series[seriesId] as &EventSeries? ?? panic("The event series does not exist")
@@ -1933,14 +1947,14 @@ contract FLOATEventSeries{
 			emit FLOATEventSeriesRevoked(seriesId: seriesId, host: host)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun recoverEventSeries(seriesId: UInt64){ 
 			let one <- self.revoked.remove(key: seriesId) ?? panic("The event series does not exist")
 			self.series[seriesId] <-! one
 			emit FLOATEventSeriesRecovered(seriesId: seriesId, host: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerToken(path: PublicPath, isNFT: Bool){ 
 			// register token from owner's capability
 			let tokenCap = (self.owner!).capabilities.get_<YOUR_TYPE>(path)
@@ -1956,12 +1970,12 @@ contract FLOATEventSeries{
 		}
 		
 		// create the controller resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createStrategyController(consumable: Bool, threshold: UInt64, delivery:{ StrategyDelivery}): @StrategyController{ 
 			return <-create StrategyController(consumable: consumable, threshold: threshold, delivery: delivery)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEventSeries(seriesId: UInt64): &EventSeries?{ 
 			return &self.series[seriesId] as &EventSeries?
 		}
@@ -1979,13 +1993,13 @@ contract FLOATEventSeries{
 	access(all)
 	resource interface EventSeriesGlobalPublic{ 
 		// get series identifier
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun querySeries(page: UInt64, limit: UInt64, isTreasuryAvailable: Bool): [
-			EventSeriesIdentifier
+			FLOATEventSeries.EventSeriesIdentifier
 		]
 		
 		// get series amount
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalAmount(isTreasuryAvailable: Bool): Int
 		
 		// add a event series with goal to global
@@ -2019,7 +2033,7 @@ contract FLOATEventSeries{
 		}
 		
 		// --- Getters - Public Interfaces ---
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun querySeries(page: UInt64, limit: UInt64, isTreasuryAvailable: Bool): [EventSeriesIdentifier]{ 
 			let arr = isTreasuryAvailable ? self.seriesWithTreasuryAvailableList : self.seriesList
 			if arr.length == 0{ 
@@ -2038,7 +2052,7 @@ contract FLOATEventSeries{
 			return ret
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalAmount(isTreasuryAvailable: Bool): Int{ 
 			let arr = isTreasuryAvailable ? self.seriesWithTreasuryAvailableList : self.seriesList
 			return arr.length
@@ -2117,7 +2131,7 @@ contract FLOATEventSeries{
 	access(all)
 	resource interface AchievementPublic{ 
 		// get achievement record owner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getOwner(): Address
 		
 		// get achievement record target
@@ -2137,7 +2151,7 @@ contract FLOATEventSeries{
 		var finishedGoals: [Int]
 		
 		// check if goal can be accomplished
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isGoalReady(goalIdx: Int): Bool
 		
 		// Update treasury claimed information
@@ -2173,13 +2187,13 @@ contract FLOATEventSeries{
 		
 		// --- Getters - Public Interfaces ---
 		// get achievement record owner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getOwner(): Address{ 
 			return (self.owner!).address
 		}
 		
 		// check if goal can be accomplished
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isGoalReady(goalIdx: Int): Bool{ 
 			// fetch the event series reference
 			let eventSeriesRef = self.target.getEventSeriesPublic()
@@ -2189,7 +2203,7 @@ contract FLOATEventSeries{
 		
 		// --- Setters - Private Interfaces ---
 		// Achieve the goal and add to score
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accomplishGoal(goalIdx: Int){ 
 			pre{ 
 				!self.finishedGoals.contains(goalIdx):
@@ -2241,8 +2255,11 @@ contract FLOATEventSeries{
 	access(all)
 	resource interface AchievementBoardPublic{ 
 		// get the achievement reference by event series identifier
-		access(all)
-		fun borrowAchievementRecordRef(host: Address, seriesId: UInt64): &Achievement?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowAchievementRecordRef(
+			host: Address,
+			seriesId: UInt64
+		): &FLOATEventSeries.Achievement?
 	}
 	
 	// Users' Achievement board
@@ -2263,7 +2280,7 @@ contract FLOATEventSeries{
 		}
 		
 		// --- Getters - Public Interfaces ---
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAchievementRecordRef(host: Address, seriesId: UInt64): &Achievement?{ 
 			let target = EventSeriesIdentifier(host, seriesId)
 			let key = target.toString()
@@ -2272,7 +2289,7 @@ contract FLOATEventSeries{
 		
 		// --- Setters - Private Interfaces ---
 		// create achievement by host and id
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAchievementRecord(host: Address, seriesId: UInt64): EventSeriesIdentifier{ 
 			let identifier = EventSeriesIdentifier(host, seriesId)
 			let key = identifier.toString()
@@ -2283,7 +2300,7 @@ contract FLOATEventSeries{
 			return identifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAchievementRecordWritable(host: Address, seriesId: UInt64): &Achievement?{ 
 			let target = EventSeriesIdentifier(host, seriesId)
 			let key = target.toString()
@@ -2292,18 +2309,18 @@ contract FLOATEventSeries{
 	}
 	
 	// ---- contract methods ----
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEventSeriesBuilder(): @EventSeriesBuilder{ 
 		return <-create EventSeriesBuilder()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAchievementBoard(): @AchievementBoard{ 
 		return <-create AchievementBoard()
 	}
 	
 	// borrow the reference of the EventSeriesGlobal
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowEventSeriesGlobal(): &EventSeriesGlobal{ 
 		return self.account.storage.borrow<&EventSeriesGlobal>(
 			from: self.FLOATEventSeriesGlobalStoragePath

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FungibleTokenMetadataViews from "./../../standardsV1/FungibleTokenMetadataViews.cdc"
 
@@ -25,15 +39,15 @@ contract Lama: ViewResolver{
 	// private functions only accessed by Account Parent
 	access(all)
 	resource interface ParentAccess{ 
-		access(all)
-		fun collect(path: PrivatePath, receiverPath: PublicPath, receiver: Address)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun collect(path: PrivatePath, receiverPath: PublicPath, receiver: Address): Void
 	}
 	
 	// private functions only accessed by Account Child
 	access(all)
 	resource interface ChildAccess{ 
-		access(all)
-		fun setAllowance(path: PrivatePath, allowance: UFix64, provider: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setAllowance(path: PrivatePath, allowance: UFix64, provider: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>): Void
 	}
 	
 	access(all)
@@ -53,17 +67,17 @@ contract Lama: ViewResolver{
 			self.capabilities ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllowance(path: PrivatePath): UFix64{ 
 			return self.allowances[path] ?? 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollected(path: PrivatePath): UFix64{ 
 			return self.collected[path] ?? 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun collect(path: PrivatePath, receiverPath: PublicPath, receiver: Address){ 
 			let childProvider: Capability<&{FungibleToken.Provider, FungibleToken.Balance}> = self.capabilities[path] ?? panic("FungibleToken.Provider capability not found for provider path")
 			let childVault: &{FungibleToken.Provider, FungibleToken.Balance} = childProvider.borrow() ?? panic("Could not borrow FungibleToken.Provider")
@@ -88,7 +102,7 @@ contract Lama: ViewResolver{
 			emit Lama.Collected(path: path, limit: collectable, receiver: receiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowance(path: PrivatePath, allowance: UFix64, provider: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>){ 
 			self.capabilities.insert(key: path, provider)
 			self._setAllowance(path: path, allowance: allowance)
@@ -101,7 +115,7 @@ contract Lama: ViewResolver{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAllowance(): @Lama.Allowance{ 
 		return <-create Allowance()
 	}

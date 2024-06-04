@@ -1,4 +1,18 @@
-import MoxyData from "./MoxyData.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MoxyData from "./MoxyData.cdc"
 
 access(all)
 contract MoxyProcessQueue{ 
@@ -28,32 +42,32 @@ contract MoxyProcessQueue{
 		access(all)
 		var isFinished: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAtBeginning(): Bool{ 
 			return self.index == self.indexStart
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentAddresses(): [Address]{ 
 			return self.currentAddresses
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBounds(): [Int]{ 
 			return [self.index, self.indexEnd]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCurrentAddresses(addresses: [Address]){ 
 			self.currentAddresses = addresses
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setIndex(index: Int){ 
 			self.index = index
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun complete(): Int{ 
 			let processed = self.currentAddresses.length
 			emit RunCompleted(processed: processed)
@@ -65,7 +79,7 @@ contract MoxyProcessQueue{
 			return processed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainings(): Int{ 
 			return self.indexEnd - self.index + 1
 		}
@@ -188,7 +202,7 @@ contract MoxyProcessQueue{
 			self.isStarted = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRunSize(quantity: Int){ 
 			pre{ 
 				quantity > 0:
@@ -208,7 +222,7 @@ contract MoxyProcessQueue{
 			destroy temp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAtBeginning(): Bool{ 
 			var isBeginning = true
 			var i = 0
@@ -219,12 +233,12 @@ contract MoxyProcessQueue{
 			return i > self.currentRuns.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasFinished(): Bool{ 
 			return self.accountsToProcess > 0 && self.accountsProcessed == self.accountsToProcess
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFreeRun(): @Run?{ 
 			var tries = 0
 			var i = 0
@@ -243,7 +257,7 @@ contract MoxyProcessQueue{
 			return <-run
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeNextAddresses(run: @Run){ 
 			self.currentRuns[run.runId]?.setCurrentAddresses(addresses: run.getCurrentAddresses())
 			self.accountsProcessed = self.accountsProcessed
@@ -252,7 +266,7 @@ contract MoxyProcessQueue{
 			destroy run
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainings(): Int{ 
 			var total = 0
 			var i = 0
@@ -265,7 +279,7 @@ contract MoxyProcessQueue{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRunBounds(): [[Int]]{ 
 			var bounds: [[Int]] = []
 			var i = 0
@@ -278,7 +292,7 @@ contract MoxyProcessQueue{
 			return bounds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentRunStatus(): CurrentRunStatus{ 
 			return CurrentRunStatus(
 				totalAccounts: self.accountsToProcess,
@@ -329,7 +343,7 @@ contract MoxyProcessQueue{
 		access(all)
 		var isStarted: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccount(address: Address){ 
 			if self.accountsDict[address] != nil{ 
 				log("Account already added to queue")
@@ -340,7 +354,7 @@ contract MoxyProcessQueue{
 			self.accountsQuantity = self.accountsQuantity + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccount(address: Address){ 
 			self.accounts[self.accountsDict[address]!] = 0x0
 			self.accountsQuantity = self.accountsQuantity - 1
@@ -362,12 +376,12 @@ contract MoxyProcessQueue{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRunSize(): Int{ 
 			return self.runSize
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRunSize(quantity: Int){ 
 			pre{ 
 				quantity > 0:
@@ -379,28 +393,28 @@ contract MoxyProcessQueue{
 		}
 		
 		/* Returns true if the current batch is at the beginning */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAtBeginning(): Bool{ 
 			return self.currentBatch.isAtBeginning()
 		}
 		
 		/* Returns true if the current batch has finished */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasFinished(): Bool{ 
 			return self.currentBatch.hasFinished()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isEmptyQueue(): Bool{ 
 			return self.accountsQuantity < 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountsQuantity(): Int{ 
 			return self.accountsQuantity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainingAddresses(): [Address]{ 
 			var addrs: [Address] = []
 			var bounds = self.currentBatch.getRunBounds()
@@ -414,7 +428,7 @@ contract MoxyProcessQueue{
 			return addrs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockRunWith(quantity: Int): @Run?{ 
 			let time0000 = MoxyData.getTimestampTo0000(timestamp: getCurrentBlock().timestamp)
 			if self.currentBatch.hasFinished() && self.currentBatch.startTime0000 < time0000 || self.currentBatch.accountsToProcess == 0{ 
@@ -435,12 +449,12 @@ contract MoxyProcessQueue{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeNextAddresses(run: @Run){ 
 			self.currentBatch.completeNextAddresses(run: <-run)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainings(): Int{ 
 			if self.currentBatch.hasFinished() || self.currentBatch.accountsToProcess < 1{ 
 				if self.currentBatch.startTime0000 < MoxyData.getTimestampTo0000(timestamp: getCurrentBlock().timestamp){ 
@@ -451,7 +465,7 @@ contract MoxyProcessQueue{
 			return self.currentBatch.getRemainings()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentRunStatus(): CurrentRunStatus{ 
 			return self.currentBatch.getCurrentRunStatus()
 		}
@@ -467,14 +481,14 @@ contract MoxyProcessQueue{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewQueue(): @Queue{ 
 		return <-create Queue()
 	}
 	
 	access(all)
 	resource interface QueueInfo{ 
-		access(all)
-		fun getCurrentRunStatus(): CurrentRunStatus
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getCurrentRunStatus(): MoxyProcessQueue.CurrentRunStatus
 	}
 }

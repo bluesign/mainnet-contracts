@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import NFTStorefront from "./../../standardsV1/NFTStorefront.cdc"
 
@@ -21,7 +35,7 @@ contract SoulMade{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintComponent(
 			series: String,
 			name: String,
@@ -50,7 +64,7 @@ contract SoulMade{
 			adminComponentsCollection.deposit(token: <-newNFT)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintComponents(
 			series: String,
 			name: String,
@@ -74,7 +88,7 @@ contract SoulMade{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun moveMainComponentToPack(
 			scarcity: String,
 			series: String,
@@ -118,7 +132,7 @@ contract SoulMade{
 			adminPackCollection.deposit(token: <-packNft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPackManually(
 			scarcity: String,
 			series: String,
@@ -140,7 +154,7 @@ contract SoulMade{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPackFreeClaim(
 			scarcity: String,
 			series: String,
@@ -162,23 +176,23 @@ contract SoulMade{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun renewFreeClaim(){ 
 			SoulMadePack.renewClaimDictionary()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updataAccountFreeClaim(address: Address, series: String){ 
 			SoulMadePack.updateClaimDictionary(address: address, series: series)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updataPlatformCut(platformCut: UFix64){ 
 			SoulMadeMarketplace.updatePlatformCut(platformCut: platformCut)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMainCollectionIds(address: Address): [UInt64]{ 
 		let receiverRef =
 			getAccount(address).capabilities.get<&{SoulMadeMain.CollectionPublic}>(
@@ -188,7 +202,7 @@ contract SoulMade{
 		return receiverRef.getIDs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMainDetail(address: Address, mainNftId: UInt64): SoulMadeMain.MainDetail{ 
 		let receiverRef =
 			getAccount(address).capabilities.get<&{SoulMadeMain.CollectionPublic}>(
@@ -198,7 +212,7 @@ contract SoulMade{
 		return receiverRef.borrowMain(id: mainNftId).mainDetail
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getComponentCollectionIds(address: Address): [UInt64]{ 
 		let receiverRef =
 			getAccount(address).capabilities.get<&{SoulMadeComponent.CollectionPublic}>(
@@ -208,7 +222,7 @@ contract SoulMade{
 		return receiverRef.getIDs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getComponentDetail(
 		address: Address,
 		componentNftId: UInt64
@@ -221,7 +235,7 @@ contract SoulMade{
 		return receiverRef.borrowComponent(id: componentNftId).componentDetail
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackCollectionIds(address: Address): [UInt64]{ 
 		let receiverRef =
 			getAccount(address).capabilities.get<&{SoulMadePack.CollectionPublic}>(
@@ -231,7 +245,7 @@ contract SoulMade{
 		return receiverRef.getIDs()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackDetail(address: Address, packNftId: UInt64): SoulMadePack.PackDetail{ 
 		let receiverRef =
 			getAccount(address).capabilities.get<&{SoulMadePack.CollectionPublic}>(
@@ -241,7 +255,7 @@ contract SoulMade{
 		return receiverRef.borrowPack(id: packNftId).packDetail
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackListingIdsPerSeries(address: Address):{ String: [UInt64]}{ 
 		let storefrontRef =
 			getAccount(address).capabilities.get<&NFTStorefront.Storefront>(

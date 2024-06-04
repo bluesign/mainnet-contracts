@@ -1,4 +1,18 @@
-import PierSwapFactory from "../0x609e10301860b683/PierSwapFactory.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import PierSwapFactory from "../0x609e10301860b683/PierSwapFactory.cdc"
 
 import PierSwapSettings from "../0x066a74dfb4da0306/PierSwapSettings.cdc"
 
@@ -22,7 +36,7 @@ access(all)
 contract PierRouterLib{ 
 	
 	// Given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quote(amountA: UFix64, reserveA: UFix64, reserveB: UFix64): UFix64{ 
 		pre{ 
 			amountA > 0.0:
@@ -47,7 +61,7 @@ contract PierRouterLib{
 	//  E.g., [TokenA amount (input), TokenB amount, TokenC amount (output)]
 	// @return A vault of the last token in the swap path, with its balance equals to
 	//  the last amount in `amounts`
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeSwaps(
 		inputVault: @{FungibleToken.Vault},
 		pools: &[
@@ -73,7 +87,7 @@ contract PierRouterLib{
 	}
 	
 	// Given a swap path, returns the corresponding array of pools
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolsByPath(path: &[String]): [&PierPair.Pool]{ 
 		pre{ 
 			path.length >= 2:
@@ -91,7 +105,7 @@ contract PierRouterLib{
 	
 	// Returns the sorted reserve amounts of the pool according to 
 	// the order of [tokenATypeIdentifier, tokenBTypeIdentifier]
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSortedReserves(
 		pool: &{IPierPair.IPool},
 		tokenATypeIdentifier: String,
@@ -109,7 +123,7 @@ contract PierRouterLib{
 	
 	// Given amountIn as the expected input of the first token in path,
 	// returns amounts of each token in path
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountsByAmountIn(amountIn: UFix64, path: &[String], pools: &[&{IPierPair.IPool}]): [
 		UFix64
 	]{ 
@@ -130,7 +144,7 @@ contract PierRouterLib{
 	
 	// Given amountOut as the expected output of the last token in path,
 	// returns amounts of each token in path
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountsByAmountOut(amountOut: UFix64, path: &[String], pools: &[&{IPierPair.IPool}]): [
 		UFix64
 	]{ 
@@ -150,7 +164,7 @@ contract PierRouterLib{
 	}
 	
 	// Given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountOut(amountIn: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		pre{ 
 			amountIn > 0.0:
@@ -173,7 +187,7 @@ contract PierRouterLib{
 	}
 	
 	// Given an output amount of an asset and pair reserves, returns a required input amount of the other asset
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountIn(amountOut: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		pre{ 
 			amountOut > 0.0:

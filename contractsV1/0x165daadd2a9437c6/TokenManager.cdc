@@ -1,4 +1,18 @@
-import Rumble from "./Rumble.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Rumble from "./Rumble.cdc"
 
 access(all)
 contract TokenManager{ 
@@ -13,13 +27,13 @@ contract TokenManager{
 	
 	access(all)
 	resource interface Public{ 
-		access(all)
-		fun deposit(from: @Rumble.Vault)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(from: @Rumble.Vault): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun canWithdraw(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
 		access(account)
@@ -34,13 +48,13 @@ contract TokenManager{
 		access(all)
 		var withdrawTimestamp: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(from: @Rumble.Vault){ 
 			self.tokens.deposit(from: <-from)
 			self.withdrawTimestamp = getCurrentBlock().timestamp + TokenManager.cooldown
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(amount: UFix64): @Rumble.Vault{ 
 			pre{ 
 				self.canWithdraw():
@@ -57,12 +71,12 @@ contract TokenManager{
 			recipientVault.deposit(from: <-tokens)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun canWithdraw(): Bool{ 
 			return getCurrentBlock().timestamp >= self.withdrawTimestamp
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.tokens.balance
 		}
@@ -73,12 +87,12 @@ contract TokenManager{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @LockedVault{ 
 		return <-create LockedVault()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkUserDepositStatusIsValid(user: Address, amount: UFix64): Bool{ 
 		let userVault =
 			getAccount(user).capabilities.get<&LockedVault>(TokenManager.VaultPublicPath).borrow<

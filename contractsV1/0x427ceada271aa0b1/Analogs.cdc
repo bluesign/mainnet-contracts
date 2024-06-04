@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -77,15 +91,15 @@ contract Analogs: NonFungibleToken{
 	access(all)
 	resource interface AnalogsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAnalog(id: UInt64): &Analogs.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -114,17 +128,17 @@ contract Analogs: NonFungibleToken{
 		access(self)
 		var metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(){ 
 			self.locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -133,7 +147,7 @@ contract Analogs: NonFungibleToken{
 			self.metadata = newMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAddedToSet(setID: UInt64){ 
 			self.addedToSet = setID
 		}
@@ -235,7 +249,7 @@ contract Analogs: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata():{ String: String}{ 
 			return (Analogs.analogsTemplates[self.templateID]!).getMetadata()
 		}
@@ -265,7 +279,7 @@ contract Analogs: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Analogs.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -273,7 +287,7 @@ contract Analogs: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -292,7 +306,7 @@ contract Analogs: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAnalog(id: UInt64): &Analogs.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -390,37 +404,37 @@ contract Analogs: NonFungibleToken{
 			emit SetCreated(setID: self.setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableTemplateIDs(): [UInt64]{ 
 			return self.availableTemplateIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPublic(){ 
 			self.isPublic = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPrivate(){ 
 			self.isPublic = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAnalogRoyaltyAddress(analogRoyaltyAddress: Address){ 
 			self.analogRoyaltyAddress = analogRoyaltyAddress
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAnalogRoyaltySecondaryCut(analogRoyaltySecondaryCut: UFix64){ 
 			self.analogRoyaltySecondaryCut = analogRoyaltySecondaryCut
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addArtistRoyalty(royalty: Royalty){ 
 			self.artistRoyalties.append(royalty)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(templateID: UInt64, available: Bool){ 
 			pre{ 
 				Analogs.analogsTemplates[templateID] != nil:
@@ -441,14 +455,14 @@ contract Analogs: NonFungibleToken{
 			emit TemplateAddedToSet(setID: self.setID, templateID: templateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplates(templateIDs: [UInt64], available: Bool){ 
 			for template in templateIDs{ 
 				self.addTemplate(templateID: template, available: available)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(templateID: UInt64){ 
 			pre{ 
 				self.lockedTemplates[templateID] != nil:
@@ -462,14 +476,14 @@ contract Analogs: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockAllTemplates(){ 
 			for template in self.templateIDs{ 
 				self.lockTemplate(templateID: template)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -477,7 +491,7 @@ contract Analogs: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(){ 
 			if self.locked{ 
 				self.locked = false
@@ -485,7 +499,7 @@ contract Analogs: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			let templateID = self.availableTemplateIDs[0]
 			if (Analogs.analogsTemplates[templateID]!).locked{ 
@@ -500,7 +514,7 @@ contract Analogs: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTByTemplateID(templateID: UInt64): @NFT{ 
 			let newNFT: @NFT <- create Analogs.NFT(initID: templateID, initTemplateID: templateID, serialNumber: self.nextSetSerialNumber)
 			Analogs.totalSupply = Analogs.totalSupply + 1
@@ -510,7 +524,7 @@ contract Analogs: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(templateID: UInt64, newMetadata:{ String: String}): AnalogsTemplate{ 
 			pre{ 
 				Analogs.analogsTemplates[templateID] != nil:
@@ -523,18 +537,18 @@ contract Analogs: NonFungibleToken{
 			return Analogs.analogsTemplates[templateID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImageCID(): String?{ 
 			return self.metadata["imageCID"]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateImageCID(imageCID: String){ 
 			self.metadata["imageCID"] = imageCID
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt64): String{ 
 		pre{ 
 			Analogs.sets[setID] != nil:
@@ -544,7 +558,7 @@ contract Analogs: NonFungibleToken{
 		return set.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetImageCID(setID: UInt64): String?{ 
 		pre{ 
 			Analogs.sets[setID] != nil:
@@ -554,7 +568,7 @@ contract Analogs: NonFungibleToken{
 		return set.getImageCID()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetRoyalties(setID: UInt64): [Royalty]{ 
 		pre{ 
 			Analogs.sets[setID] != nil:
@@ -572,7 +586,7 @@ contract Analogs: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setID: UInt64){ 
 			let set = self.borrowSet(setID: setID)
 			if (set.getAvailableTemplateIDs()!).length == 0{ 
@@ -584,7 +598,7 @@ contract Analogs: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFT())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAndMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, templateID: UInt64, setID: UInt64, name: String, description: String, metadata:{ String: String}){ 
 			if Analogs.analogsTemplates[Analogs.nextTemplateID] != nil{ 
 				panic("Template already exists")
@@ -595,13 +609,13 @@ contract Analogs: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFTByTemplateID(templateID: templateID))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAnalogsTemplate(name: String, description: String, metadata:{ String: String}){ 
 			Analogs.analogsTemplates[Analogs.nextTemplateID] = AnalogsTemplate(templateID: Analogs.nextTemplateID, name: name, description: description, metadata: metadata)
 			Analogs.nextTemplateID = Analogs.nextTemplateID + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String, analogRoyaltyAddress: Address, analogRoyaltySecondaryCut: UFix64, imageCID: String): UInt64{ 
 			var newSet <- create Set(name: name, analogRoyaltyAddress: analogRoyaltyAddress, analogRoyaltySecondaryCut: analogRoyaltySecondaryCut, imageCID: imageCID)
 			let setID = newSet.setID
@@ -609,7 +623,7 @@ contract Analogs: NonFungibleToken{
 			return setID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			pre{ 
 				Analogs.sets[setID] != nil:
@@ -618,7 +632,7 @@ contract Analogs: NonFungibleToken{
 			return (&Analogs.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetImageCID(setID: UInt64, imageCID: String){ 
 			pre{ 
 				Analogs.sets[setID] != nil:
@@ -628,7 +642,7 @@ contract Analogs: NonFungibleToken{
 			return set.updateImageCID(imageCID: imageCID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAnalogsTemplate(templateID: UInt64, newMetadata:{ String: String}){ 
 			pre{ 
 				Analogs.analogsTemplates.containsKey(templateID) != nil:
@@ -637,7 +651,7 @@ contract Analogs: NonFungibleToken{
 			(Analogs.analogsTemplates[templateID]!).updateMetadata(newMetadata: newMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInitialNFTID(initialNFTID: UInt64){ 
 			pre{ 
 				Analogs.initialNFTID == 0:
@@ -649,17 +663,17 @@ contract Analogs: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAnalogsTemplateByID(templateID: UInt64): Analogs.AnalogsTemplate{ 
 		return Analogs.analogsTemplates[templateID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAnalogsTemplates():{ UInt64: Analogs.AnalogsTemplate}{ 
 		return Analogs.analogsTemplates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableTemplateIDsInSet(setID: UInt64): [UInt64]{ 
 		pre{ 
 			Analogs.sets[setID] != nil:

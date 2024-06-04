@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 * SPDX-License-Identifier: UNLICENSED
 */
 
@@ -72,7 +86,7 @@ contract Monsoon: NonFungibleToken{
 	var addressReceivermonsoonCutPercentage: Address
 	
 	// function to inform about all totals
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotals():{ String: UInt64}{ 
 		var totals:{ String: UInt64} ={} 
 		var old = totals.insert(key: "totalSupply", self.totalSupply)
@@ -151,19 +165,19 @@ contract Monsoon: NonFungibleToken{
 	access(all)
 	resource interface MonsoonCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		//list of the propertied of the cards collections
-		access(all)
-		fun listCards():{ UInt64: CardData}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun listCards():{ UInt64: Monsoon.CardData}
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMonsoonCard(id: UInt64): &Monsoon.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -200,7 +214,7 @@ contract Monsoon: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Monsoon.NFT
 			let id: UInt64 = token.id
 			
@@ -221,7 +235,7 @@ contract Monsoon: NonFungibleToken{
 		// listCards
 		// functions for list the properties of the user's cards
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listCards():{ UInt64: CardData}{ 
 			var cardsList:{ UInt64: CardData} ={} 
 			for key in self.ownedNFTs.keys{ 
@@ -249,7 +263,7 @@ contract Monsoon: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the MonsoonCard.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMonsoonCard(id: UInt64): &Monsoon.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}? // update secure cadence
@@ -261,7 +275,7 @@ contract Monsoon: NonFungibleToken{
 		}
 		
 		// function for burned the cards in order of allow mint a fusion card
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDestroy(keys: [UInt64]): Int{ 
 			var nBurned: Int = 0
 			
@@ -323,7 +337,7 @@ contract Monsoon: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, templateID: UInt64, typeOfCard: UInt32, universeID: UInt32, numSeries: UInt32, numSerial: UInt32, CID: String){ 
 			emit Minted(id: Monsoon.totalSupply, templateID: templateID, typeOfCard: typeOfCard, universeID: universeID, numSeries: numSeries, numSerial: numSerial, CID: CID)
 			
@@ -343,13 +357,13 @@ contract Monsoon: NonFungibleToken{
 		//-------------------------------------------------------
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeMonsoonCutPercentage(newCutPercentage: UFix64){ 
 			Monsoon.monsoonCutPercentage = newCutPercentage
 			emit monsoonCutPercentageChange(newPercent: Monsoon.monsoonCutPercentage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeaddressReceivermonsoonCutPercentage(newReceiver: Address){ 
 			Monsoon.addressReceivermonsoonCutPercentage = newReceiver
 			emit monsoonCutPercentageReceiverChange(newReceiver: Monsoon.addressReceivermonsoonCutPercentage)
@@ -362,7 +376,7 @@ contract Monsoon: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Monsoon.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&Monsoon.Collection>(Monsoon.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Monsoon.Collection.borowMonsoonCard to get the correct itemID

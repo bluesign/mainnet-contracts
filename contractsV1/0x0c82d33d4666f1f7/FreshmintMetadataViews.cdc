@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 access(all)
 contract FreshmintMetadataViews{ 
@@ -26,7 +40,7 @@ contract FreshmintMetadataViews{
 	/// - Plain file: "QmXnnyufdzAWL5CqZ2RnSNgPbvCc1ALT73s6epPrRnZ1Xy"
 	/// - Directory file: "QmdbaSQbGU6Wo9i5LyWWVLuU8g6WrYpWh2K4Li4QuuE8Fr/example.txt"
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ipfsFile(file: String): MetadataViews.IPFSFile{ 
 		// Find the first "/" character if one exists
 		let maybeIndex = self.firstIndexInString(file, of: "/")
@@ -44,7 +58,7 @@ contract FreshmintMetadataViews{
 	/// Return the first index of a character in the string,
 	/// or nil if none exists.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun firstIndexInString(_ s: String, of: Character): Int?{ 
 		var i = 0
 		while i < s.length{ 

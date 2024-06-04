@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FungibleTokenMetadataViews from "./../../standardsV1/FungibleTokenMetadataViews.cdc"
 
@@ -74,7 +88,7 @@ contract ConfrariaWeb3: FungibleToken, ViewResolver{
 		}
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault: @Vault <- from as! @Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -128,7 +142,7 @@ contract ConfrariaWeb3: FungibleToken, ViewResolver{
 	
 	access(all)
 	resource Minter: Toucans.Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(amount: UFix64): @Vault{ 
 			post{ 
 				ConfrariaWeb3.maxSupply == nil || ConfrariaWeb3.totalSupply <= ConfrariaWeb3.maxSupply!:
@@ -156,12 +170,12 @@ contract ConfrariaWeb3: FungibleToken, ViewResolver{
 			self.balances[address] = balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(address: Address): UFix64{ 
 			return self.balances[address] ?? 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalances():{ Address: UFix64}{ 
 			return self.balances
 		}
@@ -177,24 +191,24 @@ contract ConfrariaWeb3: FungibleToken, ViewResolver{
 		admin.setBalance(address: address, balance: balance)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalance(address: Address): UFix64{ 
 		let admin: &Administrator = self.account.storage.borrow<&Administrator>(from: self.AdministratorStoragePath)!
 		return admin.getBalance(address: address)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalances():{ Address: UFix64}{ 
 		let admin: &Administrator = self.account.storage.borrow<&Administrator>(from: self.AdministratorStoragePath)!
 		return admin.getBalances()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<FungibleTokenMetadataViews.FTView>(), Type<FungibleTokenMetadataViews.FTDisplay>(), Type<FungibleTokenMetadataViews.FTVaultData>()]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<FungibleTokenMetadataViews.FTView>():

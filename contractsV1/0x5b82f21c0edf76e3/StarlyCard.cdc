@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -64,7 +78,7 @@ contract StarlyCard: NonFungibleToken{
 			self.starlyID = initStarlyID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): StarlyMetadataViews.CardEdition?{ 
 			return StarlyMetadata.getCardEdition(starlyID: self.starlyID)
 		}
@@ -98,10 +112,10 @@ contract StarlyCard: NonFungibleToken{
 	access(all)
 	resource interface StarlyCardCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
@@ -110,7 +124,7 @@ contract StarlyCard: NonFungibleToken{
 		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}? // from MetadataViews
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStarlyCard(id: UInt64): &StarlyCard.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -134,7 +148,7 @@ contract StarlyCard: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StarlyCard.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -159,7 +173,7 @@ contract StarlyCard: NonFungibleToken{
 			return card as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStarlyCard(id: UInt64): &StarlyCard.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -203,7 +217,7 @@ contract StarlyCard: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &StarlyCard.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&StarlyCard.Collection>(StarlyCard.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust StarlyCard.Collection.borowStarlyCard to get the correct itemID
@@ -221,7 +235,7 @@ contract StarlyCard: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, starlyID: String){ 
 			emit Minted(id: StarlyCard.totalSupply, starlyID: starlyID)
 			// deposit it in the recipient's account using their reference
@@ -232,8 +246,8 @@ contract StarlyCard: NonFungibleToken{
 	
 	access(all)
 	resource interface MinterProxyPublic{ 
-		access(all)
-		fun setMinterCapability(capability: Capability<&NFTMinter>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setMinterCapability(capability: Capability<&StarlyCard.NFTMinter>): Void
 	}
 	
 	// MinterProxy
@@ -246,12 +260,12 @@ contract StarlyCard: NonFungibleToken{
 		access(self)
 		var minterCapability: Capability<&NFTMinter>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterCapability(capability: Capability<&NFTMinter>){ 
 			self.minterCapability = capability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, starlyID: String){ 
 			((self.minterCapability!).borrow()!).mintNFT(recipient: recipient, starlyID: starlyID)
 		}
@@ -267,7 +281,7 @@ contract StarlyCard: NonFungibleToken{
 	// Anyone can call this, but the MinterProxy cannot mint without a NFTMinter capability,
 	// and only the admin can provide that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMinterProxy(): @MinterProxy{ 
 		return <-create MinterProxy()
 	}
@@ -277,7 +291,7 @@ contract StarlyCard: NonFungibleToken{
 	// A resource that allows new minters to be created
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(): @NFTMinter{ 
 			emit MinterCreated()
 			return <-create NFTMinter()

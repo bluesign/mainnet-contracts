@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
 
@@ -60,7 +74,7 @@ contract CheezeVouchers{
 		access(contract)
 		var ownedVouchers: @{UInt64: Voucher}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(voucher: @Voucher){ 
 			let id: UInt64 = voucher.id
 			// add the new token to the dictionary which removes the old one
@@ -69,12 +83,12 @@ contract CheezeVouchers{
 			destroy oldVoucher
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedVouchers.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listingIdForVoucherWithId(voucherId: UInt64): UInt64{ 
 			pre{ 
 				self.ownedVouchers.keys.contains(voucherId)
@@ -93,7 +107,7 @@ contract CheezeVouchers{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillVoucher(address: Address, voucherId: UInt64, random: UInt64){ 
 			pre{ 
 				(getAccount(address).capabilities.get<&CheezeVouchers.VoucherCollection>(/public/VoucherCollection).borrow()!).getIDs().contains(voucherId)
@@ -140,7 +154,7 @@ contract CheezeVouchers{
 				)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun putOnSale(tokens: @[CheezeNFT.NFT]){ 
 			var i = 0 as UInt64
 			let len = tokens.length
@@ -171,17 +185,17 @@ contract CheezeVouchers{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun priceFor(listingId: UInt64): UFix64{ 
 		return (self.listings[listingId]!).price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun availableVouchers(listingId: UInt64): UInt64{ 
 		return self.vouchersAvailable[listingId]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyVoucher(listingId: UInt64, payment: @FUSD.Vault): @CheezeVouchers.Voucher{ 
 		pre{ 
 			payment.balance == self.priceFor(listingId: listingId)
@@ -205,12 +219,12 @@ contract CheezeVouchers{
 		return <-create Voucher(id: id, listingId: listingId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @VoucherCollection{ 
 		return <-create VoucherCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createListingCreator(
 		price: UFix64,
 		sellerPaymentReceiver: Capability<&FUSD.Vault>

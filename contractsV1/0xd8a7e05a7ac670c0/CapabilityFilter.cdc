@@ -1,4 +1,18 @@
-/// CapabilityFilter defines `Filter`, an interface to sit on top of a ChildAccount's capabilities. Requested
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/// CapabilityFilter defines `Filter`, an interface to sit on top of a ChildAccount's capabilities. Requested
 /// capabilities will only return if the filter's `allowed` method returns true.
 ///
 /// Along with the `Filter` interface are three implementations:
@@ -29,10 +43,10 @@ contract CapabilityFilter{
 	///
 	access(all)
 	resource interface Filter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowed(cap: Capability): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct
 	}
 	
@@ -51,7 +65,7 @@ contract CapabilityFilter{
 		/// 
 		/// @param type: The type to add to the denied types mapping
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addType(_ type: Type){ 
 			self.deniedTypes.insert(key: type, true)
 			emit FilterUpdated(id: self.uuid, filterType: self.getType(), type: type, active: true)
@@ -61,7 +75,7 @@ contract CapabilityFilter{
 		///
 		/// @param type: The type to remove from the denied types mapping
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeType(_ type: Type){ 
 			if let removed = self.deniedTypes.remove(key: type){ 
 				emit FilterUpdated(id: self.uuid, filterType: self.getType(), type: type, active: false)
@@ -70,7 +84,7 @@ contract CapabilityFilter{
 		
 		/// Removes all types from the mapping of denied types
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAllTypes(){ 
 			for type in self.deniedTypes.keys{ 
 				self.removeType(type)
@@ -82,7 +96,7 @@ contract CapabilityFilter{
 		/// @param cap: The capability to check
 		/// @return: true if the capability is allowed, false otherwise
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowed(cap: Capability): Bool{ 
 			if let item = cap.borrow<&AnyResource>(){ 
 				return !self.deniedTypes.containsKey(item.getType())
@@ -95,7 +109,7 @@ contract CapabilityFilter{
 		/// @return A struct containing details about this filter including this Filter's Type indexed on the `type`
 		///		 key as well as types denied indexed on the `deniedTypes` key
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "type": self.getType(), "deniedTypes": self.deniedTypes.keys}
 		}
@@ -121,7 +135,7 @@ contract CapabilityFilter{
 		/// 
 		/// @param type: The type to add to the allowed types mapping
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addType(_ type: Type){ 
 			self.allowedTypes.insert(key: type, true)
 			emit FilterUpdated(id: self.uuid, filterType: self.getType(), type: type, active: true)
@@ -131,7 +145,7 @@ contract CapabilityFilter{
 		///
 		/// @param type: The type to remove from the denied types mapping
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeType(_ type: Type){ 
 			if let removed = self.allowedTypes.remove(key: type){ 
 				emit FilterUpdated(id: self.uuid, filterType: self.getType(), type: type, active: false)
@@ -140,7 +154,7 @@ contract CapabilityFilter{
 		
 		/// Removes all types from the mapping of denied types
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAllTypes(){ 
 			for type in self.allowedTypes.keys{ 
 				self.removeType(type)
@@ -152,7 +166,7 @@ contract CapabilityFilter{
 		/// @param cap: The capability to check
 		/// @return: true if the capability is allowed, false otherwise
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowed(cap: Capability): Bool{ 
 			if let item = cap.borrow<&AnyResource>(){ 
 				return self.allowedTypes.containsKey(item.getType())
@@ -165,7 +179,7 @@ contract CapabilityFilter{
 		/// @return A struct containing details about this filter including this Filter's Type indexed on the `type`
 		///		 key as well as types allowed indexed on the `allowedTypes` key
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "type": self.getType(), "allowedTypes": self.allowedTypes.keys}
 		}
@@ -184,7 +198,7 @@ contract CapabilityFilter{
 		/// @param cap: The capability to check
 		/// @return: true since this filter is a passthrough
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun allowed(cap: Capability): Bool{ 
 			return true
 		}
@@ -194,7 +208,7 @@ contract CapabilityFilter{
 		/// @return A struct containing details about this filter including this Filter's Type indexed on the `type`
 		///		 key
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AnyStruct{ 
 			return{ "type": self.getType()}
 		}
@@ -205,7 +219,7 @@ contract CapabilityFilter{
 	/// @param t: The type of `Filter` to create
 	/// @return: A new instance of the given `Filter` type
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(_ t: Type): @{Filter}{ 
 		post{ 
 			result.getType() == t

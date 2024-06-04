@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract ProjectMetadata{ 
 	// ProjectMetadataRandomNFT
 	access(all)
@@ -42,37 +56,37 @@ contract ProjectMetadata{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFT(_ nftID: UInt64){ 
 			self.nftIDs.append(nftID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImage(): String{ 
 			return self.image
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRatio(): UFix64{ 
 			return self.ratio
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftMetadata():{ String: String}{ 
 			return self.nftMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftIDs(): [UInt64]{ 
 			return self.nftIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMaxSupply(): UInt64{ 
 			return self.maxSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalSupply(): UInt64{ 
 			return UInt64(self.nftIDs.length)
 		}
@@ -121,7 +135,7 @@ contract ProjectMetadata{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImages(): [String]{ 
 			let res: [String] = []
 			for item in self.items{ 
@@ -130,7 +144,7 @@ contract ProjectMetadata{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftMetadatas(): [{String: String}]{ 
 			let res: [{String: String}] = []
 			for item in self.items{ 
@@ -139,7 +153,7 @@ contract ProjectMetadata{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateItem(itemId: UInt64, item: RatioRandomNFTItem){ 
 			var i = 0
 			while i < self.items.length{ 
@@ -169,7 +183,7 @@ contract ProjectMetadata{
 			return defaultItem
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRaitoRandomItemForMint(_ quantity: UInt64): [RatioRandomNFTItem]{ 
 			let randomItems: [RatioRandomNFTItem] = []
 			while UInt64(randomItems.length) < quantity{ 
@@ -191,7 +205,7 @@ contract ProjectMetadata{
 			return randomItems
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFT(itemId: UInt64, nftID: UInt64){ 
 			var i = 0
 			while i < self.items.length{ 
@@ -277,7 +291,7 @@ contract ProjectMetadata{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isNftUsed(nftID: UInt64, nftType: String): Bool{ 
 			for item in self.lotteryItems{ 
 				if item.nftType == nftType && item.nftID == nftID{ 
@@ -298,7 +312,7 @@ contract ProjectMetadata{
 		}
 		
 		// create a lottery number and update winner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tokenGate(nftID: UInt64, nftType: String, nftOwner: Address): Void{ 
 			if self.isNftUsed(nftID: nftID, nftType: nftType){ 
 				return
@@ -322,12 +336,12 @@ contract ProjectMetadata{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWinner(): LotteryItem?{ 
 			return self.winner
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resetGate(){ 
 			while self.lotteryItems.length != 0{ 
 				self.lotteryItems.remove(at: 0)

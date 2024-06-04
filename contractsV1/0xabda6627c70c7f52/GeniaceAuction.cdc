@@ -1,4 +1,18 @@
-// This contract allows users to put their NFTs up for sale. Other users
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This contract allows users to put their NFTs up for sale. Other users
 // can purchase these NFTs with fungible tokens.
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -314,7 +328,7 @@ contract GeniaceAuction{
 		// }
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun releasePreviousBid(){ 
 			if let vaultCap = self.recipientVaultCap{ 
 				self.sendBidTokens(self.recipientVaultCap!)
@@ -323,7 +337,7 @@ contract GeniaceAuction{
 		}
 		
 		//This method should probably use preconditions more 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(){ 
 			pre{ 
 				!self.auctionCompleted:
@@ -384,7 +398,7 @@ contract GeniaceAuction{
 		}
 		
 		// purchase a product directly from the auction with a fixed price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyNow(
 			tokens: @{FungibleToken.Vault},
 			collectionCap: Capability<&GeniaceNFT.Collection>
@@ -444,7 +458,7 @@ contract GeniaceAuction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun returnAuctionItemToOwner(){ 
 			
 			// release the bidder's tokens
@@ -455,7 +469,7 @@ contract GeniaceAuction{
 		}
 		
 		//this can be negative if is expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64{ 
 			let auctionLength = self.auctionLength
 			let startTime = self.auctionStartTime
@@ -464,13 +478,13 @@ contract GeniaceAuction{
 			return remaining
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool{ 
 			let timeRemaining = self.timeRemaining()
 			return timeRemaining < Fix64(0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minNextBid(): UFix64{ 
 			//If there are bids then the next min bid is the current price plus the increment
 			if self.currentPrice != 0.0{ 
@@ -481,12 +495,12 @@ contract GeniaceAuction{
 		}
 		
 		//Extend an auction with a given set of blocks
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendWith(_ amount: UFix64){ 
 			self.auctionLength = self.auctionLength + amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address?{ 
 			if let vaultCap = self.recipientVaultCap{ 
 				return vaultCap.address
@@ -494,7 +508,7 @@ contract GeniaceAuction{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.bidder() == address{ 
 				return self.bidVault.balance
@@ -503,7 +517,7 @@ contract GeniaceAuction{
 		}
 		
 		// This method should probably use preconditions more
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bidTokens: @{FungibleToken.Vault},
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
@@ -553,7 +567,7 @@ contract GeniaceAuction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(): AuctionStatus{ 
 			var leader: Address? = nil
 			if let recipient = self.recipientVaultCap{ 
@@ -588,7 +602,7 @@ contract GeniaceAuction{
 		
 		//It could be argued that this method should not be here in the public contract. I guss it could be an interface of its own
 		//That way when you create an auction you chose if this is a curated auction or an auction where everybody can put their pieces up for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(
 			token: @GeniaceNFT.NFT,
 			currencyType: Type,
@@ -600,17 +614,17 @@ contract GeniaceAuction{
 			reservePrice: UFix64,
 			collectionCap: Capability<&GeniaceNFT.Collection>,
 			saleCuts: [
-				SaleCut
+				GeniaceAuction.SaleCut
 			]
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AuctionStatus}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			id: UInt64,
 			bidTokens: @{FungibleToken.Vault},
@@ -618,14 +632,14 @@ contract GeniaceAuction{
 			collectionCap: Capability<&GeniaceNFT.Collection>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyNow(
 			id: UInt64,
 			tokens: @{FungibleToken.Vault},
 			collectionCap: Capability<&GeniaceNFT.Collection>
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64)
 	}
 	
@@ -642,7 +656,7 @@ contract GeniaceAuction{
 			self.auctionItems <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun extendAllAuctionsWith(_ amount: UFix64){ 
 			for id in self.auctionItems.keys{ 
 				let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
@@ -650,14 +664,14 @@ contract GeniaceAuction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun keys(): [UInt64]{ 
 			return self.auctionItems.keys
 		}
 		
 		// addTokenToauctionItems adds an NFT to the auction items and sets the meta data
 		// for the auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(token: @GeniaceNFT.NFT, currencyType: Type, minimumBidIncrement: UFix64, auctionLength: UFix64, auctionStartTime: UFix64, startPrice: UFix64, buyNowPrice: UFix64, reservePrice: UFix64, collectionCap: Capability<&GeniaceNFT.Collection>, saleCuts: [SaleCut]){ 
 			
 			// create a new auction items resource container
@@ -672,7 +686,7 @@ contract GeniaceAuction{
 		}
 		
 		// getAuctionPrices returns a dictionary of available NFT IDs with their current price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AuctionStatus}{ 
 			pre{ 
 				self.auctionItems.keys.length > 0:
@@ -686,7 +700,7 @@ contract GeniaceAuction{
 			return priceList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus{ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -700,7 +714,7 @@ contract GeniaceAuction{
 		
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64){ 
 			let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
 			itemRef.settleAuction()
@@ -708,13 +722,13 @@ contract GeniaceAuction{
 		
 		// If a user calls buy now then if there is a buy now price is set, he/she can directly purchase the product
 		// without bidding, and there is no auction settlement needed after this
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyNow(id: UInt64, tokens: @{FungibleToken.Vault}, collectionCap: Capability<&GeniaceNFT.Collection>){ 
 			let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
 			itemRef.buyNow(tokens: <-tokens, collectionCap: collectionCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(_ id: UInt64){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -727,7 +741,7 @@ contract GeniaceAuction{
 		
 		// placeBid sends the bidder's tokens to the bid vault and updates the
 		// currentPrice of the current auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(id: UInt64, bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&GeniaceNFT.Collection>){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -742,7 +756,7 @@ contract GeniaceAuction{
 	
 	//this method is used to create a standalone auction that is not part of a collection
 	//we use this to create the unique part of the Versus contract
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStandaloneAuction(
 		token: @GeniaceNFT.NFT,
 		currencyType: Type,
@@ -774,7 +788,7 @@ contract GeniaceAuction{
 	}
 	
 	// createAuctionCollection returns a new AuctionCollection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionCollection(): @AuctionCollection{ 
 		let auctionCollection <- create AuctionCollection()
 		return <-auctionCollection

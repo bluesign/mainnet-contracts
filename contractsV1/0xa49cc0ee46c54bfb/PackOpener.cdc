@@ -1,4 +1,18 @@
-import MotoGPAdmin from "./MotoGPAdmin.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MotoGPAdmin from "./MotoGPAdmin.cdc"
 
 import MotoGPPack from "./MotoGPPack.cdc"
 
@@ -17,7 +31,7 @@ import ContractVersion from "./ContractVersion.cdc"
 //
 access(all)
 contract PackOpener: ContractVersion{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.0"
 	}
@@ -33,16 +47,16 @@ contract PackOpener: ContractVersion{
 	
 	access(all)
 	resource interface IPackOpenerPublic{ 
-		access(all)
-		fun openPack(adminRef: &MotoGPAdmin.Admin, id: UInt64, cardIDs: [UInt64], serials: [UInt64])
+		access(TMP_ENTITLEMENT_OWNER)
+		fun openPack(adminRef: &MotoGPAdmin.Admin, id: UInt64, cardIDs: [UInt64], serials: [UInt64]): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @MotoGPPack.NFT)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &MotoGPPack.NFT?
 	}
 	
@@ -60,12 +74,12 @@ contract PackOpener: ContractVersion{
 		access(self)
 		let cardCollectionCap: Capability<&MotoGPCard.Collection>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.packMap.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @MotoGPPack.NFT){ 
 			let id: UInt64 = token.id
 			let oldToken <- self.packMap[id] <- token
@@ -77,7 +91,7 @@ contract PackOpener: ContractVersion{
 		
 		// The withdraw method is not part of IPackOpenerPublic interface, and can only be accessed by the PackOpener collection owner
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @MotoGPPack.NFT{ 
 			let token <- self.packMap.remove(key: withdrawID) ?? panic("MotoGPPack not found and can't be removed")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -86,7 +100,7 @@ contract PackOpener: ContractVersion{
 		
 		// The openPack method requires a admin reference as argument to open the pack
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(adminRef: &MotoGPAdmin.Admin, id: UInt64, cardIDs: [UInt64], serials: [UInt64]){ 
 			pre{ 
 				adminRef != nil:
@@ -113,7 +127,7 @@ contract PackOpener: ContractVersion{
 			destroy pack
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &MotoGPPack.NFT?{ 
 			return &self.packMap[id] as &MotoGPPack.NFT?
 		}
@@ -124,7 +138,7 @@ contract PackOpener: ContractVersion{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(cardCollectionCap: Capability<&MotoGPCard.Collection>): @Collection{ 
 		return <-create Collection(_cardCollectionCap: cardCollectionCap)
 	}

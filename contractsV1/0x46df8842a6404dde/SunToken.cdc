@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract SunToken: FungibleToken{ 
@@ -77,10 +91,10 @@ contract SunToken: FungibleToken{
 	/// viewing vested sun tokens within a vault
 	access(all)
 	resource interface VestedReceiver{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestedAmounts(): AnyStruct
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminDeposit(from: @{FungibleToken.Vault}, isEarlyMember: Bool)
 	}
 	
@@ -120,7 +134,7 @@ contract SunToken: FungibleToken{
 		/// getVestedAmounts
 		///
 		/// Returns the Vault's vested token arrays within a struct
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVestedAmounts(): AnyStruct{ 
 			let amounts ={ "shortTerm": self.shortTermLockedBalance, "longTerm": self.longTermLockedBalance}
 			return amounts
@@ -153,7 +167,7 @@ contract SunToken: FungibleToken{
 		/// been consumed and therefore can be destroyed.
 		///
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @SunToken.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -166,7 +180,7 @@ contract SunToken: FungibleToken{
 		/// Function that loops through the vault's shortTerm & longTerm vested
 		/// tokens, checking if vested tokens have exceeded their lock time, and 
 		/// adding them to the vault's balance. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockVestedTokens(){ 
 			var i = 0
 			while i < self.shortTermLockedBalance.length{ 
@@ -195,7 +209,7 @@ contract SunToken: FungibleToken{
 		///
 		/// isEarlyMember bool to determine if the vault owner is
 		/// an early member
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminDeposit(from: @{FungibleToken.Vault}, isEarlyMember: Bool){ 
 			let vault <- from as! @SunToken.Vault
 			var tokenSplit = vault.balance / 3.0
@@ -254,7 +268,7 @@ contract SunToken: FungibleToken{
 		///
 		/// Function that creates and returns a new minter resource
 		/// Remove after token planning is complete
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
@@ -264,7 +278,7 @@ contract SunToken: FungibleToken{
 		///
 		/// Function that creates and returns a new burner resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()
@@ -287,7 +301,7 @@ contract SunToken: FungibleToken{
 		/// and returns them to the calling context.
 		///
 		/// All existing sun tokens may be minted on initialization, rendering this function useless
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @SunToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -319,7 +333,7 @@ contract SunToken: FungibleToken{
 		/// Note: the burned tokens are automatically subtracted from the
 		/// total supply in the Vault destructor.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @SunToken.Vault
 			let amount = vault.balance

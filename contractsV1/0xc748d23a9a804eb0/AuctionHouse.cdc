@@ -1,4 +1,18 @@
-// auction.cdc
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// auction.cdc
 // by Ami Rajpal, 2021 // DAAM Agency
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -283,27 +297,27 @@ contract AuctionHouse{
 	access(all)
 	resource interface AuctionWalletPublic{ 
 		// Public Interface for AuctionWallet
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctions(): [UInt64] // MIDs in Auctions
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAgentAuctions(): [UInt64] // Returns the Auctions deposited by Agent 
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun item(_ id: UInt64): &Auction? // item(Token ID) will return the apporiate auction.
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeAuctions() // Close all finilise auctions
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeAuction(_ auctionID: UInt64) // Close auction by AID
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(
 			agent: &DAAM.Admin,
 			metadataGenerator: Capability<&DAAM.MetadataGenerator>,
@@ -354,7 +368,7 @@ contract AuctionHouse{
 		// buyNow: To amount to purchase an item directly. Note: 0.0 = OFF
 		// reprintSeries: to duplicate the current auction, with a reprint (Next Mint os Series)
 		// *** new is defines as "never sold", age is not a consideration. ***
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(metadataGenerator: Capability<&DAAM.MetadataGenerator>?, nft: @DAAM.NFT?, id: UInt64, start: UFix64, length: UFix64, isExtended: Bool, extendedTime: UFix64, vault: @{FungibleToken.Vault}, incrementByPrice: Bool, incrementAmount: UFix64, startingBid: UFix64?, reserve: UFix64, buyNow: UFix64, reprintSeries: UInt64?): UInt64{ 
 			let auction <- self.createAuctionResource(metadataGenerator: metadataGenerator, nft: <-nft, id: id, start: start, length: length, isExtended: isExtended, extendedTime: extendedTime, vault: <-vault, incrementByPrice: incrementByPrice, incrementAmount: incrementAmount, startingBid: startingBid, reserve: reserve, buyNow: buyNow, reprintSeries: reprintSeries)
 			// Add Auction
@@ -369,7 +383,7 @@ contract AuctionHouse{
 			return aid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(agent: &DAAM.Admin, metadataGenerator: Capability<&DAAM.MetadataGenerator>, mid: UInt64, start: UFix64, length: UFix64, isExtended: Bool, extendedTime: UFix64, vault: @{FungibleToken.Vault}, incrementByPrice: Bool, incrementAmount: UFix64, startingBid: UFix64?, reserve: UFix64, buyNow: UFix64, reprintSeries: UInt64?): UInt64{ 
 			pre{ 
 				DAAM.isAgent(agent.grantee) == true:
@@ -389,7 +403,7 @@ contract AuctionHouse{
 			return aid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun agentAuction(auctionID: UInt64, approve: Bool){ 
 			pre{ 
 				self.approveAuctions.containsKey(auctionID):
@@ -443,7 +457,7 @@ contract AuctionHouse{
 		// Resolves all Auctions. Closes ones that have been ended or restarts them due to being a reprintSeries auctions.
 		// This allows the auctioneer to close auctions to auctions that have ended, returning funds and appropriating items accordingly
 		// even in instances where the Winner has not claimed their item.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeAuctions(){ 
 			for act in self.currentAuctions.keys{ 
 				let current_status = self.currentAuctions[act]?.updateStatus() // status may have been changed in verifyReservePrive() called by seriesMinter()
@@ -469,7 +483,7 @@ contract AuctionHouse{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeAuction(_ auctionID: UInt64){ 
 			pre{ 
 				self.currentAuctions.containsKey(auctionID):
@@ -510,7 +524,7 @@ contract AuctionHouse{
 		}
 		
 		// Auctions can be cancelled if they have no bids.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(auctionID: UInt64){ 
 			pre{ 
 				self.currentAuctions.containsKey(auctionID):
@@ -520,7 +534,7 @@ contract AuctionHouse{
 		}
 		
 		// item(Auction ID) return a reference of the auctionID Auction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun item(_ aid: UInt64): &Auction?{ 
 			pre{ 
 				self.currentAuctions.containsKey(aid)
@@ -528,19 +542,19 @@ contract AuctionHouse{
 			return &self.currentAuctions[aid] as &Auction?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctions(): [UInt64]{ 
 			return self.currentAuctions.keys
 		} // Return all auctions by User
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAgentAuctions(): [UInt64]{ 
 			return self.approveAuctions.keys
 		} // Return all auctions by Agent, requires Approval
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endReprints(auctionID: UInt64){ // Toggles the reprint to OFF. Note: This is not a toggle 
 			
 			pre{ 
@@ -563,44 +577,44 @@ contract AuctionHouse{
 	/************************************************************************/
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
-		fun depositToBid(bidder: Address, amount: @{FungibleToken.Vault}) // @AnyResource{FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositToBid(bidder: Address, amount: @{FungibleToken.Vault}): Void // @AnyResource{FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance}
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBid(bidder: AuthAccount): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun auctionInfo(): AuctionHolder
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun winnerCollect()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyNowAmount(bidder: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinBidAmount(bidder: Address): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyItNow(bidder: Address, amount: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun buyItNowStatus(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionLog():{ Address: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): Bool?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun itemInfo(): DAAM.MetadataHolder?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay():{ String: MetadataViews.Media}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeLeft(): UFix64?
 	}
 	
@@ -814,7 +828,7 @@ contract AuctionHouse{
 		}
 		
 		// Makes Bid, Bids are deposited into vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToBid(bidder: Address, amount: @{FungibleToken.Vault}){ 
 			pre{ 
 				amount.isInstance(self.requiredCurrency):
@@ -912,7 +926,7 @@ contract AuctionHouse{
 		}
 		
 		// Allows bidder to withdraw their bid as long as they are not the lead bidder.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawBid(bidder: AuthAccount): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.leader! != bidder.address:
@@ -941,14 +955,14 @@ contract AuctionHouse{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun auctionInfo(): AuctionHolder{ 
 			let info = AuctionHolder(self.status, self.auctionID, self.creatorInfo, self.mid, self.start, self.length, self.isExtended, self.extendedTime, self.leader, self.minBid, self.startingBid, self.reserve, self.fee, self.price, self.buyNow, self.reprintSeries, self.auctionLog, self.requiredCurrency)
 			return info
 		}
 		
 		// Winner can 'Claim' an item. Reserve price must be meet, otherwise returned to auctioneer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun winnerCollect(){ 
 			pre{ 
 				self.updateStatus() == false:
@@ -1066,14 +1080,14 @@ contract AuctionHouse{
 		}
 		
 		// Return the amount needed to make the correct bid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyNowAmount(bidder: Address): UFix64{ 
 			// If no bid had been made return buynow price, else return the difference
 			return self.auctionLog[bidder] == nil ? self.buyNow : self.buyNow - self.auctionLog[bidder]!
 		}
 		
 		// Return the amount needed to make the correct bid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinBidAmount(bidder: Address): UFix64?{ 
 			// If no bid had been made return minimum bid, else return the difference
 			if self.minBid == nil{ 
@@ -1099,7 +1113,7 @@ contract AuctionHouse{
 		}
 		
 		// To purchase the item directly. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyItNow(bidder: Address, amount: @{FungibleToken.Vault}){ 
 			pre{ 
 				amount.isInstance(self.requiredCurrency):
@@ -1137,7 +1151,7 @@ contract AuctionHouse{
 		}
 		
 		// returns BuyItNowStaus, true = active, false = inactive
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun buyItNowStatus(): Bool{ 
 			pre{ 
 				self.buyNow != 0.0:
@@ -1173,7 +1187,7 @@ contract AuctionHouse{
 			emit FundsReturned(auctionID: self.auctionID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionLog():{ Address: UFix64}{ 
 			return self.auctionLog
 		}
@@ -1195,24 +1209,24 @@ contract AuctionHouse{
 		
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): Bool?{ // gets Auction status: nil = not started, true = ongoing, false = ended 
 			
 			return self.updateStatus()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun itemInfo(): DAAM.MetadataHolder?{ // returns the metadata of the item NFT. 
 			
 			return self.auctionNFT != nil ? self.auctionNFT?.metadata! : self.auctionMetadata?.getHolder()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay():{ String: MetadataViews.Media}{ 
 			return self.auctionNFT != nil ? self.auctionNFT?.file! : self.auctionMetadata?.file!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeLeft(): UFix64?{ 
 			if self.length == 0.0{ 
 				return 0.0 as UFix64
@@ -1468,7 +1482,7 @@ contract AuctionHouse{
 		}
 		
 		// Auctions can be cancelled if they have no bids.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(){ 
 			pre{ 
 				self.updateStatus() == nil || true:
@@ -1494,13 +1508,13 @@ contract AuctionHouse{
 	}
 	
 	// Get current auctions { Address : [AID] }
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentAuctions():{ Address: [UInt64]}{ 
 		return self.currentAuctions
 	}
 	
 	// Get current auctions { Address : [AID] }
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentAuctionsStatus(_ status: Bool?):{ Address: [UInt64]}{ 
 		let currentAuctions = self.currentAuctions
 		let selectedAuction:{ Address: [UInt64]} ={} 
@@ -1569,7 +1583,7 @@ contract AuctionHouse{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleHistory(id: UInt64?):{ UInt64: SaleHistory}?{ // {TokenID : SaleHistory} 
 		
 		if id == nil{ 
@@ -1582,7 +1596,7 @@ contract AuctionHouse{
 		return{ id!: salehistory}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getHistory(mid: UInt64?):{ UInt64:{ UInt64: SaleHistory}}?{ //{MID : {TokenID:SaleHistory} } 
 		
 		if mid == nil{ 
@@ -1595,12 +1609,12 @@ contract AuctionHouse{
 		return{ mid!: history}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFee(mid: UInt64): UFix64{ 
 		return self.fee[mid] == nil ? 0.025 : self.fee[mid]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addFee(mid: UInt64, fee: UFix64, permission: &DAAM.Admin){ 
 		pre{ 
 			DAAM.isAdmin((permission.owner!).address) == true:
@@ -1609,7 +1623,7 @@ contract AuctionHouse{
 		self.fee[mid] = fee
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeFee(mid: UInt64, fee: UFix64, permission: &DAAM.Admin){ 
 		pre{ 
 			DAAM.isAdmin((permission.owner!).address) == true:
@@ -1620,12 +1634,12 @@ contract AuctionHouse{
 		self.fee.remove(key: mid)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAgencyFirstSale(mid: UInt64): UFix64{ 
 		return self.agencyFirstSale[mid] == nil ? 0.15 : self.agencyFirstSale[mid]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addAgencyFirstSale(mid: UInt64, fee: UFix64, permission: &DAAM.Admin){ 
 		pre{ 
 			DAAM.isAdmin((permission.owner!).address) == true:
@@ -1634,7 +1648,7 @@ contract AuctionHouse{
 		self.agencyFirstSale[mid] = fee
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeAgencyFirstSale(mid: UInt64, fee: UFix64, permission: &DAAM.Admin){ 
 		pre{ 
 			DAAM.isAdmin((permission.owner!).address) == true:
@@ -1645,7 +1659,7 @@ contract AuctionHouse{
 		self.agencyFirstSale.remove(key: mid)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addCrypto(crypto: &{FungibleToken.Vault}, path: PublicPath, permission: &DAAM.Admin){ 
 		pre{ 
 			DAAM.isAdmin((permission.owner!).address) == true:
@@ -1656,7 +1670,7 @@ contract AuctionHouse{
 		self.crypto.insert(key: identifier, path)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeCrypto(crypto: String, permission: &DAAM.Admin){ 
 		pre{ 
 			DAAM.isAdmin((permission.owner!).address) == true:
@@ -1667,13 +1681,13 @@ contract AuctionHouse{
 		self.crypto.remove(key: crypto)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCrypto(): [String]{ 
 		return self.crypto.keys
 	}
 	
 	// Create Auction Wallet which is used for storing Auctions.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionWallet(): @AuctionWallet{ 
 		return <-create AuctionWallet()
 	}

@@ -1,4 +1,18 @@
-// CREATED BY: Touchstone (https://touchstone.city/), a platform crafted by your best friends at Emerald City DAO (https://ecdao.org/).
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// CREATED BY: Touchstone (https://touchstone.city/), a platform crafted by your best friends at Emerald City DAO (https://ecdao.org/).
 // STATEMENT: This contract promises to keep the 5% royalty off of primary sales and 2.5% off of secondary sales to Emerald City DAO or risk permanent suspension from participation in the DAO and its tools.
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -140,7 +154,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 		access(all)
 		let serial: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): NFTMetadata{ 
 			return TouchstoneFloFighters.getNFTMetadata(self.metadataId)!
 		}
@@ -241,7 +255,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			
@@ -270,7 +284,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 			return nft as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(){ 
 			if let storage = &TouchstoneFloFighters.nftStorage[(self.owner!).address] as auth(Mutate) &{UInt64: NFT}?{ 
 				for id in storage.keys{ 
@@ -302,7 +316,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 	// A function to mint NFTs. 
 	// You can only call this function if minting
 	// is currently active.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(metadataId: UInt64, recipient: &{NonFungibleToken.Receiver}, payment: @FlowToken.Vault, serial: UInt64): UInt64{ 
 		pre{ 
 			self.canMint():
@@ -350,7 +364,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMetadata(name: String, description: String, imagePath: String, thumbnailPath: String?, ipfsCID: String, price: UFix64?, extra:{ String: AnyStruct}, supply: UInt64){ 
 			TouchstoneFloFighters.metadatas[TouchstoneFloFighters.nextMetadataId] = NFTMetadata(_name: name, _description: description, _image: MetadataViews.IPFSFile(cid: ipfsCID, path: imagePath), _thumbnail: thumbnailPath == nil ? nil : MetadataViews.IPFSFile(cid: ipfsCID, path: thumbnailPath), _price: price, _extra: extra, _supply: supply)
 			TouchstoneFloFighters.nextMetadataId = TouchstoneFloFighters.nextMetadataId + 1
@@ -358,7 +372,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 		
 		// mintNFT mints a new NFT and deposits 
 		// it in the recipients collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(metadataId: UInt64, serial: UInt64, recipient: Address){ 
 			pre{ 
 				EmeraldPass.isActive(user: TouchstoneFloFighters.account.address):
@@ -374,7 +388,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBatch(metadataIds: [UInt64], serials: [UInt64], recipients: [Address]){ 
 			pre{ 
 				metadataIds.length == recipients.length:
@@ -389,13 +403,13 @@ contract TouchstoneFloFighters: NonFungibleToken{
 		}
 		
 		// create a new Administrator resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Administrator{ 
 			return <-create Administrator()
 		}
 		
 		// change piece of collection info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeField(key: String, value: AnyStruct){ 
 			TouchstoneFloFighters.collectionInfo[key] = value
 		}
@@ -408,22 +422,22 @@ contract TouchstoneFloFighters: NonFungibleToken{
 	}
 	
 	// Get information about a NFTMetadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getNFTMetadata(_ metadataId: UInt64): NFTMetadata?{ 
 		return self.metadatas[metadataId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTMetadatas():{ UInt64: NFTMetadata}{ 
 		return self.metadatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrimaryBuyers():{ Address:{ UInt64: [UInt64]}}{ 
 		return self.primaryBuyers
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionInfo():{ String: AnyStruct}{ 
 		let collectionInfo = self.collectionInfo
 		collectionInfo["metadatas"] = self.metadatas
@@ -434,28 +448,28 @@ contract TouchstoneFloFighters: NonFungibleToken{
 		return collectionInfo
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getCollectionAttribute(key: String): AnyStruct{ 
 		return self.collectionInfo[key] ?? panic(key.concat(" is not an attribute in this collection."))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOptionalCollectionAttribute(key: String): AnyStruct?{ 
 		return self.collectionInfo[key]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintVerifiers(): [{MintVerifiers.IVerifier}]{ 
 		return self.getCollectionAttribute(key: "mintVerifiers") as! [{MintVerifiers.IVerifier}]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun canMint(): Bool{ 
 		return self.getCollectionAttribute(key: "minting") as! Bool
 	}
 	
 	// Returns nil if an NFT with this metadataId doesn't exist
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPriceOfNFT(_ metadataId: UInt64): UFix64?{ 
 		if let metadata: TouchstoneFloFighters.NFTMetadata = self.getNFTMetadata(metadataId){ 
 			let defaultPrice: UFix64 = self.getCollectionAttribute(key: "price") as! UFix64
@@ -469,7 +483,7 @@ contract TouchstoneFloFighters: NonFungibleToken{
 	
 	// Returns an mapping of `id` to NFTMetadata
 	// for the NFTs a user can claim
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getClaimableNFTs(user: Address):{ UInt64: NFTMetadata}{ 
 		let answer:{ UInt64: NFTMetadata} ={} 
 		if let storage = &TouchstoneFloFighters.nftStorage[user] as auth(Mutate) &{UInt64: NFT}?{ 

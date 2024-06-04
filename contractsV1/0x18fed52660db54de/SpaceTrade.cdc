@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -58,16 +72,16 @@ contract SpaceTrade{
 	
 	access(all)
 	resource interface BidCollectionPublic{ 
-		access(all)
-		fun createBidAccessKey(id: UInt64): @BidAccessKey
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createBidAccessKey(id: UInt64): @SpaceTrade.BidAccessKey
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBidDetails(id: UInt64): &SpaceTradeBid.Bid
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBidUsingAccessKey(bidKey: &BidAccessKey): &SpaceTradeBid.Bid
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIDsByReceiver(receiver: Address?): [UInt64]
 	}
 	
@@ -86,7 +100,7 @@ contract SpaceTrade{
 			self.totalBids = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBid(recipient: Address, type: SpaceTradeBid.BidType, nftProposals: [SpaceTradeBid.NFTProposals], ftProposals: [SpaceTradeBid.FTProposals], nftRequests: [SpaceTradeBid.NFTRequests], ftRequests: [SpaceTradeBid.FTRequests], bidderFeeProviderCapability: Capability<&{FungibleToken.Balance, FungibleToken.Provider}>?, expiration: UFix64, lockedUntil: UFix64){ 
 			let id = self.totalBids
 			let bid <- SpaceTradeBid.createBid(id: id, type: type, recipient: recipient, nftProposals: nftProposals, ftProposals: ftProposals, nftRequests: nftRequests, ftRequests: ftRequests, bidderFeeProviderCapability: bidderFeeProviderCapability, expiration: expiration, lockedUntil: lockedUntil)
@@ -96,13 +110,13 @@ contract SpaceTrade{
 			emit BidCreated(id: id, owner: (self.owner!).address, recipient: recipient, expiration: expiration)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBidAccessKey(id: UInt64): @BidAccessKey{ 
 			let bid = self.borrowBid(id: id)
 			return <-create BidAccessKey(bidID: bid.id, bidRecipient: bid.recipient, bidOwner: (self.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(id: UInt64): &SpaceTradeBid.Bid{ 
 			pre{ 
 				self.bids[id] != nil:
@@ -111,12 +125,12 @@ contract SpaceTrade{
 			return (&self.bids[id] as &SpaceTradeBid.Bid?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIDs(): [UInt64]{ 
 			return self.bids.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIDsByReceiver(receiver: Address?): [UInt64]{ 
 			let keys: [UInt64] = []
 			for key in self.bids.keys{ 
@@ -128,7 +142,7 @@ contract SpaceTrade{
 			return keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBidUsingAccessKey(bidKey: &BidAccessKey): &SpaceTradeBid.Bid{ 
 			pre{ 
 				self.bids[bidKey.bidID] != nil:
@@ -141,7 +155,7 @@ contract SpaceTrade{
 			return (&self.bids[bidKey.bidID] as &SpaceTradeBid.Bid?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBidDetails(id: UInt64): &SpaceTradeBid.Bid{ 
 			pre{ 
 				self.bids[id] != nil:
@@ -151,7 +165,7 @@ contract SpaceTrade{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyBidCollection(): @BidCollection{ 
 		return <-create BidCollection()
 	}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import Controller from "./Controller.cdc"
 
@@ -43,7 +57,7 @@ contract SocialToken: FungibleToken{
 	
 	access(all)
 	resource interface SocialTokenPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenId(): String
 	}
 	
@@ -72,7 +86,7 @@ contract SocialToken: FungibleToken{
 			self.tokenId = ""
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTokenId(_ tokenId: String){ 
 			pre{ 
 				tokenId != nil:
@@ -81,7 +95,7 @@ contract SocialToken: FungibleToken{
 			self.tokenId = tokenId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenId(): String{ 
 			return self.tokenId
 		}
@@ -94,7 +108,7 @@ contract SocialToken: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @SocialToken.Vault
 			if self.tokenId == ""{ 
 				self.tokenId = vault.tokenId
@@ -154,7 +168,7 @@ contract SocialToken: FungibleToken{
 	// and store the returned Minter in their storage in order to allow their
 	// account to be able to mint new tokens.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewMinter(): @Minter{ 
 		return <-create Minter()
 	}
@@ -166,7 +180,7 @@ contract SocialToken: FungibleToken{
 	// and store the returned Burner in their storage in order to allow their
 	// account to be able to burn tokens.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewBurner(): @Burner{ 
 		return <-create Burner()
 	}
@@ -209,7 +223,7 @@ contract SocialToken: FungibleToken{
 		return <-fusdPayment
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMintPrice(_ tokenId: String, _ amount: UFix64): UFix64{ 
 		pre{ 
 			amount > 0.0:
@@ -231,7 +245,7 @@ contract SocialToken: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBurnPrice(_ tokenId: String, _ amount: UFix64): UFix64{ 
 		pre{ 
 			amount > 0.0:
@@ -253,7 +267,7 @@ contract SocialToken: FungibleToken{
 	
 	access(all)
 	resource interface MinterPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @{FungibleToken.Vault}, receiverVault: Capability<&{FungibleToken.Receiver}>): @SocialToken.Vault
 	}
 	
@@ -273,7 +287,7 @@ contract SocialToken: FungibleToken{
 		// 
 		// Returns: The SocialToken Vault
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @{FungibleToken.Vault}, receiverVault: Capability<&{FungibleToken.Receiver}>): @SocialToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -318,7 +332,7 @@ contract SocialToken: FungibleToken{
 	
 	access(all)
 	resource interface BurnerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}): @{FungibleToken.Vault}
 	}
 	
@@ -332,7 +346,7 @@ contract SocialToken: FungibleToken{
 		// 
 		// Returns: The Vault
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}): @{FungibleToken.Vault}{ 
 			let vault <- from as! @SocialToken.Vault
 			let amount = vault.balance

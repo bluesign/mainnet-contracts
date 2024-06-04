@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -109,15 +123,15 @@ contract EnemyMetal: NonFungibleToken{
 	access(all)
 	resource interface EnemyMetalCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEnemyMetalNFT(id: UInt64): &EnemyMetal.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -152,7 +166,7 @@ contract EnemyMetal: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @EnemyMetal.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -183,7 +197,7 @@ contract EnemyMetal: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the EnemyMetal.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEnemyMetalNFT(id: UInt64): &EnemyMetal.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -195,7 +209,7 @@ contract EnemyMetal: NonFungibleToken{
 		
 		// claim
 		// resource owners when claiming, Mint new NFTs and burn the claimID resource.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(claimID: UInt64){ 
 			pre{ 
 				self.ownedNFTs[claimID] != nil:
@@ -256,7 +270,7 @@ contract EnemyMetal: NonFungibleToken{
 		// mintNFT
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, data: NFTData){ 
 			EnemyMetal.totalSupply = EnemyMetal.totalSupply + 1 as UInt64
 			emit Minted(id: EnemyMetal.totalSupply, metadata: data.metadata, claimsSize: data.claims.length)

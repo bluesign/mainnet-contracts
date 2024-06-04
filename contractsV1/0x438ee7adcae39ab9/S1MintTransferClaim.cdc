@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -34,14 +48,14 @@ contract S1MintTransferClaim{
 	resource Admin{ 
 		
 		//prevent minting
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeClaim(){ 
 			S1MintTransferClaim.closed = true
 		}
 		
 		//call S1ItemNFT's mintItem function
 		//each address can only mint 2 times
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAndTransferItem(
 			name: String,
 			recipientAddr: Address,
@@ -98,14 +112,14 @@ contract S1MintTransferClaim{
 			return <-item
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 	}
 	
 	// get each address' current mint count
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAddressMintCount():{ Address: UInt32}{ 
 		return S1MintTransferClaim.addressMintCount
 	}

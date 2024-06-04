@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -226,7 +240,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			MIKOSEANFT.projectsData[self.projectId] = ProjectData(name: name, description: description, creatorAddress: creatorAddress, creatorFee: creatorFee, platformFee: platformFee, mintPrice: mintPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItem(id: UInt64){ 
 			pre{ 
 				self.numberMintedPerItem[id] == nil:
@@ -242,14 +256,14 @@ contract MIKOSEANFT: NonFungibleToken{
 			emit ItemAddedToProject(projectId: self.projectId, itemId: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItems(ids: [UInt64]){ 
 			for i in ids{ 
 				self.addItem(id: i)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockItem(id: UInt64){ 
 			pre{ 
 				self.lockItems[id] != nil:
@@ -261,14 +275,14 @@ contract MIKOSEANFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockAllItems(){ 
 			for item in self.items{ 
 				self.lockItem(id: item)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun projectLock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -348,20 +362,20 @@ contract MIKOSEANFT: NonFungibleToken{
 			emit Minted(id: self.id, projectId: self.data.projectId, itemId: self.data.itemId, tx_uiid: self.tx_uiid, mintNumber: self.data.mintNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImage(): String{ 
 			let defaultValue = "https://mikosea.s3.ap-northeast-1.amazonaws.com/mikosea-project/mikoseanft_200.png"
 			return MIKOSEANFT.getItemMetaDataByField(itemId: self.data.itemId, field: "image") ?? MIKOSEANFT.getItemMetaDataByField(itemId: self.data.itemId, field: "imageURL") ?? defaultValue
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			let defaultValue = MIKOSEANFT.getProjectName(projectId: self.data.projectId) ?? "MikoSea 1st Membership NFT"
 			let totalSupply = MIKOSEANFT.getProjectTotalSupply(self.data.projectId)
 			return defaultValue.concat(" #").concat(self.data.mintNumber.toString())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			let defaultValue = "MikoSea 1st Membership NFT \u{306f}MikoSea\u{3067}\u{6700}\u{521d}\u{306b}\u{767a}\u{884c}\u{3055}\u{308c}\u{308b}NFT\u{306b}\u{306a}\u{308a}\u{307e}\u{3059}\u{3002}\u{540c}\u{3058}\u{4fa1}\u{5024}\u{89b3}\u{30fb}\u{611f}\u{6027}\u{3092}\u{3082}\u{3063}\u{305f}\u{4ef2}\u{9593}\u{3068}\u{5171}\u{540c}\u{610f}\u{8b58}\u{3092}\u{6301}\u{3061}\u{306a}\u{304c}\u{3089}\u{5922}\u{3092}\u{5b9f}\u{73fe}\u{3055}\u{305b}\u{308b}\u{624b}\u{6bb5}\u{3068}\u{3057}\u{3066}\u{767a}\u{884c}\u{3057}\u{307e}\u{3059}\u{3002}"
 			return MIKOSEANFT.getProjectDescription(projectId: self.data.projectId) ?? defaultValue
@@ -411,7 +425,7 @@ contract MIKOSEANFT: NonFungibleToken{
 	//------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(metadata:{ String: String}, itemSupply: UInt64): UInt64{ 
 			var newItem = Item(metadata: metadata, itemSupply: itemSupply)
 			let id = newItem.itemId
@@ -419,7 +433,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			return id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItems(items: [{String: String}], projectId: UInt64, itemSupply: UInt64){ 
 			var itemIds: [UInt64] = []
 			for metadata in items{ 
@@ -429,7 +443,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			self.borrowProject(projectId: projectId).addItems(ids: itemIds)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateItemMetadata(itemId: UInt64, newData:{ String: String}, itemSupply: UInt64){ 
 			let latestItemId = MIKOSEANFT.nextItemId
 			MIKOSEANFT.nextItemId = itemId
@@ -438,13 +452,13 @@ contract MIKOSEANFT: NonFungibleToken{
 			emit UpdateItemMetadata(id: itemId, metadata: newData, itemSupply: itemSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createProject(name: String, description: String, creatorAddress: Address, creatorFee: UFix64, platformFee: UFix64, mintPrice: UFix64){ 
 			var newProject <- create Project(name: name, description: description, creatorAddress: creatorAddress, creatorFee: creatorFee, platformFee: platformFee, mintPrice: mintPrice)
 			MIKOSEANFT.projects[newProject.projectId] <-! newProject
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowProject(projectId: UInt64): &Project{ 
 			pre{ 
 				MIKOSEANFT.projects[projectId] != nil:
@@ -453,7 +467,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			return (&MIKOSEANFT.projects[projectId] as &Project?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteItem(id: UInt64){ 
 			pre{ 
 				MIKOSEANFT.itemData[id] != nil:
@@ -463,12 +477,12 @@ contract MIKOSEANFT: NonFungibleToken{
 			emit ItemDeleted(itemId: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateProject(projectId: UInt64, name: String, description: String, creatorAddress: Address, creatorFee: UFix64, platformFee: UFix64, mintPrice: UFix64){ 
 			if MIKOSEANFT.projectsData[projectId] == nil{ 
 				panic("not found project")
@@ -480,7 +494,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			emit ProjectUpdated(projectId: projectId, name: name, description: description, creatorAddress: creatorAddress, creatorFee: creatorFee, platformFee: platformFee, mintPrice: mintPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchPurchaseNFT(projectId: UInt64, itemId: UInt64, quantity: UInt64, tx_uiid: String): @Collection{ 
 			let project = &MIKOSEANFT.projects[projectId] as &Project? ?? panic("project not found")
 			let numInItems = project.numberMintedPerItem[itemId] ?? 0
@@ -498,21 +512,21 @@ contract MIKOSEANFT: NonFungibleToken{
 	access(all)
 	resource interface MikoSeaCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyNFT(id: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMiKoSeaNFT(id: UInt64): &MIKOSEANFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -538,7 +552,7 @@ contract MIKOSEANFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MIKOSEANFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -549,7 +563,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			MIKOSEANFT.removeAllCommentByNftId(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -558,7 +572,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			return <-batchCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -583,7 +597,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			return mikoseaNFT as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMiKoSeaNFT(id: UInt64): &MIKOSEANFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -593,7 +607,7 @@ contract MIKOSEANFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: UInt64): &MIKOSEANFT.NFT?{ 
 			return self.borrowMiKoSeaNFT(id: id)
 		}
@@ -603,14 +617,14 @@ contract MIKOSEANFT: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyNFT(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("missing NFT")
 			destroy token
 			emit Destroyed(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(nftID: UInt64, recipient: &{MIKOSEANFT.MikoSeaCollectionPublic}){ 
 			post{ 
 				self.ownedNFTs[nftID] == nil:
@@ -646,7 +660,7 @@ contract MIKOSEANFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkCollection(_ address: Address): Bool{ 
 		return getAccount(address).capabilities.get<&{MIKOSEANFT.MikoSeaCollectionPublic}>(MIKOSEANFT.CollectionPublicPath).check()
 	}
@@ -654,7 +668,7 @@ contract MIKOSEANFT: NonFungibleToken{
 	//------------------------------------------------------------
 	// Comment Public function
 	//------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createComment(projectId: UInt64, itemId: UInt64, userAddress: Address, nftId: UInt64, comment: String): UInt64{ 
 		var newComment = Comment(projectId: projectId, itemId: itemId, userAddress: userAddress, nftId: nftId, comment: comment)
 		var newId = newComment.commentId
@@ -662,48 +676,48 @@ contract MIKOSEANFT: NonFungibleToken{
 		return newId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun deleteComment(commentId: UInt64){ 
 		MIKOSEANFT.commentData.remove(key: commentId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun editComment(commentId: UInt64, projectId: UInt64, itemId: UInt64, userAddress: Address, nftId: UInt64, newComment: String): UInt64{ 
 		MIKOSEANFT.commentData[commentId] = Comment(projectId: projectId, itemId: itemId, userAddress: userAddress, nftId: nftId, comment: newComment)
 		return commentId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommentById(id: UInt64): String?{ 
 		return MIKOSEANFT.commentData[id]?.comment
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommentAddressById(id: UInt64): Address?{ 
 		return MIKOSEANFT.commentData[id]?.userAddress
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommentProjectIdById(id: UInt64): UInt64?{ 
 		return MIKOSEANFT.commentData[id]?.projectId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommentItemIdById(id: UInt64): UInt64?{ 
 		return MIKOSEANFT.commentData[id]?.itemId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommentNFTIdById(id: UInt64): UInt64?{ 
 		return MIKOSEANFT.commentData[id]?.nftId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllComments(): [MIKOSEANFT.Comment]{ 
 		return self.commentData.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeAllCommentByNftId(_ nftId: UInt64){ 
 		for commentId in MIKOSEANFT.commentData.keys{ 
 			let commentNftId = MIKOSEANFT.getCommentNFTIdById(id: commentId)
@@ -716,22 +730,22 @@ contract MIKOSEANFT: NonFungibleToken{
 	//------------------------------------------------------------
 	// Item Public function
 	//------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllItems(): [MIKOSEANFT.Item]{ 
 		return self.itemData.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemMetaData(itemId: UInt64):{ String: String}?{ 
 		return self.itemData[itemId]?.metadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemsInProject(projectId: UInt64): [UInt64]?{ 
 		return MIKOSEANFT.projects[projectId]?.items
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemMetaDataByField(itemId: UInt64, field: String): String?{ 
 		if let item = self.itemData[itemId]{ 
 			return item.metadata[field]
@@ -740,13 +754,13 @@ contract MIKOSEANFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItemSupply(itemId: UInt64): UInt64?{ 
 		let item = self.itemData[itemId]
 		return item?.itemSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isProjectItemLocked(projectId: UInt64, itemId: UInt64): Bool?{ 
 		if let projectToRead <- self.projects.remove(key: projectId){ 
 			let locked = projectToRead.lockItems[itemId]
@@ -760,42 +774,42 @@ contract MIKOSEANFT: NonFungibleToken{
 	//------------------------------------------------------------
 	// Project Public function
 	//------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllProjects(): [MIKOSEANFT.ProjectData]{ 
 		return self.projectsData.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectName(projectId: UInt64): String?{ 
 		return self.projectsData[projectId]?.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectDescription(projectId: UInt64): String?{ 
 		return self.projectsData[projectId]?.description
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectCreatorAddress(projectId: UInt64): Address?{ 
 		return self.projectsData[projectId]?.creatorAddress
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectCreatorFee(projectId: UInt64): UFix64?{ 
 		return self.projectsData[projectId]?.creatorFee
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectPlatformFee(projectId: UInt64): UFix64?{ 
 		return self.projectsData[projectId]?.platformFee
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isProjectLocked(projectId: UInt64): Bool?{ 
 		return self.projects[projectId]?.locked
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectIdByName(projectName: String): [UInt64]?{ 
 		var projectIds: [UInt64] = []
 		for projectDatas in self.projectsData.values{ 
@@ -811,14 +825,14 @@ contract MIKOSEANFT: NonFungibleToken{
 	}
 	
 	// fetch the nft from user collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_from: Address, itemId: UInt64): &MIKOSEANFT.NFT?{ 
 		let collection = getAccount(_from).capabilities.get<&{MIKOSEANFT.MikoSeaCollectionPublic}>(MIKOSEANFT.CollectionPublicPath).borrow<&{MIKOSEANFT.MikoSeaCollectionPublic}>() ?? panic("does't not collection")
 		return collection.borrowMiKoSeaNFT(id: itemId)
 	}
 	
 	// get total count of minted nft from project item
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalMintedNFTFromProjectItem(projectId: UInt64, itemId: UInt64): UInt64?{ 
 		if let projectToRead <- self.projects.remove(key: projectId){ 
 			let value = projectToRead.numberMintedPerItem[itemId]
@@ -830,7 +844,7 @@ contract MIKOSEANFT: NonFungibleToken{
 	}
 	
 	// get total itemSupply in project
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProjectTotalSupply(_ projectId: UInt64): UInt64{ 
 		let items = MIKOSEANFT.getItemsInProject(projectId: projectId) ?? []
 		var res: UInt64 = 0

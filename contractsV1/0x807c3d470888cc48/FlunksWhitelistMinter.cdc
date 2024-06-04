@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import Flunks from "./Flunks.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
@@ -24,7 +38,7 @@ contract FlunksWhitelistMinter{
 	access(self)
 	var whitelistedAccounts:{ Address: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPrivateNFTWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -95,7 +109,7 @@ contract FlunksWhitelistMinter{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintPublicNFTWithDUC(
 		buyer: Address,
 		setID: UInt64,
@@ -157,7 +171,7 @@ contract FlunksWhitelistMinter{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addWhiteListAddress(address: Address, amount: UInt64){ 
 			pre{ 
 				amount <= 10:
@@ -168,7 +182,7 @@ contract FlunksWhitelistMinter{
 			FlunksWhitelistMinter.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeWhiteListAddress(address: Address){ 
 			pre{ 
 				FlunksWhitelistMinter.whitelistedAccounts[address] != nil:
@@ -177,12 +191,12 @@ contract FlunksWhitelistMinter{
 			FlunksWhitelistMinter.whitelistedAccounts.remove(key: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pruneWhitelist(){ 
 			FlunksWhitelistMinter.whitelistedAccounts ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhiteListAddressAmount(address: Address, amount: UInt64){ 
 			pre{ 
 				FlunksWhitelistMinter.whitelistedAccounts[address] != nil:
@@ -191,18 +205,18 @@ contract FlunksWhitelistMinter{
 			FlunksWhitelistMinter.whitelistedAccounts[address] = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrivateSalePrice(price: UFix64){ 
 			FlunksWhitelistMinter.privateSalePrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSalePrice(price: UFix64){ 
 			FlunksWhitelistMinter.publicSalePrice = price
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWhitelistedAccounts():{ Address: UInt64}{ 
 		return FlunksWhitelistMinter.whitelistedAccounts
 	}

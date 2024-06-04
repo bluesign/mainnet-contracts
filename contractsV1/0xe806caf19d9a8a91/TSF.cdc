@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -171,7 +185,7 @@ contract TSF{
 	var usedMomentIds:{ String:{ UInt8:{ UInt64: Bool}}}
 	
 	// --------------------------------------------------------------------- //
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(recipientAcc: AuthAccount, momentIds: [UInt64]){ 
 		if !self.isGameActive{ 
 			panic("The Game is not yet active, wait for the admin to start the game")
@@ -222,7 +236,7 @@ contract TSF{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAddressMintAuthorizedThisWeek(address: Address): Bool{ 
 		let accountExistsForWeek: Bool =
 			((self.accountsParticipated[self.currentSeason]!)[self.currentWeek]!)[address] != nil
@@ -233,7 +247,7 @@ contract TSF{
 		== false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUserTopShotMoments(recipientAcc: AuthAccount, momentIdsToMint: [UInt64]):{ 
 		UInt64: OwnedPlayerInfo
 	}{ 
@@ -320,17 +334,17 @@ contract TSF{
 			self.seasonWeek = TSF.currentWeek
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPlayerInfo(): [SelectedPlayerInfo]{ 
 			return self.playerInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			return nil
 		}
@@ -343,17 +357,17 @@ contract TSF{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setGameActive(){ 
 			TSF.isGameActive = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setGameInactive(){ 
 			TSF.isGameActive = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setGameSeason(newSeason: String){ 
 			TSF.currentSeason = newSeason
 			TSF.currentWeek = 1
@@ -363,7 +377,7 @@ contract TSF{
 			TSF.userTotalPoints.insert(key: TSF.currentSeason,{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setGameWeek(newWeek: UInt8){ 
 			TSF.currentWeek = newWeek
 			(TSF.accountsParticipated[TSF.currentSeason]!).insert(key: TSF.currentWeek,{} )
@@ -371,7 +385,7 @@ contract TSF{
 			(TSF.userWeeklyTotalPoints[TSF.currentSeason]!).insert(key: TSF.currentWeek,{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPlayerWeeklyScore(
 			season: String,
 			week: UInt8,
@@ -449,7 +463,7 @@ contract TSF{
 			 TSF.userTotalPoints[season]!).insert(key: userAddr, newTotal)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -457,16 +471,16 @@ contract TSF{
 	
 	access(all)
 	resource interface TopShotCareerCollectionPublic{ 
-		access(all)
-		fun deposit(token: @TSF.NFT)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @TSF.NFT): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @TSF.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTopShotCareerNFT(id: UInt64): &TSF.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -491,7 +505,7 @@ contract TSF{
 			self.ownedNFTs <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTopShotCareerNFT(id: UInt64): &TSF.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref: &TSF.NFT = (&self.ownedNFTs[id] as &TSF.NFT?)!
@@ -504,7 +518,7 @@ contract TSF{
 		//
 		// Function that removes an NFT from the collection
 		// and moves it to the calling context
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @NFT{ 
 			// If the NFT isn't found, the transaction panics and reverts
 			let token: @TSF.NFT <- self.ownedNFTs.remove(key: withdrawID)!
@@ -515,7 +529,7 @@ contract TSF{
 		//
 		// Function that takes a NFT as an argument and
 		// adds it to the collections dictionary
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @TSF.NFT){ 
 			// add the new token to the dictionary with a force assignment
 			// if there is already a value at that key, it will fail and revert
@@ -524,20 +538,20 @@ contract TSF{
 		
 		// idExists checks to see if a NFT
 		// with the given ID exists in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.ownedNFTs.keys
 		}
 	}
 	
 	// create a new collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

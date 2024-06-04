@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract EmeraldBotVerifiers{ 
 	access(all)
 	let VerifierCollectionStoragePath: StoragePath
@@ -92,13 +106,13 @@ contract EmeraldBotVerifiers{
 	
 	access(all)
 	resource interface VerifierCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifierIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifier(verifierId: UInt64): &Verifier?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiersByGuildId(guildId: String): [&Verifier?]
 	}
 	
@@ -107,30 +121,30 @@ contract EmeraldBotVerifiers{
 		access(all)
 		let verifiers: @{UInt64: Verifier}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addVerifier(name: String, description: String, image: String, scriptCode: String, guildId: String, roleIds: [String], verificationMode: VerificationMode, extra:{ String: AnyStruct}){ 
 			let verifier <- create Verifier(name: name, description: description, image: image, scriptCode: scriptCode, guildId: guildId, roleIds: roleIds, verificationMode: verificationMode, extra: extra)
 			emit VerifierCreated(verifierId: verifier.uuid, name: name, mode: verificationMode.rawValue, guildId: guildId, roleIds: roleIds)
 			self.verifiers[verifier.uuid] <-! verifier
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteVerifier(verifierId: UInt64){ 
 			emit VerifierDeleted(verifierId: verifierId)
 			destroy self.verifiers.remove(key: verifierId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifierIds(): [UInt64]{ 
 			return self.verifiers.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifier(verifierId: UInt64): &Verifier?{ 
 			return &self.verifiers[verifierId] as &Verifier?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiersByGuildId(guildId: String): [&Verifier?]{ 
 			let response: [&Verifier?] = []
 			for id in self.getVerifierIds(){ 
@@ -147,7 +161,7 @@ contract EmeraldBotVerifiers{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @VerifierCollection{ 
 		return <-create VerifierCollection()
 	}

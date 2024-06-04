@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -313,7 +327,7 @@ contract HandyItems: NonFungibleToken{
 						i = i + UInt32(1)
 					} */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.numberMinted < self.quantity:
@@ -344,15 +358,15 @@ contract HandyItems: NonFungibleToken{
 	access(all)
 	resource interface HandyItemsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHandyItem(id: UInt64): &HandyItems.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -389,7 +403,7 @@ contract HandyItems: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @HandyItems.NFT
 			let id: UInt64 = token.id
 			
@@ -421,7 +435,7 @@ contract HandyItems: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the HandyItem.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowHandyItem(id: UInt64): &HandyItems.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -468,7 +482,7 @@ contract HandyItems: NonFungibleToken{
 	//
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSeries(metadata:{ String: String}): UInt32{ 
 			// Create the new series
 			var newSeries = SeriesData(metadata: metadata)
@@ -480,7 +494,7 @@ contract HandyItems: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(series: UInt32, metadata:{ String: String}): UInt32{ 
 			// Create the new edition
 			var newEdition = EditionData(series: series, metadata: metadata)
@@ -492,7 +506,7 @@ contract HandyItems: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(series: UInt32, edition: UInt32, quantity: UInt32, price: UFix64, isSerial: Bool, metadata:{ String: String}): UInt32{ 
 			
 			// Create the new Set
@@ -507,7 +521,7 @@ contract HandyItems: NonFungibleToken{
 			return newID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				HandyItems.sets[setID] != nil:
@@ -520,7 +534,7 @@ contract HandyItems: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTOrg(recipient: &{NonFungibleToken.CollectionPublic}, name: String, tokenURI: String, color: String, info: String){ 
 			emit Minted(id: HandyItems.totalSupply, name: name, tokenURI: tokenURI, color: color, info: info)
 			
@@ -529,7 +543,7 @@ contract HandyItems: NonFungibleToken{
 			HandyItems.totalSupply = HandyItems.totalSupply + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, edition: UInt32, quantity: UInt64, price: UInt64, isSerial: Bool, metadata:{ String: String}){ 
 			// emit Minted(id: HandyItems.totalSupply, name: name, tokenURI: tokenURI, color: color, info: info)
 			/*
@@ -549,7 +563,7 @@ contract HandyItems: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &HandyItems.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&HandyItems.Collection>(HandyItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust HandyItems.Collection.borowHandyItem to get the correct itemID
@@ -560,7 +574,7 @@ contract HandyItems: NonFungibleToken{
 	// 
 	// 
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeries():{ UInt32: QuerySeriesData}{ 
 		var ret:{ UInt32: QuerySeriesData} ={} 
 		var i: UInt32 = 0
@@ -571,7 +585,7 @@ contract HandyItems: NonFungibleToken{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesData(series: UInt32): QuerySeriesData?{ 
 		if HandyItems.seriesList[series] == nil{ 
 			return nil
@@ -583,7 +597,7 @@ contract HandyItems: NonFungibleToken{
 	// getEditions
 	// 
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditions(series: UInt32):{ UInt32: QueryEditionData}{ 
 		var ret:{ UInt32: QueryEditionData} ={} 
 		var i: UInt32 = 0
@@ -596,7 +610,7 @@ contract HandyItems: NonFungibleToken{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionData(id: UInt32): QueryEditionData?{ 
 		if HandyItems.editionList[id] == nil{ 
 			return nil
@@ -605,7 +619,7 @@ contract HandyItems: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSets():{ UInt32: QuerySetData}{ 
 		var ret:{ UInt32: QuerySetData} ={} 
 		var i: UInt32 = 0
@@ -617,7 +631,7 @@ contract HandyItems: NonFungibleToken{
 	}
 	
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSets(series: UInt32):{ UInt32: QuerySetEditionData}{ 
 		var ret:{ UInt32: QuerySetEditionData} ={} 
 		var i: UInt32 = 0
@@ -630,7 +644,7 @@ contract HandyItems: NonFungibleToken{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(setID: UInt32): QuerySetData?{ 
 		if HandyItems.sets[setID] == nil{ 
 			return nil
@@ -639,7 +653,7 @@ contract HandyItems: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowSet(setID: UInt32): &Set{ 
 		pre{ 
 			HandyItems.sets[setID] != nil:

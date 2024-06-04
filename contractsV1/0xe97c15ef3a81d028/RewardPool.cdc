@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -54,7 +68,7 @@ contract RewardPool{
 	access(self)
 	var balances:{ Address: UFix64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBalance(account: Address): UFix64{ 
 		let collectionRef =
 			getAccount(account).capabilities.get<&LPStaking.LPStakingCollection>(
@@ -67,7 +81,7 @@ contract RewardPool{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun balanceOf(account: Address): UFix64{ 
 		var balance: UFix64 = 0.0
 		if self.balances.containsKey(account){ 
@@ -76,7 +90,7 @@ contract RewardPool{
 		return balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun updateReward(account: Address?){ 
 		self.rewardPerTokenStored = self.rewardPerToken()
 		self.lastUpdateTime = self.lastTimeRewardApplicable()
@@ -91,7 +105,7 @@ contract RewardPool{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun lastTimeRewardApplicable(): UFix64{ 
 		let now = getCurrentBlock().timestamp
 		if now >= self.periodFinish{ 
@@ -101,7 +115,7 @@ contract RewardPool{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun rewardPerToken(): UFix64{ 
 		if self.totalSupply == 0.0{ 
 			return self.rewardPerTokenStored
@@ -111,7 +125,7 @@ contract RewardPool{
 		/ self.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun earned(account: Address): UFix64{ 
 		var userRewardPerTokenPaid: UFix64 = 0.0
 		if self.userRewardPerTokenPaid.containsKey(account){ 
@@ -125,7 +139,7 @@ contract RewardPool{
 		return balance * (self.rewardPerToken() - userRewardPerTokenPaid) + rewards
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReward(account: Address){ 
 		self.updateReward(account: account)
 		let reward = self.earned(account: account)
@@ -138,7 +152,7 @@ contract RewardPool{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun queueNewRewards(vault: @{FungibleToken.Vault}){ 
 		pre{ 
 			vault.balance > 0.0:
@@ -173,92 +187,92 @@ contract RewardPool{
 	
 	access(all)
 	resource PoolPublic: StarVaultInterfaces.PoolPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pid(): Int{ 
 			return RewardPool.pid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeToken(): Address{ 
 			return RewardPool.stakeToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun duration(): UFix64{ 
 			return RewardPool.duration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun periodFinish(): UFix64{ 
 			return RewardPool.periodFinish
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rewardRate(): UFix64{ 
 			return RewardPool.rewardRate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lastUpdateTime(): UFix64{ 
 			return RewardPool.lastUpdateTime
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rewardPerTokenStored(): UFix64{ 
 			return RewardPool.rewardPerTokenStored
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun queuedRewards(): UFix64{ 
 			return RewardPool.queuedRewards
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentRewards(): UFix64{ 
 			return RewardPool.currentRewards
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun historicalRewards(): UFix64{ 
 			return RewardPool.historicalRewards
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun totalSupply(): UFix64{ 
 			return RewardPool.totalSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun balanceOf(account: Address): UFix64{ 
 			return RewardPool.balanceOf(account: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateReward(account: Address?){ 
 			return RewardPool.updateReward(account: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lastTimeRewardApplicable(): UFix64{ 
 			return RewardPool.lastTimeRewardApplicable()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rewardPerToken(): UFix64{ 
 			return RewardPool.rewardPerToken()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun earned(account: Address): UFix64{ 
 			return RewardPool.earned(account: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReward(account: Address){ 
 			return RewardPool.getReward(account: account)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun queueNewRewards(vault: @{FungibleToken.Vault}){ 
 			return RewardPool.queueNewRewards(vault: <-vault)
 		}

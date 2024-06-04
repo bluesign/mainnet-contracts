@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 *
 *   This is an implemetation of a Flow Non-Fungible Token
 *   It is not a part of the official standard but it is assumed to be
@@ -130,7 +144,7 @@ contract HWGaragePack: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			if HWGaragePack.idToPackMetadata[self.id] != nil{ 
 				return (HWGaragePack.idToPackMetadata[self.id]!).metadata
@@ -155,15 +169,15 @@ contract HWGaragePack: NonFungibleToken{
 	access(all)
 	resource interface PackCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &HWGaragePack.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -189,7 +203,7 @@ contract HWGaragePack: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let HWGaragePack <- token as! @HWGaragePack.NFT
 			let HWGaragePackUUID: UInt64 = HWGaragePack.uuid
 			let HWGaragePackSeriesID: UInt64 = 4
@@ -210,7 +224,7 @@ contract HWGaragePack: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &HWGaragePack.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -267,17 +281,17 @@ contract HWGaragePack: NonFungibleToken{
 		*   Public Functions
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return self.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getName(): String{ 
 		return self.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun transfer(uuid: UInt64, id: UInt64, packSeriesId: UInt64, packEditionId: UInt64, toAddress: Address){ 
 		let HWGaragePackV2UUID: UInt64 = uuid
 		let HWGaragePackV2SeriesId: UInt64 = packSeriesId
@@ -286,12 +300,12 @@ contract HWGaragePack: NonFungibleToken{
 		emit TransferEvent(uuid: HWGaragePackV2UUID, id: HWGaragePackV2ID, seriesId: HWGaragePackV2SeriesId, editionId: HWGaragePackV2packEditionID, to: toAddress)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionMetadata():{ String: String}{ 
 		return self.collectionMetadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionMetadata(_ edition: UInt64):{ String: String}{ 
 		if self.idToPackMetadata[edition] != nil{ 
 			return (self.idToPackMetadata[edition]!).metadata
@@ -300,12 +314,12 @@ contract HWGaragePack: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataLength(): Int{ 
 		return self.idToPackMetadata.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackMetadata(): AnyStruct{ 
 		return self.idToPackMetadata
 	}

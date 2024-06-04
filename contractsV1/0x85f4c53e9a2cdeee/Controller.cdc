@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract Controller{ 
@@ -122,7 +136,7 @@ contract Controller{
 			self.socialBurnerPublicPath = socialBurnerPublicPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementReserve(_ newReserve: UFix64){ 
 			pre{ 
 				newReserve != nil:
@@ -134,7 +148,7 @@ contract Controller{
 			emit incrementReserve(newReserve)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementReserve(_ newReserve: UFix64){ 
 			pre{ 
 				newReserve != nil:
@@ -146,7 +160,7 @@ contract Controller{
 			emit decrementReserve(newReserve)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementIssuedSupply(_ amount: UFix64){ 
 			pre{ 
 				self.issuedSupply + amount <= self.maxSupply:
@@ -156,7 +170,7 @@ contract Controller{
 			emit incrementIssuedSupply(amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementIssuedSupply(_ amount: UFix64){ 
 			pre{ 
 				self.issuedSupply - amount >= 0.0:
@@ -166,12 +180,12 @@ contract Controller{
 			emit decrementIssuedSupply(amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeSplitterDetail(_ feeSplitterDetail:{ Address: FeeStructure}){ 
 			self.feeSplitterDetail = feeSplitterDetail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeeSplitterDetail():{ Address: FeeStructure}{ 
 			return self.feeSplitterDetail
 		}
@@ -179,7 +193,7 @@ contract Controller{
 	
 	access(all)
 	resource interface SpecialCapability{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerToken(
 			_ symbol: String,
 			_ maxSupply: UFix64,
@@ -190,36 +204,36 @@ contract Controller{
 			_ socialMinterPublicPath: PublicPath,
 			_ socialBurnerStoragePath: StoragePath,
 			_ socialBurnerPublicPath: PublicPath
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeeSplitterDetail(_ tokenId: String, _ feeSplitterDetail:{ Address: FeeStructure})
 	}
 	
 	access(all)
 	resource interface UserSpecialCapability{ 
-		access(all)
-		fun addCapability(cap: Capability<&{SpecialCapability}>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(cap: Capability<&{Controller.SpecialCapability}>): Void
 	}
 	
 	access(all)
 	resource interface SocialTokenResourcePublic{ 
-		access(all)
-		fun incrementIssuedSupply(_ tokenId: String, _ amount: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun incrementIssuedSupply(_ tokenId: String, _ amount: UFix64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementIssuedSupply(_ tokenId: String, _ amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementReserve(_ tokenId: String, _ newReserve: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementReserve(_ tokenId: String, _ newReserve: UFix64)
 	}
 	
 	access(all)
 	resource Admin: SpecialCapability{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerToken(_ symbol: String, _ maxSupply: UFix64, _ artist: Address, _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath, _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath, _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath){ 
 			pre{ 
 				symbol != nil:
@@ -235,7 +249,7 @@ contract Controller{
 			emit registerToken(tokenId, symbol, maxSupply, artistAddress)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeeSplitterDetail(_ tokenId: String, _ feeSplitterDetail:{ Address: FeeStructure}){ 
 			(Controller.allSocialTokens[tokenId]!).setFeeSplitterDetail(feeSplitterDetail)
 			emit updateFeeSplitterDetail(tokenId)
@@ -249,7 +263,7 @@ contract Controller{
 		var capability: Capability<&{SpecialCapability}>?
 		
 		// method which provide capability to user to utilize methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(cap: Capability<&{SpecialCapability}>){ 
 			pre{ 
 				// we make sure the SpecialCapability is 
@@ -264,7 +278,7 @@ contract Controller{
 		}
 		
 		//method to increment issued supply, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementIssuedSupply(_ tokenId: String, _ amount: UFix64){ 
 			pre{ 
 				amount > 0.0:
@@ -278,7 +292,7 @@ contract Controller{
 		}
 		
 		// method to decrement issued supply, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementIssuedSupply(_ tokenId: String, _ amount: UFix64){ 
 			pre{ 
 				amount > 0.0:
@@ -292,7 +306,7 @@ contract Controller{
 		}
 		
 		// method to increment reserve of a token, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementReserve(_ tokenId: String, _ newReserve: UFix64){ 
 			pre{ 
 				newReserve != nil:
@@ -304,7 +318,7 @@ contract Controller{
 		}
 		
 		// method to decrement reserve of a token, only access by the verified user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decrementReserve(_ tokenId: String, _ newReserve: UFix64){ 
 			pre{ 
 				newReserve != nil:
@@ -343,7 +357,7 @@ contract Controller{
 	}
 	
 	// method to get all the token details
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenDetails(_ tokenId: String): Controller.TokenStructure{ 
 		pre{ 
 			tokenId != nil:
@@ -355,7 +369,7 @@ contract Controller{
 	}
 	
 	// method to create a SocialTokenResource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSocialTokenResource(): @SocialTokenResource{ 
 		return <-create SocialTokenResource()
 	}

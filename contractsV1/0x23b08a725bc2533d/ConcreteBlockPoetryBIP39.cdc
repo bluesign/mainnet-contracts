@@ -1,4 +1,18 @@
-import BIP39WordList from "./BIP39WordList.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import BIP39WordList from "./BIP39WordList.cdc"
 
 import ConcreteAlphabets from "./ConcreteAlphabets.cdc"
 
@@ -21,16 +35,16 @@ contract ConcreteBlockPoetryBIP39{
 	
 	access(all)
 	struct interface IPoetryLogic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generatePoems(blockID: [UInt8; 32]): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateConcreteAlphabets(poems: [String]): @[[AnyResource]]
 	}
 	
 	access(all)
 	struct PoetryLogic: IPoetryLogic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generatePoems(blockID: [UInt8; 32]): [String]{ 
 			let entropyWithChecksum = self.blockIDToEntropyWithChecksum(blockID: blockID)
 			var poemEn = ""
@@ -94,7 +108,7 @@ contract ConcreteBlockPoetryBIP39{
 			return Int(res)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateConcreteAlphabets(poems: [String]): @[[AnyResource]]{ 
 			let concreteAlphabets: @[[AnyResource]] <- []
 			concreteAlphabets.append(<-ConcreteAlphabets.newText(poems[0]))
@@ -126,7 +140,7 @@ contract ConcreteBlockPoetryBIP39{
 			self.poems <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun writePoems(poetryLogic:{ IPoetryLogic}){ 
 			let poems = poetryLogic.generatePoems(blockID: getCurrentBlock().id)
 			self.poems[getCurrentBlock().timestamp] <-! <-poetryLogic.generateConcreteAlphabets(poems: poems)
@@ -134,7 +148,7 @@ contract ConcreteBlockPoetryBIP39{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyPoetryCollection(): @PoetryCollection{ 
 		return <-create PoetryCollection()
 	}

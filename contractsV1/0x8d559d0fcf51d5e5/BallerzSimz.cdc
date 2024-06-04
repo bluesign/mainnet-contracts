@@ -1,4 +1,18 @@
-import Gaia from "../0x8b148183c28ff88f/Gaia.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Gaia from "../0x8b148183c28ff88f/Gaia.cdc"
 
 import BounceToken from "./BounceToken.cdc"
 
@@ -149,7 +163,7 @@ contract BallerzSimz{
 	// Admin resource. Published only to private storage so the owner can start and complete sims.
 	access(all)
 	resource interface BallerzSimzAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startSim(
 			team1Id: UInt64,
 			team2Id: UInt64,
@@ -160,7 +174,7 @@ contract BallerzSimz{
 			}
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeSim(
 			simId: UInt64,
 			winnerId: UInt64,
@@ -173,10 +187,10 @@ contract BallerzSimz{
 			]
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSim(simId: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeeOwner(newAddress: Address)
 	}
 	
@@ -184,32 +198,32 @@ contract BallerzSimz{
 	access(all)
 	resource interface BallerzSimzPublic{ 
 		// Getters
-		access(all)
-		fun getActiveSimz(): [&ActiveSim]
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getActiveSimz(): [&BallerzSimz.ActiveSim]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSimIdz(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSim(simId: UInt64): &ActiveSim
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSimzForIdz(simIdz: [UInt64]): [&ActiveSim]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeamz(): [&BallerzTeam]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeamzForIdz(teamIdz: [UInt64]): [&BallerzTeam]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeamIdz(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeam(teamId: UInt64): &BallerzTeam
 		
 		// These allow an account that holds a baller to take action on teams
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTeam(
 			baller: &Gaia.NFT,
 			entryTokens: @{FungibleToken.Vault},
@@ -218,47 +232,47 @@ contract BallerzSimz{
 			teamName: String
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun joinTeam(baller: &Gaia.NFT, teamId: UInt64, entryTokens: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun leaveTeam(baller: &Gaia.NFT, teamId: UInt64)
 	}
 	
 	// Manager Admin interface. Published only to private storage so the admin can change config values.
 	access(all)
 	resource interface BallerzSimzConfigAdmin{ 
-		access(all)
-		fun addEntryFee(newEntryFee: UFix64, feePercentage: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addEntryFee(newEntryFee: UFix64, feePercentage: UFix64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEntryFee(entryFee: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTeamSize(newTeamSize: UInt8)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTeamSize(teamSize: UInt8)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setContractPaused(value: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAcceptedBallerzSetIdz(newSetIdz: [UInt64])
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getCurrentEntryFees(): [UFix64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getEntryFeeToFeePercentageMap():{ UFix64: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTeamSizes(): [UInt8]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getContractPaused(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getAcceptedBallerzSetIdz(): [UInt64]
 	}
 	
@@ -403,17 +417,17 @@ contract BallerzSimz{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTeamSize(): UInt8{ 
 			return self.teamSize
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBallerIdz(): [UInt64]{ 
 			return self.ballerIdz
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBallerOwnerz():{ UInt64: Address}{ 
 			return self.ballerOwnerz
 		}
@@ -588,7 +602,7 @@ contract BallerzSimz{
 				* Class methods *
 				*****************/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSimz(): [&ActiveSim]{ 
 			let activeSimzRefs: [&ActiveSim] = []
 			for simId in self.activeSimz.keys{ 
@@ -597,7 +611,7 @@ contract BallerzSimz{
 			return activeSimzRefs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSimzForIdz(simIdz: [UInt64]): [&ActiveSim]{ 
 			let activeSimzRefs: [&ActiveSim] = []
 			for simId in simIdz{ 
@@ -608,12 +622,12 @@ contract BallerzSimz{
 			return activeSimzRefs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSimIdz(): [UInt64]{ 
 			return self.activeSimz.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getActiveSim(simId: UInt64): &ActiveSim{ 
 			pre{ 
 				self.activeSimz.containsKey(simId):
@@ -622,7 +636,7 @@ contract BallerzSimz{
 			return &self.activeSimz[simId] as &BallerzSimz.ActiveSim?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeamz(): [&BallerzTeam]{ 
 			let teams: [&BallerzTeam] = []
 			for teamId in self.waitingTeamz.keys{ 
@@ -631,7 +645,7 @@ contract BallerzSimz{
 			return teams
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeamzForIdz(teamIdz: [UInt64]): [&BallerzTeam]{ 
 			let teams: [&BallerzTeam] = []
 			for teamId in teamIdz{ 
@@ -642,12 +656,12 @@ contract BallerzSimz{
 			return teams
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeamIdz(): [UInt64]{ 
 			return self.waitingTeamz.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWaitingTeam(teamId: UInt64): &BallerzTeam{ 
 			pre{ 
 				self.waitingTeamz[teamId] != nil:
@@ -656,14 +670,14 @@ contract BallerzSimz{
 			return &self.waitingTeamz[teamId] as &BallerzSimz.BallerzTeam?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFeeOwner(newAddress: Address){ 
 			let newAddressAccount = getAccount(newAddress)
 			self.feeOwnerCapability = newAddressAccount.capabilities.get<&{FungibleToken.Receiver}>(BounceToken.bounceTokenReceiverPath)!
 		}
 		
 		// Creates a new team with a baller and entry tokens for that first baller.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTeam(baller: &Gaia.NFT, entryTokens: @{FungibleToken.Vault}, teamSize: UInt8, privateTeam: Bool, teamName: String): UInt64{ 
 			pre{ 
 				BallerzSimz.getTeamSizes().contains(teamSize):
@@ -678,7 +692,7 @@ contract BallerzSimz{
 		}
 		
 		// Allows a baller to join a team given they pass in their entry fee
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun joinTeam(baller: &Gaia.NFT, teamId: UInt64, entryTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.waitingTeamz.containsKey(teamId):
@@ -692,7 +706,7 @@ contract BallerzSimz{
 		}
 		
 		// Allows a baller to leave a team. Their entry fee is returned to their account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun leaveTeam(baller: &Gaia.NFT, teamId: UInt64){ 
 			pre{ 
 				self.waitingTeamz.containsKey(teamId):
@@ -707,7 +721,7 @@ contract BallerzSimz{
 		}
 		
 		// Starts a new sim. The 2 teams must have full rosters.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startSim(team1Id: UInt64, team2Id: UInt64, entryAmount: UFix64, feePercentage: UFix64, bonuses:{ String: String}): UInt64{ 
 			pre{ 
 				!self.activeSimz.containsKey(BallerzSimz.latestSimId + 1):
@@ -745,7 +759,7 @@ contract BallerzSimz{
 		}
 		
 		// Completes a sim. This pays out the fee to the feeOwner and the winnings split evenly amonst the winning team.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeSim(simId: UInt64, winnerId: UInt64, loserId: UInt64, winnerScores: [UInt16], loserScores: [UInt16]){ 
 			pre{ 
 				self.activeSimz.keys.contains(simId):
@@ -799,7 +813,7 @@ contract BallerzSimz{
 		
 		// Cancels a sim that has already been started. This is kind of a safety mechanism if a sim is started, but can't
 		// be completed for some reason
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSim(simId: UInt64){ 
 			pre{ 
 				self.activeSimz.keys.contains(simId):
@@ -853,32 +867,32 @@ contract BallerzSimz{
 			self.acceptedBallerzSetIdz = [2]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getCurrentEntryFees(): [UFix64]{ 
 			return self.currentEntryFees
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getEntryFeeToFeePercentageMap():{ UFix64: UFix64}{ 
 			return self.entryFeeToFeePercentageMap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTeamSizes(): [UInt8]{ 
 			return self.teamSizes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getContractPaused(): Bool{ 
 			return self.contractPaused
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getAcceptedBallerzSetIdz(): [UInt64]{ 
 			return self.acceptedBallerzSetIdz
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAcceptedBallerzSetIdz(newSetIdz: [UInt64]){ 
 			pre{ 
 				newSetIdz.length > 0:
@@ -887,13 +901,13 @@ contract BallerzSimz{
 			self.acceptedBallerzSetIdz = newSetIdz
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setContractPaused(value: Bool){ 
 			self.contractPaused = value
 			emit ContractPausedSet(value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntryFee(newEntryFee: UFix64, feePercentage: UFix64){ 
 			pre{ 
 				!self.currentEntryFees.contains(newEntryFee):
@@ -907,7 +921,7 @@ contract BallerzSimz{
 			self.entryFeeToFeePercentageMap.insert(key: newEntryFee, feePercentage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeEntryFee(entryFee: UFix64){ 
 			pre{ 
 				self.currentEntryFees.contains(entryFee)
@@ -927,7 +941,7 @@ contract BallerzSimz{
 			self.entryFeeToFeePercentageMap.remove(key: entryFee)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTeamSize(newTeamSize: UInt8){ 
 			pre{ 
 				!self.teamSizes.contains(newTeamSize):
@@ -936,7 +950,7 @@ contract BallerzSimz{
 			self.teamSizes.append(newTeamSize)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTeamSize(teamSize: UInt8){ 
 			pre{ 
 				self.teamSizes.length > 1:
@@ -963,7 +977,7 @@ contract BallerzSimz{
 		self.activeBallerIdz.remove(key: ballerId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getCurrentEntryFees(): [UFix64]{ 
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
@@ -973,7 +987,7 @@ contract BallerzSimz{
 		return configAdminRef.getCurrentEntryFees()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getEntryFeeToFeePercentageMap():{ UFix64: UFix64}{ 
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
@@ -983,7 +997,7 @@ contract BallerzSimz{
 		return configAdminRef.getEntryFeeToFeePercentageMap()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTeamSizes(): [UInt8]{ 
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
@@ -993,7 +1007,7 @@ contract BallerzSimz{
 		return configAdminRef.getTeamSizes()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getContractPaused(): Bool{ 
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
@@ -1003,7 +1017,7 @@ contract BallerzSimz{
 		return configAdminRef.getContractPaused()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getAcceptedBallerzSetIdz(): [UInt64]{ 
 		let configAdmin =
 			self.account.capabilities.get<&{BallerzSimzConfigAdmin}>(
@@ -1013,7 +1027,7 @@ contract BallerzSimz{
 		return configAdminRef.getAcceptedBallerzSetIdz()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getActiveBallerIdz():{ UInt64: Bool}{ 
 		return BallerzSimz.activeBallerIdz
 	}

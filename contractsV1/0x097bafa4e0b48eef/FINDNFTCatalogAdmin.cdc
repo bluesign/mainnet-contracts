@@ -1,4 +1,18 @@
-import FINDNFTCatalog from "./FINDNFTCatalog.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FINDNFTCatalog from "./FINDNFTCatalog.cdc"
 
 import NFTCatalog from "./../../standardsV1/NFTCatalog.cdc"
 
@@ -25,7 +39,7 @@ contract FINDNFTCatalogAdmin{
 	// Admin resource to manage NFT Catalog
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCatalogEntry(collectionIdentifier: String, metadata: NFTCatalog.NFTCatalogMetadata){ 
 			FINDNFTCatalog.addCatalogEntry(
 				collectionIdentifier: collectionIdentifier,
@@ -33,7 +47,7 @@ contract FINDNFTCatalogAdmin{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCatalogEntry(
 			collectionIdentifier: String,
 			metadata: NFTCatalog.NFTCatalogMetadata
@@ -44,12 +58,12 @@ contract FINDNFTCatalogAdmin{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCatalogEntry(collectionIdentifier: String){ 
 			FINDNFTCatalog.removeCatalogEntry(collectionIdentifier: collectionIdentifier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun approveCatalogProposal(proposalID: UInt64){ 
 			pre{ 
 				FINDNFTCatalog.getCatalogProposalEntry(proposalID: proposalID) != nil:
@@ -86,7 +100,7 @@ contract FINDNFTCatalogAdmin{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rejectCatalogProposal(proposalID: UInt64){ 
 			pre{ 
 				FINDNFTCatalog.getCatalogProposalEntry(proposalID: proposalID) != nil:
@@ -110,7 +124,7 @@ contract FINDNFTCatalogAdmin{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCatalogProposal(proposalID: UInt64){ 
 			pre{ 
 				FINDNFTCatalog.getCatalogProposalEntry(proposalID: proposalID) != nil:
@@ -127,10 +141,10 @@ contract FINDNFTCatalogAdmin{
 	// a capability to admin controls
 	access(all)
 	resource interface IAdminProxy{ 
-		access(all)
-		fun addCapability(capability: Capability<&Admin>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(capability: Capability<&FINDNFTCatalogAdmin.Admin>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasCapability(): Bool
 	}
 	
@@ -139,7 +153,7 @@ contract FINDNFTCatalogAdmin{
 		access(self)
 		var capability: Capability<&Admin>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(capability: Capability<&Admin>){ 
 			pre{ 
 				capability.check():
@@ -150,12 +164,12 @@ contract FINDNFTCatalogAdmin{
 			self.capability = capability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCapability(): Capability<&Admin>?{ 
 			return self.capability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasCapability(): Bool{ 
 			return self.capability != nil
 		}
@@ -165,7 +179,7 @@ contract FINDNFTCatalogAdmin{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxy(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}

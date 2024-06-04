@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -226,14 +240,14 @@ contract IrNFT: NonFungibleToken{
 	
 	// Get all brand ids
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBrandIDs(): [UInt32]{ 
 		return IrNFT.brands.keys
 	}
 	
 	// Get the publicly available data for a Brand by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBrandData(id: UInt32): IrNFT.IrBrandData{ 
 		pre{ 
 			IrNFT.brands[id] != nil:
@@ -244,12 +258,12 @@ contract IrNFT: NonFungibleToken{
 	
 	// Get all brand names
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllBrandNames(): [String]{ 
 		return IrNFT.brandIDsByName.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBrandIDByName(name: String): UInt32?{ 
 		return IrNFT.brandIDsByName[name]
 	}
@@ -415,7 +429,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// addItem
 		// Adds a new item to the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addItem(itemID: UInt32){ 
 			pre{ 
 				self.open:
@@ -443,7 +457,7 @@ contract IrNFT: NonFungibleToken{
 		// Retires an item, which prevents it being minted in the future.
 		// This doesnt affect already sold vouchers which might still mint
 		// the retired item because it was already sold.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireItem(itemID: UInt32){ 
 			pre{ 
 				self.open:
@@ -459,7 +473,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// addDrop
 		// Adds a new drop to the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addDrop(dropID: UInt32){ 
 			pre{ 
 				self.open:
@@ -488,7 +502,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// close
 		// Closes this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			pre{ 
 				self.open:
@@ -501,14 +515,14 @@ contract IrNFT: NonFungibleToken{
 	
 	// Get all collection ids
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCollectionIDs(): [UInt32]{ 
 		return IrNFT.collections.keys
 	}
 	
 	// Get the publicly available data for a Collection by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionData(id: UInt32): IrNFT.IrCollectionData{ 
 		pre{ 
 			IrNFT.brands[id] != nil:
@@ -519,12 +533,12 @@ contract IrNFT: NonFungibleToken{
 	
 	// Get all collection names
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCollectionNames(): [String]{ 
 		return IrNFT.collectionIDsByName.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionIDByName(name: String): UInt32?{ 
 		return IrNFT.collectionIDsByName[name]
 	}
@@ -705,7 +719,7 @@ contract IrNFT: NonFungibleToken{
 			emit ItemCreated(id: self.id, collectionID: self.collectionID, name: self.name)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainingProvisionableSupply(): UInt64{ 
 			return self.supply - self.provisionedSupply
 		}
@@ -723,7 +737,7 @@ contract IrNFT: NonFungibleToken{
 	
 	// Get the publicly available data for an Item by ID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getItemData(id: UInt32): IrNFT.IrItemData{ 
 		pre{ 
 			IrNFT.items[id] != nil:
@@ -734,7 +748,7 @@ contract IrNFT: NonFungibleToken{
 	
 	// Get the rarity for an Item by ID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getItemRarity(id: UInt32): IrNFT.IrRarity{ 
 		pre{ 
 			IrNFT.items[id] != nil:
@@ -827,14 +841,14 @@ contract IrNFT: NonFungibleToken{
 			self.totalSupply = drop.totalSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasEnded(): Bool{ 
 			var current: UFix64 = getCurrentBlock().timestamp
 			var end = self.end
 			return current > end
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isSoldOut(): Bool{ 
 			if self.totalSupply >= self.supply{ 
 				return true
@@ -842,7 +856,7 @@ contract IrNFT: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isOpen(): Bool{ 
 			if self.isSoldOut(){ 
 				return false
@@ -855,13 +869,13 @@ contract IrNFT: NonFungibleToken{
 			return start <= current && current <= end
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseVoucher(recipient: &{NonFungibleToken.CollectionPublic}, paymentVault: @{FungibleToken.Vault}){ 
 			let drop = (&IrNFT.drops[self.id] as &IrNFT.IrDrop?)!
 			drop.purchaseVoucher(recipient: recipient, paymentVault: <-paymentVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeemVoucher(recipient: &{NonFungibleToken.CollectionPublic}, token: @{NonFungibleToken.NFT}){ 
 			let drop = (&IrNFT.drops[self.id] as &IrNFT.IrDrop?)!
 			drop.redeemVoucher(recipient: recipient, token: <-token)
@@ -1023,26 +1037,26 @@ contract IrNFT: NonFungibleToken{
 			IrNFT.nextDropID = IrNFT.nextDropID + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isActive(): Bool{ 
 			return IrNFT.activeDrops.contains(self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasStarted(): Bool{ 
 			var current: UFix64 = getCurrentBlock().timestamp
 			var start = self.start
 			return start < current
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun hasEnded(): Bool{ 
 			var current: UFix64 = getCurrentBlock().timestamp
 			var end = self.end
 			return current > end
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isSoldOut(): Bool{ 
 			if self.totalSupply >= self.supply{ 
 				return true
@@ -1050,7 +1064,7 @@ contract IrNFT: NonFungibleToken{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isOpen(): Bool{ 
 			if self.isSoldOut(){ 
 				return false
@@ -1060,7 +1074,7 @@ contract IrNFT: NonFungibleToken{
 			return self.hasStarted() && !self.hasEnded()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remainingVouchers(): UInt64{ 
 			return self.totalSupply - self.redeemedSupply
 		}
@@ -1083,7 +1097,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// Purchase a Voucher for this Drop
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseVoucher(recipient: &{NonFungibleToken.CollectionPublic}, paymentVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				!self.isSoldOut():
@@ -1111,7 +1125,7 @@ contract IrNFT: NonFungibleToken{
 			emit VoucherPurchased(id: tokenID, collectionID: self.collectionID, dropID: self.id, by: (recipient.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun redeemVoucher(recipient: &{NonFungibleToken.CollectionPublic}, token: @{NonFungibleToken.NFT}){ 
 			pre{ 
 				self.isSoldOut() || self.hasEnded():
@@ -1173,7 +1187,7 @@ contract IrNFT: NonFungibleToken{
 			emit VoucherRedeemed(id: voucherID, collectionID: collection.id, dropID: self.id, nftID: nftID, by: (recipient.owner!).address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setActive(){ 
 			pre{ 
 				!IrNFT.activeDrops.contains(self.id):
@@ -1182,7 +1196,7 @@ contract IrNFT: NonFungibleToken{
 			IrNFT.activeDrops.append(self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInactive(){ 
 			pre{ 
 				IrNFT.activeDrops.contains(self.id):
@@ -1216,21 +1230,21 @@ contract IrNFT: NonFungibleToken{
 	
 	// Get all drop IDs
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllDropIDs(): [UInt32]{ 
 		return IrNFT.drops.keys
 	}
 	
 	// Get active drop IDs
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getActiveDropIDs(): [UInt32]{ 
 		return IrNFT.activeDrops
 	}
 	
 	// Get the publicly available data for a Drop by ID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getDropData(id: UInt32): IrNFT.IrDropData{ 
 		pre{ 
 			IrNFT.drops.containsKey(id):
@@ -1311,18 +1325,18 @@ contract IrNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowIrNFT(id: UInt64): &IrNFT.NFT?
 	}
 	
@@ -1356,7 +1370,7 @@ contract IrNFT: NonFungibleToken{
 		// Function that takes a NFT as an argument and
 		// adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @IrNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -1367,7 +1381,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// idExists checks to see if a NFT
 		// with the given ID exists in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -1388,7 +1402,7 @@ contract IrNFT: NonFungibleToken{
 		}
 		
 		// borrowIrNFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowIrNFT(id: UInt64): &IrNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -1439,7 +1453,7 @@ contract IrNFT: NonFungibleToken{
 		// createBrand
 		// Create and store a new Brand
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBrand(publicID: String, name: String): UInt32{ 
 			pre{ 
 				!IrNFT.brandIDsByName.containsKey(name):
@@ -1462,7 +1476,7 @@ contract IrNFT: NonFungibleToken{
 		// createCollection
 		// Create and store a new Collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCollection(publicID: String, name: String, brandIDs: [UInt32], description: String?, metadata:{ String: String}?): UInt32{ 
 			// Create a new Collection
 			let newCollection <- create IrCollection(publicID: publicID, name: name, brandIDs: brandIDs, description: description, metadata: metadata ??{} )
@@ -1479,7 +1493,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// borrowCollection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollection(collectionID: UInt32): &IrCollection{ 
 			pre{ 
 				IrNFT.collections.containsKey(collectionID):
@@ -1493,7 +1507,7 @@ contract IrNFT: NonFungibleToken{
 		// createItem
 		// Create and store a new Item
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(collectionID: UInt32, publicID: String, name: String, supply: UInt64, utilities: [String], assets: [IrItemAsset], metadata:{ String: String}?): UInt32{ 
 			pre{ 
 				IrNFT.collections.containsKey(collectionID):
@@ -1516,7 +1530,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// borrowItem
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowItem(itemID: UInt32): &IrItem{ 
 			pre{ 
 				IrNFT.items.containsKey(itemID):
@@ -1530,7 +1544,7 @@ contract IrNFT: NonFungibleToken{
 		// createDrop
 		// Create and store a new Drop
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createDrop(collectionID: UInt32, publicID: String, name: String, description: String?, price: UFix64, start: UFix64, end: UFix64, items: [UInt32], supplyPerItem:{ UInt32: UInt64}, metadata:{ String: String}): UInt32{ 
 			pre{ 
 				IrNFT.collections.containsKey(collectionID):
@@ -1553,7 +1567,7 @@ contract IrNFT: NonFungibleToken{
 		
 		// borrowItem
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDrop(dropID: UInt32): &IrDrop{ 
 			pre{ 
 				IrNFT.drops.containsKey(dropID):
@@ -1568,7 +1582,7 @@ contract IrNFT: NonFungibleToken{
 		// Allows Admins to giveaway a Voucher for a specific
 		// drop while supply last. Can be done before sale start.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun giveawayVoucher(dropID: UInt32, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			pre{ 
 				IrNFT.drops.containsKey(dropID):
@@ -1590,7 +1604,7 @@ contract IrNFT: NonFungibleToken{
 		// mintItemNFT
 		// Mints a specific item NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintItemNFT(collectionID: UInt32, itemID: UInt32): @IrNFT.NFT{ 
 			pre{ 
 				IrNFT.collections.containsKey(collectionID):
@@ -1653,7 +1667,7 @@ contract IrNFT: NonFungibleToken{
 		// Mints a random NFT for an item in a drop, this checks
 		// the sold voucher amount. 
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintDropNFT(collectionID: UInt32, itemID: UInt32, dropID: UInt32): @IrNFT.NFT{ 
 			pre{ 
 				IrNFT.collections.containsKey(collectionID):
@@ -1718,7 +1732,7 @@ contract IrNFT: NonFungibleToken{
 		// createNewAdmin
 		// Allows an existing Admin to create other Admins
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

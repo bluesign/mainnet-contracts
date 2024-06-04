@@ -1,4 +1,18 @@
-// Distributors defines the ways to setting the reward amount
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Distributors defines the ways to setting the reward amount
 //
 // In Drizzle, for setting the amount of reward, you have two choices as well:
 // 1. Identical: All claimers will get identical amount of reward.
@@ -14,11 +28,11 @@ contract Distributors{
 		access(all)
 		let type: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAvailable(params:{ String: AnyStruct}): Bool
 		
 		// getEligibleAmount defines how much reward can a claimer get in this DROP
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEligibleAmount(params:{ String: AnyStruct}): UFix64
 	}
 	
@@ -44,12 +58,12 @@ contract Distributors{
 		}
 		
 		// always available
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAvailable(params:{ String: AnyStruct}): Bool{ 
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEligibleAmount(params:{ String: AnyStruct}): UFix64{ 
 			let claimer = params["claimer"]! as! Address
 			return self.distributeList[claimer] ?? 0.0
@@ -77,14 +91,14 @@ contract Distributors{
 			self.type = "Identical"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAvailable(params:{ String: AnyStruct}): Bool{ 
 			let claimedCount = params["claimedCount"]! as! UInt32
 			let availableCapacity = self.capacity - claimedCount
 			return availableCapacity > 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEligibleAmount(params:{ String: AnyStruct}): UFix64{ 
 			if !self.isAvailable(params: params){ 
 				return 0.0
@@ -113,7 +127,7 @@ contract Distributors{
 			self.type = "Random"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAvailable(params:{ String: AnyStruct}): Bool{ 
 			let claimedCount = params["claimedCount"]! as! UInt32
 			let availableCapacity = self.capacity - claimedCount
@@ -128,7 +142,7 @@ contract Distributors{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEligibleAmount(params:{ String: AnyStruct}): UFix64{ 
 			let claimedCount = params["claimedCount"]! as! UInt32
 			let availableCapacity = self.capacity - claimedCount

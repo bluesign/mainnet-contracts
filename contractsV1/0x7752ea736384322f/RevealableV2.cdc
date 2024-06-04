@@ -1,25 +1,39 @@
-// Description
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Description
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import TheFabricantMetadataViewsV2 from "./TheFabricantMetadataViewsV2.cdc"
 
 import CoCreatableV2 from "./CoCreatableV2.cdc"
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface RevealableV2{ 
 	
 	// When an NFT is minted, its metadata is stored here
 	access(contract)
 	var nftMetadata:{ UInt64:{ RevealableMetadata}}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftMetadatas():{ UInt64:{ RevealableMetadata}}
 	
 	// Mutable-Template based NFT Metadata.
 	// Each time a revealable NFT is minted, a RevealableMetadata is created
 	// and saved into the nftMetadata dictionary. This represents the
 	// bare minimum a RevealableMetadata should implement
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface RevealableMetadata{ 
 		
 		//NOTE: totalSupply value of attached NFT, therefore edition number. 
@@ -108,7 +122,7 @@ contract interface RevealableV2{
 		access(contract)
 		var revealableTraits:{ String: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevealableTraits():{ String: Bool}
 		
 		// Called by the Admin to reveal the traits for this NFT.
@@ -123,14 +137,14 @@ contract interface RevealableV2{
 		
 		// Called by the nft owner to modify if a trait can be 
 		// revealed or not - used to revoke admin access
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIsTraitRevealable(key: String, value: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkRevealableTrait(traitName: String): Bool?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface RevealableTrait{ 
 		access(all)
 		let name: String

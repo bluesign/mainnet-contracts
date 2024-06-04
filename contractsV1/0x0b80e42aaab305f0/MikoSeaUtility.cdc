@@ -1,4 +1,18 @@
-import MIKOSEANFTV2 from "./MIKOSEANFTV2.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MIKOSEANFTV2 from "./MIKOSEANFTV2.cdc"
 
 import MIKOSEANFT from "./MIKOSEANFT.cdc"
 
@@ -118,7 +132,7 @@ contract MikoSeaUtility{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun yenToDollar(yen: UFix64): UFix64{ 
 		if MikoSeaUtility.ratePrice["USD_TO_JPY"] == nil{ 
 			return 0.0
@@ -131,13 +145,13 @@ contract MikoSeaUtility{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateRate(key: String, value: UFix64){ 
 			MikoSeaUtility.ratePrice[key] = value
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun floor(_ num: Fix64): Int{ 
 		var strRes = ""
 		var numStr = num.toString()
@@ -159,7 +173,7 @@ contract MikoSeaUtility{
 		return numInt - 1
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getListingId(addr: Address, nftType: Type, nftID: UInt64): UInt64?{ 
 		if let ref =
 			getAccount(addr).capabilities.get<&{MikoSeaMarket.StorefrontPublic}>(
@@ -174,7 +188,7 @@ contract MikoSeaUtility{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftV2Detail(_ nftID: UInt64): NFTDataCommonWithListing?{ 
 		if let addr = MIKOSEANFTV2.getHolder(nftID: nftID){ 
 			let account = getAccount(addr)
@@ -189,7 +203,7 @@ contract MikoSeaUtility{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNftV1Detail(addr: Address, nftID: UInt64): NFTDataCommonWithListing?{ 
 		let account = getAccount(addr)
 		let collectionCapability =
@@ -206,7 +220,7 @@ contract MikoSeaUtility{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun parseNftV2List(_ nfts: [&MIKOSEANFTV2.NFT]): [NFTDataCommonWithListing]{ 
 		let projects:{ UInt64: &MIKOSEANFTV2.ProjectData} ={} 
 		let response: [NFTDataCommonWithListing] = []

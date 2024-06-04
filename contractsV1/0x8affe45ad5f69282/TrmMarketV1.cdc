@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 	TrmMarketV1.cdc
 
@@ -181,33 +195,33 @@ contract TrmMarketV1{
 	// to allow others to access their sale
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenID: UInt64,
 			buyTokens: @FUSD.Vault,
 			recipient: &{TrmAssetV1.CollectionPublic}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rent(
 			tokenID: UInt64,
 			buyTokens: @FUSD.Vault,
 			recipient: &{TrmRentV1.CollectionPublic}
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleListing(tokenID: UInt64): SaleListing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentListing(tokenID: UInt64): RentListing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsset(id: UInt64): &TrmAssetV1.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -274,7 +288,7 @@ contract TrmMarketV1{
 		///
 		/// Parameters: tokenID: The id of the NFT to be put up for sale
 		///			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenID: UInt64, price: UFix64){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).idExists(id: tokenID):
@@ -296,7 +310,7 @@ contract TrmMarketV1{
 		///			 price: The rent price of the NFT
 		///			 rentalPeriodSeconds: The rental period (in seconds)
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForRent(tokenID: UInt64, price: UFix64?, rentalPeriodSeconds: UFix64?){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).idExists(id: tokenID):
@@ -323,7 +337,7 @@ contract TrmMarketV1{
 		///
 		/// Parameters: tokenIDs: The array of NFT IDs to be put up for sale
 		///			 price: The sale price 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchListForSale(tokenIDs: [UInt64], price: UFix64){ 
 			for tokenID in tokenIDs{ 
 				self.listForSale(tokenID: tokenID, price: price)
@@ -336,7 +350,7 @@ contract TrmMarketV1{
 		///			 price: The rent price
 		///			 rentalPeriodSeconds: The rental period (in seconds)
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchListForRent(tokenIDs: [UInt64], price: UFix64?, rentalPeriodSeconds: UFix64?){ 
 			for tokenID in tokenIDs{ 
 				self.listForRent(tokenID: tokenID, price: price, rentalPeriodSeconds: rentalPeriodSeconds)
@@ -347,7 +361,7 @@ contract TrmMarketV1{
 		///
 		/// Parameters: tokenID: the ID of the token to remove from the sale
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64){ 
 			pre{ 
 				self.saleListings[tokenID] != nil:
@@ -368,7 +382,7 @@ contract TrmMarketV1{
 		///
 		/// Parameters: tokenID: the ID of the token to remove from the sale
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelRent(tokenID: UInt64){ 
 			pre{ 
 				self.rentListings[tokenID] != nil:
@@ -388,7 +402,7 @@ contract TrmMarketV1{
 		/// batchCancelSale cancels the sale listings for the array of NFTs
 		///
 		/// Parameters: tokenIDs: The array of NFT IDs to be removed for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCancelSale(tokenIDs: [UInt64]){ 
 			for tokenID in tokenIDs{ 
 				self.cancelSale(tokenID: tokenID)
@@ -398,7 +412,7 @@ contract TrmMarketV1{
 		/// batchCancelSale cancels the rent listings for the array of NFTs
 		///
 		/// Parameters: tokenIDs: The array of NFT IDs to be removed for rent
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCancelRent(tokenIDs: [UInt64]){ 
 			for tokenID in tokenIDs{ 
 				self.cancelRent(tokenID: tokenID)
@@ -411,7 +425,7 @@ contract TrmMarketV1{
 		/// Parameters: tokenID: the ID of the NFT to purchase
 		///			 buyTokens: the fungible tokens that are used to buy the NFT
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @FUSD.Vault, recipient: &{TrmAssetV1.CollectionPublic}){ 
 			pre{ 
 				self.saleListings[tokenID] != nil:
@@ -452,7 +466,7 @@ contract TrmMarketV1{
 		///			 buyTokens: the fungible tokens that are used to buy the NFT
 		///			 recipient: Recipient Collection to receive Rent Token
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rent(tokenID: UInt64, buyTokens: @FUSD.Vault, recipient: &{TrmRentV1.CollectionPublic}): UInt64{ 
 			pre{ 
 				self.rentListings[tokenID] != nil:
@@ -488,7 +502,7 @@ contract TrmMarketV1{
 		/// Parameters: tokenID: The ID of the NFT whose sell price to get
 		///
 		/// Returns: SaleListing: The sale listing of the token including price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleListing(tokenID: UInt64): SaleListing?{ 
 			if let listing = self.saleListings[tokenID]{ 
 				return listing
@@ -501,7 +515,7 @@ contract TrmMarketV1{
 		/// Parameters: tokenID: The ID of the NFT whose rent price to get
 		///
 		/// Returns: RentListing: The rent listing of the token including price, rental period
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentListing(tokenID: UInt64): RentListing?{ 
 			if let listing = self.rentListings[tokenID]{ 
 				return listing
@@ -510,13 +524,13 @@ contract TrmMarketV1{
 		}
 		
 		/// getSaleIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleIDs(): [UInt64]{ 
 			return self.saleListings.keys
 		}
 		
 		/// getRentIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRentIDs(): [UInt64]{ 
 			return self.rentListings.keys
 		}
@@ -526,7 +540,7 @@ contract TrmMarketV1{
 		/// Parameters: id: The ID of the token to borrow a reference to
 		///
 		/// Returns: &TrmAssetV1.NFT? Optional reference to a token for sale so that the caller can read its data
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsset(id: UInt64): &TrmAssetV1.NFT?{ 
 			// first check this collection
 			if self.saleListings[id] != nil || self.rentListings[id] != nil{ 
@@ -538,7 +552,7 @@ contract TrmMarketV1{
 	}
 	
 	/// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&TrmAssetV1.Collection>,
 		ownerCapability: Capability<&{FungibleToken.Receiver}>
@@ -550,7 +564,7 @@ contract TrmMarketV1{
 	}
 	
 	// initializes the beneficary Fusd Vault to that of the contract owner to receive cut of sales
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setupBeneficiaryFusdVault(): Capability<&{FungibleToken.Receiver}>{ 
 		if self.account.storage.borrow<&FUSD.Vault>(from: /storage/fusdVault) != nil{ 
 			return self.account.capabilities.get<&{FungibleToken.Receiver}>(/public/fusdReceiver)!
@@ -583,21 +597,21 @@ contract TrmMarketV1{
 		
 		// Admin may update the beneficiary capability to receive a cut of sales
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBeneficiaryCapability(beneficiaryCapability: Capability<&{FungibleToken.Receiver}>){ 
 			TrmMarketV1.beneficiaryCapability = beneficiaryCapability
 		}
 		
 		// Admin may update the cut percentage of sales sent to beneficiary
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCutPercentage(cutPercentage: UFix64){ 
 			TrmMarketV1.cutPercentage = cutPercentage
 		}
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}

@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -33,7 +47,7 @@ contract ColdStorage{
 		access(all)
 		var senderAddress: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun signableBytes(): [UInt8]
 	}
 	
@@ -62,7 +76,7 @@ contract ColdStorage{
 			self.sigSet = sigSet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun signableBytes(): [UInt8]{ 
 			let senderAddress = self.senderAddress.toBytes()
 			let recipientAddressBytes = self.recipientAddress.toBytes()
@@ -93,7 +107,7 @@ contract ColdStorage{
 			self.sigSet = sigSet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun signableBytes(): [UInt8]{ 
 			let senderAddress = self.senderAddress.toBytes()
 			let seqNoBytes = self.seqNo.toBigEndianBytes()
@@ -114,7 +128,7 @@ contract ColdStorage{
 			self.request = request
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _execute(fungibleTokenReceiverPath: PublicPath){ 
 			var pendingVault: @{FungibleToken.Vault} <-
 				MoxyToken.createEmptyVault(vaultType: Type<@MoxyToken.Vault>())
@@ -130,19 +144,19 @@ contract ColdStorage{
 	
 	access(all)
 	resource interface PublicVault{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSequenceNumber(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKeys(): [Key]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun prepareWithdrawal(request: WithdrawRequest): @PendingWithdrawal
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSignatures(request: KeyListChangeRequest)
 	}
 	
@@ -161,26 +175,26 @@ contract ColdStorage{
 		var seqNo: UInt64
 		
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			self.contents.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSequenceNumber(): UInt64{ 
 			return self.seqNo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): UFix64{ 
 			return self.contents.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKeys(): [Key]{ 
 			return self.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun prepareWithdrawal(request: WithdrawRequest): @PendingWithdrawal{ 
 			pre{ 
 				self.isValidSignature(request: request)
@@ -192,7 +206,7 @@ contract ColdStorage{
 			return <-create PendingWithdrawal(pendingVault: <-self.contents.withdraw(amount: request.amount), request: request)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSignatures(request: KeyListChangeRequest){ 
 			pre{ 
 				self.seqNo == request.seqNo
@@ -241,12 +255,12 @@ contract ColdStorage{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createVault(address: Address, keys: [Key], contents: @{FungibleToken.Vault}): @Vault{ 
 		return <-create Vault(address: address, keys: keys, contents: <-contents)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun validateSignature(
 		keys: [
 			Key

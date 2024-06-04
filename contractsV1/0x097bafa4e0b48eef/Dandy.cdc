@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -127,12 +141,12 @@ contract Dandy: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinterPlatform(): FindForge.MinterPlatform{ 
 			if let fetch = FindForge.getMinterPlatform(name: self.platform.name, forgeType: Dandy.getForgeType()){ 
 				let platform = &self.platform as &FindForge.MinterPlatform
@@ -193,7 +207,7 @@ contract Dandy: NonFungibleToken{
 			return MetadataViews.Royalties(royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplay(): MetadataViews.Display{ 
 			return MetadataViews.Display(name: self.name, description: self.description, thumbnail: self.thumbnail.file)
 		}
@@ -201,7 +215,7 @@ contract Dandy: NonFungibleToken{
 		//Note that when resolving schemas shared data are loaded last, so use schema names that are unique. ie prefix with shared/ or something
 		//NB! This will _not_ error out if it does not return Optional!
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.NFTCollectionDisplay>(){ 
 				let minterPlatform = self.getMinterPlatform()
 				let externalURL = MetadataViews.ExternalURL(minterPlatform.externalURL)
@@ -250,10 +264,10 @@ contract Dandy: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDsFor(minter: String): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinters(): [String]
 	}
 	
@@ -293,7 +307,7 @@ contract Dandy: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let minterPlatform = token.getMinterPlatform()
 			let minterName = minterPlatform.name
@@ -312,12 +326,12 @@ contract Dandy: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMinters(): [String]{ 
 			return self.nftIndex.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDsFor(minter: String): [UInt64]{ 
 			return self.nftIndex[minter]?.keys ?? []
 		}
@@ -347,7 +361,7 @@ contract Dandy: NonFungibleToken{
 			return nft as! &Dandy.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ id: UInt64): &NFT{ 
 			if self.ownedNFTs[id] == nil{ 
 				panic("NFT does not exist. ID : ".concat(id.toString()))
@@ -397,13 +411,13 @@ contract Dandy: NonFungibleToken{
 	//TODO: do we want to store minter 
 	access(all)
 	resource Forge: FindForge.Forge{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(platform: FindForge.MinterPlatform, data: AnyStruct, verifier: &FindForge.Verifier): @{NonFungibleToken.NFT}{ 
 			let info = data as? DandyInfo ?? panic("The data passed in is not in form of DandyInfo.")
 			return <-Dandy.mintNFT(name: info.name, description: info.description, thumbnail: info.thumbnail, platform: platform, schemas: info.schemas, externalUrlPrefix: info.externalUrlPrefix)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addContractData(platform: FindForge.MinterPlatform, data: AnyStruct, verifier: &FindForge.Verifier){ 
 			// not used here 
 			panic("Not supported for Dandy Contract")
@@ -421,7 +435,7 @@ contract Dandy: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getForgeType(): Type{ 
 		return Type<@Forge>()
 	}
@@ -436,7 +450,7 @@ contract Dandy: NonFungibleToken{
 		access(all)
 		let from: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun convert(_ value: AnyStruct): AnyStruct
 	}
 	

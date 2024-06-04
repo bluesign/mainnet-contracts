@@ -1,4 +1,18 @@
-/* */
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* */
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -88,13 +102,13 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			self.contentCapability = contentCapability
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata():{ String: AnyStruct}?{ 
 			let content = self.contentCapability.borrow<&{TiblesProducer.IContent}>() ?? panic("Failed to borrow content provider")
 			return content.getMetadata(contentId: self.contentId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun displayData():{ String: String}{ 
 			let metadata = self.metadata() ?? panic("Missing NFT metadata")
 			if metadata.containsKey("pack"){ 
@@ -120,13 +134,13 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			return{ "name": item.title(), "description": description, "imageUrl": imageUrl, "edition": edition, "serialInfo": serialInfo}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun display(): MetadataViews.Display{ 
 			let nftData = self.displayData()
 			return MetadataViews.Display(name: nftData["name"] ?? "", description: nftData["description"] ?? "", thumbnail: MetadataViews.HTTPFile(url: nftData["imageUrl"] ?? ""))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun editions(): MetadataViews.Editions{ 
 			let nftData = self.displayData()
 			let metadata = self.metadata() ?? panic("Missing NFT metadata")
@@ -143,30 +157,30 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			return MetadataViews.Editions(editionList)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun serial(): MetadataViews.Serial{ 
 			return MetadataViews.Serial(UInt64(self.mintNumber))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun royalties(): MetadataViews.Royalties{ 
 			let royalties: [MetadataViews.Royalty] = []
 			return MetadataViews.Royalties(royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun externalURL(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("https://sk8tibles.com/collection".concat(self.id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun nftCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: Sk8tibles.CollectionStoragePath, publicPath: Sk8tibles.PublicCollectionPath, publicCollection: Type<&Sk8tibles.Collection>(), publicLinkedType: Type<&Sk8tibles.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-Sk8tibles.createEmptyCollection(nftType: Type<@Sk8tibles.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun nftCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let squareMedia = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://i.tibles.com/m/sk8tibles-flow-icon.png"), mediaType: "image/svg+xml")
 			let bannerMedia = MetadataViews.Media(file: MetadataViews.HTTPFile(url: "https://i.tibles.com/m/sk8tibles-flow-collection-banner.png"), mediaType: "image/png")
@@ -178,7 +192,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			return MetadataViews.NFTCollectionDisplay(name: "Sk8tibles Collection", description: "A digital trading card collecting experience by Tibles, made in partnership with the Skateboarding Hall of Fame and Museum.", externalURL: MetadataViews.ExternalURL("https://sk8tibles.com"), squareImage: squareMedia, bannerImage: bannerMedia, socials: socials)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun traits(): MetadataViews.Traits{ 
 			let traits: [MetadataViews.Trait] = []
 			return MetadataViews.Traits(traits)
@@ -225,12 +239,12 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let tible <- token as! @Sk8tibles.NFT
 			self.depositTible(tible: <-tible)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositTible(tible: @{TiblesNFT.INFT}){ 
 			pre{ 
 				self.ownedNFTs[tible.id] == nil:
@@ -257,7 +271,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			panic("Failed to borrow NFT with ID: ".concat(id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTible(id: UInt64): &{TiblesNFT.INFT}{ 
 			if let nft = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?{ 
 				return nft as! &Sk8tibles.NFT
@@ -272,7 +286,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawTible(id: UInt64): @{TiblesNFT.INFT}{ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("Cannot withdraw: tible does not exist in the collection")
 			let tible <- token as! @Sk8tibles.NFT
@@ -288,7 +302,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			panic("Failed to borrow NFT with ID: ".concat(id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tibleDescriptions():{ UInt64:{ String: AnyStruct}}{ 
 			var descriptions:{ UInt64:{ String: AnyStruct}} ={} 
 			for id in self.ownedNFTs.keys{ 
@@ -302,7 +316,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			return descriptions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyTible(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("NFT not found")
 			destroy token
@@ -365,18 +379,18 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		access(contract)
 		let sets:{ String: Set}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minter(id: String): &Minter?{ 
 			let ref = &self.minters[id] as &{TiblesProducer.IMinter}?
 			return ref as! &Minter?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun set(id: String): &Set?{ 
 			return &self.sets[id] as &Set?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSet(_ set: Set, contentCapability: Capability){ 
 			pre{ 
 				self.sets[set.id] == nil:
@@ -399,7 +413,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(contentId: String):{ String: AnyStruct}?{ 
 			let path = self.contentIdsToPaths[contentId] ?? panic("Failed to get content path")
 			let location = path as! ContentLocation
@@ -434,22 +448,22 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		access(contract)
 		var metadata:{ String: AnyStruct}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun title(): String{ 
 			return (self.metadata!)["title"]! as! String
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun item(_ id: String): &Item?{ 
 			return &self.items[id] as &Item?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun variant(_ id: String): &Variant?{ 
 			return &self.variants[id] as &Variant?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(title: String){ 
 			self.metadata ={ "title": title}
 		}
@@ -471,18 +485,18 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		access(contract)
 		var metadata:{ String: AnyStruct}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun title(): String{ 
 			return (self.metadata!)["title"]! as! String
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun imageUrl(variantId: String): String{ 
 			let imageUrls = (self.metadata!)["imageUrls"]! as!{ String: String}
 			return imageUrls[variantId]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(title: String, imageUrls:{ String: String}){ 
 			self.metadata ={ "title": title, "imageUrls": imageUrls}
 		}
@@ -502,22 +516,22 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		access(contract)
 		var metadata:{ String: AnyStruct}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun title(): String{ 
 			return (self.metadata!)["title"]! as! String
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchSize(): UInt32?{ 
 			return (self.metadata!)["batchSize"] as! UInt32?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun maxCount(): UInt32?{ 
 			return (self.metadata!)["maxCount"] as! UInt32?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun update(title: String, batchSize: UInt32?, maxCount: UInt32?){ 
 			assert(batchSize == nil != (maxCount == nil), message: "batch size or max count can be used, not both")
 			let metadata:{ String: AnyStruct} ={ "title": title}
@@ -560,7 +574,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		access(all)
 		let contentCapability: Capability
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(mintNumber: UInt32): @{TiblesNFT.INFT}{ 
 			pre{ 
 				self.tibles[mintNumber] != nil:
@@ -569,7 +583,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			return <-self.tibles.remove(key: mintNumber)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNext(){ 
 			if let limit = self.limit{ 
 				if self.lastMintNumber >= limit{ 
@@ -611,12 +625,12 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		access(all)
 		let contentCapability: Capability
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(contentId: String):{ String: AnyStruct}?{ 
 			return{ "pack": "Sk8tibles"}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: UInt64): @{TiblesNFT.INFT}{ 
 			pre{ 
 				self.packs[id] != nil:
@@ -625,7 +639,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 			return <-self.packs.remove(key: id)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNext(printedPackId: String){ 
 			let id = Sk8tibles.totalSupply + 1
 			let mintNumber = self.lastMintNumber + 1
@@ -646,7 +660,7 @@ contract Sk8tibles: NonFungibleToken, TiblesApp, TiblesNFT, TiblesProducer{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createNewPackMinter(id: String, contentCapability: Capability): @PackMinter{ 
 		assert(self.account.address == 0x0a2fbb92a8ae5c6d, message: "wrong address")
 		return <-create PackMinter(id: id, contentCapability: contentCapability)

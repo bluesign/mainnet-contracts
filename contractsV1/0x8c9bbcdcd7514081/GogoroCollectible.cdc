@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -82,7 +96,7 @@ contract GogoroCollectible: NonFungibleToken{
 			self.itemCount = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAdditional():{ String: String}{ 
 			return self.additional
 		}
@@ -119,7 +133,7 @@ contract GogoroCollectible: NonFungibleToken{
 		}
 		
 		// Expose metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata?{ 
 			return GogoroCollectible.itemMetadata[self.itemID]
 		}
@@ -150,15 +164,15 @@ contract GogoroCollectible: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGogoroCollectible(id: UInt64): &GogoroCollectible.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -195,7 +209,7 @@ contract GogoroCollectible: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GogoroCollectible.NFT
 			let id: UInt64 = token.id
 			
@@ -227,7 +241,7 @@ contract GogoroCollectible: NonFungibleToken{
 		// exposing all of its fields.
 		// This is safe as there are no functions that can be called on the GogoroCollectible.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGogoroCollectible(id: UInt64): &GogoroCollectible.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -279,7 +293,7 @@ contract GogoroCollectible: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, itemID: UInt64, codeHash: String?){ 
 			pre{ 
 				codeHash == nil || !GogoroCollectible.checkCodeHashUsed(codeHash: codeHash!):
@@ -303,7 +317,7 @@ contract GogoroCollectible: NonFungibleToken{
 		// Mints a batch of new NFTs
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, itemID: UInt64, count: Int){ 
 			var index = 0
 			while index < count{ 
@@ -315,7 +329,7 @@ contract GogoroCollectible: NonFungibleToken{
 		// registerMetadata
 		// Registers metadata for a itemID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerMetadata(itemID: UInt64, metadata: Metadata){ 
 			pre{ 
 				GogoroCollectible.itemMetadata[itemID] == nil:
@@ -327,7 +341,7 @@ contract GogoroCollectible: NonFungibleToken{
 		// updateMetadata
 		// Registers metadata for a itemID
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(itemID: UInt64, metadata: Metadata){ 
 			pre{ 
 				GogoroCollectible.itemMetadata[itemID] != nil:
@@ -346,7 +360,7 @@ contract GogoroCollectible: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &GogoroCollectible.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&GogoroCollectible.Collection>(GogoroCollectible.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust GogoroCollectible.Collection.borowGogoroCollectible to get the correct itemID
@@ -357,7 +371,7 @@ contract GogoroCollectible: NonFungibleToken{
 	// getMetadata
 	// Get the metadata for a specific type of GogoroCollectible
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(itemID: UInt64): Metadata?{ 
 		return GogoroCollectible.itemMetadata[itemID]
 	}
@@ -365,7 +379,7 @@ contract GogoroCollectible: NonFungibleToken{
 	// checkCodeHashUsed
 	// Check if a codeHash has been registered
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun checkCodeHashUsed(codeHash: String): Bool{ 
 		var redeemedCodes = GogoroCollectible.account.storage.copy<{String: Bool}>(from: /storage/redeemedCodes)!
 		return redeemedCodes[codeHash] ?? false

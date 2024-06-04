@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -66,15 +80,15 @@ contract InceptionAvatar: NonFungibleToken{
 	access(all)
 	resource interface InceptionAvatarCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInceptionAvatar(id: UInt64): &InceptionAvatar.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -103,17 +117,17 @@ contract InceptionAvatar: NonFungibleToken{
 		access(self)
 		var metadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(){ 
 			self.locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newMetadata:{ String: String}){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -122,7 +136,7 @@ contract InceptionAvatar: NonFungibleToken{
 			self.metadata = newMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAddedToSet(setID: UInt64){ 
 			self.addedToSet = setID
 		}
@@ -187,12 +201,12 @@ contract InceptionAvatar: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTTemplate(): InceptionAvatarTemplate{ 
 			return InceptionAvatar.InceptionAvatarTemplates[self.templateID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata():{ String: String}{ 
 			return (InceptionAvatar.InceptionAvatarTemplates[self.templateID]!).getMetadata()
 		}
@@ -222,7 +236,7 @@ contract InceptionAvatar: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @InceptionAvatar.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -230,7 +244,7 @@ contract InceptionAvatar: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -249,7 +263,7 @@ contract InceptionAvatar: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInceptionAvatar(id: UInt64): &InceptionAvatar.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -330,22 +344,22 @@ contract InceptionAvatar: NonFungibleToken{
 			emit SetCreated(setID: self.setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableTemplateIDs(): [UInt64]{ 
 			return self.availableTemplateIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPublic(){ 
 			self.isPublic = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeSetPrivate(){ 
 			self.isPublic = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(templateID: UInt64){ 
 			pre{ 
 				InceptionAvatar.InceptionAvatarTemplates[templateID] != nil:
@@ -364,14 +378,14 @@ contract InceptionAvatar: NonFungibleToken{
 			emit TemplateAddedToSet(setID: self.setID, templateID: templateID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplates(templateIDs: [UInt64]){ 
 			for template in templateIDs{ 
 				self.addTemplate(templateID: template)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(templateID: UInt64){ 
 			pre{ 
 				self.lockedTemplates[templateID] != nil:
@@ -385,14 +399,14 @@ contract InceptionAvatar: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockAllTemplates(){ 
 			for template in self.templateIDs{ 
 				self.lockTemplate(templateID: template)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -400,7 +414,7 @@ contract InceptionAvatar: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(): @NFT{ 
 			let templateID = self.availableTemplateIDs[0]
 			if (InceptionAvatar.InceptionAvatarTemplates[templateID]!).locked{ 
@@ -414,7 +428,7 @@ contract InceptionAvatar: NonFungibleToken{
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTemplateMetadata(templateID: UInt64, newMetadata:{ String: String}): InceptionAvatarTemplate{ 
 			pre{ 
 				InceptionAvatar.InceptionAvatarTemplates[templateID] != nil:
@@ -430,7 +444,7 @@ contract InceptionAvatar: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, setID: UInt64){ 
 			let set = self.borrowSet(setID: setID)
 			if (set.getAvailableTemplateIDs()!).length == 0{ 
@@ -442,18 +456,18 @@ contract InceptionAvatar: NonFungibleToken{
 			recipient.deposit(token: <-set.mintNFT())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createInceptionAvatarTemplate(name: String, description: String, metadata:{ String: String}){ 
 			InceptionAvatar.InceptionAvatarTemplates[InceptionAvatar.nextTemplateID] = InceptionAvatarTemplate(templateID: InceptionAvatar.nextTemplateID, name: name, description: description, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String){ 
 			var newSet <- create Set(name: name)
 			InceptionAvatar.sets[newSet.setID] <-! newSet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt64): &Set{ 
 			pre{ 
 				InceptionAvatar.sets[setID] != nil:
@@ -462,7 +476,7 @@ contract InceptionAvatar: NonFungibleToken{
 			return (&InceptionAvatar.sets[setID] as &Set?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInceptionAvatarTemplate(templateID: UInt64, newMetadata:{ String: String}){ 
 			pre{ 
 				InceptionAvatar.InceptionAvatarTemplates.containsKey(templateID) != nil:
@@ -472,17 +486,17 @@ contract InceptionAvatar: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getInceptionAvatarTemplateByID(templateID: UInt64): InceptionAvatar.InceptionAvatarTemplate{ 
 		return InceptionAvatar.InceptionAvatarTemplates[templateID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getInceptionAvatarTemplates():{ UInt64: InceptionAvatar.InceptionAvatarTemplate}{ 
 		return InceptionAvatar.InceptionAvatarTemplates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableTemplateIDsInSet(setID: UInt64): [UInt64]{ 
 		pre{ 
 			InceptionAvatar.sets[setID] != nil:

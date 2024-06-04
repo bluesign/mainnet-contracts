@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 *
 *  This is an example implementation of a Flow Non-Fungible Token
 *  It is not part of the official standard but it assumed to be
@@ -89,7 +103,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 		/// @return An array of Types defining the implemented views. This value will be used by
 		///		 developers to know which parameter to pass to the resolveView() method.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return [Type<InscriptionMetadata.InscriptionView>()]
 		}
@@ -99,7 +113,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 		/// @param view: The Type of the desired view.
 		/// @return A structure representing the requested view.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?{ 
 			switch view{ 
 				case Type<InscriptionMetadata.InscriptionView>():
@@ -121,18 +135,18 @@ contract Inscription: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface InscriptionCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun depositCollection(collection: @Inscription.Collection)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositCollection(collection: @Inscription.Collection): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInscription(id: UInt64): &Inscription.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -173,7 +187,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 		/// @param withdrawID: The ID of the Inscription that wants to be withdrawn
 		/// @return The Inscription resource that has been taken out of the collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(withdrawIDs: [UInt64]): @Collection{ 
 			var tokens: @Collection <- Inscription.createEmptyCollection(nftType: Type<@Inscription.Collection>())
 			for id in withdrawIDs{ 
@@ -189,7 +203,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 		/// @param token: The Inscription resource to be included in the collection
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Inscription.NFT
 			let id: UInt64 = token.id
 			
@@ -199,7 +213,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositCollection(collection: @Inscription.Collection){ 
 			let withdrawIds: [UInt64] = collection.getIDs()
 			for id in collection.getIDs(){ 
@@ -237,7 +251,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted Inscription
 		/// @return A reference to the wanted Inscription resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInscription(id: UInt64): &Inscription.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -247,7 +261,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnInscription(ids: [UInt64]): [UInt64]{ 
 			var burnedId: [UInt64] = ids
 			let collection <- self.batchWithdraw(withdrawIDs: ids)
@@ -287,7 +301,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 	/// @param recipient: A capability to the collection where the new Inscription will be deposited
 	/// @param amount: The amount in the inscription
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintInscription(recipient: &{NonFungibleToken.CollectionPublic}, amount: UInt64){ 
 		pre{ 
 			amount == UInt64(1000):
@@ -312,7 +326,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		return nil
 	}
@@ -322,7 +336,7 @@ contract Inscription: NonFungibleToken, ViewResolver{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return []
 	}

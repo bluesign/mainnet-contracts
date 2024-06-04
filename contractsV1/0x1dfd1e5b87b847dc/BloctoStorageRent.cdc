@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowStorageFees from "../0xe467b9dd11fa00df/FlowStorageFees.cdc"
 
@@ -19,27 +33,27 @@ contract BloctoStorageRent{
 	access(contract)
 	var RefillRequiredBlocks: UInt64
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStorageRentRefillThreshold(): UInt64{ 
 		return self.StorageRentRefillThreshold
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRefilledAccounts(): [Address]{ 
 		return self.RefilledAccounts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRefilledAccountInfos():{ Address: RefilledAccountInfo}{ 
 		return self.RefilledAccountInfos
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRefillRequiredBlocks(): UInt64{ 
 		return self.RefillRequiredBlocks
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tryRefill(_ address: Address){ 
 		self.cleanExpiredRefilledAccounts(10)
 		let recipient = getAccount(address)
@@ -71,7 +85,7 @@ contract BloctoStorageRent{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkEligibility(_ address: Address): Bool{ 
 		if self.RefilledAccountInfos[address] != nil
 		&& getCurrentBlock().height - (self.RefilledAccountInfos[address]!).atBlock
@@ -102,7 +116,7 @@ contract BloctoStorageRent{
 			)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun cleanExpiredRefilledAccounts(_ batchSize: Int){ 
 		var index = 0
 		while index < batchSize && self.RefilledAccounts.length > index{ 
@@ -131,12 +145,12 @@ contract BloctoStorageRent{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStorageRentRefillThreshold(_ threshold: UInt64){ 
 			BloctoStorageRent.StorageRentRefillThreshold = threshold
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRefillRequiredBlocks(_ blocks: UInt64){ 
 			BloctoStorageRent.RefillRequiredBlocks = blocks
 		}

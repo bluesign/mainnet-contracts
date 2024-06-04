@@ -1,4 +1,18 @@
-/// Canonical ceWETH on Flow
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/// Canonical ceWETH on Flow
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FTMinterBurner from "../0x08dd120226ec2213/FTMinterBurner.cdc"
@@ -106,7 +120,7 @@ contract ceWETH: FungibleToken, FTMinterBurner{
 		/// been consumed and therefore can be destroyed.
 		///
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @ceWETH.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -144,7 +158,7 @@ contract ceWETH: FungibleToken, FTMinterBurner{
 		///
 		/// Function that creates and returns a new minter resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @FTMinterBurner.Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
@@ -154,7 +168,7 @@ contract ceWETH: FungibleToken, FTMinterBurner{
 		///
 		/// Function that creates and returns a new burner resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @FTMinterBurner.Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()
@@ -177,7 +191,7 @@ contract ceWETH: FungibleToken, FTMinterBurner{
 		/// Function that mints new tokens, adds them to the total supply,
 		/// and returns them to the calling context.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				amount > 0.0:
@@ -210,7 +224,7 @@ contract ceWETH: FungibleToken, FTMinterBurner{
 		/// Note: the burned tokens are automatically subtracted from the
 		/// total supply in the Vault destructor.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @ceWETH.Vault
 			let amount = vault.balance

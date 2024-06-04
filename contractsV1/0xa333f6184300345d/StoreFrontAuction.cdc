@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Unlicense
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Unlicense
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -55,13 +69,13 @@ contract StoreFrontAuction{
 		}
 		
 		// depositBidTokens deposits the bidder's tokens into the AuctionItem's Vault
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBidTokens(vault: @{FungibleToken.Vault}){ 
 			self.bidVault.deposit(from: <-vault)
 		}
 		
 		// withdrawNFT removes the NFT from the AuctionItem and returns it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNFT(): @{NonFungibleToken.NFT}{ 
 			let NFT <- self.NFT <- nil
 			return <-NFT!
@@ -163,10 +177,10 @@ contract StoreFrontAuction{
 	// retreiving the auction price list and placing bids
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionPrices():{ UInt64: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			id: UInt64,
 			bidTokens: @{FungibleToken.Vault},
@@ -189,7 +203,7 @@ contract StoreFrontAuction{
 		
 		// addTokenToauctionItems adds an NFT to the auction items and sets the meta data
 		// for the auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTokenToAuctionItems(token: @{NonFungibleToken.NFT}, minimumBidIncrement: UFix64, startPrice: UFix64, bidVault: @{FungibleToken.Vault}, collectionCap: Capability<&{NonFungibleToken.CollectionPublic}>, vaultCap: Capability<&{FungibleToken.Receiver}>, finishAtTimestamp: UFix64){ 
 			// create a new auction meta resource
 			let meta = ItemMeta(minimumBidIncrement: minimumBidIncrement, startPrice: startPrice, ownerCollectionCap: collectionCap, ownerVaultCap: vaultCap, finishAtTimestamp: finishAtTimestamp)
@@ -204,7 +218,7 @@ contract StoreFrontAuction{
 		}
 		
 		// getAuctionPrices returns a dictionary of available NFT IDs with their current price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionPrices():{ UInt64: UFix64}{ 
 			pre{ 
 				self.auctionItems.keys.length > 0:
@@ -222,7 +236,7 @@ contract StoreFrontAuction{
 		
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64){ 
 			let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
 			let itemMeta = itemRef.meta
@@ -248,7 +262,7 @@ contract StoreFrontAuction{
 		}
 		
 		// exchangeTokens sends the purchased NFT to the buyer and the bidTokens to the seller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun exchangeTokens(_ id: UInt64){ 
 			let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
 			if itemRef.NFT == nil{ 
@@ -261,7 +275,7 @@ contract StoreFrontAuction{
 		
 		// placeBid sends the bidder's tokens to the bid vault and updates the
 		// currentPrice of the current auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(id: UInt64, bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -299,7 +313,7 @@ contract StoreFrontAuction{
 		
 		// releasePreviousBid returns the outbid user's tokens to
 		// their vault receiver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun releasePreviousBid(_ id: UInt64){ 
 			// get a reference to the auction items resources
 			let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
@@ -314,7 +328,7 @@ contract StoreFrontAuction{
 		
 		// returnAuctionItemToOwner releases any bids and returns the NFT
 		// to the owner's Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun returnAuctionItemToOwner(_ id: UInt64){ 
 			let itemRef = (&self.auctionItems[id] as &AuctionItem?)!
 			let itemMeta = itemRef.meta
@@ -326,7 +340,7 @@ contract StoreFrontAuction{
 		}
 		
 		// cancel auction and returns the NFT to the owner's Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAndReturnAuctionItemToOwner(_ id: UInt64){ 
 			self.returnAuctionItemToOwner(id)
 			emit AuctionCanceled(auctionId: id)
@@ -334,7 +348,7 @@ contract StoreFrontAuction{
 	}
 	
 	// createAuctionCollection returns a new AuctionCollection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionCollection(): @AuctionCollection{ 
 		let auctionCollection <- create AuctionCollection()
 		return <-auctionCollection

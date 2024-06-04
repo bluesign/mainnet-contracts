@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Administrative Contract for SportsIcon NFT Collectibles
 
 	Exposes all functionality for an administrator of SportsIcon to
@@ -67,28 +81,28 @@ contract SportsIconManager{
 	
 	access(all)
 	resource interface ManagerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFUSD(
 			setID: UInt64,
 			quantity: UInt32,
 			vault: @{FungibleToken.Vault}
 		): @SportsIconCollectible.Collection
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFLOW(
 			setID: UInt64,
 			quantity: UInt32,
 			vault: @{FungibleToken.Vault}
 		): @SportsIconCollectible.Collection
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftForPrimarySaleWithICONS(
 			setID: UInt64,
 			quantity: UInt32,
 			vault: @{FungibleToken.Vault}
 		): @SportsIconCollectible.Collection
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftForPrimarySaleWithDUC(
 			setID: UInt64,
 			quantity: UInt32,
@@ -102,7 +116,7 @@ contract SportsIconManager{
 					Set creation
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFTSet(mediaURL: String, maxNumberOfEditions: UInt64, data:{ String: String}, mintBeneficiaries: SportsIconBeneficiaries.Beneficiaries, marketBeneficiaries: SportsIconBeneficiaries.Beneficiaries): UInt64{ 
 			let setID = SportsIconCollectible.addNFTSet(mediaURL: mediaURL, maxNumberOfEditions: maxNumberOfEditions, data: data, mintBeneficiaries: mintBeneficiaries, marketBeneficiaries: marketBeneficiaries)
 			return setID
@@ -112,12 +126,12 @@ contract SportsIconManager{
 					Set deletion
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNFTSet(setID: UInt64){ 
 			SportsIconCollectible.removeNFTSet(setID: setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMaxNumberOfEditions(setID: UInt64, maxNumberOfEditions: UInt64){ 
 			SportsIconCollectible.updateMaxNumberOfEditions(setID: setID, maxNumberOfEditions: maxNumberOfEditions)
 		}
@@ -126,31 +140,31 @@ contract SportsIconManager{
 					Modification of properties and metadata for a set
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSetMetadata(setID: UInt64, metadata:{ String: String}){ 
 			SportsIconCollectible.updateSetMetadata(setID: setID, metadata: metadata)
 			emit SetMetadataUpdated(setID: setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMediaURL(setID: UInt64, mediaURL: String){ 
 			SportsIconCollectible.updateMediaURL(setID: setID, mediaURL: mediaURL)
 			emit SetMetadataUpdated(setID: setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFLOWPublicSalePrice(setID: UInt64, price: UFix64?){ 
 			SportsIconCollectible.updateFLOWPublicSalePrice(setID: setID, price: price)
 			emit PublicSalePriceUpdated(setID: setID, fungibleTokenType: "FLOW", price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateFUSDPublicSalePrice(setID: UInt64, price: UFix64?){ 
 			SportsIconCollectible.updateFUSDPublicSalePrice(setID: setID, price: price)
 			emit PublicSalePriceUpdated(setID: setID, fungibleTokenType: "FUSD", price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateICONSPublicSalePrice(setID: UInt64, primarySaleListing: SportsIconPrimarySalePrices.PrimarySaleListing?){ 
 			SportsIconPrimarySalePrices.updateSalePrice(setID: setID, currency: "ICONS", primarySaleListing: primarySaleListing)
 			var price: UFix64? = nil
@@ -160,7 +174,7 @@ contract SportsIconManager{
 			emit PublicSalePriceUpdated(setID: setID, fungibleTokenType: "ICONS", price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDUCPublicSalePrice(setID: UInt64, primarySaleListing: SportsIconPrimarySalePrices.PrimarySaleListing?){ 
 			SportsIconPrimarySalePrices.updateSalePrice(setID: setID, currency: "DUC", primarySaleListing: primarySaleListing)
 			var price: UFix64? = nil
@@ -170,7 +184,7 @@ contract SportsIconManager{
 			emit PublicSalePriceUpdated(setID: setID, fungibleTokenType: "DUC", price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEditionMetadata(setID: UInt64, editionNumber: UInt64, metadata:{ String: String}){ 
 			SportsIconCollectible.updateEditionMetadata(setID: setID, editionNumber: editionNumber, metadata: metadata)
 			emit EditionMetadataUpdated(setID: setID, editionNumber: editionNumber)
@@ -181,26 +195,26 @@ contract SportsIconManager{
 				*/
 		
 		// fungibleTokenType is expected to be 'FLOW' or 'FUSD' or 'ICONS' or 'DUC'
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAdminPaymentReceiver(fungibleTokenType: String, paymentReceiver: Capability<&{FungibleToken.Receiver}>){ 
 			SportsIconManager.setAdminPaymentReceiver(fungibleTokenType: fungibleTokenType, paymentReceiver: paymentReceiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSaleStartTime(setID: UInt64, startTime: UFix64?){ 
 			SportsIconCollectible.updatePublicSaleStartTime(setID: setID, startTime: startTime)
 			let setMetadata = SportsIconCollectible.getMetadataForSetID(setID: setID)!
 			emit PublicSaleTimeUpdated(setID: setID, startTime: setMetadata.getPublicSaleStartTime(), endTime: setMetadata.getPublicSaleEndTime())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSaleEndTime(setID: UInt64, endTime: UFix64?){ 
 			SportsIconCollectible.updatePublicSaleEndTime(setID: setID, endTime: endTime)
 			let setMetadata = SportsIconCollectible.getMetadataForSetID(setID: setID)!
 			emit PublicSaleTimeUpdated(setID: setID, startTime: setMetadata.getPublicSaleStartTime(), endTime: setMetadata.getPublicSaleEndTime())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePublicSaleTime(setID: UInt64, startTime: UFix64?, endTime: UFix64?){ 
 			SportsIconCollectible.updatePublicSaleStartTime(setID: setID, startTime: startTime)
 			SportsIconCollectible.updatePublicSaleEndTime(setID: setID, endTime: endTime)
@@ -208,7 +222,7 @@ contract SportsIconManager{
 			emit PublicSaleTimeUpdated(setID: setID, startTime: setMetadata.getPublicSaleStartTime(), endTime: setMetadata.getPublicSaleEndTime())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDucPublicSale(setID: UInt64, creatorReceiverCap: Capability<&{FungibleToken.Receiver}>, creatorAmount: UFix64, sportsIconReceiverCap: Capability<&{FungibleToken.Receiver}>, sportsIconAmount: UFix64, totalPrice: UFix64, startTime: UFix64, endTime: UFix64, maxNumberOfEditions: UInt64){ 
 			let creatorCut = SportsIconNFTStorefront.SaleCut(receiver: creatorReceiverCap, amount: creatorAmount)
 			let sportsIconCut = SportsIconNFTStorefront.SaleCut(receiver: sportsIconReceiverCap, amount: sportsIconAmount)
@@ -233,7 +247,7 @@ contract SportsIconManager{
 		}
 		
 		// Mint many editions of NFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintSequentialEditionNFTs(setID: UInt64, quantity: UInt32): @SportsIconCollectible.Collection{ 
 			pre{ 
 				quantity >= 1 && quantity <= 10:
@@ -249,7 +263,7 @@ contract SportsIconManager{
 		}
 		
 		// Mint a specific edition of an NFT - usable for auctions, because edition numbers are set by ending auction ordering
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(setID: UInt64, editionNumber: UInt64): @SportsIconCollectible.NFT{ 
 			return <-SportsIconCollectible.mintNFT(setID: setID, editionNumber: editionNumber)
 		}
@@ -295,7 +309,7 @@ contract SportsIconManager{
 		
 		// DEPRECATED - replaced by `mintNftForPrimarySale` equivalents
 		// Ensure that the passed in vault is FUSD, and pass the expected FUSD sale price for this set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFUSD(setID: UInt64, quantity: UInt32, vault: @{FungibleToken.Vault}): @SportsIconCollectible.Collection{ 
 			pre{ 
 				(SportsIconCollectible.getMetadataForSetID(setID: setID)!).getFUSDPublicSalePrice() != nil:
@@ -308,7 +322,7 @@ contract SportsIconManager{
 		}
 		
 		// DEPRECATED - replaced by `mintNftForPrimarySale` equivalents
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftFromPublicSaleWithFLOW(setID: UInt64, quantity: UInt32, vault: @{FungibleToken.Vault}): @SportsIconCollectible.Collection{ 
 			pre{ 
 				(SportsIconCollectible.getMetadataForSetID(setID: setID)!).getFLOWPublicSalePrice() != nil:
@@ -361,7 +375,7 @@ contract SportsIconManager{
 		}
 		
 		// Ensure that the passed in vault is a ICONS vault, and pass the expected ICONS sale price for this set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftForPrimarySaleWithICONS(setID: UInt64, quantity: UInt32, vault: @{FungibleToken.Vault}): @SportsIconCollectible.Collection{ 
 			pre{ 
 				SportsIconPrimarySalePrices.getListing(setID: setID, currency: "ICONS") != nil:
@@ -376,7 +390,7 @@ contract SportsIconManager{
 		}
 		
 		// Ensure that the passed in vault is a DUC vault, and pass the expected DUC sale price for this set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftForPrimarySaleWithDUC(setID: UInt64, quantity: UInt32, vault: @{FungibleToken.Vault}): @SportsIconCollectible.Collection{ 
 			pre{ 
 				SportsIconPrimarySalePrices.getListing(setID: setID, currency: "DUC") != nil:
@@ -387,7 +401,7 @@ contract SportsIconManager{
 			return <-self.mintNftForPrimarySale(setID: setID, quantity: quantity, paymentVault: <-(vault as! @DapperUtilityCoin.Vault), primarySaleListing: SportsIconPrimarySalePrices.getListing(setID: setID, currency: "DUC")!, paymentReceiver: SportsIconManager.adminPaymentReceivers["DUC"]!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNftForGiveawayWithDUC(setID: UInt64): @SportsIconCollectible.NFT{ 
 			pre{ 
 				SportsIconPrimarySalePrices.getListing(setID: setID, currency: "DUC") != nil:
@@ -423,7 +437,7 @@ contract SportsIconManager{
 	}
 	
 	/* Public Functions */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getManagerPublic(): Capability<&SportsIconManager.Manager>{ 
 		return self.account.capabilities.get<&SportsIconManager.Manager>(self.ManagerPublicPath)!
 	}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ToucansTokens from "./ToucansTokens.cdc"
 
@@ -90,19 +104,19 @@ contract ToucansLockTokens{
 	
 	access(all)
 	resource interface ManagerPublic{ 
-		access(all)
-		fun claim(lockedVaultUuid: UInt64, receiver: &{FungibleToken.Receiver})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun claim(lockedVaultUuid: UInt64, receiver: &{FungibleToken.Receiver}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDsForAddress(address: Address): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedVaultInfos(): [LockedVaultDetails]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedVaultInfosForAddress(address: Address): [LockedVaultDetails]
 	}
 	
@@ -118,7 +132,7 @@ contract ToucansLockTokens{
 		access(self)
 		var additions: @{String: AnyResource}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(recipient: Address, unlockTime: UFix64, vault: @{FungibleToken.Vault}, tokenInfo: ToucansTokens.TokenInfo){ 
 			pre{ 
 				tokenInfo.tokenType == vault.getType():
@@ -134,7 +148,7 @@ contract ToucansLockTokens{
 			self.lockedVaults[lockedVault.uuid] <-! lockedVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(lockedVaultUuid: UInt64, receiver: &{FungibleToken.Receiver}){ 
 			let lockedVault: @LockedVault <- self.lockedVaults.remove(key: lockedVaultUuid) ?? panic("This LockedVault does not exist.")
 			lockedVault.withdrawVault(receiver: receiver)
@@ -144,17 +158,17 @@ contract ToucansLockTokens{
 			(self.addressMap[(receiver.owner!).address]!).remove(at: indexOfUuid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.lockedVaults.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDsForAddress(address: Address): [UInt64]{ 
 			return self.addressMap[address] ?? []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedVaultInfos(): [LockedVaultDetails]{ 
 			let ids: [UInt64] = self.getIDs()
 			let vaults: [LockedVaultDetails] = []
@@ -164,7 +178,7 @@ contract ToucansLockTokens{
 			return vaults
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedVaultInfosForAddress(address: Address): [LockedVaultDetails]{ 
 			let ids: [UInt64] = self.getIDsForAddress(address: address)
 			let vaults: [LockedVaultDetails] = []
@@ -181,7 +195,7 @@ contract ToucansLockTokens{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createManager(): @Manager{ 
 		return <-create Manager()
 	}

@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import RandomBeaconHistory from "../0xe467b9dd11fa00df/RandomBeaconHistory.cdc"
 
@@ -73,15 +87,15 @@ contract FlowtyRaffles{
 				NOTE: This will not work if a raffle is so large that returning all its entries will exceed computation limits
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntries(): [AnyStruct]
 		
 		// getEntryCount - return the total number of entries in this raffle source
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntryCount(): Int
 		
 		// getEntryAt - return the entry at a specific index of a raffle source
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEntryAt(index: Int): AnyStruct
 	}
 	
@@ -94,7 +108,7 @@ contract FlowtyRaffles{
 				to your raffle
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealCallback(drawingResult: DrawingResult)
 		
 		/*
@@ -103,7 +117,7 @@ contract FlowtyRaffles{
 				implementation, be mindful of the source you are using and what it does
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntries(_ v: [AnyStruct])
 		
 		/*
@@ -112,16 +126,16 @@ contract FlowtyRaffles{
 				implementation, be mindful of the source you are using and what it does
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntry(_ v: AnyStruct)
 	}
 	
 	access(all)
 	resource interface RafflePublic{ 
-		access(all)
-		fun borrowSourcePublic(): &{RaffleSourcePublic}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowSourcePublic(): &{FlowtyRaffles.RaffleSourcePublic}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): Details
 	}
 	
@@ -234,7 +248,7 @@ contract FlowtyRaffles{
 		access(all)
 		let receipts: @{UInt64: Receipt}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSourcePublic(): &{RaffleSourcePublic}?{ 
 			return &self.source as &{RaffleSourcePublic, RaffleSourcePrivate}
 		}
@@ -268,19 +282,19 @@ contract FlowtyRaffles{
 			return res
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntries(_ v: [AnyStruct]){ 
 			let blockTs = UInt64(getCurrentBlock().timestamp)
 			self.source.addEntries(v)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEntry(_ v: AnyStruct){ 
 			let blockTs = UInt64(getCurrentBlock().timestamp)
 			self.source.addEntry(v)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): Details{ 
 			return self.details
 		}
@@ -319,10 +333,10 @@ contract FlowtyRaffles{
 	
 	access(all)
 	resource interface ManagerPublic{ 
-		access(all)
-		fun borrowRafflePublic(id: UInt64): &{RafflePublic}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowRafflePublic(id: UInt64): &{FlowtyRaffles.RafflePublic}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealDrawing(manager: &Manager, raffleID: UInt64, receiptID: UInt64): DrawingResult
 		
 		access(contract)
@@ -337,10 +351,10 @@ contract FlowtyRaffles{
 	
 	access(all)
 	resource interface ManagerPrivate{ 
-		access(all)
-		fun borrowRaffle(id: UInt64): &Raffle?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowRaffle(id: UInt64): &FlowtyRaffles.Raffle?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun commitDrawing(raffleID: UInt64): UInt64
 	}
 	
@@ -354,12 +368,12 @@ contract FlowtyRaffles{
 		access(all)
 		let raffles: @{UInt64: Raffle}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRafflePublic(id: UInt64): &{RafflePublic}?{ 
 			return self.borrowRaffle(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRaffle(id: UInt64): &Raffle?{ 
 			if self.raffles[id] == nil{ 
 				return nil
@@ -375,7 +389,7 @@ contract FlowtyRaffles{
 					discussed here: https://developers.flow.com/build/advanced-concepts/randomness#guidelines-for-safe-usage
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRaffle(source: @{RaffleSourcePublic, RaffleSourcePrivate}, details: Details, revealers: [Address]?): UInt64{ 
 			let raffle <- create Raffle(source: <-source, details: details, revealers: revealers)
 			let uuid = raffle.uuid
@@ -389,7 +403,7 @@ contract FlowtyRaffles{
 				to be revealed at a later date.
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun commitDrawing(raffleID: UInt64): UInt64{ 
 			let raffle = self.borrowRaffle(id: raffleID) ?? panic("raffle not found")
 			let currentBlock = getCurrentBlock()
@@ -405,7 +419,7 @@ contract FlowtyRaffles{
 				generate a random number to draw an entry from our raffle source
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealDrawing(manager: &Manager, raffleID: UInt64, receiptID: UInt64): DrawingResult{ 
 			let ref = &self as &Manager
 			return manager._revealDrawing(raffleID: raffleID, receiptID: receiptID, drawer: ref)
@@ -429,7 +443,7 @@ contract FlowtyRaffles{
 	
 	// taken from
 	// https://github.com/onflow/random-coin-toss/blob/4271cd571b7761af36b0f1037767171aeca18387/contracts/CoinToss.cdc#L95
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun randUInt64(atBlockHeight: UInt64, salt: UInt64): UInt64{ 
 		// // query the Random Beacon history core-contract - if `blockHeight` <= current block height, panic & revert
 		// let sourceOfRandomness = RandomBeaconHistory.sourceOfRandomness(atBlockHeight: atBlockHeight)
@@ -447,7 +461,7 @@ contract FlowtyRaffles{
 		return revertibleRandom()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun extractString(_ value: AnyStruct?): String?{ 
 		if value == nil{ 
 			return nil
@@ -469,7 +483,7 @@ contract FlowtyRaffles{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createManager(): @Manager{ 
 		return <-create Manager()
 	}

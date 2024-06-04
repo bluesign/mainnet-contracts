@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 // Basketballs
 // NFT basketballs!
@@ -98,7 +112,7 @@ contract Basketballs: NonFungibleToken{
 			emit EditionCreated(editionID: self.editionID, name: self.name, description: self.description, imageURL: self.imageURL)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBasketball(): @NFT{ 
 			let basketball: @NFT <- create NFT(editionID: self.editionID, serialNumber: self.nextSerialInEdition)
 			self.nextSerialInEdition = self.nextSerialInEdition + 1 as UInt64
@@ -106,7 +120,7 @@ contract Basketballs: NonFungibleToken{
 			return <-basketball
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBasketballs(quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -151,7 +165,7 @@ contract Basketballs: NonFungibleToken{
 	// the details of Basketballs in the Collection.
 	access(all)
 	resource interface BasketballsCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBasketball(id: UInt64): &Basketballs.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -188,7 +202,7 @@ contract Basketballs: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Basketballs.NFT
 			let id: UInt64 = token.id
 			
@@ -220,7 +234,7 @@ contract Basketballs: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the Basketball.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBasketball(id: UInt64): &Basketballs.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -255,14 +269,14 @@ contract Basketballs: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(name: String, description: String, imageURL: String): UInt32{ 
 			let edition = Edition(name: name, description: description, imageURL: imageURL)
 			Basketballs.editions[edition.editionID] = edition
 			return edition.editionID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBasketball(editionID: UInt32): @NFT{ 
 			pre{ 
 				Basketballs.editions[editionID] != nil:
@@ -273,7 +287,7 @@ contract Basketballs: NonFungibleToken{
 			return <-basketball
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintBasketballs(editionID: UInt32, quantity: UInt64): @Collection{ 
 			pre{ 
 				Basketballs.editions[editionID] != nil:
@@ -284,7 +298,7 @@ contract Basketballs: NonFungibleToken{
 			return <-collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -301,7 +315,7 @@ contract Basketballs: NonFungibleToken{
 	// If it has a collection but does not contain the itemId, return nil.
 	// If it has a collection and that collection contains the itemId, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Basketballs.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&Basketballs.Collection>(Basketballs.CollectionPublicPath).borrow<&Basketballs.Collection>() ?? panic("Couldn't get collection")
 		// We trust Basketballs.Collection.borowBasketball to get the correct itemID
@@ -309,12 +323,12 @@ contract Basketballs: NonFungibleToken{
 		return collection.borrowBasketball(id: itemID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllEditions(): [Edition]{ 
 		return self.editions.values
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionMetadata(editionID: UInt32): EditionMetadata{ 
 		let edition = self.editions[editionID]!
 		let metadata = EditionMetadata(editionID: edition.editionID, name: edition.name, description: edition.description, imageURL: edition.imageURL, circulatingCount: edition.nextSerialInEdition - 1 as UInt64)

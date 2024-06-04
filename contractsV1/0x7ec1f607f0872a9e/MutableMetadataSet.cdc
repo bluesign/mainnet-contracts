@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 MutableSet
 
 We want to be able to associate metadata with a group of related resources.
@@ -29,20 +43,20 @@ contract MutableMetadataSet{
 	resource interface Public{ 
 		
 		// Is this set locked from more Templates being added?
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool
 		
 		// Number of Templates in this set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun numTemplates(): Int
 		
 		// Public version of underyling MutableMetadata.Metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): &MutableMetadata.Metadata
 		
 		// Retrieve the public version of a particular template given by the
 		// Template ID (index into the self._templates array) only if it exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(_ id: Int): &MutableMetadataTemplate.Template
 	}
 	
@@ -50,20 +64,20 @@ contract MutableMetadataSet{
 	resource interface Private{ 
 		
 		// Lock this set so more Templates may not be added to it.
-		access(all)
-		fun lock()
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lock(): Void
 		
 		// Private version of underyling MutableMetadata.Metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadataMutable(): &MutableMetadata.Metadata
 		
 		// Retrieve the private version of a particular template given by the
 		// Template ID (index into the self._templates array) only if it exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplateMutable(_ id: Int): &MutableMetadataTemplate.Template
 		
 		// Add a Template to this set if not locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(_ template: @MutableMetadataTemplate.Template)
 	}
 	
@@ -89,22 +103,22 @@ contract MutableMetadataSet{
 		// ========================================================================
 		// Public
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun locked(): Bool{ 
 			return self._locked
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun numTemplates(): Int{ 
 			return self._templates.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): &MutableMetadata.Metadata{ 
 			return &self._metadata as &MutableMetadata.Metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(_ id: Int): &MutableMetadataTemplate.Template{ 
 			pre{ 
 				id >= 0 && id < self._templates.length:
@@ -116,17 +130,17 @@ contract MutableMetadataSet{
 		// ========================================================================
 		// Private
 		// ========================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			self._locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadataMutable(): &MutableMetadata.Metadata{ 
 			return &self._metadata as &MutableMetadata.Metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplateMutable(_ id: Int): &MutableMetadataTemplate.Template{ 
 			pre{ 
 				id >= 0 && id < self._templates.length:
@@ -135,7 +149,7 @@ contract MutableMetadataSet{
 			return &self._templates[id] as &MutableMetadataTemplate.Template
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTemplate(_ template: @MutableMetadataTemplate.Template){ 
 			pre{ 
 				!self._locked:
@@ -160,7 +174,7 @@ contract MutableMetadataSet{
 	// Contract functions
 	// ========================================================================
 	// Create a new Set resource with the given Metadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun _create(metadata: @MutableMetadata.Metadata): @Set{ 
 		return <-create Set(metadata: <-metadata)
 	}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MoxyData from "./MoxyData.cdc"
 
@@ -82,14 +96,14 @@ contract PlayToken: FungibleToken{
 			self.dailyBalances <- MoxyData.createNewOrderedDictionary()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceFor(timestamp: UFix64): UFix64?{ 
 			// Returns the balance for the requested day or zero
 			// if no records at that day.
 			return self.dailyBalances.getValueOrMostRecentFor(timestamp: timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalanceFor(timestamp: UFix64): UFix64?{ 
 			return self.dailyBalances.getValueFor(timestamp: timestamp)
 		}
@@ -121,12 +135,12 @@ contract PlayToken: FungibleToken{
 		/// been consumed and therefore can be destroyed.
 		///
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			// PLAY Tokens can't be transferred
 			panic("PLAY can't be deposited")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun convertedFromMOXY(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @PlayToken.Vault
 			self.dailyBalances.setAmountFor(timestamp: getCurrentBlock().timestamp, amount: vault.balance)
@@ -166,7 +180,7 @@ contract PlayToken: FungibleToken{
 		///
 		/// Function that creates and returns a new minter resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(allowedAmount: UFix64): @Minter{ 
 			emit MinterCreated(allowedAmount: allowedAmount)
 			return <-create Minter(allowedAmount: allowedAmount)
@@ -176,7 +190,7 @@ contract PlayToken: FungibleToken{
 		///
 		/// Function that creates and returns a new burner resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()
@@ -199,7 +213,7 @@ contract PlayToken: FungibleToken{
 		/// Function that mints new tokens, adds them to the total supply,
 		/// and returns them to the calling context.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @PlayToken.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -233,7 +247,7 @@ contract PlayToken: FungibleToken{
 		/// Note: the burned tokens are automatically subtracted from the
 		/// total supply in the Vault destructor.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @PlayToken.Vault
 			let amount = vault.balance
@@ -242,7 +256,7 @@ contract PlayToken: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupplyFor(timestamp: UFix64): UFix64{ 
 		return self.totalSupplies.getValueOrMostRecentFor(timestamp: timestamp)
 	}
@@ -254,17 +268,17 @@ contract PlayToken: FungibleToken{
 	
 	access(all)
 	resource interface DailyBalancesInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDailyBalanceFor(timestamp: UFix64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalanceFor(timestamp: UFix64): UFix64?
 	}
 	
 	access(all)
 	resource interface ReceiverInterface{ 
-		access(all)
-		fun convertedFromMOXY(from: @{FungibleToken.Vault})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun convertedFromMOXY(from: @{FungibleToken.Vault}): Void
 	}
 	
 	access(all)

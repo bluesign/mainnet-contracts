@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -28,12 +42,12 @@ contract KissoNFT: NonFungibleToken{
 		access(all)
 		let variants:{ UInt64: Variant}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addUpdateVariant(variantID: UInt64, variant: Variant){ 
 			self.variants.insert(key: variantID, variant)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeVariant(variantID: UInt64){ 
 			self.variants.remove(key: variantID)
 		}
@@ -278,15 +292,15 @@ contract KissoNFT: NonFungibleToken{
 	access(all)
 	resource interface KissoNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKissoNFT(id: UInt64): &KissoNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -294,14 +308,14 @@ contract KissoNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotingWeights():{ UInt64: UInt64}
 	}
 	
 	// TODO: this is redundant with the same method on the public interface
 	access(all)
 	resource interface KissoNFTCollectionPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotingWeights():{ UInt64: UInt64}
 	}
 	
@@ -334,7 +348,7 @@ contract KissoNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @KissoNFT.NFT
 			let id: UInt64 = token.id
 			let uuid: UInt64 = token.uuid
@@ -352,18 +366,18 @@ contract KissoNFT: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotingWeightsUUIDs(): [UInt64]{ 
 			return self.votingWeights.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotingWeight(uuid: UInt64): UInt64?{ 
 			return self.votingWeights[uuid]
 		}
 		
 		// gets a collection's voting weights dict
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVotingWeights():{ UInt64: UInt64}{ 
 			return self.votingWeights
 		}
@@ -375,7 +389,7 @@ contract KissoNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKissoNFT(id: UInt64): &KissoNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -414,12 +428,12 @@ contract KissoNFT: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalSupply(): UInt64{ 
 		return KissoNFT.totalSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLineItemRecord(hash: String): KissoNFT.LineItemRecord?{ 
 		return KissoNFT.lineItemRecords[hash]
 	}
@@ -433,7 +447,7 @@ contract KissoNFT: NonFungibleToken{
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		// is a passive minter, only minting if the item hasn't been used for minting yet
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, lineItemHash: String, orderInfo: OrderInfo, lineItemInfo: LineItemInfo, lineItemVotingWeight: UInt64, royalties: [MetadataViews.Royalty]){ 
 			pre{ 
 				KissoNFT.artLibrary[lineItemInfo.product_id] != nil:
@@ -466,7 +480,7 @@ contract KissoNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addUpdateArtLibraryVariant(productID: UInt64, variantID: UInt64, thumbnailImg: String, thumbnailImgMimetype: String, ipfsCID: String, ipfsPath: String?, ref: &AdminToken.Token?){ 
 		AdminToken.checkAuthorizedAdmin(ref) // check for authorized admin
 		
@@ -476,7 +490,7 @@ contract KissoNFT: NonFungibleToken{
 		(KissoNFT.artLibrary[productID]!).addUpdateVariant(variantID: variantID, variant: KissoNFT.Variant(thumbnailImg: thumbnailImg, thumbnailImgMimetype: thumbnailImgMimetype, ipfsCID: ipfsCID, ipfsPath: ipfsPath))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeArtLibraryVariant(productID: UInt64, variantID: UInt64, ref: &AdminToken.Token?){ 
 		pre{ 
 			KissoNFT.artLibrary[productID] != nil:
@@ -489,7 +503,7 @@ contract KissoNFT: NonFungibleToken{
 		 KissoNFT.artLibrary[productID]!).removeVariant(variantID: variantID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeArtLibraryProduct(productID: UInt64, ref: &AdminToken.Token?){ 
 		pre{ 
 			KissoNFT.artLibrary[productID] != nil:
@@ -500,7 +514,7 @@ contract KissoNFT: NonFungibleToken{
 		KissoNFT.artLibrary.remove(key: productID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun artLibraryItemExists(productID: UInt64, variantID: UInt64): Bool{ 
 		if KissoNFT.artLibrary[productID] == nil{ 
 			return false
@@ -512,7 +526,7 @@ contract KissoNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArtLibraryItem(productID: UInt64, variantID: UInt64): KissoNFT.Variant?{ 
 		if KissoNFT.artLibrary[productID] == nil{ 
 			return nil

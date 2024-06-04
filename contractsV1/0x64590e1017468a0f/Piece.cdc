@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -141,7 +155,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 		access(all)
 		let originalMinter: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): NFTMetadata{ 
 			return Piece.getNFTMetadata(self.creatorID, self.indexNumber)!
 		}
@@ -224,15 +238,15 @@ contract Piece: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface PieceCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPiece(id: UInt64): &Piece.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -257,7 +271,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 		// Deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			
@@ -284,7 +298,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPiece(id: UInt64): &Piece.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -301,7 +315,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 			return nft as &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(){ 
 			if let storage = &Piece.nftStorage[(self.owner!).address] as auth(Mutate) &{UInt64: NFT}?{ 
 				for id in storage.keys{ 
@@ -334,7 +348,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 	resource Administrator{ 
 		
 		// Function to upload the Metadata to the contract.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMetadata(channel: String, creatorID: UInt64, creatorAddress: Address, sourceURL: String, textContent: String, pieceCreationDate: String, contentCreationDate: String, imgUrl: String, embededHTML: String){ 
 			// Check if a record for this ID Exist, if not
 			// create am empty one for it
@@ -356,7 +370,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 		
 		// mintNFT mints a new NFT and deposits
 		// it in the recipients collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(creatorID: UInt64, indexNumber: Int, recipient: Address){ 
 			pre{ 
 				self.isMintingAvailable(_creatorID: creatorID, _indexNumber: indexNumber):
@@ -373,13 +387,13 @@ contract Piece: NonFungibleToken, ViewResolver{
 		}
 		
 		// create a new Administrator resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Administrator{ 
 			return <-create Administrator()
 		}
 		
 		// change piece of collection info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeField(key: String, value: AnyStruct){ 
 			Piece.collectionInfo[key] = value
 		}
@@ -415,7 +429,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -430,35 +444,35 @@ contract Piece: NonFungibleToken, ViewResolver{
 	}
 	
 	//Get all the recorded creatorIDs 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllcreatorIDs(): [UInt64]{ 
 		return self.creatorIDs.keys
 	}
 	
 	// Get information about a NFTMetadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getNFTMetadata(_ creatorID: UInt64, _ indexNumber: Int): NFTMetadata?{ 
 		return (self.creatorIDs[creatorID]!)[indexNumber]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOnecreatorIdMetadatas(creatorID: UInt64): [NFTMetadata]?{ 
 		return self.creatorIDs[creatorID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTimeRemaining(_creatorID: UInt64, _indexNumber: Int): UFix64?{ 
 		let metadata = Piece.getNFTMetadata(_creatorID, _indexNumber)!
 		let answer = metadata.creationTime + 86400.0 - getCurrentBlock().timestamp
 		return answer
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getbuyersList():{ Address:{ UInt64: [UInt64]}}{ 
 		return self.buyersList
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionInfo():{ String: AnyStruct}{ 
 		let collectionInfo = self.collectionInfo
 		collectionInfo["creatorIDs"] = self.creatorIDs
@@ -468,7 +482,7 @@ contract Piece: NonFungibleToken, ViewResolver{
 		return collectionInfo
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionAttribute(key: String): AnyStruct{ 
 		return self.collectionInfo[key] ?? panic(key.concat(" is not an attribute in this collection."))
 	}

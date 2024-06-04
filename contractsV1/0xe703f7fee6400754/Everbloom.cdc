@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 /*
 	Description: Central Smart Contract for Everbloom
 	Authors: Shehryar Shoukat shehryar@everbloom.app
@@ -309,22 +323,22 @@ contract Everbloom: NonFungibleToken{
 			Everbloom.nextArtworkID = Everbloom.nextArtworkID + UInt32(1)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getContent(): ArtworkMetadata.Content{ 
 			return self.content
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreator(): ArtworkMetadata.Creator{ 
 			return self.creator
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAttributes(): [ArtworkMetadata.Attribute]{ 
 			return self.attributes
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAdditionalMetadata():{ String: AnyStruct}{ 
 			return self.additionalMetadata
 		}
@@ -334,19 +348,19 @@ contract Everbloom: NonFungibleToken{
 	// Any user can borrow the public reference of Artwork resource
 	access(all)
 	resource interface ArtworkPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEditions(): [UInt32]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionData(editionID: UInt32): Edition?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionNftCount(editionID: UInt32): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtworkData(): ArtworkData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLocked(): Bool
 	}
 	
@@ -397,22 +411,22 @@ contract Everbloom: NonFungibleToken{
 			emit ArtworkCreated(artworkID: self.artworkID, galleryID: self.galleryID, externalPostID: externalPostID, creator: self.data.creator, content: self.data.content, attributes: self.data.attributes)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getArtworkData(): ArtworkData{ 
 			return self.data
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllEditions(): [UInt32]{ 
 			return self.editions.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionData(editionID: UInt32): Edition?{ 
 			return self.editions[editionID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionNftCount(editionID: UInt32): UInt32{ 
 			pre{ 
 				self.editions[editionID] != nil:
@@ -438,7 +452,7 @@ contract Everbloom: NonFungibleToken{
 					return editionID
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(name: String): UInt32{ 
 			pre{ 
 				self.editions.length < Int(Everbloom.maxEditionLimit):
@@ -460,7 +474,7 @@ contract Everbloom: NonFungibleToken{
 					edition should not exist in artwork
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEdition(edition: Edition){ 
 			pre{ 
 				edition.editionID != nil:
@@ -483,7 +497,7 @@ contract Everbloom: NonFungibleToken{
 					parameter:  editionID: id of the edition
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEditionComplete(editionID: UInt32){ 
 			pre{ 
 				self.editionCompleted[editionID] != nil:
@@ -496,14 +510,14 @@ contract Everbloom: NonFungibleToken{
 		}
 		
 		// This method mark all edition of the artwork as completed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllEditionsComplete(){ 
 			for edition in self.editions.values{ 
 				self.setEditionComplete(editionID: edition.editionID)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isEditionCompleted(editionID: UInt32): Bool{ 
 			pre{ 
 				self.editionCompleted[editionID] != nil:
@@ -512,13 +526,13 @@ contract Everbloom: NonFungibleToken{
 			return self.editionCompleted[editionID]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLocked(): Bool{ 
 			return self.locked
 		}
 		
 		// This method locks the artwork
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -531,10 +545,10 @@ contract Everbloom: NonFungibleToken{
 	// Any user can borrow the public reference of gallery resource
 	access(all)
 	resource interface GalleryPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllArtworks(): [UInt32]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArtwork(artworkID: UInt32): &Artwork?
 	}
 	
@@ -589,7 +603,7 @@ contract Everbloom: NonFungibleToken{
 					return artworkID: id of the artwork
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createArtwork(externalPostID: String, metadata:{ String: AnyStruct}): UInt32{ 
 			pre{ 
 				!self.disabled:
@@ -607,7 +621,7 @@ contract Everbloom: NonFungibleToken{
 		}
 		
 		// This method disables the gallery
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun disableGallery(){ 
 			if !self.disabled{ 
 				self.disabled = true
@@ -616,7 +630,7 @@ contract Everbloom: NonFungibleToken{
 		}
 		
 		// This method enables the gallery
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun enableGallery(){ 
 			if self.disabled{ 
 				self.disabled = false
@@ -624,7 +638,7 @@ contract Everbloom: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllArtworks(): [UInt32]{ 
 			return self.artworks.keys
 		}
@@ -636,7 +650,7 @@ contract Everbloom: NonFungibleToken{
 					return reference to the artwork resource or nil if no artwork is found
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArtwork(artworkID: UInt32): &Artwork?{ 
 			if self.artworks[artworkID] != nil{ 
 				let ref = &self.artworks[artworkID] as &Artwork?
@@ -653,7 +667,7 @@ contract Everbloom: NonFungibleToken{
 					return reference to the artwork resource or nil if no artwork is found
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArtworkByPostID(externalPostID: String): &Artwork?{ 
 			// Iterate through all the artworkDatas and search for the externalPostID
 			for artworkData in self.artworkDatas.values{ 
@@ -670,13 +684,13 @@ contract Everbloom: NonFungibleToken{
 	// Any user can borrow the public reference of other user resource
 	access(all)
 	resource interface UserPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllGalleries(): [UInt32]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGallery(galleryID: UInt32): &Gallery?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterCapability(minterCapability: Capability<&Minter>)
 	}
 	
@@ -710,7 +724,7 @@ contract Everbloom: NonFungibleToken{
 			emit UserCreated(userID: self.userID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllGalleries(): [UInt32]{ 
 			return self.galleries.keys
 		}
@@ -720,7 +734,7 @@ contract Everbloom: NonFungibleToken{
 					parameters: minterCapability: capability of minting resource
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterCapability(minterCapability: Capability<&Minter>){ 
 			self.minterCapability = minterCapability
 		}
@@ -732,7 +746,7 @@ contract Everbloom: NonFungibleToken{
 					return reference to the gallery resource or nil if no gallery is found
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGallery(galleryID: UInt32): &Gallery?{ 
 			pre{ 
 				self.galleries[galleryID] != nil:
@@ -750,7 +764,7 @@ contract Everbloom: NonFungibleToken{
 					return galleryID
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createGallery(name: String): UInt32{ 
 			// Create the new Gallery
 			var newGallery <- create Everbloom.Gallery(name: name)
@@ -771,7 +785,7 @@ contract Everbloom: NonFungibleToken{
 					return @NFT: minted NFT resource
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPrint(galleryID: UInt32, artworkID: UInt32, editionID: UInt32, signature: String): @NFT{ 
 			let galleryRef: &Gallery = self.borrowGallery(galleryID: galleryID) ?? panic("Cannot mint the print: unable to borrow gallery")
 			let artwork: &Artwork = galleryRef.borrowArtwork(artworkID: artworkID) ?? panic("Cannot mint the print: unable to borrow artwork")
@@ -791,7 +805,7 @@ contract Everbloom: NonFungibleToken{
 					return  @NonFungibleToken.Collection: collection of minted NFTs
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintPrint(galleryID: UInt32, artworkID: UInt32, editionID: UInt32, signatures: [String]): @Collection{ 
 			pre{ 
 				signatures.length < Int(Everbloom.maxBatchMintSize):
@@ -805,7 +819,7 @@ contract Everbloom: NonFungibleToken{
 		}
 		
 		// This method disables the gallery
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun disableGallery(galleryID: UInt32){ 
 			pre{ 
 				self.galleries[galleryID] != nil:
@@ -816,7 +830,7 @@ contract Everbloom: NonFungibleToken{
 		}
 		
 		// This method enables the gallery
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockGallery(galleryID: UInt32){ 
 			pre{ 
 				self.galleries[galleryID] != nil:
@@ -834,7 +848,7 @@ contract Everbloom: NonFungibleToken{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(galleryID: UInt32, artworkID: UInt32, editionID: UInt32, serialNumber: UInt32, signature: String): @Everbloom.NFT{ 
 			let newPrint: @NFT <- create NFT(galleryID: galleryID, artworkID: artworkID, editionID: editionID, serialNumber: serialNumber, signature: signature)
 			return <-newPrint
@@ -851,7 +865,7 @@ contract Everbloom: NonFungibleToken{
 					return @Admin: admin resource
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -861,7 +875,7 @@ contract Everbloom: NonFungibleToken{
 					return @Minter: minter reource
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(): @Minter{ 
 			return <-create Minter()
 		}
@@ -875,18 +889,18 @@ contract Everbloom: NonFungibleToken{
 	access(all)
 	resource interface PrintCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPrint(id: UInt64): &Everbloom.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -931,7 +945,7 @@ contract Everbloom: NonFungibleToken{
 					Returns: @NonFungibleToken.Collection: A collection that contains the withdrawn print
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			pre{ 
 				ids.length < Int(Everbloom.maxBatchWithdrawalSize):
@@ -953,7 +967,7 @@ contract Everbloom: NonFungibleToken{
 				*/
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as a Everbloom NFT to make sure
 			// it is the correct type
 			let token <- token as! @Everbloom.NFT
@@ -972,7 +986,7 @@ contract Everbloom: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			pre{ 
 				tokens.getIDs().length < Int(Everbloom.maxBatchDepositSize):
@@ -995,7 +1009,7 @@ contract Everbloom: NonFungibleToken{
 					 target: NFT receiver capability of the receiver
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(withdrawID: UInt64, target: Capability<&{NonFungibleToken.Receiver}>){ 
 			let token <- self.withdraw(withdrawID: withdrawID)
 			emit Transfer(id: token.uuid, from: self.owner?.address, to: target.address)
@@ -1030,7 +1044,7 @@ contract Everbloom: NonFungibleToken{
 					Returns: A reference to the NFT
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPrint(id: UInt64): &Everbloom.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -1066,7 +1080,7 @@ contract Everbloom: NonFungibleToken{
 			return @User: user resource
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createUser(): @User{ 
 		return <-create User()
 	}

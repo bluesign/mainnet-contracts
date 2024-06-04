@@ -1,4 +1,18 @@
-import MatchContract from "./MatchContract.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MatchContract from "./MatchContract.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -92,7 +106,7 @@ contract Gomoku{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun manualFinalizeByTimeout(index: UInt32){ 
 			if let compositionRef = Gomoku.getCompositionRef(by: index) as &Gomoku.Composition?{ 
 				let participants = Gomoku.getParticipants(by: index)
@@ -113,7 +127,7 @@ contract Gomoku{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun recycleBets(){ 
 			let capability =
 				Gomoku.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)
@@ -184,7 +198,7 @@ contract Gomoku{
 	}
 	
 	// Scripts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCompositionRef(by index: UInt32): &Gomoku.Composition?{ 
 		if let host = MatchContract.getHostAddress(by: index){ 
 			if let collectionRef = getAccount(host).capabilities.get<&Gomoku.CompositionCollection>(self.CollectionPublicPath).borrow(){ 
@@ -197,12 +211,12 @@ contract Gomoku{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getParticipants(by index: UInt32): [Address]{ 
 		return self.getCompositionRef(by: index)?.getParticipants() ?? []
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCompositeResult(by index: UInt32): GomokuType.Result?{ 
 		if let compositionRef = self.getCompositionRef(by: index){ 
 			let roundWinners = compositionRef.getRoundWinners()
@@ -227,7 +241,7 @@ contract Gomoku{
 	}
 	
 	// Opening bets
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOpeningBet(by index: UInt32): UFix64?{ 
 		let hostBet = self.getHostOpeningBet(by: index)
 		if hostBet == nil{ 
@@ -240,27 +254,27 @@ contract Gomoku{
 		return hostBet! + challengerBet!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getHostOpeningBet(by index: UInt32): UFix64?{ 
 		return self.hostOpeningBetMap[index]?.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getChallengerOpeningBet(by index: UInt32): UFix64?{ 
 		return self.challengerOpeningBetMap[index]?.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getHostRaisedBet(by index: UInt32): UFix64?{ 
 		return self.hostRaisedBetMap[index]?.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getChallengerRaisedBet(by index: UInt32): UFix64?{ 
 		return self.challengerRaisedBetMap[index]?.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFinalizedBets(by index: UInt32): [UFix64]?{ 
 		if let roundWinners = self.getCompositionRef(by: index)?.getRoundWinners(){ 
 			if roundWinners.length != 2{ 
@@ -273,7 +287,7 @@ contract Gomoku{
 	}
 	
 	// Opening bets + raised bets
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getValidBets(by index: UInt32): UFix64?{ 
 		let openingBet = self.getOpeningBet(by: index)
 		if let bet = openingBet{ 
@@ -289,7 +303,7 @@ contract Gomoku{
 	}
 	
 	// Transaction
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun register(
 		host: Address,
 		openingBet: @FlowToken.Vault,
@@ -331,7 +345,7 @@ contract Gomoku{
 		compositionCollectionRef.deposit(token: <-composition)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun matchOpponent(
 		index: UInt32,
 		challenger: Address,
@@ -443,12 +457,12 @@ contract Gomoku{
 		}
 		
 		// Script
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTimeout(): UInt64{ 
 			return self.latestBlockHeight + self.blockHeightTimeout
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStoneData(_for round: UInt8): [StoneData]{ 
 			pre{ 
 				self.steps.length > Int(round):
@@ -476,7 +490,7 @@ contract Gomoku{
 			return stoneData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getParticipants(): [Address]{ 
 			if let challenger = self.challenger{ 
 				return [self.host, challenger]
@@ -485,7 +499,7 @@ contract Gomoku{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundWinner(by index: UInt8): GomokuType.Result?{ 
 			if self.roundWinners.length > Int(index){ 
 				return self.roundWinners[index]
@@ -494,18 +508,18 @@ contract Gomoku{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoundWinners(): [GomokuType.Result]{ 
 			return self.roundWinners
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWinner(): GomokuType.Role?{ 
 			return self.winner
 		}
 		
 		// Transaction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeMove(
 			identityCollectionRef: &GomokuIdentity.IdentityCollection,
 			resultCollectionRef: &GomokuResult.ResultCollection,
@@ -635,7 +649,7 @@ contract Gomoku{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun surrender(
 			identityCollectionRef: &GomokuIdentity.IdentityCollection,
 			resultCollectionRef: &GomokuResult.ResultCollection
@@ -1443,23 +1457,23 @@ contract Gomoku{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt32]{ 
 			return self.ownedCompositionMap.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalance(): Int{ 
 			return self.ownedCompositionMap.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt32): &Gomoku.Composition?{ 
 			return &self.ownedCompositionMap[id] as &Gomoku.Composition?
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVault(): @Gomoku.CompositionCollection{ 
 		emit CollectionCreated()
 		return <-create CompositionCollection()
@@ -1487,18 +1501,18 @@ contract Gomoku{
 		access(all)
 		let location: GomokuType.StoneLocation
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(color: GomokuType.StoneColor, location: GomokuType.StoneLocation){ 
 			self.color = color
 			self.location = location
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun key(): String{ 
 			return self.location.key()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun convertToData():{ GomokuType.StoneDataing}{ 
 			return StoneData(color: self.color, location: self.location)
 		}

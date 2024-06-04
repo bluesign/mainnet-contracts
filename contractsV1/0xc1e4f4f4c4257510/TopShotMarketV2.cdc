@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	TopShotMarketV2.cdc
 
@@ -86,7 +100,7 @@ contract TopShotMarketV2{
 		access(all)
 		var cutPercentage: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}): @TopShot.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -94,13 +108,13 @@ contract TopShotMarketV2{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &TopShot.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -177,7 +191,7 @@ contract TopShotMarketV2{
 		//
 		// Parameters: tokenID: The id of the NFT to be put up for sale
 		//			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenID: UInt64, price: UFix64){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowMoment(id: tokenID) != nil:
@@ -193,7 +207,7 @@ contract TopShotMarketV2{
 		//
 		// Parameters: tokenID: the ID of the token to withdraw from the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -217,7 +231,7 @@ contract TopShotMarketV2{
 		//			 buyTokens: the fungible tokens that are used to buy the NFT
 		//
 		// Returns: @TopShot.NFT: the purchased NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @{FungibleToken.Vault}): @TopShot.NFT{ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowMoment(id: tokenID) != nil && self.prices[tokenID] != nil:
@@ -250,7 +264,7 @@ contract TopShotMarketV2{
 		// changePercentage changes the cut percentage of the tokens that are for sale
 		//
 		// Parameters: newPercent: The new cut percentage for the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePercentage(_ newPercent: UFix64){ 
 			self.cutPercentage = newPercent
 			emit CutPercentageChanged(newPercent: newPercent, seller: self.owner?.address)
@@ -260,7 +274,7 @@ contract TopShotMarketV2{
 		//
 		// Parameters: newOwnerCapability: The new fungible token capability for the account 
 		//								 who received tokens for purchases
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeOwnerReceiver(_ newOwnerCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newOwnerCapability.borrow() != nil:
@@ -273,7 +287,7 @@ contract TopShotMarketV2{
 		//
 		// Parameters: newBeneficiaryCapability the new capability for the beneficiary of the cut of the sale
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeBeneficiaryReceiver(_ newBeneficiaryCapability: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				newBeneficiaryCapability.borrow() != nil:
@@ -287,13 +301,13 @@ contract TopShotMarketV2{
 		// Parameters: tokenID: The ID of the NFT whose price to get
 		//
 		// Returns: UFix64: The price of the token
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.prices.keys
 		}
@@ -306,7 +320,7 @@ contract TopShotMarketV2{
 		// Returns: &TopShot.NFT? Optional reference to a moment for sale 
 		//						so that the caller can read its data
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &TopShot.NFT?{ 
 			if self.prices[id] != nil{ 
 				let ref = (self.ownerCollection.borrow()!).borrowMoment(id: id)
@@ -318,7 +332,7 @@ contract TopShotMarketV2{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerCollection: Capability<&TopShot.Collection>,
 		ownerCapability: Capability<&{FungibleToken.Receiver}>,

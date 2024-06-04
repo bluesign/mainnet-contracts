@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract NFTLockBox{ 
@@ -23,8 +37,8 @@ contract NFTLockBox{
 	// that allows users to claim NFTs from a lock box.
 	access(all)
 	resource interface LockBoxPublic{ 
-		access(all)
-		fun claim(id: UInt64, address: Address, signature: [UInt8])
+		access(TMP_ENTITLEMENT_OWNER)
+		fun claim(id: UInt64, address: Address, signature: [UInt8]): Void
 	}
 	
 	// A lock box is an NFT collection that maintains
@@ -65,7 +79,7 @@ contract NFTLockBox{
 		//
 		// After deposit, the NFT can be claimed with a signature
 		// from the private key that corresponds to the provided public key.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT}, publicKey: [UInt8]){ 
 			let collection = self.collection.borrow()!
 			self.publicKeys[token.id] = publicKey
@@ -88,7 +102,7 @@ contract NFTLockBox{
 		//	 "FLOW-V0.0-user" + BYTES(ADDRESS) + BIG_ENDIAN_BYTES(ID)
 		//   )
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(id: UInt64, address: Address, signature: [UInt8]){ 
 			let collection = self.collection.borrow()!
 			
@@ -115,7 +129,7 @@ contract NFTLockBox{
 		//
 		// Both Address and UInt64 values have a fixed-length byte representation
 		// of 8 bytes (64 bits), so a valid message will always be exactly 16 bytes long.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeClaimMessage(address: Address, id: UInt64): [UInt8]{ 
 			let addressBytes = address.toBytes()
 			let idBytes = id.toBigEndianBytes()
@@ -123,7 +137,7 @@ contract NFTLockBox{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLockBox(
 		collection: Capability<&{NonFungibleToken.Provider, NonFungibleToken.Receiver}>,
 		receiverPath: PublicPath

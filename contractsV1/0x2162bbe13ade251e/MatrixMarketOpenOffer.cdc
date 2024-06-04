@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -111,10 +125,10 @@ contract MatrixMarketOpenOffer{
 	
 	access(all)
 	resource interface OfferPublic{ 
-		access(all)
-		fun purchase(item: @{NonFungibleToken.NFT}): @{FungibleToken.Vault}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun purchase(item: @{NonFungibleToken.NFT}): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): OfferDetails
 	}
 	
@@ -151,7 +165,7 @@ contract MatrixMarketOpenOffer{
 			emit OfferAvailable(bidAddress: rewardCapability.address, bidId: self.details.bidId, vaultType: self.details.vaultType, bidPrice: self.details.bidPrice, nftType: self.details.nftType, nftId: self.details.nftId, brutto: self.details.brutto, cuts: cutsInfo, expirationTime: self.details.expirationTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(item: @{NonFungibleToken.NFT}): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.details.expirationTime > getCurrentBlock().timestamp:
@@ -176,7 +190,7 @@ contract MatrixMarketOpenOffer{
 			return <-payment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): OfferDetails{ 
 			return self.details
 		}
@@ -184,7 +198,7 @@ contract MatrixMarketOpenOffer{
 	
 	access(all)
 	resource interface OpenOfferManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOffer(
 			vaultRefCapability: Capability<
 				&{FungibleToken.Receiver, FungibleToken.Balance, FungibleToken.Provider}
@@ -194,24 +208,24 @@ contract MatrixMarketOpenOffer{
 			nftType: Type,
 			nftId: UInt64,
 			cuts: [
-				Cut
+				MatrixMarketOpenOffer.Cut
 			],
 			expirationTime: UFix64
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(bidId: UInt64)
 	}
 	
 	access(all)
 	resource interface OpenOfferPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOffer(bidId: UInt64): &Offer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(bidId: UInt64)
 	}
 	
@@ -220,7 +234,7 @@ contract MatrixMarketOpenOffer{
 		access(self)
 		var bids: @{UInt64: Offer}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOffer(vaultRefCapability: Capability<&{FungibleToken.Receiver, FungibleToken.Balance, FungibleToken.Provider}>, offerPrice: UFix64, rewardCapability: Capability<&{NonFungibleToken.CollectionPublic}>, nftType: Type, nftId: UInt64, cuts: [Cut], expirationTime: UFix64): UInt64{ 
 			let bid <- create Offer(vaultRefCapability: vaultRefCapability, offerPrice: offerPrice, rewardCapability: rewardCapability, nftType: nftType, nftId: nftId, cuts: cuts, expirationTime: expirationTime)
 			let bidId = bid.uuid
@@ -229,17 +243,17 @@ contract MatrixMarketOpenOffer{
 			return bidId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(bidId: UInt64){ 
 			destroy (self.bids.remove(key: bidId) ?? panic("missing bid"))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferIds(): [UInt64]{ 
 			return self.bids.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOffer(bidId: UInt64): &Offer?{ 
 			if self.bids[bidId] != nil{ 
 				return &self.bids[bidId] as &Offer?
@@ -248,7 +262,7 @@ contract MatrixMarketOpenOffer{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(bidId: UInt64){ 
 			pre{ 
 				self.bids[bidId] != nil:
@@ -266,7 +280,7 @@ contract MatrixMarketOpenOffer{
 	}
 	
 	// create openbid resource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createOpenOffer(): @OpenOffer{ 
 		return <-create OpenOffer()
 	}

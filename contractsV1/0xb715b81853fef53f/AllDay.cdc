@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Adapted from: Genies.cdc
 	Author: Rhea Myers rhea.myers@dapperlabs.com
 	Author: Sadie Freeman sadie.freeman@dapperlabs.com
@@ -190,7 +204,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Close this series
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			pre{ 
 				self.active == true:
@@ -221,7 +235,7 @@ contract AllDay: NonFungibleToken{
 	
 	// Get the publicly available data for a Series by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesData(id: UInt64): AllDay.SeriesData{ 
 		pre{ 
 			AllDay.seriesByID[id] != nil:
@@ -232,7 +246,7 @@ contract AllDay: NonFungibleToken{
 	
 	// Get the publicly available data for a Series by name
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesDataByName(name: String): AllDay.SeriesData{ 
 		pre{ 
 			AllDay.seriesIDByName[name] != nil:
@@ -244,14 +258,14 @@ contract AllDay: NonFungibleToken{
 	
 	// Get all series names (this will be *long*)
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSeriesNames(): [String]{ 
 		return AllDay.seriesIDByName.keys
 	}
 	
 	// Get series id for name
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSeriesIDByName(name: String): UInt64?{ 
 		return AllDay.seriesIDByName[name]
 	}
@@ -273,7 +287,7 @@ contract AllDay: NonFungibleToken{
 		var setPlaysInEditions:{ UInt64: Bool}
 		
 		// member function to check the setPlaysInEditions to see if this Set/Play combination already exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPlayExistsInEdition(playID: UInt64): Bool{ 
 			return self.setPlaysInEditions.containsKey(playID)
 		}
@@ -304,7 +318,7 @@ contract AllDay: NonFungibleToken{
 		var setPlaysInEditions:{ UInt64: Bool}
 		
 		// member function to insert a new Play to the setPlaysInEditions dictionary
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertNewPlay(playID: UInt64){ 
 			self.setPlaysInEditions[playID] = true
 		}
@@ -330,7 +344,7 @@ contract AllDay: NonFungibleToken{
 	
 	// Get the publicly available data for a Set
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetData(id: UInt64): AllDay.SetData{ 
 		pre{ 
 			AllDay.setByID[id] != nil:
@@ -341,7 +355,7 @@ contract AllDay: NonFungibleToken{
 	
 	// Get the publicly available data for a Set by name
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetDataByName(name: String): AllDay.SetData{ 
 		pre{ 
 			AllDay.setIDByName[name] != nil:
@@ -353,7 +367,7 @@ contract AllDay: NonFungibleToken{
 	
 	// Get all set names (this will be *long*)
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSetNames(): [String]{ 
 		return AllDay.setIDByName.keys
 	}
@@ -412,7 +426,7 @@ contract AllDay: NonFungibleToken{
 	
 	// Get the publicly available data for a Play
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayData(id: UInt64): AllDay.PlayData{ 
 		pre{ 
 			AllDay.playByID[id] != nil:
@@ -450,7 +464,7 @@ contract AllDay: NonFungibleToken{
 		var numMinted: UInt64
 		
 		// member function to check if max edition size has been reached
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun maxEditionMintSizeReached(): Bool{ 
 			return self.numMinted == self.maxMintSize
 		}
@@ -511,7 +525,7 @@ contract AllDay: NonFungibleToken{
 		// Mint a Moment NFT in this edition, with the given minting mintingDate.
 		// Note that this will panic if the max mint size has already been reached.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(): @AllDay.NFT{ 
 			pre{ 
 				self.numMinted != self.maxMintSize:
@@ -564,7 +578,7 @@ contract AllDay: NonFungibleToken{
 	
 	// Get the publicly available data for an Edition
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionData(id: UInt64): EditionData{ 
 		pre{ 
 			AllDay.editionByID[id] != nil:
@@ -624,18 +638,18 @@ contract AllDay: NonFungibleToken{
 	access(all)
 	resource interface MomentNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMomentNFT(id: UInt64): &AllDay.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -669,7 +683,7 @@ contract AllDay: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @AllDay.NFT
 			let id: UInt64 = token.id
 			
@@ -682,7 +696,7 @@ contract AllDay: NonFungibleToken{
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -712,7 +726,7 @@ contract AllDay: NonFungibleToken{
 		
 		// borrowMomentNFT gets a reference to an NFT in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMomentNFT(id: UInt64): &AllDay.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -763,7 +777,7 @@ contract AllDay: NonFungibleToken{
 		// Mint a single NFT
 		// The Edition for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @AllDay.NFT
 	}
 	
@@ -773,7 +787,7 @@ contract AllDay: NonFungibleToken{
 	resource Admin: NFTMinter{ 
 		// Borrow a Series
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeries(id: UInt64): &AllDay.Series{ 
 			pre{ 
 				AllDay.seriesByID[id] != nil:
@@ -784,7 +798,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Borrow a Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(id: UInt64): &AllDay.Set{ 
 			pre{ 
 				AllDay.setByID[id] != nil:
@@ -795,7 +809,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Borrow a Play
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPlay(id: UInt64): &AllDay.Play{ 
 			pre{ 
 				AllDay.playByID[id] != nil:
@@ -806,7 +820,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Borrow an Edition
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEdition(id: UInt64): &AllDay.Edition{ 
 			pre{ 
 				AllDay.editionByID[id] != nil:
@@ -817,7 +831,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Create a Series
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSeries(name: String): UInt64{ 
 			// Create and store the new series
 			let series <- create AllDay.Series(name: name)
@@ -830,7 +844,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Close a Series
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeSeries(id: UInt64): UInt64{ 
 			let series = &AllDay.seriesByID[id] as &AllDay.Series?
 			series.close()
@@ -839,7 +853,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Create a Set
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String): UInt64{ 
 			// Create and store the new set
 			let set <- create AllDay.Set(name: name)
@@ -852,7 +866,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Create a Play
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPlay(classification: String, metadata:{ String: String}): UInt64{ 
 			// Create and store the new play
 			let play <- create AllDay.Play(classification: classification, metadata: metadata)
@@ -865,7 +879,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Create an Edition
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEdition(seriesID: UInt64, setID: UInt64, playID: UInt64, maxMintSize: UInt64?, tier: String): UInt64{ 
 			let edition <- create Edition(seriesID: seriesID, setID: setID, playID: playID, maxMintSize: maxMintSize, tier: tier)
 			let editionID = edition.id
@@ -875,7 +889,7 @@ contract AllDay: NonFungibleToken{
 		
 		// Close an Edition
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun closeEdition(id: UInt64): UInt64{ 
 			let edition = &AllDay.editionByID[id] as &AllDay.Edition?
 			edition.close()
@@ -885,7 +899,7 @@ contract AllDay: NonFungibleToken{
 		// Mint a single NFT
 		// The Edition for the given ID must already exist
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(editionID: UInt64): @AllDay.NFT{ 
 			pre{ 
 				// Make sure the edition we are creating this NFT in exists

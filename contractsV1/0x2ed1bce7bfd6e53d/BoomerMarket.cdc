@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -152,13 +166,13 @@ contract BoomerMarket{
 	// to allow others to access their sale
 	access(all)
 	resource interface ManagerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(listingID: UInt64, buyTokens: &{FungibleToken.Vault}): @Boomer.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBoomer(listingID: UInt64): &Boomer.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -168,7 +182,7 @@ contract BoomerMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListings(): [Listing]
 	}
 	
@@ -181,21 +195,21 @@ contract BoomerMarket{
 		// createListing
 		// Allows the Storefront owner to create and insert Listings.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(
 			nftID: UInt64,
 			salePrice: UFix64,
 			saleCuts: [
-				SaleCut
+				BoomerMarket.SaleCut
 			],
 			salePaymentVaultType: Type,
 			sellerCapability: Capability
-		)
+		): Void
 		
 		// removeListing
 		// Allows the Storefront owner to remove any sale listing, acepted or not.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingID: UInt64)
 	}
 	
@@ -228,7 +242,7 @@ contract BoomerMarket{
 		///
 		/// Parameters: tokenID: The id of the NFT to be put up for sale
 		///			 price: The price of the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(nftID: UInt64, salePrice: UFix64, saleCuts: [SaleCut], salePaymentVaultType: Type, sellerCapability: Capability){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowBoomerNFT(id: nftID) != nil:
@@ -249,7 +263,7 @@ contract BoomerMarket{
 		///
 		/// Parameters: tokenID: the ID of the token to withdraw from the sale
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingID: UInt64){ 
 			// Remove the price from the prices dictionary
 			self.listings.remove(key: listingID)
@@ -265,7 +279,7 @@ contract BoomerMarket{
 		///			 buyTokens: the fungible tokens that are used to buy the NFT
 		///
 		/// Returns: @Boomer.NFT: the purchased NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(listingID: UInt64, buyTokens: &{FungibleToken.Vault}): @Boomer.NFT{ 
 			pre{ 
 				self.listings.containsKey(listingID):
@@ -294,7 +308,7 @@ contract BoomerMarket{
 		}
 		
 		/// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.listings.keys
 		}
@@ -307,14 +321,14 @@ contract BoomerMarket{
 		/// Returns: &Boomer.NFT? Optional reference to a moment for sale 
 		///						so that the caller can read its data
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBoomer(listingID: UInt64): &Boomer.NFT?{ 
 			let ref = (self.ownerCollection.borrow()!).borrowBoomerNFT(id: (self.listings[listingID]!).nftID)
 			return ref
 		}
 		
 		/// getListings returns an array of Listing that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListings(): [Listing]{ 
 			return self.listings.values
 		}
@@ -325,7 +339,7 @@ contract BoomerMarket{
 	// -----------------------------------------------------------------------
 	// createManager creates a new Manager resource
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createManager(ownerCapability: Capability<&Boomer.Collection>): @Manager{ 
 		return <-create Manager(ownerCollection: ownerCapability)
 	}
@@ -333,7 +347,7 @@ contract BoomerMarket{
 	// createSaleCut creates a new SaleCut to a receiver user
 	// with a specific percentage.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCut(
 		receiver: Capability<&{FungibleToken.Receiver}>,
 		percentage: UFix64
@@ -343,7 +357,7 @@ contract BoomerMarket{
 	
 	// totalSaleCuts sum all percentages in a array of SaleCut
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun totalSaleCuts(saleCuts: [SaleCut]): UFix64{ 
 		var total: UFix64 = 0.0
 		for cut in saleCuts{ 

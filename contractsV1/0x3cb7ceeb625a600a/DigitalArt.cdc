@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -79,14 +93,14 @@ contract DigitalArt: NonFungibleToken{
 			self.closed = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun newEditionID(): UInt64{ 
 			let val = self.nextEdition
 			self.nextEdition = self.nextEdition + UInt64(1)
 			return val
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun availableEditions(): UInt64{ 
 			if !self.closed && (self.metadata!).maxEdition >= self.nextEdition{ 
 				return (self.metadata!).maxEdition - self.nextEdition + UInt64(1)
@@ -97,7 +111,7 @@ contract DigitalArt: NonFungibleToken{
 		
 		// We close masters after all editions are minted instead of deleting master records
 		// This process ensures nobody can ever mint tokens with the same asset ID.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			self.metadata = nil
 			self.evergreenProfile = nil
@@ -186,7 +200,7 @@ contract DigitalArt: NonFungibleToken{
 			self.assetHead = assetHead
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEdition(edition: UInt64){ 
 			self.edition = edition
 		}
@@ -242,12 +256,12 @@ contract DigitalArt: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetID(): String{ 
 			return self.metadata.asset
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEvergreenProfile(): Evergreen.Profile{ 
 			return self.evergreenProfile
 		}
@@ -264,15 +278,15 @@ contract DigitalArt: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDigitalArt(id: UInt64): &DigitalArt.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -310,7 +324,7 @@ contract DigitalArt: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DigitalArt.NFT
 			let id: UInt64 = token.id
 			
@@ -342,7 +356,7 @@ contract DigitalArt: NonFungibleToken{
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the DigitalArt.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDigitalArt(id: UInt64): &DigitalArt.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -358,7 +372,7 @@ contract DigitalArt: NonFungibleToken{
 			return nft as! &DigitalArt.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowEvergreenToken(id: UInt64): &{Evergreen.Token}?{ 
 			return self.borrowDigitalArt(id: id)
 		}
@@ -394,14 +408,14 @@ contract DigitalArt: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(address: Address, tokenId: UInt64): Metadata?{ 
 		let acct = getAccount(address)
 		let collectionRef = (acct.capabilities.get<&{DigitalArt.CollectionPublic}>(self.CollectionPublicPath)!).borrow() ?? panic("Could not borrow capability from public collection")
 		return (collectionRef.borrowDigitalArt(id: tokenId)!).metadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isClosed(masterId: String): Bool{ 
 		if DigitalArt.masters.containsKey(masterId){ 
 			let master = &DigitalArt.masters[masterId]! as &Master
@@ -411,7 +425,7 @@ contract DigitalArt: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getWebFriendlyURL(url: String): String{ 
 		if url.slice(from: 0, upTo: 4) == "ipfs"{ 
 			return "https://sequel.mypinata.cloud/ipfs/".concat(url.slice(from: 7, upTo: url.length))
@@ -429,7 +443,7 @@ contract DigitalArt: NonFungibleToken{
 		
 		// sealMaster saves and freezes the master copy that then can be used
 		// to mint NFT editions.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sealMaster(metadata: Metadata, evergreenProfile: Evergreen.Profile){ 
 			pre{ 
 				metadata.asset != "":
@@ -444,12 +458,12 @@ contract DigitalArt: NonFungibleToken{
 			DigitalArt.masters[metadata.asset] = Master(metadata: metadata, evergreenProfile: evergreenProfile)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isSealed(masterId: String): Bool{ 
 			return DigitalArt.masters.containsKey(masterId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun availableEditions(masterId: String): UInt64{ 
 			pre{ 
 				DigitalArt.masters.containsKey(masterId):
@@ -459,7 +473,7 @@ contract DigitalArt: NonFungibleToken{
 			return master.availableEditions()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun evergreenProfile(masterId: String): Evergreen.Profile{ 
 			pre{ 
 				DigitalArt.masters.containsKey(masterId):
@@ -472,7 +486,7 @@ contract DigitalArt: NonFungibleToken{
 		// mintEditionNFT mints a token from master with the given ID.
 		// If it's a mint-on-demand, provide MOD ID to link it with the Marketplace database.
 		// Otherwise, set modID to 0.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintEditionNFT(masterId: String, modID: UInt64): @DigitalArt.NFT{ 
 			pre{ 
 				DigitalArt.masters.containsKey(masterId):

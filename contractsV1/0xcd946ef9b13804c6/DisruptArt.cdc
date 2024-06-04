@@ -1,4 +1,18 @@
-// DisruptArt NFT Marketplace
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// DisruptArt NFT Marketplace
 // NFT smart contract
 // NFT Marketplace : www.disrupt.art
 // Owner		   : Disrupt Art, INC.
@@ -64,7 +78,7 @@ contract DisruptArt: NonFungibleToken{
 		access(self)
 		let metaData:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metaData
 		}
@@ -139,15 +153,15 @@ contract DisruptArt: NonFungibleToken{
 	access(all)
 	resource interface DisruptArtCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDisruptArt(id: UInt64): &DisruptArt.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -171,7 +185,7 @@ contract DisruptArt: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DisruptArt.NFT
 			let id: UInt64 = token.id
 			
@@ -194,7 +208,7 @@ contract DisruptArt: NonFungibleToken{
 		}
 		
 		// Gets a reference to an NFT in the collection as a DisruptArt
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDisruptArt(id: UInt64): &DisruptArt.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -205,7 +219,7 @@ contract DisruptArt: NonFungibleToken{
 		}
 		
 		// function to check wether the owner have token or not
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tokenExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -245,7 +259,7 @@ contract DisruptArt: NonFungibleToken{
 	resource NFTMinter{ 
 		
 		// Function to mint group of tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun GroupMint(recipient: &{DisruptArtCollectionPublic}, content: String, description: String, name: String, edition: UInt, tokenGroupId: UInt64, previewContent: String, mimeType: String){ 
 			pre{ 
 				DisruptArt.editionLimit >= edition:
@@ -263,7 +277,7 @@ contract DisruptArt: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun Mint(recipient: &{DisruptArtCollectionPublic}, content: String, name: String, description: String, previewContent: String, mimeType: String){ 
 			let token <- create NFT(id: DisruptArt.totalSupply, content: content, name: name, description: description, creator: recipient.owner?.address, previewContent: previewContent, mimeType: mimeType)
 			emit Mint(id: DisruptArt.totalSupply, content: content, owner: recipient.owner?.address, name: name)
@@ -281,7 +295,7 @@ contract DisruptArt: NonFungibleToken{
 	// Admin can change the maximum supported group minting count limit for the platform. Currently it is 50
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeLimit(limit: UInt){ 
 			DisruptArt.editionLimit = limit
 		}

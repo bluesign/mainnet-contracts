@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract OpenlockerNFT: NonFungibleToken{ 
@@ -87,7 +101,7 @@ contract OpenlockerNFT: NonFungibleToken{
 		access(all)
 		let tokenDAddress: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(tokenDAddress: String){ 
 			self.tokenDAddress = tokenDAddress
 		}
@@ -99,12 +113,12 @@ contract OpenlockerNFT: NonFungibleToken{
 		access(all)
 		var isPrepared: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(isPrepared: Bool){ 
 			self.isPrepared = isPrepared
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrepared(isPrepared: Bool){ 
 			self.isPrepared = isPrepared
 		}
@@ -116,12 +130,12 @@ contract OpenlockerNFT: NonFungibleToken{
 		access(all)
 		var isUpdated: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(isUpdated: Bool){ 
 			self.isUpdated = isUpdated
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUpdated(isUpdated: Bool){ 
 			self.isUpdated = isUpdated
 		}
@@ -149,15 +163,15 @@ contract OpenlockerNFT: NonFungibleToken{
 	access(all)
 	resource interface ONFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowONFT(id: UInt64): &OpenlockerNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -189,7 +203,7 @@ contract OpenlockerNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @OpenlockerNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -199,7 +213,7 @@ contract OpenlockerNFT: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToTokenD(id: UInt64){ 
 			if !self.tokenDDepositerCap.check(){ 
 				panic("TokenD depositer cap not found. You either trying to deposit from admin account or something wrong with collection initialization")
@@ -220,7 +234,7 @@ contract OpenlockerNFT: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowONFT(id: UInt64): &OpenlockerNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -254,7 +268,7 @@ contract OpenlockerNFT: NonFungibleToken{
 			self.ONFTCollectionPublicPath = collectionPublicPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTByIssuance(requests: [IssuanceMintMsg]){ 
 			let minterOwner = self.owner ?? panic("could not get minter owner")
 			let minterOwnerCollection = minterOwner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.ONFTCollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get reference to the service account's NFT Collection")
@@ -272,7 +286,7 @@ contract OpenlockerNFT: NonFungibleToken{
 		}
 		
 		// TODO redesign it it operate with tokens stored in a vault of the account which is owner of the Minter resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(withdrawRequestID: UInt64, detailsURL: String, receiver: Address){ 
 			// Borrow the recipient's public NFT collection reference
 			let recipientAccount = getAccount(receiver)
@@ -291,7 +305,7 @@ contract OpenlockerNFT: NonFungibleToken{
 	
 	access(all)
 	resource NFTBurner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnNFT(token: @{NonFungibleToken.NFT}){ 
 			let id = token.id
 			destroy token
@@ -299,17 +313,17 @@ contract OpenlockerNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAccountPreparedProvider(isPrepared: Bool): AccountPreparedProvider{ 
 		return AccountPreparedProvider(isPrepared: isPrepared)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createIsStorageUpdatedToV1Provider(isUpdated: Bool): IsStorageUpdatedToV1Provider{ 
 		return IsStorageUpdatedToV1Provider(isUpdated: isUpdated)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenDAddressProvider(tokenDAddress: String): TokenDAddressProvider{ 
 		return TokenDAddressProvider(tokenDAddress: tokenDAddress)
 	}
@@ -321,7 +335,7 @@ contract OpenlockerNFT: NonFungibleToken{
 	}
 	
 	// public function that anyone can call to create a burner to burn their oun tokens
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createBurner(): @NFTBurner{ 
 		return <-create NFTBurner()
 	}

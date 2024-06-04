@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 *  SPDX-License-Identifier: GPL-3.0-only
 */
 
@@ -120,7 +134,7 @@ contract GooberXContract: NonFungibleToken{
 			self.price = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setName(name: String){ 
 			self.metadata.insert(key: "name", name)
 		}
@@ -223,13 +237,13 @@ contract GooberXContract: NonFungibleToken{
 		// Param token refers to a NonFungibleToken.NFT to be deposited within this collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		// Get all IDs related to the current Goober Collection
 		// returns an Array of IDs
 		//
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		// Borrow NonFungibleToken NFT with ID from current Goober Collection 
 		// Param id refers to a Goober ID
@@ -241,7 +255,7 @@ contract GooberXContract: NonFungibleToken{
 		// Eventually borrow Goober NFT with ID from current Goober Collection
 		// Returns an option reference to GooberXContract.NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGoober(id: UInt64): &GooberXContract.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -254,7 +268,7 @@ contract GooberXContract: NonFungibleToken{
 		// List all goobers the user of the current collection owns
 		// Returns a dictionary having the id as key and a GooberStruct as value
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listUsersGoobers():{ UInt64: GooberStruct}
 		
 		// List a paged resultset of Goobers of the users collection
@@ -262,7 +276,7 @@ contract GooberXContract: NonFungibleToken{
 		// Param pageSize determines the maximum size of the resultset
 		// Returns a dictionary having the id as key and a GooberStruct as value
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listUsersGoobersPaged(page: UInt32, pageSize: UInt32):{ UInt64: GooberStruct}
 	}
 	
@@ -277,7 +291,7 @@ contract GooberXContract: NonFungibleToken{
 		// the first Goober is removed from the pool and minted as a NFT
 		// in the users collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addGooberToPool(uri: String, metadata:{ String: AnyStruct}, address: Address, price: UFix64){ 
 			pre{ 
 				uri.length > 0:
@@ -289,7 +303,7 @@ contract GooberXContract: NonFungibleToken{
 		// Replaces Goobers in global pool
 		// This is used to exchange existing Goober Pool 
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun replaceGooberInPool(uri: String, metadata:{ String: AnyStruct}, address: Address, price: UFix64, index: Int){ 
 			pre{ 
 				uri.length > 0:
@@ -305,7 +319,7 @@ contract GooberXContract: NonFungibleToken{
 		// removeGooberFromPool
 		// removes a goober from the pool using a index paramter
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeGooberFromPool(index: UInt64){ 
 			pre{ 
 				GooberXContract.gooberPool[index] != nil:
@@ -318,7 +332,7 @@ contract GooberXContract: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// to the contract owner account for free
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminMintNFT(recipient: &{NonFungibleToken.CollectionPublic}){ 
 			pre{ 
 				GooberXContract.gooberPool.length > 0:
@@ -334,7 +348,7 @@ contract GooberXContract: NonFungibleToken{
 		// adminMintAirDropNFT
 		// Mints a new NFT with a new ID and airdrops the Goober to a Recipient
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminMintAirDropNFT(uri: String, metadata:{ String: AnyStruct}, address: Address, price: UFix64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			pre{ 
 				uri.length > 0:
@@ -351,7 +365,7 @@ contract GooberXContract: NonFungibleToken{
 		// add a new Giveaway key to the available giveaways
 		// Important: the code needs to be hashed sha3_256 off chain
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createGiveaway(giveawayKey: String){ 
 			pre{ 
 				GooberXContract.gooberPool.length > 0:
@@ -391,7 +405,7 @@ contract GooberXContract: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GooberXContract.NFT
 			let id: UInt64 = token.id
 			
@@ -429,7 +443,7 @@ contract GooberXContract: NonFungibleToken{
 		// exposing all data.
 		// This is safe as there are no functions that can be called on the Goober.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGoober(id: UInt64): &GooberXContract.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -451,7 +465,7 @@ contract GooberXContract: NonFungibleToken{
 		// List all goobers the user of the current collection owns
 		// Returns a dictionary having the id as key and a GooberStruct as value
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listUsersGoobers():{ UInt64: GooberStruct}{ 
 			var goobers:{ UInt64: GooberStruct} ={} 
 			for key in self.ownedNFTs.keys{ 
@@ -467,7 +481,7 @@ contract GooberXContract: NonFungibleToken{
 		// Param pageSize determines the maximum size of the resultset
 		// Returns a dictionary having the id as key and a GooberStruct as value
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listUsersGoobersPaged(page: UInt32, pageSize: UInt32):{ UInt64: GooberStruct}{ 
 			var it: UInt32 = 0
 			var goobers:{ UInt64: GooberStruct} ={} 
@@ -533,7 +547,7 @@ contract GooberXContract: NonFungibleToken{
 	// Mints a new NFT with a new ID
 	// and deposit it in the recipients collection using their collection reference
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, address: Address, paymentVault: @{FungibleToken.Vault}){ 
 		pre{ 
 			GooberXContract.gooberPool.length > 0:
@@ -561,7 +575,7 @@ contract GooberXContract: NonFungibleToken{
 	// Retrieves a giveaway and adds a new NFT with a new ID
 	// and deposit it in the recipients collection using their collection reference
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun retrieveGiveaway(recipient: &{NonFungibleToken.CollectionPublic}, address: Address, giveawayCode: String){ 
 		// Hash giveawayCode
 		let digest = HashAlgorithm.SHA3_256.hash(giveawayCode.decodeHex())
@@ -580,7 +594,7 @@ contract GooberXContract: NonFungibleToken{
 	
 	// nameYourGoober
 	// Give your Goober a name
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun nameYourGoober(newName: String, gooberID: UInt64, collection: &GooberXContract.Collection, paymentVault: @{FungibleToken.Vault}){ 
 		pre{ 
 			paymentVault.balance >= UFix64(5):
@@ -617,7 +631,7 @@ contract GooberXContract: NonFungibleToken{
 	// Param gooberID refers to a Goober ID
 	// returns the GooberStruct refered by the Goober ID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGoober(gooberID: UInt64): GooberStruct{ 
 		let index: Int = self.mintedGoobersIndex[gooberID]!
 		let goober = self.mintedGoobers[index]
@@ -627,7 +641,7 @@ contract GooberXContract: NonFungibleToken{
 	// getGooberzCount
 	// return the amount of goobers minted
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGooberzCount(): UInt64{ 
 		return self.totalSupply
 	}
@@ -635,7 +649,7 @@ contract GooberXContract: NonFungibleToken{
 	// getAvailableGooberzCount
 	// returns the amount of currently available goobers for minting
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAvailableGooberzCount(): UInt64{ 
 		return UInt64(self.gooberPool.length)
 	}
@@ -643,7 +657,7 @@ contract GooberXContract: NonFungibleToken{
 	// isGooberzPoolEmpty
 	// returns a bool to indicate whether or not there is a goober to mint
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isGooberzPoolEmpty(): Bool{ 
 		return self.gooberPool.length > 0
 	}
@@ -651,7 +665,7 @@ contract GooberXContract: NonFungibleToken{
 	// listMintedGoobers
 	// list all minted goobers
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun listMintedGoobers(): [GooberStruct]{ 
 		return self.mintedGoobers
 	}
@@ -662,7 +676,7 @@ contract GooberXContract: NonFungibleToken{
 	// Param page size - indicates the maximum size of the resultset
 	// returns an array of GooberStructs
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun listMintedGoobersPaged(page: UInt32, pageSize: UInt32): [GooberStruct]{ 
 		var it: UInt32 = 0
 		var retValues: [GooberStruct] = []
@@ -680,7 +694,7 @@ contract GooberXContract: NonFungibleToken{
 	// getGooberPrice
 	// return the goober price
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getGooberPrice(): UFix64{ 
 		if self.gooberPool.length > 0{ 
 			return self.gooberPool[self.firstGooberInPoolIndex].price
@@ -691,7 +705,7 @@ contract GooberXContract: NonFungibleToken{
 	// getContractAddress
 	// returns address to smart contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getContractAddress(): Address{ 
 		return self.account.address
 	}

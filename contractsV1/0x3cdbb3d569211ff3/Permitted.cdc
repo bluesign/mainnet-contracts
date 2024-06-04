@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract Permitted{ 
@@ -25,14 +39,14 @@ contract Permitted{
 		access(account)
 		let permittedUUID:{ UInt64: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isPermitted(_ nft: &{NonFungibleToken.NFT}): Bool{ 
 			let t = nft.getType()
 			return (self.permitted[t] == nil || self.permitted[t]!)
 			&& (self.permittedUUID[nft.uuid] == nil || self.permittedUUID[nft.uuid]!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPermittedType(_ t: Type, _ b: Bool, _ s: String){ 
 			self.permitted[t] = b
 			let manager = Permitted.getReasonManager()
@@ -40,19 +54,19 @@ contract Permitted{
 			emit PermittedType(t.identifier, b, s)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeType(_ t: Type){ 
 			self.permitted.remove(key: t)
 			emit PermittedTypeRemoved(t)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPermittedUUID(_ uuid: UInt64, _ b: Bool, _ s: String){ 
 			self.permittedUUID[uuid] = b
 			emit PermittedUUID(uuid, b, s)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAll():{ Type: Bool}{ 
 			return self.permitted
 		}
@@ -63,24 +77,24 @@ contract Permitted{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isPermitted(_ nft: &{NonFungibleToken.NFT}): Bool{ 
 		return (self.account.storage.borrow<&Manager>(from: Permitted.StoragePath)!).isPermitted(
 			nft
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAll():{ Type: Bool}{ 
 		return (self.account.storage.borrow<&Manager>(from: Permitted.StoragePath)!).getAll()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReasonManagerPublicPath(): PublicPath{ 
 		return /public/permittedReason
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReasonManagerStoragePath(): StoragePath{ 
 		return /storage/permittedReason
 	}
@@ -98,18 +112,18 @@ contract Permitted{
 			self.uuidReasons ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReason(_ t: Type, _ s: String){ 
 			self.typeReasons[t] = s
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReason(_ t: Type): String?{ 
 			return self.typeReasons[t]
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReason(_ t: Type): String?{ 
 		return (
 			self.account.storage.borrow<&PermitReasonManager>(
@@ -125,7 +139,7 @@ contract Permitted{
 		)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createReasonManager(): @PermitReasonManager{ 
 		return <-create PermitReasonManager()
 	}

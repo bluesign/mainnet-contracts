@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract NFTAirDrop{ 
@@ -13,8 +27,14 @@ contract NFTAirDrop{
 	
 	access(all)
 	resource interface DropPublic{ 
-		access(all)
-		fun claim(id: UInt64, signature: [UInt8], receiver: &{NonFungibleToken.CollectionPublic})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun claim(
+			id: UInt64,
+			signature: [
+				UInt8
+			],
+			receiver: &{NonFungibleToken.CollectionPublic}
+		): Void
 	}
 	
 	access(all)
@@ -28,14 +48,14 @@ contract NFTAirDrop{
 		access(self)
 		let claims:{ UInt64: [UInt8]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT}, publicKey: [UInt8]){ 
 			let collection = self.collection.borrow()!
 			self.claims[token.id] = publicKey
 			collection.deposit(token: <-token)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(id: UInt64, signature: [UInt8], receiver: &{NonFungibleToken.CollectionPublic}){ 
 			let collection = self.collection.borrow()!
 			let rawPublicKey = self.claims.remove(key: id) ?? panic("no claim exists for NFT")
@@ -48,7 +68,7 @@ contract NFTAirDrop{
 			emit Claimed(nftType: self.nftType, nftID: id, recipient: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeClaimMessage(address: Address, id: UInt64): [UInt8]{ 
 			let addressBytes = address.toBytes()
 			let idBytes = id.toBigEndianBytes()
@@ -62,7 +82,7 @@ contract NFTAirDrop{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDrop(
 		nftType: Type,
 		collection: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>

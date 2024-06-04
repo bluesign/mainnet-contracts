@@ -1,4 +1,18 @@
-//-------------- Mainnet -----------------------------
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//-------------- Mainnet -----------------------------
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import RedevNFT from "./RedevNFT.cdc"
@@ -122,12 +136,12 @@ contract LithokenNFT: NonFungibleToken, RedevNFT{
 			self.royalties = royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): Metadata{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [{RedevNFT.Royalty}]{ 
 			return self.royalties
 		}
@@ -141,18 +155,18 @@ contract LithokenNFT: NonFungibleToken, RedevNFT{
 	access(all)
 	resource interface LithokenNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun getMetadata(id: UInt64): Metadata
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getMetadata(id: UInt64): LithokenNFT.Metadata
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLithokenItem(id: UInt64): &LithokenNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -180,7 +194,7 @@ contract LithokenNFT: NonFungibleToken, RedevNFT{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LithokenNFT.NFT
 			let id: UInt64 = token.id
 			let dummy <- self.ownedNFTs[id] <- token
@@ -198,7 +212,7 @@ contract LithokenNFT: NonFungibleToken, RedevNFT{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLithokenItem(id: UInt64): &LithokenNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -208,13 +222,13 @@ contract LithokenNFT: NonFungibleToken, RedevNFT{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64): Metadata{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return (ref as! &LithokenNFT.NFT).getMetadata()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: UInt64): [{RedevNFT.Royalty}]{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return (ref as! &{RedevNFT.NFT}).getRoyalties()
@@ -243,7 +257,7 @@ contract LithokenNFT: NonFungibleToken, RedevNFT{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTo(creator: Capability<&{NonFungibleToken.Receiver}>, name: String, artist: String, description: String, dedicace: String, type: String, ipfs: String, collection: String, nomSerie: String, edition: UInt64, nbrEdition: UInt64, royalties: [{RedevNFT.Royalty}]): &{NonFungibleToken.NFT}{ 
 			let metadata = Metadata(name: name, artist: artist, creatorAddress: creator.address, description: description, dedicace: dedicace, type: type, ipfs: ipfs, collection: collection, nomSerie: nomSerie, edition: edition, nbrEdition: nbrEdition)
 			let token <- create NFT(id: LithokenNFT.totalSupply, creator: creator.address, metadata: metadata, royalties: royalties)
@@ -255,7 +269,7 @@ contract LithokenNFT: NonFungibleToken, RedevNFT{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun minter(): Capability<&Minter>{ 
 		return self.account.capabilities.get<&Minter>(self.minterPublicPath)!
 	}

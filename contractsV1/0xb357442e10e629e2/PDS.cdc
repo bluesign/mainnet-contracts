@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import IPackNFT from "./IPackNFT.cdc"
 
@@ -71,7 +85,7 @@ contract PDS{
 		access(all)
 		var state: PDS.DistState
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setState(newState: PDS.DistState){ 
 			self.state = newState
 		}
@@ -95,7 +109,7 @@ contract PDS{
 		let id: UInt64
 		
 		// returning in string so that it is more readable and anyone can check the hash
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hashString(): String{ 
 			// address string is 16 characters long with 0x as prefix (for 8 bytes in hex)
 			// example: ,f3fcd2c1a78f5ee.ExampleNFT.12
@@ -133,13 +147,13 @@ contract PDS{
 		access(self)
 		let operatorCap: Capability<&{IPackNFT.IOperator}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFromIssuer(withdrawID: UInt64): @{NonFungibleToken.NFT}{ 
 			let c = self.withdrawCap.borrow() ?? panic("no such cap")
 			return <-c.withdraw(withdrawID: withdrawID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPackNFT(
 			distId: UInt64,
 			commitHashes: [
@@ -158,13 +172,13 @@ contract PDS{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealPackNFT(packId: UInt64, nfts: [{IPackNFT.Collectible}], salt: String){ 
 			let c = self.operatorCap.borrow() ?? panic("no such cap")
 			c.reveal(id: packId, nfts: nfts, salt: salt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPackNFT(
 			packId: UInt64,
 			nfts: [{
@@ -199,8 +213,8 @@ contract PDS{
 	
 	access(all)
 	resource interface PackIssuerCapReciever{ 
-		access(all)
-		fun setDistCap(cap: Capability<&DistributionCreator>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setDistCap(cap: Capability<&PDS.DistributionCreator>): Void
 	}
 	
 	access(all)
@@ -208,7 +222,7 @@ contract PDS{
 		access(self)
 		var cap: Capability<&DistributionCreator>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDistCap(cap: Capability<&DistributionCreator>){ 
 			pre{ 
 				cap.borrow() != nil:
@@ -217,7 +231,7 @@ contract PDS{
 			self.cap = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _create(sharedCap: @SharedCapabilities, title: String, metadata:{ String: String}){ 
 			assert(title.length > 0, message: "Title must not be empty")
 			let c = (self.cap!).borrow()!
@@ -232,13 +246,19 @@ contract PDS{
 	// DistCap to be shared
 	access(all)
 	resource interface IDistCreator{ 
-		access(all)
-		fun createNewDist(sharedCap: @SharedCapabilities, title: String, metadata:{ String: String})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createNewDist(
+			sharedCap: @PDS.SharedCapabilities,
+			title: String,
+			metadata:{ 
+				String: String
+			}
+		): Void
 	}
 	
 	access(all)
 	resource DistributionCreator: IDistCreator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewDist(sharedCap: @SharedCapabilities, title: String, metadata:{ String: String}){ 
 			let currentId = PDS.nextDistId
 			PDS.DistSharedCap[currentId] <-! sharedCap
@@ -250,7 +270,7 @@ contract PDS{
 	
 	access(all)
 	resource DistributionManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDistState(distId: UInt64, state: PDS.DistState){ 
 			let d = PDS.Distributions.remove(key: distId) ?? panic("No such distribution")
 			d.setState(newState: state)
@@ -258,7 +278,7 @@ contract PDS{
 			emit DistributionStateUpdated(DistId: distId, state: state.rawValue)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(distId: UInt64, nftIDs: [UInt64], escrowCollectionPublic: PublicPath){ 
 			assert(PDS.DistSharedCap.containsKey(distId), message: "No such distribution")
 			let d <- PDS.DistSharedCap.remove(key: distId)!
@@ -274,7 +294,7 @@ contract PDS{
 			PDS.DistSharedCap[distId] <-! d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPackNFT(
 			distId: UInt64,
 			commitHashes: [
@@ -294,7 +314,7 @@ contract PDS{
 			PDS.DistSharedCap[distId] <-! d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealPackNFT(
 			distId: UInt64,
 			packId: UInt64,
@@ -327,7 +347,7 @@ contract PDS{
 			PDS.DistSharedCap[distId] <-! d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPackNFT(
 			distId: UInt64,
 			packId: UInt64,
@@ -396,12 +416,12 @@ contract PDS{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPackIssuer(): @PackIssuer{ 
 		return <-create PackIssuer()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSharedCapabilities(
 		withdrawCap: Capability<&{NonFungibleToken.Provider}>,
 		operatorCap: Capability<&{IPackNFT.IOperator}>
@@ -409,7 +429,7 @@ contract PDS{
 		return <-create SharedCapabilities(withdrawCap: withdrawCap, operatorCap: operatorCap)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDistInfo(distId: UInt64): DistInfo?{ 
 		return PDS.Distributions[distId]
 	}

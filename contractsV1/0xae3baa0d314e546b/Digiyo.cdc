@@ -1,4 +1,18 @@
-//SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier: MIT
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -176,7 +190,7 @@ contract Digiyo: NonFungibleToken{
 		// The asset needs to exist
 		// The set cannot have been locked
 		// The set must not yet contain the asset
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAsset(assetID: UInt32){ 
 			pre{ 
 				Digiyo.assetDatas[assetID] != nil:
@@ -197,7 +211,7 @@ contract Digiyo: NonFungibleToken{
 		
 		// addAssets adds multiple assets to the set
 		// Parameters: assetIDs: The IDs of the assets
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAssets(assetIDs: [UInt32]){ 
 			for asset in assetIDs{ 
 				self.addAsset(assetID: asset)
@@ -208,7 +222,7 @@ contract Digiyo: NonFungibleToken{
 		// Parameters: assetID: The ID of the asset that is being retired
 		// Pre-Conditions:
 		// The asset needs to be an existing, unretired asset
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAsset(assetID: UInt32){ 
 			pre{ 
 				self.retired[assetID] != nil:
@@ -222,7 +236,7 @@ contract Digiyo: NonFungibleToken{
 		
 		// retireAll retires all the assets in the set
 		// Afterwards, none of the retired assets will be mintable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireAll(){ 
 			for asset in self.assets{ 
 				self.retireAsset(assetID: asset)
@@ -232,7 +246,7 @@ contract Digiyo: NonFungibleToken{
 		// lock() locks the set so that no more assets can be added to it
 		// Pre-Conditions:
 		// The set cannot yet have been locked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			if !self.locked{ 
 				self.locked = true
@@ -245,7 +259,7 @@ contract Digiyo: NonFungibleToken{
 		// Pre-Conditions:
 		// The asset must exist in the set and be mintable
 		// Returns: The instance that was minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintInstance(assetID: UInt32): @NFT{ 
 			pre{ 
 				self.retired[assetID] != nil:
@@ -266,7 +280,7 @@ contract Digiyo: NonFungibleToken{
 		// Parameters: assetID: the ID of the asset from which the instances are minted
 		//			 quantity: The quantity of instances to be minted
 		// Returns: Collection object that contains all the instances that were minted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintInstance(assetID: UInt32, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -319,14 +333,14 @@ contract Digiyo: NonFungibleToken{
 			emit InstanceMinted(instanceID: self.id, assetID: assetID, setID: self.data.setID, serialNumber: self.data.serialNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			let fullName: String = Digiyo.getAssetMetaDataByField(assetID: self.data.assetID, field: "FullName") ?? ""
 			let assetType: String = Digiyo.getAssetMetaDataByField(assetID: self.data.assetID, field: "AssetType") ?? ""
 			return fullName.concat(" ").concat(assetType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			let setName: String = Digiyo.getSetName(setID: self.data.setID) ?? ""
 			let serialNumber: String = self.data.serialNumber.toString()
@@ -334,13 +348,13 @@ contract Digiyo: NonFungibleToken{
 			return "A series ".concat(seriesNumber).concat(" ").concat(setName).concat(" instance with serial number ").concat(serialNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun thumbnail(): String{ 
 			let cid: String = Digiyo.getAssetMetaDataByField(assetID: self.data.assetID, field: "CID") ?? ""
 			return "https://ipfs.io/ipfs/".concat(cid)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata():{ String: AnyStruct}{ 
 			let metadata:{ String: AnyStruct} = Digiyo.getAssetMetaData(assetID: self.data.assetID) ??{} 
 			return metadata
@@ -398,7 +412,7 @@ contract Digiyo: NonFungibleToken{
 		// createAsset creates a new Asset struct and stores it
 		// Parameters: metadata: A dictionary mapping metadata keys to their values
 		// Returns: the ID of the new Asset object
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAsset(metadata:{ String: String}): UInt32{ 
 			var newAsset = Asset(metadata: metadata) // Create the new Asset
 			
@@ -412,7 +426,7 @@ contract Digiyo: NonFungibleToken{
 		// so that the caller can store it in their account
 		// Parameters: name: The name of the set
 		//			 series: The series to which the set
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSet(name: String){ 
 			var newSet <- create Set(name: name) // Create the new Set
 			
@@ -423,7 +437,7 @@ contract Digiyo: NonFungibleToken{
 		// contract so that the admin can call methods on it
 		// Parameters: setID: The ID of the set referenced
 		// Returns: A reference to the set with fields and methods exposed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSet(setID: UInt32): &Set{ 
 			pre{ 
 				Digiyo.sets[setID] != nil:
@@ -434,7 +448,7 @@ contract Digiyo: NonFungibleToken{
 		
 		// startNewSeries ends the current series by incrementing currentSeries
 		// Returns: The new series number
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewSeries(): UInt32{ 
 			Digiyo.currentSeries = Digiyo.currentSeries + UInt32(1)
 			emit NewSeriesStarted(newCurrentSeries: Digiyo.currentSeries)
@@ -442,7 +456,7 @@ contract Digiyo: NonFungibleToken{
 		}
 		
 		// createNewAdmin creates a new Admin Resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -452,18 +466,18 @@ contract Digiyo: NonFungibleToken{
 	access(all)
 	resource interface DigiyoNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInstance(id: UInt64): &Digiyo.NFT?{ 
 			post{ // If not nil should match argument 
 				
@@ -496,7 +510,7 @@ contract Digiyo: NonFungibleToken{
 		}
 		
 		// batchWithdraw withdraws multiple tokens and returns them as a Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -507,7 +521,7 @@ contract Digiyo: NonFungibleToken{
 		
 		// deposit takes an Instance and adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Digiyo.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token // add the new token to the dictionary
@@ -520,7 +534,7 @@ contract Digiyo: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ // iterate through the keys in the collection and deposit each one 
@@ -549,7 +563,7 @@ contract Digiyo: NonFungibleToken{
 		// essentially a more robust version of the borrowNFT function (allows method calls)
 		// Parameters: id: The ID of the instance to get the reference for
 		// Returns: A reference to the instance
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowInstance(id: UInt64): &Digiyo.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -594,7 +608,7 @@ contract Digiyo: NonFungibleToken{
 	
 	// getAllAssets returns all the assets in digiyo
 	// Returns: An array of all the assets that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllAssets(): [Digiyo.Asset]{ 
 		return Digiyo.assetDatas.values
 	}
@@ -602,7 +616,7 @@ contract Digiyo: NonFungibleToken{
 	// getAssetMetaData returns the metadata associated with a given asset
 	// Parameters: assetID: The id of the asset
 	// Returns: The metadata as a String
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAssetMetaData(assetID: UInt32):{ String: String}?{ 
 		return self.assetDatas[assetID]?.metadata
 	}
@@ -611,7 +625,7 @@ contract Digiyo: NonFungibleToken{
 	// Parameters: assetID: The id of the asset
 	//			 field: The field (i.e. metadata key) sought
 	// Returns: The metadata field as a String Optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAssetMetaDataByField(assetID: UInt32, field: String): String?{ 
 		if let asset = Digiyo.assetDatas[assetID]{ 
 			return asset.metadata[field]
@@ -623,7 +637,7 @@ contract Digiyo: NonFungibleToken{
 	// getSetName returns the name of the set whose ID is passed.
 	// Parameters: setID: The id of the set
 	// Returns: The name of the set
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetName(setID: UInt32): String?{ 
 		return Digiyo.setDatas[setID]?.name
 	}
@@ -631,7 +645,7 @@ contract Digiyo: NonFungibleToken{
 	// getSetSeries returns the of the set whose ID is passed
 	// Parameters: setID: The id of the set
 	// Returns: The series that the set belongs to
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetSeries(setID: UInt32): UInt32?{ 
 		return Digiyo.setDatas[setID]?.series
 	}
@@ -639,7 +653,7 @@ contract Digiyo: NonFungibleToken{
 	// getSetIDsByName returns the IDs of the set whose name is passed.
 	// Parameters: setName: The name of the set
 	// Returns: An array of the IDs of the set if it exists, or nil if doesn't
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetIDsByName(setName: String): [UInt32]?{ 
 		var setIDs: [UInt32] = []
 		for setData in Digiyo.setDatas.values{ // search setDatas for name 
@@ -660,7 +674,7 @@ contract Digiyo: NonFungibleToken{
 	// getAssetsInSet returns a list of asset IDs in the set whose ID is passed
 	// Parameters: setID: The id of the set
 	// Returns: An array of asset IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAssetsInSet(setID: UInt32): [UInt32]?{ 
 		return Digiyo.sets[setID]?.assets
 	}
@@ -671,7 +685,7 @@ contract Digiyo: NonFungibleToken{
 	// Parameters: setID: The id of the set
 	//			 assetID: The id of the asset
 	// Returns: Boolean indicating whether the edition is retired
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isEditionRetired(setID: UInt32, assetID: UInt32): Bool?{ 
 		// remove the set from the dictionary to get its field
 		if let setToRead <- Digiyo.sets.remove(key: setID){ 
@@ -688,7 +702,7 @@ contract Digiyo: NonFungibleToken{
 	//			 but instances can still be minted from assets therein.
 	// Parameters: setID: The id of the set
 	// Returns: Boolean indicating if the set is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isSetLocked(setID: UInt32): Bool?{ 
 		return Digiyo.sets[setID]?.locked
 	}
@@ -697,7 +711,7 @@ contract Digiyo: NonFungibleToken{
 	// Parameters: setID: The id of the set
 	//			 assetID: The id of the asset
 	// Returns: The total number of instances minted from an edition
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumInstancesInEdition(setID: UInt32, assetID: UInt32): UInt32?{ 
 		if let setToRead <- Digiyo.sets.remove(key: setID){ 
 			let amount = setToRead.numberMintedPerAsset[assetID]

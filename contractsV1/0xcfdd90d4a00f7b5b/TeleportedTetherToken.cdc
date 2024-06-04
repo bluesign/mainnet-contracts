@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract TeleportedTetherToken: FungibleToken{ 
@@ -102,7 +116,7 @@ contract TeleportedTetherToken: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @TeleportedTetherToken.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -151,23 +165,23 @@ contract TeleportedTetherToken: FungibleToken{
 		//
 		// Function that creates and returns a new teleport admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewTeleportAdmin(allowedAmount: UFix64): @TeleportAdmin{ 
 			emit TeleportAdminCreated(allowedAmount: allowedAmount)
 			return <-create TeleportAdmin(allowedAmount: allowedAmount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			TeleportedTetherToken.isFrozen = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			TeleportedTetherToken.isFrozen = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAllowance(allowedAmount: UFix64): @Allowance{ 
 			return <-create Allowance(balance: allowedAmount)
 		}
@@ -191,31 +205,31 @@ contract TeleportedTetherToken: FungibleToken{
 		access(all)
 		var ethereumAdminAccount: [UInt8]
 		
-		access(all)
-		fun teleportOut(from: @{FungibleToken.Vault}, to: [UInt8])
+		access(TMP_ENTITLEMENT_OWNER)
+		fun teleportOut(from: @{FungibleToken.Vault}, to: [UInt8]): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositAllowance(from: @Allowance)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEthereumAdminAccount(): [UInt8]
 	}
 	
 	access(all)
 	resource interface TeleportControl{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun teleportIn(amount: UFix64, from: [UInt8], hash: String): @TeleportedTetherToken.Vault
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFee(amount: UFix64): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInwardFee(fee: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateOutwardFee(fee: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEthereumAdminAccount(account: [UInt8])
 	}
 	
@@ -252,7 +266,7 @@ contract TeleportedTetherToken: FungibleToken{
 		// Function that mints new tokens, adds them to the total supply,
 		// and returns them to the calling context.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun teleportIn(amount: UFix64, from: [UInt8], hash: String): @TeleportedTetherToken.Vault{ 
 			pre{ 
 				!TeleportedTetherToken.isFrozen:
@@ -286,7 +300,7 @@ contract TeleportedTetherToken: FungibleToken{
 		// Note: the burned tokens are automatically subtracted from the 
 		// total supply in the Vault destructor.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun teleportOut(from: @{FungibleToken.Vault}, to: [UInt8]){ 
 			pre{ 
 				!TeleportedTetherToken.isFrozen:
@@ -303,22 +317,22 @@ contract TeleportedTetherToken: FungibleToken{
 			emit TokensTeleportedOut(amount: amount, to: to)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFee(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-self.feeCollector.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateInwardFee(fee: UFix64){ 
 			self.inwardFee = fee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateOutwardFee(fee: UFix64){ 
 			self.outwardFee = fee
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateEthereumAdminAccount(account: [UInt8]){ 
 			pre{ 
 				account.length == 20:
@@ -327,18 +341,18 @@ contract TeleportedTetherToken: FungibleToken{
 			self.ethereumAdminAccount = account
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeeAmount(): UFix64{ 
 			return self.feeCollector.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositAllowance(from: @Allowance){ 
 			self.allowedAmount = self.allowedAmount + from.balance
 			destroy from
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEthereumAdminAccount(): [UInt8]{ 
 			return self.ethereumAdminAccount
 		}

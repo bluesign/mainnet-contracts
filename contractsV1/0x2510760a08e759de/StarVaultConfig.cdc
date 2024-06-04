@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract StarVaultConfig{ 
 	access(all)
 	let VaultPublicPath: PublicPath
@@ -111,17 +125,17 @@ contract StarVaultConfig{
 	access(all)
 	event FeeRatioChanged(oldFeeRatio: UFix64, newFeeRatio: UFix64)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun SliceTokenTypeIdentifierFromVaultType(vaultTypeIdentifier: String): String{ 
 		return vaultTypeIdentifier.slice(from: 0, upTo: vaultTypeIdentifier.length - 6)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sliceTokenTypeIdentifierFromCollectionType(collectionTypeIdentifier: String): String{ 
 		return collectionTypeIdentifier.slice(from: 0, upTo: collectionTypeIdentifier.length - 11)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultFees(vaultId: Int): VaultFees{ 
 		if self.vaultFees.containsKey(vaultId){ 
 			return self.vaultFees[vaultId]!
@@ -132,7 +146,7 @@ contract StarVaultConfig{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFactoryFees(
 			mintFee: UFix64,
 			randomRedeemFee: UFix64,
@@ -156,7 +170,7 @@ contract StarVaultConfig{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVaultFees(
 			vaultId: Int,
 			mintFee: UFix64,
@@ -184,7 +198,7 @@ contract StarVaultConfig{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun disableVaultFees(vaultId: Int){ 
 			pre{ 
 				StarVaultConfig.vaultFees.containsKey(vaultId):
@@ -194,13 +208,13 @@ contract StarVaultConfig{
 			emit DisableVaultFees(vaultId: vaultId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeTo(feeToAddr: Address){ 
 			emit FeeToAddressChanged(oldFeeTo: StarVaultConfig.feeTo, newFeeTo: feeToAddr)
 			StarVaultConfig.feeTo = feeToAddr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeRatio(feeRatio: UFix64){ 
 			pre{ 
 				feeRatio <= 1.0:

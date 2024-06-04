@@ -1,4 +1,18 @@
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
 
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	
 // Join us by visiting https://r3volution.io
 access(all)
 contract R3VNFTS{ 
@@ -43,19 +57,19 @@ contract R3VNFTS{
 	access(all)
 	resource interface NFTReceiver{ 
 		// deposit an @NFT into this receiver
-		access(all)
-		fun deposit(token: @NFT)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @R3VNFTS.NFT): Void
 		
 		// get the IDs of the NFTs this receiver stores
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [Int]
 		
 		// check if a specific ID is stored in this receiver
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: Int): Bool
 		
 		// get the metadata of the provided receivers as a [string]
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(ids: [Int]): [String]
 	}
 	
@@ -82,7 +96,7 @@ contract R3VNFTS{
 		}
 		
 		// withdrawal NFT from the Collection.ownedNFTs map
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: Int): @NFT{ 
 			let location = (self.owner!).address.toString()
 			let token <- self.ownedNFTs.remove(key: withdrawID)!
@@ -91,7 +105,7 @@ contract R3VNFTS{
 		}
 		
 		// deposit NFT into this Collection.ownedNFTs map
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @NFT){ 
 			let id = token.id
 			let md = token.metadata
@@ -101,19 +115,19 @@ contract R3VNFTS{
 		}
 		
 		// returns a Bool on whether the provided ID exists within this Collection.ownedNFTs.keys
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: Int): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
 		// gets all keys within this Collection.ownedNFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [Int]{ 
 			return self.ownedNFTs.keys
 		}
 		
 		// get an array of strings from the provided Collection.owndeNFTs.keys
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(ids: [Int]): [String]{ 
 			var ret: [String] = []
 			for id in ids{ 
@@ -126,7 +140,7 @@ contract R3VNFTS{
 	}
 	
 	// helper function to create a new collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}
@@ -168,7 +182,7 @@ contract R3VNFTS{
 		}
 		
 		// mint a new NFT from this NFTMinter
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(metadata: String): @NFT{ 
 			var newNFT <- create NFT(id: self.idCount, metadata: metadata)
 			self.idCount = self.idCount + 1

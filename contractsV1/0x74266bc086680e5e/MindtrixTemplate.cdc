@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 ============================================================
 Name: Template Contract for Mindtrix NFT
 Author: AS
@@ -192,7 +206,7 @@ contract MindtrixTemplate{
 			self.currentEdition = newEdition
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMintingRecordsByAddress(address: Address): [MindtrixViews.NFTIdentifier]?{ 
 			let identifiers: [MindtrixViews.NFTIdentifier]? = self.minters[address]
 			if self.minters[address] == nil{ 
@@ -201,22 +215,22 @@ contract MindtrixTemplate{
 			return identifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStrMetadata():{ String: String}{ 
 			return self.strMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntMetadata():{ String: UInt64}{ 
 			return self.intMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplate(){ 
 			self.locked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStrMetadata(newMetadata:{ String: String}){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -225,7 +239,7 @@ contract MindtrixTemplate{
 			self.strMetadata = newMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIntMetadata(newMetadata:{ String: UInt64}){ 
 			pre{ 
 				newMetadata.length != 0:
@@ -234,12 +248,12 @@ contract MindtrixTemplate{
 			self.intMetadata = newMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [MetadataViews.Royalty]{ 
 			return self.royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVerifiers(): [{MindtrixViews.IVerifier}]{ 
 			var verifiers: [{MindtrixViews.IVerifier}] = []
 			for key in self.verifiers.keys{ 
@@ -248,12 +262,12 @@ contract MindtrixTemplate{
 			return verifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentType(): Type{ 
 			return self.paymentType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMintPrice(identifier: String): MindtrixViews.FT?{ 
 			if self.mintPrice.keys.length > 0{ 
 				return self.mintPrice[identifier]
@@ -348,7 +362,7 @@ contract MindtrixTemplate{
 	// Creators can perform important operations for their own templates.
 	access(all)
 	resource interface AdminPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMindtrixTemplateStruct(
 			name: String,
 			description: String,
@@ -375,18 +389,18 @@ contract MindtrixTemplate{
 			verifiers: [{
 				MindtrixViews.IVerifier}
 			]
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwnedMindtrixTemplateIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedTemplateIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableTemplateIds(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplateById(templateId: UInt64)
 	}
 	
@@ -398,7 +412,7 @@ contract MindtrixTemplate{
 		access(account)
 		var lockedTemplateIds:{ UInt64: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMindtrixTemplateStruct(name: String, description: String, strMetadata:{ String: String}, intMetadata:{ String: UInt64}, maxEdition: UInt64, paymentType: Type, mintPrice:{ String: MindtrixViews.FT}, royalties: [MetadataViews.Royalty], socials:{ String: String}, components:{ String: UInt64}, verifiers: [{MindtrixViews.IVerifier}]){ 
 			let templateId = MindtrixTemplate.nextTemplateId
 			MindtrixTemplate.MindtrixTemplates[templateId] = MindtrixTemplateStruct(templateId: templateId, name: name, description: description, strMetadata: strMetadata, intMetadata: intMetadata, currentEdition: 0, maxEdition: maxEdition, createdTime: getCurrentBlock().timestamp, paymentType: paymentType, mintPrice: mintPrice, royalties: royalties, socials: socials, components: components, verifiers: verifiers)
@@ -406,7 +420,7 @@ contract MindtrixTemplate{
 			self.lockedTemplateIds.insert(key: templateId, false)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOwnedMindtrixTemplateIds(): [UInt64]{ 
 			var ids: [UInt64] = []
 			for templateId in self.ownedTemplateIds.keys{ 
@@ -417,7 +431,7 @@ contract MindtrixTemplate{
 			return ids
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLockedTemplateIds(): [UInt64]{ 
 			var templateIds: [UInt64] = []
 			for id in self.lockedTemplateIds.keys{ 
@@ -428,7 +442,7 @@ contract MindtrixTemplate{
 			return templateIds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAvailableTemplateIds(): [UInt64]{ 
 			var templateIds: [UInt64] = []
 			for id in self.lockedTemplateIds.keys{ 
@@ -439,7 +453,7 @@ contract MindtrixTemplate{
 			return templateIds
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockTemplateById(templateId: UInt64){ 
 			pre{ 
 				self.lockedTemplateIds[templateId] == nil || self.lockedTemplateIds[templateId] == false:
@@ -464,27 +478,27 @@ contract MindtrixTemplate{
 	// ========================================================
 	//					 PUBLIC FUNCTION
 	// ========================================================
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdmin(): @Admin{ 
 		return <-create Admin()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllMindtrixTemplates():{ UInt64: MindtrixTemplateStruct}{ 
 		return self.MindtrixTemplates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllMindtrixTemplateIds(): [UInt64]{ 
 		return self.MindtrixTemplates.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMindtrixTemplateByTemplateId(templateId: UInt64): MindtrixTemplateStruct?{ 
 		return self.MindtrixTemplates[templateId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMindtrixTemplatesByShowGuId(
 		showGuid: String,
 		templateTypes: [
@@ -507,7 +521,7 @@ contract MindtrixTemplate{
 		return templates
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun filterTemplateByTypeAndStatus(
 		template: MindtrixTemplateStruct?,
 		templateTypes: [
@@ -529,7 +543,7 @@ contract MindtrixTemplate{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun freeMintNFT(recipient: &Mindtrix.Collection, templateId: UInt64){ 
 		pre{ 
 			MindtrixTemplate.MindtrixTemplates.containsKey(templateId):
@@ -545,7 +559,7 @@ contract MindtrixTemplate{
 	}
 	
 	// The fun supports USDC, FUSD, FLOW, FUT, DUC payment.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyNFT(
 		recipient: &Mindtrix.Collection,
 		paymentVault: @{FungibleToken.Vault},

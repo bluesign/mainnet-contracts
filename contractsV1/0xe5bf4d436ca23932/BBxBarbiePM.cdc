@@ -1,4 +1,18 @@
-/* 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* 
 *   A contract that manages the creation and sale of packs and tokens
 *
 *   A manager resource exists allow modifying the parameters of the public
@@ -185,7 +199,7 @@ contract BBxBarbiePM{
 				 */
 		
 		// One call to add a new seriesID for Packs and Card
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNewSeriesID(seriesID: UInt64){ 
 			BBxBarbiePM.addSeriesID(seriesID: seriesID)
 			self.addPackSeriesID(packSeriesID: seriesID)
@@ -197,7 +211,7 @@ contract BBxBarbiePM{
 				*   BBxBarbieToken
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTokenSeriesID(packSeriesId: UInt64){ 
 			pre{ 
 				packSeriesId >= 1:
@@ -207,7 +221,7 @@ contract BBxBarbiePM{
 			emit AdminAddNewTokenSeries(tokenSeriesID: packSeriesId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialBBxBarbieToken(
 			address: Address,
 			packSeriesID: UInt64,
@@ -249,7 +263,7 @@ contract BBxBarbiePM{
 				*/
 		
 		// Add a packSeries to the dictionary to support a new drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCardSeriesID(packSeriesID: UInt64){ 
 			pre{ 
 				packSeriesID >= 1:
@@ -259,7 +273,7 @@ contract BBxBarbiePM{
 			emit AdminAddNewCardSeries(cardSeriesID: packSeriesID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialBBxBarbieCard(
 			address: Address,
 			packHash: String,
@@ -292,7 +306,7 @@ contract BBxBarbiePM{
 				*/
 		
 		// Add a packSeries to the dictionary to support a new drop
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPackSeriesID(packSeriesID: UInt64){ 
 			pre{ 
 				packSeriesID >= 1:
@@ -304,7 +318,7 @@ contract BBxBarbiePM{
 			emit AdminAddNewPackSeries(packSeriesID: packSeriesID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintSequentialBBxBarbiePack(
 			address: Address,
 			packHash: String,
@@ -492,22 +506,22 @@ contract BBxBarbiePM{
 		*   BBxBarbiePM
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledSeries():{ UInt64: Bool}{ 
 		return BBxBarbiePM.BBxBarbieSeriesIdIsLive
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledTokenSeries():{ UInt64: Bool}{ 
 		return BBxBarbiePM.BBxBarbieTokenSeriesIdIsLive
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledCardSeries():{ UInt64: Bool}{ 
 		return BBxBarbiePM.BBxBarbieCardSeriesIdIsLive
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEnabledPackSeries():{ UInt64: Bool}{ 
 		return BBxBarbiePM.BBxBarbiePackSeriesIdIsLive
 	}
@@ -516,7 +530,7 @@ contract BBxBarbiePM{
 		 *  Public Pack Functions
 		 */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimPack(address: Address, packHash: String){ 
 		// this event is picked up by a web hook to verify packHash
 		// if packHash is valid, the backend will mint the pack and
@@ -524,7 +538,7 @@ contract BBxBarbiePM{
 		emit PackClaimBegin(address: address, packHash: packHash)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicRedeemPack(address: Address, pack: @{NonFungibleToken.NFT}, packHash: String){ 
 		pre{ 
 			getCurrentBlock().timestamp >= self.packRedeemStartTime:
@@ -544,17 +558,17 @@ contract BBxBarbiePM{
 		destroy packInstance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackEditionIdByPackSeriesId():{ UInt64: UInt64}{ 
 		return BBxBarbiePack.currentPackEditionIdByPackSeriesId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardEditionIdByPackSeriesId():{ UInt64: UInt64}{ 
 		return BBxBarbieCard.currentCardEditionIdByPackSeriesId
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenEditionIdByPackSeriesId():{ UInt64: UInt64}{ 
 		return BBxBarbieToken.currentTokenEditionIdByPackSeriesId
 	}
@@ -563,7 +577,7 @@ contract BBxBarbiePM{
 		 *  Public Airdrop Functions
 		*/
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun burnAirdrop(
 		walletAddress: Address,
 		tokenSerial: String,

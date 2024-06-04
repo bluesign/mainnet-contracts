@@ -1,4 +1,18 @@
-/** 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/** 
 
 # BaguetteSale contract
 
@@ -115,7 +129,7 @@ contract BaguetteSale{
 		access(all)
 		var parameters: SaleParameters
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @FUSD.Vault): @Record.NFT{ 
 			post{ 
 				result.id == tokenID:
@@ -123,13 +137,13 @@ contract BaguetteSale{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isForSale(tokenID: UInt64): Bool
 	}
 	
@@ -162,7 +176,7 @@ contract BaguetteSale{
 		
 		// List the item for sale. Note that there is no check here to see if the item is tradable (unlocked without decryption key)
 		// However, the during a sale, the transaction of the trade will panic if the item is not tradable
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenID: UInt64, price: UFix64){ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowRecord(recordID: tokenID) != nil:
@@ -176,7 +190,7 @@ contract BaguetteSale{
 			emit ListingCreated(recordID: tokenID, price: price, seller: self.owner?.address!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenID: UInt64){ 
 			pre{ 
 				self.prices[tokenID] != nil:
@@ -193,7 +207,7 @@ contract BaguetteSale{
 			emit ListingCanceled(recordID: tokenID, seller: self.owner?.address!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenID: UInt64, buyTokens: @FUSD.Vault): @Record.NFT{ 
 			pre{ 
 				(self.ownerCollection.borrow()!).borrowRecord(recordID: tokenID) != nil && self.prices[tokenID] != nil:
@@ -236,18 +250,18 @@ contract BaguetteSale{
 			return <-record
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenID: UInt64): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.prices.keys
 		}
 		
 		// Check if the sale is still available
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isForSale(tokenID: UInt64): Bool{ 
 			return (self.ownerCollection.borrow()!).borrowRecord(recordID: tokenID) != nil && self.prices[tokenID] != nil && ((self.ownerCollection.borrow()!).borrowRecord(recordID: tokenID)!).tradable()
 		}
@@ -260,13 +274,13 @@ contract BaguetteSale{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setParameters(parameters: SaleParameters){ 
 			BaguetteSale.parameters = parameters
 		}
 		
 		// Set the vault used to collect market shares
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketVault(marketVault: Capability<&FUSD.Vault>){ 
 			pre{ 
 				marketVault.check():
@@ -275,7 +289,7 @@ contract BaguetteSale{
 			BaguetteSale.marketVault = marketVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLostAndFoundVaults(fVault: Capability<&FUSD.Vault>){ 
 			pre{ 
 				fVault.check():
@@ -285,7 +299,7 @@ contract BaguetteSale{
 		}
 		
 		// createCollection returns a new collection resource to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCustomSaleCollection(
 			parameters: SaleParameters,
 			ownerFVault: Capability<&FUSD.Vault>,
@@ -303,7 +317,7 @@ contract BaguetteSale{
 	// Contract public functions
 	// -----------------------------------------------------------------------
 	// createCollection returns a new collection resource to the caller, with default market & artist shares
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		ownerFVault: Capability<&FUSD.Vault>,
 		ownerNFVault: Capability<&Record.Collection>

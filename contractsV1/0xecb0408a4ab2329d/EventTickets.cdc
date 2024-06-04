@@ -1,4 +1,18 @@
-import CapsuleNFT from "./CapsuleNFT.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import CapsuleNFT from "./CapsuleNFT.cdc"
 
 access(all)
 contract EventTickets: CapsuleNFT{ 
@@ -88,16 +102,16 @@ contract EventTickets: CapsuleNFT{
 	/// It also allows for reading the details of an EventTicket in the Collection.
 	access(all)
 	resource interface EventTicketsCollectionPublic{ 
-		access(all)
-		fun deposit(token: @{CapsuleNFT.NFT})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @{CapsuleNFT.NFT}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: String): &{CapsuleNFT.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: String): &EventTickets.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -120,7 +134,7 @@ contract EventTickets: CapsuleNFT{
 		}
 		
 		/// Removes an NFT from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: String): @{CapsuleNFT.NFT}{ 
 			let address: Address? = self.owner?.address
 			let account: &Account = getAccount(address!)
@@ -133,7 +147,7 @@ contract EventTickets: CapsuleNFT{
 		}
 		
 		/// Takes an NFT, adds it to the Collections dictionary, and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{CapsuleNFT.NFT}){ 
 			let address: Address? = self.owner?.address
 			let account: &Account = getAccount(address!)
@@ -149,13 +163,13 @@ contract EventTickets: CapsuleNFT{
 		}
 		
 		/// Returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [String]{ 
 			return self.ownedNFTs.keys
 		}
 		
 		/// Gets a reference to an NFT in the Collection so that the caller can read its metadata and call its methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(id: String): &{CapsuleNFT.NFT}{ 
 			return (&self.ownedNFTs[id] as &{CapsuleNFT.NFT}?)!
 		}
@@ -166,7 +180,7 @@ contract EventTickets: CapsuleNFT{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: An optional reference to the desired NFT, will be nil if the passed ID does not exist
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFTSafe(id: String): &{CapsuleNFT.NFT}?{ 
 			if let nftRef = &self.ownedNFTs[id] as &{CapsuleNFT.NFT}?{ 
 				return nftRef
@@ -174,7 +188,7 @@ contract EventTickets: CapsuleNFT{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTicket(id: String): &EventTickets.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorised reference to allow downcasting
@@ -191,7 +205,7 @@ contract EventTickets: CapsuleNFT{
 	}
 	
 	/// Public function that anyone can call to create a new empty collection
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @{CapsuleNFT.Collection}{ 
 		emit CollectionCreated()
 		return <-create Collection()
@@ -202,7 +216,7 @@ contract EventTickets: CapsuleNFT{
 	access(all)
 	resource NFTMinter{ 
 		/// Mints a new EventTicket NFT with a new ID and deposits it in the recipients Collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTicket(recipient: &{CapsuleNFT.CollectionPublic}, id: String, ticketId: UInt64, ticketCategory: String, eventName: String, retailPrice: UFix64, mintedTime: String, rarity: String, edition: String, mediaUri: String){ 
 			// Create a new EventTicket
 			var ticket: @EventTickets.NFT <- create NFT(id: id, ticketId: ticketId, ticketCategory: ticketCategory, eventName: eventName, retailPrice: retailPrice, mintedTime: mintedTime, rarity: rarity, edition: edition, mediaUri: mediaUri)

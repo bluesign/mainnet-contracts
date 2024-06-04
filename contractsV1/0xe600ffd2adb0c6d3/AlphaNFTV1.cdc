@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -67,7 +81,7 @@ contract AlphaNFTV1: NonFungibleToken{
 			self.issuedSupply = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}{ 
 			return self.immutableData
 		}
@@ -120,15 +134,15 @@ contract AlphaNFTV1: NonFungibleToken{
 	access(all)
 	resource interface AlphaNFTV1CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAlphaNFTV1(id: UInt64): &AlphaNFTV1.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -163,7 +177,7 @@ contract AlphaNFTV1: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @AlphaNFTV1.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -178,7 +192,7 @@ contract AlphaNFTV1: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAlphaNFTV1(id: UInt64): &AlphaNFTV1.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -241,19 +255,19 @@ contract AlphaNFTV1: NonFungibleToken{
 	}
 	
 	//public function to get all templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplates():{ UInt64: Template}{ 
 		return AlphaNFTV1.templates
 	}
 	
 	//public function to get the latest template id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLatestTemplateId(): UInt64{ 
 		return AlphaNFTV1.nextTemplateId - 1
 	}
 	
 	//public function to get template by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateById(templateId: UInt64): Template{ 
 		pre{ 
 			AlphaNFTV1.templates[templateId] != nil:
@@ -263,7 +277,7 @@ contract AlphaNFTV1: NonFungibleToken{
 	}
 	
 	//public function to get nft-data by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTData(nftId: UInt64): NFTData{ 
 		pre{ 
 			AlphaNFTV1.nfts[nftId] != nil:

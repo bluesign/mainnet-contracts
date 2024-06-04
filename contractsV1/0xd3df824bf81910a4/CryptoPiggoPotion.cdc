@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
@@ -132,7 +146,7 @@ contract CryptoPiggoPotion: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CryptoPiggoPotion.NFT
 			let id: UInt64 = token.id
 			
@@ -144,7 +158,7 @@ contract CryptoPiggoPotion: NonFungibleToken{
 		
 		// transfer takes an NFT ID and a reference to a recipient's collection
 		// and transfers the NFT corresponding to that ID to the recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(id: UInt64, recipient: &{NonFungibleToken.CollectionPublic}){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -157,7 +171,7 @@ contract CryptoPiggoPotion: NonFungibleToken{
 		}
 		
 		// burn destroys an NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			post{ 
 				self.ownedNFTs[id] == nil:
@@ -230,7 +244,7 @@ contract CryptoPiggoPotion: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, file: MetadataViews.IPFSFile, royalties: [MetadataViews.Royalty], metadata:{ String: String}){ 
 			// create a new NFT
 			let newNFT <- create NFT(file: file, royalties: royalties, metadata: self.transformMetadata(metadata))

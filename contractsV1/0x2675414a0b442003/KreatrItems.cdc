@@ -1,4 +1,18 @@
-// import NonFungibleToken from "./NonFungibleToken.cdc"   
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// import NonFungibleToken from "./NonFungibleToken.cdc"   
 // import NonFungibleToken from 0x631e88ae7f1d7c20 // Testnet
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -94,7 +108,7 @@ contract KreatrItems: NonFungibleToken{
 			self.creatorRoyalties = initCreatorRoyalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return "A ".concat("piece of created art called").concat(self.slug).concat(" with id ").concat(self.id.toString())
 		}
@@ -125,15 +139,15 @@ contract KreatrItems: NonFungibleToken{
 	access(all)
 	resource interface KreatrItemsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKreatrItem(id: UInt64): &KreatrItems.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -170,7 +184,7 @@ contract KreatrItems: NonFungibleToken{
 		// and adds the ID to the id array
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @KreatrItems.NFT
 			let id: UInt64 = token.id
 			
@@ -202,7 +216,7 @@ contract KreatrItems: NonFungibleToken{
 		// exposing all of its fields (including the typeID & rarityID).
 		// This is safe as there are no functions that can be called on the KreatrItem.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKreatrItem(id: UInt64): &KreatrItems.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -261,7 +275,7 @@ contract KreatrItems: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(typeID: UInt64, slug: String, thumbnailUri: String, supply: UInt64, uri: String, creatorRoyalties:{ String: UFix64}?): @NFT{ 
 			KreatrItems.totalSupply = KreatrItems.totalSupply + 1
 			var newNFT <- create NFT(initID: KreatrItems.totalSupply, initSlug: slug, initThumbnailUri: thumbnailUri, initTypeID: typeID, initSupply: supply, initUri: uri, initCreatorRoyalties: creatorRoyalties)
@@ -276,7 +290,7 @@ contract KreatrItems: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &KreatrItems.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&KreatrItems.Collection>(KreatrItems.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust KreatrItems.Collection.borowKreatrItem to get the correct itemID

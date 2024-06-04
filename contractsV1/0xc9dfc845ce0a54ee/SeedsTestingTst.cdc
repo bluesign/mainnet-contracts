@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -61,7 +75,7 @@ contract SeedsTestingTst: NonFungibleToken{
 	
 	/// Return the royalty recipients for this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(): [MetadataViews.Royalty]{ 
 		return SeedsTestingTst.royalties
 	}
@@ -101,12 +115,12 @@ contract SeedsTestingTst: NonFungibleToken{
 		///
 		/// This can be used to hash the metadata and verify its integrity.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun encode(): [UInt8]{ 
 			return self.salt.concat(self.image.utf8).concat(self.serialNumber.toBigEndianBytes()).concat(self.name.utf8).concat(self.description.utf8)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hash(): [UInt8]{ 
 			return HashAlgorithm.SHA3_256.hash(self.encode())
 		}
@@ -125,7 +139,7 @@ contract SeedsTestingTst: NonFungibleToken{
 	///
 	/// This function returns nil if the NFT has not yet been revealed.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getMetadata(nftID: UInt64): Metadata?{ 
 		return SeedsTestingTst.metadata[nftID]
 	}
@@ -142,7 +156,7 @@ contract SeedsTestingTst: NonFungibleToken{
 	access(contract)
 	let nftsByHash:{ String: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTIDByHash(hash: String): UInt64?{ 
 		return SeedsTestingTst.nftsByHash[hash]
 	}
@@ -172,7 +186,7 @@ contract SeedsTestingTst: NonFungibleToken{
 		/// This function returns nil if the NFT metadata has
 		/// not yet been revealed.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMetadata(): Metadata?{ 
 			return SeedsTestingTst.metadata[self.id]
 		}
@@ -221,35 +235,35 @@ contract SeedsTestingTst: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveDisplay(_ metadata: Metadata): MetadataViews.Display{ 
 			return MetadataViews.Display(name: metadata.name, description: metadata.description, thumbnail: MetadataViews.IPFSFile(cid: metadata.image, path: nil))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveExternalURL(): MetadataViews.ExternalURL{ 
 			return MetadataViews.ExternalURL("https://flute-app.vercel.app/".concat(self.id.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 			let media = MetadataViews.Media(file: MetadataViews.IPFSFile(cid: "bafkreicrfbblmaduqg2kmeqbymdifawex7rxqq2743mitmeia4zdybmmre", path: nil), mediaType: "image/jpeg")
 			return MetadataViews.NFTCollectionDisplay(name: "SeedsTestingTst", description: "Seeds of Testing", externalURL: MetadataViews.ExternalURL("https://flute-app.vercel.app"), squareImage: media, bannerImage: media, socials:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			return MetadataViews.NFTCollectionData(storagePath: SeedsTestingTst.CollectionStoragePath, publicPath: SeedsTestingTst.CollectionPublicPath, publicCollection: Type<&SeedsTestingTst.Collection>(), publicLinkedType: Type<&SeedsTestingTst.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 					return <-SeedsTestingTst.createEmptyCollection(nftType: Type<@SeedsTestingTst.Collection>())
 				})
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveRoyalties(): MetadataViews.Royalties{ 
 			return MetadataViews.Royalties(SeedsTestingTst.royalties)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveSerial(_ metadata: Metadata): MetadataViews.Serial{ 
 			return MetadataViews.Serial(metadata.serialNumber)
 		}
@@ -263,15 +277,15 @@ contract SeedsTestingTst: NonFungibleToken{
 	access(all)
 	resource interface SeedsTestingTstCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeedsTestingTst(id: UInt64): &SeedsTestingTst.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -304,7 +318,7 @@ contract SeedsTestingTst: NonFungibleToken{
 		/// Deposit an NFT into this collection.
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SeedsTestingTst.NFT
 			let id: UInt64 = token.id
 			
@@ -335,7 +349,7 @@ contract SeedsTestingTst: NonFungibleToken{
 		///
 		/// This function returns nil if the NFT does not exist in this collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSeedsTestingTst(id: UInt64): &SeedsTestingTst.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -389,7 +403,7 @@ contract SeedsTestingTst: NonFungibleToken{
 		/// To mint a blind NFT, specify its metadata hash
 		/// that can later be used to verify the revealed NFT.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(hash: [UInt8]): @SeedsTestingTst.NFT{ 
 			let hexHash = String.encodeHex(hash)
 			
@@ -408,7 +422,7 @@ contract SeedsTestingTst: NonFungibleToken{
 		///
 		/// To reveal an NFT, publish its complete metadata and unique salt value.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun revealNFT(id: UInt64, metadata: Metadata){ 
 			pre{ 
 				SeedsTestingTst.metadata[id] == nil:
@@ -432,7 +446,7 @@ contract SeedsTestingTst: NonFungibleToken{
 		/// This function updates the royalty recipients for all NFTs
 		/// minted by this contract.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalties(_ royalties: [MetadataViews.Royalty]){ 
 			SeedsTestingTst.royalties = royalties
 		}
@@ -440,21 +454,21 @@ contract SeedsTestingTst: NonFungibleToken{
 	
 	/// Return a public path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPublicPath(suffix: String): PublicPath{ 
 		return PublicPath(identifier: "SeedsTestingTst_".concat(suffix))!
 	}
 	
 	/// Return a private path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrivatePath(suffix: String): PrivatePath{ 
 		return PrivatePath(identifier: "SeedsTestingTst_".concat(suffix))!
 	}
 	
 	/// Return a storage path that is scoped to this contract.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoragePath(suffix: String): StoragePath{ 
 		return StoragePath(identifier: "SeedsTestingTst_".concat(suffix))!
 	}

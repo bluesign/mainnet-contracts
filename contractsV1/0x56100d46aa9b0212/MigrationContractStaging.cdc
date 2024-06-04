@@ -1,4 +1,18 @@
-/// This contract is intended for use in the Cadence 1.0 contract migration across the Flow network.
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/// This contract is intended for use in the Cadence 1.0 contract migration across the Flow network.
 ///
 /// In preparation for this milestone, your contract will NEED to be updated! Once you've updated your code for
 /// Cadence 1.0, you MUST stage your contract code in this contract so that the update can be executed as a part of the

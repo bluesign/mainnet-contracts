@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Copied from the EternalShardedCollection contract except with
 	names changed.
 */
@@ -63,7 +77,7 @@ contract EternalShardedCollection{
 		//
 		// Returns: @NonFungibleToken.Collection a Collection containing the moments
 		//		  that were withdrawn
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <-
 				Eternal.createEmptyCollection(nftType: Type<@Eternal.Collection>())
@@ -77,7 +91,7 @@ contract EternalShardedCollection{
 		
 		// deposit takes a Moment and adds it to the Collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Find the bucket this corresponds to
 			let bucket = token.id % self.numBuckets
@@ -94,7 +108,7 @@ contract EternalShardedCollection{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			
@@ -144,7 +158,7 @@ contract EternalShardedCollection{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoment(id: UInt64): &Eternal.NFT?{ 
 			
 			// Get the bucket of the nft to be borrowed
@@ -167,7 +181,7 @@ contract EternalShardedCollection{
 	}
 	
 	// Creates an empty ShardedCollection and returns it to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(numBuckets: UInt64): @ShardedCollection{ 
 		return <-create ShardedCollection(numBuckets: numBuckets)
 	}

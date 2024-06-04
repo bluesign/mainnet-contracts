@@ -1,4 +1,18 @@
-/* SPDX-License-Identifier: UNLICENSED */
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/* SPDX-License-Identifier: UNLICENSED */
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
@@ -128,27 +142,27 @@ contract DimeCollectibleV2: NonFungibleToken{
 			self.history.append(newEntry)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCreators(): [Address]{ 
 			return self.creators
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getHistory(): [[AnyStruct]]{ 
 			return self.history
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPreviousHistory(): [[AnyStruct]]{ 
 			return self.previousHistory
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): Royalties{ 
 			return self.creatorRoyalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasHiddenContent(): Bool{ 
 			return self.hiddenContent != nil
 		}
@@ -165,12 +179,12 @@ contract DimeCollectibleV2: NonFungibleToken{
 	access(all)
 	resource interface DimeCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DimeCollectibleV2.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -180,8 +194,8 @@ contract DimeCollectibleV2: NonFungibleToken{
 			}
 		}
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 	}
 	
 	// Collection
@@ -204,7 +218,7 @@ contract DimeCollectibleV2: NonFungibleToken{
 		
 		// Takes a NFT and adds it to the collection dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DimeCollectibleV2.NFT
 			let id: UInt64 = token.id
 			
@@ -228,7 +242,7 @@ contract DimeCollectibleV2: NonFungibleToken{
 		}
 		
 		// Gets a reference to an NFT in the collection as a DimeCollectibleV2.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectible(id: UInt64): &DimeCollectibleV2.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -269,7 +283,7 @@ contract DimeCollectibleV2: NonFungibleToken{
 	resource NFTMinter{ 
 		// Mints an NFT with a new ID and deposits it in the recipient's
 		// collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTs(collection: &{NonFungibleToken.CollectionPublic}, tokenIds: [UInt64], creators: [Address], content: String, hiddenContent: String?, tradeable: Bool, previousHistory: [[AnyStruct]]?, creatorRoyalties: Royalties){ 
 			var totalAllotment = 0.0
 			for recipient in creatorRoyalties.recipients.values{ 
@@ -296,7 +310,7 @@ contract DimeCollectibleV2: NonFungibleToken{
 	// If it has a collection but does not contain the itemId, return nil.
 	// If it has a collection and that collection contains the itemId,
 	// return a reference to it
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemId: UInt64): &DimeCollectibleV2.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&DimeCollectibleV2.Collection>(DimeCollectibleV2.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		return collection.borrowCollectible(id: itemId)

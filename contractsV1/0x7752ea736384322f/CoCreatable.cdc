@@ -1,4 +1,18 @@
-// A CoCreatable contract is one where the user combines characteristics
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// A CoCreatable contract is one where the user combines characteristics
 // to create an NFT. The contract should employ a set of dictionaries
 // at the top that provide the set from which the user can select the 
 // characteristics
@@ -6,7 +20,7 @@ import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface CoCreatable{ 
 	
 	// The contract should have a dictionary of id to characteristic:
@@ -18,16 +32,16 @@ contract interface CoCreatable{
 	access(contract)
 	var dataAllocations:{ String: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDataAllocations():{ String: UInt64}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface CoCreatableNFT{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCharacteristics():{ String:{ Characteristic}}?
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface Characteristic{ 
 		access(all)
 		var id: UInt64
@@ -72,12 +86,12 @@ contract interface CoCreatable{
 		fun updateCharacteristic(key: String, value: AnyStruct)
 		
 		//Helper function that converts the characteristics to traits
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun convertToTraits(): [MetadataViews.Trait]
 		
 		// Helper function that can return the media associated with this characteristic.
 		// Not all characteristics will have media. For example, this would return the png associated with a garment
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedia(): AnyStruct?
 	}
 }

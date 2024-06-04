@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import AACommon from "./AACommon.cdc"
 
@@ -90,17 +104,17 @@ contract AAFeeManager{
 			self.insurance = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markAsPurchased(){ 
 			self.purchased = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalty(_ r: AACommon.PaymentCut){ 
 			self.royalty = r
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInsurrance(_ b: Bool){ 
 			self.insurance = b
 		}
@@ -118,14 +132,14 @@ contract AAFeeManager{
 			assert(totalRate <= 1.0, message: "Total rate exceed 1.0")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCutForPhysicalItem(nftID: UInt64, cuts: [AACommon.PaymentCut]){ 
 			self.assert(cuts: cuts)
 			AAFeeManager.itemPhysicalCuts[nftID] = cuts
 			emit PhysicalFeeSetting(nftID: nftID, cuts: cuts)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPlatformCut(recipient: Address, rate: UFix64){ 
 			assert(rate <= 1.0, message: "Cut rate must be in range [0..1)")
 			AAFeeManager.platformCut = AACommon.PaymentCut(
@@ -137,14 +151,14 @@ contract AAFeeManager{
 			emit PlatformCutSetting(recipient: recipient, rate: rate)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseNonPhysicalsCuts(cuts: [AACommon.PaymentCut]){ 
 			self.assert(cuts: cuts)
 			AAFeeManager.baseNonPhysicalCuts = cuts
 			emit BaseFeeDigitalSetting(cuts: cuts)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBasePhysicalCuts(forPurchased: Bool, cuts: [AACommon.PaymentCut]){ 
 			self.assert(cuts: cuts)
 			if forPurchased{ 
@@ -155,7 +169,7 @@ contract AAFeeManager{
 			emit BaseFeePhysicalSetting(firstPurchased: forPurchased, cuts: cuts)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAffiliateRate(rate: UFix64){ 
 			pre{ 
 				rate < 1.0:
@@ -166,7 +180,7 @@ contract AAFeeManager{
 			emit AffiliateRateSetting(newRate: rate)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReferralRate(newRate: UFix64){ 
 			pre{ 
 				newRate < 1.0:
@@ -177,7 +191,7 @@ contract AAFeeManager{
 			emit ReferralRateSetting(newRate: newRate)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configFee(
 			plarformRecipient: Address,
 			platformRate: UFix64,
@@ -205,7 +219,7 @@ contract AAFeeManager{
 			emit AffiliateRateSetting(newRate: affiliateRate)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun validatePlatformFee(){ 
 			if AAFeeManager.platformCut == nil{ 
 				return
@@ -217,7 +231,7 @@ contract AAFeeManager{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalty(type: Type, nftID: UInt64, recipient: Address, rate: UFix64){ 
 			let id = AACommon.itemIdentifier(type: type, id: nftID)
 			if AAFeeManager.extradata[id] == nil{ 
@@ -230,7 +244,7 @@ contract AAFeeManager{
 			AAFeeManager.extradata[id] = extradata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInsurrance(type: Type, nftID: UInt64, b: Bool){ 
 			let id = AACommon.itemIdentifier(type: type, id: nftID)
 			if AAFeeManager.extradata[id] == nil{ 
@@ -242,12 +256,12 @@ contract AAFeeManager{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlatformCut(): AACommon.PaymentCut?{ 
 		return self.platformCut
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNonPhysicalsPaymentCuts(type: Type, nftID: UInt64): [AACommon.PaymentCut]{ 
 		let cuts: [AACommon.PaymentCut] = []
 		let id = AACommon.itemIdentifier(type: type, id: nftID)
@@ -259,7 +273,7 @@ contract AAFeeManager{
 		return cuts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPhysicalPaymentCuts(nftID: UInt64): [AACommon.PaymentCut]{ 
 		let cuts: [AACommon.PaymentCut] = []
 		let id = AACommon.itemIdentifier(type: Type<@AAPhysical.NFT>(), id: nftID)
@@ -288,7 +302,7 @@ contract AAFeeManager{
 		return cuts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPaymentCuts(type: Type, nftID: UInt64): [AACommon.PaymentCut]{ 
 		if Type<@AAPhysical.NFT>() == type{ 
 			return self.getPhysicalPaymentCuts(nftID: nftID)
@@ -296,7 +310,7 @@ contract AAFeeManager{
 		return self.getNonPhysicalsPaymentCuts(type: type, nftID: nftID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlatformCuts(referralReceiver: Address?, affiliate: Address?): [AACommon.PaymentCut]?{ 
 		if let platformCut = self.platformCut{ 
 			let cuts: [AACommon.PaymentCut] = []
@@ -315,7 +329,7 @@ contract AAFeeManager{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun paidAffiliateFee(
 		paymentType: Type,
 		affiliate: Address?,

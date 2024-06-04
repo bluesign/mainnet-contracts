@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: The Marketplace Contract for TheFabricant NFTs
 
 	The contract is focussed on handling listings and offers of TheFabricant NFTs
@@ -211,13 +225,13 @@ contract TheFabricantMarketplace{
 	// to allow others to access their listing
 	access(all)
 	resource interface ListingPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingDetails(): TheFabricantMarketplace.ListingDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNFT(): Bool
 	}
 	
@@ -244,7 +258,7 @@ contract TheFabricantMarketplace{
 		// borrowNFT
 		// This will assert in the same way as the NFT standard borrowNFT()
 		// if the NFT is absent, for example if it has been sold via another listing.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}{ 
 			let ref = (self.nftProviderCapability.borrow()!).borrowNFT(self.getListingDetails().nftID)
 			assert(ref.isInstance(self.getListingDetails().nftType), message: "token has wrong type")
@@ -254,13 +268,13 @@ contract TheFabricantMarketplace{
 		
 		// getListingDetails
 		// Get the details of the current state of the Listing as a struct.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingDetails(): ListingDetails{ 
 			return self.listingDetails
 		}
 		
 		// checks whether owner of listing contains the nft for cleanUp
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun containsNFT(): Bool{ 
 			return (self.nftProviderCapability.borrow()!).getIDs().contains(self.listingDetails.nftID)
 		}
@@ -269,7 +283,7 @@ contract TheFabricantMarketplace{
 		// Purchase the listing, buying the token.
 		// This pays the beneficiaries and returns the token to the buyer.
 		// can only be called through the Listings resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				payment.isInstance(self.listingDetails.salePaymentVaultType):
@@ -334,7 +348,7 @@ contract TheFabricantMarketplace{
 	
 	access(all)
 	resource interface ListingsManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -345,11 +359,11 @@ contract TheFabricantMarketplace{
 			salePaymentVaultType: Type,
 			price: UFix64,
 			saleCuts: [
-				SaleCut
+				TheFabricantMarketplace.SaleCut
 			]
 		): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingID: String)
 	}
 	
@@ -358,16 +372,16 @@ contract TheFabricantMarketplace{
 	//
 	access(all)
 	resource interface ListingsPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingID: String): &Listing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanUp(listingID: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseListing(
 			listingID: String,
 			recipientCap: &{NonFungibleToken.Receiver},
@@ -394,7 +408,7 @@ contract TheFabricantMarketplace{
 		//
 		// createListing
 		// Create a listing if the nft is not already listed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64, paymentCapability: Capability<&{FungibleToken.Receiver}>, salePaymentVaultType: Type, price: UFix64, saleCuts: [SaleCut]): String{ 
 			pre{ 
 				nftProviderCapability.check():
@@ -422,7 +436,7 @@ contract TheFabricantMarketplace{
 		// removeListing
 		// Remove a Listing that has not yet been purchased from the collection and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingID: String){ 
 			let listing <- self.listings.remove(key: listingID) ?? panic("missing Listing")
 			emit NFTDelisted(listingID: listingID, seller: self.owner?.address!)
@@ -433,7 +447,7 @@ contract TheFabricantMarketplace{
 		// purchase an availableListing
 		// deposits the nft from seller to buyer,
 		// deposits FungibleToken from buyer to seller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseListing(listingID: String, recipientCap: &{NonFungibleToken.Receiver}, payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.listings[listingID] != nil:
@@ -452,7 +466,7 @@ contract TheFabricantMarketplace{
 		// mainly used to prevent ghost listing in 2 cases
 		// 1) when user transfers nft to another account 
 		// 2) when user accepts an offer for the nft when there is still a listing available
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanUp(listingID: String){ 
 			let ref = self.borrowListing(listingID: listingID)
 			if ref != nil{ 
@@ -465,7 +479,7 @@ contract TheFabricantMarketplace{
 		// borrowListing
 		// Returns a read-only view of the Listing for the given listingID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingID: String): &Listing?{ 
 			return &self.listings[listingID] as &Listing?
 		}
@@ -473,13 +487,13 @@ contract TheFabricantMarketplace{
 		// getListingIDs
 		// Returns an array of the Listing IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [String]{ 
 			return self.listings.keys
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createListings(): @Listings{ 
 		return <-create Listings()
 	}
@@ -550,7 +564,7 @@ contract TheFabricantMarketplace{
 	// to allow others to access their offer
 	access(all)
 	resource interface OfferPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferDetails(): TheFabricantMarketplace.OfferDetails
 	}
 	
@@ -576,7 +590,7 @@ contract TheFabricantMarketplace{
 		// getOfferDetails
 		// Get the details of the current state of the Offer as a struct.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferDetails(): OfferDetails{ 
 			return self.offerDetails
 		}
@@ -585,7 +599,7 @@ contract TheFabricantMarketplace{
 		// function that accepts an offer, returning the nft
 		// This pays the beneficiaries and transfers the nft to the user who made the offer
 		// can only be called through the Offers resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(nft: @{NonFungibleToken.NFT}): @{FungibleToken.Vault}{ 
 			pre{ 
 				nft.isInstance(self.offerDetails.nftType):
@@ -651,7 +665,7 @@ contract TheFabricantMarketplace{
 	
 	access(all)
 	resource interface OffersManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeOffer(
 			initialNFTOwner: Address,
 			ftProviderCapability: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>,
@@ -661,11 +675,11 @@ contract TheFabricantMarketplace{
 			nftReceiverCapability: Capability<&{NonFungibleToken.CollectionPublic}>,
 			price: UFix64,
 			saleCuts: [
-				SaleCut
+				TheFabricantMarketplace.SaleCut
 			]
 		): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(offerID: String)
 	}
 	
@@ -674,26 +688,26 @@ contract TheFabricantMarketplace{
 	//
 	access(all)
 	resource interface OffersPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowOffer(offerID: String): &Offer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(
 			offerID: String,
 			recipientCap: Capability<&{FungibleToken.Receiver}>,
 			nft: @{NonFungibleToken.NFT}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(offerID: String): Fix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeExpiredOffers()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOfferExpired(offerID: String): Bool
 	}
 	
@@ -715,7 +729,7 @@ contract TheFabricantMarketplace{
 		//
 		// makeOffer
 		// Create an offer for an nft if user has not already made an offer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun makeOffer(initialNFTOwner: Address, ftProviderCapability: Capability<&{FungibleToken.Provider, FungibleToken.Balance}>, offerPaymentVaultType: Type, nftType: Type, nftID: UInt64, nftReceiverCapability: Capability<&{NonFungibleToken.CollectionPublic}>, price: UFix64, saleCuts: [SaleCut]): String{ 
 			pre{ 
 				ftProviderCapability.check():
@@ -745,7 +759,7 @@ contract TheFabricantMarketplace{
 		// Removes an offer from offer dictionary
 		//
 		// Parameters: offerID: the ID of the token to be removed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeOffer(offerID: String){ 
 			let offer <- self.offers.remove(key: offerID) ?? panic("missing Offer")
 			
@@ -756,7 +770,7 @@ contract TheFabricantMarketplace{
 		
 		// acceptOffer lets a user transfer nft to user who made the offer, and be sent FungibleToken based on price
 		// only if offer has not expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptOffer(offerID: String, recipientCap: Capability<&{FungibleToken.Receiver}>, nft: @{NonFungibleToken.NFT}){ 
 			pre{ 
 				self.offers[offerID] != nil:
@@ -780,7 +794,7 @@ contract TheFabricantMarketplace{
 		// borrowOffer
 		// Returns a read-only view of the Offer for the given offerID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun borrowOffer(offerID: String): &Offer?{ 
 			return &self.offers[offerID] as &Offer?
 		}
@@ -788,13 +802,13 @@ contract TheFabricantMarketplace{
 		// getOfferIDs
 		// Returns an array of the Offer IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferIDs(): [String]{ 
 			return self.offers.keys
 		}
 		
 		// public function that anyone can call to remove offers that have expired 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeExpiredOffers(){ 
 			for offerID in self.offers.keys{ 
 				if self.isOfferExpired(offerID: offerID){ 
@@ -804,7 +818,7 @@ contract TheFabricantMarketplace{
 		}
 		
 		// get the time remaining of an NFT's offer
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(offerID: String): Fix64{ 
 			let offerDuration = TheFabricantMarketplace.offerDuration
 			let offer = (self.borrowOffer(offerID: offerID)!).getOfferDetails()
@@ -815,7 +829,7 @@ contract TheFabricantMarketplace{
 		}
 		
 		// check if offer of NFT has expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOfferExpired(offerID: String): Bool{ 
 			let timeRemaining = self.timeRemaining(offerID: offerID)
 			return timeRemaining <= Fix64(0.0)
@@ -823,7 +837,7 @@ contract TheFabricantMarketplace{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createOffers(): @Offers{ 
 		return <-create Offers()
 	}
@@ -834,7 +848,7 @@ contract TheFabricantMarketplace{
 	resource Admin{ 
 		
 		// change contract royalty address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setChannelFeeCap(channelFeeCap: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				channelFeeCap.check():
@@ -845,7 +859,7 @@ contract TheFabricantMarketplace{
 		}
 		
 		// change the duration of offers before they expire
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOfferDuration(duration: UFix64){ 
 			TheFabricantMarketplace.offerDuration = duration
 			emit OfferDurationChanged(duration: duration)
@@ -853,30 +867,30 @@ contract TheFabricantMarketplace{
 	}
 	
 	// get the amount of times each nft is sold/accepted by listing/offerID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTSaleCounts():{ String: UInt32}{ 
 		return TheFabricantMarketplace.nftSaleCount
 	}
 	
 	// get the amount of times an nft is sold/accepted by listing/offerID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTSaleCount(typeID: String): UInt32{ 
 		return TheFabricantMarketplace.nftSaleCount[typeID]!
 	}
 	
 	// return the channelFeeCapability of the marketplace
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getChannelFeeCap(): Capability<&{FungibleToken.Receiver}>?{ 
 		return TheFabricantMarketplace.channelFeeCap
 	}
 	
 	// concat an nft's type and id into a single stirng
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun typeID(type: Type, id: UInt64): String{ 
 		return type.identifier.concat("_").concat(id.toString())
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	init(){ 
 		self.ListingsPublicPath = /public/fabricantPublicTheFabricantMarketplaceListings0021
 		self.ListingsStoragePath = /storage/fabricantStorageTheFabricantMarketplaceListings0021

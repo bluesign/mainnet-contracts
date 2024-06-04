@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -87,7 +101,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 			self.description = description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			return self.metadata
 		}
@@ -119,21 +133,21 @@ contract ExperiaNFTContract: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRefNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowExperiaNFT(id: UInt64): &ExperiaNFTContract.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -177,7 +191,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 		
 		/*Function to deposit a  NFT in the collection*/
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @ExperiaNFTContract.NFT
 			let id: UInt64 = token.id
 			self.ownedNFTs[token.id] <-! token
@@ -191,7 +205,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 		}
 		
 		/*Function get Ref NFT*/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRefNFT(id: UInt64): &{NonFungibleToken.NFT}{ 
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
@@ -203,14 +217,14 @@ contract ExperiaNFTContract: NonFungibleToken{
 		}
 		
 		/*Function borrow Experia View NFT*/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowExperiaNFT(id: UInt64): &ExperiaNFTContract.NFT?{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return ref as! &ExperiaNFTContract.NFT?
 		}
 		
 		// fun to check if the NFT exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -235,10 +249,10 @@ contract ExperiaNFTContract: NonFungibleToken{
 	// to add the first NFTs to an empty collection.
 	access(all)
 	resource interface NFTCollectionReceiver{ 
-		access(all)
-		fun generateNFT(amount: UInt64, collection: Capability<&ExperiaNFTContract.Collection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun generateNFT(amount: UInt64, collection: Capability<&ExperiaNFTContract.Collection>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuantityAvailablesForCreate(): Int
 	}
 	
@@ -277,7 +291,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 			self.generateNFT(amount: amountToCreate, collection: collection)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun generateNFT(amount: UInt64, collection: Capability<&ExperiaNFTContract.Collection>){ 
 			if Int(amount) < 0{ 
 				panic("Error amount should be greather than 0")
@@ -304,7 +318,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 			self.counteriDs = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuantityAvailablesForCreate(): Int{ 
 			return Int(self.maximum) - self.collectionNFT.length
 		}
@@ -312,7 +326,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 	
 	access(all)
 	resource NFTMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTTemplate(name: String, metadata:{ String: AnyStruct}, thumbnail: String, description: String, amountToCreate: UInt64, maximum: UInt64, collection: Capability<&ExperiaNFTContract.Collection>): @NFTTemplate{ 
 			emit CreateNFTCollection(amount: amountToCreate, maxNFTs: maximum)
 			return <-create NFTTemplate(name: name, metadata: metadata, thumbnail: thumbnail, description: description, amountToCreate: amountToCreate, maximum: maximum, collection: collection)
@@ -324,7 +338,7 @@ contract ExperiaNFTContract: NonFungibleToken{
 		return <-create Collection(name: "", metadata:{} )
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollectionNFT(name: String, metadata:{ String: AnyStruct}): @{NonFungibleToken.Collection}{ 
 		var newID = ExperiaNFTContract.totalCollection + 1
 		ExperiaNFTContract.totalCollection = newID

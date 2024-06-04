@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -157,7 +171,7 @@ contract GaiaPackNFT: NonFungibleToken{
 	access(contract)
 	let series:{ UInt64: Series}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getSeries(id: UInt64): &Series?{ 
 		return &self.series[id] as &Series?
 	}
@@ -264,7 +278,7 @@ contract GaiaPackNFT: NonFungibleToken{
 		}
 		
 		// Verify that commit hash matches token identifiers and salt.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun verify(_ contents: [String], _ salt: String): Bool{ 
 			var hash = self.h(salt.utf8)
 			for i in contents{ 
@@ -275,7 +289,7 @@ contract GaiaPackNFT: NonFungibleToken{
 		}
 		
 		// Once a reveal is requested, packs can be revealed by anyone with the correct nft identifiers and salt.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(id: UInt64, contents: [String], salt: String){ 
 			pre{ 
 				self.status == PackStatus.RevealRequested:
@@ -305,7 +319,7 @@ contract GaiaPackNFT: NonFungibleToken{
 		
 		// Once a pack open is requested, it can be opened by anyone with the correct NFTs.
 		// Packs will be revealed when opened if they aren't already.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(id: UInt64, nfts: @[{NonFungibleToken.NFT}], salt: String?){ 
 			pre{ 
 				self.status == PackStatus.OpenRequested:
@@ -353,7 +367,7 @@ contract GaiaPackNFT: NonFungibleToken{
 	access(contract)
 	let packStates:{ UInt64: PackState}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getPackState(nftID: UInt64): &PackState?{ 
 		return &self.packStates[nftID] as &PackState?
 	}
@@ -373,20 +387,20 @@ contract GaiaPackNFT: NonFungibleToken{
 		access(all)
 		let id: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun state(): &GaiaPackNFT.PackState
 	}
 	
 	// Exclusive owner accessible fields/methods.
 	access(all)
 	resource interface PackNFTOwner{ 
-		access(all)
-		fun requestReveal(shouldOpen: Bool, receiverCap: Capability<&{NonFungibleToken.Receiver}>?)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun requestReveal(shouldOpen: Bool, receiverCap: Capability<&{NonFungibleToken.Receiver}>?): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestOpen(receiverCap: Capability<&{NonFungibleToken.Receiver}>)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReceiverCap(receiverCap: Capability<&{NonFungibleToken.Receiver}>)
 	}
 	
@@ -396,29 +410,29 @@ contract GaiaPackNFT: NonFungibleToken{
 		access(all)
 		let id: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun state(): &GaiaPackNFT.PackState{ 
 			return GaiaPackNFT.getPackState(nftID: self.id)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun series(): &GaiaPackNFT.Series{ 
 			return GaiaPackNFT.getSeries(id: self.state().seriesID)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setReceiverCap(receiverCap: Capability<&{NonFungibleToken.Receiver}>){ 
 			GaiaPackNFT.setReceiverCap(nftID: self.id, receiverCap: receiverCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestReveal(shouldOpen: Bool, receiverCap: Capability<&{NonFungibleToken.Receiver}>?){ 
 			GaiaPackNFT.requestReveal(nftID: self.id, shouldOpen: shouldOpen, receiverCap: receiverCap)
 		}
 		
 		// Request pack open. If a pack owner calls requestReveal() and shouldOpen is true, a transactor will
 		// reveal and open the pack. Meaning, an existing reveal capability cannot be updated in this txn.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestOpen(receiverCap: Capability<&{NonFungibleToken.Receiver}>){ 
 			GaiaPackNFT.requestOpen(nftID: self.id, receiverCap: receiverCap)
 		}
@@ -534,22 +548,22 @@ contract GaiaPackNFT: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionOwner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaPackNFT(id: UInt64): &GaiaPackNFT.NFT
 	}
 	
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaPackNFTPublic(id: UInt64): &GaiaPackNFT.NFT
 	}
 	
@@ -573,7 +587,7 @@ contract GaiaPackNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GaiaPackNFT.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -592,7 +606,7 @@ contract GaiaPackNFT: NonFungibleToken{
 		}
 		
 		// Public references of NFT are restricted
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaPackNFTPublic(id: UInt64): &GaiaPackNFT.NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -603,7 +617,7 @@ contract GaiaPackNFT: NonFungibleToken{
 		}
 		
 		// Only collection owner can borrow an unrestricted reference to GaiaPackNFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaPackNFT(id: UInt64): &GaiaPackNFT.NFT{ 
 			pre{ 
 				self.ownedNFTs.containsKey(id):
@@ -640,7 +654,7 @@ contract GaiaPackNFT: NonFungibleToken{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(id: UInt64, commitHash: String, seriesID: UInt64): @{NonFungibleToken.NFT}{ 
 			let series = GaiaPackNFT.getSeries(id: seriesID) ?? panic("Missing series with ID ".concat(seriesID.toString()))
 			return <-series.mintNFT(id: id, commitHash: commitHash)
@@ -649,40 +663,40 @@ contract GaiaPackNFT: NonFungibleToken{
 	
 	access(all)
 	resource interface Operator{ 
-		access(all)
-		fun createMinter(): @Minter
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createMinter(): @GaiaPackNFT.Minter
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSeries(id: UInt64, name: String, description: String, packDisplay: GaiaPackNFT.PackDisplay, maxSupply: UInt64?)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(nftID: UInt64, contents: [String], salt: String)
 	}
 	
 	access(all)
 	resource Owner: Operator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMinter(): @Minter{ 
 			return <-create Minter()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSeries(id: UInt64, name: String, description: String, packDisplay: GaiaPackNFT.PackDisplay, maxSupply: UInt64?){ 
 			let series = GaiaPackNFT.Series(id: id, name: name, description: description, packDisplay: packDisplay, maxSupply: maxSupply)
 			GaiaPackNFT.addSeries(series: series)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(nftID: UInt64, contents: [String], salt: String){ 
 			GaiaPackNFT.ownerReveal(nftID: nftID, contents: contents, salt: salt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionDisplay(collectionDisplay: MetadataViews.NFTCollectionDisplay){ 
 			GaiaPackNFT.collectionDisplay = collectionDisplay
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalties(royalties: MetadataViews.Royalties?){ 
 			GaiaPackNFT.royalties = royalties
 		}

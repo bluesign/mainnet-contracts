@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -31,115 +45,115 @@ contract Arlequin{
 	
 	// Query Functions
 	/* For ArleePartner */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkArleePartnerNFT(addr: Address): Bool{ 
 		return ArleePartner.checkArleePartnerNFT(addr: addr)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerNFTIDs(addr: Address): [UInt64]?{ 
 		return ArleePartner.getArleePartnerNFTIDs(addr: addr)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerNFTName(id: UInt64): String?{ 
 		return ArleePartner.getArleePartnerNFTName(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerNFTNames(addr: Address): [String]?{ 
 		return ArleePartner.getArleePartnerNFTNames(addr: addr)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerAllNFTNames():{ UInt64: String}{ 
 		return ArleePartner.getAllArleePartnerNFTNames()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerRoyalties():{ String: ArleePartner.Royalty}{ 
 		return ArleePartner.getRoyalties()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerRoyaltiesByPartner(partner: String): ArleePartner.Royalty?{ 
 		return ArleePartner.getPartnerRoyalty(partner: partner)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerOwner(id: UInt64): Address?{ 
 		return ArleePartner.getOwner(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerMintable():{ String: Bool}{ 
 		return ArleePartner.getMintable()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerTotalSupply(): UInt64{ 
 		return ArleePartner.totalSupply
 	}
 	
 	// For Minting 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerMintPrice(): UFix64{ 
 		return Arlequin.arleepartnerNFTPrice
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleePartnerSplitRatio(): UFix64{ 
 		return Arlequin.partnerSplitRatio
 	}
 	
 	/* For ArleeScene */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneNFTIDs(addr: Address): [UInt64]?{ 
 		return ArleeScene.getArleeSceneIDs(addr: addr)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneRoyalties(): [ArleeScene.Royalty]{ 
 		return ArleeScene.getRoyalty()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneCID(id: UInt64): String?{ 
 		return ArleeScene.getArleeSceneCID(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllArleeSceneCID():{ UInt64: String}{ 
 		return ArleeScene.getAllArleeSceneCID()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneFreeMintAcct():{ Address: UInt64}{ 
 		return ArleeScene.getFreeMintAcct()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getArleeSceneFreeMintQuota(addr: Address): UInt64?{ 
 		return ArleeScene.getFreeMintQuota(addr: addr)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneOwner(id: UInt64): Address?{ 
 		return ArleeScene.getOwner(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneMintable(): Bool{ 
 		return ArleeScene.mintable
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneTotalSupply(): UInt64{ 
 		return ArleeScene.totalSupply
 	}
 	
 	// For Minting 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArleeSceneMintPrice(): UFix64{ 
 		return Arlequin.sceneNFTPrice
 	}
@@ -147,43 +161,43 @@ contract Arlequin{
 	access(all)
 	resource ArleePartnerAdmin{ 
 		// ArleePartner NFT Admin Functinos
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPartner(creditor: String, addr: Address, cut: UFix64){ 
 			ArleePartner.addPartner(creditor: creditor, addr: addr, cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePartner(creditor: String){ 
 			ArleePartner.removePartner(creditor: creditor)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketplaceCut(cut: UFix64){ 
 			ArleePartner.setMarketplaceCut(cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPartnerCut(partner: String, cut: UFix64){ 
 			ArleePartner.setPartnerCut(partner: partner, cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMintable(mintable: Bool){ 
 			ArleePartner.setMintable(mintable: mintable)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setSpecificPartnerNFTMintable(partner: String, mintable: Bool){ 
 			ArleePartner.setSpecificPartnerNFTMintable(partner: partner, mintable: mintable)
 		}
 		
 		// for Minting
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setArleePartnerMintPrice(price: UFix64){ 
 			Arlequin.arleepartnerNFTPrice = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setArleePartnerSplitRatio(ratio: UFix64){ 
 			pre{ 
 				ratio <= 1.0:
@@ -193,7 +207,7 @@ contract Arlequin{
 		}
 		
 		// Add flexibility to giveaway : an Admin mint function.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminMintArleePartnerNFT(partner: String){ 
 			// get all merchant receiving vault references 
 			let recipientCap =
@@ -210,52 +224,52 @@ contract Arlequin{
 	access(all)
 	resource ArleeSceneAdmin{ 
 		// Arlee Scene NFT Admin Functinos
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketplaceCut(cut: UFix64){ 
 			ArleeScene.setMarketplaceCut(cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFreeMintAcct(addr: Address, mint: UInt64){ 
 			ArleeScene.addFreeMintAcct(addr: addr, mint: mint)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchAddFreeMintAcct(list:{ Address: UInt64}){ 
 			ArleeScene.batchAddFreeMintAcct(list: list)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFreeMintAcct(addr: Address){ 
 			ArleeScene.removeFreeMintAcct(addr: addr)
 		}
 		
 		// set an acct's free minting limit
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFreeMintAcctQuota(addr: Address, mint: UInt64){ 
 			ArleeScene.setFreeMintAcctQuota(addr: addr, mint: mint)
 		}
 		
 		// add to an acct's free minting limit
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFreeMintAcctQuota(addr: Address, additionalMint: UInt64){ 
 			ArleeScene.addFreeMintAcctQuota(addr: addr, additionalMint: additionalMint)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMintable(mintable: Bool){ 
 			ArleeScene.setMintable(mintable: mintable)
 		}
 		
 		// for minting
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setArleeSceneMintPrice(price: UFix64){ 
 			Arlequin.sceneNFTPrice = price
 		}
 	}
 	
 	/* Public Minting for ArleePartnerNFT */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintArleePartnerNFT(buyer: Address, partner: String, paymentVault: @{FungibleToken.Vault}){ 
 		pre{ 
 			paymentVault.balance >= Arlequin.arleepartnerNFTPrice:
@@ -291,7 +305,7 @@ contract Arlequin{
 	}
 	
 	/* Public Minting for ArleeSceneNFT */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintSceneNFT(
 		buyer: Address,
 		cid: String,
@@ -320,7 +334,7 @@ contract Arlequin{
 	}
 	
 	/* Free Minting for ArleeSceneNFT */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintSceneFreeMintNFT(buyer: Address, cid: String, description: String){ 
 		pre{ 
 			Arlequin.getArleeSceneFreeMintQuota(addr: buyer) != nil:

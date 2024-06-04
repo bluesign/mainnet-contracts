@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -28,12 +42,12 @@ contract StarlyMetadata{
 			self.cards = cards
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insertCard(cardID: UInt32, card: StarlyMetadataViews.Card){ 
 			self.cards.insert(key: cardID, card)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCard(cardID: UInt32){ 
 			self.cards.remove(key: cardID)
 		}
@@ -54,7 +68,7 @@ contract StarlyMetadata{
 	access(all)
 	let EditorProxyPublicPath: PublicPath
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [
 			Type<MetadataViews.Display>(),
@@ -68,7 +82,7 @@ contract StarlyMetadata{
 		]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(starlyID: String, view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.Display>():
@@ -90,7 +104,7 @@ contract StarlyMetadata{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDisplay(starlyID: String): MetadataViews.Display?{ 
 		if let cardEdition = self.getCardEdition(starlyID: starlyID){ 
 			let card = cardEdition.card
@@ -110,7 +124,7 @@ contract StarlyMetadata{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEdition(starlyID: String): MetadataViews.Edition?{ 
 		if let cardEdition = self.getCardEdition(starlyID: starlyID){ 
 			let card = cardEdition.card
@@ -121,7 +135,7 @@ contract StarlyMetadata{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(starlyID: String): MetadataViews.Royalties?{ 
 		if let cardEdition = self.getCardEdition(starlyID: starlyID){ 
 			let creator = cardEdition.collection.creator
@@ -132,7 +146,7 @@ contract StarlyMetadata{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExternalURL(starlyID: String): MetadataViews.ExternalURL?{ 
 		if let cardEdition = self.getCardEdition(starlyID: starlyID){ 
 			return MetadataViews.ExternalURL(cardEdition.url)
@@ -140,7 +154,7 @@ contract StarlyMetadata{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTraits(starlyID: String): MetadataViews.Traits?{ 
 		if let cardEdition = self.getCardEdition(starlyID: starlyID){ 
 			let collection = cardEdition.collection
@@ -151,7 +165,7 @@ contract StarlyMetadata{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 		return MetadataViews.NFTCollectionDisplay(
 			name: "Starly",
@@ -177,7 +191,7 @@ contract StarlyMetadata{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCardEdition(starlyID: String): StarlyMetadataViews.CardEdition?{ 
 		let starlyID = StarlyIDParser.parse(starlyID: starlyID)
 		let collectionMetadataOptional = self.metadata[starlyID.collectionID]
@@ -192,37 +206,41 @@ contract StarlyMetadata{
 	
 	access(all)
 	resource interface IEditor{ 
-		access(all)
-		fun putCollectionCard(collectionID: String, cardID: UInt32, card: StarlyMetadataViews.Card)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun putCollectionCard(
+			collectionID: String,
+			cardID: UInt32,
+			card: StarlyMetadataViews.Card
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun putMetadata(collectionID: String, metadata: CollectionMetadata)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteCollectionCard(collectionID: String, cardID: UInt32)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteMetadata(collectionID: String)
 	}
 	
 	access(all)
 	resource Editor: IEditor{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun putCollectionCard(collectionID: String, cardID: UInt32, card: StarlyMetadataViews.Card){ 
 			StarlyMetadata.metadata[collectionID]?.insertCard(cardID: cardID, card: card)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun putMetadata(collectionID: String, metadata: CollectionMetadata){ 
 			StarlyMetadata.metadata.insert(key: collectionID, metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteCollectionCard(collectionID: String, cardID: UInt32){ 
 			StarlyMetadata.metadata[collectionID]?.removeCard(cardID: cardID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteMetadata(collectionID: String){ 
 			StarlyMetadata.metadata.remove(key: collectionID)
 		}
@@ -230,8 +248,8 @@ contract StarlyMetadata{
 	
 	access(all)
 	resource interface EditorProxyPublic{ 
-		access(all)
-		fun setEditorCapability(cap: Capability<&Editor>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setEditorCapability(cap: Capability<&StarlyMetadata.Editor>): Void
 	}
 	
 	access(all)
@@ -239,27 +257,27 @@ contract StarlyMetadata{
 		access(self)
 		var editorCapability: Capability<&Editor>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEditorCapability(cap: Capability<&Editor>){ 
 			self.editorCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun putCollectionCard(collectionID: String, cardID: UInt32, card: StarlyMetadataViews.Card){ 
 			((self.editorCapability!).borrow()!).putCollectionCard(collectionID: collectionID, cardID: cardID, card: card)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun putMetadata(collectionID: String, metadata: CollectionMetadata){ 
 			((self.editorCapability!).borrow()!).putMetadata(collectionID: collectionID, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteCollectionCard(collectionID: String, cardID: UInt32){ 
 			((self.editorCapability!).borrow()!).deleteCollectionCard(collectionID: collectionID, cardID: cardID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteMetadata(collectionID: String){ 
 			((self.editorCapability!).borrow()!).deleteMetadata(collectionID: collectionID)
 		}
@@ -269,14 +287,14 @@ contract StarlyMetadata{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEditorProxy(): @EditorProxy{ 
 		return <-create EditorProxy()
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewEditor(): @Editor{ 
 			return <-create Editor()
 		}

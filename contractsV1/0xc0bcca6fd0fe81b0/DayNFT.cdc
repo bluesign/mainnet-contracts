@@ -1,4 +1,18 @@
-// Implementation of the DayNFT contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Implementation of the DayNFT contract
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -101,7 +115,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// Get the best bid for today's auction
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBestBidWithToday(today: DateUtils.Date): PublicBid{ 
 			if today.equals(self.bestBid.date){ 
 				return PublicBid(amount: self.bestBid.vault.balance, user: self.bestBid.recipient, date: today)
@@ -111,7 +125,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// Verify if a user has any NFTs to claim after winning one or more auctions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun nbNFTsToClaimWithToday(address: Address, today: DateUtils.Date): Int{ 
 			var res = 0
 			if self.NFTsDue[address] != nil{ 
@@ -124,7 +138,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// Handle new incoming bid
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun handleBid(newBid: @Bid, today: DateUtils.Date){ 
 			var bid <- newBid
 			if self.bestBid.date.equals(today) || self.bestBid.vault.balance == 0.0{ 
@@ -181,7 +195,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// Claim NFTs due to the user, and deposit them into their collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimNFTsWithToday(address: Address, today: DateUtils.Date): Int{ 
 			var res = 0
 			let receiver = getAccount(address).capabilities.get<&{DayNFT.CollectionPublic}>(DayNFT.CollectionPublicPath).borrow<&{DayNFT.CollectionPublic}>() ?? panic("Could not get receiver reference to the NFT Collection")
@@ -217,7 +231,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// Get amount of Flow due to the user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tokensToClaim(address: Address): UFix64{ 
 			// Borrow the recipient's public NFT collection reference
 			let holder = getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath).borrow<&DayNFT.Collection>() ?? panic("Could not get receiver reference to the NFT Collection")
@@ -231,7 +245,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// Claim Flow due to the user
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimTokens(address: Address): UFix64{ 
 			// Borrow the recipient's public NFT collection reference
 			let holder = getAccount(address).capabilities.get<&DayNFT.Collection>(DayNFT.CollectionPublicPath).borrow<&DayNFT.Collection>() ?? panic("Could not get receiver reference to the NFT Collection")
@@ -252,7 +266,7 @@ contract DayNFT: NonFungibleToken{
 			return amountDue
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun max(_ a: UFix64, _ b: UFix64): UFix64{ 
 			var res = a
 			if b > a{ 
@@ -262,7 +276,7 @@ contract DayNFT: NonFungibleToken{
 		}
 		
 		// Deposit Flow into the contract, to be redistributed among NFT holders
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(vault: @{FungibleToken.Vault}){ 
 			let amount = vault.balance
 			var distribute = amount * self.percentageDistributed
@@ -347,15 +361,15 @@ contract DayNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDayNFT(id: UInt64): &DayNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -389,7 +403,7 @@ contract DayNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @DayNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -414,7 +428,7 @@ contract DayNFT: NonFungibleToken{
 		
 		// Gets a reference to an NFT in the collection as a DayNFT,
 		// exposing all of its fields.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowDayNFT(id: UInt64): &DayNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -453,7 +467,7 @@ contract DayNFT: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(date: DateUtils.Date, title: String): @NFT{ 
 			
 			// create a new NFT
@@ -495,7 +509,7 @@ contract DayNFT: NonFungibleToken{
 	}
 	
 	// Make a bid on today's NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeBid(vault: @FlowToken.Vault, recipient: Address, title: String, date: DateUtils.Date){ 
 		let today = DateUtils.getDate()
 		self.makeBidWithToday(vault: <-vault, recipient: recipient, title: title, date: date, today: today)
@@ -537,7 +551,7 @@ contract DayNFT: NonFungibleToken{
 	}
 	
 	// Get the best bid for today's auction
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBestBid(): PublicBid{ 
 		var today = DateUtils.getDate()
 		return self.getBestBidWithToday(today: today)
@@ -550,7 +564,7 @@ contract DayNFT: NonFungibleToken{
 	}
 	
 	// Verify if a user has any NFTs to claim after winning one or more auctions
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun nbNFTsToClaim(address: Address): Int{ 
 		let today = DateUtils.getDate()
 		return self.nbNFTsToClaimWithToday(address: address, today: today)
@@ -576,13 +590,13 @@ contract DayNFT: NonFungibleToken{
 	}
 	
 	// Get amount of Flow due to the user
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tokensToClaim(address: Address): UFix64{ 
 		return self.manager.tokensToClaim(address: address)
 	}
 	
 	// Claim Flow due to the user
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun claimTokens(address: Address): UFix64{ 
 		return self.manager.claimTokens(address: address)
 	}
@@ -591,7 +605,7 @@ contract DayNFT: NonFungibleToken{
 	access(all)
 	resource Admin: FungibleToken.Receiver{ 
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			DayNFT.manager.deposit(vault: <-from)
 		}
 		

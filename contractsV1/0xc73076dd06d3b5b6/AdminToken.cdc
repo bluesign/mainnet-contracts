@@ -1,4 +1,18 @@
-import Clock from "./Clock.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Clock from "./Clock.cdc"
 
 // we whitelist admins here
 // utilizing an admin token resource gives us the opportunity to expire a given 
@@ -66,8 +80,8 @@ contract AdminToken{
 	
 	access(all)
 	resource interface AdminTokenVaultPublic{ 
-		access(all)
-		fun deposit(token: @AdminToken.Token)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun deposit(token: @AdminToken.Token): Void
 	}
 	
 	access(all)
@@ -79,7 +93,7 @@ contract AdminToken{
 			self.adminToken <- nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @AdminToken.Token){ 
 			let token <- token as! @AdminToken.Token
 			let id: UInt64 = token.id
@@ -88,7 +102,7 @@ contract AdminToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAdminToken(): &AdminToken.Token?{ 
 			if self.adminToken != nil{ 
 				let ref = (&self.adminToken as &AdminToken.Token?)!
@@ -98,12 +112,12 @@ contract AdminToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyTokenVault(): @AdminToken.TokenVault{ 
 		return <-create TokenVault()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkAuthorizedAdmin(_ adminTokenRef: &AdminToken.Token?){ 
 		pre{ 
 			adminTokenRef != nil:
@@ -120,7 +134,7 @@ contract AdminToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAdminDetails(address: Address): AdminToken.AdminDetails?{ 
 		pre{ 
 			AdminToken.adminRegistry[address] != nil:
@@ -129,14 +143,14 @@ contract AdminToken{
 		return AdminToken.adminRegistry[address]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAdminRegistryKeys(): [Address]{ 
 		return AdminToken.adminRegistry.keys
 	}
 	
 	access(all)
 	resource TokenMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintToken(recipient: &{AdminToken.AdminTokenVaultPublic}){ 
 			var newToken <-
 				create Token(id: AdminToken.totalSupply, address: (recipient.owner!).address)
@@ -147,7 +161,7 @@ contract AdminToken{
 	
 	access(all)
 	resource SuperAdminManager{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNAdmin(address: Address, expires: UFix64){ 
 			pre{ 
 				AdminToken.adminRegistry[address] == nil:
@@ -157,7 +171,7 @@ contract AdminToken{
 			emit AdminAdded(address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAdmin(address: Address){ 
 			pre{ 
 				AdminToken.adminRegistry[address] != nil:

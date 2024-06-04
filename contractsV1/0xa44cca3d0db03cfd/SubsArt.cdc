@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for Subs “Originals” NFT
 
 	authors: Dmytro Kabyshev dmytro@subs.tv
@@ -193,7 +207,7 @@ contract SubsArt: NonFungibleToken{
 			emit ArtCreated(id: self.artId, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -255,13 +269,13 @@ contract SubsArt: NonFungibleToken{
 	
 	access(all)
 	resource interface GalleryCreator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createArt(metadata:{ String: String}): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(artID: UInt32): @NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(artID: UInt32, quantity: UInt64): @Collection
 	}
 	
@@ -331,7 +345,7 @@ contract SubsArt: NonFungibleToken{
 		//
 		// Returns: the ID of the new Art object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createArt(metadata:{ String: String}): UInt32{ 
 			pre{ 
 				!self.locked:
@@ -356,7 +370,7 @@ contract SubsArt: NonFungibleToken{
 		// Pre-Conditions:
 		// The Art is part of the Gallery and not concealed (available for minting).
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun concealArt(artID: UInt32){ 
 			pre{ 
 				self.concealed[artID] != nil:
@@ -377,7 +391,7 @@ contract SubsArt: NonFungibleToken{
 		// The Gallery needs to be not locked
 		// The Art can't have already been added to the Gallery
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addArt(artID: UInt32){ 
 			pre{ 
 				SubsArt.artDatas[artID] != nil:
@@ -404,7 +418,7 @@ contract SubsArt: NonFungibleToken{
 		// Parameters: artIDs: The IDs of the Arts that are being added
 		//					  as an array
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addArts(artIDs: [UInt32]){ 
 			for artID in artIDs{ 
 				self.addArt(artID: artID)
@@ -420,7 +434,7 @@ contract SubsArt: NonFungibleToken{
 		//
 		// Returns: The NFT that was minted
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(artID: UInt32): @NFT{ 
 			pre{ 
 				SubsArt.artDatas[artID] != nil:
@@ -452,7 +466,7 @@ contract SubsArt: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the NFTs that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(artID: UInt32, quantity: UInt64): @Collection{ 
 			pre{ 
 				SubsArt.artDatas[artID] != nil:
@@ -492,8 +506,8 @@ contract SubsArt: NonFungibleToken{
 	
 	access(all)
 	resource interface SubsUserPublic{ 
-		access(all)
-		fun assignCreator(creator: @SubsArt.Creator)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun assignCreator(creator: @SubsArt.Creator): Void
 	}
 	
 	access(all)
@@ -505,12 +519,12 @@ contract SubsArt: NonFungibleToken{
 			self.creator <- nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCreatorGallery(): &Gallery?{ 
 			return self.creator?.borrowGallery()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun assignCreator(creator: @SubsArt.Creator){ 
 			pre{ 
 				self.creator == nil:
@@ -553,7 +567,7 @@ contract SubsArt: NonFungibleToken{
 		// Returns: A reference to the Gallery with all of the fields
 		// and methods exposed via interface GalleryCreator
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGallery(): &Gallery{ 
 			pre{ 
 				SubsArt.galleries[self.userID] != nil:
@@ -577,7 +591,7 @@ contract SubsArt: NonFungibleToken{
 		// Parameters: userID: The ID of the User that this resoulve will 
 		// be assosiated to
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewCreator(userID: UInt64): @SubsArt.Creator{ 
 			return <-create SubsArt.Creator(userID: userID)
 		}
@@ -587,7 +601,7 @@ contract SubsArt: NonFungibleToken{
 		//
 		// Parameters: userID: The ID of user the new gallery will be linked to
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createGallery(userID: UInt64){ 
 			pre{ 
 				SubsArt.galleries[userID] == nil:
@@ -617,7 +631,7 @@ contract SubsArt: NonFungibleToken{
 		//
 		// Returns: the ID of the new Art object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createArt(metadata:{ String: String}): UInt32{ 
 			// Create the new Art
 			var newArt = Art(metadata: metadata)
@@ -637,7 +651,7 @@ contract SubsArt: NonFungibleToken{
 		// Returns: A reference to the Gallery with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGallery(userID: UInt64): &SubsArt.Gallery{ 
 			pre{ 
 				SubsArt.galleries[userID] != nil:
@@ -655,7 +669,7 @@ contract SubsArt: NonFungibleToken{
 		// Parameters: userID: The ID of the User that you want to
 		// get a Gallery's reference to
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockGallery(userID: UInt64){ 
 			pre{ 
 				SubsArt.galleries[userID] != nil:
@@ -670,7 +684,7 @@ contract SubsArt: NonFungibleToken{
 		
 		// unlockGallery unlocks the gallery assigned to the specific user
 		// so that he would be able to mint again
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockGallery(userID: UInt64){ 
 			pre{ 
 				SubsArt.galleries[userID] != nil:
@@ -685,14 +699,14 @@ contract SubsArt: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @SubsArt.Admin{ 
 			return <-create SubsArt.Admin()
 		}
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewModerator(): @SubsArt.Moderator{ 
 			return <-create SubsArt.Moderator()
 		}
@@ -704,18 +718,18 @@ contract SubsArt: NonFungibleToken{
 	access(all)
 	resource interface ArtCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArtNFT(id: UInt64): &SubsArt.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -764,7 +778,7 @@ contract SubsArt: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Arts
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -783,7 +797,7 @@ contract SubsArt: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a SubsArt NFT to make sure
 			// it is the correct type
@@ -807,7 +821,7 @@ contract SubsArt: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -855,7 +869,7 @@ contract SubsArt: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArtNFT(id: UInt64): &SubsArt.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -900,7 +914,7 @@ contract SubsArt: NonFungibleToken{
 	// createSubsUser creates a new SubsUser object so that
 	// we have a place for all internal resources.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSubsUser(): @SubsArt.SubsUser{ 
 		return <-create SubsArt.SubsUser()
 	}
@@ -908,7 +922,7 @@ contract SubsArt: NonFungibleToken{
 	// getAllArts returns all the arts in SubsArt
 	//
 	// Returns: An array of all the arts that have been created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllArts(): [SubsArt.Art]{ 
 		return SubsArt.artDatas.values
 	}
@@ -918,7 +932,7 @@ contract SubsArt: NonFungibleToken{
 	// Parameters: artID: The id of the Art that is being searched
 	//
 	// Returns: The metadata as a String to String mapping optional
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArtMetaData(artID: UInt32):{ String: String}?{ 
 		return SubsArt.artDatas[artID]?.metadata
 	}
@@ -931,7 +945,7 @@ contract SubsArt: NonFungibleToken{
 	// Parameters: userID: The id a User who owns the Gallery that is being searched
 	//
 	// Returns: Boolean indicating if the Gallery is locked or not
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isGalleryLocked(userID: UInt64): Bool?{ 
 		// Don't force a revert if the galleryID is invalid
 		return SubsArt.galleries[userID]?.locked
@@ -943,7 +957,7 @@ contract SubsArt: NonFungibleToken{
 	// Parameters: userID: The id a User who owns the Gallery that is being searched
 	//
 	// Returns: Boolean indicating if the Gallery exists
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isGalleryExists(userID: UInt64): Bool{ 
 		// Don't force a revert if the galleryID is invalid
 		return SubsArt.galleries[userID] != nil
@@ -954,7 +968,7 @@ contract SubsArt: NonFungibleToken{
 	// Parameters: userID: The id a User who owns the Gallery that is being searched
 	//
 	// Returns: An array of Art IDs
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArtsInGallery(userID: UInt64): [UInt32]?{ 
 		// Don't force a revert if the setID is invalid
 		return SubsArt.galleries[userID]?.arts

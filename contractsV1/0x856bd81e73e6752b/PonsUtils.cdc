@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -24,25 +38,25 @@ contract PonsUtils{
 		}
 		
 		/* Check whether the amount is at least the amount of another FlowUnits */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isAtLeast(_ flowUnits: FlowUnits): Bool{ 
 			return self.flowAmount >= flowUnits.flowAmount
 		}
 		
 		/* Make another FlowUnits equivalent to the amount being scaled by a ratio */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun scale(ratio: Ratio): FlowUnits{ 
 			return FlowUnits(flowAmount: self.flowAmount * ratio.amount)
 		}
 		
 		/* Make another FlowUnits equivalent to the amount being subtracted by another amount of FlowUnits */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cut(_ flowUnits: FlowUnits): FlowUnits{ 
 			return FlowUnits(flowAmount: self.flowAmount - flowUnits.flowAmount)
 		}
 		
 		/* Produce a string representation in a format like "1234.56 FLOW" */
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toString(): String{ 
 			return self.flowAmount.toString().concat(" FLOW")
 		}
@@ -61,7 +75,7 @@ contract PonsUtils{
 	}
 	
 	/* Produce a FlowUnits equivalent to the sum of the two separate amounts of FlowUnits */
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sumFlowUnits(_ flowUnits1: FlowUnits, _ flowUnits2: FlowUnits): FlowUnits{ 
 		let flowAmount1 = flowUnits1.flowAmount
 		let flowAmount2 = flowUnits2.flowAmount

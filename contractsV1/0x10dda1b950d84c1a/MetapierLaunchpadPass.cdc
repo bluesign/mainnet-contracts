@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -50,25 +64,25 @@ contract MetapierLaunchpadPass: NonFungibleToken{
 		access(all)
 		let launchTokenType: Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundsBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchTokenBalance(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFunds(vault: @{FungibleToken.Vault})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositLaunchToken(vault: @{FungibleToken.Vault})
 	}
 	
 	access(all)
 	resource interface PrivatePass{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFunds(amount: UFix64): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawLaunchToken(amount: UFix64): @{FungibleToken.Vault}
 	}
 	
@@ -101,32 +115,32 @@ contract MetapierLaunchpadPass: NonFungibleToken{
 			self.launchTokenVault <- launchTokenVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFundsBalance(): UFix64{ 
 			return self.fundsVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchTokenBalance(): UFix64{ 
 			return self.launchTokenVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFunds(vault: @{FungibleToken.Vault}){ 
 			self.fundsVault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositLaunchToken(vault: @{FungibleToken.Vault}){ 
 			self.launchTokenVault.deposit(from: <-vault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFunds(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-self.fundsVault.withdraw(amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawLaunchToken(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-self.launchTokenVault.withdraw(amount: amount)
 		}
@@ -139,16 +153,16 @@ contract MetapierLaunchpadPass: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicPass(id: UInt64): &MetapierLaunchpadPass.NFT
 	}
 	
 	access(all)
 	resource interface CollectionPrivate{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPrivatePass(id: UInt64): &MetapierLaunchpadPass.NFT
 	}
 	
@@ -169,7 +183,7 @@ contract MetapierLaunchpadPass: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// make sure the token has the right type
 			let token <- token as! @MetapierLaunchpadPass.NFT
 			let id: UInt64 = token.id
@@ -180,7 +194,7 @@ contract MetapierLaunchpadPass: NonFungibleToken{
 			emit Deposit(id: id, to: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
@@ -195,14 +209,14 @@ contract MetapierLaunchpadPass: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicPass(id: UInt64): &MetapierLaunchpadPass.NFT{ 
 			let passRef = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			let intermediateRef = passRef as! &MetapierLaunchpadPass.NFT
 			return intermediateRef as &MetapierLaunchpadPass.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPrivatePass(id: UInt64): &MetapierLaunchpadPass.NFT{ 
 			let passRef = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return passRef as! &MetapierLaunchpadPass.NFT
@@ -230,7 +244,7 @@ contract MetapierLaunchpadPass: NonFungibleToken{
 	}
 	
 	// anyone can create a new pass to try participating a launch pool
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNewPass(recipient: Capability<&{NonFungibleToken.CollectionPublic}>, fundsVault: @{FungibleToken.Vault}, launchTokenVault: @{FungibleToken.Vault}): UInt64{ 
 		let newPass <- create NFT(initID: MetapierLaunchpadPass.totalSupply, // id never repeats																			 
 																			 originalOwner: recipient.address, fundsVault: <-fundsVault, launchTokenVault: <-launchTokenVault)

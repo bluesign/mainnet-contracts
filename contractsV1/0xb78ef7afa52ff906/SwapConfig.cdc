@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Common configs & swap library functions
 
@@ -40,7 +54,7 @@ contract SwapConfig{
 	/// Utility function to convert a UFix64 number to its scaled equivalent in UInt256 format
 	/// e.g. 184467440737.09551615 (UFix64.max) => 184467440737095516150000000000
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun UFix64ToScaledUInt256(_ f: UFix64): UInt256{ 
 		let integral = UInt256(f)
 		let fractional = f % 1.0
@@ -52,7 +66,7 @@ contract SwapConfig{
 	/// Utility function to convert a fixed point number in form of scaled UInt256 back to UFix64 format
 	/// e.g. 184467440737095516150000000000 => 184467440737.09551615
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun ScaledUInt256ToUFix64(_ scaled: UInt256): UFix64{ 
 		let integral = scaled / self.scaleFactor
 		let ufixScaledFractional =
@@ -63,7 +77,7 @@ contract SwapConfig{
 	/// Utility function to simulate addition of Word256, like Word64 not to throw an overflow error.
 	/// e.g. 10 + UInt256.max = 9
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun overflowAddUInt256(_ value1: UInt256, _ value2: UInt256): UInt256{ 
 		if value1 > UInt256.max - value2{ 
 			return value2 - (UInt256.max - value1) - 1
@@ -75,7 +89,7 @@ contract SwapConfig{
 	/// Utility function to simulate subtraction of Word256.
 	/// e.g. 10 - UInt256.max = 11
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun underflowSubtractUInt256(_ value1: UInt256, _ value2: UInt256): UInt256{ 
 		if value1 >= value2{ 
 			return value1 - value2
@@ -89,7 +103,7 @@ contract SwapConfig{
 	/// @Param vaultTypeIdentifier - eg. A.f8d6e0586b0a20c7.FlowToken.Vault
 	/// @Return tokenTypeIdentifier - eg. A.f8d6e0586b0a20c7.FlowToken
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun SliceTokenTypeIdentifierFromVaultType(vaultTypeIdentifier: String): String{ 
 		return vaultTypeIdentifier.slice(from: 0, upTo: vaultTypeIdentifier.length - 6)
 	}
@@ -98,7 +112,7 @@ contract SwapConfig{
 	/// Compute √x using Newton's method.
 	/// @Param - x: Scaled UFix64 number in cadence. e.g. UFix64ToScaledUInt256( 16.0 )
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun sqrt(_ x: UInt256): UInt256{ 
 		var res: UInt256 = 0
 		var one: UInt256 = self.scaleFactor
@@ -119,7 +133,7 @@ contract SwapConfig{
 	/// Deprecated Helper function:
 	/// Given pair reserves and the exact input amount of an asset, returns the maximum output amount of the other asset
 	/// [Deprecated] Use getAmountOutVolatile / getAmountOutStable instead.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountOut(amountIn: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		pre{ 
 			amountIn > 0.0:
@@ -140,7 +154,7 @@ contract SwapConfig{
 	/// Helper function:
 	/// Given pair reserves and the exact output amount of an asset wanted, returns the required (minimum) input amount of the other asset
 	/// [Deprecated] Use getAmountInVolatile / getAmountInStable instead.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountIn(amountOut: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		pre{ 
 			amountOut < reserveOut:
@@ -163,7 +177,7 @@ contract SwapConfig{
 	/// Using the standard constant product formula:
 	/// x * y = k
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountOutVolatile(
 		amountIn: UFix64,
 		reserveIn: UFix64,
@@ -190,7 +204,7 @@ contract SwapConfig{
 	/// Helper function:
 	/// Given pair reserves and the exact output amount of an asset wanted, returns the required (minimum) input amount of the other asset
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountInVolatile(
 		amountOut: UFix64,
 		reserveIn: UFix64,
@@ -218,7 +232,7 @@ contract SwapConfig{
 	/// Using the Solidly curve formula:
 	/// (px)^3*y + px*y^3 = k
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountOutStable(
 		amountIn: UFix64,
 		reserveIn: UFix64,
@@ -252,7 +266,7 @@ contract SwapConfig{
 	/// Using the Solidly curve formula:
 	/// (px)^3*y + px*y^3 = k
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountInStable(
 		amountOut: UFix64,
 		reserveIn: UFix64,
@@ -284,7 +298,7 @@ contract SwapConfig{
 	/// Helper function used in adding liquidity & v2-pair's oracle price computation:
 	/// Given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quote(amountA: UFix64, reserveA: UFix64, reserveB: UFix64): UFix64{ 
 		pre{ 
 			amountA > 0.0:
@@ -304,7 +318,7 @@ contract SwapConfig{
 	/// using the current spot price on the Solidly curve formula:
 	/// (px)^3*y + px*y^3 = k
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteStable(amountA: UFix64, reserveA: UFix64, reserveB: UFix64, p: UFix64): UFix64{ 
 		pre{ 
 			amountA > 0.0:
@@ -334,7 +348,7 @@ contract SwapConfig{
 	///	1: current cumulative price1 scaled by 1e18
 	///	2: current block timestamp scaled by 1e18
 	/// ]
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCurrentCumulativePrices(pairAddr: Address): [UInt256; 3]{ 
 		let pairPublicRef =
 			getAccount(pairAddr).capabilities.get<&{SwapInterfaces.PairPublic}>(self.PairPublicPath)
@@ -382,7 +396,7 @@ contract SwapConfig{
 	
 	/// f(x,y) = p^3 * x^3 * y + p * x * y^3
 	/// dy | (x = x1) = p^3 * x^3 + 3 * p * x * y^2, (x = x1)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun dy(_ x1: UInt256, _ y: UInt256, _ p: UInt256): UInt256{ 
 		let e18: UInt256 = self.scaleFactor
 		let p3 = p * p / e18 * p / e18
@@ -391,7 +405,7 @@ contract SwapConfig{
 	
 	/// f(x,y) = p^3 * x^3 * y + p * x * y^3
 	/// dx | (y = y1) = 3 * p^3 * y * x^2 + p * y^3, (y = y1)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun dx(_ x: UInt256, _ y1: UInt256, _ p: UInt256): UInt256{ 
 		let e18: UInt256 = self.scaleFactor
 		let p3 = p * p / e18 * p / e18
@@ -401,7 +415,7 @@ contract SwapConfig{
 	/// f(x, y) = (px)^3 * y + px * y^3 - k0, with k0 = (p*x0)^3 * y0 + p*x0 * y0^3
 	/// Given x1, k0, solving y1 for f(x1, y1) = 0 using newton's method: y_n+1 = y_n - f(x1, y_n) / f'(x1, y_n)
 	/// Stop searching when |y_n+1 - y_n| < ε
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun get_y(
 		_ x1: UInt256,
 		_ y0: UInt256,
@@ -435,7 +449,7 @@ contract SwapConfig{
 	/// f(x, y) = (px)^3 * y + px * y^3 - k0, with k0 = (p*x0)^3 * y0 + p*x0 * y0^3
 	/// Given y1, k0, solving x1 for f(x1, y1) = 0 using newton's method: x_n+1 = x_n - f(x_n, y1) / f'(x_n, y1)
 	/// Stop searching when |x_n+1 - x_n| < ε
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun get_x(
 		_ x0: UInt256,
 		_ y1: UInt256,
@@ -467,7 +481,7 @@ contract SwapConfig{
 	}
 	
 	/// k = (p*x)^3 * y + (p*x) * y^3
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun k_stable_p(_ balance0: UInt256, _ balance1: UInt256, _ p: UInt256): UInt256{ 
 		let e18: UInt256 = self.scaleFactor
 		let _p3_scaled = p * p / e18 * p / e18

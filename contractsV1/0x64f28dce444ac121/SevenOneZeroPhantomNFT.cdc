@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Central Smart Contract for 710 Phantom
 
 	author: Bilal Shahid bilal@zay.codes
@@ -117,17 +131,17 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 			self.traits = traits
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIpfsMetadataHash(): String{ 
 			return self.ipfsMetadataHash
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraits():{ PhantomTrait: String}{ 
 			return self.traits
 		}
@@ -139,18 +153,18 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 	access(all)
 	resource interface SevenOneZeroPhantomNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSevenOneZeroPhantomNFT(id: UInt64): &SevenOneZeroPhantomNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -195,7 +209,7 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 		}
 		
 		// Currently entire doesn't fail if one fails
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			var batchCollection <- create Collection()
 			for id in ids{ 
@@ -205,7 +219,7 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SevenOneZeroPhantomNFT.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -214,7 +228,7 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 		}
 		
 		// Currently entire doesn't fail if one fails
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			let keys = tokens.getIDs()
 			for key in keys{ 
@@ -233,7 +247,7 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSevenOneZeroPhantomNFT(id: UInt64): &SevenOneZeroPhantomNFT.NFT?{ 
 			if self.ownedNFTs[id] == nil{ 
 				return nil
@@ -264,7 +278,7 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &{SevenOneZeroPhantomNFT.SevenOneZeroPhantomNFTCollectionPublic}): UInt64{ 
 			pre{ 
 				SevenOneZeroPhantomNFT.totalSupply <= SevenOneZeroPhantomNFT.maxAmount:
@@ -277,7 +291,7 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 			return id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMint(recipient: &{SevenOneZeroPhantomNFT.SevenOneZeroPhantomNFTCollectionPublic}, amount: UInt64): [UInt64]{ 
 			pre{ 
 				amount > 0:
@@ -301,7 +315,7 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 			emit PhantomDataUpdated(nftID: nftID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchUpdatePhantomData(nftIDs: [UInt64], ipfsMetadataHashes: [String], metadata: [{String: String}], traits: [{SevenOneZeroPhantomNFT.PhantomTrait: String}]){ 
 			var i = 0
 			while i < nftIDs.length{ 
@@ -314,47 +328,47 @@ contract SevenOneZeroPhantomNFT: NonFungibleToken{
 	// -----------------------------------------------------------------------
 	// SevenOneZeroPhantomNFT Functions
 	// -----------------------------------------------------------------------
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getName(): String{ 
 		return self.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExternalURL(): String{ 
 		return self.externalURL
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxAmount(): UInt64{ 
 		return self.maxAmount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPhantomData():{ UInt64: PhantomData}{ 
 		return self.phantomData
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPhantomData(id: UInt64): PhantomData{ 
 		return SevenOneZeroPhantomNFT.phantomData[id]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPhantomMetadata(id: UInt64):{ String: String}{ 
 		return (SevenOneZeroPhantomNFT.phantomData[id]!).getMetadata()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPhantomIpfsHash(id: UInt64): String{ 
 		return (SevenOneZeroPhantomNFT.phantomData[id]!).getIpfsMetadataHash()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPhantomTraits(id: UInt64):{ PhantomTrait: String}{ 
 		return (SevenOneZeroPhantomNFT.phantomData[id]!).getTraits()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPhantomHasTrait(id: UInt64, lookupTrait: PhantomTrait, lookupValue: String): Bool{ 
 		let nftTrait = (SevenOneZeroPhantomNFT.phantomData[id]!).getTraits()[lookupTrait]
 		if nftTrait != nil && nftTrait == lookupValue{ 

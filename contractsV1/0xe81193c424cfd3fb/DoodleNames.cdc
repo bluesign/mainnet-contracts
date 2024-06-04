@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -62,7 +76,7 @@ contract DoodleNames: NonFungibleToken{
 			self.characterId = characterId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun equipped(): Bool{ 
 			return self.characterId != nil
 		}
@@ -128,7 +142,7 @@ contract DoodleNames: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
@@ -176,7 +190,7 @@ contract DoodleNames: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			token.increaseNounce()
@@ -273,12 +287,12 @@ contract DoodleNames: NonFungibleToken{
 		return <-newNFT
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isNameFree(_ name: String): Bool{ 
 		return !self.registry.containsKey(name)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(): [MetadataViews.Royalty]{ 
 		let royalties: [MetadataViews.Royalty] = []
 		for r in DoodleNames.royalties{ 
@@ -287,7 +301,7 @@ contract DoodleNames: NonFungibleToken{
 		return royalties
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setRoyalties(_ r: [Templates.Royalty]){ 
 		self.royalties = r
 	}

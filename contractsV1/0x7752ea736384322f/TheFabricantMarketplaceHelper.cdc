@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: The Marketplace Helper Contract for TheFabricant NFTs
    
 	the purpose of this contract is to enforce the SaleCut array when a listing is created or an offer is made for a nft
@@ -239,7 +253,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// list an s0Item from ItemNFT contract, calling TheFabricantMarketplace's Listings' createListing function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun s0ListItem(
 		itemRef: &ItemNFT.NFT,
 		listingRef: &TheFabricantMarketplace.Listings,
@@ -328,7 +342,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// make an offer for an s0Item from ItemNFT contract, calling TheFabricantMarketplace's Offers' makeOffer function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun s0ItemMakeOffer(
 		initialNFTOwner: Address,
 		itemRef: &ItemNFT.NFT,
@@ -410,7 +424,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// list an s1Item from TheFabricantS1ItemNFT contract, calling TheFabricantMarketplace's Listings' createListing function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun s1ListItem(
 		itemRef: &TheFabricantS1ItemNFT.NFT,
 		listingRef: &TheFabricantMarketplace.Listings,
@@ -500,7 +514,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// make an offer for an s1Item from TheFabricantS1ItemNFT contract, calling TheFabricantMarketplace's Offers' makeOffer function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun s1ItemMakeOffer(
 		initialNFTOwner: Address,
 		itemRef: &TheFabricantS1ItemNFT.NFT,
@@ -581,7 +595,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// list an s2Item from TheFabricantS2ItemNFT contract, calling TheFabricantMarketplace's Listings' createListing function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun s2ListItem(
 		itemRef: &TheFabricantS2ItemNFT.NFT,
 		listingRef: &TheFabricantMarketplace.Listings,
@@ -674,7 +688,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// make an offer for an s1Item from TheFabricantS1ItemNFT contract, calling TheFabricantMarketplace's Offers' makeOffer function
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun s2ItemMakeOffer(
 		initialNFTOwner: Address,
 		itemRef: &TheFabricantS2ItemNFT.NFT,
@@ -761,7 +775,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// list an TheFabricantAccessPass NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun listAccessPass(
 		accessPassRef: &TheFabricantAccessPass.NFT,
 		listingRef: &TheFabricantMarketplace.Listings,
@@ -807,7 +821,7 @@ contract TheFabricantMarketplaceHelper{
 	}
 	
 	// make an offer for a TheFabricantAccessPass NFT
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun accessPassMakeOffer(
 		initialNFTOwner: Address,
 		accessPassRef: &TheFabricantAccessPass.NFT,
@@ -847,7 +861,7 @@ contract TheFabricantMarketplaceHelper{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun xxoryListItem(
 		itemRef: &TheFabricantXXories.NFT,
 		listingsRef: &TheFabricantMarketplace.Listings,
@@ -920,7 +934,7 @@ contract TheFabricantMarketplaceHelper{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun catListItem(
 		itemRef: &CAT_EnterTheEvolution.NFT,
 		listingsRef: &TheFabricantMarketplace.Listings,
@@ -976,7 +990,7 @@ contract TheFabricantMarketplaceHelper{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tfnftListItem(
 		itemRef: &{TheFabricantNFTStandardV2.TFNFT},
 		listingsRef: &TheFabricantMarketplace.Listings,
@@ -1038,19 +1052,19 @@ contract TheFabricantMarketplaceHelper{
 	resource Admin{ 
 		
 		// change contract royalty address
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSaleCutValues(royaltyName: String, initialAmount: UFix64, amount: UFix64){ 
 			TheFabricantMarketplaceHelper.saleCuts[royaltyName] = TheFabricantMarketplaceHelper
 					.SaleCutValues(initialAmount: initialAmount, amount: amount)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleCuts():{ String: SaleCutValues}{ 
 		return self.saleCuts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	init(){ 
 		self.AdminStoragePath = /storage/fabricantTheFabricantMarketplaceHelperAdmin0021
 		self.saleCuts ={} 

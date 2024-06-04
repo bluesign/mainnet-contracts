@@ -1,4 +1,18 @@
-import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import SwapConfig from "../0xb78ef7afa52ff906/SwapConfig.cdc"
 
 import SwapError from "../0xb78ef7afa52ff906/SwapError.cdc"
 
@@ -24,7 +38,7 @@ contract StableSwapFactory{
 	access(self)
 	let _reservedFields:{ String: AnyStruct}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPairAddress(token0Key: String, token1Key: String): Address?{ 
 		let pairExist0To1 =
 			self.stableSwapPairMap.containsKey(token0Key)
@@ -39,7 +53,7 @@ contract StableSwapFactory{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPairInfo(token0Key: String, token1Key: String): AnyStruct?{ 
 		var pairAddr = self.getPairAddress(token0Key: token0Key, token1Key: token1Key)
 		if pairAddr == nil{ 
@@ -52,13 +66,13 @@ contract StableSwapFactory{
 		).getPairInfo()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllStableSwapPairsLength(): Int{ 
 		return self.stableSwapPairs.length
 	}
 	
 	/// Get sliced array of pair addresses (inclusive for both indexes)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSlicedPairs(from: UInt64, to: UInt64): [Address]{ 
 		pre{ 
 			from <= to && from < UInt64(self.stableSwapPairs.length):
@@ -77,7 +91,7 @@ contract StableSwapFactory{
 	}
 	
 	/// Get sliced array of PairInfos (inclusive for both indexes)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSlicedPairInfos(from: UInt64, to: UInt64): [AnyStruct]{ 
 		let pairSlice: [Address] = self.getSlicedPairs(from: from, to: to)
 		var i = 0

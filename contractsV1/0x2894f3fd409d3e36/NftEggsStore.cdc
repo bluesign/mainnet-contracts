@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -182,7 +196,7 @@ contract NftEggsStore{
 		}
 		
 		//是否过了结束时间
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isExpired(): Bool{ 
 			let endTime = self.endTime
 			let currentTime = getCurrentBlock().timestamp
@@ -196,19 +210,19 @@ contract NftEggsStore{
 	access(all)
 	resource interface ListingPublic{ 
 		// 对NFT的引用
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}
 		
 		//购买
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}, buyerAddress: Address)
 		
 		//投标
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(bidTokens: @{FungibleToken.Vault}, address: Address)
 		
 		// getDetails
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails
 	}
 	
@@ -230,7 +244,7 @@ contract NftEggsStore{
 		let nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>
 		
 		// 对NFT的引用
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}{ 
 			let ref = (self.nftProviderCapability.borrow()!).borrowNFT(self.getDetails().nftID)
 			assert(ref.isInstance(self.getDetails().nftType), message: "token has wrong type")
@@ -241,13 +255,13 @@ contract NftEggsStore{
 		//获取详细信息
 		//以结构形式获取列表当前状态的详细信息。
 		//这避免了为它们提供更多的公共变量和getter方法，并很好地使用脚本（不能返回资源）发挥了作用
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails{ 
 			return self.details
 		}
 		
 		//购买
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}, buyerAddress: Address){ 
 			pre{ 
 				self.details.purchased == false:
@@ -316,7 +330,7 @@ contract NftEggsStore{
 			emit ListingCompleted(storefrontAddress: self.owner?.address!, listingResourceID: self.uuid, storefrontResourceID: self.details.storefrontID, purchased: self.details.purchased, buyerAddress: buyerAddress, dealPrice: self.details.salePrice, nftID: self.details.nftID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(bidTokens: @{FungibleToken.Vault}, address: Address){ 
 			pre{ 
 				self.details.purchased == false:
@@ -352,7 +366,7 @@ contract NftEggsStore{
 		}
 		
 		//结束销售
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endSale(owner: Bool){ 
 			pre{ 
 				!self.details.purchased:
@@ -451,7 +465,7 @@ contract NftEggsStore{
 	resource interface StorefrontManager{ 
 		// 创建销售列表项
 		// 允许店面拥有者创建并插入信息到销售列表
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -468,20 +482,20 @@ contract NftEggsStore{
 		
 		// removeListing
 		// 允许店面所有者删除任何销售清单
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingResourceID: UInt64)
 	}
 	
 	//店面公众功能接口
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &Listing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(listingResourceID: UInt64)
 	}
 	
@@ -496,7 +510,7 @@ contract NftEggsStore{
 		
 		// 创建销售列表项
 		// 允许店面拥有者创建并插入信息到销售列表
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64, salePaymentVaultType: Type, saleItemPrice: UFix64, saleType: UInt64, startTime: UFix64, endTime: UFix64, minimumBidIncrement: UFix64): UInt64{ 
 			if endTime <= startTime{ 
 				panic("startTime must be less than endTime")
@@ -524,7 +538,7 @@ contract NftEggsStore{
 		// removeListing
 		// Remove a Listing that has not yet been purchased from the collection and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingResourceID: UInt64){ 
 			pre{ 
 				self.listings[listingResourceID] != nil:
@@ -542,7 +556,7 @@ contract NftEggsStore{
 		// getListingIDs
 		// Returns an array of the Listing resource IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]{ 
 			return self.listings.keys
 		}
@@ -550,7 +564,7 @@ contract NftEggsStore{
 		// borrowSaleItem
 		// Returns a read-only view of the SaleItem for the given listingID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &Listing?{ 
 			if self.listings[listingResourceID] != nil{ 
 				return &self.listings[listingResourceID] as &NftEggsStore.Listing?
@@ -564,7 +578,7 @@ contract NftEggsStore{
 		// Anyone can call, but at present it only benefits the account owner to do so.
 		// Kind purchasers can however call it if they like.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(listingResourceID: UInt64){ 
 			pre{ 
 				self.listings[listingResourceID] != nil:
@@ -596,7 +610,7 @@ contract NftEggsStore{
 	// createStorefront
 	// Make creating a Storefront publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createStorefront(): @Storefront{ 
 		return <-create Storefront()
 	}

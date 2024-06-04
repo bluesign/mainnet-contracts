@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -119,13 +133,13 @@ contract BandOracle{
 	///
 	access(all)
 	resource interface OracleAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUpdaterCapabilityPathFromAddress(relayer: Address): PrivatePath
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSymbol(symbol: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewFeeCollector(): @BandOracle.FeeCollector
 	}
 	
@@ -133,7 +147,7 @@ contract BandOracle{
 	///
 	access(all)
 	resource interface DataUpdater{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateData(
 			symbolsRates:{ 
 				String: UInt64
@@ -141,9 +155,9 @@ contract BandOracle{
 			resolveTime: UInt64,
 			requestID: UInt64,
 			relayerID: UInt64
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceUpdateData(
 			symbolsRates:{ 
 				String: UInt64
@@ -165,7 +179,7 @@ contract BandOracle{
 		///
 		/// @param relayer: The entitled relayer account address
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUpdaterCapabilityPathFromAddress(relayer: Address): PrivatePath{ 
 			// Create the string that will form the private path concatenating the base
 			// path and the relayer identifying address
@@ -179,7 +193,7 @@ contract BandOracle{
 		///
 		/// @param symbol: The string representing the symbol to be removed from the contract.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSymbol(symbol: String){ 
 			BandOracle.removeSymbol(symbol: symbol)
 		}
@@ -191,7 +205,7 @@ contract BandOracle{
 		/// @param requestID: The Band Protocol request ID.
 		/// @param relayerID: The ID of the relayer carrying the update.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateData(symbolsRates:{ String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64){ 
 			BandOracle.updateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, requestID: requestID, relayerID: relayerID)
 		}
@@ -203,7 +217,7 @@ contract BandOracle{
 		/// @param requestID: The Band Protocol request ID.
 		/// @param relayerID: The ID of the relayer carrying the update.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceUpdateData(symbolsRates:{ String: UInt64}, resolveTime: UInt64, requestID: UInt64, relayerID: UInt64){ 
 			BandOracle.forceUpdateRefData(symbolsRates: symbolsRates, resolveTime: resolveTime, requestID: requestID, relayerID: relayerID)
 		}
@@ -213,7 +227,7 @@ contract BandOracle{
 		///
 		/// @return The `FeeCollector` resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewFeeCollector(): @FeeCollector{ 
 			return <-create FeeCollector()
 		}
@@ -234,7 +248,7 @@ contract BandOracle{
 		/// @param resolveTime: The registered time for the rates.
 		/// @param requestID: The Band Protocol request ID.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun relayRates(symbolsRates:{ String: UInt64}, resolveTime: UInt64, requestID: UInt64){ 
 			let updaterRef =
 				self.updaterCapability.borrow()
@@ -257,7 +271,7 @@ contract BandOracle{
 		/// @param resolveTime: The registered time for the rates.
 		/// @param requestID: The Band Protocol request ID.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceRelayRates(
 			symbolsRates:{ 
 				String: UInt64
@@ -295,7 +309,7 @@ contract BandOracle{
 		///
 		/// @param fee: The amount of Flow tokens.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFee(fee: UFix64){ 
 			BandOracle.setFee(fee: fee)
 		}
@@ -304,7 +318,7 @@ contract BandOracle{
 		/// 
 		/// @return A vault containing the funds obtained for the oracle use.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun collectFees(): @{FungibleToken.Vault}{ 
 			return <-BandOracle.collectFees()
 		}
@@ -442,7 +456,7 @@ contract BandOracle{
 	/// @param updaterCapability: The capability pointing to the OracleAdmin resource needed to create the relay.
 	/// @return The new relay resource.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createRelay(updaterCapability: Capability<&{DataUpdater}>): @Relay{ 
 		return <-create Relay(updaterCapability: updaterCapability)
 	}
@@ -453,7 +467,7 @@ contract BandOracle{
 	///
 	/// @param relayer: Address of the account who will be granted with a relayer.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUpdaterCapabilityNameFromAddress(relayer: Address): String{ 
 		// Create the string that will form the private path concatenating the base
 		// path and the relayer identifying address.
@@ -465,7 +479,7 @@ contract BandOracle{
 	///
 	/// @return The fee to be charged for every request made to the oracle.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFee(): UFix64{ 
 		return BandOracle.fee
 	}
@@ -477,7 +491,7 @@ contract BandOracle{
 	/// @param payment: Flow token vault containing the service fee.
 	/// @return The `ReferenceData` containing the requested data.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getReferenceData(
 		baseSymbol: String,
 		quoteSymbol: String,
@@ -506,7 +520,7 @@ contract BandOracle{
 	/// @param
 	/// @return
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun e18ToFixedPoint(rate: UInt256): UFix64{ 
 		return UFix64(rate / BandOracle.e18)
 		+ UFix64(rate / BandOracle.e9 % BandOracle.e9) / UFix64(BandOracle.e9)

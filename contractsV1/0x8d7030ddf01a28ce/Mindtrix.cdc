@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 ============================================================
 Name: NFT Contract for Mindtrix
@@ -450,12 +464,12 @@ contract Mindtrix: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.Serial>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.Editions>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.License>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.Traits>(), Type<Mindtrix.SerialString>(), Type<Mindtrix.SerialGenuses>(), Type<Mindtrix.EssenceIdentifier>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(): UInt64{ 
 			return Mindtrix.getSerialNumber(firstSerial: self.firstSerial, secondSerial: self.secondSerial, thirdSerial: self.thirdSerial, fourthSerial: self.fourthSerial, fifthSerial: self.fifthSerial, editionNumber: self.editionNumber)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialGenus(): [Mindtrix.SerialGenus]{ 
 			return Mindtrix.getSerialGenus(firstSerial: self.firstSerial, secondSerial: self.secondSerial, thirdSerial: self.thirdSerial, fourthSerial: self.fourthSerial, fifthSerial: self.fifthSerial, editionNumber: self.editionNumber)
 		}
@@ -576,19 +590,19 @@ contract Mindtrix: NonFungibleToken{
 		access(all)
 		let licenseIdentifier: String
 		
-		access(all)
-		fun freeMint(recipient: &{NonFungibleToken.CollectionPublic}, params:{ String: AnyStruct})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun freeMint(recipient: &{NonFungibleToken.CollectionPublic}, params:{ String: AnyStruct}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolders():{ UInt64: NFTIdentifier}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolder(essenceId: UInt64): NFTIdentifier?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getPrices():{ String: FT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -692,7 +706,7 @@ contract Mindtrix: NonFungibleToken{
 		access(account)
 		let verifiers:{ String: [{Mindtrix.IVerifier}]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeMint(recipient: &{NonFungibleToken.CollectionPublic}, params:{ String: AnyStruct}){ 
 			pre{ 
 				self.getPrices() == nil:
@@ -705,7 +719,7 @@ contract Mindtrix: NonFungibleToken{
 			emit NFTFreeMinted(essenceId: self.id, minter: (recipient.owner!).address, essenceName: self.name, essenceDescription: self.description, ipfsCid: self.ipfsCid, ipfsDirectory: self.ipfsDirectory)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getPrices():{ String: FT}?{ 
 			if let prices = self.prices{ 
 				return prices as!{ String: FT}
@@ -713,7 +727,7 @@ contract Mindtrix: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolder(essenceId: UInt64): NFTIdentifier?{ 
 			pre{ 
 				self.currentHolders[essenceId] != nil:
@@ -727,7 +741,7 @@ contract Mindtrix: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentHolders():{ UInt64: NFTIdentifier}{ 
 			return self.currentHolders
 		}
@@ -756,14 +770,14 @@ contract Mindtrix: NonFungibleToken{
 		}
 		
 		// track who is the first minter
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDicOnFirstMint(uuid: UInt64, serial: UInt64, holder: Address){ 
 			self.minters[holder] = NFTIdentifier(uuid: uuid, serial: serial, holder: holder)
 			self.updateDicOnDeposit(uuid: uuid, serial: serial, holder: holder)
 		}
 		
 		// make sure to keep the holder map up to date
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDicOnDeposit(uuid: UInt64, serial: UInt64, holder: Address){ 
 			self.currentHolders[uuid] = NFTIdentifier(uuid: uuid, serial: serial, holder: holder)
 		}
@@ -816,17 +830,17 @@ contract Mindtrix: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(): UInt64{ 
 			return Mindtrix.getSerialNumber(firstSerial: self.firstSerial, secondSerial: self.secondSerial, thirdSerial: self.thirdSerial, fourthSerial: self.fourthSerial, fifthSerial: self.fifthSerial, editionNumber: self.currentEdition)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialGenus(): [Mindtrix.SerialGenus]{ 
 			return Mindtrix.getSerialGenus(firstSerial: self.firstSerial, secondSerial: self.secondSerial, thirdSerial: self.thirdSerial, fourthSerial: self.fourthSerial, fifthSerial: self.fifthSerial, editionNumber: self.currentEdition)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(recipient: &{NonFungibleToken.CollectionPublic}){ 
 			
 			// pass Essence collection data to Mindtrix NFT
@@ -894,7 +908,7 @@ contract Mindtrix: NonFungibleToken{
 	// EssenceCollection owns by each creator
 	access(all)
 	resource EssenceCollection{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchCreateEssence(names: [String], descriptions: [String], thumbnails: [String], prices: [{String: FT}?], ipfsCids: [String], ipfsDirectories: [String], royalties: [MetadataViews.Royalty], showGuid: String, episodeGuid: String, offChainedIds: [String], collectionName: String, collectionDescription: String, collectionExternalURL: String, collectionSquareImageUrl: String, collectionSquareImageType: String, collectionSocials:{ String: String}, essenceExternalURLs: [String], licenseIdentifiers: [String], firstSerials: [UInt16], secondSerials: [UInt16], thirdSerials: [UInt16], fourthSerials: [UInt32], fifthSerials: [UInt16], limitedEditions: [UInt64], metadatas: [{String: AnyStruct}], verifiers: [[{IVerifier}]]){ 
 			var i: UInt64 = 0
 			let len = UInt64(names.length)
@@ -910,7 +924,7 @@ contract Mindtrix: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEssence(name: String, description: String, thumbnail: String, prices:{ String: FT}?, ipfsCid: String, ipfsDirectory: String, royalties: [MetadataViews.Royalty], showGuid: String, episodeGuid: String, offChainedId: String, collectionName: String, collectionDescription: String, collectionExternalURL: String, collectionSquareImageUrl: String, collectionSquareImageType: String, collectionSocials:{ String: String}, essenceExternalURL: String, licenseIdentifier: String, firstSerial: UInt16, secondSerial: UInt16, thirdSerial: UInt16, fourthSerial: UInt32, fifthSerial: UInt16, limitedEdition: UInt64, metadata:{ String: AnyStruct}, verifiers: [{IVerifier}]): UInt64{ 
 			let currentBlock = getCurrentBlock()
 			metadata["createdBlock"] = currentBlock.height
@@ -945,15 +959,15 @@ contract Mindtrix: NonFungibleToken{
 	access(all)
 	resource interface MindtrixCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMindtrix(id: UInt64): &Mindtrix.NFT{ 
 			post{ 
 				result == nil || result.id == id:
@@ -988,7 +1002,7 @@ contract Mindtrix: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			// let collectionId = nft.collectionId
@@ -1012,7 +1026,7 @@ contract Mindtrix: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMindtrix(id: UInt64): &Mindtrix.NFT{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &Mindtrix.NFT
@@ -1049,7 +1063,7 @@ contract Mindtrix: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, ipfsCid: String, ipfsDirectory: String, royalties: [MetadataViews.Royalty], showGuid: String, episodeGuid: String, collectionName: String, collectionDescription: String, collectionExternalURL: String, collectionSquareImageUrl: String, collectionSquareImageType: String, collectionSocials:{ String: String}, licenseIdentifier: String, firstSerial: UInt16, secondSerial: UInt16, thirdSerial: UInt16, fourthSerial: UInt32, fifthSerial: UInt16, editionNumber: UInt64, editionQuantity: UInt64, audioEssence: AudioEssence, metadata:{ String: AnyStruct}){ 
 			let currentBlock = getCurrentBlock()
 			// general metadata that every NFT would include
@@ -1067,7 +1081,7 @@ contract Mindtrix: NonFungibleToken{
 			recipient.deposit(token: <-newNFT)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, ipfsCid: String, ipfsDirectory: String, royalties: [MetadataViews.Royalty], showGuid: String, episodeGuid: String, collectionName: String, collectionDescription: String, collectionExternalURL: String, collectionSquareImageUrl: String, collectionSquareImageType: String, collectionSocials:{ String: String}, licenseIdentifier: String, firstSerial: UInt16, secondSerial: UInt16, thirdSerial: UInt16, fourthSerial: UInt32, fifthSerial: UInt16, editionQuantity: UInt64, audioEssence: AudioEssence, metadata:{ String: AnyStruct}){ 
 			var i: UInt64 = 0
 			while i < editionQuantity{ 
@@ -1087,43 +1101,43 @@ contract Mindtrix: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyEssenceCollection(): @EssenceCollection{ 
 		return <-create EssenceCollection()
 	}
 	
 	// fetch essence
 	// TODO: access(account) fun removeEssence()
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllEssenceIds(): [UInt64]{ 
 		return Mindtrix.essenceDic.keys
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEssencesByShowGuid(showGuid: String):{ UInt64: Bool}{ 
 		return Mindtrix.showGuidToEssenceIds[showGuid]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getOneEssence(essenceId: UInt64): &Essence{ 
 		return (&Mindtrix.essenceDic[essenceId] as &Essence?)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowEssenceViewResolver(id: UInt64): &{ViewResolver.Resolver}{ 
 		let essence = (&Mindtrix.essenceDic[id] as &Mindtrix.Essence?)!
 		return essence as &{ViewResolver.Resolver}
 	}
 	
 	// helper functions
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSerialNumber(firstSerial: UInt16, secondSerial: UInt16, thirdSerial: UInt16, fourthSerial: UInt32, fifthSerial: UInt16, editionNumber: UInt64): UInt64{ 
 		assert(firstSerial <= 18, message: "The first serial number should not be over 18 because the serial is an UInt64 number.")
 		let fullSerial = UInt64(firstSerial) * 1000000000000000000 + UInt64(secondSerial) * 10000000000000000 + UInt64(thirdSerial) * 10000000000000 + UInt64(fourthSerial) * 100000000 + UInt64(fifthSerial) * 100000 + UInt64(editionNumber)
 		return fullSerial
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSerialGenus(firstSerial: UInt16, secondSerial: UInt16, thirdSerial: UInt16, fourthSerial: UInt32, fifthSerial: UInt16, editionNumber: UInt64): [Mindtrix.SerialGenus]{ 
 		let first = Mindtrix.SerialGenus(tier: 1, number: firstSerial, name: "nftRealm", description: "e.g. the Podcast, Literature, or Video")
 		let second = Mindtrix.SerialGenus(tier: 2, number: secondSerial, name: "nftEnum", description: "e.g. the Audio, Image, or Quest in a Podcast Show")

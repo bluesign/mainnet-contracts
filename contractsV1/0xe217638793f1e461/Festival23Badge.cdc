@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -71,7 +85,7 @@ contract Festival23Badge: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
@@ -84,8 +98,8 @@ contract Festival23Badge: NonFungibleToken{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
-		fun borrow(id: UInt64): &NFT?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrow(id: UInt64): &Festival23Badge.NFT?
 	}
 	
 	access(all)
@@ -105,7 +119,7 @@ contract Festival23Badge: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Festival23Badge.NFT
 			let id: UInt64 = token.id
 			let dummy <- self.ownedNFTs[id] <- token
@@ -130,13 +144,13 @@ contract Festival23Badge: NonFungibleToken{
 			return ref as! &{ViewResolver.Resolver}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &NFT?{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(id: UInt64):{ String: String}{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return (ref as! &Festival23Badge.NFT).getMetadata()
@@ -165,7 +179,7 @@ contract Festival23Badge: NonFungibleToken{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTo(creator: Capability<&{NonFungibleToken.Receiver}>, metadata:{ String: String}): &{NonFungibleToken.NFT}{ 
 			let id = Festival23Badge.totalSupply.toString()
 			let meta ={ "name": metadata["name"] ?? "", "description": metadata["description"] ?? "", "metaURI": "https://nft.tobiratory.com/festival23badge/metadata/".concat(id)}

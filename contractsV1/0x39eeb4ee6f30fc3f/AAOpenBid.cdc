@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -152,10 +166,10 @@ contract AAOpenBid{
 	//
 	access(all)
 	resource interface BidPublic{ 
-		access(all)
-		fun getDetails(): BidDetails
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getDetails(): AAOpenBid.BidDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(nftProviderCapability: Capability<&{NonFungibleToken.Provider}>)
 	}
 	
@@ -176,12 +190,12 @@ contract AAOpenBid{
 		// This avoids having more public variables and getter methods for them, and plays
 		// nicely with scripts (which cannot return resources). 
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): BidDetails{ 
 			return self.details
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(nftProviderCapability: Capability<&{NonFungibleToken.Provider}>){ 
 			pre{ 
 				self.details.purchased == false:
@@ -242,7 +256,7 @@ contract AAOpenBid{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleCuts(seller: Address, nftType: Type, nftID: UInt64, affiliate: Address?): [
 		AACommon.PaymentCut
 	]{ 
@@ -266,7 +280,7 @@ contract AAOpenBid{
 		// createBid
 		// Allows the OpenBid owner to create and insert Bid.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBid(
 			vaultProviderCapability: Capability<
 				&{FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance}
@@ -279,19 +293,19 @@ contract AAOpenBid{
 		): UInt64
 		
 		// Allows the OpenBid owner to remove any bid, purchased or not.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBid(bidResourceID: UInt64)
 	}
 	
 	access(all)
 	resource interface OpenBidPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(bidResourceID: UInt64): &Bid?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(bidResourceID: UInt64)
 	}
 	
@@ -305,7 +319,7 @@ contract AAOpenBid{
 		access(self)
 		var bids: @{UInt64: Bid}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createBid(vaultProviderCapability: Capability<&{FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance}>, nftType: Type, nftID: UInt64, bidPrice: UFix64, recipientCapability: Capability<&{NonFungibleToken.CollectionPublic}>, affiliate: Address?): UInt64{ 
 			let bid <- create Bid(vaultProviderCapability: vaultProviderCapability, nftType: nftType, nftID: nftID, bidPrice: bidPrice, recipientCapability: recipientCapability, affiliate: affiliate)
 			let bidResourceID = bid.uuid
@@ -319,7 +333,7 @@ contract AAOpenBid{
 			return bidResourceID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeBid(bidResourceID: UInt64){ 
 			let bid <- self.bids.remove(key: bidResourceID) ?? panic("missing Bid")
 			
@@ -327,12 +341,12 @@ contract AAOpenBid{
 			destroy bid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBidIDs(): [UInt64]{ 
 			return self.bids.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBid(bidResourceID: UInt64): &Bid?{ 
 			if self.bids[bidResourceID] != nil{ 
 				return (&self.bids[bidResourceID] as &Bid?)!
@@ -341,7 +355,7 @@ contract AAOpenBid{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(bidResourceID: UInt64){ 
 			pre{ 
 				self.bids[bidResourceID] != nil:
@@ -363,7 +377,7 @@ contract AAOpenBid{
 	// createOpenBid
 	// Make creating a OpenBid publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createOpenBid(): @OpenBid{ 
 		return <-create OpenBid()
 	}

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -54,13 +68,13 @@ contract Art: NonFungibleToken{
 		access(all)
 		let schema: String?
 		
-		access(all)
-		fun content(): String?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun content(): String
 		
 		access(account)
 		let royalty:{ String: Royalty}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cacheKey(): String
 	}
 	
@@ -157,7 +171,7 @@ contract Art: NonFungibleToken{
 			self.description = metadata.description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cacheKey(): String{ 
 			if self.url != nil{ 
 				return self.url!
@@ -166,7 +180,7 @@ contract Art: NonFungibleToken{
 		}
 		
 		//return the content for this NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun content(): String{ 
 			if self.url != nil{ 
 				return self.url!
@@ -188,7 +202,7 @@ contract Art: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				return MetadataViews.ExternalURL("https://www.versus.auction/piece/".concat((self.owner!).address.toString()).concat("/").concat(self.id.toString()))
 			}
@@ -230,15 +244,15 @@ contract Art: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArt(id: UInt64): &{Art.Public}?
 	}
 	
@@ -273,7 +287,7 @@ contract Art: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Art.NFT
 			let id: UInt64 = token.id
 			
@@ -302,7 +316,7 @@ contract Art: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowArt(id: UInt64): &{Art.Public}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -362,7 +376,7 @@ contract Art: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getContentForArt(address: Address, artId: UInt64): String?{ 
 		let account = getAccount(address)
 		if let artCollection = account.capabilities.get<&{Art.CollectionPublic}>(self.CollectionPublicPath).borrow<&{Art.CollectionPublic}>(){ 
@@ -372,7 +386,7 @@ contract Art: NonFungibleToken{
 	}
 	
 	// We cannot return the content here since it will be too big to run in a script
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getArt(address: Address): [ArtData]{ 
 		var artData: [ArtData] = []
 		let account = getAccount(address)

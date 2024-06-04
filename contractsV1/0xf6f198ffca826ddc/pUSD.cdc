@@ -1,4 +1,18 @@
-/*:
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*:
   # pUSD (Pictta Coin)
 
   - Author: martin
@@ -103,7 +117,7 @@ contract pUSD: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @pUSD.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -147,7 +161,7 @@ contract pUSD: FungibleToken{
 		// Function that mints new tokens, adds them to the total supply,
 		// and returns them to the calling context.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @pUSD.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -161,8 +175,8 @@ contract pUSD: FungibleToken{
 	
 	access(all)
 	resource interface MinterProxyPublic{ 
-		access(all)
-		fun setMinterCapability(cap: Capability<&Minter>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setMinterCapability(cap: Capability<&pUSD.Minter>): Void
 	}
 	
 	// MinterProxy
@@ -179,12 +193,12 @@ contract pUSD: FungibleToken{
 		
 		// Anyone can call this, but only the admin can create Minter capabilities,
 		// so the type system constrains this to being called by the admin.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterCapability(cap: Capability<&Minter>){ 
 			self.minterCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @pUSD.Vault{ 
 			return <-((self.minterCapability!).borrow()!).mintTokens(amount: amount)
 		}
@@ -200,7 +214,7 @@ contract pUSD: FungibleToken{
 	// Anyone can call this, but the MinterProxy cannot mint without a Minter capability,
 	// and only the admin can provide that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMinterProxy(): @MinterProxy{ 
 		return <-create MinterProxy()
 	}
@@ -227,7 +241,7 @@ contract pUSD: FungibleToken{
 		// then the admin account running:
 		// transactions/pUSD/admin/deposit_minter_capability.cdc
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(): @Minter{ 
 			emit MinterCreated()
 			return <-create Minter()

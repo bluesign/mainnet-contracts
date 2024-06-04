@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 	TrmAssetV2_1.cdc
 
@@ -137,7 +151,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		case public
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assetTypeToString(_ assetType: AssetType): String{ 
 		switch assetType{ 
 			case AssetType.private:
@@ -149,7 +163,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stringToAssetType(_ assetTypeStr: String): AssetType{ 
 		switch assetTypeStr{ 
 			case "private":
@@ -441,45 +455,45 @@ contract TrmAssetV2_1: NonFungibleToken{
 		fun destroyToken(id: UInt64)
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowAsset(id: UInt64): &NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowAsset(id: UInt64): &TrmAssetV2_1.NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKID(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(id: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetName(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetDescription(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetURL(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetThumbnailURL(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetType(id: UInt64): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetMetadata(id: UInt64):{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInvitees(id: UInt64): [Address]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteeExists(id: UInt64, invitee: Address): Bool
 	}
 	
@@ -513,7 +527,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		
 		// deposit takes an NFT as an argument and adds it to the Collection
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			pre{ 
 				false:
 					"Depositing Asset directly to Asset contract is not allowed"
@@ -546,7 +560,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns a borrowed reference to the Asset in the collection so that the caller can read data and call methods from it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAsset(id: UInt64): &NFT{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -557,13 +571,13 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Checks if id of NFT exists in collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idExists(id: UInt64): Bool{ 
 			return self.ownedNFTs[id] != nil
 		}
 		
 		// Returns the asset ID for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getKID(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -575,7 +589,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the serial number for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(id: UInt64): UInt64{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -587,7 +601,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the asset name for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetName(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -599,7 +613,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the asset description for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetDescription(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -611,7 +625,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the asset URL for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetURL(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -623,7 +637,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the asset thumbnail URL for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetThumbnailURL(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -635,7 +649,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the asset type for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetType(id: UInt64): String{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -647,7 +661,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the asset metadata for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetMetadata(id: UInt64):{ String: String}{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -659,7 +673,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// Returns the invitees list for an NFT in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInvitees(id: UInt64): [Address]{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -855,7 +869,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 			refAssetNFT.disinvite(invitee: invitee)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun inviteeExists(id: UInt64, invitee: Address): Bool{ 
 			pre{ 
 				self.ownedNFTs[id] != nil:
@@ -908,7 +922,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 	resource Minter{ 
 		
 		// mintNFT mints the asset NFT and stores it in the collection of recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(kID: String, serialNumber: UInt64, assetName: String, assetDescription: String, assetURL: String, assetThumbnailURL: String, assetType: String, assetMetadata:{ String: String}, recipient: &TrmAssetV2_1.Collection): UInt64{ 
 			pre{ 
 				assetType == "private" || assetType == "public":
@@ -926,7 +940,7 @@ contract TrmAssetV2_1: NonFungibleToken{
 		}
 		
 		// batchMintNFTs mints the asset NFT in batch and stores it in the collection of recipient
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFTs(kID: String, totalSerialNumbers: UInt64, assetName: String, assetDescription: String, assetURL: String, assetThumbnailURL: String, assetType: String, assetMetadata:{ String: String}, recipient: &TrmAssetV2_1.Collection): UInt64{ 
 			pre{ 
 				assetType == "private" || assetType == "public":
@@ -957,79 +971,79 @@ contract TrmAssetV2_1: NonFungibleToken{
 	/// allows the admin to perform important functions
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawAsset(assetCollectionAddress: Address, id: UInt64): @{NonFungibleToken.NFT}{ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			return <-assetCollectionCapability.withdrawAsset(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositAsset(assetCollectionAddress: Address, token: @{NonFungibleToken.NFT}){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.depositAsset(token: <-token)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateAsset(assetCollectionAddress: Address, id: UInt64, assetName: String?, assetDescription: String?, assetThumbnailURL: String?, assetType: String?, assetMetadata:{ String: String}?){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.updateAsset(id: id, assetName: assetName, assetDescription: assetDescription, assetThumbnailURL: assetThumbnailURL, assetType: assetType, assetMetadata: assetMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchUpdateAsset(assetCollectionAddress: Address, ids: [UInt64], kID: String, assetName: String?, assetDescription: String?, assetThumbnailURL: String?, assetType: String?, assetMetadata:{ String: String}?){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchUpdateAsset(ids: ids, kID: kID, assetName: assetName, assetDescription: assetDescription, assetThumbnailURL: assetThumbnailURL, assetType: assetType, assetMetadata: assetMetadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAssetMetadataEntry(assetCollectionAddress: Address, id: UInt64, key: String, value: String){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.addAssetMetadataEntry(id: id, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchAddAssetMetadataEntry(assetCollectionAddress: Address, ids: [UInt64], kID: String, key: String, value: String){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchAddAssetMetadataEntry(ids: ids, kID: kID, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAssetMetadataEntry(assetCollectionAddress: Address, id: UInt64, key: String, value: String){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.setAssetMetadataEntry(id: id, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchSetAssetMetadataEntry(assetCollectionAddress: Address, ids: [UInt64], kID: String, key: String, value: String){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchSetAssetMetadataEntry(ids: ids, kID: kID, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAssetMetadataEntry(assetCollectionAddress: Address, id: UInt64, key: String){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.removeAssetMetadataEntry(id: id, key: key)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchRemoveAssetMetadataEntry(assetCollectionAddress: Address, ids: [UInt64], kID: String, key: String){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.batchRemoveAssetMetadataEntry(ids: ids, kID: kID, key: key)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun invite(assetCollectionAddress: Address, id: UInt64, invitee: Address){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.invite(id: id, invitee: invitee)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun disinvite(assetCollectionAddress: Address, id: UInt64, invitee: Address){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.disinvite(id: id, invitee: invitee)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun destroyToken(assetCollectionAddress: Address, id: UInt64){ 
 			let assetCollectionCapability = getAccount(assetCollectionAddress).capabilities.get<&TrmAssetV2_1.Collection>(TrmAssetV2_1.collectionPublicPath).borrow() ?? panic("Could not borrow asset collection capability from provided asset collection address")
 			assetCollectionCapability.destroyToken(id: id)

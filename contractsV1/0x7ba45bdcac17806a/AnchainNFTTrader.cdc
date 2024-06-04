@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -186,18 +200,18 @@ contract AnchainNFTTrader{
 		/// This will assert in the same way as the NFT standard borrowNFT()
 		/// if the NFT is absent, for example if it has been executed via another trade.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}
 		
 		/// execute
 		/// Executes the trade, swapping the NFTs.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _execute(payment: @{NonFungibleToken.NFT}): @{NonFungibleToken.NFT}
 		
 		/// getDetails
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): TradeDetails
 	}
 	
@@ -221,7 +235,7 @@ contract AnchainNFTTrader{
 		/// This will assert in the same way as the NFT standard borrowNFT()
 		/// if the NFT is absent, for example if it has been sold via another trade.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}{ 
 			let ref = (self.nftProviderCapability.borrow()!).borrowNFT(self.getDetails().nftID)
 			//- CANNOT DO THIS IN PRECONDITION: "member of restricted type is not accessible: isInstance"
@@ -236,7 +250,7 @@ contract AnchainNFTTrader{
 		/// This avoids having more public variables and getter methods for them, and plays
 		/// nicely with scripts (which cannot return resources). 
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): TradeDetails{ 
 			return self.details
 		}
@@ -244,7 +258,7 @@ contract AnchainNFTTrader{
 		/// execute
 		/// Execute the trade, swapping the NFTs.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _execute(payment: @{NonFungibleToken.NFT}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				self.details.executed == false:
@@ -315,7 +329,7 @@ contract AnchainNFTTrader{
 		/// createTrade
 		/// Allows the Trader to create and insert Trades.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTrade(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -330,7 +344,7 @@ contract AnchainNFTTrader{
 		/// removeTrade
 		/// Allows the Trader to remove any trade, accepted or not.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTrade(tradeResourceID: UInt64)
 	}
 	
@@ -340,13 +354,13 @@ contract AnchainNFTTrader{
 	///
 	access(all)
 	resource interface TraderPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTradeIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTrade(tradeResourceID: UInt64): &Trade?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(tradeResourceID: UInt64)
 	}
 	
@@ -363,7 +377,7 @@ contract AnchainNFTTrader{
 		/// insert
 		/// Create and publish a Trade for an NFT.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createTrade(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64, nftReceiverCapability: Capability<&{NonFungibleToken.Receiver}>, requestedNftType: Type, requestedNftID: UInt64?): UInt64{ 
 			let trade <- create Trade(nftProviderCapability: nftProviderCapability, nftType: nftType, nftID: nftID, nftReceiverCapability: nftReceiverCapability, requestedNftType: requestedNftType, requestedNftID: requestedNftID, traderID: self.uuid)
 			let tradeResourceID = trade.uuid
@@ -379,7 +393,7 @@ contract AnchainNFTTrader{
 		/// removeTrade
 		/// Remove a Trade that has not yet been executed from the collection and destroy it.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTrade(tradeResourceID: UInt64){ 
 			let trade <- self.trades.remove(key: tradeResourceID) ?? panic("missing Trade")
 			
@@ -390,7 +404,7 @@ contract AnchainNFTTrader{
 		/// getTradeIDs
 		/// Returns an array of the Trade resource IDs that are in the collection
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTradeIDs(): [UInt64]{ 
 			return self.trades.keys
 		}
@@ -398,7 +412,7 @@ contract AnchainNFTTrader{
 		/// borrowTrade
 		/// Returns a read-only view of the Trade for the given tradeID if it is contained by this collection.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTrade(tradeResourceID: UInt64): &Trade?{ 
 			if self.trades[tradeResourceID] != nil{ 
 				return &self.trades[tradeResourceID] as &Trade?
@@ -412,7 +426,7 @@ contract AnchainNFTTrader{
 		/// Anyone can call, but at present it only benefits the account owner to do so.
 		/// Kind traders can however call it if they like.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(tradeResourceID: UInt64){ 
 			pre{ 
 				self.trades[tradeResourceID] != nil:
@@ -438,7 +452,7 @@ contract AnchainNFTTrader{
 	/// createTrader
 	/// Make creating a Trader publicly accessible.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTrader(): @Trader{ 
 		return <-create Trader()
 	}

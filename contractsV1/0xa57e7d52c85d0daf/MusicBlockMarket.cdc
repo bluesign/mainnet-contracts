@@ -1,4 +1,18 @@
-import Melos from "./Melos.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Melos from "./Melos.cdc"
 
 import MusicBlock from "./MusicBlock.cdc"
 
@@ -109,7 +123,7 @@ contract MusicBlockMarket{
 		// If they send the correct payment in Melos, and if the item is still available,
 		// the MusicBlock NFT will be placed in their MusicBlock.Collection .
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(buyerCollection: &MusicBlock.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				buyerPayment.balance == self.price:
@@ -153,7 +167,7 @@ contract MusicBlockMarket{
 	// createSaleOffer
 	// Make creating a SaleOffer publicly accessible.
 	// typeID: UInt64,
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleOffer(
 		sellerItemProvider: Capability<&MusicBlock.Collection>,
 		itemID: UInt64,
@@ -174,10 +188,10 @@ contract MusicBlockMarket{
 	//
 	access(all)
 	resource interface CollectionManager{ 
-		access(all)
-		fun insert(offer: @MusicBlockMarket.SaleOffer)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(offer: @MusicBlockMarket.SaleOffer): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer
 	}
 	
@@ -188,12 +202,12 @@ contract MusicBlockMarket{
 	//
 	access(all)
 	resource interface CollectionPurchaser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			itemID: UInt64,
 			buyerCollection: &MusicBlock.Collection,
 			buyerPayment: @{FungibleToken.Vault}
-		)
+		): Void
 	}
 	
 	// CollectionPublic
@@ -201,13 +215,13 @@ contract MusicBlockMarket{
 	//
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			itemID: UInt64,
 			buyerCollection: &MusicBlock.Collection,
@@ -226,7 +240,7 @@ contract MusicBlockMarket{
 		// insert
 		// Insert a SaleOffer into the collection, replacing one with the same itemID if present.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(offer: @MusicBlockMarket.SaleOffer){ 
 			let itemID: UInt64 = offer.itemID
 			// let typeID: UInt64 = offer.typeID
@@ -241,7 +255,7 @@ contract MusicBlockMarket{
 		
 		// remove
 		// Remove and return a SaleOffer from the collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(itemID: UInt64): @SaleOffer{ 
 			emit CollectionRemovedSaleOffer(itemID: itemID, owner: self.owner?.address!)
 			return <-(self.saleOffers.remove(key: itemID) ?? panic("missing SaleOffer"))
@@ -259,7 +273,7 @@ contract MusicBlockMarket{
 		//   3. MusicBlock.Deposit
 		//   4. SaleOffer.SaleOfferFinished
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(itemID: UInt64, buyerCollection: &MusicBlock.Collection, buyerPayment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.saleOffers[itemID] != nil:
@@ -274,7 +288,7 @@ contract MusicBlockMarket{
 		// getSaleOfferIDs
 		// Returns an array of the IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSaleOfferIDs(): [UInt64]{ 
 			return self.saleOffers.keys
 		}
@@ -283,7 +297,7 @@ contract MusicBlockMarket{
 		// Returns an Optional read-only view of the SaleItem for the given itemID if it is contained by this collection.
 		// The optional will be nil if the provided itemID is not present in the collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleItem(itemID: UInt64): &SaleOffer?{ 
 			if self.saleOffers[itemID] == nil{ 
 				return nil
@@ -304,7 +318,7 @@ contract MusicBlockMarket{
 	// createEmptyCollection
 	// Make creating a Collection publicly accessible.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @Collection{ 
 		return <-create Collection()
 	}

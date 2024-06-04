@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 	GaiaPrimarySale.cdc
 
 	Description: Facilitates the exchange of Fungible Tokens for NFTs.
@@ -62,7 +76,7 @@ contract GaiaPrimarySale{
 	
 	access(all)
 	resource interface IMinter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(assetID: UInt64, creator: Address): @{NonFungibleToken.NFT}
 	}
 	
@@ -108,7 +122,7 @@ contract GaiaPrimarySale{
 			self.expiration = expiration
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun toString(): String{ 
 			var assetIDs = ""
 			var i = 0
@@ -140,48 +154,48 @@ contract GaiaPrimarySale{
 	
 	access(all)
 	resource interface PrimarySalePublic{ 
-		access(all)
-		fun getDetails(): PrimarySaleDetails
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getDetails(): GaiaPrimarySale.PrimarySaleDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupply(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ String: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseNFTs(payment: @{FungibleToken.Vault}, data: AdminSignedData, sig: String): @[{
 			NonFungibleToken.NFT}
 		]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimNFTs(data: AdminSignedData, sig: String): @[{NonFungibleToken.NFT}]
 	}
 	
 	access(all)
 	resource interface PrimarySalePrivate{ 
-		access(all)
-		fun pause()
+		access(TMP_ENTITLEMENT_OWNER)
+		fun pause(): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDetails(name: String, description: String, imageURI: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(priceType: String, price: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAdminPublicKey(adminPublicKey: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAsset(assetID: UInt64)
 	}
 	
@@ -249,7 +263,7 @@ contract GaiaPrimarySale{
 			emit PrimarySaleCreated(externalID: externalID, name: name, description: description, imageURI: imageURI, nftType: nftType, prices: prices)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String{ 
 			if self.status == PrimarySaleStatus.PAUSED{ 
 				return "PAUSED"
@@ -262,56 +276,56 @@ contract GaiaPrimarySale{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDetails(name: String, description: String, imageURI: String){ 
 			self.details = PrimarySaleDetails(name: name, description: description, imageURI: imageURI)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): PrimarySaleDetails{ 
 			return self.details
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(priceType: String, price: UFix64){ 
 			self.prices[priceType] = price
 			emit PriceSet(externalID: self.externalID, type: priceType, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removePrice(priceType: String){ 
 			self.prices.remove(key: priceType)
 			emit PriceRemoved(externalID: self.externalID, type: priceType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ String: UFix64}{ 
 			return self.prices
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupply(): Int{ 
 			return self.availableAssetIDs.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAdminPublicKey(adminPublicKey: String){ 
 			self.adminPublicKey = adminPublicKey
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAsset(assetID: UInt64){ 
 			self.availableAssetIDs[assetID] = true
 			emit AssetAdded(externalID: self.externalID, assetID: assetID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pause(){ 
 			self.status = PrimarySaleStatus.PAUSED
 			emit PrimarySaleStatusChanged(externalID: self.externalID, status: self.getStatus())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(){ 
 			pre{ 
 				self.status != PrimarySaleStatus.OPEN:
@@ -323,7 +337,7 @@ contract GaiaPrimarySale{
 			emit PrimarySaleStatusChanged(externalID: self.externalID, status: self.getStatus())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			self.status = PrimarySaleStatus.CLOSED
 			emit PrimarySaleStatusChanged(externalID: self.externalID, status: self.getStatus())
@@ -335,7 +349,7 @@ contract GaiaPrimarySale{
 			return publicKey.verify(signature: sig.decodeHex(), signedData: data.toString().utf8, domainSeparationTag: "FLOW-V0.0-user", hashAlgorithm: HashAlgorithm.SHA3_256)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseNFTs(payment: @{FungibleToken.Vault}, data: AdminSignedData, sig: String): @[{NonFungibleToken.NFT}]{ 
 			pre{ 
 				self.externalID == data.externalID:
@@ -369,7 +383,7 @@ contract GaiaPrimarySale{
 			return <-nfts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimNFTs(data: AdminSignedData, sig: String): @[{NonFungibleToken.NFT}]{ 
 			pre{ 
 				self.externalID == data.externalID:
@@ -402,7 +416,7 @@ contract GaiaPrimarySale{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createPrimarySale(
 		externalID: String,
 		name: String,

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -87,16 +101,16 @@ contract ByteNextBridge{
 	
 	access(all)
 	resource interface BridgeStorePublic{ 
-		access(all)
-		fun verifyFungibleForUser(tokens: @{FungibleToken.Vault}, hash: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun verifyFungibleForUser(tokens: @{FungibleToken.Vault}, hash: String): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifyNonFungibleForUser(collection: @{NonFungibleToken.Collection}, hash: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserFungibleBalance(tokenType: String): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserNonFungibleIds(collectionType: String): [UInt64]
 	}
 	
@@ -117,7 +131,7 @@ contract ByteNextBridge{
 				User call this function to bridge their tokens to `destinationChain`
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFungible(destinationChain: UInt64, tokens: @{FungibleToken.Vault}, recipient: String){ 
 			pre{ 
 				ByteNextBridge.allowedChains[destinationChain] == true:
@@ -140,7 +154,7 @@ contract ByteNextBridge{
 			emit FungibleRequested(account: owner.address, tokenType: tokenType, destinationChain: destinationChain, amount: tokenAmount, recipient: recipient)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNonFungible(destinationChain: UInt64, collection: @{NonFungibleToken.Collection}, feeTokens: @{FungibleToken.Vault}, recipient: String){ 
 			pre{ 
 				ByteNextBridge.allowedChains[destinationChain] == true:
@@ -191,7 +205,7 @@ contract ByteNextBridge{
 				* Normally, when a bridging is detected, admin will call this function so that user can fulfill their tokens
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifyFungibleForUser(tokens: @{FungibleToken.Vault}, hash: String){ 
 			pre{ 
 				tokens.balance > 0.0:
@@ -208,7 +222,7 @@ contract ByteNextBridge{
 			emit UserFungibleVerified(account: (self.owner!).address, tokenType: tokenType, amount: tokenAmount, hash: hash)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verifyNonFungibleForUser(collection: @{NonFungibleToken.Collection}, hash: String){ 
 			pre{ 
 				collection.getIDs().length > 0:
@@ -232,7 +246,7 @@ contract ByteNextBridge{
 				User claim their tokens
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillFungible(tokenType: String): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.owner != nil:
@@ -248,7 +262,7 @@ contract ByteNextBridge{
 			return <-userVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillNonFungible(collectionType: String): @{NonFungibleToken.Collection}{ 
 			pre{ 
 				self.owner != nil:
@@ -265,7 +279,7 @@ contract ByteNextBridge{
 			return <-collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserFungibleBalance(tokenType: String): UFix64{ 
 			if !self.userVaults.containsKey(tokenType){ 
 				return 0.0
@@ -277,7 +291,7 @@ contract ByteNextBridge{
 			return balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUserNonFungibleIds(collectionType: String): [UInt64]{ 
 			if !self.userCollections.containsKey(collectionType){ 
 				return []
@@ -322,7 +336,7 @@ contract ByteNextBridge{
 	
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowedChains(chainNumbers: [UInt64], value: Bool){ 
 			pre{ 
 				chainNumbers.length > 0:
@@ -333,7 +347,7 @@ contract ByteNextBridge{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setChainAddressLength(chainNumbers: [UInt64], addressLengths: [UInt64]){ 
 			pre{ 
 				chainNumbers.length > 0:
@@ -348,7 +362,7 @@ contract ByteNextBridge{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFeeTokenType(
 			feeTokenType: String,
 			feeTokenReceiver: Capability<&{FungibleToken.Receiver}>
@@ -357,7 +371,7 @@ contract ByteNextBridge{
 			ByteNextBridge.feeTokenReceiver = feeTokenReceiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFungibleReceiver(
 			tokenType: String,
 			fungibleTokenReceiver: Capability<&{FungibleToken.Receiver}>
@@ -365,7 +379,7 @@ contract ByteNextBridge{
 			ByteNextBridge.fungibleTokenReceiver[tokenType] = fungibleTokenReceiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNonFungibleReceiver(
 			collectionType: String,
 			nonFungibleTokenReceiver: Capability<&{NonFungibleToken.Receiver}>
@@ -373,7 +387,7 @@ contract ByteNextBridge{
 			ByteNextBridge.nonFungibleTokenReceiver[collectionType] = nonFungibleTokenReceiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFee(toChains: [UInt64], fees: [UFix64]){ 
 			let count = toChains.length
 			var index = 0
@@ -383,32 +397,32 @@ contract ByteNextBridge{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowedFungibleToken(tokenTypes: [String], value: Bool){ 
 			for tokenType in tokenTypes{ 
 				ByteNextBridge.allowedFungibleTokens[tokenType] = value
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowedNonFungibleToken(collectionTypes: [String], value: Bool){ 
 			for collectionType in collectionTypes{ 
 				ByteNextBridge.allowedNonFungibleTokens[collectionType] = value
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxNftCountPerTransaction(value: UInt64){ 
 			ByteNextBridge.maxNftCountPerTransaction = value
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createBridgeStore(): @ByteNextBridge.BridgeStore{ 
 		return <-create ByteNextBridge.BridgeStore()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAllowedFungibleToken(tokenType: String): Bool{ 
 		if self.allowedFungibleTokens.containsKey(tokenType)
 		&& self.allowedFungibleTokens[tokenType] == true{ 
@@ -417,7 +431,7 @@ contract ByteNextBridge{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isAllowedNonFungibleToken(collectionType: String): Bool{ 
 		if self.allowedNonFungibleTokens.containsKey(collectionType)
 		&& self.allowedNonFungibleTokens[collectionType] == true{ 
@@ -426,12 +440,12 @@ contract ByteNextBridge{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeeTokenType(): String{ 
 		return self.feeTokenType
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFee(toChain: UInt64): UFix64{ 
 		if !self.nonFungibleFees.containsKey(toChain){ 
 			panic("toChain is invalid")
@@ -439,7 +453,7 @@ contract ByteNextBridge{
 		return self.nonFungibleFees[toChain]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxNftCountPerTransaction(): UInt64{ 
 		return self.maxNftCountPerTransaction
 	}

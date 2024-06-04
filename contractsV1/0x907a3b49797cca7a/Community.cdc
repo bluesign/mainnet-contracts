@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 ## The contract of Community Space on Flow Quest
 
 > Author: Bohao Tang<tech@btang.cn>
@@ -124,7 +138,7 @@ contract Community{
 			self.key = key
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBountyEntity(): &{Interfaces.BountyEntityPublic}{ 
 			if self.category == Interfaces.BountyType.quest{ 
 				return self.getQuestConfig()
@@ -133,13 +147,13 @@ contract Community{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionConfig(): &MissionConfig{ 
 			let community = self.getOwnerCommunity()
 			return community.borrowMissionRef(key: self.key) ?? panic("Failed to borrow mission.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuestConfig(): &QuestConfig{ 
 			let community = self.getOwnerCommunity()
 			return community.borrowQuestRef(key: self.key) ?? panic("Failed to borrow quest.")
@@ -197,7 +211,7 @@ contract Community{
 		}
 		
 		// display
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStandardDisplay(): MetadataViews.Display{ 
 			var thumbnail:{ MetadataViews.File}? = nil
 			if self.image != nil{ 
@@ -209,7 +223,7 @@ contract Community{
 			return MetadataViews.Display(name: self.title, description: self.description, thumbnail: thumbnail!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): Interfaces.MissionDetail{ 
 			return Interfaces.MissionDetail(steps: self.steps, stepsCfg: self.stepsCfg.uri())
 		}
@@ -267,12 +281,12 @@ contract Community{
 		}
 		
 		// display
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStandardDisplay(): MetadataViews.Display{ 
 			return MetadataViews.Display(name: self.title, description: self.description, thumbnail: MetadataViews.HTTPFile(url: "https://nftstorage.link/ipfs/".concat(self.image)))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetail(): Interfaces.QuestDetail{ 
 			return Interfaces.QuestDetail(missions: self.missions, achievement: self.achievement)
 		}
@@ -334,25 +348,25 @@ contract Community{
 		access(all)
 		let key: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStandardDisplay(): MetadataViews.Display
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetailedDisplay(): CommunityDisplay
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionKeys(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuestKeys(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMissionRef(key: String): &MissionConfig?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowQuestRef(key: String): &QuestConfig?
 	}
 	
@@ -397,7 +411,7 @@ contract Community{
 			self.bounties = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateBasics(desc: String, image: String, banner: String?){ 
 			self.description = desc
 			self.imageIpfs = image
@@ -405,13 +419,13 @@ contract Community{
 			emit CommunityUpdateBasics(id: self.uuid, owner: (self.owner!).address, name: self.name, description: desc, image: image, banner: banner)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSocial(key: String, value: String){ 
 			self.socials[key] = value
 			emit CommunityUpdateSocial(id: self.uuid, owner: (self.owner!).address, key: key, value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMission(key: String, mission: MissionConfig){ 
 			pre{ 
 				self.owner != nil:
@@ -428,7 +442,7 @@ contract Community{
 			emit MissionCreated(key: key, communityId: self.uuid, owner: owner, steps: mission.steps)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addQuest(key: String, quest: QuestConfig){ 
 			pre{ 
 				self.owner != nil:
@@ -452,7 +466,7 @@ contract Community{
 			emit QuestCreated(key: key, communityId: self.uuid, owner: owner, missionKeys: missionKeys, achievementHost: quest.achievement?.host, achievementId: quest.achievement?.eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateQuestAchievement(key: String, achi: Helper.EventIdentifier){ 
 			pre{ 
 				self.owner != nil:
@@ -463,7 +477,7 @@ contract Community{
 			emit QuestAchievementUpdated(key: key, communityId: self.uuid, owner: (self.owner!).address, achievementHost: achi.host, achievementId: achi.eventId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMissionStepsCfg(key: String, stepsCfg: String){ 
 			let mission = self.missions[key] ?? panic("Failed to find mission:".concat(key))
 			mission.updateMissionStepsCfg(stepsCfg: stepsCfg)
@@ -476,37 +490,37 @@ contract Community{
 		}
 		
 		/************* Getters (for anyone) *************/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMissionKeys(): [String]{ 
 			return self.missions.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getQuestKeys(): [String]{ 
 			return self.quests.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMissionRef(key: String): &MissionConfig?{ 
 			return &self.missions[key] as &MissionConfig?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowQuestRef(key: String): &QuestConfig?{ 
 			return &self.quests[key] as &QuestConfig?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStandardDisplay(): MetadataViews.Display{ 
 			return MetadataViews.Display(name: self.name, description: self.description, thumbnail: MetadataViews.HTTPFile(url: "https://nftstorage.link/ipfs/".concat(self.imageIpfs)))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetailedDisplay(): CommunityDisplay{ 
 			return CommunityDisplay(self.getRef())
 		}
@@ -533,13 +547,13 @@ contract Community{
 	
 	access(all)
 	resource interface CommunityBuilderPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCommunity(id: UInt64): &CommunityIns
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}
 		
 		access(contract)
@@ -555,7 +569,7 @@ contract Community{
 			self.communities <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCommunity(key: String, name: String, description: String, image: String, banner: String?, socials:{ String: String}?): UInt64{ 
 			pre{ 
 				self.owner?.address != nil:
@@ -574,12 +588,12 @@ contract Community{
 			return id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCommunityPrivateRef(id: UInt64): &CommunityIns{ 
 			return &self.communities[id] as &CommunityIns? ?? panic("Failed to borrow community.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferCommunity(id: UInt64, recipient: &CommunityBuilder){ 
 			let community <- self.communities.remove(key: id) ?? panic("Failed to transfer community")
 			recipient.takeover(ins: <-community)
@@ -595,17 +609,17 @@ contract Community{
 		}
 		
 		/************* Getters (for anyone) *************/
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCommunity(id: UInt64): &CommunityIns{ 
 			return &self.communities[id] as &CommunityIns? ?? panic("Failed to borrow community.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.communities.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}{ 
 			return &self.communities[id] as &{ViewResolver.Resolver}? ?? panic("Failed to borrow community")
 		}
@@ -628,14 +642,14 @@ contract Community{
 			self.id = id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCommunity(): &CommunityIns?{ 
 			return Community.borrowCommunity(host: self.owner, id: self.id)
 		}
 	}
 	
 	// ----- public methods -----
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCommunityBuilder(): @CommunityBuilder{ 
 		return <-create CommunityBuilder()
 	}
@@ -645,7 +659,7 @@ contract Community{
 		 * Get all communities
 		 */
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommunities(): [CommunityIdentitier]{ 
 		let ret: [CommunityIdentitier] = []
 		for key in self.communityKeyMapping.keys{ 
@@ -658,7 +672,7 @@ contract Community{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCommunityByKey(key: String): &CommunityIns?{ 
 		if let id = Community.communityKeyMapping[key]{ 
 			return Community.borrowCommunityById(id: id)
@@ -666,7 +680,7 @@ contract Community{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCommunityById(id: UInt64): &CommunityIns?{ 
 		if let host = Community.communityIdMapping[id]{ 
 			return Community.borrowCommunity(host: host, id: id)
@@ -674,7 +688,7 @@ contract Community{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowCommunity(host: Address, id: UInt64): &CommunityIns?{ 
 		if let builder =
 			getAccount(host).capabilities.get<&CommunityBuilder>(Community.CommunityPublicPath)

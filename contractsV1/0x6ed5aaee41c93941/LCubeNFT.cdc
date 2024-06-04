@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -108,15 +122,15 @@ contract LCubeNFT: NonFungibleToken{
 	access(all)
 	resource interface LCubeCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubeNFT(id: UInt64): &LCubeNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -150,7 +164,7 @@ contract LCubeNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @LCubeNFT.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -172,7 +186,7 @@ contract LCubeNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowLCubeNFT(id: UInt64): &LCubeNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -218,7 +232,7 @@ contract LCubeNFT: NonFungibleToken{
 	resource NFTMinter{ 
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(creator: Capability<&{NonFungibleToken.Receiver}>, recipient: &{NonFungibleToken.CollectionPublic}, ipfsHash: String, name: String, description: String, nftType: String, nftTypeDescription: String, contentType: String, power: UFix64, rarity: UFix64): &{NonFungibleToken.NFT}{ 
 			// create a new NFT
 			var token <- create NFT(creator: creator.address, ipfsHash: ipfsHash, name: name, description: description, nftType: nftType, nftTypeDescription: nftTypeDescription, contentType: contentType, power: power, rarity: rarity)
@@ -230,7 +244,7 @@ contract LCubeNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun minter(): Capability<&NFTMinter>{ 
 		return self.account.capabilities.get<&NFTMinter>(self.MinterPublicPath)!
 	}

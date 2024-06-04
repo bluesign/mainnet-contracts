@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 // Token contract of EmptyPotionBottle (EPB)
 access(all)
@@ -127,7 +141,7 @@ contract EmptyPotionBottle: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @EmptyPotionBottle.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -168,7 +182,7 @@ contract EmptyPotionBottle: FungibleToken{
 		//
 		// Function that creates and returns a new minter resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewMinter(): @Minter{ 
 			emit MinterCreated()
 			return <-create Minter()
@@ -178,7 +192,7 @@ contract EmptyPotionBottle: FungibleToken{
 		//
 		// Function that creates and returns a new burner resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewBurner(): @Burner{ 
 			emit BurnerCreated()
 			return <-create Burner()
@@ -197,7 +211,7 @@ contract EmptyPotionBottle: FungibleToken{
 		// Function that mints new tokens, adds them to the total supply,
 		// and returns them to the calling context.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @EmptyPotionBottle.Vault{ 
 			pre{ 
 				amount > 0.0:
@@ -223,7 +237,7 @@ contract EmptyPotionBottle: FungibleToken{
 		// Note: the burned tokens are automatically subtracted from the 
 		// total supply in the Vault destructor.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnTokens(from: @{FungibleToken.Vault}){ 
 			let vault <- from as! @EmptyPotionBottle.Vault
 			let amount = vault.balance
@@ -234,8 +248,8 @@ contract EmptyPotionBottle: FungibleToken{
 	
 	access(all)
 	resource interface MinterProxyPublic{ 
-		access(all)
-		fun setMinterCapability(cap: Capability<&Minter>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setMinterCapability(cap: Capability<&EmptyPotionBottle.Minter>): Void
 	}
 	
 	// MinterProxy
@@ -252,12 +266,12 @@ contract EmptyPotionBottle: FungibleToken{
 		
 		// Anyone can call this, but only the admin can create Minter capabilities,
 		// so the type system constrains this to being called by the admin.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterCapability(cap: Capability<&Minter>){ 
 			self.minterCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTokens(amount: UFix64): @EmptyPotionBottle.Vault{ 
 			return <-((self.minterCapability!).borrow()!).mintTokens(amount: amount)
 		}
@@ -273,7 +287,7 @@ contract EmptyPotionBottle: FungibleToken{
 	// Anyone can call this, but the MinterProxy cannot mint without a Minter capability,
 	// and only the admin can provide that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMinterProxy(): @MinterProxy{ 
 		emit MinterProxyCreated()
 		return <-create MinterProxy()

@@ -1,4 +1,18 @@
-/*:
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*:
   # Evaluate.Market Marketplace Flow Smart Contract
 
   - Author: Evaluate.Market
@@ -126,18 +140,18 @@ contract EMMarket{
 	//
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListings():{ UInt64: ListingDetails}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseListing(listingResourceID: UInt64, paymentVault: @{FungibleToken.Vault}): @{
 			NonFungibleToken.NFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &Listing?
 	}
 	
@@ -149,7 +163,7 @@ contract EMMarket{
 		// createListing
 		// Allows the Storefront owner to create and insert Listings.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(
 			nftProviderCapability: Capability<
 				&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}
@@ -158,17 +172,17 @@ contract EMMarket{
 			nftID: UInt64,
 			salePaymentVaultType: Type,
 			saleCuts: [
-				ListingSaleCut
+				EMMarket.ListingSaleCut
 			]
 		): UInt64
 		
 		// removeListing
 		// Allows the Storefront owner to remove any sale listing, acepted or not.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingResourceID: UInt64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowManagerListing(listingResourceID: UInt64): &Listing?
 	}
 	
@@ -181,7 +195,7 @@ contract EMMarket{
 			self.listings <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64, salePaymentVaultType: Type, saleCuts: [ListingSaleCut]): UInt64{ 
 			pre{ 
 				EMMarket.marketStatus != MarketStatus.disabled:
@@ -213,7 +227,7 @@ contract EMMarket{
 		// removeListing
 		// Remove a Listing that has not yet been purchased from the collection and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingResourceID: UInt64){ 
 			pre{ 
 				EMMarket.marketStatus != MarketStatus.disabled:
@@ -250,12 +264,12 @@ contract EMMarket{
 		// getListingIDs
 		// Returns an array of the Listing resource IDs that are in the collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListingIDs(): [UInt64]{ 
 			return self.listings.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListings():{ UInt64: ListingDetails}{ 
 			let listings:{ UInt64: ListingDetails} ={} 
 			for listingResourceID in self.getListingIDs(){ 
@@ -267,7 +281,7 @@ contract EMMarket{
 		// purchaseListing
 		// Returns the purchased NFT from the listing given the listingID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseListing(listingResourceID: UInt64, paymentVault: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			let listing = self.borrowListing(listingResourceID: listingResourceID) ?? panic("No listing with that ID in Storefront")
 			let hasNFT = listing.hasNFT()
@@ -284,7 +298,7 @@ contract EMMarket{
 		// borrowSaleItem
 		// Returns a read-only view of the SaleItem for the given listingID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(listingResourceID: UInt64): &Listing?{ 
 			if self.listings[listingResourceID] != nil{ 
 				return &self.listings[listingResourceID] as &EMMarket.Listing?
@@ -293,7 +307,7 @@ contract EMMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowManagerListing(listingResourceID: UInt64): &Listing?{ 
 			if self.listings[listingResourceID] != nil{ 
 				return &self.listings[listingResourceID] as &EMMarket.Listing?
@@ -305,7 +319,7 @@ contract EMMarket{
 	
 	access(all)
 	resource EMMarketAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTokenCollectionPlatform(_ platform: TokenCollectionPlatform): Type{ 
 			let nftType = platform.nftType
 			EMMarket.tokenCollectionPlatforms[nftType.identifier] = platform
@@ -313,7 +327,7 @@ contract EMMarket{
 			return nftType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addMarketFeeReceiver(
 			type: Type,
 			receiver: Capability<&{FungibleToken.Receiver}>
@@ -327,12 +341,12 @@ contract EMMarket{
 			return type
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listMarketFeeReceivers():{ String: Capability<&{FungibleToken.Receiver}>}{ 
 			return EMMarket.marketSaleCut.receivers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeTokenCollectionPlatform(nftType: Type): Type{ 
 			pre{ 
 				EMMarket.tokenCollectionPlatforms[nftType.identifier] != nil:
@@ -343,7 +357,7 @@ contract EMMarket{
 			return nftType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeMarketFeeReceiver(type: Type): Type{ 
 			pre{ 
 				EMMarket.marketSaleCut.receivers[type.identifier] != nil:
@@ -354,7 +368,7 @@ contract EMMarket{
 			return type
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateTokenCollectionPlatform(_ platform: TokenCollectionPlatform): Type{ 
 			pre{ 
 				EMMarket.tokenCollectionPlatforms[platform.nftType.identifier] != nil:
@@ -366,7 +380,7 @@ contract EMMarket{
 			return nftType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMarketFee(_ marketSaleCut: MarketSaleCut){ 
 			for receiverKey in EMMarket.marketSaleCut.receivers.keys{ 
 				marketSaleCut.receivers[receiverKey] = EMMarket.marketSaleCut.receivers[receiverKey]
@@ -375,13 +389,13 @@ contract EMMarket{
 			emit MarketFeeChanged()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMarketStatus(_ marketStatus: UInt8){ 
 			EMMarket.marketStatus = MarketStatus(rawValue: marketStatus)!
 			emit MarketStatusChanged(marketStatus: marketStatus)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @EMMarketAdmin{ 
 			return <-create EMMarketAdmin()
 		}
@@ -487,22 +501,22 @@ contract EMMarket{
 		// This will assert in the same way as the NFT standard borrowNFT()
 		// if the NFT is absent, for example if it has been sold via another listing.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasNFT(): Bool
 		
 		// purchase
 		// Purchase the listing, buying the token.
 		// This pays the beneficiaries and returns the token to the buyer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(paymentVault: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}
 		
 		// getDetails
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails
 	}
 	
@@ -545,7 +559,7 @@ contract EMMarket{
 		// This will assert in the same way as the NFT standard borrowNFT()
 		// if the NFT is absent, for example if it has been sold via another listing.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}{ 
 			let ref = (self.nftProviderCapability.borrow()!).borrowNFT(self.getDetails().nftID)
 			assert(ref.isInstance(self.getDetails().nftType), message: "token has wrong type")
@@ -553,7 +567,7 @@ contract EMMarket{
 			return ref as &{NonFungibleToken.NFT}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasNFT(): Bool{ 
 			let ids = (self.nftProviderCapability.borrow()!).getIDs()
 			return ids.contains(self.getDetails().nftID)
@@ -564,12 +578,12 @@ contract EMMarket{
 		// This avoids having more public variables and getter methods for them, and plays
 		// nicely with scripts (which cannot return resources).
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails{ 
 			return self.details
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSaleCuts(_ saleCuts: [ListingSaleCut]){ 
 			self.details.updateSaleCuts(saleCuts)
 			let saleCutAmounts: [UFix64] = []
@@ -583,7 +597,7 @@ contract EMMarket{
 		// Purchase the listing, buying the token.
 		// This pays the beneficiaries and returns the token to the buyer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(paymentVault: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				EMMarket.marketStatus != MarketStatus.disabled:
@@ -807,7 +821,7 @@ contract EMMarket{
 			self.maxAmount = maxAmount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateCut(_ amount: UFix64): UFix64{ 
 			var cut = 0.0
 			if self.amountType == SaleCutType.fixed{ 
@@ -894,7 +908,7 @@ contract EMMarket{
 			self.saleCuts = saleCuts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateCuts(_ price: UFix64):{ String: UFix64}{ 
 			let cutMap:{ String: UFix64} ={} 
 			for saleCut in self.saleCuts{ 
@@ -904,17 +918,17 @@ contract EMMarket{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun listTokenCollectionPlatforms():{ String: TokenCollectionPlatform}{ 
 		return self.tokenCollectionPlatforms
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTokenCollectionPlatformByNftType(nftType: Type): TokenCollectionPlatform?{ 
 		return self.tokenCollectionPlatforms[nftType.identifier]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketSaleCut(paymentType: Type): SaleCut?{ 
 		let marketSaleCut = EMMarket.marketSaleCut
 		let marketSaleCutReceiver = marketSaleCut.receivers[paymentType.identifier]
@@ -924,7 +938,7 @@ contract EMMarket{
 		return nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenStorefront(): @EMStorefront{ 
 		return <-create EMStorefront()
 	}

@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -103,7 +117,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		}
 		
 		// Public Functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun findMetadataRef(_ creatorId: UInt64, _ description: String): &Memento.NFTMetadata?{ 
 			let metadatas = self.creatorsIds[creatorId]!
 			var i = metadatas.length - 1
@@ -118,7 +132,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		}
 		
 		// Public Functions
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun findMetadata(_ creatorId: UInt64, _ description: String): Memento.NFTMetadata?{ 
 			let metadatas = self.creatorsIds[creatorId]!
 			var i = metadatas.length - 1
@@ -131,7 +145,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTimeRemaining(_ creatorID: UInt64, _ description: String): UFix64?{ 
 			let metadata = self.findMetadata(creatorID, description)!
 			let answer = metadata.creationTime + 86400.0 - getCurrentBlock().timestamp
@@ -143,10 +157,10 @@ contract Memento: NonFungibleToken, ViewResolver{
 	///
 	access(all)
 	resource interface MetadataStoragePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTimeRemaining(_ creatorID: UInt64, _ description: String): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun findMetadata(_ creatorId: UInt64, _ description: String): Memento.NFTMetadata?
 	}
 	
@@ -246,7 +260,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		access(all)
 		let originalMinter: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata(): NFTMetadata{ 
 			return Memento.getNFTMetadata(self.creatorID, self.description)!
 		}
@@ -319,15 +333,15 @@ contract Memento: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface MementoCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMemento(id: UInt64): &Memento.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -352,7 +366,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		// Deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			
@@ -379,7 +393,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMemento(id: UInt64): &Memento.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -396,7 +410,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 			return nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(){ 
 			if let storage = &Memento.nftStorage[(self.owner!).address] as auth(Mutate) &{UInt64: NFT}?{ 
 				for id in storage.keys{ 
@@ -428,7 +442,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 	access(all)
 	resource Administrator{ 
 		// Function to upload the Metadata to the contract.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNFTMetadata(channel: String, creatorID: UInt64, creatorUsername: String, creatorAddress: Address, sourceURL: String, description: String, MementoCreationDate: String, contentCreationDate: String, lockdownOption: Int, supplyOption: UInt64, imgUrl: String, embededHTML: String){ 
 			// Load the metadata from the Memento account
 			let metadatas = Memento.account.storage.borrow<&Memento.MetadataStorage>(from: Memento.MetadataStoragePath)!
@@ -445,7 +459,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		
 		// mintNFT mints a new NFT and deposits
 		// it in the recipients collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(creatorId: UInt64, description: String, recipient: Address){ 
 			pre{ 
 				self.isMintingAvailable(creatorId, description):
@@ -462,13 +476,13 @@ contract Memento: NonFungibleToken, ViewResolver{
 		}
 		
 		// create a new Administrator resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Administrator{ 
 			return <-create Administrator()
 		}
 		
 		// change Memento of collection info
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeField(key: String, value: AnyStruct){ 
 			Memento.collectionInfo[key] = value
 		}
@@ -523,7 +537,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -538,7 +552,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 	}
 	
 	// Get information about a NFTMetadata
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getNFTMetadata(_ creatorId: UInt64, _ description: String): Memento.NFTMetadata?{ 
 		let publicAccount = self.account
 		let metadataCapability: Capability<&{Memento.MetadataStoragePublic}> = publicAccount.capabilities.get<&{MetadataStoragePublic}>(self.MetadataPublicPath)!
@@ -547,7 +561,7 @@ contract Memento: NonFungibleToken, ViewResolver{
 		return metadatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionInfo():{ String: AnyStruct}{ 
 		let collectionInfo = self.collectionInfo
 		collectionInfo["totalSupply"] = self.totalSupply
@@ -555,12 +569,12 @@ contract Memento: NonFungibleToken, ViewResolver{
 		return collectionInfo
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionAttribute(key: String): AnyStruct{ 
 		return self.collectionInfo[key] ?? panic(key.concat(" is not an attribute in this collection."))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isMintingAvailable(_ creatorId: UInt64, _ description: String): Bool{ 
 		let metadata = Memento.getNFTMetadata(creatorId, description)!
 		if metadata.unlimited{ 

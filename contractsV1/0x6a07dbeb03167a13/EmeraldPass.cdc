@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
 
@@ -37,7 +51,7 @@ contract EmeraldPass{
 		access(all)
 		let tokenTypeToVault:{ Type: Capability<&{FungibleToken.Receiver}>}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupportedTokens(): [Type]{ 
 			return self.tokenTypeToVault.keys
 		}
@@ -61,7 +75,7 @@ contract EmeraldPass{
 		access(all)
 		let costToTime:{ UFix64: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTime(cost: UFix64): UFix64?{ 
 			return self.costToTime[cost]
 		}
@@ -76,13 +90,13 @@ contract EmeraldPass{
 		access(all)
 		var endDate: UFix64
 		
-		access(all)
-		fun purchase(payment: @{FungibleToken.Vault})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun purchase(payment: @{FungibleToken.Vault}): Void
 		
 		access(account)
 		fun addTime(time: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isActive(): Bool
 	}
 	
@@ -91,7 +105,7 @@ contract EmeraldPass{
 		access(all)
 		var endDate: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				false:
@@ -106,7 +120,7 @@ contract EmeraldPass{
 			emit Purchased(subscriber: (self.owner!).address, time: time, vaultType: paymentType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isActive(): Bool{ 
 			return true
 		}
@@ -127,19 +141,19 @@ contract EmeraldPass{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createVault(): @Vault{ 
 		return <-create Vault()
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePricing(newPricing:{ Type: Pricing}){ 
 			EmeraldPass.pricing = newPricing
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun giveUserTime(user: Address, time: UFix64){ 
 			let userVault =
 				getAccount(user).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath).borrow<
@@ -152,7 +166,7 @@ contract EmeraldPass{
 	
 	// A public function because, well, ... um ... you can
 	// always call this if you want! :D ;) <3
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun depositToECTreasury(vault: @{FungibleToken.Vault}){ 
 		pre{ 
 			self.getTreasury()[vault.getType()] != nil:
@@ -162,7 +176,7 @@ contract EmeraldPass{
 	}
 	
 	// A function you can call to donate subscription time to someone else
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun donate(nicePerson: Address, to: Address, payment: @{FungibleToken.Vault}){ 
 		pre{ 
 			false:
@@ -177,27 +191,27 @@ contract EmeraldPass{
 	}
 	
 	// Checks to see if a user is currently subscribed to Emerald Pass
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isActive(user: Address): Bool{ 
 		return true
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllPricing():{ Type: Pricing}{ 
 		return self.pricing
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPricing(vaultType: Type): Pricing?{ 
 		return self.getAllPricing()[vaultType]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getTreasury():{ Type: Capability<&{FungibleToken.Receiver}>}{ 
 		return ECTreasury().tokenTypeToVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUserVault(user: Address): &Vault?{ 
 		return getAccount(user).capabilities.get<&Vault>(EmeraldPass.VaultPublicPath).borrow<
 			&Vault

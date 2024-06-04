@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Unlicense
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Unlicense
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -177,12 +191,12 @@ contract ARTIFACTMarketV2{
 			self.nftSaleCuts = nftSaleCuts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePreSaleStatus(isPreSale: Bool){ 
 			self.isPreSale = isPreSale
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseBuyers(userAddress: Address, quantity: UInt64){ 
 			if self.buyers[userAddress] == nil{ 
 				self.buyers[userAddress] = 0
@@ -190,7 +204,7 @@ contract ARTIFACTMarketV2{
 			self.buyers[userAddress] = self.buyers[userAddress]! + quantity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(): UFix64{ 
 			if self.isPreSale == true{ 
 				return self.preSalePrice
@@ -198,13 +212,13 @@ contract ARTIFACTMarketV2{
 			return self.salePrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhitelist(whitelist: [Address], preSaleBuyerMaxLimit:{ Address: UInt64}){ 
 			self.whitelist = whitelist
 			self.preSaleBuyerMaxLimit = preSaleBuyerMaxLimit
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyers(): Int{ 
 			return self.buyers.keys.length
 		}
@@ -243,7 +257,7 @@ contract ARTIFACTMarketV2{
 	// to allow others to access their sale
 	access(all)
 	resource interface ManagerPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			listingID: UInt64,
 			buyTokens: &{FungibleToken.Vault},
@@ -252,9 +266,9 @@ contract ARTIFACTMarketV2{
 			userPackCollection: &ARTIFACTPackV3.Collection,
 			userCollection: &ARTIFACTV2.Collection,
 			quantity: UInt64
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseOnPreSale(
 			listingID: UInt64,
 			buyTokens: &{FungibleToken.Vault},
@@ -265,10 +279,10 @@ contract ARTIFACTMarketV2{
 			quantity: UInt64
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListings(): [Listing]
 	}
 	
@@ -281,13 +295,13 @@ contract ARTIFACTMarketV2{
 		// createListing
 		// Allows the ARTIFACTV2 owner to create and insert Listings.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(
 			nftID: UInt64?,
 			packTemplateID: UInt64?,
 			salePrice: UFix64,
 			saleCuts: [
-				SaleCut
+				ARTIFACTMarketV2.SaleCut
 			],
 			salePaymentVaultType: Type,
 			sellerCapability: Capability<&{FungibleToken.Receiver}>,
@@ -301,23 +315,23 @@ contract ARTIFACTMarketV2{
 			},
 			preSalePrice: UFix64,
 			nftSaleCuts: [
-				SaleCut
+				ARTIFACTMarketV2.SaleCut
 			]
-		)
+		): Void
 		
 		// removeListing
 		// Allows the ARTIFACTMarketV2 owner to remove any sale listing, acepted or not.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingID: UInt64)
 		
 		// changePreSaleStatus
 		// Allows the ARTIFACTMarketV2 owner change pre-sale status.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePreSaleStatus(listingID: UInt64, isPreSale: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhitelist(
 			listingResourceID: UInt64,
 			whitelist: [
@@ -364,7 +378,7 @@ contract ARTIFACTMarketV2{
 		/// Parameters: sellerCapability: The seller capability to transfer FUSD
 		/// Parameters: databaseID: The database id
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(nftID: UInt64?, packTemplateID: UInt64?, salePrice: UFix64, saleCuts: [SaleCut], salePaymentVaultType: Type, sellerCapability: Capability<&{FungibleToken.Receiver}>, databaseID: String, whitelist: [Address], isPreSale: Bool, preSaleBuyerMaxLimit:{ Address: UInt64}, preSalePrice: UFix64, nftSaleCuts: [SaleCut]){ 
 			pre{ 
 				salePrice >= 0.0:
@@ -387,7 +401,7 @@ contract ARTIFACTMarketV2{
 			emit ARTIFACTMarketListed(listingID: listingID, price: salePrice, saleCuts: saleCutsInfo, seller: self.owner?.address, databaseID: databaseID, nftID: nftID, packTemplateID: packTemplateID, preSalePrice: preSalePrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getNumberValue(value: Bool): UInt64{ 
 			if value == true{ 
 				return 1
@@ -399,7 +413,7 @@ contract ARTIFACTMarketV2{
 		///
 		/// Parameters: listingID: the ID of the listing to withdraw from the sale
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(listingID: UInt64){ 
 			// Remove the price from the prices dictionary
 			self.listings.remove(key: listingID)
@@ -419,7 +433,7 @@ contract ARTIFACTMarketV2{
 		/// Parameters: userCollection: The nft collection 
 		/// Parameters: quantity: Quantity of pack to buy
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(listingID: UInt64, buyTokens: &{FungibleToken.Vault}, databaseID: String, owner: Address, userPackCollection: &ARTIFACTPackV3.Collection, userCollection: &ARTIFACTV2.Collection, quantity: UInt64){ 
 			pre{ 
 				!(self.listings[listingID]!).isPreSale:
@@ -439,7 +453,7 @@ contract ARTIFACTMarketV2{
 		/// Parameters: userCollection: The nft collection 
 		/// Parameters: quantity: Quantity of pack to buy
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseOnPreSale(listingID: UInt64, buyTokens: &{FungibleToken.Vault}, databaseID: String, owner: Address, userPackCollection: &ARTIFACTPackV3.Collection, userCollection: &ARTIFACTV2.Collection, quantity: UInt64){ 
 			pre{ 
 				(self.listings[listingID]!).isPreSale:
@@ -572,26 +586,26 @@ contract ARTIFACTMarketV2{
 		}
 		
 		/// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.listings.keys
 		}
 		
 		/// getListings returns an array of Listing that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getListings(): [Listing]{ 
 			return self.listings.values
 		}
 		
 		/// getListings returns an array of Listing that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBuyersByListingID(listingID: UInt64): Int{ 
 			return (self.listings[listingID]!).getBuyers()
 		}
 		
 		// updateWhitelist
 		// Update listing whitelist 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateWhitelist(listingResourceID: UInt64, whitelist: [Address], preSaleBuyerMaxLimit:{ Address: UInt64}){ 
 			pre{ 
 				self.listings[listingResourceID] != nil:
@@ -601,7 +615,7 @@ contract ARTIFACTMarketV2{
 			listing.updateWhitelist(whitelist: whitelist, preSaleBuyerMaxLimit: preSaleBuyerMaxLimit)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePreSaleStatus(listingID: UInt64, isPreSale: Bool){ 
 			pre{ 
 				self.listings.containsKey(listingID):
@@ -616,7 +630,7 @@ contract ARTIFACTMarketV2{
 	// -----------------------------------------------------------------------
 	// createManager creates a new Manager resource
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createManager(
 		superAdminTokenReceiver: Capability<&ARTIFACTAdminV2.AdminTokenReceiver>,
 		ownerCollection: Capability<&ARTIFACTV2.Collection>
@@ -630,7 +644,7 @@ contract ARTIFACTMarketV2{
 	// createSaleCut creates a new SaleCut to a receiver user
 	// with a specific percentage.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCut(
 		receiver: Capability<&{FungibleToken.Receiver}>,
 		percentage: UFix64
@@ -640,7 +654,7 @@ contract ARTIFACTMarketV2{
 	
 	// totalSaleCuts sum all percentages in a array of SaleCut
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun totalSaleCuts(saleCuts: [SaleCut]): UFix64{ 
 		var total: UFix64 = 0.0
 		for cut in saleCuts{ 

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FiatToken from "./../../standardsV1/FiatToken.cdc"
 
@@ -111,7 +125,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 		// was a temporary holder of the tokens. The Vault's balance has
 		// been consumed and therefore can be destroyed.
 		access(all)
-		fun deposit(from: @{FungibleToken.Vault}){ 
+		fun deposit(from: @{FungibleToken.Vault}): Void{ 
 			let vault <- from as! @UsdcUsdtSwapPair.Vault
 			self.balance = self.balance + vault.balance
 			emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
@@ -156,24 +170,24 @@ contract UsdcUsdtSwapPair: FungibleToken{
 			self.token2 <- fromToken2
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken1(from: @FiatToken.Vault){ 
 			self.token1.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToken2(from: @TeleportedTetherToken.Vault){ 
 			self.token2.deposit(from: <-from)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken1(): @FiatToken.Vault{ 
 			var vault <- FiatToken.createEmptyVault(vaultType: Type<@FiatToken.Vault>()) as! @FiatToken.Vault
 			vault <-> self.token1
 			return <-vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawToken2(): @TeleportedTetherToken.Vault{ 
 			var vault <- TeleportedTetherToken.createEmptyVault(vaultType: Type<@TeleportedTetherToken.Vault>()) as! @TeleportedTetherToken.Vault
 			vault <-> self.token2
@@ -183,14 +197,14 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	
 	// createEmptyBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyTokenBundle(): @UsdcUsdtSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-(FiatToken.createEmptyVault(vaultType: Type<@FiatToken.Vault>()) as! @FiatToken.Vault), fromToken2: <-(TeleportedTetherToken.createEmptyVault(vaultType: Type<@TeleportedTetherToken.Vault>()) as! @TeleportedTetherToken.Vault))
 	}
 	
 	// createTokenBundle
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenBundle(fromToken1: @FiatToken.Vault, fromToken2: @TeleportedTetherToken.Vault): @UsdcUsdtSwapPair.TokenBundle{ 
 		return <-create TokenBundle(fromToken1: <-fromToken1, fromToken2: <-fromToken2)
 	}
@@ -228,12 +242,12 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun freeze(){ 
 			UsdcUsdtSwapPair.isFrozen = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unfreeze(){ 
 			UsdcUsdtSwapPair.isFrozen = false
 		}
@@ -253,19 +267,19 @@ contract UsdcUsdtSwapPair: FungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFeePercentage(): UFix64{ 
 		return 0.0
 	}
 	
 	// Check current pool amounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolAmounts(): PoolAmounts{ 
 		return PoolAmounts(token1Amount: UsdcUsdtSwapPair.token1Vault.balance, token2Amount: UsdcUsdtSwapPair.token2Vault.balance)
 	}
 	
 	// Get quote for Token1 (given) -> Token2
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken1ForToken2(amount: UFix64): UFix64{ 
 		pre{ 
 			self.token2Vault.balance >= amount:
@@ -277,7 +291,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token1 -> Token2 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken1ForExactToken2(amount: UFix64): UFix64{ 
 		pre{ 
 			self.token2Vault.balance >= amount:
@@ -289,7 +303,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 (given) -> Token1
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapExactToken2ForToken1(amount: UFix64): UFix64{ 
 		pre{ 
 			self.token1Vault.balance >= amount:
@@ -301,7 +315,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	}
 	
 	// Get quote for Token2 -> Token1 (given)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun quoteSwapToken2ForExactToken1(amount: UFix64): UFix64{ 
 		pre{ 
 			self.token1Vault.balance >= amount:
@@ -313,7 +327,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	}
 	
 	// Swaps Token1 (FiatToken) -> Token2 (tUSDT)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken1ForToken2(from: @FiatToken.Vault): @TeleportedTetherToken.Vault{ 
 		pre{ 
 			!UsdcUsdtSwapPair.isFrozen:
@@ -333,7 +347,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	}
 	
 	// Swap Token2 (tUSDT) -> Token1 (FiatToken)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapToken2ForToken1(from: @TeleportedTetherToken.Vault): @FiatToken.Vault{ 
 		pre{ 
 			!UsdcUsdtSwapPair.isFrozen:
@@ -353,7 +367,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 	}
 	
 	// Used to add liquidity without minting new liquidity token
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun donateLiquidity(from: @UsdcUsdtSwapPair.TokenBundle){ 
 		let token1Vault <- from.withdrawToken1()
 		let token2Vault <- from.withdrawToken2()
@@ -362,7 +376,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 		destroy from
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addLiquidity(from: @UsdcUsdtSwapPair.TokenBundle): @UsdcUsdtSwapPair.Vault{ 
 		pre{ 
 			!UsdcUsdtSwapPair.isFrozen:
@@ -378,7 +392,7 @@ contract UsdcUsdtSwapPair: FungibleToken{
 		return <-UsdcUsdtSwapPair.mintTokens(amount: totalLiquidityAmount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeLiquidity(from: @UsdcUsdtSwapPair.Vault, token1Amount: UFix64, token2Amount: UFix64): @UsdcUsdtSwapPair.TokenBundle{ 
 		pre{ 
 			!UsdcUsdtSwapPair.isFrozen:

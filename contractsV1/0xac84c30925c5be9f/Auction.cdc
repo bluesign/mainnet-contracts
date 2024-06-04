@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
 
@@ -299,7 +313,7 @@ contract Auction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionNumber(id: UInt64): UInt64?{ 
 			return self.NFT?.editionNumber
 		}
@@ -333,7 +347,7 @@ contract Auction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(){ 
 			pre{ 
 				!self.auctionCancelled:
@@ -360,7 +374,7 @@ contract Auction{
 		}
 		
 		//this can be negative if is expired
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun timeRemaining(): Fix64{ 
 			let auctionLength = self.auctionLength
 			let startTime = self.auctionStartTime
@@ -369,13 +383,13 @@ contract Auction{
 			return remaining
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isAuctionExpired(): Bool{ 
 			let timeRemaining = self.timeRemaining()
 			return timeRemaining < Fix64(0.0)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minNextBid(): UFix64{ 
 			//If there are bids then the next min bid is the current price plus the increment
 			if self.currentPrice != 0.0{ 
@@ -395,7 +409,7 @@ contract Auction{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address?{ 
 			if let vaultCap = self.recipientVaultCap{ 
 				// Check possible situation, where vault was unlinked after bid
@@ -408,7 +422,7 @@ contract Auction{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.bidder() == address{ 
 				return self.bidVault.balance
@@ -417,7 +431,7 @@ contract Auction{
 		}
 		
 		// This method should probably use preconditions more
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			bidTokens: @{FungibleToken.Vault},
 			vaultCap: Capability<&{FungibleToken.Receiver}>,
@@ -480,7 +494,7 @@ contract Auction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(): AuctionStatus{ 
 			var leader: Address? = nil
 			if let recipient = self.recipientVaultCap{ 
@@ -506,7 +520,7 @@ contract Auction{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(){ 
 			pre{ 
 				!self.auctionCancelled:
@@ -519,7 +533,7 @@ contract Auction{
 			self.auctionCancelled = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFT(NFT: @Collectible.NFT){ 
 			pre{ 
 				self.NFT == nil:
@@ -535,7 +549,7 @@ contract Auction{
 	// retreiving the auction price list and placing bids
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(
 			minimumBidIncrement: UFix64,
 			auctionLength: UFix64,
@@ -547,16 +561,16 @@ contract Auction{
 			editionCap: Capability<&{Edition.EditionCollectionPublic}>
 		): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AuctionStatus}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTimeLeft(_ id: UInt64): Fix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			id: UInt64,
 			bidTokens: @{FungibleToken.Vault},
@@ -578,14 +592,14 @@ contract Auction{
 			self.auctionItems <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun keys(): [UInt64]{ 
 			return self.auctionItems.keys
 		}
 		
 		// addTokenToauctionItems adds an NFT to the auction items and sets the meta data
 		// for the auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(minimumBidIncrement: UFix64, auctionLength: UFix64, extendedLength: UFix64, remainLengthToExtend: UFix64, auctionStartTime: UFix64, startPrice: UFix64, platformVaultCap: Capability<&{FungibleToken.Receiver}>, editionCap: Capability<&{Edition.EditionCollectionPublic}>): UInt64{ 
 			pre{ 
 				auctionLength > 0.00:
@@ -615,7 +629,7 @@ contract Auction{
 		}
 		
 		// getAuctionPrices returns a dictionary of available NFT IDs with their current price
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatuses():{ UInt64: AuctionStatus}{ 
 			if self.auctionItems.keys.length == 0{ 
 				return{} 
@@ -628,7 +642,7 @@ contract Auction{
 			return priceList
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionStatus(_ id: UInt64): AuctionStatus?{ 
 			if self.auctionItems[id] == nil{ 
 				return nil
@@ -639,7 +653,7 @@ contract Auction{
 			return itemRef.getAuctionStatus()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTimeLeft(_ id: UInt64): Fix64?{ 
 			if self.auctionItems[id] == nil{ 
 				return nil
@@ -652,7 +666,7 @@ contract Auction{
 		
 		// settleAuction sends the auction item to the highest bidder
 		// and deposits the FungibleTokens into the auction owner's account
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun settleAuction(_ id: UInt64){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -662,7 +676,7 @@ contract Auction{
 			itemRef.settleAuction()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(_ id: UInt64){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -675,7 +689,7 @@ contract Auction{
 		
 		// placeBid sends the bidder's tokens to the bid vault and updates the
 		// currentPrice of the current auction item
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(id: UInt64, bidTokens: @{FungibleToken.Vault}, vaultCap: Capability<&{FungibleToken.Receiver}>, collectionCap: Capability<&{Collectible.CollectionPublic}>){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -687,7 +701,7 @@ contract Auction{
 			itemRef.placeBid(bidTokens: <-bidTokens, vaultCap: vaultCap, collectionCap: collectionCap)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNFT(id: UInt64, NFT: @Collectible.NFT){ 
 			pre{ 
 				self.auctionItems[id] != nil:
@@ -699,7 +713,7 @@ contract Auction{
 	}
 	
 	// createAuctionCollection returns a new AuctionCollection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionCollection(): @AuctionCollection{ 
 		let auctionCollection <- create AuctionCollection()
 		return <-auctionCollection

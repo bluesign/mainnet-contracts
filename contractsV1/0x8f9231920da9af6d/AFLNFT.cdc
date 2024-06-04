@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -85,7 +99,7 @@ contract AFLNFT: NonFungibleToken{
 			self.issuedSupply = 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getImmutableData():{ String: AnyStruct}{ 
 			return self.immutableData
 		}
@@ -165,15 +179,15 @@ contract AFLNFT: NonFungibleToken{
 	access(all)
 	resource interface AFLNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAFLNFT(id: UInt64): &AFLNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -209,7 +223,7 @@ contract AFLNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @AFLNFT.NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -224,7 +238,7 @@ contract AFLNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAFLNFT(id: UInt64): &AFLNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -300,19 +314,19 @@ contract AFLNFT: NonFungibleToken{
 	}
 	
 	//method to get all templates
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates():{ UInt64: Template}{ 
 		return AFLNFT.allTemplates
 	}
 	
 	//method to get the latest template id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getLatestTemplateId(): UInt64{ 
 		return AFLNFT.lastIssuedTemplateId - 1
 	}
 	
 	//method to get template by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplateById(templateId: UInt64): Template{ 
 		pre{ 
 			AFLNFT.allTemplates[templateId] != nil:
@@ -325,7 +339,7 @@ contract AFLNFT: NonFungibleToken{
 	}
 	
 	//method to get nft-data by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTData(nftId: UInt64): NFTData{ 
 		pre{ 
 			AFLNFT.allNFTs[nftId] != nil:

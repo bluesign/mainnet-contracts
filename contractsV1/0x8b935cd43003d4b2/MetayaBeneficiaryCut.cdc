@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 	Description: Central Smart Contract for Metaya Beneficiary Cut
 	This smart contract stores the mappings from the names of copyright owners
 	to the vaults in which they'd like to receive tokens,
@@ -111,37 +125,37 @@ contract MetayaBeneficiaryCut{
 	var commonwealCutPercentages:{ String: UFix64}
 	
 	/// Get all copyright owner names
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCopyrightOwnerNames(): [String]{ 
 		return self.copyrightOwnerCapabilities.keys
 	}
 	
 	/// Get all commonweal names
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllCommonwealNames(): [String]{ 
 		return self.commonwealCapabilities.keys
 	}
 	
 	/// Get the saleIDs in storeCutPercentages
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleIDsInStoreCutPercentages(): [UInt32]{ 
 		return self.storeCutPercentages.keys
 	}
 	
 	/// Get the packIDs in packCutPercentages
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackIDsInPackCutPercentages(): [UInt32]{ 
 		return self.packCutPercentages.keys
 	}
 	
 	/// Get the playIDs in marketCutPercentages
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayIDsInMarketCutPercentages(): [UInt32]{ 
 		return self.marketCutPercentages.keys
 	}
 	
 	/// Get the capability for depositing accounting tokens to the copyright owner
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCopyrightOwnerCapability(name: String): Capability<&{FungibleToken.Receiver}>?{ 
 		if let cap = self.copyrightOwnerCapabilities[name]{ 
 			return cap
@@ -151,7 +165,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the copyright owners' sale cutPercentage of the store with saleID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoreCutPercentage(saleID: UInt32, name: String): UFix64?{ 
 		if let cutPercentages = self.storeCutPercentages[saleID]{ 
 			return cutPercentages[name]
@@ -161,7 +175,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the copyright owners' pack cutPercentage of the pack with packID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackCutPercentage(packID: UInt32, name: String): UFix64?{ 
 		if let cutPercentages = self.packCutPercentages[packID]{ 
 			return cutPercentages[name]
@@ -171,7 +185,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the copyright owners' market cutPercentage of the NFT with playID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketCutPercentage(playID: UInt32, name: String): UFix64?{ 
 		if let cutPercentages = self.marketCutPercentages[playID]{ 
 			return cutPercentages[name]
@@ -181,7 +195,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the copyright owners' names with saleID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStoreCopyrightOwnerNames(saleID: UInt32): [String]?{ 
 		if let cac = self.storeCutPercentages[saleID]{ 
 			return cac.keys
@@ -191,7 +205,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the copyright owners' names with packID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackCopyrightOwnerNames(packID: UInt32): [String]?{ 
 		if let cac = self.packCutPercentages[packID]{ 
 			return cac.keys
@@ -201,7 +215,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the copyright owners' names with playID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketCopyrightOwnerNames(playID: UInt32): [String]?{ 
 		if let cac = self.marketCutPercentages[playID]{ 
 			return cac.keys
@@ -211,7 +225,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the capability for depositing accounting tokens to the commonweal organization
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommonwealCapability(name: String): Capability<&{FungibleToken.Receiver}>?{ 
 		if let cap = self.commonwealCapabilities[name]{ 
 			return cap
@@ -221,7 +235,7 @@ contract MetayaBeneficiaryCut{
 	}
 	
 	/// Get the cutPercentage of commonweal organization
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCommonwealCutPercentage(name: String): UFix64?{ 
 		if let cutPercentage = self.commonwealCutPercentages[name]{ 
 			return cutPercentage
@@ -234,7 +248,7 @@ contract MetayaBeneficiaryCut{
 	resource Admin{ 
 		
 		/// Set or update the FT-receiving capability for a copyright owner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCopyrightOwnerCapability(
 			name: String,
 			capability: Capability<&{FungibleToken.Receiver}>?
@@ -252,7 +266,7 @@ contract MetayaBeneficiaryCut{
 		}
 		
 		/// Set or update the store cutpercentage for the copyright owner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStoreCutPercentages(
 			saleID: UInt32,
 			copyrightOwnerAndCutPercentage:{ 
@@ -277,7 +291,7 @@ contract MetayaBeneficiaryCut{
 		}
 		
 		/// Set or update the pack cutpercentage for the copyright owner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPackCutPercentages(
 			packID: UInt32,
 			copyrightOwnerAndCutPercentage:{ 
@@ -302,7 +316,7 @@ contract MetayaBeneficiaryCut{
 		}
 		
 		/// Set or update the market cutpercentage for the copyright owner
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketCutPercentages(
 			playID: UInt32,
 			copyrightOwnerAndCutPercentage:{ 
@@ -328,7 +342,7 @@ contract MetayaBeneficiaryCut{
 		}
 		
 		/// Update the capability of Metaya service
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetayaCapability(capability: Capability<&{FungibleToken.Receiver}>){ 
 			MetayaBeneficiaryCut.metayaCapability = capability
 			
@@ -342,7 +356,7 @@ contract MetayaBeneficiaryCut{
 		}
 		
 		/// Update the market cutPercentage of Metaya service
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetayaMarketCutPercentage(cutPercentage: UFix64){ 
 			pre{ 
 				cutPercentage < 1.0:
@@ -353,7 +367,7 @@ contract MetayaBeneficiaryCut{
 		}
 		
 		/// Set or update the capability and cutPercentage of commonweal organization
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCommonweal(
 			name: String,
 			capability: Capability<&{FungibleToken.Receiver}>?,

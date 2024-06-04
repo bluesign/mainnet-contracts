@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Components{ 
 	access(all)
 	let AdminPath: StoragePath
@@ -50,8 +64,8 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
-		fun build(components:{ String:{ Component}}, colors: Colors): String
+		access(TMP_ENTITLEMENT_OWNER)
+		fun build(components:{ String:{ Components.Component}}, colors: Components.Colors): String
 	}
 	
 	access(all)
@@ -59,7 +73,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "accessories_".concat(self.name))!) ?? panic("accessory not found")
 			switch self.name{ 
@@ -80,7 +94,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "clothing_".concat(self.name))!) ?? panic("clothing not found")
 			switch self.name{ 
@@ -104,7 +118,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "clothingGraphic_".concat(self.name))!) ?? panic("clothing not found")
 			return content[0]
@@ -120,7 +134,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "eyebrows_".concat(self.name))!) ?? panic("eyebrows not found")
 			return content[0]
@@ -136,7 +150,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "eyes_".concat(self.name))!) ?? panic("eyes not found")
 			return content[0]
@@ -152,7 +166,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "facialHair_".concat(self.name))!) ?? panic("facialHair not found")
 			return content[0].concat(colors.facialHair).concat(content[1])
@@ -168,7 +182,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "mouth_".concat(self.name))!) ?? panic("mouth not found")
 			return content[0]
@@ -184,7 +198,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "nose_".concat(self.name))!) ?? panic("nose not found")
 			return content[0]
@@ -200,7 +214,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "style_".concat(self.name))!) ?? panic("style not found")
 			let base = (components["base"]!).build(components: components, colors: colors)
@@ -223,7 +237,7 @@ contract Components{
 		access(all)
 		let name: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(components:{ String:{ Component}}, colors: Colors): String{ 
 			let content = Components.account.storage.borrow<&[String]>(from: StoragePath(identifier: "top_".concat(self.name))!) ?? panic("top not found")
 			switch self.name{ 
@@ -262,7 +276,7 @@ contract Components{
 		access(all)
 		let flattened:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun build(): String{ 
 			let content =
 				Components.account.storage.borrow<&[String]>(
@@ -343,7 +357,7 @@ contract Components{
 		access(all)
 		let colors:{ String: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRandom(): Renderer{ 
 			let c: [String] = []
 			var count = 0
@@ -368,13 +382,13 @@ contract Components{
 			return Renderer(components: components, colors: colors)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun rollOption(segment: String): String{ 
 			let keys = (self.options[segment]!).keys
 			return keys[revertibleRandom<UInt64>() % UInt64(keys.length)]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerContent(component: String, name: String, content: [String]){ 
 			let storagePath = StoragePath(identifier: component.concat("_").concat(name))!
 			Components.account.storage.save(content, to: storagePath)
@@ -387,12 +401,12 @@ contract Components{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addColor(_ c: String){ 
 			self.colors.insert(key: c, true)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeColor(_ c: String){ 
 			self.colors.remove(key: c)
 		}

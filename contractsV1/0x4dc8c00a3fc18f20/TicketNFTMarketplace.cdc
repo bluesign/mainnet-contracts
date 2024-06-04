@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import TicketNFT from "./TicketNFT.cdc"
 
@@ -24,20 +38,20 @@ contract TicketNFTMarketplace{
 	
 	access(all)
 	resource interface SaleCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(id: UInt64): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			id: UInt64,
 			recipientCollection: &TicketNFT.Collection,
 			payment: @FlowToken.Vault
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimTicketNFT(id: UInt64, recipientCollection: &TicketNFT.Collection)
 	}
 	
@@ -52,7 +66,7 @@ contract TicketNFTMarketplace{
 		access(all)
 		let FlowTokenVault: Capability<&FlowToken.Vault>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(id: UInt64, price: UFix64){ 
 			pre{ 
 				price >= 0.0:
@@ -63,12 +77,12 @@ contract TicketNFTMarketplace{
 			self.forSale[id] = price
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlistFromSale(id: UInt64){ 
 			self.forSale.remove(key: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(id: UInt64, recipientCollection: &TicketNFT.Collection, payment: @FlowToken.Vault){ 
 			pre{ 
 				payment.balance == self.forSale[id]:
@@ -79,18 +93,18 @@ contract TicketNFTMarketplace{
 			self.unlistFromSale(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claimTicketNFT(id: UInt64, recipientCollection: &TicketNFT.Collection){ 
 			recipientCollection.deposit(token: <-(self.TicketNFTCollection.borrow()!).withdraw(withdrawID: id))
 			self.unlistFromSale(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(id: UInt64): UFix64{ 
 			return self.forSale[id] ?? panic("Can't get the NFT price")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
@@ -102,7 +116,7 @@ contract TicketNFTMarketplace{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(
 		TicketNFTCollection: Capability<&TicketNFT.Collection>,
 		FlowTokenVault: Capability<&FlowToken.Vault>

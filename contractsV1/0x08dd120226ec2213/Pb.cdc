@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Pb{ 
 	/// only support Varint and LengthDelim for now
 	access(all)
@@ -51,20 +65,20 @@ contract Pb{
 		}
 		
 		// if idx >= b.length, means we're done
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasMore(): Bool{ 
 			return self.idx < self.b.length
 		}
 		
 		// has to use struct as cadence can has only single return
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decKey(): TagType{ 
 			let v = self.decVarint()
 			return TagType(tag: v / 8, wt: UInt8(v % 8))
 		}
 		
 		// modify self.idx
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decVarint(): UInt64{ 
 			var ret: UInt64 = 0
 			// zero-copy for lower gas cost even though it may not matter
@@ -84,7 +98,7 @@ contract Pb{
 		}
 		
 		// modify self.idx
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun decBytes(): [UInt8]{ 
 			let len = self.decVarint()
 			let end = self.idx + Int(len)
@@ -101,7 +115,7 @@ contract Pb{
 	}
 	
 	// raw is UInt64 big endian, raw.length <= 8
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toUInt64(_ raw: [UInt8]): UInt64{ 
 		let rawLen = raw.length
 		assert(rawLen <= 8, message: "invalid raw length for UInt64")
@@ -116,7 +130,7 @@ contract Pb{
 	}
 	
 	// raw is UInt256 big endian, raw.length <= 32
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toUInt256(_ raw: [UInt8]): UInt256{ 
 		let rawLen = raw.length
 		assert(rawLen <= 32, message: "invalid raw length for UInt256")
@@ -130,19 +144,19 @@ contract Pb{
 		return ret
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toAddress(_ raw: [UInt8]): Address{ 
 		return Address(self.toUInt64(raw))
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toUFix64(_ raw: [UInt8]): UFix64{ 
 		let val = self.toUInt64(raw)
 		return UFix64(val / 100_000_000) + UFix64(val % 100_000_000) / 100_000_000.0
 	}
 	
 	/// return hex string!
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun toString(_ raw: [UInt8]): String{ 
 		return String.encodeHex(raw)
 	}

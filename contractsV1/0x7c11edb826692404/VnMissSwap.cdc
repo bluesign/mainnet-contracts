@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import VnMiss from "./VnMiss.cdc"
 
@@ -24,7 +38,7 @@ contract VnMissSwap{
 	access(all)
 	event SwapTimeChange(startAt: UFix64, endAt: UFix64)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun levelAsString(level: UInt8): String{ 
 		switch level{ 
 			case VnMiss.Level.Bronze.rawValue:
@@ -37,7 +51,7 @@ contract VnMissSwap{
 		return ""
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapNFTForNFT(
 		list: @[
 			VnMiss.NFT; 5
@@ -103,7 +117,7 @@ contract VnMissSwap{
 				 * Admin will call this function on demand
 				 */
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTime(startAt: UFix64, endAt: UFix64){ 
 			VnMissSwap.startAt = startAt
 			VnMissSwap.endAt = endAt

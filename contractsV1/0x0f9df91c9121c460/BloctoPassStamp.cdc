@@ -1,4 +1,18 @@
-// This is the implementation of BloctoPassStamp
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This is the implementation of BloctoPassStamp
 // Used to mark history onto BloctoPass
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -27,7 +41,7 @@ contract BloctoPassStamp: NonFungibleToken{
 	
 	access(all)
 	resource interface BloctoPassPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMessage(): String
 	}
 	
@@ -52,7 +66,7 @@ contract BloctoPassStamp: NonFungibleToken{
 			self.message = message
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMessage(): String{ 
 			return self.message
 		}
@@ -81,7 +95,7 @@ contract BloctoPassStamp: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BloctoPassStamp.NFT
 			let id: UInt64 = token.id
 			
@@ -134,7 +148,7 @@ contract BloctoPassStamp: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, message: String){ 
 			
 			// create a new NFT

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import NFTPlus from "./NFTPlus.cdc"
 
@@ -81,7 +95,7 @@ contract CommonNFT: NonFungibleToken, NFTPlus{
 			self.royalties = royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(): [{NFTPlus.Royalties}]{ 
 			return self.royalties
 		}
@@ -104,7 +118,7 @@ contract CommonNFT: NonFungibleToken, NFTPlus{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CommonNFT.NFT
 			let id: UInt64 = token.id
 			let dummy <- self.ownedNFTs[id] <- token
@@ -112,7 +126,7 @@ contract CommonNFT: NonFungibleToken, NFTPlus{
 			emit Deposit(id: id, to: self.owner?.address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(tokenId: UInt64, to: Capability<&{NonFungibleToken.Receiver}>){ 
 			let token <- self.ownedNFTs.remove(key: tokenId) ?? panic("Missed NFT")
 			emit Withdraw(id: tokenId, from: self.owner?.address)
@@ -130,7 +144,7 @@ contract CommonNFT: NonFungibleToken, NFTPlus{
 			return &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalties(id: UInt64): [{NFTPlus.Royalties}]{ 
 			let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
 			return (ref as! &{NFTPlus.NFT}).getRoyalties()
@@ -159,7 +173,7 @@ contract CommonNFT: NonFungibleToken, NFTPlus{
 	
 	access(all)
 	resource Minter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(creator: Address, metadata: String, royalties: [{NFTPlus.Royalties}]): @{NonFungibleToken.NFT}{ 
 			let token <- create NFT(id: CommonNFT.totalSupply, creator: creator, metadata: metadata, royalties: royalties)
 			CommonNFT.totalSupply = CommonNFT.totalSupply + 1
@@ -167,7 +181,7 @@ contract CommonNFT: NonFungibleToken, NFTPlus{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTo(creator: Capability<&{NonFungibleToken.Receiver}>, metadata: String, royalties: [{NFTPlus.Royalties}]): &{NonFungibleToken.NFT}{ 
 			let token <- create NFT(id: CommonNFT.totalSupply, creator: creator.address, metadata: metadata, royalties: royalties)
 			CommonNFT.totalSupply = CommonNFT.totalSupply + 1
@@ -178,17 +192,17 @@ contract CommonNFT: NonFungibleToken, NFTPlus{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun receiver(_ address: Address): Capability<&{NonFungibleToken.Receiver}>{ 
 		return getAccount(address).capabilities.get<&{NonFungibleToken.Receiver}>(self.collectionPublicPath)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun collectionPublic(_ address: Address): Capability<&{NonFungibleToken.CollectionPublic}>{ 
 		return getAccount(address).capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.collectionPublicPath)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun minter(): Capability<&Minter>{ 
 		return self.account.capabilities.get<&Minter>(self.minterPublicPath)!
 	}

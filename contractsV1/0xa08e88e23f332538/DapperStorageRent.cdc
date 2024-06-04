@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
@@ -47,7 +61,7 @@ contract DapperStorageRent{
 	/// Get the current StorageRentRefillThreshold
 	///
 	/// @return UInt64 value of the current StorageRentRefillThreshold value
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStorageRentRefillThreshold(): UInt64{ 
 		return self.StorageRentRefillThreshold
 	}
@@ -56,7 +70,7 @@ contract DapperStorageRent{
 	/// Get the current StorageRentRefillThreshold
 	///
 	/// @return List of refilled Accounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRefilledAccounts(): [Address]{ 
 		return self.RefilledAccounts
 	}
@@ -65,7 +79,7 @@ contract DapperStorageRent{
 	/// Get the current StorageRentRefillThreshold
 	///
 	/// @return List of blocked accounts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBlockedAccounts(): [Address]{ 
 		return self.BlockedAccounts
 	}
@@ -74,7 +88,7 @@ contract DapperStorageRent{
 	/// Get the current StorageRentRefillThreshold
 	///
 	/// @return Address: RefilledAccountInfo mapping
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRefilledAccountInfos():{ Address: RefilledAccountInfo}{ 
 		return self.RefilledAccountInfos
 	}
@@ -83,12 +97,12 @@ contract DapperStorageRent{
 	/// Get the current StorageRentRefillThreshold
 	///
 	/// @return UInt64 value of the current RefillRequiredBlocks value
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRefillRequiredBlocks(): UInt64{ 
 		return self.RefillRequiredBlocks
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fundedRefillV2(address: Address, tokens: @{FungibleToken.Vault}): @{FungibleToken.Vault}{ 
 		let privateForwardingSenderRef =
 			self.account.storage.borrow<&PrivateReceiverForwarder.Sender>(
@@ -105,7 +119,7 @@ contract DapperStorageRent{
 	/// Attempt to refill an accounts storage capacity if it has dipped below threshold and passes other checks.
 	///
 	/// @param address: Address to attempt a storage refill on
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun tryRefill(_ address: Address){ 
 		let REFUEL_AMOUNT = 0.06
 		self.cleanExpiredRefilledAccounts(10)
@@ -179,7 +193,7 @@ contract DapperStorageRent{
 	///
 	/// @param address: Address to check eligibility on
 	/// @return Boolean valued based on if the provided address is below the storage threshold
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkEligibility(_ address: Address): Bool{ 
 		if self.RefilledAccountInfos[address] != nil
 		&& getCurrentBlock().height - (self.RefilledAccountInfos[address]!).atBlock
@@ -213,7 +227,7 @@ contract DapperStorageRent{
 	/// public method to clean up expired accounts based on current block height
 	///
 	/// @param batchSize: Int to set the batch size of the cleanup
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun cleanExpiredRefilledAccounts(_ batchSize: Int){ 
 		var index = 0
 		while index < batchSize && self.RefilledAccounts.length > index{ 
@@ -246,17 +260,17 @@ contract DapperStorageRent{
 	/// Used to set different configuration levers such as StorageRentRefillThreshold, RefillRequiredBlocks, and BlockedAccounts
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStorageRentRefillThreshold(_ threshold: UInt64){ 
 			DapperStorageRent.StorageRentRefillThreshold = threshold
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRefillRequiredBlocks(_ blocks: UInt64){ 
 			DapperStorageRent.RefillRequiredBlocks = blocks
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun blockAddress(_ address: Address){ 
 			if !DapperStorageRent.getBlockedAccounts().contains(address){ 
 				DapperStorageRent.BlockedAccounts.append(address)
@@ -264,7 +278,7 @@ contract DapperStorageRent{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unblockAddress(_ address: Address){ 
 			if DapperStorageRent.getBlockedAccounts().contains(address){ 
 				let position = DapperStorageRent.BlockedAccounts.firstIndex(of: address) ?? panic("Trying to unblock an address that is not blocked.")

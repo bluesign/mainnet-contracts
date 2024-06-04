@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -204,12 +218,12 @@ contract Bl0x: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun increaseNounce(){ 
 			self.nounce = self.nounce + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String{ 
 			var traitRarity: [String] = []
 			for trait in self.getAllTraitsMetadata().values{ 
@@ -225,7 +239,7 @@ contract Bl0x: NonFungibleToken{
 			return rarity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTraitsAsTraits(): MetadataViews.Traits{ 
 			let traits = self.getAllTraitsMetadata()
 			let mvt: [MetadataViews.Trait] = []
@@ -236,7 +250,7 @@ contract Bl0x: NonFungibleToken{
 			return MetadataViews.Traits(mvt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTraitsMetadataAsArray(): [{String: String}]{ 
 			let traits = self.traits
 			if self.serial == 885{ 
@@ -253,7 +267,7 @@ contract Bl0x: NonFungibleToken{
 			return traitMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTraitsMetadata():{ String: Trait}{ 
 			let traits = self.traits
 			if self.serial == 885{ 
@@ -298,7 +312,7 @@ contract Bl0x: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			//TODO: add nounce and emit better event the first time it is moved.
@@ -392,12 +406,12 @@ contract Bl0x: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.metadata["name"]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String{ 
 			return self.metadata["rarity"]!
 		}
@@ -411,12 +425,12 @@ contract Bl0x: NonFungibleToken{
 		self.traits[trait.id] = trait
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTraits():{ UInt64: Trait}{ 
 		return self.traits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTrait(_ id: UInt64): Trait?{ 
 		return self.traits[id]
 	}

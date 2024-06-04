@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: Unlicense
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: Unlicense
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -201,15 +215,15 @@ contract ARTIFACT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &ARTIFACT.NFT?
 	}
 	
@@ -247,7 +261,7 @@ contract ARTIFACT: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -270,7 +284,7 @@ contract ARTIFACT: NonFungibleToken{
 		//
 		// Returns: A reference to the NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(id: UInt64): &ARTIFACT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -286,10 +300,10 @@ contract ARTIFACT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun borrowViewResolver(id: UInt64): &{MetadataViews.Resolver}{ 
+		view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver}?{ 
 			let nft = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			let artifactsNFT = nft as! &NFT
-			return artifactsNFT as &{MetadataViews.Resolver}
+			return artifactsNFT as &{ViewResolver.Resolver}?
 		}
 		
 		access(all)
@@ -326,21 +340,21 @@ contract ARTIFACT: NonFungibleToken{
 	
 	// getAllTemplates get all templates stored in the contract
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllTemplates(): [Template]{ 
 		return ARTIFACT.templateDatas.values
 	}
 	
 	// getTemplate get a specific templates stored in the contract by id
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTemplate(templateId: UInt64): Template?{ 
 		return ARTIFACT.templateDatas[templateId]
 	}
 	
 	// getNumberMintedByTemplate get number nft minted by template
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedByTemplate(templateId: UInt64): UInt64?{ 
 		return ARTIFACT.numberMintedByTemplate[templateId]
 	}

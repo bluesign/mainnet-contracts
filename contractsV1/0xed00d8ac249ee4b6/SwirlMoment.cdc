@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -74,7 +88,7 @@ contract SwirlMoment: NonFungibleToken{
 			self.signature = signature
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun signedData(): [UInt8]{ 
 			var json = "{"
 			json = json.concat("\"address\":\"").concat(self.account.address.toString()).concat("\",")
@@ -85,14 +99,14 @@ contract SwirlMoment: NonFungibleToken{
 			return json.utf8
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun signPubKey(): AccountKey{ 
 			return self.account.keys.get(keyIndex: self.keyIndex) ?? panic("no key at given index")
 		}
 	}
 	
 	/// Mints a new NFT. Proof-of-Location is required to mint moment
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mint(proofs: [ProofOfMeeting]){ 
 		// validate swirl participants' messages
 		for proof in proofs{ 
@@ -179,7 +193,7 @@ contract SwirlMoment: NonFungibleToken{
 			self.mintedAt = mintedAt
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun profile(): SwirlNametag.Profile{ 
 			return SwirlNametag.getProfile(self.nametagID)
 		}
@@ -190,12 +204,12 @@ contract SwirlMoment: NonFungibleToken{
 			return views
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return "Swirl Moment with ".concat(self.profile().nickname)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun profileImageUrl(): String{ 
 			let profile = self.profile()
 			var url = "https://swirl.deno.dev/dnft/moment.svg?"
@@ -245,15 +259,15 @@ contract SwirlMoment: NonFungibleToken{
 	access(all)
 	resource interface SwirlMomentCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSwirlMoment(id: UInt64): &SwirlMoment.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -279,7 +293,7 @@ contract SwirlMoment: NonFungibleToken{
 			panic("soulbound; SBT is not transferable")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("missing NFT")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -289,7 +303,7 @@ contract SwirlMoment: NonFungibleToken{
 		// deposit takes an NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SwirlMoment.NFT
 			let id: UInt64 = token.id
 			
@@ -312,7 +326,7 @@ contract SwirlMoment: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSwirlMoment(id: UInt64): &SwirlMoment.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -46,7 +60,7 @@ contract Admin{
 	// Admin things
 	/// ===================================================================================
 	//Admin client to use for capability receiver pattern
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAdminProxyClient(): @AdminProxy{ 
 		return <-create AdminProxy()
 	}
@@ -54,8 +68,8 @@ contract Admin{
 	//interface to use for capability receiver pattern
 	access(all)
 	resource interface AdminProxyClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&FIND.Network>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&FIND.Network>): Void
 	}
 	
 	//admin proxy with capability receiver
@@ -64,7 +78,7 @@ contract Admin{
 		access(self)
 		var capability: Capability<&FIND.Network>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&FIND.Network>){ 
 			pre{ 
 				cap.check():
@@ -75,7 +89,7 @@ contract Admin{
 			self.capability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPublicForgeType(name: String, forgeType: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -84,7 +98,7 @@ contract Admin{
 			FindForge.addPublicForgeType(forgeType: forgeType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPrivateForgeType(name: String, forgeType: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -93,7 +107,7 @@ contract Admin{
 			FindForge.addPrivateForgeType(name: name, forgeType: forgeType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeForgeType(_ type: Type){ 
 			pre{ 
 				self.capability != nil:
@@ -102,7 +116,7 @@ contract Admin{
 			FindForge.removeForgeType(type: type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addForgeContractData(lease: String, forgeType: Type, data: AnyStruct){ 
 			pre{ 
 				self.capability != nil:
@@ -111,7 +125,7 @@ contract Admin{
 			FindForge.adminAddContractData(lease: lease, forgeType: forgeType, data: data)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addForgeMintType(_ mintType: String){ 
 			pre{ 
 				self.capability != nil:
@@ -120,7 +134,7 @@ contract Admin{
 			FindForgeOrder.addMintType(mintType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun orderForge(leaseName: String, mintType: String, minterCut: UFix64?, collectionDisplay: MetadataViews.NFTCollectionDisplay){ 
 			pre{ 
 				self.capability != nil:
@@ -129,7 +143,7 @@ contract Admin{
 			FindForge.adminOrderForge(leaseName: leaseName, mintType: mintType, minterCut: minterCut, collectionDisplay: collectionDisplay)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelForgeOrder(leaseName: String, mintType: String){ 
 			pre{ 
 				self.capability != nil:
@@ -138,7 +152,7 @@ contract Admin{
 			FindForge.cancelForgeOrder(leaseName: leaseName, mintType: mintType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillForgeOrder(contractName: String, forgeType: Type): MetadataViews.NFTCollectionDisplay{ 
 			pre{ 
 				self.capability != nil:
@@ -149,7 +163,7 @@ contract Admin{
 		
 		/// Set the wallet used for the network
 		/// @param _ The FT receiver to send the money to
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWallet(_ wallet: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				self.capability != nil:
@@ -160,7 +174,7 @@ contract Admin{
 		}
 		
 		/// Enable or disable public registration
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPublicEnabled(_ enabled: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -170,7 +184,7 @@ contract Admin{
 			walletRef.setPublicEnabled(enabled)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAddonPrice(name: String, price: UFix64){ 
 			pre{ 
 				self.capability != nil:
@@ -180,7 +194,7 @@ contract Admin{
 			walletRef.setAddonPrice(name: name, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(_default: UFix64, additional:{ Int: UFix64}){ 
 			pre{ 
 				self.capability != nil:
@@ -190,7 +204,7 @@ contract Admin{
 			walletRef.setPrice(_default: _default, additionalPrices: additional)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun register(name: String, profile: Capability<&{Profile.Public}>, leases: Capability<&FIND.LeaseCollection>){ 
 			pre{ 
 				self.capability != nil:
@@ -202,7 +216,7 @@ contract Admin{
 			walletRef.internal_register(name: name, profile: profile, leases: leases)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAddon(name: String, addon: String){ 
 			pre{ 
 				self.capability != nil:
@@ -215,7 +229,7 @@ contract Admin{
 			ref.adminAddAddon(name: name, addon: addon)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun adminSetMinterPlatform(name: String, forgeType: Type, minterCut: UFix64?, description: String, externalURL: String, squareImage: String, bannerImage: String, socials:{ String: String}){ 
 			pre{ 
 				self.capability != nil:
@@ -226,7 +240,7 @@ contract Admin{
 			FindForge.adminSetMinterPlatform(leaseName: name, forgeType: forgeType, minterCut: minterCut, description: description, externalURL: externalURL, squareImage: squareImage, bannerImage: bannerImage, socials: socials)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintForge(name: String, forgeType: Type, data: AnyStruct, receiver: &{NonFungibleToken.Receiver, ViewResolver.ResolverCollection}){ 
 			pre{ 
 				self.capability != nil:
@@ -235,7 +249,7 @@ contract Admin{
 			FindForge.mintAdmin(leaseName: name, forgeType: forgeType, data: data, receiver: receiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun advanceClock(_ time: UFix64){ 
 			pre{ 
 				self.capability != nil:
@@ -246,7 +260,7 @@ contract Admin{
 			Clock.tick(time)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun debug(_ value: Bool){ 
 			pre{ 
 				self.capability != nil:
@@ -269,7 +283,7 @@ contract Admin{
 		// Fungible Token Registry
 		/// ===================================================================================
 		// Registry FungibleToken Information
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setFTInfo(alias: String, type: Type, tag: [String], icon: String?, receiverPath: PublicPath, balancePath: PublicPath, vaultPath: StoragePath){ 
 			pre{ 
 				self.capability != nil:
@@ -279,7 +293,7 @@ contract Admin{
 		}
 		
 		// Remove FungibleToken Information by type identifier
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFTInfoByTypeIdentifier(_ typeIdentifier: String){ 
 			pre{ 
 				self.capability != nil:
@@ -289,7 +303,7 @@ contract Admin{
 		}
 		
 		// Remove FungibleToken Information by alias
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeFTInfoByAlias(_ alias: String){ 
 			pre{ 
 				self.capability != nil:
@@ -301,7 +315,7 @@ contract Admin{
 		/// ===================================================================================
 		// Find Pack
 		/// ===================================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuthPointer(pathIdentifier: String, id: UInt64): FindViews.AuthNFTPointer{ 
 			pre{ 
 				self.capability != nil:
@@ -317,7 +331,7 @@ contract Admin{
 			return FindViews.AuthNFTPointer(cap: cap!, id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getProviderCap(_ path: PrivatePath): Capability<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>{ 
 			pre{ 
 				self.capability != nil:
@@ -326,7 +340,7 @@ contract Admin{
 			return Admin.account.capabilities.get<&{NonFungibleToken.Provider, ViewResolver.ResolverCollection}>(path)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintFindPack(packTypeName: String, typeId: UInt64, hash: String){ 
 			pre{ 
 				self.capability != nil:
@@ -339,7 +353,7 @@ contract Admin{
 			FindForge.adminMint(lease: packTypeName, forgeType: Type<@FindPack.Forge>(), data: mintPackData, receiver: receiver)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fulfillFindPack(packId: UInt64, types: [Type], rewardIds: [UInt64], salt: String){ 
 			pre{ 
 				self.capability != nil:
@@ -348,7 +362,7 @@ contract Admin{
 			FindPack.fulfill(packId: packId, types: types, rewardIds: rewardIds, salt: salt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requeueFindPack(packId: UInt64){ 
 			pre{ 
 				self.capability != nil:
@@ -358,7 +372,7 @@ contract Admin{
 			cap.requeue(packId: packId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFindRoyaltyCap(): Capability<&{FungibleToken.Receiver}>{ 
 			pre{ 
 				self.capability != nil:
@@ -370,7 +384,7 @@ contract Admin{
 		/// ===================================================================================
 		// FINDNFTCatalog
 		/// ===================================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCatalogEntry(collectionIdentifier: String, metadata: NFTCatalog.NFTCatalogMetadata){ 
 			pre{ 
 				self.capability != nil:
@@ -380,7 +394,7 @@ contract Admin{
 			FINDCatalogAdmin.addCatalogEntry(collectionIdentifier: collectionIdentifier, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeCatalogEntry(collectionIdentifier: String){ 
 			pre{ 
 				self.capability != nil:
@@ -390,7 +404,7 @@ contract Admin{
 			FINDCatalogAdmin.removeCatalogEntry(collectionIdentifier: collectionIdentifier)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSwitchboardReceiverPublic(): Capability<&{FungibleToken.Receiver}>{ 
 			// we hard code it here instead, to avoid importing just for path
 			return Admin.account.capabilities.get<&{FungibleToken.Receiver}>(/public/GenericFTReceiver)!
@@ -399,7 +413,7 @@ contract Admin{
 		/// ===================================================================================
 		// Name Voucher
 		/// ===================================================================================
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNameVoucher(receiver: &{NonFungibleToken.Receiver}, minCharLength: UInt64): UInt64{ 
 			pre{ 
 				self.capability != nil:
@@ -408,7 +422,7 @@ contract Admin{
 			return NameVoucher.mintNFT(recipient: receiver, minCharLength: minCharLength)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNameVoucherToFind(minCharLength: UInt64): UInt64{ 
 			pre{ 
 				self.capability != nil:

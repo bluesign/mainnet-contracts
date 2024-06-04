@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -142,19 +156,19 @@ contract RaptaIcon: NonFungibleToken{
 		access(all)
 		let description: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessories(): &{String: RaptaAccessory.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPng(): String
 	}
 	
 	access(all)
 	resource interface Private{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccessory(accessory: @RaptaAccessory.NFT): @RaptaAccessory.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(category: String): @RaptaAccessory.NFT?
 		
 		access(contract)
@@ -170,15 +184,15 @@ contract RaptaIcon: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowIcon(id: UInt64): &RaptaIcon.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -235,37 +249,37 @@ contract RaptaIcon: NonFungibleToken{
 			emit Mint(id: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDescription(): String{ 
 			return self.description
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPng(): String{ 
 			return self.png
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnail(): String{ 
 			return self.thumbnail
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccessories(): &{String: RaptaAccessory.NFT}{ 
 			return &self.accessories as &{String: RaptaAccessory.NFT}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccessory(accessory: @RaptaAccessory.NFT): @RaptaAccessory.NFT?{ 
 			let id: UInt64 = accessory.id
 			let category = accessory.getCategory()
@@ -275,14 +289,14 @@ contract RaptaIcon: NonFungibleToken{
 			return <-removedAccessory
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccessory(category: String): @RaptaAccessory.NFT?{ 
 			let removedAccessory <- self.accessories.remove(key: category)!
 			emit AccessoryRemoved(raptaIconId: self.id, accessory: category)
 			return <-removedAccessory
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleThumbnail(){ 
 			if self.thumbnail == self.png{ 
 				self.thumbnail = self.dynamicImage
@@ -350,7 +364,7 @@ contract RaptaIcon: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let id: UInt64 = token.id
 			let token <- token as! @RaptaIcon.NFT
 			let removedToken <- self.ownedNFTs[id] <- token
@@ -375,7 +389,7 @@ contract RaptaIcon: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowIcon(id: UInt64): &RaptaIcon.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -385,7 +399,7 @@ contract RaptaIcon: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowIconPrivate(id: UInt64): &{RaptaIcon.Private}?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -424,7 +438,7 @@ contract RaptaIcon: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintIcon(user: Address): @NFT{ 
 			pre{ 
 				RaptaIcon.totalSupply < 444:
@@ -436,52 +450,52 @@ contract RaptaIcon: NonFungibleToken{
 			return <-create NFT(royalties: Royalties(royalty: RaptaIcon.royalties))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAccessory(templateId: UInt64): @RaptaAccessory.NFT{ 
 			let accessory <- RaptaAccessory.mintAccessory(templateId: templateId)
 			return <-accessory
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateContractPng(newPng: String){ 
 			RaptaIcon.png = newPng
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIconLayer(user: AuthAccount, id: UInt64, newLayer: String){ 
 			let icon = (user.borrow<&RaptaIcon.Collection>(from: RaptaIcon.CollectionStoragePath)!).borrowIcon(id: id)!
 			icon.updateLayer(newLayer: newLayer)
 			emit Updated(iconId: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateIconPng(user: AuthAccount, id: UInt64, newPNG: String){ 
 			let icon = (user.borrow<&RaptaIcon.Collection>(from: RaptaIcon.CollectionStoragePath)!).borrowIcon(id: id)!
 			icon.updatePNG(newPNG: newPNG)
 			emit Updated(iconId: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyaltyCut(value: UFix64){ 
 			RaptaIcon.setRoyaltyCut(value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketplaceCut(value: UFix64){ 
 			RaptaIcon.setMarketplaceCut(value: value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAccessoryTemplate(name: String, description: String, category: String, mintLimit: UInt64, png: String, layer: String){ 
 			RaptaAccessory.createAccessoryTemplate(name: name, description: description, category: category, mintLimit: mintLimit, png: png, layer: layer)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalites(newRoyalties: [Royalty]): [RaptaIcon.Royalty]{ 
 			RaptaIcon.setRoyalites(newRoyalties: newRoyalties)
 			return RaptaIcon.royalties
@@ -494,12 +508,12 @@ contract RaptaIcon: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyaltyCut(): UFix64{ 
 		return self.royaltyCut
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMarketplaceCut(): UFix64{ 
 		return self.marketplaceCut
 	}
@@ -520,7 +534,7 @@ contract RaptaIcon: NonFungibleToken{
 		return self.royalties
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addAccessory(account: AuthAccount, iconId: UInt64, accessoryId: UInt64){ 
 		let iconCollection: &RaptaIcon.Collection = account.borrow<&RaptaIcon.Collection>(from: RaptaIcon.CollectionStoragePath)!
 		let accessories: &RaptaAccessory.Collection = account.borrow<&RaptaAccessory.Collection>(from: RaptaAccessory.CollectionStoragePath)!
@@ -535,7 +549,7 @@ contract RaptaIcon: NonFungibleToken{
 		emit Updated(iconId: iconId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeAccessory(account: AuthAccount, iconId: UInt64, category: String){ 
 		let icon: &RaptaIcon.NFT = (account.borrow<&RaptaIcon.Collection>(from: RaptaIcon.CollectionStoragePath)!).borrowIcon(id: iconId)!
 		let accessories: &RaptaAccessory.Collection = account.borrow<&RaptaAccessory.Collection>(from: RaptaAccessory.CollectionStoragePath)!
@@ -547,7 +561,7 @@ contract RaptaIcon: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintIcon(user: Address): @NFT{ 
 		pre{ 
 			RaptaIcon.totalSupply < 444:

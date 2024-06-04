@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -14,7 +28,7 @@ import MotoGPRegistry from 0xa49cc0ee46c54bfb
 //
 access(all)
 contract MotoGPPackMetadata: ContractVersion{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.2"
 	}
@@ -73,7 +87,7 @@ contract MotoGPPackMetadata: ContractVersion{
 		return traits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(view: Type, id: UInt64, packID: UInt64, serial: UInt64, publicCollectionType: Type, publicLinkedType: Type, providerLinkedType: Type, createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.Traits>():
@@ -137,26 +151,26 @@ contract MotoGPPackMetadata: ContractVersion{
 	
 	// Get all metadatas
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatas():{ UInt64: MotoGPPackMetadata.Metadata}{ 
 		return self.metadatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatasCount(): UInt64{ 
 		return UInt64(self.metadatas.length)
 	}
 	
 	//Get metadata for a specific packID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataForPackID(packID: UInt64): MotoGPPackMetadata.Metadata?{ 
 		return self.metadatas[packID]
 	}
 	
 	//Access to set metadata is controlled using an Admin reference as argument
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setMetadata(adminRef: &MotoGPAdmin.Admin, packID: UInt64, name: String, description: String, imageUrl: String, data:{ String: String}){ 
 		pre{ 
 			adminRef != nil:
@@ -168,7 +182,7 @@ contract MotoGPPackMetadata: ContractVersion{
 	
 	//Remove metadata by packID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeMetadata(adminRef: &MotoGPAdmin.Admin, packID: UInt64){ 
 		pre{ 
 			adminRef != nil:

@@ -1,4 +1,18 @@
-import FlowToken from "./../../standardsV1/FlowToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FlowToken from "./../../standardsV1/FlowToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -127,19 +141,19 @@ contract Tickets{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(level: UInt8, price: UFix64){ 
 			Tickets.ticketPrices[Ticket.Level(rawValue: level)!] = price
 			emit PriceChange(level: level, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMaxTickets(level: UInt8, qty: UInt64){ 
 			Tickets.maxTickets[Ticket.Level(rawValue: level)!] = qty
 			emit MaxQtyChange(level: level, qty: qty)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPaymentCut(cuts: [PaymentCut]){ 
 			var rate = 0.0
 			let saleCuts: [SaleCut] = []
@@ -155,28 +169,28 @@ contract Tickets{
 			emit PaymentCutChanged(cuts: cuts)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setWhitelistTime(startAt: UFix64, endAt: UFix64){ 
 			Tickets.whitelistStartAt = startAt
 			Tickets.whitelistEndAt = endAt
 			emit WhitelistTimeChange(startAt: startAt, endAt: endAt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTime(startAt: UFix64, endAt: UFix64){ 
 			Tickets.ticketStartAt = startAt
 			Tickets.ticketEndAt = endAt
 			emit TimeChange(startAt: startAt, endAt: endAt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTimeSwap(startAt: UFix64, endAt: UFix64){ 
 			Tickets.swapStartAt = startAt
 			Tickets.swapEndAt = endAt
 			emit TimeChange(startAt: startAt, endAt: endAt)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawCandidateFunds(amount: UFix64): @{FungibleToken.Vault}{ 
 			return <-Tickets.candidateFund.withdraw(amount: amount)
 		}
@@ -330,7 +344,7 @@ contract Tickets{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyTickets(
 		recipient: Capability<&{NonFungibleToken.CollectionPublic}>,
 		level: UInt8,
@@ -350,7 +364,7 @@ contract Tickets{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buyWhitelist(
 		recipient: Capability<&{NonFungibleToken.CollectionPublic}>,
 		payment: @{FungibleToken.Vault},
@@ -378,12 +392,12 @@ contract Tickets{
 		Whitelist.markAsBought(address: buyer)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCandidateFundBalance(): UFix64{ 
 		return self.candidateFund.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapForNFT(
 		ticket: @Ticket.NFT,
 		candidateID: UInt64,
@@ -422,7 +436,7 @@ contract Tickets{
 		emit SwapForNFT(ticketID: ticketID, level: levelInt, candidateID: candidateID)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun levelAsString(level: UInt8): String{ 
 		switch level{ 
 			case Ticket.Level.One.rawValue:
@@ -435,33 +449,33 @@ contract Tickets{
 		panic("Invalid level")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleCuts(): [SaleCut]{ 
 		return self.saleCuts
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBoughtTickets():{ Ticket.Level: UInt64}{ 
 		return self.boughtTickets
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaxTickets():{ Ticket.Level: UInt64}{ 
 		return self.maxTickets
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCandidateDept(id: UInt64): UFix64{ 
 		return self.candidateDept[id] ?? 0.0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMinted(id: UInt64, level: UInt8): UInt64{ 
 		let m = self.minted[id] ??{} 
 		return m[Ticket.Level(rawValue: level)!] ?? 0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTicketPrice(level: UInt8): UFix64{ 
 		return self.ticketPrices[Ticket.Level(rawValue: level)!] ?? 0.0
 	}

@@ -1,4 +1,18 @@
-import JoyridePayments from "../0xecfad18ba9582d4f/JoyridePayments.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import JoyridePayments from "../0xecfad18ba9582d4f/JoyridePayments.cdc"
 
 access(all)
 contract JoyrideGameShim{ 
@@ -18,17 +32,17 @@ contract JoyrideGameShim{
 	access(all)
 	event TokensDeposited(amount: UFix64, to: Address?)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun GameIDtoStoragePath(_ gameID: String): StoragePath{ 
 		return StoragePath(identifier: "JoyrideGame_".concat(gameID))!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun GameIDtoCapabilityPath(_ gameID: String): PrivatePath{ 
 		return PrivatePath(identifier: "JoyrideGame_".concat(gameID))!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun CreateJoyrideGame(
 		paymentsAdmin: Capability<&{JoyridePayments.WalletAdmin}>,
 		gameID: String
@@ -38,10 +52,10 @@ contract JoyrideGameShim{
 	
 	access(all)
 	resource interface JoyrideGameData{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun readGameInfo(_ key: String): AnyStruct
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setGameInfo(_ key: String, value: AnyStruct)
 	}
 	
@@ -58,17 +72,17 @@ contract JoyrideGameShim{
 			self.paymentsAdmin = paymentsAdmin
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun readGameInfo(_ key: String): AnyStruct{ 
 			return self.gameInfo[key]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setGameInfo(_ key: String, value: AnyStruct){ 
 			self.gameInfo[key] = value
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun PlayerTransaction(playerID: String, tokenContext: String, amount: Fix64, gameID: String, txID: String, reward: Bool, notes: String): Bool{ 
 			if !self.gameInfo.containsKey("gameID"){ 
 				panic("gameID not set")
@@ -81,13 +95,13 @@ contract JoyrideGameShim{
 			return (self.paymentsAdmin.borrow()!).PlayerTransaction(playerID: playerID, tokenContext: tokenContext, amount: amount, gameID: gameID, txID: txID, reward: reward, notes: notes)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun FinalizeTransactionWithDevPercentage(txID: String, profit: UFix64, devPercentage: UFix64): Bool{ 
 			emit JoyrideGameShim.FinalizeTransaction(gameID: self.readGameInfo("gameID")! as! String)
 			return (self.paymentsAdmin.borrow()!).FinalizeTransactionWithDevPercentage(txID: txID, profit: profit, devPercentage: devPercentage)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun RefundTransaction(txID: String): Bool{ 
 			emit JoyrideGameShim.RefundTransaction(gameID: self.readGameInfo("gameID")! as! String)
 			return (self.paymentsAdmin.borrow()!).RefundTransaction(txID: txID)

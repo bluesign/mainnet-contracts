@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # Liquid Staking
 
@@ -75,7 +89,7 @@ contract LiquidStaking{
 	}
 	
 	/// Deposit and stake $flow in exchange for $stFlow token
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stake(flowVault: @FlowToken.Vault): @stFlowToken.Vault{ 
 		pre{ 
 			// Pause check
@@ -112,7 +126,7 @@ contract LiquidStaking{
 	
 	/// To unstake (normally) that needs to wait for several epochs before finally withdrawing $flow (principal + interests) from the protocol
 	/// Returns a ticket indicating the amount of $flow redeemable after certain protocol epoch (so you won't get $flow back immediately)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun unstake(stFlowVault: @stFlowToken.Vault): @WithdrawVoucher{ 
 		pre{ 
 			// Pause check
@@ -167,7 +181,7 @@ contract LiquidStaking{
 	
 	/// To unstake (quickly) from liquid staking protocol's default staking node, without waiting for several epochs
 	/// You'll immediately get $flow back, as long as the default staking node has enough newly committed tokens from this epoch; otherwise reverts internally.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun unstakeQuickly(stFlowVault: @stFlowToken.Vault): @FlowToken.Vault{ 
 		pre{ 
 			// Pause check
@@ -208,7 +222,7 @@ contract LiquidStaking{
 	}
 	
 	/// Cashout WithdrawVoucher by burning it for FlowToken
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun cashoutWithdrawVoucher(voucher: @WithdrawVoucher): @FlowToken.Vault{ 
 		pre{ 
 			DelegatorManager.quoteEpochCounter >= voucher.unlockEpoch:
@@ -229,7 +243,7 @@ contract LiquidStaking{
 	/// This is a useful feature for users who have already staked $flow to nodes. To get the benefits of $stFlow and its ecosystem, they do not have to
 	/// first unstake from nodes (as it usually takes 1~2 epochs and lose staking rewards meanwhile); users can just migrate their NodeDelegator resources
 	/// (represents their staked positions) in and get $stFlow immediately.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun migrate(delegator: @FlowIDTableStaking.NodeDelegator): @stFlowToken.Vault{ 
 		pre{ 
 			// Pause check
@@ -288,10 +302,10 @@ contract LiquidStaking{
 	/// WithdrawVoucher collection
 	access(all)
 	resource interface WithdrawVoucherCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVoucherInfos(): [AnyStruct]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(voucher: @WithdrawVoucher)
 	}
 	
@@ -301,12 +315,12 @@ contract LiquidStaking{
 		access(self)
 		var vouchers: @[WithdrawVoucher]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(voucher: @WithdrawVoucher){ 
 			self.vouchers.append(<-voucher)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(uuid: UInt64): @WithdrawVoucher{ 
 			var findIndex: Int? = nil
 			var index = 0
@@ -321,7 +335,7 @@ contract LiquidStaking{
 			return <-self.vouchers.remove(at: findIndex!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getVoucherInfos(): [AnyStruct]{ 
 			var voucherInfos: [AnyStruct] = []
 			var index = 0
@@ -337,13 +351,13 @@ contract LiquidStaking{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyWithdrawVoucherCollection(): @WithdrawVoucherCollection{ 
 		return <-create WithdrawVoucherCollection()
 	}
 	
 	/// Calculate exchange amount from Flow to stFlow
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calcStFlowFromFlow(flowAmount: UFix64): UFix64{ 
 		let currentEpochSnapshot = DelegatorManager.borrowCurrentQuoteEpochSnapshot()
 		let scaledFlowPrice = currentEpochSnapshot.scaledQuoteFlowStFlow
@@ -356,7 +370,7 @@ contract LiquidStaking{
 	}
 	
 	/// Calculate exchange amount from stFlow to Flow
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calcFlowFromStFlow(stFlowAmount: UFix64): UFix64{ 
 		let currentEpochSnapshot = DelegatorManager.borrowCurrentQuoteEpochSnapshot()
 		let scaledStFlowPrice = currentEpochSnapshot.scaledQuoteStFlowFlow

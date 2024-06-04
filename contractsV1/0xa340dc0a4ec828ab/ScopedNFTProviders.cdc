@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import StringUtils from "./../../standardsV1/StringUtils.cdc"
 
@@ -16,13 +30,13 @@ access(all)
 contract ScopedNFTProviders{ 
 	access(all)
 	struct interface NFTFilter{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canWithdraw(_ nft: &{NonFungibleToken.NFT}): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markWithdrawn(_ nft: &{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails():{ String: AnyStruct}
 	}
 	
@@ -41,17 +55,17 @@ contract ScopedNFTProviders{
 			self.ids = d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canWithdraw(_ nft: &{NonFungibleToken.NFT}): Bool{ 
 			return self.ids[nft.id] != nil && self.ids[nft.id] == true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markWithdrawn(_ nft: &{NonFungibleToken.NFT}){ 
 			self.ids[nft.id] = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails():{ String: AnyStruct}{ 
 			return{ "ids": self.ids}
 		}
@@ -72,17 +86,17 @@ contract ScopedNFTProviders{
 			self.uuids = d
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canWithdraw(_ nft: &{NonFungibleToken.NFT}): Bool{ 
 			return self.uuids[nft.uuid] != nil && self.uuids[nft.uuid]! == true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun markWithdrawn(_ nft: &{NonFungibleToken.NFT}){ 
 			self.uuids[nft.uuid] = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails():{ String: AnyStruct}{ 
 			return{ "uuids": self.uuids}
 		}
@@ -103,7 +117,7 @@ contract ScopedNFTProviders{
 		access(self)
 		let expiration: UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isExpired(): Bool{ 
 			if let expiration = self.expiration{ 
 				return getCurrentBlock().timestamp >= expiration
@@ -111,14 +125,14 @@ contract ScopedNFTProviders{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(provider: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, filters: [{NFTFilter}], expiration: UFix64?){ 
 			self.provider = provider
 			self.expiration = expiration
 			self.filters = filters
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun canWithdraw(_ id: UInt64): Bool{ 
 			if self.isExpired(){ 
 				return false
@@ -137,7 +151,7 @@ contract ScopedNFTProviders{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun check(): Bool{ 
 			return self.provider.check()
 		}
@@ -161,7 +175,7 @@ contract ScopedNFTProviders{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): [{String: AnyStruct}]{ 
 			let details: [{String: AnyStruct}] = []
 			for f in self.filters{ 
@@ -171,7 +185,7 @@ contract ScopedNFTProviders{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createScopedNFTProvider(
 		provider: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>,
 		filters: [{

@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -92,7 +106,7 @@ contract BlockpartyNFT: NonFungibleToken{
 		access(all)
 		let tokenDAddress: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(tokenDAddress: String){ 
 			self.tokenDAddress = tokenDAddress
 		}
@@ -104,12 +118,12 @@ contract BlockpartyNFT: NonFungibleToken{
 		access(all)
 		var isPrepared: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(isPrepared: Bool){ 
 			self.isPrepared = isPrepared
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrepared(isPrepared: Bool){ 
 			self.isPrepared = isPrepared
 		}
@@ -121,12 +135,12 @@ contract BlockpartyNFT: NonFungibleToken{
 		access(all)
 		var isUpdated: Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		init(isUpdated: Bool){ 
 			self.isUpdated = isUpdated
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUpdated(isUpdated: Bool){ 
 			self.isUpdated = isUpdated
 		}
@@ -141,22 +155,22 @@ contract BlockpartyNFT: NonFungibleToken{
 			self.values = values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(values:{ String: String}){ 
 			self.values = values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.values
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataValue(key: String, value: String){ 
 			self.values.insert(key: key, value)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataValue(key: String): String?{ 
 			return self.values[key]
 		}
@@ -228,15 +242,15 @@ contract BlockpartyNFT: NonFungibleToken{
 	access(all)
 	resource interface BNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBNFT(id: UInt64): &BlockpartyNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -268,7 +282,7 @@ contract BlockpartyNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @BlockpartyNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -278,7 +292,7 @@ contract BlockpartyNFT: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositToTokenD(id: UInt64){ 
 			if !self.tokenDDepositerCap.check(){ 
 				panic("TokenD depositer cap not found. You either trying to deposit from admin account or something wrong with collection initialization")
@@ -300,7 +314,7 @@ contract BlockpartyNFT: NonFungibleToken{
 			return ref!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBNFT(id: UInt64): &BlockpartyNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -348,7 +362,7 @@ contract BlockpartyNFT: NonFungibleToken{
 			self.BNFTCollectionPublicPath = collectionPublicPath
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFTByIssuance(requests: [IssuanceMintMsg], metadatas: [{String: String}]){ 
 			let minterOwner = self.owner ?? panic("could not get minter owner")
 			let minterOwnerCollection = minterOwner.capabilities.get<&{NonFungibleToken.CollectionPublic}>(self.BNFTCollectionPublicPath).borrow<&{NonFungibleToken.CollectionPublic}>() ?? panic("Could not get reference to the service account's NFT Collection")
@@ -368,7 +382,7 @@ contract BlockpartyNFT: NonFungibleToken{
 		}
 		
 		// TODO redesign it it operate with tokens stored in a vault of the account which is owner of the Minter resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(withdrawRequestID: UInt64, detailsURL: String, metadataMap:{ String: String}, receiver: Address){ 
 			// Borrow the recipient's public NFT collection reference
 			let recipientAccount = getAccount(receiver)
@@ -389,7 +403,7 @@ contract BlockpartyNFT: NonFungibleToken{
 	
 	access(all)
 	resource NFTBurner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burnNFT(token: @{NonFungibleToken.NFT}){ 
 			let id = token.id
 			destroy token
@@ -402,19 +416,19 @@ contract BlockpartyNFT: NonFungibleToken{
 		access(account)
 		var NFTMetadataMap:{ UInt64: NFTMetadata}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNFTMetadata(id: UInt64, metadataMap:{ String: String}){ 
 			var metadata = self.NFTMetadataMap[id] ?? BlockpartyNFT.NFTMetadata(values:{} )
 			metadata.setMetadata(values: metadataMap)
 			self.NFTMetadataMap.insert(key: id, metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTMetadata(id: UInt64): NFTMetadata?{ 
 			return self.NFTMetadataMap[id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadataMap(NFTMetadataMap:{ UInt64: BlockpartyNFT.NFTMetadata}){ 
 			self.NFTMetadataMap = NFTMetadataMap
 		}
@@ -424,22 +438,22 @@ contract BlockpartyNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun NFTMetadataStoragePath(): StoragePath{ 
 		return /storage/NFTMetadata
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAccountPreparedProvider(isPrepared: Bool): AccountPreparedProvider{ 
 		return AccountPreparedProvider(isPrepared: isPrepared)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createIsStorageUpdatedToV1Provider(isUpdated: Bool): IsStorageUpdatedToV1Provider{ 
 		return IsStorageUpdatedToV1Provider(isUpdated: isUpdated)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenDAddressProvider(tokenDAddress: String): TokenDAddressProvider{ 
 		return TokenDAddressProvider(tokenDAddress: tokenDAddress)
 	}
@@ -451,13 +465,13 @@ contract BlockpartyNFT: NonFungibleToken{
 	}
 	
 	// public function that anyone can call to create a burner to burn their oun tokens
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createBurner(): @NFTBurner{ 
 		return <-create NFTBurner()
 	}
 	
 	// public function that anyone can call to create a metadata storage
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMetadataStorage(): @NFTMetadataStorage{ 
 		return <-create NFTMetadataStorage()
 	}

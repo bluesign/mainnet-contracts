@@ -1,4 +1,18 @@
-// This contract defines an interface for node stakers
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// This contract defines an interface for node stakers
 // to use to be able to perform common staking actions
 
 // It also defines a resource that a node operator can
@@ -56,44 +70,44 @@ contract StakingProxy{
 	/// from the staker who they operate for
 	access(all)
 	struct interface NodeStakerProxy{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeNewTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeUnstakedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64)
 	}
 	
 	/// The interface the describes what a delegator can do
 	access(all)
 	struct interface NodeDelegatorProxy{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateNewTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateUnstakedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delegateRewardedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64)
 	}
 	
@@ -102,10 +116,10 @@ contract StakingProxy{
 	/// staking helper relationships with them
 	access(all)
 	resource interface NodeStakerProxyHolderPublic{ 
-		access(all)
-		fun addStakingProxy(nodeID: String, proxy:{ NodeStakerProxy})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addStakingProxy(nodeID: String, proxy:{ StakingProxy.NodeStakerProxy}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNodeInfo(nodeID: String): NodeInfo?
 	}
 	
@@ -132,7 +146,7 @@ contract StakingProxy{
 		
 		/// Node operator calls this to add info about a node they 
 		/// want to accept tokens for
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addNodeInfo(nodeInfo: NodeInfo){ 
 			pre{ 
 				self.nodeInfo[nodeInfo.id] == nil
@@ -141,13 +155,13 @@ contract StakingProxy{
 		}
 		
 		/// Remove node info if it isn't in use any more
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeNodeInfo(nodeID: String): NodeInfo{ 
 			return self.nodeInfo.remove(key: nodeID)!
 		}
 		
 		/// Published function to get all the info for a specific node ID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNodeInfo(nodeID: String): NodeInfo?{ 
 			return self.nodeInfo[nodeID]
 		}
@@ -156,7 +170,7 @@ contract StakingProxy{
 		/// the node operator's NodeInfo to operate a node
 		/// They store their `NodeStakerProxy` here to allow the node
 		/// operator to perform some staking actions also
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStakingProxy(nodeID: String, proxy:{ NodeStakerProxy}){ 
 			pre{ 
 				self.stakingProxies[nodeID] == nil
@@ -166,7 +180,7 @@ contract StakingProxy{
 		
 		/// The node operator can call the removeStakingProxy function
 		/// to remove a staking proxy if it is no longer needed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeStakingProxy(nodeID: String):{ NodeStakerProxy}{ 
 			pre{ 
 				self.stakingProxies[nodeID] != nil
@@ -176,14 +190,14 @@ contract StakingProxy{
 		
 		/// Borrow a "reference" to the staking proxy so staking operations
 		/// can be performed with it
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowStakingProxy(nodeID: String):{ NodeStakerProxy}?{ 
 			return self.stakingProxies[nodeID]
 		}
 	}
 	
 	/// Create a new proxy holder for a node operator
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createProxyHolder(): @NodeStakerProxyHolder{ 
 		return <-create NodeStakerProxyHolder()
 	}

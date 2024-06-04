@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -40,7 +54,7 @@ contract SecondaryMarketplace{
 		access(all)
 		var royalty: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenId: UInt64,
 			kind: Type,
@@ -55,10 +69,10 @@ contract SecondaryMarketplace{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenId: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenIds(): [UInt64]
 	}
 	
@@ -84,7 +98,7 @@ contract SecondaryMarketplace{
 			self.databaseId = databaseId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updatePrice(price: UFix64){ 
 			self.price = price
 		}
@@ -127,7 +141,7 @@ contract SecondaryMarketplace{
 				beneficiaryCapability.borrow() != nil:
 					"Beneficiary Receiver Capability is invalid!"
 			}
-			self.storeFrontCapability = getAccount(storeFrontAddress).capabilities.get<&StoreFrontSuperAdmin.SuperAdmin>(storeFrontPublicPath)!
+			self.storeFrontCapability = getAccount(storeFrontAddress).capabilities.get<&StoreFrontSuperAdmin.SuperAdmin>(storeFrontPublicPath)
 			self.collection = collection
 			self.ownerCapability = ownerCapability
 			self.royaltyCapability = royaltyCapability
@@ -138,7 +152,7 @@ contract SecondaryMarketplace{
 			emit TokenCreated(royalty: royalty, currency: currency, seller: (collection.borrow()!).owner?.address, databaseId: databaseId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenId: UInt64, price: UFix64, finishAtTimestamp: UFix64, databaseId: String){ 
 			pre{ 
 				(self.collection.borrow()!).borrowNFT(tokenId) != nil:
@@ -148,7 +162,7 @@ contract SecondaryMarketplace{
 			emit TokenListed(id: tokenId, price: price, seller: self.owner?.address, databaseId: databaseId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelSale(tokenId: UInt64){ 
 			pre{ 
 				(self.collection.borrow()!).borrowNFT(tokenId) != nil:
@@ -161,7 +175,7 @@ contract SecondaryMarketplace{
 			emit TokenWithdrawn(id: tokenId, databaseId: databaseId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(tokenId: UInt64, kind: Type, vault: @{FungibleToken.Vault}, address: Address): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				(self.collection.borrow()!).borrowNFT(tokenId) != nil:
@@ -197,7 +211,7 @@ contract SecondaryMarketplace{
 			return <-(self.collection.borrow()!).withdraw(withdrawID: tokenId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokenId: UInt64, price: UFix64){ 
 			pre{ 
 				(self.collection.borrow()!).borrowNFT(tokenId) != nil:
@@ -208,13 +222,13 @@ contract SecondaryMarketplace{
 			emit TokenPriceChanged(id: tokenId, price: price, databaseId: (self.items[tokenId]!).databaseId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyalty(_ royalty: UFix64, databaseId: String){ 
 			self.royalty = royalty
 			emit RoyaltyChanged(royalty: self.royalty, databaseId: databaseId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrice(tokenId: UInt64): UFix64?{ 
 			if let cap = self.collection.borrow(){ 
 				if (cap!).getIDs().contains(tokenId){ 
@@ -225,13 +239,13 @@ contract SecondaryMarketplace{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenIds(): [UInt64]{ 
 			return self.items.keys
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTokenSaleCollection(
 		collection: Capability<&{NonFungibleToken.Collection}>,
 		ownerCapability: Capability<&{FungibleToken.Receiver}>,

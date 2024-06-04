@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
@@ -60,10 +74,10 @@ contract FreshmintClaimSaleV2{
 	///
 	access(all)
 	resource interface SaleCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSale(id: String): &{SalePublic}?
 	}
 	
@@ -83,26 +97,26 @@ contract FreshmintClaimSaleV2{
 			self.sales <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(_ sale: @Sale){ 
 			emit SaleInserted(uuid: sale.uuid, id: sale.id, address: self.owner?.address)
 			let oldSale <- self.sales[sale.id] <- sale
 			destroy oldSale
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(id: String): @Sale{ 
 			let sale <- self.sales.remove(key: id) ?? panic("sale does not exist")
 			emit SaleRemoved(uuid: sale.uuid, id: sale.id, address: self.owner?.address)
 			return <-sale
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [String]{ 
 			return self.sales.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSale(id: String): &{SalePublic}?{ 
 			return &self.sales[id] as &{SalePublic}?
 		}
@@ -112,7 +126,7 @@ contract FreshmintClaimSaleV2{
 		/// Use this function to modify properties of the sale
 		/// (e.g. to set an allowlist or claim limit).
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSaleAuth(id: String): &Sale?{ 
 			return &self.sales[id] as &Sale?
 		}
@@ -166,22 +180,22 @@ contract FreshmintClaimSaleV2{
 		access(all)
 		let receiverPath: PublicPath
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentVaultType(): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupply(): Int?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInfo(): SaleInfo
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainingClaims(address: Address): UInt?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(payment: @{FungibleToken.Vault}, address: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPaymentReceiver(): &{FungibleToken.Receiver}
 	}
 	
@@ -256,7 +270,7 @@ contract FreshmintClaimSaleV2{
 		///
 		/// Pass nil to remove the claim limit from this sale.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setClaimLimit(limit: UInt?){ 
 			self.claimLimit = limit
 		}
@@ -265,21 +279,21 @@ contract FreshmintClaimSaleV2{
 		///
 		/// Pass nil to remove the allowlist from this sale.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAllowlist(allowlist: Capability<&Allowlist>?){ 
 			self.allowlist = allowlist
 		}
 		
 		/// getInfo returns a read-only summary of this sale.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInfo(): SaleInfo{ 
 			return SaleInfo(id: self.id, price: self.price, paymentVaultType: self.getPaymentVaultType(), size: self.size, supply: self.getSupply())
 		}
 		
 		/// getPaymentVaultType returns the underlying type of the payment receiver.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPaymentVaultType(): Type{ 
 			return self.borrowPaymentReceiver().getType()
 		}
@@ -288,7 +302,7 @@ contract FreshmintClaimSaleV2{
 		///
 		/// This function returns nil if there is no claim limit.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainingClaims(address: Address): UInt?{ 
 			if let claimLimit = self.claimLimit{ 
 				let claims = self.claims[address] ?? 0
@@ -302,7 +316,7 @@ contract FreshmintClaimSaleV2{
 		
 		/// getSupply returns the number of NFTs remaining in this sale.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSupply(): Int?{ 
 			let queueRef = self.queue.borrow() ?? panic("failed to borrow queue capability")
 			return queueRef.remaining()
@@ -311,7 +325,7 @@ contract FreshmintClaimSaleV2{
 		/// borrowPaymentReceiver returns a reference to the
 		/// payment receiver for this sale.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPaymentReceiver(): &{FungibleToken.Receiver}{ 
 			return self.paymentReceiver.borrow() ?? panic("failed to borrow payment receiver capability")
 		}
@@ -345,7 +359,7 @@ contract FreshmintClaimSaleV2{
 		/// The NFT is transfered to the provided address at the storage
 		/// path defined in self.receiverPath.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(payment: @{FungibleToken.Vault}, address: Address){ 
 			pre{ 
 				payment.balance == self.price:
@@ -395,7 +409,7 @@ contract FreshmintClaimSaleV2{
 		
 		/// setClaims sets the number of claims that an address can make.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setClaims(address: Address, claims: UInt){ 
 			self.claimsByAddress[address] = claims
 		}
@@ -403,7 +417,7 @@ contract FreshmintClaimSaleV2{
 		/// getClaims returns the number of claims for an address
 		/// or nil if the address is not in the allowlist.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaims(address: Address): UInt?{ 
 			return self.claimsByAddress[address]
 		}
@@ -412,17 +426,17 @@ contract FreshmintClaimSaleV2{
 	/// makeAllowlistName is a utility function that constructs
 	/// an allowlist name with a common prefix.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun makeAllowlistName(name: String): String{ 
 		return "Allowlist_".concat(name)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptySaleCollection(): @SaleCollection{ 
 		return <-create SaleCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSale(
 		id: String,
 		queue: Capability<&{FreshmintQueue.Queue}>,
@@ -452,7 +466,7 @@ contract FreshmintClaimSaleV2{
 		return <-sale
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAllowlist(): @Allowlist{ 
 		return <-create Allowlist()
 	}

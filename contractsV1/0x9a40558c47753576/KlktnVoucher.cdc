@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: MIT
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: MIT
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
@@ -43,15 +57,15 @@ contract KlktnVoucher: NonFungibleToken{
 	access(all)
 	resource interface KlktnVoucherCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKlktnVoucher(id: UInt64): &KlktnVoucher.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -77,12 +91,12 @@ contract KlktnVoucher: NonFungibleToken{
 		access(all)
 		var nextSerialNumber: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateUri(uri: String){ 
 			self.uri = uri
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun incrementNextSerialNumber(){ 
 			self.nextSerialNumber = self.nextSerialNumber + UInt64(1)
 		}
@@ -134,7 +148,7 @@ contract KlktnVoucher: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): KlktnVoucherTemplate{ 
 			return KlktnVoucher.KlktnVoucherTemplates[self.templateID]!
 		}
@@ -164,7 +178,7 @@ contract KlktnVoucher: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @KlktnVoucher.NFT
 			let id: UInt64 = token.id
 			let oldToken <- self.ownedNFTs[id] <- token
@@ -172,7 +186,7 @@ contract KlktnVoucher: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(collection: @Collection){ 
 			let keys = collection.getIDs()
 			for key in keys{ 
@@ -191,7 +205,7 @@ contract KlktnVoucher: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowKlktnVoucher(id: UInt64): &KlktnVoucher.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -235,7 +249,7 @@ contract KlktnVoucher: NonFungibleToken{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, templateID: UInt64){ 
 			pre{ 
 				KlktnVoucher.KlktnVoucherTemplates[templateID] != nil:
@@ -253,12 +267,12 @@ contract KlktnVoucher: NonFungibleToken{
 			(KlktnVoucher.KlktnVoucherTemplates[templateID]!).incrementNextSerialNumber()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createKlktnVoucherTemplate(description: String, uri: String, mintLimit: UInt64){ 
 			KlktnVoucher.KlktnVoucherTemplates[KlktnVoucher.nextTemplateID] = KlktnVoucherTemplate(templateID: KlktnVoucher.nextTemplateID, description: description, uri: uri, mintLimit: mintLimit)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateKlktnVoucherUri(templateID: UInt64, uri: String){ 
 			pre{ 
 				KlktnVoucher.KlktnVoucherTemplates.containsKey(templateID) != nil:
@@ -268,12 +282,12 @@ contract KlktnVoucher: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getKlktnVoucherTemplateByID(templateID: UInt64): KlktnVoucher.KlktnVoucherTemplate{ 
 		return KlktnVoucher.KlktnVoucherTemplates[templateID]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getKlktnVoucherTemplates():{ UInt64: KlktnVoucher.KlktnVoucherTemplate}{ 
 		return KlktnVoucher.KlktnVoucherTemplates
 	}

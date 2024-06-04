@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 import FlowtyWrapped from "./FlowtyWrapped.cdc"
 
@@ -28,7 +42,7 @@ contract WrappedEditions{
 		let collections: [String] // type identifier of each collection
 		
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toTraits(): MetadataViews.Traits{ 
 			let traits: [MetadataViews.Trait] =
 				[
@@ -86,7 +100,7 @@ contract WrappedEditions{
 		access(all)
 		let mintedAddresses:{ Address: Bool}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ t: Type, _ nft: &FlowtyWrapped.NFT): AnyStruct?{ 
 			let wrapped = nft.data["wrapped"]! as! Wrapped2023Data
 			switch t{ 
@@ -111,7 +125,7 @@ contract WrappedEditions{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionSupply(): UInt64{ 
 			return self.supply
 		}
@@ -140,22 +154,22 @@ contract WrappedEditions{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getName(): String{ 
 			return self.name
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStatus(_ s: String){ 
 			self.status = s
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseImageUrl(_ s: String){ 
 			self.baseImageUrl = s
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseHtmlUrl(_ s: String){ 
 			self.baseHtmlUrl = s
 		}
@@ -171,7 +185,7 @@ contract WrappedEditions{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun buildTrait(_ name: String, _ value: AnyStruct): MetadataViews.Trait{ 
 		return MetadataViews.Trait(name: name, value: value, displayType: nil, rarity: nil)
 	}

@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import SwapInterfaces from "../0xb78ef7afa52ff906/SwapInterfaces.cdc"
 
@@ -12,17 +26,17 @@ import PierPair from "../0x609e10301860b683/PierPair.cdc"
 
 access(all)
 contract SA{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountOut(amountIn: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		return amountIn * 0.997 * reserveOut / (reserveIn + amountIn * 0.997)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAmountIn(amountOut: UFix64, reserveIn: UFix64, reserveOut: UFix64): UFix64{ 
 		return amountOut * reserveIn / ((reserveOut - amountOut) * 0.997)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapFlowToUsdc_IM(inVault: @{FungibleToken.Vault}, minAmountOut: UFix64): @{
 		FungibleToken.Vault
 	}{ 
@@ -118,7 +132,7 @@ contract SA{
 		return <-outVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun swapUsdcToFlow_IM(inVault: @{FungibleToken.Vault}, minAmountOut: UFix64): @{
 		FungibleToken.Vault
 	}{ 

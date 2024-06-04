@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 access(all)
 contract TSInnovators22: NonFungibleToken{ 
@@ -77,7 +91,7 @@ contract TSInnovators22: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		//We dont wan't the withdraw function to be publically accessible
 		//pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT 
@@ -85,15 +99,15 @@ contract TSInnovators22: NonFungibleToken{
 		view fun getIDs(): [UInt64]
 		
 		//Check if user has a token 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasToken(): Bool
 		
 		//Returns NonFungibleToken nft
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
 		//Returns TSInnovators22 nft
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTSInnovatorsToken(id: UInt64): &NFT?
 	}
 	
@@ -103,13 +117,13 @@ contract TSInnovators22: NonFungibleToken{
 		access(all)
 		var ownedNFTs: @{UInt64:{ NonFungibleToken.NFT}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasToken(): Bool{ 
 			return !(self.getIDs().length == 0)
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			pre{ 
 				self.getIDs().length == 0:
 					"You Already Own A TSInnovatorNFT"
@@ -137,7 +151,7 @@ contract TSInnovators22: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowTSInnovatorsToken(id: UInt64): &NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -155,7 +169,7 @@ contract TSInnovators22: NonFungibleToken{
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delete(id: UInt64){ 
 			let token <- self.ownedNFTs.remove(key: id) ?? panic("You do not own this FLOAT in your collection")
 			let nft <- token as! @NFT
@@ -187,7 +201,7 @@ contract TSInnovators22: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createToken(ipfsHash: String, email: String, description: String, org: String, serial: String): @TSInnovators22.NFT{ 
 		return <-create NFT(_ipfsHash: ipfsHash, _email: email, _description: description, _org: org, _serial: serial)
 	}

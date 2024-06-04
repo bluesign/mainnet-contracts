@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 access(all)
 contract ByteNextLaunchpad{ 
@@ -89,7 +103,7 @@ contract ByteNextLaunchpad{
 			self._totalRaise = totalRaise
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTotalBought(_ value: UFix64){ 
 			self._totalBought = value
 		}
@@ -97,26 +111,26 @@ contract ByteNextLaunchpad{
 	
 	access(all)
 	resource interface LaunchpadPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun join(
 			id: Int,
 			paymentVault: @{FungibleToken.Vault},
 			tokenReceiver: Capability<&{FungibleToken.Receiver}>
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(id: Int, address: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchpadCount(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLaunchpadInfo(id: Int): LaunchpadInfo?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getUserAllocation(id: Int, _ account: Address): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimable(id: Int, _ account: Address): UFix64
 	}
 	
@@ -139,7 +153,7 @@ contract ByteNextLaunchpad{
 			self._launchpadTokens <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewLaunchpad(startTime: UFix64, endTime: UFix64, tokenPrice: UFix64, tokenType: Type, paymentType: Type, tokenReceiver: Capability<&{FungibleToken.Receiver}>, claimingTimes: [UFix64], claimingPercents: [UFix64], totalRaise: UFix64){ 
 			pre{ 
 				startTime < endTime:
@@ -150,7 +164,7 @@ contract ByteNextLaunchpad{
 			emit NewLauchpadCreated(id: self._launchpadCount, startTime: startTime, endTime: endTime, tokenType: tokenType, paymentType: paymentType)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setTime(id: Int, startTime: UFix64, endTime: UFix64){ 
 			pre{ 
 				startTime < endTime:
@@ -163,7 +177,7 @@ contract ByteNextLaunchpad{
 			emit LaunchpadTimeUpdated(id: id, startTime: startTime, endTime: endTime)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setUserAllocation(id: Int, account: Address, allocation: UFix64){ 
 			pre{ 
 				self.getLaunchpadInfo(id: id) != nil:
@@ -176,7 +190,7 @@ contract ByteNextLaunchpad{
 			emit UserAllocationSetted(id: id, account: account, allocation: allocation)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositLaunchpadToken(id: Int, newVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.getLaunchpadInfo(id: id) != nil:
@@ -194,7 +208,7 @@ contract ByteNextLaunchpad{
 			destroy oldVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawLaunchpadToken(id: Int, amount: UFix64): @{FungibleToken.Vault}{ 
 			let vault <- self._launchpadTokens.remove(key: id)!
 			let withdrawVault <- vault.withdraw(amount: amount)
@@ -204,17 +218,17 @@ contract ByteNextLaunchpad{
 		}
 		
 		//PUBLIC FUNCTIONS
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLaunchpadCount(): Int{ 
 			return self._launchpadCount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getLaunchpadInfo(id: Int): LaunchpadInfo?{ 
 			return self._launchpads[id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getUserAllocation(id: Int, _ account: Address): UFix64{ 
 			let launchpadInfo: LaunchpadInfo? = self.getLaunchpadInfo(id: id)
 			if launchpadInfo == nil{ 
@@ -227,7 +241,7 @@ contract ByteNextLaunchpad{
 			return userAllocation!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimable(id: Int, _ account: Address): UFix64{ 
 			if self.getLaunchpadInfo(id: id) == nil{ 
 				return 0.0
@@ -270,7 +284,7 @@ contract ByteNextLaunchpad{
 			return userBought / launchpadInfo._tokenPrice * totalPercent / 100.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun join(id: Int, paymentVault: @{FungibleToken.Vault}, tokenReceiver: Capability<&{FungibleToken.Receiver}>){ 
 			pre{ 
 				self.getLaunchpadInfo(id: id) != nil:
@@ -318,7 +332,7 @@ contract ByteNextLaunchpad{
 			(launchpadInfo._tokenReceiver.borrow()!).deposit(from: <-paymentVault)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(id: Int, address: Address){ 
 			pre{ 
 				self.getLaunchpadInfo(id: id) != nil:

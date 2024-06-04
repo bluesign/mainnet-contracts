@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -42,7 +56,7 @@ contract SpaceTradeBid{
 			self.nfts <- nfts
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(receiver: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			let collectionRef =
 				receiver.borrow()
@@ -71,7 +85,7 @@ contract SpaceTradeBid{
 			self.vault <- vault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transfer(receiver: Capability<&{FungibleToken.Receiver}>){ 
 			let receiverRef =
 				receiver.borrow()
@@ -99,7 +113,7 @@ contract SpaceTradeBid{
 		}
 		
 		// Key in receivers is the collectionIdentifier as defined in SpaceTradeAssetCatalog
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferNFTs(receivers:{ String: Capability<&{NonFungibleToken.CollectionPublic}>}){ 
 			var index = 0
 			while index < self.nfts.length{ 
@@ -111,7 +125,7 @@ contract SpaceTradeBid{
 		}
 		
 		// Key in receivers is the tokenIdentifier as defined in SpaceTradeAssetCatalog
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun transferFTs(receivers:{ String: Capability<&{FungibleToken.Receiver}>}){ 
 			var index = 0
 			while index < self.fts.length{ 
@@ -407,7 +421,7 @@ contract SpaceTradeBid{
 	
 	access(all)
 	resource interface BidAccept{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(
 			nftProviderCapabilities:{ 
 				String: Capability<&{NonFungibleToken.Provider}>
@@ -416,7 +430,7 @@ contract SpaceTradeBid{
 				String: Capability<&{FungibleToken.Provider}>
 			},
 			feeProviderCapability: Capability<&{FungibleToken.Balance, FungibleToken.Provider}>?
-		): @BidFulfilledBundle
+		): @SpaceTradeBid.BidFulfilledBundle
 	}
 	
 	access(all)
@@ -505,13 +519,13 @@ contract SpaceTradeBid{
 			assert(bidderFeeProvider.balance >= (SpaceTradeFeeManager.fee!).tokenAmount, message: "Bidder has not enough to cover fees for this bid")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(){ 
 			self.open = false
 			emit BidCanceled(id: self.id, owner: (self.owner!).address, recipient: self.recipient)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun accept(nftProviderCapabilities:{ String: Capability<&{NonFungibleToken.Provider}>}, ftProviderCapabilities:{ String: Capability<&{FungibleToken.Provider}>}, feeProviderCapability: Capability<&{FungibleToken.Balance, FungibleToken.Provider}>?): @BidFulfilledBundle{ 
 			pre{ 
 				self.open == true:
@@ -581,7 +595,7 @@ contract SpaceTradeBid{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createBid(
 		id: UInt64,
 		type: BidType,

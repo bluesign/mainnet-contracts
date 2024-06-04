@@ -1,4 +1,18 @@
-/** 
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/** 
 
 # BaguetteOffer contract
 
@@ -370,7 +384,7 @@ contract BaguetteOffer{
 		}
 		
 		// What the next offer has to match
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun minNextOffer(): UFix64{ 
 			return self.offer + self.parameters.offerIncrement
 		}
@@ -378,7 +392,7 @@ contract BaguetteOffer{
 		// Get the auction status
 		// Will fail is offer is not valid
 		// It is worthless and should be destroyed
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferStatus(): OfferStatus{ 
 			pre{ 
 				self.isValid:
@@ -404,10 +418,10 @@ contract BaguetteOffer{
 		access(all)
 		let parameters: OfferParameters
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferStatus(_ recordID: UInt64): OfferStatus
 	}
 	
@@ -420,10 +434,10 @@ contract BaguetteOffer{
 		access(all)
 		let parameters: OfferParameters
 		
-		access(all)
-		fun acceptDirectOffer(record: @Record.NFT, ownerFVault: Capability<&FUSD.Vault>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun acceptDirectOffer(record: @Record.NFT, ownerFVault: Capability<&FUSD.Vault>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptAuctionOffer(
 			record: @Record.NFT,
 			ownerFVault: Capability<&FUSD.Vault>,
@@ -455,8 +469,8 @@ contract BaguetteOffer{
 	//
 	access(all)
 	resource interface AuctionCreatorClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&BaguetteAuction.Collection>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&BaguetteAuction.Collection>): Void
 	}
 	
 	// Collection
@@ -485,18 +499,18 @@ contract BaguetteOffer{
 			self.auctionServerAccepted = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setAuctionServerAccepted(serverID: UInt64){ 
 			self.auctionServerAccepted = serverID
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.offerItems.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getOfferStatus(_ recordID: UInt64): OfferStatus{ 
 			pre{ 
 				self.offerItems[recordID] != nil:
@@ -507,7 +521,7 @@ contract BaguetteOffer{
 			return self.offerItems[recordID]?.getOfferStatus()!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptDirectOffer(record: @Record.NFT, ownerFVault: Capability<&FUSD.Vault>){ 
 			pre{ 
 				self.offerItems[record.id] != nil:
@@ -519,7 +533,7 @@ contract BaguetteOffer{
 			destroy self.offerItems.remove(key: recordID)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun acceptAuctionOffer(record: @Record.NFT, ownerFVault: Capability<&FUSD.Vault>, ownerRCollection: Capability<&Record.Collection>){ 
 			pre{ 
 				self.offerItems[record.id] != nil:
@@ -574,7 +588,7 @@ contract BaguetteOffer{
 			emit OfferCanceled(offerID: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&BaguetteAuction.Collection>){ 
 			pre{ 
 				cap.check():
@@ -596,8 +610,8 @@ contract BaguetteOffer{
 	//
 	access(all)
 	resource interface CollectionCreator{ 
-		access(all)
-		fun createOfferCollection(): @Collection
+		access(TMP_ENTITLEMENT_OWNER)
+		fun createOfferCollection(): @BaguetteOffer.Collection
 	}
 	
 	// Admin
@@ -606,12 +620,12 @@ contract BaguetteOffer{
 	//
 	access(all)
 	resource Admin: CollectionCreator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setParameters(parameters: OfferParameters){ 
 			BaguetteOffer.parameters = parameters
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMarketVault(marketVault: Capability<&FUSD.Vault>){ 
 			pre{ 
 				marketVault.check():
@@ -620,7 +634,7 @@ contract BaguetteOffer{
 			BaguetteOffer.marketVault = marketVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setLostAndFoundVaults(fVault: Capability<&FUSD.Vault>, rCollection: Capability<&Record.Collection>){ 
 			pre{ 
 				fVault.check():
@@ -633,13 +647,13 @@ contract BaguetteOffer{
 		}
 		
 		// create collection with default parameters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOfferCollection(): @Collection{ 
 			return <-create Collection(parameters: BaguetteOffer.parameters)
 		}
 		
 		// create collection with custom parameters
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createCustomOfferCollection(parameters: OfferParameters): @Collection{ 
 			return <-create Collection(parameters: parameters)
 		}
@@ -651,8 +665,8 @@ contract BaguetteOffer{
 	//
 	access(all)
 	resource interface ManagerClient{ 
-		access(all)
-		fun addCapability(_ cap: Capability<&Admin>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun addCapability(_ cap: Capability<&BaguetteOffer.Admin>): Void
 	}
 	
 	// Manager
@@ -668,7 +682,7 @@ contract BaguetteOffer{
 			self.server = nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCapability(_ cap: Capability<&Admin>){ 
 			pre{ 
 				cap.check():
@@ -679,7 +693,7 @@ contract BaguetteOffer{
 			self.server = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOfferCollection(): @Collection{ 
 			pre{ 
 				self.server != nil:
@@ -703,7 +717,7 @@ contract BaguetteOffer{
 			self.offers ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addOffer(
 			offerCollection: &Collection,
 			recordID: UInt64,
@@ -720,7 +734,7 @@ contract BaguetteOffer{
 			self.offers[recordID] = BaguetteOffer.totalOffers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelOffer(offerCollection: &Collection, recordID: UInt64){ 
 			pre{ 
 				self.offers[recordID] != nil:
@@ -730,7 +744,7 @@ contract BaguetteOffer{
 			self.offers.remove(key: recordID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasOffer(recordID: UInt64): Bool{ 
 			return false
 		}
@@ -740,13 +754,13 @@ contract BaguetteOffer{
 	// Contract public functions
 	// -----------------------------------------------------------------------
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createManager(): @Manager{ 
 		return <-create Manager()
 	}
 	
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createOfferor(): @OfferorCollection{ 
 		return <-create OfferorCollection()
 	}

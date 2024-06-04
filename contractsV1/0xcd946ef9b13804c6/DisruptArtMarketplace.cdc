@@ -1,4 +1,18 @@
-// DisruptArt NFT Marketplace
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// DisruptArt NFT Marketplace
 // Marketplace smart contract
 // NFT Marketplace : www.disrupt.art
 // Owner		   : Disrupt Art, INC.
@@ -57,14 +71,14 @@ contract DisruptArtMarketplace{
 	// Interface public methods that are used for NFT sales actions
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			id: UInt64,
 			recipient: &{DisruptArt.DisruptArtCollectionPublic},
 			payment: @{FungibleToken.Vault}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseGroup(
 			tokens: [
 				UInt64
@@ -73,19 +87,19 @@ contract DisruptArtMarketplace{
 			payment: @{FungibleToken.Vault}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(id: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tokenCreator(id: UInt64): Address??
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentTokenOwner(id: UInt64): Address??
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isResale(id: UInt64): Bool?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 	}
 	
@@ -133,7 +147,7 @@ contract DisruptArtMarketplace{
 		}
 		
 		// Withdraw gives the owner the opportunity to remove a NFT from sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(id: UInt64): @DisruptArt.NFT{ 
 			// remove the price
 			self.prices.remove(key: id)
@@ -146,7 +160,7 @@ contract DisruptArtMarketplace{
 		}
 		
 		// List NFTs in market collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSaleGroup(sellerRef: &DisruptArt.Collection, tokens: [UInt64], price: UFix64){ 
 			pre{ 
 				tokens.length > 0:
@@ -163,7 +177,7 @@ contract DisruptArtMarketplace{
 		}
 		
 		// lists an NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(token: @DisruptArt.NFT, price: UFix64){ 
 			let id = token.id
 			
@@ -180,7 +194,7 @@ contract DisruptArtMarketplace{
 		}
 		
 		// Change price of a group of tokens
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changePrice(tokens: [UInt64], newPrice: UFix64){ 
 			pre{ 
 				tokens.length > 0:
@@ -196,7 +210,7 @@ contract DisruptArtMarketplace{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun tokensExist(tokens: [UInt64], ids: [UInt64]): Bool{ 
 			var count = 0
 			while count < tokens.length{ 
@@ -209,7 +223,7 @@ contract DisruptArtMarketplace{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun tokensTotalPrice(tokens: [UInt64]): UFix64{ 
 			var count = 0
 			var price: UFix64 = 0.0
@@ -221,7 +235,7 @@ contract DisruptArtMarketplace{
 		}
 		
 		// Purchase : Allows am user send FUSD to purchase a NFT that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseGroup(tokens: [UInt64], recipient: &{DisruptArt.DisruptArtCollectionPublic}, payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				tokens.length > 0:
@@ -243,7 +257,7 @@ contract DisruptArtMarketplace{
 		}
 		
 		// Purchase: Allows an user to send FUSD to purchase a NFT that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(id: UInt64, recipient: &{DisruptArt.DisruptArtCollectionPublic}, payment: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.forSale[id] != nil && self.prices[id] != nil:
@@ -285,41 +299,41 @@ contract DisruptArtMarketplace{
 			emit TokenPurchased(id: id, price: totalamount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun flowshare(price: UFix64, commission: UFix64): UFix64{ 
 			return price / 100.0 * commission
 		}
 		
 		// Return the FUSD price of a specific token that is listed for sale.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(id: UInt64): UFix64?{ 
 			return self.prices[id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isResale(id: UInt64): Bool?{ 
 			return self.resale[id]
 		}
 		
 		// Returns the owner / original minter of a specific NFT token in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun tokenCreator(id: UInt64): Address??{ 
 			return self.creators[id]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentTokenOwner(id: UInt64): Address??{ 
 			return self.seller[id]
 		}
 		
 		// getIDs returns an array of token IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.forSale.keys
 		}
 		
 		// Withdraw NFTs from DisruptArtMarketplace
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun saleWithdrawn(tokens: [UInt64]){ 
 			pre{ 
 				tokens.length > 0:
@@ -340,14 +354,14 @@ contract DisruptArtMarketplace{
 	}
 	
 	// createCollection returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(ownerVault: Capability<&{FungibleToken.Receiver}>): @SaleCollection{ 
 		return <-create SaleCollection(vault: ownerVault)
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeoperator(newOperator: Address, marketCommission: UFix64, royality: UFix64){ 
 			DisruptArtMarketplace.marketAddress = newOperator
 			DisruptArtMarketplace.marketFee = marketCommission

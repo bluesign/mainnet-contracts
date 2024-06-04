@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract FlowviewAccountBookmark{ 
 	access(all)
 	let AccountBookmarkCollectionStoragePath: StoragePath
@@ -40,7 +54,7 @@ contract FlowviewAccountBookmark{
 			self.note = note
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNote(note: String){ 
 			self.note = note
 		}
@@ -48,10 +62,10 @@ contract FlowviewAccountBookmark{
 	
 	access(all)
 	resource interface CollectionPublic{ 
-		access(all)
-		fun borrowPublicAccountBookmark(address: Address): &AccountBookmark?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowPublicAccountBookmark(address: Address): &FlowviewAccountBookmark.AccountBookmark?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountBookmarks(): &{Address: AccountBookmark}
 	}
 	
@@ -64,7 +78,7 @@ contract FlowviewAccountBookmark{
 			self.bookmarks <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAccountBookmark(address: Address, note: String){ 
 			pre{ 
 				self.bookmarks[address] == nil:
@@ -74,29 +88,29 @@ contract FlowviewAccountBookmark{
 			emit AccountBookmarkAdded(owner: (self.owner!).address, address: address, note: note)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeAccountBookmark(address: Address){ 
 			destroy self.bookmarks.remove(key: address)
 			emit AccountBookmarkRemoved(owner: (self.owner!).address, address: address)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicAccountBookmark(address: Address): &AccountBookmark?{ 
 			return &self.bookmarks[address] as &AccountBookmark?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowAccountBookmark(address: Address): &AccountBookmark?{ 
 			return &self.bookmarks[address] as &AccountBookmark?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAccountBookmarks(): &{Address: AccountBookmark}{ 
 			return &self.bookmarks as &{Address: AccountBookmark}
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyCollection(): @AccountBookmarkCollection{ 
 		return <-create AccountBookmarkCollection()
 	}

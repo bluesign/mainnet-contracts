@@ -1,4 +1,18 @@
-import MusicPeaksMembershipToken from "./MusicPeaksMembershipToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MusicPeaksMembershipToken from "./MusicPeaksMembershipToken.cdc"
 
 access(all)
 contract FLOATIncinerator{ 
@@ -22,7 +36,7 @@ contract FLOATIncinerator{
 		access(all)
 		var contributedStrength: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraMetadata():{ String: String}
 	}
 	
@@ -37,7 +51,7 @@ contract FLOATIncinerator{
 		access(self)
 		var extraMetadata:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun burn(collection: &MusicPeaksMembershipToken.Collection, ids: [UInt64]){ 
 			let length = ids.length
 			for id in ids{ 
@@ -51,7 +65,7 @@ contract FLOATIncinerator{
 			FLOATIncinerator.totalIncinerated = FLOATIncinerator.totalIncinerated + UInt64(length)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraMetadata():{ String: String}{ 
 			return self.extraMetadata
 		}
@@ -63,12 +77,12 @@ contract FLOATIncinerator{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createIncinerator(): @Incinerator{ 
 		return <-create Incinerator()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateScore(dateReceived: UFix64, serial: UInt64): UInt64{ 
 		// Serial
 		var serialScore: UInt64 = 0

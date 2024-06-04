@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -36,10 +50,10 @@ contract NFTQueueDrop{
 		access(all)
 		var status: DropStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supply(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}
 	}
 	
@@ -63,12 +77,12 @@ contract NFTQueueDrop{
 		access(all)
 		var status: DropStatus
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun pause(){ 
 			self.status = DropStatus.paused
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resume(){ 
 			pre{ 
 				self.status != DropStatus.closed:
@@ -77,17 +91,17 @@ contract NFTQueueDrop{
 			self.status = DropStatus.open
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun close(){ 
 			self.status = DropStatus.closed
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun supply(): Int{ 
 			return (self.collection.borrow()!).getIDs().length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun complete(): Bool{ 
 			return self.supply() == 0
 		}
@@ -100,7 +114,7 @@ contract NFTQueueDrop{
 			return <-collection.withdraw(withdrawID: nextID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(payment: @{FungibleToken.Vault}): @{NonFungibleToken.NFT}{ 
 			pre{ 
 				payment.balance == self.price:
@@ -127,7 +141,7 @@ contract NFTQueueDrop{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createDrop(
 		nftType: Type,
 		collection: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>,

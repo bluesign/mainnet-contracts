@@ -1,14 +1,28 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
 
-access(all)
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+
+access(TMP_ENTITLEMENT_OWNER)
 contract interface Interfaces{ 
 	
 	// ARTIFACTAdminOpener is a interface resource used to
 	// to open pack from a user wallet
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface ARTIFACTAdminOpener{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(
 			userPack: &{IPack},
 			packID: UInt64,
@@ -24,7 +38,7 @@ contract interface Interfaces{
 	
 	// Resource interface to pack  
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IPack{ 
 		access(all)
 		let id: UInt64
@@ -38,7 +52,7 @@ contract interface Interfaces{
 	
 	// Struct interface to pack template 
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface IPackTemplate{ 
 		access(all)
 		let templateId: UInt64
@@ -50,7 +64,7 @@ contract interface Interfaces{
 		let totalSupply: UInt64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface IHashMetadata{ 
 		access(all)
 		let hash: String
@@ -62,7 +76,7 @@ contract interface Interfaces{
 		let end: UInt64
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	struct interface IPackOption{ 
 		access(all)
 		let options: [String]

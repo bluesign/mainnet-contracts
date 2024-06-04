@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 ============================================================
 Name: Smart Contract for Mindtrix
@@ -277,7 +291,7 @@ contract Mindtrix: NonFungibleToken{
 			self.extraMetadata = extraMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(newExtraMetadata:{ String: AnyStruct}){ 
 			for key in newExtraMetadata.keys{ 
 				if !self.extraMetadata.containsKey(key){ 
@@ -286,7 +300,7 @@ contract Mindtrix: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExtraMetadata():{ String: AnyStruct}{ 
 			return self.extraMetadata
 		}
@@ -296,7 +310,7 @@ contract Mindtrix: NonFungibleToken{
 			return [Type<MetadataViews.Display>(), Type<MetadataViews.Serial>(), Type<MetadataViews.Editions>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.License>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<Mindtrix.SerialString>(), Type<Mindtrix.SerialGenuses>(), Type<Mindtrix.AudioEssence>()]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSerialNumber(): UInt64{ 
 			assert(self.firstSerial <= 18, message: "The first serial number should not be over 18 because the serial is an UInt64 number.")
 			let fullSerial = UInt64(self.firstSerial) * 1000000000000000000 + UInt64(self.secondSerial) * 10000000000000000 + UInt64(self.thirdSerial) * 10000000000000 + UInt64(self.fourthSerial) * 100000000 + UInt64(self.fifthSerial) * 100000 + UInt64(self.editionNumber)
@@ -363,15 +377,15 @@ contract Mindtrix: NonFungibleToken{
 	access(all)
 	resource interface MindtrixCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMindtrix(id: UInt64): &Mindtrix.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -402,7 +416,7 @@ contract Mindtrix: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Mindtrix.NFT
 			let id: UInt64 = token.id
 			
@@ -425,7 +439,7 @@ contract Mindtrix: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMindtrix(id: UInt64): &Mindtrix.NFT?{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &Mindtrix.NFT
@@ -462,7 +476,7 @@ contract Mindtrix: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, ipfsCid: String, ipfsDirectory: String, royalties: [MetadataViews.Royalty], collectionName: String, collectionDescription: String, collectionExternalURL: String, collectionSquareImageUrl: String, collectionSquareImageType: String, collectionSocials:{ String: String}, licenseIdentifier: String, firstSerial: UInt16, secondSerial: UInt16, thirdSerial: UInt16, fourthSerial: UInt32, fifthSerial: UInt16, editionNumber: UInt64, editionQuantity: UInt64, extraMetadata:{ String: AnyStruct}){ 
 			
 			// create a new NFT
@@ -473,7 +487,7 @@ contract Mindtrix: NonFungibleToken{
 			Mindtrix.totalSupply = Mindtrix.totalSupply + UInt64(1)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, ipfsCid: String, ipfsDirectory: String, royalties: [MetadataViews.Royalty], collectionName: String, collectionDescription: String, collectionExternalURL: String, collectionSquareImageUrl: String, collectionSquareImageType: String, collectionSocials:{ String: String}, licenseIdentifier: String, firstSerial: UInt16, secondSerial: UInt16, thirdSerial: UInt16, fourthSerial: UInt32, fifthSerial: UInt16, editionQuantity: UInt64, extraMetadata:{ String: AnyStruct}){ 
 			var i: UInt64 = 0
 			while i < editionQuantity{ 

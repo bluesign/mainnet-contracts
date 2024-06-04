@@ -1,4 +1,18 @@
-import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import MetadataViews from "./../../standardsV1/MetadataViews.cdc"
 
 access(all)
 contract MikoSeaMarketHistoryV2{ 
@@ -223,10 +237,10 @@ contract MikoSeaMarketHistoryV2{
 	//------------------------------------------------------------
 	access(all)
 	resource interface AdminPublicCollection{ 
-		access(all)
-		fun getTransactionById(_ id: UInt64): &Transaction?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getTransactionById(_ id: UInt64): &MikoSeaMarketHistoryV2.Transaction?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevenueById(_ id: UInt64): &Revenue?
 	}
 	
@@ -267,17 +281,17 @@ contract MikoSeaMarketHistoryV2{
 			self.revenueData <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTransactionById(_ id: UInt64): &Transaction?{ 
 			return &self.transactionData[id] as &Transaction?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRevenueById(_ id: UInt64): &Revenue?{ 
 			return &self.revenueData[id] as &Revenue?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTransaction(owner: Address, amount: UFix64, royalties: MetadataViews.Royalties?, type: String, metadata:{ String: String}, message: String): &Transaction{ 
 			let _transaction <- create Transaction(userAddress: owner, amount: amount, royalties: royalties, type: type, metadata: metadata, message: message)
 			let transactionId = _transaction.transactionId
@@ -299,18 +313,18 @@ contract MikoSeaMarketHistoryV2{
 			return self.getTransactionById(transactionId)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addTransactionWithoutFee(owner: Address, amount: UFix64, type: String, metadata:{ String: String}, message: String): &Transaction{ 
 			return self.addTransaction(owner: owner, amount: amount, royalties: nil, type: type, metadata: metadata, message: message)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(_ transactionId: UInt64, metadata:{ String: String}): &Transaction?{ 
 			self.transactionData[transactionId]?.updateMetadata(metadata)
 			return self.getTransactionById(transactionId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMessage(_ transactionId: UInt64, message: String): &Transaction?{ 
 			self.transactionData[transactionId]?.updateMessage(message)
 			return self.getTransactionById(transactionId)
@@ -363,7 +377,7 @@ contract MikoSeaMarketHistoryV2{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRequestRevenue(_ address: Address, amount: UFix64, metadata:{ String: String}){ 
 			// add event withdraw && update balance
 			let userBalance = self.userBalances[address] ?? 0.0
@@ -387,7 +401,7 @@ contract MikoSeaMarketHistoryV2{
 		}
 		
 		// when admin transfer monney done
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateStatusRevenue(_ revenueId: UInt64, status: String){ 
 			self.revenueData[revenueId]?.updateStatus(status)
 		}
@@ -400,22 +414,22 @@ contract MikoSeaMarketHistoryV2{
 		)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getById(_ id: UInt64): &Transaction?{ 
 		return self.getAdminRef().getTransactionById(id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUserTransactionIds(_ address: Address): [UInt64]{ 
 		return self.getAdminRef().userTransactions[address] ?? []
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUserBalance(_ address: Address): Fix64{ 
 		return self.getAdminRef().userBalances[address] ?? 0.0
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRevenuesByAddress(_ address: Address): [&Revenue]{ 
 		let revenueIds = self.getAdminRef().userRevenues[address] ?? []
 		let res: [&Revenue] = []
@@ -427,7 +441,7 @@ contract MikoSeaMarketHistoryV2{
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalAmount(_ transactionIds: [UInt64]): UFix64{ 
 		var totalAmount = 0.0
 		for id in transactionIds{ 

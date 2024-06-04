@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import FlovatarComponentTemplate from "./FlovatarComponentTemplate.cdc"
@@ -64,25 +78,25 @@ contract FlovatarComponent: NonFungibleToken{
 		access(all)
 		let mint: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): FlovatarComponentTemplate.ComponentTemplateData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCategory(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeries(): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isBooster(rarity: String): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkCategorySeries(category: String, series: UInt32): Bool
 		
 		//these three are added because I think they will be in the standard. At least Dieter thinks it will be needed
@@ -133,50 +147,50 @@ contract FlovatarComponent: NonFungibleToken{
 			FlovatarComponentTemplate.setLastComponentMintedAt(id: templateId, value: getCurrentBlock().timestamp)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
 		// Returns the Template associated to the current Component
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): FlovatarComponentTemplate.ComponentTemplateData{ 
 			return FlovatarComponentTemplate.getComponentTemplate(id: self.templateId)!
 		}
 		
 		// Gets the SVG from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			return self.getTemplate().svg!
 		}
 		
 		// Gets the category from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCategory(): String{ 
 			return self.getTemplate().category
 		}
 		
 		// Gets the series number from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeries(): UInt32{ 
 			return self.getTemplate().series
 		}
 		
 		// Gets the rarity from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String{ 
 			return self.getTemplate().rarity
 		}
 		
 		// Check the boost and rarity from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isBooster(rarity: String): Bool{ 
 			let template = self.getTemplate()
 			return template.category == "boost" && template.rarity == rarity
 		}
 		
 		//Check the category and series from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkCategorySeries(category: String, series: UInt32): Bool{ 
 			let template = self.getTemplate()
 			return template.category == category && template.series == series
@@ -200,7 +214,7 @@ contract FlovatarComponent: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				let address = self.owner?.address
 				let url = address == nil ? "https://flovatar.com/builder/" : "https://flovatar.com/components/".concat(self.id.toString()).concat("/").concat((address!).toString())
@@ -259,15 +273,15 @@ contract FlovatarComponent: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowComponent(id: UInt64): &FlovatarComponent.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -301,7 +315,7 @@ contract FlovatarComponent: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FlovatarComponent.NFT
 			let id: UInt64 = token.id
 			
@@ -326,7 +340,7 @@ contract FlovatarComponent: NonFungibleToken{
 		
 		// borrowComponent returns a borrowed reference to a FlovatarComponent
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowComponent(id: UInt64): &FlovatarComponent.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -411,7 +425,7 @@ contract FlovatarComponent: NonFungibleToken{
 	}
 	
 	// Get the SVG of a specific Component from an account and the ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSvgForComponent(address: Address, componentId: UInt64): String?{ 
 		let account = getAccount(address)
 		if let componentCollection = account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath).borrow<&{FlovatarComponent.CollectionPublic}>(){ 
@@ -421,7 +435,7 @@ contract FlovatarComponent: NonFungibleToken{
 	}
 	
 	// Get a specific Component from an account and the ID as ComponentData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getComponent(address: Address, componentId: UInt64): ComponentData?{ 
 		let account = getAccount(address)
 		if let componentCollection = account.capabilities.get<&{FlovatarComponent.CollectionPublic}>(self.CollectionPublicPath).borrow<&{FlovatarComponent.CollectionPublic}>(){ 
@@ -436,7 +450,7 @@ contract FlovatarComponent: NonFungibleToken{
 	}
 	
 	// Get an array of all the components in a specific account as ComponentData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getComponents(address: Address): [ComponentData]{ 
 		var componentData: [ComponentData] = []
 		let account = getAccount(address)

@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import Flovatar from "./Flovatar.cdc"
@@ -69,36 +83,36 @@ contract FlovatarMarketplace{
 	// that only exposes the methods that are supposed to be public
 	access(all)
 	resource interface SalePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseFlovatar(
 			tokenId: UInt64,
 			recipientCap: Capability<&{Flovatar.CollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseFlovatarComponent(
 			tokenId: UInt64,
 			recipientCap: Capability<&{FlovatarComponent.CollectionPublic}>,
 			buyTokens: @{FungibleToken.Vault}
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarPrice(tokenId: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentPrice(tokenId: UInt64): UFix64?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatar(tokenId: UInt64): &{Flovatar.Public}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponent(tokenId: UInt64): &{FlovatarComponent.Public}?
 	}
 	
@@ -136,7 +150,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Gives the owner the opportunity to remove a Flovatar sale from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFlovatar(tokenId: UInt64): @Flovatar.NFT{ 
 			// remove the price
 			self.flovatarPrices.remove(key: tokenId)
@@ -148,7 +162,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Gives the owner the opportunity to remove a Component sale from the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFlovatarComponent(tokenId: UInt64): @FlovatarComponent.NFT{ 
 			// remove the price
 			self.flovatarComponentPrices.remove(key: tokenId)
@@ -160,7 +174,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Lists a Flovatar NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listFlovatarForSale(token: @Flovatar.NFT, price: UFix64){ 
 			let id = token.id
 			
@@ -175,7 +189,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Lists a Component NFT for sale in this collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listFlovatarComponentForSale(token: @FlovatarComponent.NFT, price: UFix64){ 
 			let id = token.id
 			let mint = token.mint
@@ -191,7 +205,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Changes the price of a Flovatar that is currently for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeFlovatarPrice(tokenId: UInt64, newPrice: UFix64){ 
 			self.flovatarPrices[tokenId] = newPrice
 			let vaultRef = self.ownerVault.borrow() ?? panic("Could not borrow reference to owner token vault")
@@ -199,7 +213,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Changes the price of a Component that is currently for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeFlovatarComponentPrice(tokenId: UInt64, newPrice: UFix64){ 
 			self.flovatarComponentPrices[tokenId] = newPrice
 			let vaultRef = self.ownerVault.borrow() ?? panic("Could not borrow reference to owner token vault")
@@ -207,7 +221,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Lets a user send tokens to purchase a Flovatar that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseFlovatar(tokenId: UInt64, recipientCap: Capability<&{Flovatar.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.flovatarForSale[tokenId] != nil && self.flovatarPrices[tokenId] != nil:
@@ -244,7 +258,7 @@ contract FlovatarMarketplace{
 		}
 		
 		// Lets a user send tokens to purchase a Component that is for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchaseFlovatarComponent(tokenId: UInt64, recipientCap: Capability<&{FlovatarComponent.CollectionPublic}>, buyTokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				self.flovatarComponentForSale[tokenId] != nil && self.flovatarComponentPrices[tokenId] != nil:
@@ -276,32 +290,32 @@ contract FlovatarMarketplace{
 		}
 		
 		// Returns the price of a specific Flovatar in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarPrice(tokenId: UInt64): UFix64?{ 
 			return self.flovatarPrices[tokenId]
 		}
 		
 		// Returns the price of a specific Component in the sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentPrice(tokenId: UInt64): UFix64?{ 
 			return self.flovatarComponentPrices[tokenId]
 		}
 		
 		// Returns an array of Flovatar IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarIDs(): [UInt64]{ 
 			return self.flovatarForSale.keys
 		}
 		
 		// Returns an array of Component IDs that are for sale
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponentIDs(): [UInt64]{ 
 			return self.flovatarComponentForSale.keys
 		}
 		
 		// Returns a borrowed reference to a Flovatar Sale
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatar(tokenId: UInt64): &{Flovatar.Public}?{ 
 			if self.flovatarForSale[tokenId] != nil{ 
 				let ref = (&self.flovatarForSale[tokenId] as &Flovatar.NFT?)!
@@ -313,7 +327,7 @@ contract FlovatarMarketplace{
 		
 		// Returns a borrowed reference to a Component Sale
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFlovatarComponent(tokenId: UInt64): &{FlovatarComponent.Public}?{ 
 			if self.flovatarComponentForSale[tokenId] != nil{ 
 				let ref = (&self.flovatarComponentForSale[tokenId] as &FlovatarComponent.NFT?)!
@@ -389,7 +403,7 @@ contract FlovatarMarketplace{
 	}
 	
 	// Get all the Flovatar Sale offers for a specific account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarSales(address: Address): [FlovatarSaleData]{ 
 		var saleData: [FlovatarSaleData] = []
 		let account = getAccount(address)
@@ -409,7 +423,7 @@ contract FlovatarMarketplace{
 	}
 	
 	// Get all the Component Sale offers for a specific account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarComponentSales(address: Address): [FlovatarComponentSaleData]{ 
 		var saleData: [FlovatarComponentSaleData] = []
 		let account = getAccount(address)
@@ -429,7 +443,7 @@ contract FlovatarMarketplace{
 	}
 	
 	// Get a specific Flovatar Sale offers for an account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarSale(address: Address, id: UInt64): FlovatarSaleData?{ 
 		let account = getAccount(address)
 		if let saleCollection =
@@ -447,7 +461,7 @@ contract FlovatarMarketplace{
 	}
 	
 	// Get a specific Component Sale offers for an account
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getFlovatarComponentSale(address: Address, id: UInt64): FlovatarComponentSaleData?{ 
 		let account = getAccount(address)
 		if let saleCollection =
@@ -465,12 +479,12 @@ contract FlovatarMarketplace{
 	}
 	
 	// Returns a new collection resource to the caller
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSaleCollection(ownerVault: Capability<&{FungibleToken.Receiver}>): @SaleCollection{ 
 		return <-create SaleCollection(vault: ownerVault)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	init(){ 
 		self.CollectionPublicPath = /public/FlovatarMarketplace
 		self.CollectionStoragePath = /storage/FlovatarMarketplace

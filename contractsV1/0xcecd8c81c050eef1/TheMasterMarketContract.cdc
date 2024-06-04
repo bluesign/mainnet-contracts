@@ -1,4 +1,18 @@
-import TheMasterPieceContract from "./TheMasterPieceContract.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import TheMasterPieceContract from "./TheMasterPieceContract.cdc"
 
 import TheMasterPixelContract from "./TheMasterPixelContract.cdc"
 
@@ -25,7 +39,7 @@ contract TheMasterMarketContract{
 	access(all)
 	let MarketStatePublicPath: PublicPath
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createTheMasterMarket(
 		sectorsRef: Capability<&TheMasterPixelContract.TheMasterSectors>
 	): @TheMasterMarket{ 
@@ -102,7 +116,7 @@ contract TheMasterMarketContract{
 			self.sectorsRef = sectorsRef
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(tokenIDs: [UInt32], price: UFix64){ 
 			pre{ 
 				TheMasterMarketContract.isOpened(ownerAddress: (self.owner!).address):
@@ -131,7 +145,7 @@ contract TheMasterMarketContract{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			tokenIDs: [
 				UInt32
@@ -168,7 +182,7 @@ contract TheMasterMarketContract{
 			emit TokenPurchased(sectorId: self.sectorId, ids: tokenIDs, price: totalPrice)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelListForSale(tokenIDs: [UInt32]){ 
 			let sectorsRef = self.sectorsRef.borrow()!
 			let sectorRef: &TheMasterPixelContract.TheMasterSector =
@@ -189,12 +203,12 @@ contract TheMasterMarketContract{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun idPrice(tokenID: UInt32): UFix64?{ 
 			return self.prices[tokenID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices():{ UInt32: UFix64}{ 
 			return self.prices
 		}
@@ -203,7 +217,7 @@ contract TheMasterMarketContract{
 	// ########################################################################################
 	access(all)
 	resource interface TheMasterMarketInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			sectorId: UInt16,
 			tokenIDs: [
@@ -211,9 +225,9 @@ contract TheMasterMarketContract{
 			],
 			recipient: &{TheMasterPixelContract.TheMasterSectorsInterface},
 			vaultRef: &{FungibleToken.Provider}
-		)
+		): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices(sectorId: UInt16):{ UInt32: UFix64}
 	}
 	
@@ -238,7 +252,7 @@ contract TheMasterMarketContract{
 			self.sectorsRef = sectorsRef
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun listForSale(sectorId: UInt16, tokenIDs: [UInt32], price: UFix64){ 
 			if self.saleSectors[sectorId] == nil{ 
 				self.saleSectors[sectorId] <-! create TheMasterMarketSector(sectorId: sectorId, ownerVault: self.ownerVault, creatorVault: self.creatorVault, sectorsRef: self.sectorsRef)
@@ -246,19 +260,19 @@ contract TheMasterMarketContract{
 			((&self.saleSectors[sectorId] as &TheMasterMarketSector?)!).listForSale(tokenIDs: tokenIDs, price: price)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(sectorId: UInt16, tokenIDs: [UInt32], recipient: &{TheMasterPixelContract.TheMasterSectorsInterface}, vaultRef: &{FungibleToken.Provider}){ 
 			((&self.saleSectors[sectorId] as &TheMasterMarketSector?)!).purchase(tokenIDs: tokenIDs, recipient: recipient, vaultRef: vaultRef)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelListForSale(sectorId: UInt16, tokenIDs: [UInt32]){ 
 			if self.saleSectors[sectorId] != nil{ 
 				((&self.saleSectors[sectorId] as &TheMasterMarketSector?)!).cancelListForSale(tokenIDs: tokenIDs)
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPrices(sectorId: UInt16):{ UInt32: UFix64}{ 
 			if self.saleSectors.containsKey(sectorId){ 
 				return ((&self.saleSectors[sectorId] as &TheMasterMarketSector?)!).getPrices()
@@ -271,7 +285,7 @@ contract TheMasterMarketContract{
 	// ########################################################################################
 	access(all)
 	resource interface TheMasterMarketStateInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpened(): Bool
 	}
 	
@@ -284,12 +298,12 @@ contract TheMasterMarketContract{
 			self.opened = false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setOpened(state: Bool){ 
 			self.opened = state
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpened(): Bool{ 
 			return self.opened
 		}

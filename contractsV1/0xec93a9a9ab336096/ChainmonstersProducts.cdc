@@ -1,4 +1,18 @@
-import FUSD from "./../../standardsV1/FUSD.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FUSD from "./../../standardsV1/FUSD.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -82,7 +96,7 @@ contract ChainmonstersProducts{
 			self.saleEnabled = saleEnabled
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSales(): UInt32{ 
 			return ChainmonstersProducts.salesPerProduct[self.productID]!
 		}
@@ -165,12 +179,12 @@ contract ChainmonstersProducts{
 		}
 		
 		// Get all receipt IDs in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt64]{ 
 			return self.receipts.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowReceipt(receiptID: UInt64): &Receipt?{ 
 			if self.receipts[receiptID] != nil{ 
 				return &self.receipts[receiptID] as &Receipt?
@@ -179,7 +193,7 @@ contract ChainmonstersProducts{
 		}
 		
 		// Check if the collection has a receipt for a given productID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasBoughtProduct(productID: UInt32): Bool{ 
 			var i = 0
 			for receiptID in self.getIds(){ 
@@ -213,7 +227,7 @@ contract ChainmonstersProducts{
 	// Whoever owns an admin resource can create new products, set a product enabled/disabled and create new admin resources
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewProduct(
 			priceCuts: [
 				PriceCut
@@ -236,7 +250,7 @@ contract ChainmonstersProducts{
 			ChainmonstersProducts.products[product.productID] = product
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setProductSaleEnabled(productID: UInt32, saleEnabled: Bool){ 
 			var product = ChainmonstersProducts.products[productID] ?? panic("Product not found")
 			if product.saleEnabled == saleEnabled{ 
@@ -249,7 +263,7 @@ contract ChainmonstersProducts{
 		}
 		
 		// Purchase a product if it is available
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			productID: UInt32,
 			buyerReceiptCollection: &ReceiptCollection,
@@ -306,7 +320,7 @@ contract ChainmonstersProducts{
 		}
 		
 		// createNewAdmin creates a new Admin resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -317,13 +331,13 @@ contract ChainmonstersProducts{
 	   */
 	
 	// Create a new empty receipt collection for a purchaser
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createReceiptCollection(): @ReceiptCollection{ 
 		return <-create ReceiptCollection()
 	}
 	
 	// Get a single product by id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getProduct(productID: UInt32): Product?{ 
 		return self.products[productID]
 	}

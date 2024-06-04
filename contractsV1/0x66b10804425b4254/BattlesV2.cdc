@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import REVV from "../0xd01e482eb680ec9f/REVV.cdc"
 
@@ -219,7 +233,7 @@ contract BattlesV2{
 	/// getPlayerPayment
 	/// Retrieves the payment state of a player.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPlayerPayment(tournamentId: String, from: Address): Player?{ 
 		if !self.tournaments.containsKey(tournamentId){ 
 			return nil
@@ -230,7 +244,7 @@ contract BattlesV2{
 	/// getTournamentView
 	/// Retrieves the battle details of a race slot.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTournamentView(tournamentId: String): TournamentView?{ 
 		if !self.tournaments.containsKey(tournamentId){ 
 			return nil
@@ -248,7 +262,7 @@ contract BattlesV2{
 	/// joinTournament
 	/// Allows anyone with a valid signature to join a Race Event.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun joinTournament(
 		tournamentId: String,
 		amount: UFix64,
@@ -296,7 +310,7 @@ contract BattlesV2{
 	/// refundLobby
 	/// Allows anyone with a valid signature to refund a lobby.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun refundLobby(tournamentId: String, lobbyId: String, players: [Address], signature: String){ 
 		pre{ 
 			self.publicKey.length > 0:
@@ -329,7 +343,7 @@ contract BattlesV2{
 	/// rewardLobby
 	/// Allows anyone with a valid result to reward a lobby.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun rewardLobby(tournamentId: String, lobbyId: String, players: [Address], signature: String){ 
 		pre{ 
 			self.feeReceiver != nil:
@@ -386,7 +400,7 @@ contract BattlesV2{
 	/// setFeeReceiver
 	/// Allows the admin token holder to set the fee receiver.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setFeeReceiver(admin: &Admin, feeReceiver: Capability<&REVV.Vault>){ 
 		pre{ 
 			admin != nil:
@@ -400,7 +414,7 @@ contract BattlesV2{
 	/// setPublicKey
 	/// Allows the admin token holder to set the public key.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setPublicKey(admin: &Admin, publicKey: String){ 
 		pre{ 
 			admin != nil:
@@ -412,7 +426,7 @@ contract BattlesV2{
 	/// setRewards
 	/// Allows the admin token holder to set the reward percentages.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setRewards(admin: &Admin, rewards: [UFix64]){ 
 		pre{ 
 			admin != nil:

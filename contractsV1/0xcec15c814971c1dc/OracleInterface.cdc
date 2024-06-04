@@ -1,4 +1,18 @@
-/**
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/**
 
 # This contract is the interface description of PriceOracle.
   The oracle includes an medianizer, which obtains prices from multiple feeds and calculate the median as the final price.
@@ -21,7 +35,7 @@
 
 */
 
-access(all)
+access(TMP_ENTITLEMENT_OWNER)
 contract interface OracleInterface{ 
 	/*
 			************************************
@@ -33,30 +47,30 @@ contract interface OracleInterface{
 	///
 	/// Only readers in the addr whitelist have permission to read prices
 	/// Please do not share your PriceReader capability with others and take the responsibility of community governance.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface PriceReader{ 
 		/// Get the median price of all current feeds.
 		///
 		/// @Return Median price, returns 0.0 if the current price is invalid
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMedianPrice(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceIdentifier(): String{ 
 			return ""
 		}
 		
 		/// Calculate the *raw* median of the price feed with no filtering of expired data.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawMedianPrice(): UFix64{ 
 			return 0.0
 		}
 		
 		/// Calculate the published block height of the *raw* median data. If it's an even list, it is the smaller one of the two middle value.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawMedianBlockHeight(): UInt64{ 
 			return 0
 		}
@@ -64,16 +78,16 @@ contract interface OracleInterface{
 	
 	/// Reader related public interfaces opened on PriceOracle smart contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface OraclePublicInterface_Reader{ 
 		/// Users who need to read the oracle price should mint this resource and save locally.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPriceReader(): @{OracleInterface.PriceReader}
 		
 		/// Recommended path for PriceReader, users can manage resources by themselves
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceReaderStoragePath(): StoragePath
 	}
 	
@@ -85,43 +99,43 @@ contract interface OracleInterface{
 	
 	/// Panel for publishing price. Every feeder needs to mint this resource locally.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface PriceFeeder: PriceFeederPublic{ 
 		/// The feeder uses this function to offer price at the price panel
 		///
 		/// Param price - price from off-chain
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun publishPrice(price: UFix64)
 		
 		/// Set valid duration of price. If there is no update within the duration, the price will be expired.
 		///
 		/// Param blockheightDuration by the block numbers
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setExpiredDuration(blockheightDuration: UInt64)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface PriceFeederPublic{ 
 		/// Get the current feed price, this function can only be called by the PriceOracle contract
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun fetchPrice(certificate: &{OracleInterface.OracleCertificate}): UFix64
 		
 		/// Get the current feed price regardless of whether it's expired or not.
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRawPrice(certificate: &{OracleInterface.OracleCertificate}): UFix64{ 
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLatestPublishBlockHeight(): UInt64{ 
 			return 0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getExpiredHeightDuration(): UInt64{ 
 			return 0
 		}
@@ -129,36 +143,36 @@ contract interface OracleInterface{
 	
 	/// Feeder related public interfaces opened on PriceOracle smart contract
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface OraclePublicInterface_Feeder{ 
 		/// Feeders need to mint their own price panels and expose the exact public path to oracle contract
 		///
 		/// @Return Resource of price panel
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPriceFeeder(): @{OracleInterface.PriceFeeder}
 		
 		/// The oracle contract will get the PriceFeeder resource based on this path
 		///
 		/// Feeders need to expose the capabilities at this public path
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceFeederPublicPath(): PublicPath
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPriceFeederStoragePath(): StoragePath
 	}
 	
 	/// IdentityCertificate resource which is used to identify account address or perform caller authentication
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface IdentityCertificate{} 
 	
 	/// Each oracle contract will hold its own certificate to identify itself.
 	///
 	/// Only the oracle contract can mint the certificate.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface OracleCertificate: IdentityCertificate{} 
 	
 	/*
@@ -169,9 +183,9 @@ contract interface OracleInterface{
 	
 	/// Community administrator, Increment Labs will then collect community feedback and initiate voting for governance.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	resource interface Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun configOracle(
 			priceIdentifier: String,
 			minFeederNumber: Int,
@@ -180,19 +194,19 @@ contract interface OracleInterface{
 			readerStoragePath: StoragePath
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addFeederWhiteList(feederAddr: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addReaderWhiteList(readerAddr: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delFeederWhiteList(feederAddr: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun delReaderWhiteList(readerAddr: Address)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFeederWhiteListPrice(): [UFix64]
 	}
 }

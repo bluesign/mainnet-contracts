@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract Content{ 
 	access(all)
 	var totalSupply: UInt64
@@ -38,8 +52,8 @@ contract Content{
 	//return the content for this NFT
 	access(all)
 	resource interface PublicContent{ 
-		access(all)
-		fun content(_ id: UInt64): String?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun content(_ id: UInt64): String
 	}
 	
 	access(all)
@@ -52,7 +66,7 @@ contract Content{
 		}
 		
 		// withdraw removes an NFT from the collection and moves it to the caller
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(withdrawID: UInt64): @Blob{ 
 			let token <- self.contents.remove(key: withdrawID) ?? panic("missing content")
 			emit Withdraw(id: token.id, from: self.owner?.address)
@@ -61,7 +75,7 @@ contract Content{
 		
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @Blob){ 
 			let id: UInt64 = token.id
 			
@@ -72,12 +86,12 @@ contract Content{
 		}
 		
 		// getIDs returns an array of the IDs that are in the collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]{ 
 			return self.contents.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun content(_ id: UInt64): String{ 
 			return self.contents[id]?.content ?? panic("Content blob does not exist")
 		}

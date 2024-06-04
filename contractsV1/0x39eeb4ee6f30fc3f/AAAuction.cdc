@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -160,7 +174,7 @@ contract AAAuction{
 			self.affiliate = affiliate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun doRefund(): Bool{ 
 			if let recipient = self.refund.borrow(){ 
 				if self.vault.getType() == recipient.getType(){ 
@@ -171,14 +185,14 @@ contract AAAuction{
 			return false
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun doIncrease(affiliate: Address?, from: @{FungibleToken.Vault}){ 
 			self.vault.deposit(from: <-from)
 			self.price = self.vault.balance
 			self.affiliate = affiliate
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payout(cuts: [AACommon.PaymentCut], _for seller: Address){ 
 			let path = AACurrencyManager.getPath(type: self.vault.getType())
 			assert(path != nil, message: "Currency Path not setting")
@@ -208,12 +222,12 @@ contract AAAuction{
 			emit AuctionPayment(type: self.vault.getType(), payments: payments)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidder(): Address{ 
 			return self.refund.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun bidAmount(): UFix64{ 
 			return self.vault.balance
 		}
@@ -221,13 +235,13 @@ contract AAAuction{
 	
 	access(all)
 	resource interface AuctionPublic{ 
-		access(all)
-		fun getDetails(): AuctionDetails
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getDetails(): AAAuction.AuctionDetails
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpen(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(
 			recipient: Capability<&{NonFungibleToken.CollectionPublic}>,
 			refund: Capability<&{FungibleToken.Receiver}>,
@@ -235,7 +249,7 @@ contract AAAuction{
 			affiliate: Address?
 		)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64
 	}
 	
@@ -250,7 +264,7 @@ contract AAAuction{
 		access(contract)
 		var bid: @Bid?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNFT(): &{NonFungibleToken.NFT}{ 
 			let ref = (self.nftProviderCapability.borrow()!).borrowNFT(self.getDetails().nftID)
 			assert(ref.isInstance(self.getDetails().nftType), message: "token has wrong type")
@@ -258,12 +272,12 @@ contract AAAuction{
 			return ref as &{NonFungibleToken.NFT}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): AuctionDetails{ 
 			return self.details
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun currentBidForUser(address: Address): UFix64{ 
 			if self.bid?.bidder() == address{ 
 				return self.bid?.bidAmount()!
@@ -271,7 +285,7 @@ contract AAAuction{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isOpen(): Bool{ 
 			let now = getCurrentBlock().timestamp
 			if self.details.startAt > now{ 
@@ -283,7 +297,7 @@ contract AAAuction{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun placeBid(recipient: Capability<&{NonFungibleToken.CollectionPublic}>, refund: Capability<&{FungibleToken.Receiver}>, vault: @{FungibleToken.Vault}, affiliate: Address?){ 
 			pre{ 
 				refund.check():
@@ -391,10 +405,10 @@ contract AAAuction{
 	
 	access(all)
 	resource interface AuctionStorePublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(auctionID: UInt64): &Auction?
 	}
 	
@@ -403,7 +417,7 @@ contract AAAuction{
 		access(self)
 		let auctions: @{UInt64: Auction}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAuction(nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>, nftType: Type, nftID: UInt64, startAt: UFix64, endAt: UFix64?, startPrice: UFix64, increment: UFix64, bidType: Type): UInt64{ 
 			pre{ 
 				AACurrencyManager.isCurrencyAccepted(type: bidType):
@@ -425,7 +439,7 @@ contract AAAuction{
 			return auctionID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelAuction(auctionID: UInt64){ 
 			let auction <- self.auctions.remove(key: auctionID) ?? panic("missing auction")
 			assert(auction.bid == nil, message: "Can't cancel auction with bids")
@@ -433,19 +447,19 @@ contract AAAuction{
 			destroy auction
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun completeAuction(auctionID: UInt64){ 
 			let auction <- self.auctions.remove(key: auctionID) ?? panic("missing auction")
 			auction.complete()
 			destroy auction
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAuctionIDs(): [UInt64]{ 
 			return self.auctions.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(auctionID: UInt64): &Auction?{ 
 			if self.auctions[auctionID] != nil{ 
 				return (&self.auctions[auctionID] as &Auction?)!
@@ -462,7 +476,7 @@ contract AAAuction{
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun refundUnclaimedBidForUser(storeUUID: UInt64){ 
 			if let bids <- AAAuction.unclaimedBids.remove(key: storeUUID){ 
 				var i = 0
@@ -476,7 +490,7 @@ contract AAAuction{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createAuctionStore(): @AuctionStore{ 
 		return <-create AuctionStore()
 	}

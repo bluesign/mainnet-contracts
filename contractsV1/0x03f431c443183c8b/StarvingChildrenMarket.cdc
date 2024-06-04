@@ -1,140 +1,20 @@
-// SPDX-License-Identifier: Unlicense
-import StarvingChildren from "../0x3f431c443183c8b/StarvingChildren.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
 
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
 
-import FUSD from "./../../standardsV1/FUSD.cdc"
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
 
-access(all)
-contract StarvingChildrenMarket{ 
-	// -----------------------------------------------------------------------
-	// StarvingChildrenMarket contract-level fields.
-	// These contain actual values that are stored in the smart contract.
-	// -----------------------------------------------------------------------
-	
-	/// Path where the `SaleCollection` is stored
-	access(all)
-	let marketStoragePath: StoragePath
-	
-	/// Path where the public capability for the `SaleCollection` is
-	access(all)
-	let marketPublicPath: PublicPath
-	
-	/// Event used on Purchase method
-	access(all)
-	event StarvingChildrenPurchased(
-		idBuyer: UInt64,
-		idCharity: UInt64,
-		templateId: UInt64,
-		buyerAddress: Address,
-		charityAddress: Address
-	)
-	
-	// ManagerPublic 
-	//
-	// The interface that a user can publish a capability to their sale
-	// to allow others to access their sale
-	access(all)
-	resource interface ManagerPublic{ 
-		access(all)
-		fun purchase(
-			templateId: UInt64,
-			buyTokens: &{FungibleToken.Vault},
-			buyerAddress: Address
-		): @StarvingChildren.NFT
-	}
-	
-	// Manager
-	// Is a resource used to do purchase action
-	//
-	access(all)
-	resource Manager: ManagerPublic{ 
-		
-		/// A admin capability of admin resource used to mintNFT
-		access(self)
-		var adminCapability: Capability<&StarvingChildren.Admin>
-		
-		/// A receiver capability of fungible token resource used to receive FUSD
-		access(self)
-		var receiverCapability: Capability<&FUSD.Vault>
-		
-		/// A buyer's collection to get purchased NFT 
-		access(self)
-		var collectionCapability: Capability<&{StarvingChildren.StarvingChildrenCollectionPublic}>
-		
-		init(adminCapability: Capability<&StarvingChildren.Admin>, receiverCapability: Capability<&FUSD.Vault>, collectionCapability: Capability<&{StarvingChildren.StarvingChildrenCollectionPublic}>){ 
-			pre{ 
-				// Check that the owner's NFT collection capability is correct
-				adminCapability.borrow() != nil:
-					"Admin Capability is invalid!"
-				receiverCapability.borrow() != nil:
-					"FUSD receiver Capability is invalid!"
-				collectionCapability.borrow() != nil:
-					"Collection Capability is invalid!"
-			}
-			self.adminCapability = adminCapability
-			self.receiverCapability = receiverCapability
-			self.collectionCapability = collectionCapability
-		}
-		
-		/// purchase lets a user send tokens to purchase an NFT that is for sale
-		/// the purchased NFT is returned to the transaction context that called it
-		///
-		/// Parameters: templateId: the template ID of the NFT to purchase
-		///			 buyTokens: the fungible tokens that are used to buy the NFT
-		///			 buyerAddress: the buyer wallet address used to send on event
-		///
-		/// Returns: @StarvingChildren.NFT: the purchased NFT
-		access(all)
-		fun purchase(templateId: UInt64, buyTokens: &{FungibleToken.Vault}, buyerAddress: Address): @StarvingChildren.NFT{ 
-			pre{ 
-				StarvingChildren.getMetadatas().containsKey(templateId):
-					"templateId not found"
-				buyTokens.isInstance(Type<@FUSD.Vault>()):
-					"payment vault is not requested fungible token"
-				(StarvingChildren.getMetadatas()[templateId]!).price > 0.0:
-					"price must be more than zero "
-				(StarvingChildren.getMetadatas()[templateId]!).maxEditions > StarvingChildren.getNumberMintedByTemplate(templateId: templateId)!:
-					"template not available"
-			}
-			let template = StarvingChildren.getMetadatas()[templateId]!
-			let price = template.price
-			
-			// Withdraw funds
-			let buyerVault <- buyTokens.withdraw(amount: price)
-			(self.receiverCapability.borrow()!).deposit(from: <-buyerVault)
-			
-			// Mint NFTs
-			let nftBuyer <- (self.adminCapability.borrow()!).mintNFT(metadata: template.metadataBuyer, templateId: templateId, buyer: true)
-			let nftCharity <- (self.adminCapability.borrow()!).mintNFT(metadata: template.metadataCharity, templateId: templateId, buyer: false)
-			emit StarvingChildrenPurchased(idBuyer: nftBuyer.id, idCharity: nftCharity.id, templateId: templateId, buyerAddress: buyerAddress, charityAddress: StarvingChildren.getAdminAddress()!)
-			(			 
-			 // Transfer NFT to charity
-			 self.collectionCapability.borrow()!).deposit(token: <-nftCharity)
-			return <-nftBuyer
-		}
-	}
-	
-	// -----------------------------------------------------------------------
-	// StarvingChildrenMarket contract-level function definitions
-	// -----------------------------------------------------------------------
-	// createManager creates a new Manager resource
-	//
-	access(all)
-	fun createManager(
-		adminCapability: Capability<&StarvingChildren.Admin>,
-		receiverCapability: Capability<&FUSD.Vault>,
-		collectionCapability: Capability<&{StarvingChildren.StarvingChildrenCollectionPublic}>
-	): @Manager{ 
-		return <-create Manager(
-			adminCapability: adminCapability,
-			receiverCapability: receiverCapability,
-			collectionCapability: collectionCapability
-		)
-	}
-	
-	init(){ 
-		self.marketStoragePath = /storage/starvingMarketCollection
-		self.marketPublicPath = /public/starvingMarketCollection
-	}
-}
+*/
+
+	Parsing failed:
+error: unexpected token in type: '<<'
+  --> :27:132
+   |
+27 |        access(TMP_ENTITLEMENT_OWNER) fun purchase(templateId: UInt64, buyTokens: &{FungibleToken.Vault}, buyerAddress: Address): @<<invalid>>
+   |                                                                                                                                     ^

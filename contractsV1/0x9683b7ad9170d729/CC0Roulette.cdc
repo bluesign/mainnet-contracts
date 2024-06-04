@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 *
 *  This is forked from the exampleNFT contract:
 *  https://github.com/onflow/flow-nft/blob/master/contracts/ExampleNFT.cdc
@@ -129,15 +143,15 @@ contract CC0Roulette: NonFungibleToken, ViewResolver{
 	access(all)
 	resource interface CC0RouletteCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCC0RouletteNFT(id: UInt64): &CC0Roulette.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -178,7 +192,7 @@ contract CC0Roulette: NonFungibleToken, ViewResolver{
 		/// @param token: The NFT resource to be included in the collection
 		///
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CC0Roulette.NFT
 			let id: UInt64 = token.id
 			
@@ -214,7 +228,7 @@ contract CC0Roulette: NonFungibleToken, ViewResolver{
 		/// @param id: The ID of the wanted NFT
 		/// @return A reference to the wanted NFT resource
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCC0RouletteNFT(id: UInt64): &CC0Roulette.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -291,7 +305,7 @@ contract CC0Roulette: NonFungibleToken, ViewResolver{
 		/// @param description: The description for the NFT metadata
 		/// @param thumbnail: The thumbnail for the NFT metadata
 		///
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, metadata:{ String: AnyStruct}){ 
 			assert(CC0Roulette.totalSupply <= 5000, message: "Max amount of NFTs allowed is 5,000")
 			let currentBlock = getCurrentBlock()
@@ -314,7 +328,7 @@ contract CC0Roulette: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -333,7 +347,7 @@ contract CC0Roulette: NonFungibleToken, ViewResolver{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}

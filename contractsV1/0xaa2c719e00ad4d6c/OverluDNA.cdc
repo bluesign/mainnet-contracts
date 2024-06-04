@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -133,7 +147,7 @@ contract OverluDNA: NonFungibleToken{
 			self.metadata = metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun calculateEnergy(): UFix64{ 
 			var energy = 0.0
 			if OverluDNA.exemptionTypeIds.contains(self.typeId){ 
@@ -160,7 +174,7 @@ contract OverluDNA: NonFungibleToken{
 			return energy
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: AnyStruct}{ 
 			let metadata = OverluDNA.predefinedMetadata[self.typeId] ??{} 
 			// todo other meta data
@@ -236,15 +250,15 @@ contract OverluDNA: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOverluDNA(id: UInt64): &OverluDNA.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -290,7 +304,7 @@ contract OverluDNA: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @OverluDNA.NFT
 			let id: UInt64 = token.id
 			emit TypeTransfered(id: id, typeId: token.typeId, to: self.owner?.address)
@@ -314,7 +328,7 @@ contract OverluDNA: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowOverluDNA(id: UInt64): &OverluDNA.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -358,7 +372,7 @@ contract OverluDNA: NonFungibleToken{
 		
 		// mintNFT mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(typeId: UInt64, recipient: &{NonFungibleToken.CollectionPublic}, name: String, description: String, thumbnail: String, royalties: [MetadataViews.Royalty]){ 
 			let preMetadata = OverluDNA.predefinedMetadata[typeId]!
 			let metadata:{ String: AnyStruct} ={} 
@@ -391,7 +405,7 @@ contract OverluDNA: NonFungibleToken{
 		}
 		
 		// energy logic
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEnergy(id: UInt64, energies: [UFix64]){ 
 			// pre{
 			//	 energies.length > 0 : OverluError.errorEncode(msg: "DNA: energy array is empty", err: OverluError.ErrorCode.INVALID_PARAMETERS)
@@ -399,24 +413,24 @@ contract OverluDNA: NonFungibleToken{
 			OverluDNA.energyAddedRecords[id] = energies
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addEnergy(id: UInt64, energy: UFix64){ 
 			let energies = OverluDNA.energyAddedRecords[id] ?? []
 			energies.append(energy)
 			OverluDNA.energyAddedRecords[id] = energies
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setInterval(_ interval: UFix64){ 
 			OverluDNA.intervalPerEnergy = interval
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPause(_ pause: Bool){ 
 			OverluDNA.pause = pause
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun AddExemptionTypeIds(_ id: UInt64){ 
 			pre{ 
 				OverluDNA.exemptionTypeIds.contains(id) != true:
@@ -425,13 +439,13 @@ contract OverluDNA: NonFungibleToken{
 			OverluDNA.exemptionTypeIds.append(id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeExemptionTypeIds(_ id: UInt64){ 
 			let idx = OverluDNA.exemptionTypeIds.firstIndex(of: id)
 			OverluDNA.exemptionTypeIds.remove(at: idx!)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setBaseURI(_ uri: String){ 
 			OverluDNA.baseURI = uri
 		}
@@ -440,7 +454,7 @@ contract OverluDNA: NonFungibleToken{
 		// Update metadata for a typeId
 		//  type // max // name // description // thumbnail // royalties
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateMetadata(typeId: UInt64, metadata:{ String: AnyStruct}){ 
 			let currentSupply = OverluDNA.supplyOfTypes[typeId] ?? 0
 			let max = (metadata["max"] as? UInt64?)!
@@ -462,19 +476,19 @@ contract OverluDNA: NonFungibleToken{
 	// getTypeSupply
 	// Get NFT supply of typeId
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTypeSupply(_ typeId: UInt64): UInt64?{ 
 		return OverluDNA.supplyOfTypes[typeId]
 	}
 	
 	// Get metadata
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadata(_ typeId: UInt64):{ String: AnyStruct}{ 
 		return OverluDNA.predefinedMetadata[typeId] ??{} 
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExemptionTypeIds(): [UInt64]{ 
 		return OverluDNA.exemptionTypeIds
 	}

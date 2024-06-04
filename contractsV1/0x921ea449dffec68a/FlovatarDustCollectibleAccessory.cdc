@@ -1,4 +1,18 @@
-//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//import FungibleToken from "../0xf233dcee88fe0abe/FungibleToken.cdc"
 //import NonFungibleToken from "../0x1d7e57aa55817448/NonFungibleToken.cdc"
 //import FlowToken from "../0x1654653399040a61/FlowToken.cdc"
 //import FlovatarDustCollectibleTemplate from "./FlovatarDustCollectibleTemplate.cdc"
@@ -65,31 +79,31 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 		access(all)
 		let mint: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): FlovatarDustCollectibleTemplate.CollectibleTemplateData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeries(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayer(): UInt32
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBasePrice(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentPrice(): UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalMinted(): UInt64
 		
 		//these three are added because I think they will be in the standard. At least Dieter thinks it will be needed
@@ -141,56 +155,56 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 			FlovatarDustCollectibleTemplate.increaseTemplatesCurrentPrice(id: templateId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getID(): UInt64{ 
 			return self.id
 		}
 		
 		// Returns the Template associated to the current Component
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTemplate(): FlovatarDustCollectibleTemplate.CollectibleTemplateData{ 
 			return FlovatarDustCollectibleTemplate.getCollectibleTemplate(id: self.templateId)!
 		}
 		
 		// Gets the SVG from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSvg(): String{ 
 			return self.getTemplate().svg!
 		}
 		
 		// Gets the series number from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSeries(): UInt64{ 
 			return self.getTemplate().series
 		}
 		
 		// Gets the rarity from the parent Template
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRarity(): String{ 
 			return self.getTemplate().rarity
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.getTemplate().metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLayer(): UInt32{ 
 			return self.getTemplate().layer
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBasePrice(): UFix64{ 
 			return self.getTemplate().basePrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCurrentPrice(): UFix64{ 
 			return self.getTemplate().currentPrice
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalMinted(): UInt64{ 
 			return self.getTemplate().totalMintedComponents
 		}
@@ -213,7 +227,7 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 		}
 		
 		access(all)
-		fun resolveView(_ type: Type): AnyStruct?{ 
+		fun resolveView(_ view: Type): AnyStruct?{ 
 			if type == Type<MetadataViews.ExternalURL>(){ 
 				return MetadataViews.ExternalURL("https://flovatar.com")
 			}
@@ -268,15 +282,15 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectibleAccessory(id: UInt64): &FlovatarDustCollectibleAccessory.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -310,7 +324,7 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @FlovatarDustCollectibleAccessory.NFT
 			let id: UInt64 = token.id
 			
@@ -335,7 +349,7 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 		
 		// borrowCollectibleAccessory returns a borrowed reference to a FlovatarComponent
 		// so that the caller can read data and call methods from it.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollectibleAccessory(id: UInt64): &FlovatarDustCollectibleAccessory.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -432,7 +446,7 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 	}
 	
 	// Get the SVG of a specific Component from an account and the ID
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSvgForComponent(address: Address, componentId: UInt64): String?{ 
 		let account = getAccount(address)
 		if let componentCollection = account.capabilities.get<&FlovatarDustCollectibleAccessory.Collection>(self.CollectionPublicPath).borrow<&FlovatarDustCollectibleAccessory.Collection>(){ 
@@ -442,7 +456,7 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 	}
 	
 	// Get a specific Component from an account and the ID as CollectibleAccessoryData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessory(address: Address, componentId: UInt64): CollectibleAccessoryData?{ 
 		let account = getAccount(address)
 		if let componentCollection = account.capabilities.get<&FlovatarDustCollectibleAccessory.Collection>(self.CollectionPublicPath).borrow<&FlovatarDustCollectibleAccessory.Collection>(){ 
@@ -454,7 +468,7 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 	}
 	
 	// Get an array of all the components in a specific account as CollectibleAccessoryData
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessories(address: Address): [CollectibleAccessoryData]{ 
 		var componentData: [CollectibleAccessoryData] = []
 		let account = getAccount(address)
@@ -469,7 +483,7 @@ contract FlovatarDustCollectibleAccessory: NonFungibleToken{
 	
 	//This method is used to mint a new Dust Accessory by paying the necessary amount of DUST
 	// The only parameters are the parent Template ID and the vault with the DUST token. It will return a Component NFT resource
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createCollectibleAccessory(templateId: UInt64, vault: @{FungibleToken.Vault}): @FlovatarDustCollectibleAccessory.NFT{ 
 		pre{ 
 			vault.isInstance(Type<@FlovatarDustToken.Vault>()):

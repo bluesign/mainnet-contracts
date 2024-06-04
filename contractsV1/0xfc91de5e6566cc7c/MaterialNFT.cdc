@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -173,7 +187,7 @@ contract MaterialNFT: NonFungibleToken{
 	//
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMaterialData(mainImage: String, secondImage: String, name: String, description: String): UInt32{ 
 			// Create the new MaterialData
 			var newMaterial = MaterialData(mainImage: mainImage, secondImage: secondImage, name: name, description: description)
@@ -187,13 +201,13 @@ contract MaterialNFT: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 		
 		// Mint the new Material
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(materialDataID: UInt32, royaltyVault: Capability<&FBRC.Vault>): @NFT{ 
 			pre{ 
 				royaltyVault.check():
@@ -210,7 +224,7 @@ contract MaterialNFT: NonFungibleToken{
 			return <-newMaterial
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(materialDataID: UInt32, royaltyVault: Capability<&FBRC.Vault>, quantity: UInt64): @Collection{ 
 			let newCollection <- create Collection()
 			var i: UInt64 = 0
@@ -222,14 +236,14 @@ contract MaterialNFT: NonFungibleToken{
 		}
 		
 		// Change the royalty percentage of the contract
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun changeRoyaltyPercentage(newRoyaltyPercentage: UFix64){ 
 			MaterialNFT.royaltyPercentage = newRoyaltyPercentage
 			emit RoyaltyPercentageChanged(newRoyaltyPercentage: newRoyaltyPercentage)
 		}
 		
 		// Retire materialData so that it cannot be used to mint anymore
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun retireMaterialData(materialDataID: UInt32){ 
 			pre{ 
 				MaterialNFT.isMaterialDataRetired[materialDataID] != nil:
@@ -248,18 +262,18 @@ contract MaterialNFT: NonFungibleToken{
 	access(all)
 	resource interface MaterialCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMaterial(id: UInt64): &MaterialNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -307,7 +321,7 @@ contract MaterialNFT: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn Material
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -326,7 +340,7 @@ contract MaterialNFT: NonFungibleToken{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			// Cast the deposited token as NFT to make sure
 			// it is the correct type
 			let token <- token as! @MaterialNFT.NFT
@@ -349,7 +363,7 @@ contract MaterialNFT: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			// Get an array of the IDs to be deposited
 			let keys = tokens.getIDs()
@@ -388,7 +402,7 @@ contract MaterialNFT: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMaterial(id: UInt64): &MaterialNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -432,37 +446,37 @@ contract MaterialNFT: NonFungibleToken{
 	}
 	
 	// get dictionary of numberMintedPerMaterial
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNumberMintedPerMaterial():{ UInt32: UInt32}{ 
 		return MaterialNFT.numberMintedPerMaterial
 	}
 	
 	// get how many Materials with materialDataID are minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaterialNumberMinted(id: UInt32): UInt32{ 
 		let numberMinted = MaterialNFT.numberMintedPerMaterial[id] ?? panic("materialDataID not found")
 		return numberMinted
 	}
 	
 	// get the materialData of a specific id
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaterialData(id: UInt32): MaterialData{ 
 		let materialData = MaterialNFT.materialDatas[id] ?? panic("materialDataID not found")
 		return materialData
 	}
 	
 	// get all materialDatas created
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaterialDatas():{ UInt32: MaterialData}{ 
 		return MaterialNFT.materialDatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaterialDatasRetired():{ UInt32: Bool}{ 
 		return MaterialNFT.isMaterialDataRetired
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMaterialDataRetired(materialDataID: UInt32): Bool{ 
 		let isMaterialDataRetired = MaterialNFT.isMaterialDataRetired[materialDataID] ?? panic("materialDataID not found")
 		return isMaterialDataRetired

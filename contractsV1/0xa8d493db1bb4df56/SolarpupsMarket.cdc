@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import SolarpupsNFT from "./SolarpupsNFT.cdc"
 
@@ -76,7 +90,7 @@ contract SolarpupsMarket{
 			self.amount = self.paymentVault.balance
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun split(_ amount: UFix64): @Payment{ 
 			pre{ 
 				amount <= self.amount:
@@ -99,13 +113,13 @@ contract SolarpupsMarket{
 		access(all)
 		var price: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSupply(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLocked(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getShares():{ Address: UFix64}
 	}
 	
@@ -115,22 +129,22 @@ contract SolarpupsMarket{
 	
 	access(all)
 	resource interface NFTOffering{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun provide(): @{NonFungibleToken.Collection}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSupply(): Int
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock()
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReceiver(): Capability<&{FungibleToken.Receiver}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyReceiver(): Capability<&{FungibleToken.Receiver}>
 	}
 	
@@ -159,7 +173,7 @@ contract SolarpupsMarket{
 		access(self)
 		let royaltyReceiver: Capability<&{FungibleToken.Receiver}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun provide(): @{NonFungibleToken.Collection}{ 
 			let sourceCollection = self.provider.borrow()!
 			let targetCollection <- SolarpupsNFT.createEmptyCollection(nftType: Type<@SolarpupsNFT.Collection>())
@@ -170,22 +184,22 @@ contract SolarpupsMarket{
 			return <-targetCollection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReceiver(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.receiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyReceiver(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.royaltyReceiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSupply(): Int{ 
 			return self.tokenIds.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				self.tokenIds.length >= 1:
@@ -194,7 +208,7 @@ contract SolarpupsMarket{
 			self.locked = self.locked + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(){ 
 			pre{ 
 				self.locked >= 1 as UInt64:
@@ -241,22 +255,22 @@ contract SolarpupsMarket{
 		access(self)
 		let royaltyReceiver: Capability<&{FungibleToken.Receiver}>
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun provide(): @{NonFungibleToken.Collection}{ 
 			return <-self.minter.mint(assetId: self.assetId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getReceiver(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.receiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyaltyReceiver(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.royaltyReceiver
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSupply(): Int{ 
 			let supply = SolarpupsNFT.getAsset(assetId: self.assetId)?.supply
 			let maxSupply = Int((supply!).max)
@@ -264,7 +278,7 @@ contract SolarpupsMarket{
 			return maxSupply - curSupply
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			pre{ 
 				self.getSupply() >= 1:
@@ -273,7 +287,7 @@ contract SolarpupsMarket{
 			self.locked = self.locked + 1 as UInt64
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(){ 
 			pre{ 
 				self.locked >= 1 as UInt64:
@@ -369,36 +383,36 @@ contract SolarpupsMarket{
 			destroy payment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getSupply(): Int{ 
 			return self.nftOffering.getSupply()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(){ 
 			self.nftOffering.lock()
 			self.locked = self.locked + 1 as UInt64
 			emit MarketItemLocked(assetId: self.assetId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(){ 
 			self.nftOffering.unlock()
 			self.locked = self.locked - 1 as UInt64
 			emit MarketItemUnlocked(assetId: self.assetId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getLocked(): UInt64{ 
 			return self.locked
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getShares():{ Address: UFix64}{ 
 			return self.shares
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPrice(price: UFix64){ 
 			pre{ 
 				self.locked == 0 as UInt64:
@@ -425,7 +439,7 @@ contract SolarpupsMarket{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMarketItem(
 		assetId: String,
 		price: UFix64,
@@ -448,16 +462,16 @@ contract SolarpupsMarket{
 	
 	access(all)
 	resource interface MarketStoreAdmin{ 
-		access(all)
-		fun lock(token: &MarketToken, assetId: String)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun lock(token: &SolarpupsMarket.MarketToken, assetId: String): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(token: &MarketToken, assetId: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockOffering(token: &MarketToken, assetId: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockOffering(token: &MarketToken, assetId: String)
 	}
 	
@@ -467,10 +481,10 @@ contract SolarpupsMarket{
 	
 	access(all)
 	resource interface MarketStoreManager{ 
-		access(all)
-		fun insert(item: @MarketItem)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun insert(item: @SolarpupsMarket.MarketItem): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(assetId: String): @MarketItem
 	}
 	
@@ -480,13 +494,13 @@ contract SolarpupsMarket{
 	
 	access(all)
 	resource interface PublicMarketStore{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetIds(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMarketItem(assetId: String): &MarketItem?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(assetId: String, payment: @Payment, receiver: &{NonFungibleToken.Receiver})
 	}
 	
@@ -503,7 +517,7 @@ contract SolarpupsMarket{
 		access(all)
 		let lockedItems:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun insert(item: @MarketItem){ 
 			let assetId = item.assetId
 			let price = item.price
@@ -516,7 +530,7 @@ contract SolarpupsMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun remove(assetId: String): @MarketItem{ 
 			if self.owner?.address != nil{ 
 				emit MarketItemRemoved(assetId: assetId, owner: self.owner?.address!)
@@ -524,7 +538,7 @@ contract SolarpupsMarket{
 			return <-(self.items.remove(key: assetId) ?? panic("missing market item"))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buy(assetId: String, payment: @Payment, receiver: &{NonFungibleToken.Receiver}){ 
 			pre{ 
 				self.items[assetId] != nil:
@@ -551,17 +565,17 @@ contract SolarpupsMarket{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lock(token: &MarketToken, assetId: String){ 
 			self.lockedItems[assetId] = assetId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlock(token: &MarketToken, assetId: String){ 
 			self.lockedItems.remove(key: assetId)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockOffering(token: &MarketToken, assetId: String){ 
 			pre{ 
 				self.items[assetId] != nil:
@@ -571,7 +585,7 @@ contract SolarpupsMarket{
 			item?.lock()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unlockOffering(token: &MarketToken, assetId: String){ 
 			pre{ 
 				self.items[assetId] != nil:
@@ -581,12 +595,12 @@ contract SolarpupsMarket{
 			item?.unlock()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAssetIds(): [String]{ 
 			return self.items.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMarketItem(assetId: String): &MarketItem?{ 
 			if self.items[assetId] == nil{ 
 				return nil
@@ -601,12 +615,12 @@ contract SolarpupsMarket{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMarketStore(): @MarketStore{ 
 		return <-create MarketStore()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createListOffer(
 		tokenIds: [
 			UInt64
@@ -625,7 +639,7 @@ contract SolarpupsMarket{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createLazyOffer(
 		assetId: String,
 		minter: @SolarpupsNFT.Minter,
@@ -640,7 +654,7 @@ contract SolarpupsMarket{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createMarketAdmin(): @MarketAdmin{ 
 		return <-create MarketAdmin()
 	}
@@ -660,7 +674,7 @@ contract SolarpupsMarket{
 	
 	access(all)
 	resource MarketAdmin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPayment(vault: @{FungibleToken.Vault}): @Payment{ 
 			return <-create Payment(vault: <-vault)
 		}

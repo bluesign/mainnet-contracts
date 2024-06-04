@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -16,7 +30,7 @@ import MotoGPRegistry from "./MotoGPRegistry.cdc"
 //
 access(all)
 contract MotoGPCardMetadata: ContractVersion{ 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVersion(): String{ 
 		return "1.0.4"
 	}
@@ -59,7 +73,7 @@ contract MotoGPCardMetadata: ContractVersion{
 	// The getRider method is the equivalent of the MetadataViews.get{ViewName} methods 
 	// to get the custom Riders view by supplying a card reference as argument
 	// 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRiders(_ viewResolver: &{ViewResolver.Resolver}): Riders?{ 
 		if let view = viewResolver.resolveView(Type<Riders>()){ 
 			if let v = view as? Riders{ 
@@ -145,7 +159,7 @@ contract MotoGPCardMetadata: ContractVersion{
 		return Riders(riders: riders)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(view: Type, id: UInt64, cardID: UInt64, serial: UInt64, publicCollectionType: Type, publicLinkedType: Type, providerLinkedType: Type, createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}): AnyStruct?{ 
 		switch view{ 
 			case Type<MotoGPCardMetadata.Riders>():
@@ -214,26 +228,26 @@ contract MotoGPCardMetadata: ContractVersion{
 	
 	// Get all metadatas
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatas():{ UInt64: MotoGPCardMetadata.Metadata}{ 
 		return self.metadatas
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadatasCount(): UInt64{ 
 		return UInt64(self.metadatas.length)
 	}
 	
 	//Get metadata for a specific cardID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMetadataForCardID(cardID: UInt64): MotoGPCardMetadata.Metadata?{ 
 		return self.metadatas[cardID]
 	}
 	
 	//Access to set metadata is controlled using an Admin reference as argument
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setMetadata(adminRef: &MotoGPAdmin.Admin, cardID: UInt64, name: String, description: String, imageUrl: String, data:{ String: String}){ 
 		pre{ 
 			adminRef != nil:
@@ -245,7 +259,7 @@ contract MotoGPCardMetadata: ContractVersion{
 	
 	//Remove metadata by cardID
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeMetadata(adminRef: &MotoGPAdmin.Admin, cardID: UInt64){ 
 		pre{ 
 			adminRef != nil:

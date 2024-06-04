@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -143,17 +157,17 @@ contract Crash: NonFungibleToken{
 		access(all)
 		let id: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return "Crash".concat(" #").concat(self.id.toString())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun description(): String{ 
 			return "Crash ".concat(" with serial number ").concat(self.id.toString())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun thumbnail(): MetadataViews.HTTPFile{ 
 			return MetadataViews.HTTPFile(url: "https://ipfs.io/ipfs/Qmb84UcaMr1MUwNbYBnXWHM3kEaDcYrKuPWwyRLVTNKELC/".concat(self.id.toString()).concat(".png"))
 		}
@@ -225,15 +239,15 @@ contract Crash: NonFungibleToken{
 	access(all)
 	resource interface CrashCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCrash(id: UInt64): &Crash.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -274,7 +288,7 @@ contract Crash: NonFungibleToken{
 		// takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Crash.NFT
 			let id: UInt64 = token.id
 			// add the new token to the dictionary which removes the old one
@@ -303,7 +317,7 @@ contract Crash: NonFungibleToken{
 		// exposing all of its fields (including the typeID & rarityID).
 		// This is safe as there are no functions that can be called on the Crash.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCrash(id: UInt64): &Crash.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -356,7 +370,7 @@ contract Crash: NonFungibleToken{
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, component: Crash.CrashComponent, royalties: [MetadataViews.Royalty], id: UInt64){ 
 			let metadata:{ String: AnyStruct} ={} 
 			let currentBlock = getCurrentBlock()
@@ -399,7 +413,7 @@ contract Crash: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, itemID: UInt64): &Crash.NFT?{ 
 		let collection = (getAccount(from).capabilities.get<&Crash.Collection>(Crash.CollectionPublicPath)!).borrow() ?? panic("Couldn't get collection")
 		// We trust Crash.Collection.borowCrash to get the correct itemID

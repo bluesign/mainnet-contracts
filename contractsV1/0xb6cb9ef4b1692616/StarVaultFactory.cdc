@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -32,7 +46,7 @@ contract StarVaultFactory{
 	access(all)
 	event VaultAccountPublicKeyChanged(oldPublicKey: String?, newPublicKey: String?)
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createVault(
 		vaultName: String,
 		collection: @{NonFungibleToken.Collection},
@@ -82,7 +96,7 @@ contract StarVaultFactory{
 			self.tokenVaults <-{} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(vault: Address, tokenVault: @{FungibleToken.Vault}){ 
 			pre{ 
 				tokenVault.balance > 0.0:
@@ -98,7 +112,7 @@ contract StarVaultFactory{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(vault: Address, amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.tokenVaults.containsKey(vault):
@@ -113,12 +127,12 @@ contract StarVaultFactory{
 			return <-withdrawVault
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getCollectionLength(): Int{ 
 			return self.tokenVaults.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTokenBalance(vault: Address): UFix64{ 
 			if self.tokenVaults.containsKey(vault){ 
 				let vaultRef = (&self.tokenVaults[vault] as &{FungibleToken.Vault}?)!
@@ -127,12 +141,12 @@ contract StarVaultFactory{
 			return 0.0
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllTokens(): [Address]{ 
 			return self.tokenVaults.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSlicedTokens(from: UInt64, to: UInt64): [Address]{ 
 			pre{ 
 				from <= to && from < UInt64(self.getCollectionLength()):
@@ -151,12 +165,12 @@ contract StarVaultFactory{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyVaultTokenCollection(): @VaultTokenCollection{ 
 		return <-create VaultTokenCollection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getVaultAddress(tokenKey: String): Address?{ 
 		if self.vaultMap.containsKey(tokenKey){ 
 			return self.vaultMap[tokenKey]!
@@ -165,24 +179,24 @@ contract StarVaultFactory{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun vault(vaultId: Int): Address{ 
 		return self.vaults[vaultId]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun allVaults(): [Address]{ 
 		return self.vaults
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun numVaults(): Int{ 
 		return self.vaults.length
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVaultContractTemplate(newAddr: Address){ 
 			pre{ 
 				getAccount(newAddr).contracts.get(name: "StarVault") != nil:
@@ -195,7 +209,7 @@ contract StarVaultFactory{
 			StarVaultFactory.vaultTemplate = newAddr
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVaultAccountPublicKey(publicKey: String?){ 
 			pre{ 
 				PublicKey(publicKey: (publicKey!).decodeHex(), signatureAlgorithm: SignatureAlgorithm.ECDSA_P256) != nil:

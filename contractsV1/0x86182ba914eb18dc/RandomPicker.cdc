@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract RandomPicker{ 
 	access(all)
 	var totalSelections: UInt64
@@ -174,8 +188,8 @@ contract RandomPicker{
 	
 	access(all)
 	resource interface IAdminPublic{ 
-		access(all)
-		fun borrowSelectionDetails(selectionId: UInt64): &SelectionDetails?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowSelectionDetails(selectionId: UInt64): &RandomPicker.SelectionDetails?
 	}
 	
 	access(all)
@@ -183,7 +197,7 @@ contract RandomPicker{
 		access(all)
 		let selectionHistory: @{UInt64: SelectionDetails}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createSelection(strings: [String], allowMultipleSelections: Bool, startRange: UInt64, endRange: UInt64, isNumbers: Bool): UInt64{ 
 			let newSelectionDetails: @SelectionDetails <- create SelectionDetails(strings: strings, allowMultipleSelections: allowMultipleSelections, startRange: startRange, endRange: endRange, isNumbers: isNumbers)
 			let giveawayId: UInt64 = newSelectionDetails.id
@@ -191,7 +205,7 @@ contract RandomPicker{
 			return giveawayId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun selectString(giveawayId: UInt64, newGiveaway: Bool, strings: [String], allowMultipleSelections: Bool, startRange: UInt64, endRange: UInt64, isNumbers: Bool): SelectedWinner?{ 
 			if newGiveaway{ 
 				let newSelectionDetails: @SelectionDetails <- create SelectionDetails(strings: strings, allowMultipleSelections: allowMultipleSelections, startRange: startRange, endRange: endRange, isNumbers: isNumbers)
@@ -205,13 +219,13 @@ contract RandomPicker{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun viewResult(giveawayId: UInt64){ 
 			let selectionDetails = self.borrowSelectionDetails(selectionId: giveawayId)
 			selectionDetails?.viewResult()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSelectionDetails(selectionId: UInt64): &SelectionDetails?{ 
 			return &self.selectionHistory[selectionId] as &SelectionDetails?
 		}
@@ -221,7 +235,7 @@ contract RandomPicker{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowAdmin(): &Admin{ 
 		return self.account.storage.borrow<&RandomPicker.Admin>(from: self.AdminStoragePath)!
 	}

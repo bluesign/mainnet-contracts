@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NFTStorefront from "./../../standardsV1/NFTStorefront.cdc"
 
@@ -83,7 +97,7 @@ contract Marketplace{
 	//
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSaleCutRequirements(_ requirements: [SaleCutRequirement], nftType: Type){ 
 			var totalRatio: UFix64 = 0.0
 			for requirement in requirements{ 
@@ -93,7 +107,7 @@ contract Marketplace{
 			Marketplace.saleCutRequirements[nftType.identifier] = requirements
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun forceRemoveListing(id: UInt64){ 
 			if let item = Marketplace.listingIDItems[id]{ 
 				Marketplace.removeItem(item)
@@ -101,34 +115,34 @@ contract Marketplace{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getListingIDItem(listingID: UInt64): Item?{ 
 		return self.listingIDItems[listingID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getListingID(nftType: Type, nftID: UInt64): UInt64?{ 
 		let nftListingIDs = self.collectionNFTListingIDs[nftType.identifier] ??{} 
 		return nftListingIDs[nftID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNFTIDListingIDMap(nftType: Type):{ UInt64: UInt64}{ 
 		let nftListingIDs = self.collectionNFTListingIDs[nftType.identifier] ??{} 
 		return nftListingIDs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllSaleCutRequirements():{ String: [SaleCutRequirement]}{ 
 		return self.saleCutRequirements
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSaleCutRequirements(nftType: Type): [SaleCutRequirement]{ 
 		return self.saleCutRequirements[nftType.identifier] ?? []
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addListing(
 		id: UInt64,
 		storefrontPublicCapability: Capability<&{NFTStorefront.StorefrontPublic}>
@@ -137,7 +151,7 @@ contract Marketplace{
 		self.addItem(item, storefrontPublicCapability: storefrontPublicCapability)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun addListingWithIndex(
 		id: UInt64,
 		storefrontPublicCapability: Capability<&{NFTStorefront.StorefrontPublic}>,
@@ -148,7 +162,7 @@ contract Marketplace{
 	}
 	
 	// Anyone can remove it if the listing item has been removed or purchased.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeListing(id: UInt64){ 
 		if let item = self.listingIDItems[id]{ 
 			// Skip if the listing item hasn't been purchased
@@ -165,7 +179,7 @@ contract Marketplace{
 	}
 	
 	// Anyone can remove it if the listing item has been removed or purchased.
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun removeListingWithIndex(id: UInt64, indexToRemoveListingID: Int){ 
 		if let item = self.listingIDItems[id]{ 
 			// Skip if the listing item hasn't been purchased
@@ -258,7 +272,7 @@ contract Marketplace{
 	}
 	
 	// Run reverse for loop to find out the index to insert
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIndexToAddListingID(item: Item, items: [UInt64]): Int{ 
 		var index = items.length - 1
 		while index >= 0{ 

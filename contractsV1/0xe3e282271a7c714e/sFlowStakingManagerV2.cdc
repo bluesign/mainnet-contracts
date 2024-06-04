@@ -1,4 +1,18 @@
-// import sFlowToken from "../"./sFlowToken.cdc"/sFlowToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// import sFlowToken from "../"./sFlowToken.cdc"/sFlowToken.cdc"
 
 // Testnet
 // import FungibleToken from "../0x9a0766d93b6608b7/FungibleToken.cdc"
@@ -50,43 +64,43 @@ contract sFlowStakingManagerV2{
 	event FeesTaken(amount: UFix64)
 	
 	// getters
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPoolFee(): UFix64{ 
 		return sFlowStakingManagerV2.poolFee
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNodeId(): String{ 
 		return sFlowStakingManagerV2.nodeID
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDelegatorId(): UInt32{ 
 		return self.delegatorID
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrevNodeId(): String{ 
 		return self.prevNodeID
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPrevDelegatorId(): UInt32{ 
 		return self.prevDelegatorID
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getUnstakeRequests(): [{String: AnyStruct}]{ 
 		return self.unstakeRequests
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isStakingEnabled(): Bool{ 
 		return FlowIDTableStaking.stakingEnabled()
 	}
 	
 	// This returns flow that is not yet delegated (aka the balance of the account)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccountFlowBalance(): UFix64{ 
 		let vaultRef =
 			self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenBalance).borrow<
@@ -96,7 +110,7 @@ contract sFlowStakingManagerV2{
 		return vaultRef.balance
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDelegatorInfo(): FlowIDTableStaking.DelegatorInfo{ 
 		let delegatingInfo =
 			FlowStakingCollection.getAllDelegatorInfo(address: self.account.address)
@@ -108,7 +122,7 @@ contract sFlowStakingManagerV2{
 		panic("No Delegating Information")
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getsFlowPrice(): UFix64{ 
 		let undelegatedFlowBalance = self.getAccountFlowBalance()
 		let delegatingInfo =
@@ -169,7 +183,7 @@ contract sFlowStakingManagerV2{
 		return sFlowBurner
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun stake(from: @{FungibleToken.Vault}): @sFlowToken.Vault{ 
 		let vault <- from as! @FlowToken.Vault
 		let sFlowPrice: UFix64 = self.getsFlowPrice()
@@ -187,7 +201,7 @@ contract sFlowStakingManagerV2{
 		return <-managerMinterVault.mintTokens(amount: amount)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun unstake(accountAddress: Address, from: @{FungibleToken.Vault}){ 
 		var withdrawableFlowAmount = 0.0
 		let sFlowPrice = self.getsFlowPrice()
@@ -243,7 +257,7 @@ contract sFlowStakingManagerV2{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun updateStakingCollection(){ 
 		let delegatorInfo = self.getDelegatorInfo()
 		let stakingCollectionRef = self.borrowStakingCollection()
@@ -264,7 +278,7 @@ contract sFlowStakingManagerV2{
 		)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun processUnstakeRequests(){ 
 		let minFlowBalance = 0.001
 		let delegatorInfo = self.getDelegatorInfo()
@@ -300,7 +314,7 @@ contract sFlowStakingManagerV2{
 	resource Manager{ 
 		init(){} 
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNewDelegator(nodeID: String, delegatorID: UInt32){ 
 			if nodeID == sFlowStakingManagerV2.nodeID{ 
 				panic("Node id is same")
@@ -311,12 +325,12 @@ contract sFlowStakingManagerV2{
 			sFlowStakingManagerV2.delegatorID = delegatorID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setPoolFee(amount: UFix64){ 
 			sFlowStakingManagerV2.poolFee = amount
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerNewDelegator(id: String, amount: UFix64){ 
 			let stakingCollectionRef: &FlowStakingCollection.StakingCollection =
 				sFlowStakingManagerV2.account.storage.borrow<
@@ -326,7 +340,7 @@ contract sFlowStakingManagerV2{
 			stakingCollectionRef.registerDelegator(nodeID: id, amount: amount)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(nodeId: String, delegatorId: UInt32){ 
 			let delegatingInfo =
 				FlowStakingCollection.getAllDelegatorInfo(

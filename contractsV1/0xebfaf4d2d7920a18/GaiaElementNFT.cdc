@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -87,12 +101,12 @@ contract GaiaElementNFT: NonFungibleToken{
 		access(all)
 		let elements:{ UInt64: Element}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun elementCount(): Int{ 
 			return self.elements.keys.length
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getElementRef(id: UInt64): &Element{ 
 			return &self.elements[id]! as &GaiaElementNFT.Element
 		}
@@ -117,7 +131,7 @@ contract GaiaElementNFT: NonFungibleToken{
 		}
 		
 		// lock set if it has any child elements
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLocked(): Bool{ 
 			return self.elementCount() > 0
 		}
@@ -134,12 +148,12 @@ contract GaiaElementNFT: NonFungibleToken{
 	access(all)
 	let sets:{ UInt64: Set}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun setCount(): Int{ 
 		return self.sets.keys.length
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getSetRef(id: UInt64): &GaiaElementNFT.Set{ 
 		return &GaiaElementNFT.sets[id]! as &GaiaElementNFT.Set
 	}
@@ -198,12 +212,12 @@ contract GaiaElementNFT: NonFungibleToken{
 		access(all)
 		let nftSerials:{ UInt64: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTSerial(nftID: UInt64): UInt64?{ 
 			return self.nftSerials[nftID]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun set(): GaiaElementNFT.Set{ 
 			return GaiaElementNFT.sets[self.setID]!
 		}
@@ -221,7 +235,7 @@ contract GaiaElementNFT: NonFungibleToken{
 		}
 		
 		// lock element if it minted any child NFTs
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun isLocked(): Bool{ 
 			return self.totalSupply > 0
 		}
@@ -301,22 +315,22 @@ contract GaiaElementNFT: NonFungibleToken{
 		access(all)
 		let setID: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun set(): &GaiaElementNFT.Set{ 
 			return GaiaElementNFT.getSetRef(id: self.setID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun element(): &GaiaElementNFT.Element{ 
 			return self.set().getElementRef(id: self.elementID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun serial(): UInt64{ 
 			return self.element().getNFTSerial(nftID: self.id)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return self.element().name.concat(" #").concat(self.serial().toString())
 		}
@@ -385,15 +399,15 @@ contract GaiaElementNFT: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaElementNFT(id: UInt64): &GaiaElementNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -415,7 +429,7 @@ contract GaiaElementNFT: NonFungibleToken{
 		}
 		
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @GaiaElementNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -435,7 +449,7 @@ contract GaiaElementNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowGaiaElementNFT(id: UInt64): &GaiaElementNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -485,7 +499,7 @@ contract GaiaElementNFT: NonFungibleToken{
 		access(self)
 		var totalMints: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(nftID: UInt64, setID: UInt64, elementID: UInt64): @GaiaElementNFT.NFT{ 
 			pre{ 
 				self.totalMints < self.maxMints:
@@ -511,39 +525,39 @@ contract GaiaElementNFT: NonFungibleToken{
 	
 	access(all)
 	resource Owner{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionDisplay(_ collectionDisplay: MetadataViews.NFTCollectionDisplay){ 
 			GaiaElementNFT.collectionDisplay = collectionDisplay
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setRoyalties(_ royalties: MetadataViews.Royalties){ 
 			GaiaElementNFT.royalties = royalties
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addSet(setID: UInt64, name: String, description: String, metadata:{ String: AnyStruct}){ 
 			GaiaElementNFT.addSet(setID: setID, name: name, description: description, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeSet(id: UInt64){ 
 			GaiaElementNFT.removeSet(id: id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addElementToSet(elementID: UInt64, setID: UInt64, name: String, description: String, color: String, image:{ MetadataViews.File}, video:{ MetadataViews.File}?, metadata:{ String: AnyStruct}, maxSupply: UInt64){ 
 			let set = GaiaElementNFT.getSetRef(id: setID)
 			set.addElement(elementID: elementID, name: name, description: description, color: color, image: image, video: video, metadata: metadata, maxSupply: maxSupply)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeElementInSet(setID: UInt64, elementID: UInt64){ 
 			let set = GaiaElementNFT.getSetRef(id: setID)
 			set.removeElement(id: elementID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createMinter(maxMints: UInt64): @GaiaElementNFT.NFTMinter{ 
 			return <-GaiaElementNFT.createMinter(maxMints: maxMints)
 		}

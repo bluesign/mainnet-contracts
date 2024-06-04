@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
   Description: Central Smart Contract for FrontRow dapp
 
   This smart contract contains the core functionality for
@@ -128,14 +142,14 @@ contract FrontRow: NonFungibleToken{
 		}
 		
 		// Check if blueprint is cancelled
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun isCancelled(): Bool{ 
 			return self.cancelled
 		}
 		
 		// Cancel a blueprint (no more NFTs can be printed fron it)
 		// This operation is irreversible
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancel(){ 
 			if !self.cancelled{ 
 				self.cancelled = true
@@ -143,25 +157,25 @@ contract FrontRow: NonFungibleToken{
 		}
 		
 		// Get mint count
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getMintCount(): UInt32{ 
 			return self.mintCount
 		}
 		
 		// Set mint count
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMintCount(_ mintCount: UInt32){ 
 			self.mintCount = mintCount
 		}
 		
 		// Set map entry of serial number to the new global NFT ID
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setNftId(_ serialNumber: UInt32, nftId: UInt64){ 
 			self.nfts[serialNumber] = nftId
 		}
 		
 		// Get the NFT ID corresponding to a serial number
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNftId(_ serialNumber: UInt32): UInt64?{ 
 			return self.nfts[serialNumber]
 		}
@@ -221,8 +235,8 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Returns: @FrontRow.NFT token that was minted
 		//
-		access(all)
-		fun mintNFT(blueprintId: UInt32): @NFT
+		access(TMP_ENTITLEMENT_OWNER)
+		fun mintNFT(blueprintId: UInt32): @FrontRow.NFT
 	}
 	
 	// Admin is a special authorization resource that
@@ -241,7 +255,7 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Returns: the ID of the new Blueprint object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun printBlueprint(maxQuantity: UInt32, metadata:{ String: String}): UInt32{ 
 			post{ 
 				FrontRow.nextBlueprintId == before(FrontRow.nextBlueprintId) + 1:
@@ -267,7 +281,7 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Parameters:  blueprintId: ID of the blueprint to cancel
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cancelBlueprint(_ blueprintId: UInt32){ 
 			let blueprint: Blueprint = FrontRow.blueprints[blueprintId]!
 			blueprint.cancel()
@@ -281,7 +295,7 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Returns: @FrontRow.NFT token that was minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(blueprintId: UInt32): @NFT{ 
 			
 			// Check if the blueprint with provided ID exists
@@ -323,7 +337,7 @@ contract FrontRow: NonFungibleToken{
 		//			 quantity: number of NFTs to be minted
 		//			 receiverRef: reference to the receiver's collection
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(blueprintId: UInt32, quantity: UInt64, receiverRef: &{FrontRow.CollectionPublic}){ 
 			// Mint and deposit NFTs to receiver's collection
 			var i: UInt64 = 0
@@ -341,15 +355,15 @@ contract FrontRow: NonFungibleToken{
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFrontRowNFT(id: UInt64): &FrontRow.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -367,7 +381,7 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Returns: the ID of the new Blueprint object
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftByBlueprint(blueprintId: UInt32, serialNumber: UInt32): &FrontRow.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -414,7 +428,7 @@ contract FrontRow: NonFungibleToken{
 		// Parameters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a FrontRow NFT to make sure
 			// it is the correct type
@@ -476,7 +490,7 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Returns: &FrontRow.NFT a reference to the FrontRow NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowFrontRowNFT(id: UInt64): &FrontRow.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -494,7 +508,7 @@ contract FrontRow: NonFungibleToken{
 		//
 		// Returns: &FrontRow.NFT a reference to the FrontRow NFT
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowNftByBlueprint(blueprintId: UInt32, serialNumber: UInt32): &FrontRow.NFT?{ 
 			let maybeBlueprint = FrontRow.blueprints[blueprintId]
 			if let blueprint = maybeBlueprint{ 
@@ -542,7 +556,7 @@ contract FrontRow: NonFungibleToken{
 	//
 	// Returns: a map of blueprint IDs to the corresponding blueprint objects
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBlueprints():{ UInt32: Blueprint}{ 
 		return FrontRow.blueprints
 	}
@@ -554,7 +568,7 @@ contract FrontRow: NonFungibleToken{
 	//
 	// Returns: a blueprint struct
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBlueprint(id: UInt32): Blueprint?{ 
 		return FrontRow.blueprints[id]
 	}
@@ -563,7 +577,7 @@ contract FrontRow: NonFungibleToken{
 	//
 	// Returns: total number of blueprints printed so far
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBlueprintsCount(): UInt32{ 
 		let count = FrontRow.blueprints != nil ? FrontRow.blueprints.length : 0
 		return UInt32(count)
@@ -575,7 +589,7 @@ contract FrontRow: NonFungibleToken{
 	//
 	// Returns: the mint count for the given blueprint
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getBlueprintMintCount(_ blueprintId: UInt32): UInt32{ 
 		let blueprint: Blueprint = FrontRow.blueprints[blueprintId]!
 		let count = blueprint != nil ? blueprint.getMintCount() : 0 as UInt32

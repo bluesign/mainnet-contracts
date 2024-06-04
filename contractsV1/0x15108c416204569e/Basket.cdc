@@ -1,4 +1,18 @@
-// Basket Contract
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Basket Contract
 //
 // NonFungibleToken that holds any number of NonFungibleTokens and FungibleTokens
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -32,12 +46,12 @@ contract Basket: NonFungibleToken, ViewResolver{
 	let CollectionPublicPath: PublicPath
 	
 	// Thought these could be added as useful way to retrieve correct paths that is backwards compatible across all contracts
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultCollectionStoragePath(): StoragePath{ 
 		return self.CollectionStoragePath
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDefaultCollectionPublicPath(): PublicPath{ 
 		return self.CollectionPublicPath
 	}
@@ -59,16 +73,16 @@ contract Basket: NonFungibleToken, ViewResolver{
 	// allows access to read the metadata and ipfs pin of the nft
 	access(all)
 	resource interface BasketPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalances():{ String: UFix64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTs():{ String: [UInt64]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNonFungibleTokens(from: @{NonFungibleToken.Collection})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFungibleTokens(from: @{FungibleToken.Vault})
 	}
 	
@@ -77,16 +91,16 @@ contract Basket: NonFungibleToken, ViewResolver{
 	// capability to access these functions can be given to other users by sharing a private capability
 	access(all)
 	resource interface BasketOwner{ 
-		access(all)
-		fun depositFungibleTokens(from: @{FungibleToken.Vault})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositFungibleTokens(from: @{FungibleToken.Vault}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFungibleTokens(identifier: String, amount: UFix64): @{FungibleToken.Vault}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNonFungibleTokens(from: @{NonFungibleToken.Collection})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNonFungibleTokens(targetCollection: @{NonFungibleToken.Collection}, ids: [UInt64]): @{NonFungibleToken.Collection}
 	}
 	
@@ -164,7 +178,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBalances():{ String: UFix64}{ 
 			let balances:{ String: UFix64} ={} 
 			for key in self.vaults.keys{ 
@@ -173,7 +187,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 			return balances
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTs():{ String: [UInt64]}{ 
 			let nftIDs:{ String: [UInt64]} ={} 
 			for key in self.collections.keys{ 
@@ -182,7 +196,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 			return nftIDs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCollectionViews(): AnyStruct{ 
 			let collectionViews:{ String: AnyStruct} ={} 
 			for key in self.collections.keys{ 
@@ -198,7 +212,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 			return collectionViews
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTViews(key: String): AnyStruct{ 
 			// get collection ref
 			let collectionRef = &self.collections[key] as &{NonFungibleToken.Collection}?
@@ -222,7 +236,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 		}
 		
 		// pub fun getVaultViews()
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositFungibleTokens(from: @{FungibleToken.Vault}){ 
 			let identifier = from.getType().identifier
 			let balance = from.balance
@@ -235,7 +249,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 			emit DepositFungibleTokens(identifier: identifier, amount: balance)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawFungibleTokens(identifier: String, amount: UFix64): @{FungibleToken.Vault}{ 
 			pre{ 
 				self.vaults.containsKey(identifier):
@@ -246,7 +260,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 			return <-self.vaults[identifier]?.withdraw(amount: amount)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositNonFungibleTokens(from: @{NonFungibleToken.Collection}){ 
 			let identifier = from.getType().identifier
 			let ids = from.getIDs()
@@ -262,7 +276,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 		}
 		
 		// requires passing in a correctly typed targetCollection which receives the tokens and can be created in the transaction 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawNonFungibleTokens(targetCollection: @{NonFungibleToken.Collection}, ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			pre{ 
 				self.collections.containsKey(targetCollection.getType().identifier):
@@ -282,17 +296,17 @@ contract Basket: NonFungibleToken, ViewResolver{
 	
 	access(all)
 	resource interface BasketCollectionPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBasket(id: UInt64): &Basket.NFT?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 	}
 	
 	// standard implmentation for managing a collection of NFTs
@@ -318,7 +332,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Basket.NFT
 			let id: UInt64 = token.id
 			
@@ -344,7 +358,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 		
 		// borrowBasket gets a reference to an NFT in the collection
 		// so that the caller can read its metadata and call its methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowBasket(id: UInt64): &Basket.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -390,7 +404,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyBasket(): @{NonFungibleToken.NFT}{ 
 		var newNFT <- create NFT(initID: Basket.totalSupply)
 		Basket.totalSupply = Basket.totalSupply + 1
@@ -402,7 +416,7 @@ contract Basket: NonFungibleToken, ViewResolver{
 	/// @param view: The Type of the desired view.
 	/// @return A structure representing the requested view.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.NFTCollectionData>():
@@ -420,12 +434,12 @@ contract Basket: NonFungibleToken, ViewResolver{
 	/// @return An array of Types defining the implemented views. This value will be used by
 	///		 developers to know which parameter to pass to the resolveView() method.
 	///
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.NFTCollectionDisplay>()]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getThumbnailURL(): String{ 
 		return "https://basket-sable.vercel.app/_app/immutable/assets/basket-icon.41a9e902.svg"
 	}

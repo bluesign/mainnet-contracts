@@ -1,4 +1,18 @@
-//SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	//SPDX-License-Identifier: UNLICENSED
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
@@ -112,7 +126,7 @@ contract DropchasePacks: NonFungibleToken{
 			self.packBuyers = []
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintPack(packID: UInt32): @NFT{ 
 			// Mint the new moment
 			let newPack: @NFT <- create NFT(packID: self.packID, serialNumber: self.numberMinted + 1)
@@ -126,7 +140,7 @@ contract DropchasePacks: NonFungibleToken{
 		//
 		// Returns: Collection object that contains all the Packs that were minted
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintPack(packID: UInt32, quantity: Int): @Collection{ 
 			let newCollection <- create Collection()
 			var i: Int = 0
@@ -171,14 +185,14 @@ contract DropchasePacks: NonFungibleToken{
 	// An interface to allow purchasing packs
 	access(all)
 	resource interface PackPurchaser{ 
-		access(all)
-		fun buyPack(packID: UInt32, buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun buyPack(packID: UInt32, buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address): Void
 	}
 	
 	// PacksHandler
 	access(all)
 	resource PacksHandler: PackPurchaser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun buyPack(packID: UInt32, buyerPayment: @{FungibleToken.Vault}, buyerAddress: Address){ 
 			pre{ 
 				DropchasePacks.packs[packID] != nil:
@@ -217,7 +231,7 @@ contract DropchasePacks: NonFungibleToken{
 		//
 		// Parameters: name: The name of the pack
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createPack(name: String, creator: String, price: UFix64, packsAmount: Int, packImage: String){ 
 			// Create the new pack
 			var newPack = Pack(name: name, creator: creator, price: price, packsAmount: packsAmount, packImage: packImage)
@@ -235,7 +249,7 @@ contract DropchasePacks: NonFungibleToken{
 		// Returns: A reference to the pack with all of the fields
 		// and methods exposed
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(packID: UInt32): &Pack{ 
 			pre{ 
 				DropchasePacks.packs[packID] != nil:
@@ -249,7 +263,7 @@ contract DropchasePacks: NonFungibleToken{
 		
 		// createNewAdmin creates a new Admin resource
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(): @Admin{ 
 			return <-create Admin()
 		}
@@ -261,18 +275,18 @@ contract DropchasePacks: NonFungibleToken{
 	access(all)
 	resource interface PackCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &DropchasePacks.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -321,7 +335,7 @@ contract DropchasePacks: NonFungibleToken{
 		// Returns: @NonFungibleToken.Collection: A collection that contains
 		//										the withdrawn moments
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -340,7 +354,7 @@ contract DropchasePacks: NonFungibleToken{
 		// Paramters: token: the NFT to be deposited in the collection
 		//
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			
 			// Cast the deposited token as a DropchasePacks NFT to make sure
 			// it is the correct type
@@ -364,7 +378,7 @@ contract DropchasePacks: NonFungibleToken{
 		
 		// batchDeposit takes a Collection object as an argument
 		// and deposits each contained NFT into this Collection
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -411,7 +425,7 @@ contract DropchasePacks: NonFungibleToken{
 		// Parameters: id: The ID of the NFT to get the reference for
 		//
 		// Returns: A reference to the NFT
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPack(id: UInt64): &DropchasePacks.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = &self.ownedNFTs[id] as &{NonFungibleToken.NFT}?
@@ -421,7 +435,7 @@ contract DropchasePacks: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun openPack(withdrawID: UInt64){ 
 			
 			// Remove the nft from the Collection
@@ -464,7 +478,7 @@ contract DropchasePacks: NonFungibleToken{
 		return <-create DropchasePacks.Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackPrice(packID: UInt32): UFix64{ 
 		pre{ 
 			self.packs[packID] != nil:
@@ -473,13 +487,13 @@ contract DropchasePacks: NonFungibleToken{
 		return (self.packs[packID]!).price
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackName(packID: UInt32): String?{ 
 		// Don't force a revert if the packID is invalid
 		return DropchasePacks.packs[packID]?.name
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getPackCreator(packID: UInt32): String{ 
 		// Don't force a revert if the packID is invalid
 		return (DropchasePacks.packs[packID]!).creator

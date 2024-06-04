@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import FUSD from "./../../standardsV1/FUSD.cdc"
 
@@ -43,17 +57,17 @@ contract SportsIconBeneficiaries{
 			self.flowWallet = flowWallet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCut(): UFix64{ 
 			return self.cut
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFUSDWallet(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.fusdWallet
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getFLOWWallet(): Capability<&{FungibleToken.Receiver}>{ 
 			return self.flowWallet
 		}
@@ -68,7 +82,7 @@ contract SportsIconBeneficiaries{
 			self.beneficiaries = beneficiaries
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payOut(
 			paymentReceiver: Capability<&{FungibleToken.Receiver}>?,
 			payment: @{FungibleToken.Vault},
@@ -122,18 +136,18 @@ contract SportsIconBeneficiaries{
 			destroy payment
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getBeneficiaries(): [Beneficiary]{ 
 			return self.beneficiaries
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAdminFUSDVault(): Capability<&FUSD.Vault>{ 
 		return self.account.capabilities.get<&FUSD.Vault>(/public/fusdReceiver)!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAdminFLOWVault(): Capability<&FlowToken.Vault>{ 
 		return self.account.capabilities.get<&FlowToken.Vault>(/public/flowTokenReceiver)!
 	}

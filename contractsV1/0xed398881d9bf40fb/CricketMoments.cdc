@@ -1,4 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// SPDX-License-Identifier: UNLICENSED
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 /**
@@ -111,13 +125,13 @@ contract CricketMoments: NonFungibleToken{
 		}
 		
 		// get complete metadata
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
 		// get metadata field by key
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadataField(key: String): String?{ 
 			if let value = self.metadata[key]{ 
 				return value
@@ -137,15 +151,15 @@ contract CricketMoments: NonFungibleToken{
 	access(all)
 	resource interface CricketMomentsCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCricketMoment(id: UInt64): &CricketMoments.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -178,7 +192,7 @@ contract CricketMoments: NonFungibleToken{
 		// deposit
 		// Takes a NFT and adds it to the collections dictionary
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @CricketMoments.NFT
 			let id: UInt64 = token.id
 			
@@ -211,7 +225,7 @@ contract CricketMoments: NonFungibleToken{
 		// This is safe as there are no functions that can be called on the Moment.
 		// Metadata is also a private field, therefore can't be changed using borrowed object.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCricketMoment(id: UInt64): &CricketMoments.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -264,7 +278,7 @@ contract CricketMoments: NonFungibleToken{
 		// Increments serial number
 		// deposits all in the recipients collection using their collection reference
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNewNFTs(recipient: &{NonFungibleToken.CollectionPublic}, serialQuantity: UInt64, metadata:{ String: String}){ 
 			var serialNumber = 1 as UInt64
 			var ipfs: String = metadata["ipfs"] ?? panic("IPFS url not available")
@@ -285,7 +299,7 @@ contract CricketMoments: NonFungibleToken{
 		}
 		
 		// Mint more NFTs for a particular momentId that already exists
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintOldNFTs(recipient: &{NonFungibleToken.CollectionPublic}, momentId: UInt64, serialQuantity: UInt64, metadata:{ String: String}){ 
 			var ipfs: String = metadata["ipfs"] ?? panic("IPFS url not available")
 			var serialNumber = CricketMoments.nextSerial[momentId] ?? panic("momentId not present")
@@ -309,7 +323,7 @@ contract CricketMoments: NonFungibleToken{
 		}
 		
 		// Lock a particular momentId, so that no more moments with this momentId can be minted. 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockMoment(momentId: UInt64){ 
 			if CricketMoments.locked[momentId] == nil{ 
 				panic("Moment not minted yet")
@@ -324,7 +338,7 @@ contract CricketMoments: NonFungibleToken{
 	// If it has a collection but does not contain the itemID, return nil.
 	// If it has a collection and that collection contains the itemID, return a reference to that.
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun fetch(_ from: Address, id: UInt64): &CricketMoments.NFT?{ 
 		let collection = getAccount(from).capabilities.get<&CricketMoments.Collection>(CricketMoments.CollectionPublicPath).borrow<&CricketMoments.Collection>() ?? panic("Couldn't get collection")
 		// We trust CricketMoments.Collection.borrowMoment to get the correct itemID
@@ -333,7 +347,7 @@ contract CricketMoments: NonFungibleToken{
 	}
 	
 	// get next serial for a momentId (nextSerial -1 indicates number of copies minted for this momentId)
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNextSerial(momentId: UInt64): UInt64?{ 
 		if let nextSerial = self.nextSerial[momentId]{ 
 			return nextSerial
@@ -342,7 +356,7 @@ contract CricketMoments: NonFungibleToken{
 	}
 	
 	// check if a moment is locked. No more copies of a locked moment can be minted 
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isMomentLocked(momentId: UInt64): Bool?{ 
 		if let isLocked = self.locked[momentId]{ 
 			return isLocked

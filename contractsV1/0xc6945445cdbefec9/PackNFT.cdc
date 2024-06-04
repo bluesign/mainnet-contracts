@@ -1,4 +1,18 @@
-import Crypto
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import Crypto
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -98,25 +112,25 @@ contract PackNFT: NonFungibleToken{
 	
 	access(all)
 	resource interface IOperator{ 
-		access(all)
-		fun setMetadata(distId: UInt64, edition: UInt32?, metadata: Metadata, overwrite: Bool)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setMetadata(distId: UInt64, edition: UInt32?, metadata: PackNFT.Metadata, overwrite: Bool): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionMetadata(distId: UInt64, edition: UInt32?, metadata: CollectionMetadata, overwrite: Bool)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(distId: UInt64, additionalInfo:{ String: String}?, commitHash: String, issuer: Address, nftCount: UInt16?, lockTime: UFix64?): @NFT
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(id: UInt64, nfts: [&{NonFungibleToken.NFT}], salt: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(id: UInt64, nfts: [&{NonFungibleToken.NFT}])
 	}
 	
 	access(all)
 	resource PackNFTOperator: IOperator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMetadata(distId: UInt64, edition: UInt32?, metadata: Metadata, overwrite: Bool){ 
 			let fullId = edition != nil ? distId.toString().concat(":").concat((edition!).toString()) : distId.toString()
 			if !overwrite && PackNFT.itemMetadata[fullId] != nil{ 
@@ -126,7 +140,7 @@ contract PackNFT: NonFungibleToken{
 			emit MetadataUpdated(distId: distId, edition: edition, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionMetadata(distId: UInt64, edition: UInt32?, metadata: CollectionMetadata, overwrite: Bool){ 
 			let fullId = edition != nil ? distId.toString().concat(":").concat((edition!).toString()) : distId.toString()
 			if !overwrite && PackNFT.itemCollectionMetadata[fullId] != nil{ 
@@ -136,7 +150,7 @@ contract PackNFT: NonFungibleToken{
 			emit CollectionMetadataUpdated(distId: distId, edition: edition, metadata: metadata)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mint(distId: UInt64, additionalInfo:{ String: String}?, commitHash: String, issuer: Address, nftCount: UInt16?, lockTime: UFix64?): @NFT{ 
 			assert(PackNFT.defaultCollectionMetadata != nil, message: "Please set the default collection metadata before minting")
 			let totalEditions = PackNFT.itemEditions[distId] ?? UInt32(0)
@@ -151,31 +165,31 @@ contract PackNFT: NonFungibleToken{
 			return <-nft
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(id: UInt64, nfts: [&{NonFungibleToken.NFT}], salt: String){ 
 			let p <- PackNFT.packs.remove(key: id) ?? panic("no such pack")
 			p.reveal(id: id, nfts: nfts, salt: salt)
 			PackNFT.packs[id] <-! p
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(id: UInt64, nfts: [&{NonFungibleToken.NFT}]){ 
 			let p <- PackNFT.packs.remove(key: id) ?? panic("no such pack")
 			p.open(id: id, nfts: nfts)
 			PackNFT.packs[id] <-! p
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createOperator(): @PackNFTOperator{ 
 			return <-create PackNFTOperator()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setDefaultCollectionMetadata(defaultCollectionMetadata: CollectionMetadata){ 
 			PackNFT.defaultCollectionMetadata = defaultCollectionMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setVersion(version: String){ 
 			PackNFT.version = version
 		}
@@ -203,7 +217,7 @@ contract PackNFT: NonFungibleToken{
 		access(all)
 		var salt: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun verify(nftString: String): Bool{ 
 			assert(self.status as! PackNFT.Status != PackNFT.Status.Sealed, message: "Pack not revealed yet")
 			var hashString = self.salt!
@@ -337,7 +351,7 @@ contract PackNFT: NonFungibleToken{
 		access(all)
 		let credits: String?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toDict():{ String: AnyStruct?}{ 
 			let rawMetadata:{ String: AnyStruct?} ={} 
 			rawMetadata.insert(key: "title", self.title)
@@ -372,7 +386,7 @@ contract PackNFT: NonFungibleToken{
 			return rawMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toStringDict():{ String: String?}{ 
 			let rawMetadata:{ String: String?} ={} 
 			rawMetadata.insert(key: "title", self.title)
@@ -407,7 +421,7 @@ contract PackNFT: NonFungibleToken{
 			return rawMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun patchedForOpened(): Metadata{ 
 			return Metadata(title: PackNFT.metadataOpenedWarning.concat(self.title), description: PackNFT.metadataOpenedWarning.concat(self.description), creator: self.creator, asset: self.asset, assetMimeType: self.assetMimeType, assetHash: self.assetHash, artwork: self.artworkOpened ?? self.artwork, artworkMimeType: self.artworkOpenedMimeType ?? self.artworkMimeType, artworkHash: self.artworkOpenedHash ?? self.artworkHash, artworkAlternate: self.artworkAlternate, artworkAlternateMimeType: self.artworkAlternateMimeType, artworkAlternateHash: self.artworkAlternateHash, artworkOpened: self.artworkOpened, artworkOpenedMimeType: self.artworkOpenedMimeType, artworkOpenedHash: self.artworkOpenedHash, thumbnail: self.thumbnailOpened ?? self.thumbnail, thumbnailMimeType: self.thumbnailOpenedMimeType ?? self.thumbnailMimeType, thumbnailOpened: self.thumbnailOpened, thumbnailOpenedMimeType: self.thumbnailOpenedMimeType, termsUrl: self.termsUrl, externalUrl: self.externalUrl, rarity: self.rarity, credits: self.credits)
 		}
@@ -465,7 +479,7 @@ contract PackNFT: NonFungibleToken{
 		access(all)
 		let socials:{ String: String}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toDict():{ String: AnyStruct?}{ 
 			let rawMetadata:{ String: AnyStruct?} ={} 
 			rawMetadata.insert(key: "name", self.name)
@@ -514,10 +528,10 @@ contract PackNFT: NonFungibleToken{
 	
 	access(all)
 	resource interface IPackNFTOwnerOperator{ 
-		access(all)
-		fun reveal(openRequest: Bool)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun reveal(openRequest: Bool): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open()
 	}
 	
@@ -553,12 +567,12 @@ contract PackNFT: NonFungibleToken{
 		access(all)
 		let mintedTime: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun reveal(openRequest: Bool){ 
 			PackNFT.revealRequest(id: self.id, openRequest: openRequest)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun open(){ 
 			pre{ 
 				self.lockTime == nil || getCurrentBlock().timestamp > self.lockTime!:
@@ -567,12 +581,12 @@ contract PackNFT: NonFungibleToken{
 			PackNFT.openRequest(id: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAdditionalInfo():{ String: String}{ 
 			return self.additionalInfo
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun totalEditions(): UInt32{ 
 			return PackNFT.itemEditions[self.distId] ?? UInt32(0)
 		}
@@ -631,7 +645,7 @@ contract PackNFT: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun _metadata(): Metadata{ 
 			let fullId = self.distId.toString().concat(":").concat(self.edition.toString())
 			let editionMetadata = PackNFT.itemMetadata[fullId]
@@ -645,7 +659,7 @@ contract PackNFT: NonFungibleToken{
 			panic("Metadata not found for collectible ".concat(fullId))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadata(): Metadata{ 
 			let metadata = self._metadata()
 			let p = PackNFT.borrowPackRepresentation(id: self.id) ?? panic("Pack representation not found")
@@ -655,7 +669,7 @@ contract PackNFT: NonFungibleToken{
 			return metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun collectionMetadata(): CollectionMetadata?{ 
 			let fullId = self.distId.toString().concat(":").concat(self.edition.toString())
 			let editionMetadata = PackNFT.itemCollectionMetadata[fullId]
@@ -666,7 +680,7 @@ contract PackNFT: NonFungibleToken{
 			return distMetadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun metadataDict():{ String: AnyStruct?}{ 
 			let dict = self.metadata().toDict()
 			let collectionDict = self.collectionMetadata()?.toDict()
@@ -707,16 +721,16 @@ contract PackNFT: NonFungibleToken{
 	access(all)
 	resource interface IPackNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
-		fun borrowPackNFT(id: UInt64): &NFT?{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowPackNFT(id: UInt64): &PackNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
 			post{ 
@@ -728,8 +742,8 @@ contract PackNFT: NonFungibleToken{
 	
 	access(all)
 	resource interface IPackNFTCollectionPrivate{ 
-		access(all)
-		fun borrowPackNFT(id: UInt64): &NFT?{ 
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowPackNFT(id: UInt64): &PackNFT.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
 			post{ 
@@ -761,7 +775,7 @@ contract PackNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @PackNFT.NFT
 			let id: UInt64 = token.id
 			
@@ -784,7 +798,7 @@ contract PackNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPackNFT(id: UInt64): &NFT?{ 
 			let nft <- self.ownedNFTs.remove(key: id)
 			if nft == nil{ 
@@ -834,13 +848,13 @@ contract PackNFT: NonFungibleToken{
 		emit OpenRequest(id: id)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun publicReveal(id: UInt64, nfts: [&{NonFungibleToken.NFT}], salt: String){ 
 		let p = PackNFT.borrowPackRepresentation(id: id) ?? panic("No such pack")
 		p.reveal(id: id, nfts: nfts, salt: salt)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun borrowPackRepresentation(id: UInt64): &Pack?{ 
 		return &self.packs[id] as &Pack?
 	}

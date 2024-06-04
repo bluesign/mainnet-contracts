@@ -1,4 +1,18 @@
-import TheMasterPieceContract from "./TheMasterPieceContract.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import TheMasterPieceContract from "./TheMasterPieceContract.cdc"
 
 access(all)
 contract TheMasterPixelContract{ 
@@ -54,7 +68,7 @@ contract TheMasterPixelContract{
 	resource TheMasterPixelMinter{ 
 		init(){} 
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintTheMasterPixel(
 			theMasterSectorsRef: &TheMasterPixelContract.TheMasterSectors,
 			pixels:{ 
@@ -103,17 +117,17 @@ contract TheMasterPixelContract{
 			self.colors[id] = 4294967295
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getColor(id: UInt32): UInt32{ 
 			return self.colors[id]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPixels():{ UInt32: UInt32}{ 
 			return self.colors
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setColor(id: UInt32, color: UInt32){ 
 			if self.colors.containsKey(id){ 
 				self.colors[id] = color
@@ -130,7 +144,7 @@ contract TheMasterPixelContract{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(): [UInt32]{ 
 			return self.colors.keys
 		}
@@ -139,17 +153,17 @@ contract TheMasterPixelContract{
 	// ########################################################################################
 	access(all)
 	resource interface TheMasterSectorsInterface{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPixels(sectorId: UInt16):{ UInt32: UInt32}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(sectorId: UInt16): [UInt32]
 		
 		access(account)
 		fun getSectorRef(sectorId: UInt16): &TheMasterSector
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptySectors(): @TheMasterSectors{ 
 		return <-create TheMasterSectors()
 	}
@@ -171,7 +185,7 @@ contract TheMasterPixelContract{
 			return (&self.ownedSectors[sectorId] as &TheMasterSector?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPixels(sectorId: UInt16):{ UInt32: UInt32}{ 
 			if self.ownedSectors.containsKey(sectorId){ 
 				return self.ownedSectors[sectorId]?.getPixels()!
@@ -180,19 +194,19 @@ contract TheMasterPixelContract{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setColors(sectorId: UInt16, colors:{ UInt32: UInt32}){ 
 			self.getSectorRef(sectorId: sectorId).setColors(colors: colors)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setColor(sectorId: UInt16, id: UInt32, color: UInt32){ 
 			if self.ownedSectors.containsKey(sectorId){ 
 				self.ownedSectors[sectorId]?.setColor(id: id, color: color)!
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIds(sectorId: UInt16): [UInt32]{ 
 			if self.ownedSectors.containsKey(sectorId){ 
 				return self.ownedSectors[sectorId]?.getIds()!

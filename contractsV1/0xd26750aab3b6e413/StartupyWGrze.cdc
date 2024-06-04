@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -89,12 +103,12 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 	access(self)
 	var itemViewResolvers: @{String:{ CollecticoStandardViews.ItemViewResolver}}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getViews(): [Type]{ 
 		return [Type<MetadataViews.Display>(), Type<MetadataViews.ExternalURL>(), Type<MetadataViews.NFTCollectionDisplay>(), Type<MetadataViews.NFTCollectionData>(), Type<MetadataViews.Royalties>(), Type<MetadataViews.License>(), Type<CollecticoStandardViews.ContractInfo>()]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun resolveView(_ view: Type): AnyStruct?{ 
 		switch view{ 
 			case Type<MetadataViews.Display>():
@@ -189,7 +203,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			self.isLocked = true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		view fun getTotalSupply(): UInt64{ 
 			return self.numMinted - self.numDestroyed
 		}
@@ -315,21 +329,21 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 	access(all)
 	resource interface CollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun batchDeposit(tokens: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun batchDeposit(tokens: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollecticoNFT(id: UInt64): &StartupyWGrze.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -364,7 +378,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			return <-token
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchWithdraw(ids: [UInt64]): @{NonFungibleToken.Collection}{ 
 			// Create a new empty Collection
 			var batchCollection <- create Collection()
@@ -381,7 +395,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @StartupyWGrze.NFT
 			let id: UInt64 = token.id
 			
@@ -391,7 +405,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDeposit(tokens: @{NonFungibleToken.Collection}){ 
 			
 			// Get an array of the IDs to be deposited
@@ -419,7 +433,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowCollecticoNFT(id: UInt64): &StartupyWGrze.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -458,7 +472,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllItemsRef(): [&Item]{ 
 		let resultItems: [&Item] = []
 		for key in self.items.keys{ 
@@ -468,7 +482,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return resultItems
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAllItems(view: Type): [AnyStruct]{ 
 		let resultItems: [AnyStruct] = []
 		for key in self.items.keys{ 
@@ -483,7 +497,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return resultItems
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun getItemRef(itemId: UInt64): &Item{ 
 		pre{ 
 			self.items[itemId] != nil:
@@ -493,7 +507,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return item!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getItem(itemId: UInt64, view: Type): AnyStruct?{ 
 		pre{ 
 			self.items[itemId] != nil:
@@ -503,12 +517,12 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return item.resolveView(view)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isClaimed(claimId: String): Bool{ 
 		return self.claims.containsKey(claimId)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun areClaimed(claimIds: [String]):{ String: Bool}{ 
 		let res:{ String: Bool} ={} 
 		for claimId in claimIds{ 
@@ -517,31 +531,31 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return res
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun countNFTsMintedPerItem(itemId: UInt64): UInt64{ 
 		let item = self.getItemRef(itemId: itemId)
 		return item.numMinted
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun countNFTsDestroyedPerItem(itemId: UInt64): UInt64{ 
 		let item = self.getItemRef(itemId: itemId)
 		return item.numDestroyed
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isItemSupplyValid(itemId: UInt64): Bool{ 
 		let item = self.getItemRef(itemId: itemId)
 		return item.maxSupply == nil || item.getTotalSupply() <= item.maxSupply!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	view fun isItemLocked(itemId: UInt64): Bool{ 
 		let item = self.getItemRef(itemId: itemId)
 		return item.isLocked
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertCollectionMetadataIsValid(){ 
 		// assert display data:
 		self.assertDictEntry(self.metadata, "name", Type<String>(), true)
@@ -553,42 +567,42 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		self.assertDictEntry(self.metadata, "_licenseId", Type<String>(), false)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getExternalURL(): MetadataViews.ExternalURL{ 
 		return self.metadata["externalURL"]! as! MetadataViews.ExternalURL
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getContractInfo(): CollecticoStandardViews.ContractInfo{ 
 		return CollecticoStandardViews.ContractInfo(name: self.contractName, address: self.account.address)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionDisplay(): MetadataViews.NFTCollectionDisplay{ 
 		return MetadataViews.NFTCollectionDisplay(name: self.metadata["name"]! as! String, description: self.metadata["description"]! as! String, externalURL: self.metadata["externalURL"]! as! MetadataViews.ExternalURL, squareImage: self.metadata["squareImage"]! as! MetadataViews.Media, bannerImage: self.metadata["bannerImage"]! as! MetadataViews.Media, socials: self.metadata["socials"]! as!{ String: MetadataViews.ExternalURL})
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionData(): MetadataViews.NFTCollectionData{ 
 		return MetadataViews.NFTCollectionData(storagePath: self.CollectionStoragePath, publicPath: self.CollectionPublicPath, publicCollection: Type<&StartupyWGrze.Collection>(), publicLinkedType: Type<&StartupyWGrze.Collection>(), createEmptyCollectionFunction: fun (): @{NonFungibleToken.Collection}{ 
 				return <-StartupyWGrze.createEmptyCollection(nftType: Type<@StartupyWGrze.Collection>())
 			})
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertItemMetadataIsValid(itemId: UInt64){ 
 		let item = self.getItemRef(itemId: itemId)
 		self.assertDictEntry(*item.metadata, "_licenseId", Type<String>(), false)
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertDictEntry(_ dict:{ String: AnyStruct}?, _ key: String, _ type: Type, _ required: Bool){ 
 		if dict != nil{ 
 			self.assertValueAndType(name: key, value: (dict!)[key], type: type, required: required)
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun assertValueAndType(name: String, value: AnyStruct?, type: Type, required: Bool){ 
 		if required{ 
 			assert(value != nil, message: "Missing required value for '".concat(name).concat("'"))
@@ -598,7 +612,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDictValue(dict:{ String: AnyStruct}?, key: String, type: Type): AnyStruct?{ 
 		if dict == nil || (dict!)[key] == nil || !((dict!)[key]!).isInstance(type){ 
 			return nil
@@ -606,13 +620,13 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return (dict!)[key]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun dictToTraits(dict:{ String: AnyStruct}?, excludedNames: [String]?): MetadataViews.Traits?{ 
 		let traits = self.dictToTraitArray(dict: dict, excludedNames: excludedNames)
 		return traits.length != 0 ? MetadataViews.Traits(traits) : nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun dictToTraitArray(dict:{ String: AnyStruct}?, excludedNames: [String]?): [MetadataViews.Trait]{ 
 		if dict == nil{ 
 			return []
@@ -653,13 +667,13 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return traits
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun dictToMedias(dict:{ String: AnyStruct}?, excludedNames: [String]?): MetadataViews.Medias?{ 
 		let medias = self.dictToMediaArray(dict: dict, excludedNames: excludedNames)
 		return medias.length != 0 ? MetadataViews.Medias(medias) : nil
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun dictToMediaArray(dict:{ String: AnyStruct}?, excludedNames: [String]?): [MetadataViews.Media]{ 
 		if dict == nil{ 
 			return []
@@ -695,7 +709,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 		return medias
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mergeDicts(_ dict1:{ String: AnyStruct}?, _ dict2:{ String: AnyStruct}?):{ String: AnyStruct}?{ 
 		if dict1 == nil{ 
 			return dict2
@@ -721,7 +735,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			self.data ={} 
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createItem(name: String, description: String, thumbnail: MetadataViews.Media, metadata:{ String: AnyStruct}?, maxSupply: UInt64?, isTransferable: Bool?, royalties: [MetadataViews.Royalty]?): UInt64{ 
 			let newItemId = StartupyWGrze.nextItemId
 			StartupyWGrze.items[newItemId] <-! create Item(id: newItemId, name: name, description: description, thumbnail: thumbnail.file, metadata: metadata != nil ? metadata! :{} , maxSupply: maxSupply, isTransferable: isTransferable != nil ? isTransferable! : true, royalties: royalties)
@@ -731,7 +745,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			return newItemId
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteItem(itemId: UInt64){ 
 			pre{ 
 				StartupyWGrze.items[itemId] != nil:
@@ -744,7 +758,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			destroy item
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun lockItem(itemId: UInt64){ 
 			pre{ 
 				StartupyWGrze.items[itemId] != nil:
@@ -754,7 +768,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			item.lock()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(itemId: UInt64, isTransferable: Bool?, metadata:{ String: AnyStruct}?): @NFT{ 
 			pre{ 
 				StartupyWGrze.items[itemId] != nil:
@@ -775,7 +789,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintAndClaim(itemId: UInt64, claimId: String, isTransferable: Bool?, metadata:{ String: AnyStruct}?): @NFT{ 
 			pre{ 
 				!StartupyWGrze.claims.containsKey(claimId):
@@ -791,13 +805,13 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			return <-newNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewAdmin(receiver: Address?): @Admin{ 
 			emit NewAdminCreated(receiver: receiver)
 			return <-create Admin()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateCollectionMetadata(data:{ String: AnyStruct}){ 
 			for key in data.keys{ 
 				StartupyWGrze.metadata.insert(key: key, data[key]!)
@@ -806,7 +820,7 @@ contract StartupyWGrze: NonFungibleToken, CollecticoStandardNFT, CollectionResol
 			emit CollectionMetadataUpdated(keys: data.keys)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateDefaultRoyalties(royalties: [MetadataViews.Royalty]){ 
 			StartupyWGrze.defaultRoyalties = royalties
 		}

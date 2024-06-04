@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
@@ -279,15 +293,15 @@ contract DooverseAdminNFTStorefront{
 		// Purchase the listing, buying the token.
 		// This pays the beneficiaries and mints the token to the buyer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(
 			payment: @{FungibleToken.Vault},
 			nftCollectionCapability: Capability<&{NonFungibleToken.CollectionPublic}>
-		)
+		): Void
 		
 		// getDetails
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails
 	}
 	
@@ -317,7 +331,7 @@ contract DooverseAdminNFTStorefront{
 		// This avoids having more public variables and getter methods for them, and plays
 		// nicely with scripts (which cannot return resources).
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDetails(): ListingDetails{ 
 			return self.details
 		}
@@ -326,7 +340,7 @@ contract DooverseAdminNFTStorefront{
 		// Purchase the listing, buying the token.
 		// This pays the beneficiaries and returns the token to the buyer.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun purchase(payment: @{FungibleToken.Vault}, nftCollectionCapability: Capability<&{NonFungibleToken.CollectionPublic}>){ 
 			pre{ 
 				nftCollectionCapability.borrow() != nil:
@@ -393,19 +407,19 @@ contract DooverseAdminNFTStorefront{
 	//
 	access(all)
 	resource interface StorefrontPublic{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetIDs(): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPackIDs(setID: String): [String]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListings(setID: String): &{String: Listing}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(setID: String, packID: String): &Listing?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(setID: String, packID: String)
 	}
 	
@@ -419,7 +433,7 @@ contract DooverseAdminNFTStorefront{
 		// createListing
 		// Allows the Storefront owner to create and insert Listings.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(
 			setID: String,
 			packID: String,
@@ -429,20 +443,20 @@ contract DooverseAdminNFTStorefront{
 				}
 			],
 			paymentOptions: [
-				PaymentOption
+				DooverseAdminNFTStorefront.PaymentOption
 			]
 		): String
 		
 		// removeListing
 		// Allows the Storefront owner to remove any sale listing, acepted or not.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(setID: String, packID: String)
 		
 		// resolveListing
 		// Allows the Storefront owner to remove any sale listing, acepted or not, and resolve its puchase status.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveListing(
 			setID: String,
 			packID: String,
@@ -466,7 +480,7 @@ contract DooverseAdminNFTStorefront{
 		// getSetIDs
 		// Returns an array of set IDs.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getSetIDs(): [String]{ 
 			return self.listings.keys
 		}
@@ -474,7 +488,7 @@ contract DooverseAdminNFTStorefront{
 		// getPackIDs
 		// Returns an array of the pack IDs that are linked to the given setID.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getPackIDs(setID: String): [String]{ 
 			let setListings = self.borrowListings(setID: setID)
 			if setListings != nil{ 
@@ -486,7 +500,7 @@ contract DooverseAdminNFTStorefront{
 		// borrowListings
 		// Returns a read-only view of the listings for the given setID if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListings(setID: String): &{String: Listing}?{ 
 			if self.listings[setID] != nil{ 
 				return &self.listings[setID] as &{String: DooverseAdminNFTStorefront.Listing}?
@@ -498,7 +512,7 @@ contract DooverseAdminNFTStorefront{
 		// borrowListing
 		// Returns a read-only view of the Listing if it is contained by this collection.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowListing(setID: String, packID: String): &Listing?{ 
 			let setListings = self.borrowListings(setID: setID)
 			if setListings != nil{ 
@@ -514,7 +528,7 @@ contract DooverseAdminNFTStorefront{
 		// Anyone can call, but at present it only benefits the admin to do so.
 		// Kind purchasers can however call it if they like.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun cleanup(setID: String, packID: String){ 
 			pre{ 
 				self.listings.containsKey(setID):
@@ -535,7 +549,7 @@ contract DooverseAdminNFTStorefront{
 		// createListing
 		// Create and publish a Listing for a pack of NFTs.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createListing(setID: String, packID: String, metadatas: [{String: String}], paymentOptions: [PaymentOption]): String{ 
 			let listing <- create Listing(packID: packID, metadatas: metadatas, paymentOptions: paymentOptions, storefrontID: self.uuid)
 			
@@ -570,7 +584,7 @@ contract DooverseAdminNFTStorefront{
 		// removeListing
 		// Remove a Listing from the collection and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun removeListing(setID: String, packID: String){ 
 			let setListings <- self.listings.remove(key: setID)!
 			let listing <- setListings.remove(key: packID) ?? panic("missing Listing")
@@ -587,7 +601,7 @@ contract DooverseAdminNFTStorefront{
 		// resolveListing
 		// Remove a Listing from the collection, mark it as either purchased or un-purchased, and destroy it.
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveListing(setID: String, packID: String, wasPurchased: Bool, metadata:{ String: String}){ 
 			let setListings <- self.listings.remove(key: setID)!
 			let listing <- setListings.remove(key: packID) ?? panic("missing Listing")

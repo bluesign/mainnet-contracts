@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 
 	BloctoTokenStaking
 
@@ -178,7 +192,7 @@ contract BloctoTokenStaking{
 			self.tokensRequestedToUnstake = stakerRecord.tokensRequestedToUnstake
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun totalTokensInRecord(): UFix64{ 
 			return self.tokensStaked + self.tokensCommitted + self.tokensUnstaked
 			+ self.tokensRewarded
@@ -204,7 +218,7 @@ contract BloctoTokenStaking{
 		}
 		
 		/// Add new tokens to the system to stake during the next epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeNewTokens(_ tokens: @{FungibleToken.Vault}){ 
 			pre{ 
 				BloctoTokenStaking.stakingEnabled:
@@ -220,7 +234,7 @@ contract BloctoTokenStaking{
 		}
 		
 		/// Stake tokens that are in the tokensUnstaked bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeUnstakedTokens(amount: UFix64){ 
 			pre{ 
 				BloctoTokenStaking.stakingEnabled:
@@ -245,7 +259,7 @@ contract BloctoTokenStaking{
 		}
 		
 		/// Stake tokens that are in the tokensRewarded bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun stakeRewardedTokens(amount: UFix64){ 
 			pre{ 
 				BloctoTokenStaking.stakingEnabled:
@@ -257,7 +271,7 @@ contract BloctoTokenStaking{
 		}
 		
 		/// Request amount tokens to be removed from staking at the end of the next epoch
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun requestUnstaking(amount: UFix64){ 
 			pre{ 
 				BloctoTokenStaking.stakingEnabled:
@@ -290,7 +304,7 @@ contract BloctoTokenStaking{
 		
 		/// Requests to unstake all of the staker operators staked and committed tokens
 		/// as well as all the staked and committed tokens of all of their delegators
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unstakeAll(){ 
 			pre{ 
 				BloctoTokenStaking.stakingEnabled:
@@ -307,7 +321,7 @@ contract BloctoTokenStaking{
 		}
 		
 		/// Withdraw tokens from the unstaked bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawUnstakedTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			let stakerRecord = BloctoTokenStaking.borrowStakerRecord(self.id)
 			emit UnstakedTokensWithdrawn(stakerID: stakerRecord.id, amount: amount)
@@ -315,7 +329,7 @@ contract BloctoTokenStaking{
 		}
 		
 		/// Withdraw tokens from the rewarded bucket
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdrawRewardedTokens(amount: UFix64): @{FungibleToken.Vault}{ 
 			let stakerRecord = BloctoTokenStaking.borrowStakerRecord(self.id)
 			emit RewardTokensWithdrawn(stakerID: stakerRecord.id, amount: amount)
@@ -330,7 +344,7 @@ contract BloctoTokenStaking{
 		
 		/// A staker record is created when a BloctoPass NFT is created
 		/// It returns the resource for stakers that they can store in their account storage
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addStakerRecord(id: UInt64): @Staker{ 
 			pre{ 
 				BloctoTokenStaking.stakingEnabled:
@@ -347,7 +361,7 @@ contract BloctoTokenStaking{
 		
 		/// Starts the staking auction, the period when stakers and delegators
 		/// are allowed to perform staking related operations
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startNewEpoch(){ 
 			BloctoTokenStaking.stakingEnabled = true
 			BloctoTokenStaking.setEpoch(BloctoTokenStaking.getEpoch() + 1 as UInt64)
@@ -360,21 +374,21 @@ contract BloctoTokenStaking{
 		
 		/// Starts the staking auction, the period when stakers and delegators
 		/// are allowed to perform staking related operations
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun startStakingAuction(){ 
 			BloctoTokenStaking.stakingEnabled = true
 		}
 		
 		/// Ends the staking Auction by removing any unapproved stakers
 		/// and setting stakingEnabled to false
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun endStakingAuction(){ 
 			BloctoTokenStaking.stakingEnabled = false
 		}
 		
 		/// Called at the end of the epoch to pay rewards to staker operators
 		/// based on the tokens that they have staked
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun payRewards(_ stakerIDs: [UInt64]){ 
 			pre{ 
 				!BloctoTokenStaking.stakingEnabled:
@@ -430,7 +444,7 @@ contract BloctoTokenStaking{
 		/// Tokens that have been committed are moved to the staked bucket
 		/// Tokens that were unstaking during the last epoch are fully unstaked
 		/// Unstaking requests are filled by moving those tokens from staked to unstaking
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun moveTokens(_ stakerIDs: [UInt64]){ 
 			pre{ 
 				!BloctoTokenStaking.stakingEnabled:
@@ -465,7 +479,7 @@ contract BloctoTokenStaking{
 		}
 		
 		/// Changes the total weekly payout to a new value
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEpochTokenPayout(_ newPayout: UFix64){ 
 			BloctoTokenStaking.epochTokenPayout = newPayout
 			emit NewWeeklyPayout(newPayout: newPayout)
@@ -485,7 +499,7 @@ contract BloctoTokenStaking{
 	/// Gets an array of all the stakerIDs that are staked.
 	/// Only stakers that are participating in the current epoch
 	/// can be staked, so this is an array of all the active stakers
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakedStakerIDs(): [UInt64]{ 
 		var stakers: [UInt64] = []
 		for stakerID in BloctoTokenStaking.getStakerIDs(){ 
@@ -498,7 +512,7 @@ contract BloctoTokenStaking{
 	}
 	
 	/// Gets an slice of stakerIDs who's staking balance > 0
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakedStakerIDsSlice(start: UInt64, end: UInt64): [UInt64]{ 
 		// all staker ids
 		var allStakerIDs: [UInt64] = BloctoTokenStaking.getStakerIDs()
@@ -520,13 +534,13 @@ contract BloctoTokenStaking{
 	}
 	
 	/// Gets an array of all the staker IDs that have ever registered
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakerIDs(): [UInt64]{ 
 		return BloctoTokenStaking.stakers.keys
 	}
 	
 	/// Gets an slice of stakerIDs who's staking balance > 0
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakerIDsSlice(start: UInt64, end: UInt64): [UInt64]{ 
 		// all staker ids
 		var allStakerIDs: [UInt64] = BloctoTokenStaking.getStakerIDs()
@@ -544,31 +558,31 @@ contract BloctoTokenStaking{
 	}
 	
 	/// Gets staker id count
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakerIDCount(): Int{ 
 		return BloctoTokenStaking.stakers.keys.length
 	}
 	
 	/// Gets the token payout value for the current epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEpochTokenPayout(): UFix64{ 
 		return self.epochTokenPayout
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStakingEnabled(): Bool{ 
 		return self.stakingEnabled
 	}
 	
 	/// Gets the total number of BLT that is currently staked
 	/// by all of the staked stakers in the current epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getTotalStaked(): UFix64{ 
 		return BloctoTokenStaking.totalTokensStaked
 	}
 	
 	/// Epoch
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEpoch(): UInt64{ 
 		return self.account.storage.copy<UInt64>(from: /storage/bloctoTokenStakingEpoch)
 		?? 0 as UInt64
@@ -597,7 +611,7 @@ contract BloctoTokenStaking{
 	}
 	
 	/// staking reward records
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun hasSentStakingReward(epoch: UInt64, stakerID: UInt64): Bool{ 
 		let stakingRewardRecordsRef =
 			self.account.storage.borrow<&{String: Bool}>(

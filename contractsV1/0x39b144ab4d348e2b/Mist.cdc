@@ -1,4 +1,18 @@
-// Made by Lanford33
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	// Made by Lanford33
 //
 // Mist.cdc defines the NFT Raffle and the collections of it.
 //
@@ -127,7 +141,7 @@ contract Mist{
 			self.extraData = extraData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String{ 
 			switch self.status{ 
 				case AvailabilityStatus.notStartYet:
@@ -187,7 +201,7 @@ contract Mist{
 			self.extraData = extraData
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStatus(): String{ 
 			switch self.status{ 
 				case EligibilityStatus.eligibleForRegistering:
@@ -375,43 +389,43 @@ contract Mist{
 		access(all)
 		let extraData:{ String: AnyStruct}
 		
-		access(all)
-		fun register(account: Address, params:{ String: AnyStruct})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun register(account: Address, params:{ String: AnyStruct}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasRegistered(account: Address): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRegistrationRecords():{ Address: RegistrationRecord}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRegistrationRecord(account: Address): RegistrationRecord?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWinners():{ Address: WinnerRecord}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWinner(account: Address): WinnerRecord?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(receiver: &{NonFungibleToken.CollectionPublic}, params:{ String: AnyStruct})
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkAvailability(params:{ String: AnyStruct}): Availability
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkRegistrationEligibility(account: Address, params:{ String: AnyStruct}): Eligibility
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkClaimEligibility(account: Address, params:{ String: AnyStruct}): Eligibility
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRegistrationVerifiers():{ String: [{EligibilityVerifiers.IEligibilityVerifier}]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimVerifiers():{ String: [{EligibilityVerifiers.IEligibilityVerifier}]}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardDisplays():{ UInt64: NFTDisplay}
 	}
 	
@@ -502,7 +516,7 @@ contract Mist{
 		access(self)
 		let rewardDisplays:{ UInt64: NFTDisplay}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun register(account: Address, params:{ String: AnyStruct}){ 
 			params.insert(key: "recordUsedNFT", true)
 			let availability = self.checkAvailability(params: params)
@@ -518,32 +532,32 @@ contract Mist{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasRegistered(account: Address): Bool{ 
 			return self.registrationRecords[account] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRegistrationRecords():{ Address: RegistrationRecord}{ 
 			return self.registrationRecords
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRegistrationRecord(account: Address): RegistrationRecord?{ 
 			return self.registrationRecords[account]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWinners():{ Address: WinnerRecord}{ 
 			return self.winners
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getWinner(account: Address): WinnerRecord?{ 
 			return self.winners[account]
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun claim(receiver: &{NonFungibleToken.CollectionPublic}, params:{ String: AnyStruct}){ 
 			params.insert(key: "recordUsedNFT", true)
 			let availability = self.checkAvailability(params: params)
@@ -568,7 +582,7 @@ contract Mist{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkAvailability(params:{ String: AnyStruct}): Availability{ 
 			if self.isEnded{ 
 				return Availability(status: AvailabilityStatus.ended, extraData:{} )
@@ -599,7 +613,7 @@ contract Mist{
 			return Availability(status: AvailabilityStatus.registering, extraData:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkRegistrationEligibility(account: Address, params:{ String: AnyStruct}): Eligibility{ 
 			if let record = self.registrationRecords[account]{ 
 				return Eligibility(status: EligibilityStatus.hasRegistered, eligibleNFTs: [], extraData:{} )
@@ -608,7 +622,7 @@ contract Mist{
 			return Eligibility(status: isEligible ? EligibilityStatus.eligibleForRegistering : EligibilityStatus.notEligibleForRegistering, eligibleNFTs: [], extraData:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkClaimEligibility(account: Address, params:{ String: AnyStruct}): Eligibility{ 
 			if self.winners[account] == nil{ 
 				return Eligibility(status: EligibilityStatus.notEligibleForClaiming, eligibleNFTs: [], extraData:{} )
@@ -624,17 +638,17 @@ contract Mist{
 			return Eligibility(status: isEligible ? EligibilityStatus.eligibleForClaiming : EligibilityStatus.notEligibleForClaiming, eligibleNFTs: record.rewardTokenIDs, extraData:{} )
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRegistrationVerifiers():{ String: [{EligibilityVerifiers.IEligibilityVerifier}]}{ 
 			return self.registrationVerifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getClaimVerifiers():{ String: [{EligibilityVerifiers.IEligibilityVerifier}]}{ 
 			return self.claimVerifiers
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRewardDisplays():{ UInt64: NFTDisplay}{ 
 			return self.rewardDisplays
 		}
@@ -699,7 +713,7 @@ contract Mist{
 			panic("invalid mode: ".concat(mode.rawValue.toString()))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun draw(params:{ String: AnyStruct}){ 
 			let availability = self.checkAvailability(params: params)
 			assert(availability.status == AvailabilityStatus.drawing, message: availability.getStatus())
@@ -718,7 +732,7 @@ contract Mist{
 			emit RaffleWinnerDrawn(raffleID: self.raffleID, name: self.name, host: self.host, winner: winner, nftIdentifier: self.nftInfo.nftType.identifier, tokenIDs: [rewardTokenID])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchDraw(params:{ String: AnyStruct}){ 
 			let availability = self.checkAvailability(params: params)
 			assert(availability.status == AvailabilityStatus.drawing, message: availability.getStatus())
@@ -741,7 +755,7 @@ contract Mist{
 		}
 		
 		// private methods
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun togglePause(): Bool{ 
 			pre{ 
 				!self.isEnded:
@@ -757,7 +771,7 @@ contract Mist{
 		}
 		
 		// deposit more NFT into the Raffle
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(token: @{NonFungibleToken.NFT}, display: NFTDisplay){ 
 			pre{ 
 				!self.isEnded:
@@ -769,7 +783,7 @@ contract Mist{
 			self.rewardDisplays[tokenID] = display
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun end(receiver: &{NonFungibleToken.CollectionPublic}){ 
 			self.isEnded = true
 			self.isPaused = true
@@ -824,7 +838,7 @@ contract Mist{
 	
 	access(all)
 	resource interface IMistPauser{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleContractPause(): Bool
 	}
 	
@@ -832,7 +846,7 @@ contract Mist{
 	resource Admin: IMistPauser{ 
 		// Use to pause the creation of new Raffle
 		// If we want to migrate the contracts, we can make sure no more Raffle in old contracts be created.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun toggleContractPause(): Bool{ 
 			Mist.isPaused = !Mist.isPaused
 			return Mist.isPaused
@@ -841,10 +855,10 @@ contract Mist{
 	
 	access(all)
 	resource interface IRaffleCollectionPublic{ 
-		access(all)
-		fun getAllRaffles():{ UInt64: &{IRafflePublic}}
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getAllRaffles():{ UInt64: &{Mist.IRafflePublic}}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicRaffleRef(raffleID: UInt64): &{IRafflePublic}?
 	}
 	
@@ -853,7 +867,7 @@ contract Mist{
 		access(all)
 		var raffles: @{UInt64: Raffle}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createRaffle(name: String, description: String, host: Address, image: String?, url: String?, startAt: UFix64?, endAt: UFix64?, registrationEndAt: UFix64, numberOfWinners: UInt64, nftInfo: NFTInfo, collection: @{NonFungibleToken.Collection}, registrationVerifyMode: EligibilityVerifiers.VerifyMode, claimVerifyMode: EligibilityVerifiers.VerifyMode, registrationVerifiers: [{EligibilityVerifiers.IEligibilityVerifier}], claimVerifiers: [{EligibilityVerifiers.IEligibilityVerifier}], extraData:{ String: AnyStruct}): UInt64{ 
 			pre{ 
 				registrationVerifiers.length <= 1:
@@ -887,7 +901,7 @@ contract Mist{
 			return raffleID
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAllRaffles():{ UInt64: &{IRafflePublic}}{ 
 			let raffleRefs:{ UInt64: &{IRafflePublic}} ={} 
 			for raffleID in self.raffles.keys{ 
@@ -897,17 +911,17 @@ contract Mist{
 			return raffleRefs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowPublicRaffleRef(raffleID: UInt64): &{IRafflePublic}?{ 
 			return &self.raffles[raffleID] as &{IRafflePublic}?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowRaffleRef(raffleID: UInt64): &Raffle?{ 
 			return &self.raffles[raffleID] as &Raffle?
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteRaffle(raffleID: UInt64, receiver: &{NonFungibleToken.CollectionPublic}){ 
 			// Clean the Raffle before make it ownerless
 			let raffleRef = self.borrowRaffleRef(raffleID: raffleID) ?? panic("This raffle does not exist")
@@ -921,7 +935,7 @@ contract Mist{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEmptyRaffleCollection(): @RaffleCollection{ 
 		return <-create RaffleCollection()
 	}

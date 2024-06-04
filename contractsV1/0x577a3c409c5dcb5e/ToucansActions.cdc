@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
@@ -10,10 +24,10 @@ access(all)
 contract ToucansActions{ 
 	access(all)
 	struct interface Action{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String
 	}
 	
@@ -41,12 +55,12 @@ contract ToucansActions{
 		access(all)
 		let readableAmount: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Withdraw ".concat(self.readableAmount).concat(" ").concat(self.tokenSymbol).concat(" tokens from the treasury to ").concat(ToucansUtils.getFind(((self.recipientVault.borrow()!).owner!).address))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "Withdraw"
 		}
@@ -81,12 +95,12 @@ contract ToucansActions{
 		access(all)
 		let totalReadableAmount: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Withdraw a total of ".concat(self.totalReadableAmount).concat(" ").concat(self.tokenSymbol).concat(" tokens from the treasury to ").concat(self.amounts.keys.length.toString()).concat(" total wallets")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "BatchWithdraw"
 		}
@@ -128,12 +142,12 @@ contract ToucansActions{
 		access(all)
 		let extra:{ String: AnyStruct}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Withdraw ".concat(self.nftIDs.length.toString()).concat(" ").concat(self.collectionName).concat(" NFT(s) from the treasury to ").concat(ToucansUtils.getFind(self.recipientCollection.address))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "WithdrawNFTs"
 		}
@@ -170,12 +184,12 @@ contract ToucansActions{
 		access(all)
 		let readableAmount: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Mint ".concat(self.readableAmount).concat(" ").concat(self.tokenSymbol).concat(" tokens to ").concat(ToucansUtils.getFind(((self.recipientVault.borrow()!).owner!).address))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "Mint"
 		}
@@ -203,12 +217,12 @@ contract ToucansActions{
 		access(all)
 		let totalReadableAmount: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Mint a total of ".concat(self.totalReadableAmount).concat(" ").concat(self.tokenSymbol).concat(" tokens to ").concat(self.amounts.keys.length.toString()).concat(" total wallets")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "BatchMint"
 		}
@@ -237,12 +251,12 @@ contract ToucansActions{
 		access(all)
 		let readableAmount: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Mint ".concat(self.readableAmount).concat(" ").concat(self.tokenSymbol).concat(" tokens to the Treasury")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "MintToTreasury"
 		}
@@ -260,12 +274,12 @@ contract ToucansActions{
 		access(all)
 		let signer: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Add ".concat(ToucansUtils.getFind(self.signer)).concat(" as a signer to the Treasury")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "AddSigner"
 		}
@@ -284,12 +298,12 @@ contract ToucansActions{
 		access(all)
 		let signer: Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Remove ".concat(ToucansUtils.getFind(self.signer)).concat(" as a signer from the Treasury")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "RemoveSigner"
 		}
@@ -305,12 +319,12 @@ contract ToucansActions{
 		access(all)
 		let threshold: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Update the threshold of signers needed to execute an action in the Treasury to ".concat(self.threshold.toString())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "UpdateThreshold"
 		}
@@ -332,12 +346,12 @@ contract ToucansActions{
 		access(all)
 		let readableAmount: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Burn ".concat(self.readableAmount).concat(" ").concat(self.tokenSymbol).concat(" tokens from the Treasury")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "Burn"
 		}
@@ -367,12 +381,12 @@ contract ToucansActions{
 		access(all)
 		let unlockTime: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Lock ".concat(self.readableAmount).concat(" ").concat(self.tokenSymbol).concat(" tokens for ").concat(ToucansUtils.getFind(self.recipient)).concat(" until ").concat(self.unlockTime.toString())
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "LockTokens"
 		}
@@ -401,12 +415,12 @@ contract ToucansActions{
 		access(all)
 		let readableMin: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Stake ".concat(self.readableAmount).concat(" FLOW ").concat(" tokens by swapping them for a minimum of ").concat(self.readableMin).concat(" stFlow.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "StakeFlow"
 		}
@@ -434,12 +448,12 @@ contract ToucansActions{
 		access(all)
 		let readableMin: String
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIntent(): String{ 
 			return "Unstake FLOW".concat(" tokens by swapping ").concat(self.readableAmount).concat(" stFlow for a minimum of ").concat(self.readableMin).concat(" FLOW.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTitle(): String{ 
 			return "UnstakeFlow"
 		}

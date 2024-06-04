@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract StarlyRoyalties{ 
 	access(all)
 	struct Royalty{ 
@@ -35,7 +49,7 @@ contract StarlyRoyalties{
 	access(all)
 	let EditorProxyPublicPath: PublicPath
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRoyalties(collectionID: String, starlyID: String): [Royalty]{ 
 		let royalties = [self.starlyRoyalty]
 		if let collectionRoyalty = self.collectionRoyalties[collectionID]{ 
@@ -49,17 +63,17 @@ contract StarlyRoyalties{
 		return royalties
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getStarlyRoyalty(): Royalty{ 
 		return self.starlyRoyalty
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCollectionRoyalty(collectionID: String): Royalty?{ 
 		return self.collectionRoyalties[collectionID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getMinterRoyalty(collectionID: String, starlyID: String): Royalty?{ 
 		if let minterRoyaltiesForCollection = self.minterRoyalties[collectionID]{ 
 			return minterRoyaltiesForCollection[starlyID]
@@ -69,40 +83,40 @@ contract StarlyRoyalties{
 	
 	access(all)
 	resource interface IEditor{ 
-		access(all)
-		fun setStarlyRoyalty(address: Address, cut: UFix64)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setStarlyRoyalty(address: Address, cut: UFix64): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionRoyalty(collectionID: String, address: Address, cut: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteCollectionRoyalty(collectionID: String)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterRoyalty(collectionID: String, starlyID: String, address: Address, cut: UFix64)
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteMinterRoyalty(collectionID: String, starlyID: String)
 	}
 	
 	access(all)
 	resource Editor: IEditor{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStarlyRoyalty(address: Address, cut: UFix64){ 
 			StarlyRoyalties.starlyRoyalty = Royalty(address: address, cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionRoyalty(collectionID: String, address: Address, cut: UFix64){ 
 			StarlyRoyalties.collectionRoyalties.insert(key: collectionID, Royalty(address: address, cut: cut))
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteCollectionRoyalty(collectionID: String){ 
 			StarlyRoyalties.collectionRoyalties.remove(key: collectionID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterRoyalty(collectionID: String, starlyID: String, address: Address, cut: UFix64){ 
 			if !StarlyRoyalties.minterRoyalties.containsKey(collectionID){ 
 				StarlyRoyalties.minterRoyalties.insert(key: collectionID,{ starlyID: Royalty(address: address, cut: cut)})
@@ -111,7 +125,7 @@ contract StarlyRoyalties{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteMinterRoyalty(collectionID: String, starlyID: String){ 
 			StarlyRoyalties.minterRoyalties[collectionID]?.remove(key: starlyID)
 		}
@@ -119,8 +133,8 @@ contract StarlyRoyalties{
 	
 	access(all)
 	resource interface EditorProxyPublic{ 
-		access(all)
-		fun setEditorCapability(cap: Capability<&Editor>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setEditorCapability(cap: Capability<&StarlyRoyalties.Editor>): Void
 	}
 	
 	access(all)
@@ -128,32 +142,32 @@ contract StarlyRoyalties{
 		access(self)
 		var editorCapability: Capability<&Editor>?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setEditorCapability(cap: Capability<&Editor>){ 
 			self.editorCapability = cap
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setStarlyRoyalty(address: Address, cut: UFix64){ 
 			((self.editorCapability!).borrow()!).setStarlyRoyalty(address: address, cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setCollectionRoyalty(collectionID: String, address: Address, cut: UFix64){ 
 			((self.editorCapability!).borrow()!).setCollectionRoyalty(collectionID: collectionID, address: address, cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteCollectionRoyalty(collectionID: String){ 
 			((self.editorCapability!).borrow()!).deleteCollectionRoyalty(collectionID: collectionID)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMinterRoyalty(collectionID: String, starlyID: String, address: Address, cut: UFix64){ 
 			((self.editorCapability!).borrow()!).setMinterRoyalty(collectionID: collectionID, starlyID: starlyID, address: address, cut: cut)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deleteMinterRoyalty(collectionID: String, starlyID: String){ 
 			((self.editorCapability!).borrow()!).deleteMinterRoyalty(collectionID: collectionID, starlyID: starlyID)
 		}
@@ -163,14 +177,14 @@ contract StarlyRoyalties{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEditorProxy(): @EditorProxy{ 
 		return <-create EditorProxy()
 	}
 	
 	access(all)
 	resource Admin{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createNewEditor(): @Editor{ 
 			return <-create Editor()
 		}

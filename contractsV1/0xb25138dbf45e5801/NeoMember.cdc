@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -189,17 +203,17 @@ contract NeoMember: NonFungibleToken{
 			self.stickers <- NeoSticker.createEmptyCollection(nftType: Type<@NeoSticker.Collection>()) as! @NeoSticker.Collection
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getAchievements(): [NeoMotorcycle.Achievement]{ 
 			return self.achievements
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMetadata():{ String: String}{ 
 			return self.metadata
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getStickerViews(): [NeoViews.StickerView]{ 
 			let displays: [NeoViews.StickerView] = []
 			for id in self.stickers.getIDs(){ 
@@ -232,7 +246,7 @@ contract NeoMember: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMediaHash(): String{ 
 			if self.mediaHash != nil{ 
 				return self.mediaHash!
@@ -241,17 +255,17 @@ contract NeoMember: NonFungibleToken{
 			return dummyHashes[self.role]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getMediaType(): String{ 
 			return self.mediaType ?? "image"
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getThumbnailHash(): String{ 
 			return self.thumbnailHash ?? self.getMediaHash()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMedia(mediaHash: String, mediaType: String, thumbnailHash: String){ 
 			if self.mediaHash != nil{ 
 				panic("already set")
@@ -269,13 +283,13 @@ contract NeoMember: NonFungibleToken{
 				}
 				*/
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addAchievement(_ achievement: NeoMotorcycle.Achievement){ 
 			emit AchievementAdded(teamId: self.id, achievement: achievement.name)
 			self.achievements.append(achievement)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTeamId(): UInt64{ 
 			return (self.motorcyclePointer.resolve()!).id
 		}
@@ -317,7 +331,7 @@ contract NeoMember: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @NFT
 			let id: UInt64 = token.id
 			let motorcycle = token.motorcyclePointer.resolve()!
@@ -329,7 +343,7 @@ contract NeoMember: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setMedia(id: UInt64, mediaHash: String, mediaType: String, thumbnailHash: String){ 
 			let item = self.borrow(id)
 			item.setMedia(mediaHash: mediaHash, mediaType: mediaType, thumbnailHash: thumbnailHash)
@@ -370,7 +384,7 @@ contract NeoMember: NonFungibleToken{
 			return exampleNFT
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrow(_ id: UInt64): &NeoMember.NFT{ 
 			let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 			return ref as! &NeoMember.NFT

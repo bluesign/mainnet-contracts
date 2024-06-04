@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
 	Description: Smart Contract for Managing the 710 Phantom NFT Drop
 
 	author: Bilal Shahid bilal@zay.codes
@@ -92,7 +106,7 @@ contract SevenOneZeroPhantomNFTDrop{
 		return self.accessSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun batchIncrementRegularPhantomCount(
 		adminRef: &SevenOneZeroPhantomNFT.Admin,
 		nftIDs: [
@@ -125,7 +139,7 @@ contract SevenOneZeroPhantomNFTDrop{
 		return accessIDs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun batchIncrementAccessPhantomCount(
 		adminRef: &SevenOneZeroPhantomNFT.Admin,
 		nftIDs: [
@@ -158,37 +172,37 @@ contract SevenOneZeroPhantomNFTDrop{
 		return accessIDs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessPhantomIDForNFT(nftID: UInt64): UInt32?{ 
 		return self.accessPhantomIDs[nftID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRegularPhantomIDForNFT(nftID: UInt64): UInt32?{ 
 		return self.regularPhantomIDs[nftID]
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRegularPhantomSupply(): UInt32{ 
 		return self.regularSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getRegularPhantomSaleSupply(): UInt32{ 
 		return self.regularSaleSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessPhantomSupply(): UInt32{ 
 		return self.accessSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getAccessPhantomSaleSupply(): UInt32{ 
 		return self.accessSaleSupply
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getIsSessionIDMinted(sessionID: String): Bool{ 
 		return self.sessionIDsMinted[sessionID] ?? false
 	}

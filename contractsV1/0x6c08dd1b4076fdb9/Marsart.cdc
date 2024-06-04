@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 // Marsart
 // NFT items for Marsart!
@@ -116,18 +130,18 @@ contract Marsart: NonFungibleToken{
 	access(all)
 	resource interface MarsartCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
-		access(all)
-		fun depositBatch(cardCollection: @{NonFungibleToken.Collection})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun depositBatch(cardCollection: @{NonFungibleToken.Collection}): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getIDs(): [UInt64]
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMarsart(id: UInt64): &Marsart.NFT?{ 
 			// If the result isn't nil, the id of the returned reference
 			// should be the same as the argument to the function
@@ -160,7 +174,7 @@ contract Marsart: NonFungibleToken{
 		// Takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @Marsart.NFT
 			let id: UInt64 = token.id
 			
@@ -173,7 +187,7 @@ contract Marsart: NonFungibleToken{
 		// depositBatch
 		// This is primarily called by an Admin to
 		// deposit newly minted Cards into this Collection.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun depositBatch(cardCollection: @{NonFungibleToken.Collection}){ 
 			pre{ 
 				cardCollection.getIDs().length <= 100:
@@ -208,7 +222,7 @@ contract Marsart: NonFungibleToken{
 		// Gets a reference to an NFT in the collection as a Marsart,
 		// exposing all of its fields (including the typeID).
 		// This is safe as there are no functions that can be called on the Marsart.
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMarsart(id: UInt64): &Marsart.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				let ref = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
@@ -254,7 +268,7 @@ contract Marsart: NonFungibleToken{
 		// mintNFT
 		// Mints a new NFT with a new ID
 		// and deposit it in the recipients collection using their collection reference
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, name: String, artist: String, artistIntroduction: String, artworkIntroduction: String, typeId: UInt64, type: String, description: String, ipfsLink: String, MD5Hash: String, serialNumber: UInt32, totalNumber: UInt32){ 
 			Marsart.totalSupply = Marsart.totalSupply + 1 as UInt64
 			emit Minted(id: Marsart.totalSupply, name: name, artist: artist, artistIntroduction: artistIntroduction, artworkIntroduction: artworkIntroduction, typeId: typeId, type: type, description: description, ipfsLink: ipfsLink, MD5Hash: MD5Hash, serialNumber: serialNumber, totalNumber: totalNumber)

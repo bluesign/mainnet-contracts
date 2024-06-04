@@ -1,4 +1,18 @@
 /*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	/*
  * Copyright (C) Wayports, Inc.
  *
  * SPDX-License-Identifier: (MIT)
@@ -25,10 +39,10 @@ contract WRLEvent{
 	//
 	access(all)
 	resource interface Validable{ 
-		access(all)
-		fun validate()
+		access(TMP_ENTITLEMENT_OWNER)
+		fun validate(): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPenalty(participant: Address, time: UInt64)
 	}
 	
@@ -38,8 +52,8 @@ contract WRLEvent{
 	//
 	access(all)
 	resource interface ResultSetter{ 
-		access(all)
-		fun setResults(stands:{ Address: UInt64})
+		access(TMP_ENTITLEMENT_OWNER)
+		fun setResults(stands:{ Address: UInt64}): Void
 	}
 	
 	// GetEventInfo
@@ -48,8 +62,8 @@ contract WRLEvent{
 	//
 	access(all)
 	resource interface GetEventInfo{ 
-		access(all)
-		fun getEventInfo(): EventInfo
+		access(TMP_ENTITLEMENT_OWNER)
+		fun getEventInfo(): WRLEvent.EventInfo
 	}
 	
 	// ValidatorReceiver
@@ -58,8 +72,8 @@ contract WRLEvent{
 	//
 	access(all)
 	resource interface ValidatorReceiver{ 
-		access(all)
-		fun receiveValidator(cap: Capability<&WRLEvent.Event>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun receiveValidator(cap: Capability<&WRLEvent.Event>): Void
 	}
 	
 	// EventViewerReceiver
@@ -68,10 +82,10 @@ contract WRLEvent{
 	//
 	access(all)
 	resource interface EventViewerReceiver{ 
-		access(all)
-		fun receiveEventViewer(cap: Capability<&WRLEvent.Event>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun receiveEventViewer(cap: Capability<&WRLEvent.Event>): Void
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventInfo(): EventInfo
 	}
 	
@@ -81,8 +95,8 @@ contract WRLEvent{
 	//
 	access(all)
 	resource interface ResultSetterReceiver{ 
-		access(all)
-		fun receiveResultSetter(cap: Capability<&WRLEvent.Event>)
+		access(TMP_ENTITLEMENT_OWNER)
+		fun receiveResultSetter(cap: Capability<&WRLEvent.Event>): Void
 	}
 	
 	// EventInfo
@@ -208,7 +222,7 @@ contract WRLEvent{
 		// This function updated the race stands, not allowing the update to happen
 		// if it's already been updated or if the race is not finished yet
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setResults(stands:{ Address: UInt64}){ 
 			pre{ 
 				self.finished:
@@ -224,7 +238,7 @@ contract WRLEvent{
 		// Adds a time penalty to a given participant. The penalty is applied to the finalStands dictionary
 		// and also to the penalties dictionary in order to keep track of all the penalties applied on a given event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPenalty(participant: Address, time: UInt64){ 
 			pre{ 
 				// The address must be among the address of the final stands
@@ -242,7 +256,7 @@ contract WRLEvent{
 		// validate
 		// Increase the validation counter by 1 unit
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun validate(){ 
 			pre{ 
 				self.resultsUpdated:
@@ -254,7 +268,7 @@ contract WRLEvent{
 		// end
 		// Sets the finished flag to true indicating that the event is over
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun end(){ 
 			pre{ 
 				!self.finished:
@@ -266,7 +280,7 @@ contract WRLEvent{
 		// sortByTime
 		// Returns an array of addresses sorted by finishing time of all participants
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun sortByTime(): [Address]{ 
 			pre{ 
 				self.resultsUpdated:
@@ -292,7 +306,7 @@ contract WRLEvent{
 		// getEventInfo
 		// Returns all fields of the Event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventInfo(): EventInfo{ 
 			return EventInfo(self.name, self.baseReward, self.rewards, self.participants, self.finished, self.validations, self.resultsUpdated, self.finalStands, self.penalties)
 		}
@@ -316,7 +330,7 @@ contract WRLEvent{
 		// receiveEventViewer
 		// Receives the capability that will be used to return the event info
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun receiveEventViewer(cap: Capability<&WRLEvent.Event>){ 
 			pre{ 
 				cap.borrow() != nil:
@@ -328,7 +342,7 @@ contract WRLEvent{
 		// getEventInfo
 		// Uses the received capability to return the information about an Event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEventInfo(): EventInfo{ 
 			pre{ 
 				self.eventInfoCapability != nil:
@@ -357,7 +371,7 @@ contract WRLEvent{
 		// receiveValidator
 		// Receives and updates the validateEventCapability
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun receiveValidator(cap: Capability<&WRLEvent.Event>){ 
 			pre{ 
 				cap.borrow() != nil:
@@ -369,7 +383,7 @@ contract WRLEvent{
 		// validateEvent
 		// Uses the received capability to validate the Event by increasing the validations counter
 		// 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun validateEvent(){ 
 			pre{ 
 				self.validateEventCapability != nil:
@@ -383,7 +397,7 @@ contract WRLEvent{
 		// Takes a participant address and an amount of time to be added to the finishing time
 		// of that participant, in order to penalize for any incidents that took place in the Event
 		//
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addPenalty(participant: Address, time: UInt64){ 
 			pre{ 
 				self.validateEventCapability != nil:
@@ -411,7 +425,7 @@ contract WRLEvent{
 		
 		// receiveResultSetter
 		// Receives and stores the capability that allows interaction with Event resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun receiveResultSetter(cap: Capability<&WRLEvent.Event>){ 
 			pre{ 
 				cap.borrow() != nil:
@@ -423,7 +437,7 @@ contract WRLEvent{
 		// setResults
 		// Receives a dictionary containing the participant address and the time that participant
 		// took to finish the race as the value and sets it as the Event finalStands
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun setResults(results:{ Address: UInt64}){ 
 			pre{ 
 				self.resultSetter != nil:
@@ -439,7 +453,7 @@ contract WRLEvent{
 	// event resources, therefore the only one able to delegate Validators and ResultSetters
 	access(all)
 	resource Administrator{ 
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createEvent(
 			eventName: String,
 			participants: [
@@ -462,7 +476,7 @@ contract WRLEvent{
 	// createSteward
 	// Creates a new instance of Steward resource returns it
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createSteward(): @Steward{ 
 		return <-create Steward()
 	}
@@ -470,7 +484,7 @@ contract WRLEvent{
 	// createEventViewer
 	// Creates a new instance of EventViewer resource and returns it
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createEventViewer(): @EventViewer{ 
 		return <-create EventViewer()
 	}
@@ -478,7 +492,7 @@ contract WRLEvent{
 	// createOracle
 	// Creates a new instance of Oracle resource and returns it
 	//
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createOracle(): @Oracle{ 
 		return <-create Oracle()
 	}

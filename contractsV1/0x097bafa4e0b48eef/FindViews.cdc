@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -66,10 +80,10 @@ contract FindViews{
 		access(all)
 		var balance: UFix64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ view: Type): AnyStruct?
 	}
 	
@@ -167,50 +181,50 @@ contract FindViews{
 		access(all)
 		let id: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ type: Type): AnyStruct?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUID(): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun owner(): Address
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun valid(): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViewResolver(): &{ViewResolver.Resolver}
 		
 		//There are just convenience functions for shared views in the standard
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(): MetadataViews.Royalties
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalRoyaltiesCut(): UFix64
 		
 		//Requred views
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkSoulBound(): Bool
 	}
 	
 	//An interface to say that this pointer can withdraw
 	access(all)
 	struct interface AuthPointer{ 
-		access(all)
-		fun withdraw(): @AnyResource
+		access(TMP_ENTITLEMENT_OWNER)
+		fun withdraw(): @{NonFungibleToken.NFT}
 	}
 	
 	access(all)
@@ -240,27 +254,27 @@ contract FindViews{
 			self.itemType = viewResolver.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ type: Type): AnyStruct?{ 
 			return self.getViewResolver().resolveView(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUID(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return self.getViewResolver().getViews()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun owner(): Address{ 
 			return self.cap.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalRoyaltiesCut(): UFix64{ 
 			var total = 0.0
 			for royalty in self.getRoyalty().getRoyalties(){ 
@@ -269,7 +283,7 @@ contract FindViews{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(): MetadataViews.Royalties{ 
 			if let v = MetadataViews.getRoyalties(self.getViewResolver()){ 
 				return v
@@ -277,7 +291,7 @@ contract FindViews{
 			return MetadataViews.Royalties([])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun valid(): Bool{ 
 			if !self.cap.check() || !(self.cap.borrow()!).getIDs().contains(self.id){ 
 				return false
@@ -285,17 +299,17 @@ contract FindViews{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type{ 
 			return self.itemType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViewResolver(): &{ViewResolver.Resolver}{ 
 			return self.cap.borrow()?.borrowViewResolver(id: self.id)! ?? panic("The capability of view pointer is not linked.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display{ 
 			if let v = MetadataViews.getDisplay(self.getViewResolver()){ 
 				return v
@@ -303,7 +317,7 @@ contract FindViews{
 			panic("MetadataViews Display View is not implemented on this NFT.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			if let v = MetadataViews.getNFTCollectionData(self.getViewResolver()){ 
 				return v
@@ -311,13 +325,13 @@ contract FindViews{
 			panic("MetadataViews NFTCollectionData View is not implemented on this NFT.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkSoulBound(): Bool{ 
 			return FindViews.checkSoulBound(self.getViewResolver())
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getNounce(_ viewResolver: &{ViewResolver.Resolver}): UInt64{ 
 		if let nounce = viewResolver.resolveView(Type<FindViews.Nounce>()){ 
 			if let v = nounce as? FindViews.Nounce{ 
@@ -358,27 +372,27 @@ contract FindViews{
 			self.itemType = viewResolver.getType()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViewResolver(): &{ViewResolver.Resolver}{ 
 			return self.cap.borrow()?.borrowViewResolver(id: self.id)! ?? panic("The capability of view pointer is not linked.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun resolveView(_ type: Type): AnyStruct?{ 
 			return self.getViewResolver().resolveView(type)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getUUID(): UInt64{ 
 			return self.uuid
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getViews(): [Type]{ 
 			return self.getViewResolver().getViews()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun valid(): Bool{ 
 			if !self.cap.check() || !(self.cap.borrow()!).getIDs().contains(self.id){ 
 				return false
@@ -392,7 +406,7 @@ contract FindViews{
 			return true
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getTotalRoyaltiesCut(): UFix64{ 
 			var total = 0.0
 			for royalty in self.getRoyalty().getRoyalties(){ 
@@ -401,7 +415,7 @@ contract FindViews{
 			return total
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRoyalty(): MetadataViews.Royalties{ 
 			if let v = MetadataViews.getRoyalties(self.getViewResolver()){ 
 				return v
@@ -409,7 +423,7 @@ contract FindViews{
 			return MetadataViews.Royalties([])
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getDisplay(): MetadataViews.Display{ 
 			if let v = MetadataViews.getDisplay(self.getViewResolver()){ 
 				return v
@@ -417,7 +431,7 @@ contract FindViews{
 			panic("MetadataViews Display View is not implemented on this NFT.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getNFTCollectionData(): MetadataViews.NFTCollectionData{ 
 			if let v = MetadataViews.getNFTCollectionData(self.getViewResolver()){ 
 				return v
@@ -425,7 +439,7 @@ contract FindViews{
 			panic("MetadataViews NFTCollectionData View is not implemented on this NFT.")
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun withdraw(): @{NonFungibleToken.NFT}{ 
 			if !self.cap.check(){ 
 				panic("The pointer capability is invalid.")
@@ -433,7 +447,7 @@ contract FindViews{
 			return <-(self.cap.borrow()!).withdraw(withdrawID: self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun deposit(_ nft: @{NonFungibleToken.NFT}){ 
 			if !self.cap.check(){ 
 				panic("The pointer capablity is invalid.")
@@ -441,23 +455,23 @@ contract FindViews{
 			(self.cap.borrow()!).deposit(token: <-nft)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun owner(): Address{ 
 			return self.cap.address
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getItemType(): Type{ 
 			return self.itemType
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun checkSoulBound(): Bool{ 
 			return FindViews.checkSoulBound(self.getViewResolver())
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun createViewReadPointer(address: Address, path: PublicPath, id: UInt64): ViewReadPointer{ 
 		let cap = getAccount(address).capabilities.get<&{ViewResolver.ResolverCollection}>(path)
 		let pointer = FindViews.ViewReadPointer(cap: cap!, id: id)
@@ -484,7 +498,7 @@ contract FindViews{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun checkSoulBound(_ viewResolver: &{ViewResolver.Resolver}): Bool{ 
 		if let soulBound = viewResolver.resolveView(Type<FindViews.SoulBound>()){ 
 			if let v = soulBound as? FindViews.SoulBound{ 
@@ -494,7 +508,7 @@ contract FindViews{
 		return false
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getDapperAddress(): Address{ 
 		switch FindViews.account.address.toString(){ 
 			case "0x097bafa4e0b48eef":

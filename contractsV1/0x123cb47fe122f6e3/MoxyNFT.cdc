@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -101,12 +115,12 @@ contract MoxyNFT: NonFungibleToken{
 			self.edition = edition
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEdition(): Edition{ 
 			return MoxyNFT.editions[self.editionId]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCid(): String{ 
 			return self.getEdition().cid
 		}
@@ -164,33 +178,33 @@ contract MoxyNFT: NonFungibleToken{
 	access(all)
 	resource interface MoxyNFTCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCatalogsInfo():{ UInt64: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionsInfo():{ UInt64: UInt64}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCatalogTotal(catalogId: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionTotal(editionId: UInt64): UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasCatalog(catalogId: UInt64): Bool
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasEdition(editionId: UInt64): Bool
 		
-		access(all)
-		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
+		access(TMP_ENTITLEMENT_OWNER)
+		fun borrowNFT(id: UInt64): &{NonFungibleToken.NFT}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoxyNFT(id: UInt64): &MoxyNFT.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -257,7 +271,7 @@ contract MoxyNFT: NonFungibleToken{
 		access(all)
 		var socials:{ String: MetadataViews.ExternalURL}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getInfo(): CatalogInfo{ 
 			return CatalogInfo(id: self.id, name: self.name, description: self.description, externalURL: self.externalURL, squareImage: self.squareImage, bannerImage: self.bannerImage, socials: self.socials)
 		}
@@ -341,7 +355,7 @@ contract MoxyNFT: NonFungibleToken{
 		// deposit takes a NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @MoxyNFT.NFT
 			let id: UInt64 = token.id
 			self.registerToken(catalogId: token.catalogId, editionId: token.editionId)
@@ -352,7 +366,7 @@ contract MoxyNFT: NonFungibleToken{
 			destroy oldToken
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun registerToken(catalogId: UInt64, editionId: UInt64){ 
 			if self.catalogs[catalogId] == nil{ 
 				self.catalogs[catalogId] = 0
@@ -364,7 +378,7 @@ contract MoxyNFT: NonFungibleToken{
 			self.editions[editionId] = self.editions[editionId]! + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun unregisterToken(catalogId: UInt64, editionId: UInt64){ 
 			self.catalogs[catalogId] = self.catalogs[catalogId]! - 1
 			self.editions[editionId] = self.editions[editionId]! - 1
@@ -382,17 +396,17 @@ contract MoxyNFT: NonFungibleToken{
 			return self.ownedNFTs.keys
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCatalogsInfo():{ UInt64: UInt64}{ 
 			return self.catalogs
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionsInfo():{ UInt64: UInt64}{ 
 			return self.editions
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getCatalogTotal(catalogId: UInt64): UInt64{ 
 			if self.catalogs[catalogId] == nil{ 
 				return 0
@@ -400,7 +414,7 @@ contract MoxyNFT: NonFungibleToken{
 			return self.catalogs[catalogId]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getEditionTotal(editionId: UInt64): UInt64{ 
 			if self.editions[editionId] == nil{ 
 				return 0
@@ -408,12 +422,12 @@ contract MoxyNFT: NonFungibleToken{
 			return self.editions[editionId]!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasCatalog(catalogId: UInt64): Bool{ 
 			return self.catalogs[catalogId] != nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasEdition(editionId: UInt64): Bool{ 
 			return self.editions[editionId] != nil
 		}
@@ -425,7 +439,7 @@ contract MoxyNFT: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowMoxyNFT(id: UInt64): &MoxyNFT.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -481,22 +495,22 @@ contract MoxyNFT: NonFungibleToken{
 		access(all)
 		var currentEdition: UInt64
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun editionMinted(){ 
 			self.currentEdition = self.currentEdition + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasFinished(): Bool{ 
 			return self.currentEdition > (MoxyNFT.editions[self.editionId]!).maxEdition
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun hasPendings(): Bool{ 
 			return !self.hasFinished()
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun getRemainings(): UInt64{ 
 			return (MoxyNFT.editions[self.editionId]!).maxEdition - (self.currentEdition - 1)
 		}
@@ -548,7 +562,7 @@ contract MoxyNFT: NonFungibleToken{
 			MoxyNFT.editionsTotalSupply[editionId] = MoxyNFT.editionsTotalSupply[editionId]! + 1
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun batchMintNFT(recipient: &{NonFungibleToken.CollectionPublic}, catalogId: UInt64, name: String, description: String, thumbnail: String, cid: String, rarityDescription: String, royalties: [MetadataViews.Royalty], maxEdition: UInt64){ 
 			pre{ 
 				MoxyNFT.mintRequest == nil:
@@ -561,7 +575,7 @@ contract MoxyNFT: NonFungibleToken{
 			self.processMintRequest(quantity: 100)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun processMintRequest(quantity: UInt64){ 
 			pre{ 
 				MoxyNFT.mintRequest != nil:
@@ -584,7 +598,7 @@ contract MoxyNFT: NonFungibleToken{
 			}
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addCatalog(name: String, description: String, externalURL: String, squareImage: String, bannerImage: String, socials:{ String: MetadataViews.ExternalURL}){ 
 			MoxyNFT.catalogListIndex = MoxyNFT.catalogListIndex + 1
 			let col = Catalog(id: MoxyNFT.catalogListIndex, name: name, description: description, externalURL: externalURL, squareImage: squareImage, bannerImage: bannerImage, socials: socials)
@@ -593,7 +607,7 @@ contract MoxyNFT: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCatalog(id: UInt64): CatalogInfo?{ 
 		if MoxyNFT.catalogList[id] == nil{ 
 			return nil
@@ -601,7 +615,7 @@ contract MoxyNFT: NonFungibleToken{
 		return (MoxyNFT.catalogList[id]!).getInfo()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getCatalogTotalSupply(catalogId: UInt64): UInt64{ 
 		if MoxyNFT.catalogsTotalSupply[catalogId] == nil{ 
 			return 0
@@ -609,7 +623,7 @@ contract MoxyNFT: NonFungibleToken{
 		return MoxyNFT.catalogsTotalSupply[catalogId]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getEditionTotalSupply(editionId: UInt64): UInt64{ 
 		if MoxyNFT.editionsTotalSupply[editionId] == nil{ 
 			return 0
@@ -617,7 +631,7 @@ contract MoxyNFT: NonFungibleToken{
 		return MoxyNFT.editionsTotalSupply[editionId]!
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun isNFTMiningInProgress(): Bool{ 
 		return MoxyNFT.mintRequest != nil
 	}

@@ -1,4 +1,18 @@
-access(all)
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	access(all)
 contract EntropyScriptsArr{ 
 	
 	// EntropyScriptsArr Contract Events
@@ -59,7 +73,7 @@ contract EntropyScriptsArr{
 	resource Admin{ 
 		
 		// Create a new Script
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createScript(scriptName: String, scriptSignature: String){ 
 			// Create script resource
 			var newScript <- create Script(name: scriptName, signature: scriptSignature)
@@ -76,7 +90,7 @@ contract EntropyScriptsArr{
 			)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToString(scriptName: String, string: String){ 
 			let script =
 				EntropyScriptsArr.account.storage.borrow<&EntropyScriptsArr.Script>(
@@ -85,7 +99,7 @@ contract EntropyScriptsArr{
 			script.addToString(string: string)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun addToArray(scriptName: String, string: String){ 
 			let script =
 				EntropyScriptsArr.account.storage.borrow<&EntropyScriptsArr.Script>(
@@ -95,13 +109,13 @@ contract EntropyScriptsArr{
 		}
 		
 		// create a new Administrator resource
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun createAdmin(): @Admin{ 
 			return <-create Admin()
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getScript(scriptName: String): String{ 
 		let script =
 			EntropyScriptsArr.account.storage.borrow<&EntropyScriptsArr.Script>(

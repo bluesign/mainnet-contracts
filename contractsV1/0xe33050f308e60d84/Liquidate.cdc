@@ -1,4 +1,18 @@
-import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import FungibleToken from "./../../standardsV1/FungibleToken.cdc"
 
 import LendingConfig from "../0x2df970b6cdee5735/LendingConfig.cdc"
 
@@ -24,7 +38,7 @@ contract Liquidate{
 	access(self)
 	let _reservedFields:{ String: AnyStruct}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun repayAmount(borrowerAddr: Address, liquidatorAddr: Address): UFix64{ 
 		let comptrollerRef =
 			getAccount(0xf80cb737bfe7c792).capabilities.get<&{LendingInterfaces.ComptrollerPublic}>(
@@ -57,7 +71,7 @@ contract Liquidate{
 		return repayAmount
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun calculateLiquidation(borrowerAddr: Address, liquidatorAddr: Address):{ String: AnyStruct}{ 
 		let poolPrices: [UFix64] = []
 		let liquidatorBalances: [UFix64] = []
@@ -112,7 +126,7 @@ contract Liquidate{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun liquidate(
 		repayVault: &{FungibleToken.Vault},
 		borrowerAddr: Address,
@@ -164,17 +178,17 @@ contract Liquidate{
 		return <-redeemedVault
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun min(_ a: UFix64, _ b: UFix64): UFix64{ 
 		return a > b ? b : a
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun poolAddresses(): [Address]{ 
 		return self.poolAddrs
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun poolVaultStoragePaths(): [String]{ 
 		return self.poolVaultPaths
 	}

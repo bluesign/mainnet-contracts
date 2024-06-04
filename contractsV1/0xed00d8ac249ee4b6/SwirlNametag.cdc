@@ -1,4 +1,18 @@
-import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
+/*
+This tool adds a new entitlemtent called TMP_ENTITLEMENT_OWNER to some functions that it cannot be sure if it is safe to make access(all)
+those functions you should check and update their entitlemtents ( or change to all access )
+
+Please see: 
+https://cadence-lang.org/docs/cadence-migration-guide/nft-guide#update-all-pub-access-modfiers
+
+IMPORTANT SECURITY NOTICE
+Please familiarize yourself with the new entitlements feature because it is extremely important for you to understand in order to build safe smart contracts.
+If you change pub to access(all) without paying attention to potential downcasting from public interfaces, you might expose private functions like withdraw 
+that will cause security problems for your contract.
+
+*/
+
+	import NonFungibleToken from "./../../standardsV1/NonFungibleToken.cdc"
 
 import ViewResolver from "../../standardsV1/ViewResolver.cdc"
 
@@ -85,17 +99,17 @@ contract SwirlNametag: NonFungibleToken{
 			return views
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun name(): String{ 
 			return "Swirl Nametag: ".concat(self.profile().nickname)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun profile(): Profile{ 
 			return SwirlNametag.getProfile(self.id)
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun profileImageUrl(): String{ 
 			let profile = self.profile()
 			var url = "https://swirl.deno.dev/dnft/nametag.svg?"
@@ -150,15 +164,15 @@ contract SwirlNametag: NonFungibleToken{
 	access(all)
 	resource interface SwirlNametagCollectionPublic{ 
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT})
+		fun deposit(token: @{NonFungibleToken.NFT}): Void
 		
 		access(all)
-		fun getIDs(): [UInt64]
+		view fun getIDs(): [UInt64]
 		
 		access(all)
 		view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}?
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSwirlNametag(id: UInt64): &SwirlNametag.NFT?{ 
 			post{ 
 				result == nil || result?.id == id:
@@ -187,7 +201,7 @@ contract SwirlNametag: NonFungibleToken{
 		// deposit takes an NFT and adds it to the collections dictionary
 		// and adds the ID to the id array
 		access(all)
-		fun deposit(token: @{NonFungibleToken.NFT}){ 
+		fun deposit(token: @{NonFungibleToken.NFT}): Void{ 
 			let token <- token as! @SwirlNametag.NFT
 			let id: UInt64 = token.id
 			
@@ -210,7 +224,7 @@ contract SwirlNametag: NonFungibleToken{
 			return (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun borrowSwirlNametag(id: UInt64): &SwirlNametag.NFT?{ 
 			if self.ownedNFTs[id] != nil{ 
 				// Create an authorized reference to allow downcasting
@@ -220,7 +234,7 @@ contract SwirlNametag: NonFungibleToken{
 			return nil
 		}
 		
-		access(all)
+		access(TMP_ENTITLEMENT_OWNER)
 		fun updateSwirlNametag(profile: Profile){ 
 			let tokenIDs = self.getIDs()
 			if tokenIDs.length == 0{ 
@@ -252,7 +266,7 @@ contract SwirlNametag: NonFungibleToken{
 		}
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun getProfile(_ tokenID: UInt64): Profile{ 
 		return self.profiles[tokenID] ?? panic("no profile for token ID")
 	}
@@ -268,7 +282,7 @@ contract SwirlNametag: NonFungibleToken{
 		return <-create Collection()
 	}
 	
-	access(all)
+	access(TMP_ENTITLEMENT_OWNER)
 	fun mintNFT(recipient: &{NonFungibleToken.CollectionPublic}, profile: Profile){ 
 		// create a new NFT
 		var newNFT <- create NFT(id: SwirlNametag.totalSupply + 1)
